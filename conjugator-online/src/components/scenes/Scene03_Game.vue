@@ -11,8 +11,8 @@
         <p>Tenses: {{ gameSettings.tenses.join(', ') }}</p>
       </div>
       <div class="timers">
-        <p>Overall Timer: {{ overallTimer }}</p>
         <p>Round Timer: {{ roundTimer }}</p>
+        <p>Overall Timer: {{ overallTimer }}</p>
         <p>Right: {{ rightCount }}</p>
         <p>Wrong: {{ wrongCount }}</p>
         <p>Remaining: {{ remainingCount }}</p>
@@ -79,13 +79,21 @@ export default {
       remainingCount: this.gameSettings.numPrompts,
       promptCounter: 0,
       submitButtontext: 'SUBMIT',
-      results: {}
+      results: {},
+      startTime: null,
+      intervalId: null,
+      roundStartTime: null,
+      roundIntervalId: null,
     };
   },
   async mounted() {
-    this.game = new Game(this.gameSettings);
-    await this.game.start();
-    console.log('Game Settings:', this.gameSettings); // Debug print
+  this.game = new Game(this.gameSettings);
+  this.game.start();
+},
+  beforeDestroy() {
+    clearInterval(this.timerInterval);
+    clearInterval(this.intervalId); // Clear the overall timer interval
+    clearInterval(this.roundIntervalId); // Clear the round timer interval
   },
   methods: {
     goBack() {
@@ -94,12 +102,16 @@ export default {
     endGame() {
       this.results = this.game.getResults();
       this.$emit('gameOver', this.results);
+      this.endTimer();
     },
     quitGame() {
       this.$emit('changeScene', 'Scene01_Landing');
     },
     startGame() {
       this.gameStarted = true;
+      this.startTime = new Date().getTime();
+      this.roundStartTime = new Date().getTime();
+      this.timerInterval = setInterval(this.updateTimers, 1000);
       this.updatePrompt();
     },
     updatePrompt() {
@@ -108,28 +120,57 @@ export default {
       this.currentPrompt.verb = prompt.getVerb();
       this.currentPrompt.tense = prompt.getTense();
       this.currentPrompt.sentenceType = prompt.getSentenceType();
+      this.startRoundTimer();
+    },
+    updateTimers() {
+  const now = new Date().getTime();
+  this.overallTimer = Math.floor((now - this.startTime) / 1000);
+},
+    endTimer() {
+    clearInterval(this.intervalId);
+    },
+    startRoundTimer() {
+  this.roundStartTime = new Date().getTime(); // Reset round start time
+  this.roundTimer = 0; // Reset the round timer display
+  clearInterval(this.roundIntervalId); // Clear any existing interval
+  
+  this.roundIntervalId = setInterval(() => {
+    const now = new Date().getTime();
+    this.roundTimer = Math.floor((now - this.roundStartTime) / 1000);
+  }, 1000);
+},
+    endRoundTimer() {
+      clearInterval(this.roundIntervalId);
     },
     submitAnswer() {
-      const isCorrect = this.game.submitAnswer(this.userAnswer);
-      if (isCorrect) {
-        this.rightCount = this.game.getRightCount();
-      } else {
-        this.wrongCount = this.game.getWrongCount();
-      }
-      this.promptCounter++;
-      this.remainingCount--;
-      this.userAnswer = '';
-      if (this.remainingCount === 1) {
-        this.submitButtontext = 'FINISH';
-      }
-      if (this.remainingCount === 0) {
-        console.log(this.game.getResults());
-        this.endGame();
-      } else {
-        this.game.nextPrompt();
-        this.updatePrompt();
-      }
-    }
+  const isCorrect = this.game.submitAnswer(this.userAnswer);
+  if (isCorrect) {
+    this.rightCount = this.game.getRightCount();
+  } else {
+    this.wrongCount = this.game.getWrongCount();
+  }
+  this.promptCounter++;
+  this.remainingCount--;
+  this.userAnswer = '';
+  
+  // End the current round timer
+  this.endRoundTimer();
+
+  if (this.remainingCount === 1) {
+    this.submitButtontext = 'FINISH';
+  }
+  if (this.remainingCount === 0) {
+    console.log(this.game.getResults());
+    this.endGame();
+  } else {
+    this.game.nextPrompt();
+    this.updatePrompt();
+    
+    // Start a new round timer
+    this.startRoundTimer();
+  }
+}
+
   }
 };
 </script>
