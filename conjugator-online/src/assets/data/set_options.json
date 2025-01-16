@@ -1,0 +1,5 @@
+{
+    "sentence_types":["Positive", "Negative", "Questions"],
+    "verb_sets": ["Common verbs (Reg + Irreg)", "Regular verbs only", "Irregular verbs only"],
+    "tenses": ["Present simple", "Past simple", "Future simple", "Recommendation", "Present continuous", "Present perfect"]
+}

@@ -1,0 +1,5 @@
+{
+    "present_simple": ["never", "rarely", "sometimes", "seldom", "always", "usually", "often"],
+    "present_continuous": ["now", "currently", "at the moment", "this week", "this month", "this year"],
+    "past_simple": []
+}
