@@ -2,13 +2,21 @@ const basedir = "./src/assets/data/";
 
 let irregularVerbs = {};
 
-try {
-    const irregularVerbsResponse = await fetch(basedir + 'irregularVerbs.json');
-    irregularVerbs = await irregularVerbsResponse.json();
-}
-catch (error) {
-    console.error('Error fetching irregular verbs:', error);
-}
+async function loadIrregularVerbs() {
+    try {
+      const irregularVerbsResponse = await fetch(basedir + 'irregularVerbs.json');
+      const irregularVerbs = await irregularVerbsResponse.json();
+      return irregularVerbs;
+    } catch (error) {
+      console.error(error);
+      return null;
+    }
+  }
+
+  loadIrregularVerbs().then((verbs) => {
+    console.log('Irregular verbs loaded:', verbs);
+  });
+  
 const consonants = ['b', 'c', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'm', 'n', 'p', 'q', 'r', 's', 't', 'v', 'w', 'x', 'y', 'z'];
 const vowels = ['a', 'e', 'i', 'o', 'u'];
 const NON_DOUBLING_CONSONANTS = ['w', 'x', 'y'];
