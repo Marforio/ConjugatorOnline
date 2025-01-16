@@ -1,6 +1,6 @@
 <template>
     <div class="settings-scene">
-      <h1>VOCAB AND CONJUGATION TESTER</h1>
+      <h1>VOCAB AND CONJUGATION TESTER DAWG</h1>
 
       <button @click="goToScene('Scene02_Settings')">PLAY</button>
     </div>
