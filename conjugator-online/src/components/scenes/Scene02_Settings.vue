@@ -79,7 +79,7 @@ export default {
   data() {
     return {
       options,
-      selectedVerbSet: '',
+      selectedVerbSet: options.verb_sets[0],
       selectedSentenceTypes: options.sentence_types,
       selectedTenses: options.tenses,
       numPrompts: 10
