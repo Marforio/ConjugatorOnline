@@ -1,3 +1,8 @@
+/* This module is responsible for building sentences based on the tense and type of sentence (declarative, negative, or question).
+The sentence built here are used to define the correct answers for the conjugation prompts.
+It imports the necessary functions from tenses.js to handle the conjugation of verbs in different tenses.
+*/
+
 // Import the necessary functions from tenses.js
 import { presentSimple, presentContinuous, pastSimple, presentPerfect, future, recommendation } from './tenses';
 

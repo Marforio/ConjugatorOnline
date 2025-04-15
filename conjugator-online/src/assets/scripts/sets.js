@@ -8,7 +8,7 @@ import { router } from './sentenceBuilder.js';
 import { abbreviator } from './abbreviations.js';
 
 class VocabularySet {
-    static IRREGULAR_VERBS = 'src/assets/data/irregularVerbs.json';
+    static IRREGULAR_VERBS = '/data/irregularVerbs.json';
 
     constructor(window, vocabulary, length = 10) {
         const basedir = path.dirname(__filename);
@@ -47,9 +47,9 @@ class ConjugationSet {
     static PERSONS = ['i', 'you', 'he', 'she', 'it', 'we', 'they'];
     static ALL_TENSES = ['Present simple', 'Past simple', 'Future simple', 'Present continuous', 'Present perfect', 'Recommendation'];
     static ALL_SENTENCES = ['Declarative', 'Negative', 'Question'];
-    static IRREGULAR_VERBS = 'src/assets/data/irregularVerbs.json';
-    static COMMON_VERBS = 'src/assets/data/commonVerbs.json';
-    static REGULAR_VERBS = 'src/assets/data/regularVerbs.json';
+    static IRREGULAR_VERBS = '/data/irregularVerbs.json';
+    static COMMON_VERBS = '/data/commonVerbs.json';
+    static REGULAR_VERBS = '/data/regularVerbs.json';
 
     constructor(type, tenses, sentences, length) {
         this.type = type;
@@ -62,7 +62,7 @@ class ConjugationSet {
     }
 
     async loadPrompts() {
-        const basedir = './src/assets/data/';
+        const basedir = '/data/';
         try {
             const commonVerbsResponse = await fetch(basedir + 'commonVerbs.json');
             this.commonVerbs = await commonVerbsResponse.json();

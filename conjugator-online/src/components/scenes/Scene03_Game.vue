@@ -1,12 +1,12 @@
 <!-- src/components/scenes/Scene03_Game.vue -->
 <template>
-  <div class="conjugator-container">
+  <div class="conjugator-container" style="height: 100%">
     <div id="game-scene">
       <div id="logo">
         <p class="display-5 text-center"><span class="border rounded-pill p-3 px-5">Conjugator</span></p>
-      </div> <!-- Missing closing tag added -->
+      </div> 
       <div id="sidebar">
-          <h2>Settings</h2>
+          <h2>Your settings</h2>
           <p>Name: {{ userName }}</p>
           <p>Verb Set: {{ gameSettings.verbSet }}</p>
           <p>Sentence Types: {{ gameSettings.sentenceTypes.join(', ') }}</p>
@@ -15,42 +15,49 @@
       <div id="gamespace">
           <div id="prompt1">
             <div class="card" style="width: 18rem;">
-              <p class="h3">{{ currentPrompt.person }}</p>
               <div class="card-body">
                 <h5 class="card-title">Person</h5>
+                <p class="h3">{{ currentPrompt.person }}</p>
               </div>
             </div>
           </div>
           <div id="prompt2">
             <div class="card" style="width: 18rem;">
-              <p class="h3">{{ currentPrompt.tense }}</p>
               <div class="card-body">
                 <h5 class="card-title">Tense</h5>
+                <p class="h3">{{ currentPrompt.tense }}</p>
               </div>
             </div>
           </div>
           <div id="prompt3">
             <div class="card" style="width: 18rem;">
-              <p class="h3">{{ currentPrompt.sentenceType }}</p>
               <div class="card-body">
                 <h5 class="card-title">Sentence type</h5>
+                <p class="h3">{{ currentPrompt.sentenceType }}</p>
               </div>
             </div>
           </div>
           <div id="verb">
-            <p>Verb: {{ currentPrompt.verb }}</p>
-          </div>
-          <div id="answer">
-            <div v-if="!gameStarted">
-              <button @click="startGame">START</button>
-            </div>
-            <div v-else>
-              <label>Answer:</label>
-              <input v-model="userAnswer" @keyup.enter="submitAnswer" />
-              <button @click="submitAnswer">{{ submitButtontext }}</button>
+            <div class="card" style="width: 18rem;">
+              <div class="card-body">
+                <h5 class="card-title">VERB</h5>
+                <p class="h3">{{ currentPrompt.verb }}</p>
+              </div>
             </div>
           </div>
       </div>
+      <div id="answer">
+            <div v-if="!gameStarted">
+              <button class="btn btn-success" @click="startGame">START</button>
+            </div>
+            <div v-else class="d-flex justify-content-center align-items-center mb-3">
+              <div>
+                <label>Answer:</label>
+                <input v-model="userAnswer" @keyup.enter="submitAnswer" />
+              </div>
+              <button class="btn btn-primary" @click="submitAnswer">{{ submitButtontext }}</button>
+            </div>
+          </div>
       <div id="footer" class="d-flex flex-row">
           <p>Right: {{ rightCount }}</p>
           <p>Wrong: {{ wrongCount }}</p>
@@ -61,9 +68,9 @@
           <p>Round Timer: {{ roundTimer }}</p>
           <p>Overall Timer: {{ overallTimer }}</p>
       </div>
-      <div id="nav">
-        <button @click="goBack">BACK</button>
-        <button @click="quitGame">QUIT</button>
+      <div id="nav" class="d-flex flex-row justify-content-center align-items-center">
+        <button class="btn btn-secondary m-2" @click="goBack">BACK</button>
+        <button class="btn btn-secondary m-2" @click="quitGame">QUIT</button>
       </div>
     </div>
    </div> 
@@ -201,15 +208,16 @@ export default {
 #game-scene {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr 1fr;
-  grid-template-rows: auto 1fr 1fr auto auto;
+  grid-template-rows: auto auto auto auto auto;
   grid-template-areas: 
     "logo . timer timer"
-    "logo prompt1 prompt2 prompt3"
+    "sidebar prompt1 prompt2 prompt3"
     "sidebar verb verb verb"
     "sidebar answer answer answer"
     "nav footer footer footer";
-  height: 100vh; /* Use the full viewport height */
-  width: 100vw;  /* Use the full viewport width */
+  height: 100%;
+  max-height: 100%;
+  max-width: 100%;
   gap: 10px; /* Add spacing between grid items */
 }
 
@@ -224,12 +232,17 @@ export default {
   background-color: #f0f0f0;
   padding: 10px;
   border-radius: 5px;
+  display: flex;
+  flex-direction: column;
 }
 
 #gamespace {
   grid-column: span 3; /* Ensures proper layout */
   display: flex;
-  flex-wrap: wrap; /* Allows items to wrap if necessary */
+  flex-direction: row;
+  align-content: center;
+  flex-wrap: wrap; 
+  max-width: 100%;
   gap: 15px; /* Adds spacing between prompts */
 }
 
@@ -260,5 +273,32 @@ export default {
   flex-direction: column;
   align-items: center;
   gap: 10px;
+}
+
+@media (max-width: 576px) {
+  #game-scene {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto auto auto auto auto;
+    grid-template-areas: 
+      "logo"
+      "timer"
+      "prompt1"
+      "prompt2"
+      "prompt3"
+      "verb"
+      "answer"
+      "footer"
+      "nav"
+      ;
+  }
+  #sidebar {
+    display: none; /* Hide sidebar on small screens */
+  }
+  #gamespace {
+    flex-direction: column; /* Stack prompts vertically on small screens */
+  }
+  #footer, #nav {
+    flex-direction: column; /* Stack footer and nav items vertically */
+  }
 }
 </style>

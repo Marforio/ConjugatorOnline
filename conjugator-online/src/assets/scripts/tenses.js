@@ -3,7 +3,7 @@ These functions are used to generate the individual word elements in correct ans
 The correct answers are put together as complete sentences by the functions in a different module (sentenceBuilder.js).
 */
 
-const basedir = "./src/assets/data/";
+const basedir = "/data/";
 
 let irregularVerbs = {};
 

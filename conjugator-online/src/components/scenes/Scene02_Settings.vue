@@ -1,7 +1,7 @@
 <template>
   <div class="conjugator-container">
     <div class="settings-scene">
-      <h1 class="display-1 fst-italic mb-3">THE CONJUGATOR</h1>
+      <h1 id="settings-header" class="display-1 fst-italic mb-3">THE CONJUGATOR</h1>
       <div id="settings-card-container">
         <!-- Verb Sets Card -->
         <div class="card mb-3 bg-secondary">
@@ -93,18 +93,33 @@
 
 
 <script>
-import options from '@/assets/data/set_options.json';
 import '@/assets/styles/global_conjugator_styles.css';
 
 export default {
   data() {
     return {
-      options,
-      selectedVerbSet: options.verb_sets[0],
-      selectedSentenceTypes: options.sentence_types,
-      selectedTenses: options.tenses,
+      options: null,
+      selectedVerbSet: null,
+      selectedSentenceTypes: [],
+      selectedTenses: [],
       numPrompts: 10
     };
+  },
+  async created() {
+    try {
+      // Fetch the JSON file from the public folder
+      const response = await fetch('/data/set_options.json');
+      if (!response.ok) {
+        throw new Error(`Failed to fetch set_options.json: ${response.statusText}`);
+      }
+      const options = await response.json();
+      this.options = options;
+      this.selectedVerbSet = options.verb_sets[0];
+      this.selectedSentenceTypes = options.sentence_types;
+      this.selectedTenses = options.tenses;
+    } catch (error) {
+      console.error('Error loading options:', error);
+    }
   },
   methods: {
     goToScene(sceneName) {
@@ -139,7 +154,12 @@ export default {
     gap: 20px;
     color: white;
   }
-
+  #buttons-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 50px;
+  }
   #settings-card-container {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -152,11 +172,10 @@ export default {
     color: white;
   }
   
-  #buttons-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 50px;
+  @media (max-width: 576px) {
+  #settings-header {
+    font-size: 2rem; /* Smaller font size for smartphone-sized screens */
+    }
   }
   
   /* Custom styles for checkbox containers */
