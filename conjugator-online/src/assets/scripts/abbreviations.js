@@ -1,3 +1,7 @@
+/* This module has functions that generate valid alternative answers to the correct answer for each Prompt.
+Game players therefore have more flexibility in their answers, including missing apostrophes and other common insignificant mistakes.
+*/
+
 function abbreviator(tense, person, sentenceType, text) {
     // Returns a list 'alternatives' containing abbreviated strings
     
@@ -9,13 +13,13 @@ function abbreviator(tense, person, sentenceType, text) {
     }
 
     const NEGATIVE_ABBREVIATIONS = {
-        "i am not": ["i'm not"],
-        "you are not": ["you're not", "you aren't"],
-        "he is not": ["he's not", "he isn't"],
-        "she is not": ["she's not", "she isn't"],
-        "it is not": ["it's not", "it isn't"],
-        "we are not": ["we're not", "we aren't"],
-        "they are not": ["they're not", "they aren't"]
+        "i am not": ["i'm not", "im not"],
+        "you are not": ["you're not", "youre not", "you aren't", "you arent"],
+        "he is not": ["he's not", "hes not", "he isn't", "he isnt"],
+        "she is not": ["she's not", "shes not", "she isn't", "she isnt"],
+        "it is not": ["it's not", "its not", "it isn't", "it isnt"],
+        "we are not": ["we're not", "were not", "we aren't", "we arent"],
+        "they are not": ["they're not", "theyre not" ,"they aren't", "they arent"]
     };
 
     let alternatives = [];

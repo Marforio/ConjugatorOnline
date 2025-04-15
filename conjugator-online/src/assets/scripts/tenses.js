@@ -1,3 +1,8 @@
+/* This file contains functions needed to conjugate verbs in different tenses.
+These functions are used to generate the individual word elements in correct answers, such as the past simple and gerund forms of verbs.
+The correct answers are put together as complete sentences by the functions in a different module (sentenceBuilder.js).
+*/
+
 const basedir = "./src/assets/data/";
 
 let irregularVerbs = {};
@@ -20,10 +25,10 @@ async function loadIrregularVerbs() {
 const consonants = ['b', 'c', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'm', 'n', 'p', 'q', 'r', 's', 't', 'v', 'w', 'x', 'y', 'z'];
 const vowels = ['a', 'e', 'i', 'o', 'u'];
 const NON_DOUBLING_CONSONANTS = ['w', 'x', 'y'];
-const NON_DOUBLING = ['administer', 'allow', 'alter', 'anger', 'answer', 'bother', 'cater', 'color', 'consider', 'counter', 'cover', 'deliver', 
-    'differ', 'discover', 'encounter', 'enter', 'favor', 'foster', 'gather', 'honor', 'lower', 'master', 'market', 'minister', 
+const NON_DOUBLING = ['administer', 'allow', 'alter', 'anger', 'answer', 'bother', 'broaden', 'cater', 'color', 'consider', 'counter', 'cover', 'deliver', 
+    'differ', 'discover', 'encounter', 'enter', 'favor', 'foster', 'gather', 'honor', 'lower', 'lengthen', 'master', 'market', 'minister', 
     'monitor', 'murder', 'offer', 'open', 'order', 'pocket', 'ponder', 'reconsider', 'recover', 'register', 'remember', 'render',  
-    'rocket', 'skyrocket', 'suffer', 'surrender', 'target', 'transfer', 'wager', 'wander', 'wonder'];
+    'rocket', 'shorten', 'skyrocket', 'strengthen', 'suffer', 'surrender', 'target', 'tighten', 'transfer', 'wager', 'wander', 'widen', 'wonder'];
 
 function presentSimple(sentence, action, person) {
     const problemEndingsOne = ['x', 's'];

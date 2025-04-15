@@ -1,0 +1,11 @@
+.conjugator-container {
+    border: 2px solid #ccc; /* Light gray border */
+    border-radius: 10px; /* Rounded corners */
+    margin: 20px; /* Margin from the viewport edges */
+    padding: 20px; /* Inner padding for content */
+    background-color: #f9f7f7; /* Pleasant pastel background */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+    display: flex; /* Use flexbox for alignment */
+    flex-direction: column; /* Stack children vertically */
+    align-items: center; /* Center children horizontally */
+  }

@@ -1,3 +1,7 @@
+ /* @fileoverview This file contains the VocabularySet and ConjugationSet classes.
+ These classes are used to manage sets of vocabulary and conjugation prompts for the conjugator game.
+ These Set classes make use of the ConjugationPrompt class to create and manage individual prompts.
+*/
 import { random } from 'lodash';
 import { ConjugationPrompt } from './prompts.js';
 import { router } from './sentenceBuilder.js';

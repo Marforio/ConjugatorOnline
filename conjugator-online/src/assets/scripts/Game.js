@@ -1,3 +1,5 @@
+/* Module containing functions for game logic and data management for the Conjugator game */
+
 // src/assets/scripts/Game.js
 import { ConjugationSet } from './sets';
 

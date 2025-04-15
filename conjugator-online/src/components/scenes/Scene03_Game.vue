@@ -1,75 +1,78 @@
 <!-- src/components/scenes/Scene03_Game.vue -->
 <template>
-  <div id="game-scene">
-    <div id="logo">
-      <p class="display-5 text-center"><span class="border rounded-pill p-3 px-5">Conjugator</span></p>
-    </div> <!-- Missing closing tag added -->
-    <div id="sidebar">
-        <h2>Settings</h2>
-        <p>Name: {{ userName }}</p>
-        <p>Verb Set: {{ gameSettings.verbSet }}</p>
-        <p>Sentence Types: {{ gameSettings.sentenceTypes.join(', ') }}</p>
-        <p>Tenses: {{ gameSettings.tenses.join(', ') }}</p>
-    </div>
-    <div id="gamespace">
-        <div id="prompt1">
-          <div class="card" style="width: 18rem;">
-            <p class="h3">{{ currentPrompt.person }}</p>
-            <div class="card-body">
-              <h5 class="card-title">Person</h5>
+  <div class="conjugator-container">
+    <div id="game-scene">
+      <div id="logo">
+        <p class="display-5 text-center"><span class="border rounded-pill p-3 px-5">Conjugator</span></p>
+      </div> <!-- Missing closing tag added -->
+      <div id="sidebar">
+          <h2>Settings</h2>
+          <p>Name: {{ userName }}</p>
+          <p>Verb Set: {{ gameSettings.verbSet }}</p>
+          <p>Sentence Types: {{ gameSettings.sentenceTypes.join(', ') }}</p>
+          <p>Tenses: {{ gameSettings.tenses.join(', ') }}</p>
+      </div>
+      <div id="gamespace">
+          <div id="prompt1">
+            <div class="card" style="width: 18rem;">
+              <p class="h3">{{ currentPrompt.person }}</p>
+              <div class="card-body">
+                <h5 class="card-title">Person</h5>
+              </div>
             </div>
           </div>
-        </div>
-        <div id="prompt2">
-          <div class="card" style="width: 18rem;">
-            <p class="h3">{{ currentPrompt.tense }}</p>
-            <div class="card-body">
-              <h5 class="card-title">Tense</h5>
+          <div id="prompt2">
+            <div class="card" style="width: 18rem;">
+              <p class="h3">{{ currentPrompt.tense }}</p>
+              <div class="card-body">
+                <h5 class="card-title">Tense</h5>
+              </div>
             </div>
           </div>
-        </div>
-        <div id="prompt3">
-          <div class="card" style="width: 18rem;">
-            <p class="h3">{{ currentPrompt.sentenceType }}</p>
-            <div class="card-body">
-              <h5 class="card-title">Sentence type</h5>
+          <div id="prompt3">
+            <div class="card" style="width: 18rem;">
+              <p class="h3">{{ currentPrompt.sentenceType }}</p>
+              <div class="card-body">
+                <h5 class="card-title">Sentence type</h5>
+              </div>
             </div>
           </div>
-        </div>
-        <div id="verb">
-          <p>Verb: {{ currentPrompt.verb }}</p>
-        </div>
-        <div id="answer">
-          <div v-if="!gameStarted">
-            <button @click="startGame">START</button>
+          <div id="verb">
+            <p>Verb: {{ currentPrompt.verb }}</p>
           </div>
-          <div v-else>
-            <label>Answer:</label>
-            <input v-model="userAnswer" @keyup.enter="submitAnswer" />
-            <button @click="submitAnswer">{{ submitButtontext }}</button>
+          <div id="answer">
+            <div v-if="!gameStarted">
+              <button @click="startGame">START</button>
+            </div>
+            <div v-else>
+              <label>Answer:</label>
+              <input v-model="userAnswer" @keyup.enter="submitAnswer" />
+              <button @click="submitAnswer">{{ submitButtontext }}</button>
+            </div>
           </div>
-        </div>
+      </div>
+      <div id="footer" class="d-flex flex-row">
+          <p>Right: {{ rightCount }}</p>
+          <p>Wrong: {{ wrongCount }}</p>
+          <p>Remaining: {{ remainingCount }}</p>
+          <p>Completed rounds: {{ promptCounter }}</p>
+      </div>
+      <div id="timer">
+          <p>Round Timer: {{ roundTimer }}</p>
+          <p>Overall Timer: {{ overallTimer }}</p>
+      </div>
+      <div id="nav">
+        <button @click="goBack">BACK</button>
+        <button @click="quitGame">QUIT</button>
+      </div>
     </div>
-    <div id="footer" class="d-flex flex-row">
-        <p>Right: {{ rightCount }}</p>
-        <p>Wrong: {{ wrongCount }}</p>
-        <p>Remaining: {{ remainingCount }}</p>
-        <p>Completed rounds: {{ promptCounter }}</p>
-    </div>
-    <div id="timer">
-        <p>Round Timer: {{ roundTimer }}</p>
-        <p>Overall Timer: {{ overallTimer }}</p>
-    </div>
-    <div id="nav">
-      <button @click="goBack">BACK</button>
-      <button @click="quitGame">QUIT</button>
-    </div>
-  </div>
+   </div> 
 </template>
 
 
 <script>
 import Game from '@/assets/scripts/Game';
+import '@/assets/styles/global_conjugator_styles.css';
 
 export default {
   props: ['gameSettings'],

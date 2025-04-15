@@ -1,3 +1,8 @@
+/* Module containing the ConjugationPrompt class, which represents a single conjugation prompt in the Conjugator game.
+ The class has methods for setting user answers, checking correctness, and retrieving prompt data.
+ It is used by the Set classes (VocabularySet and ConjugationSet) to create and manage sets of prompts for the game.
+ */
+
 class ConjugationPrompt {
     /**
      * Creates a ConjugationPrompt object.

@@ -1,24 +1,27 @@
 <template>
-  <div class="settings-scene">
-    <h1>Results page</h1>
-    <p>Game results</p>
-    <div v-for="(result, index) in normalizedResults" :key="index">
-      <p>Prompt {{ index + 1 }}:</p>
-      <p>Verb: {{ result.prompt.verb }}</p>
-      <p>Person: {{ result.prompt.person }}</p>
-      <p>Tense: {{ result.prompt.tense }}</p>
-      <p>Sentence Type: {{ result.prompt['sentence type'] }}</p>
-      <p>User Answer: {{ result['user answer'] }}</p>
-      <p>Correct: {{ result.correct }}</p>
-      <p>Correct Answers: {{ result['correct answer(s)'].join(', ') }}</p>
+  <div class="conjugator-container">
+    <div class="settings-scene">
+      <h1>Results page</h1>
+      <p>Game results</p>
+      <div v-for="(result, index) in normalizedResults" :key="index">
+        <p>Prompt {{ index + 1 }}:</p>
+        <p>Verb: {{ result.prompt.verb }}</p>
+        <p>Person: {{ result.prompt.person }}</p>
+        <p>Tense: {{ result.prompt.tense }}</p>
+        <p>Sentence Type: {{ result.prompt['sentence type'] }}</p>
+        <p>User Answer: {{ result['user answer'] }}</p>
+        <p>Correct: {{ result.correct }}</p>
+        <p>Correct Answers: {{ result['correct answer(s)'].join(', ') }}</p>
+      </div>
+      <div id="pie-chart"></div> <!-- Container for the pie chart -->
+      <button @click="goToScene('Scene02_Settings')">PLAY AGAIN</button>
     </div>
-    <div id="pie-chart"></div> <!-- Container for the pie chart -->
-    <button @click="goToScene('Scene02_Settings')">PLAY AGAIN</button>
   </div>
 </template>
 
 <script>
 import * as d3 from "d3";
+import '@/assets/styles/global_conjugator_styles.css';
 
 export default {
   props: {
