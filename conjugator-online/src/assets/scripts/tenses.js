@@ -10,10 +10,11 @@ let irregularVerbs = {};
 async function loadIrregularVerbs() {
     try {
       const irregularVerbsResponse = await fetch(basedir + 'irregularVerbs.json');
-      const irregularVerbs = await irregularVerbsResponse.json();
+      irregularVerbs = await irregularVerbsResponse.json();
+      console.log('Irregular verbs loaded:', irregularVerbs);
       return irregularVerbs;
     } catch (error) {
-      console.error(error);
+        console.error('Error loading irregular verbs:', error);
       return null;
     }
   }
@@ -77,7 +78,7 @@ function presentContinuous(action, person) {
         principal = action + action[action.length - 1] + "ing";
     } else if (action.slice(-2) === "ie") {
         principal = action.slice(0, -2) + 'ying';
-    } else if (consonants.includes(action[action.length - 2]) && action[action.length - 1] === "e") {
+    } else if ((consonants.includes(action[action.length - 2]) || action[action.length - 2] === "u" ) && action[action.length - 1] === "e") {
         principal = action.slice(0, -1) + "ing";
     } else {
         principal = action + "ing";

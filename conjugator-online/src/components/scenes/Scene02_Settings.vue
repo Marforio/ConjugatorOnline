@@ -193,4 +193,6 @@ export default {
   .checkbox-item input {
     margin-right: 5px;
   }
+
+  
   </style>

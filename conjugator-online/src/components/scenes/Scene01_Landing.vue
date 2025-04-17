@@ -16,16 +16,8 @@
           />
         </div>
         
-        <span class="text-body-secondary fs-2 flaming-text">put your conjugation skills to the test</span>
+        <span class="text-body-secondary fs-2 beating-text">Put your conjugation to the test!</span>
       </h1>
-      <div class="d-flex justify-content-center mt-2">
-        <button 
-          @click="goToScene('Scene02_Settings')" 
-          class="btn btn-primary btn-lg hover-effect"
-        >
-          ENTER
-        </button>
-      </div>
     </div>
   </div>
 </template>
@@ -53,52 +45,18 @@ export default {
   transform: translateY(5%); /* Adjust position downwards */
   text-align: center; /* Center align the text */
 }
-.flaming-text {
-  color: #ff4500; /* Base color for the flame */
-  text-shadow: 
-    0 0 5px #ff4500, 
-    0 0 10px #ff6347, 
-    0 0 15px #ff6347, 
-    0 0 20px #ffa07a, 
-    0 0 25px #ffa07a, 
-    0 0 30px #ff4500;
-  animation: flicker 1.5s infinite alternate, vibrate 0.1s infinite;
+.beating-text {
+  display: inline-block;
+  color: #134376; /* Base blue color */
+  animation: beat 2.5s infinite ease-in-out;
 }
-@keyframes flicker {
-  0% {
-    text-shadow: 
-      0 0 5px #ff4500, 
-      0 0 10px #ff6347, 
-      0 0 15px #ff6347, 
-      0 0 20px #ffa07a, 
-      0 0 25px #ffa07a, 
-      0 0 30px #ff4500;
+@keyframes beat {
+  0%, 100% {
+    transform: scale(1); /* Normal size */
   }
   50% {
-    text-shadow: 
-      0 0 10px #ff6347, 
-      0 0 15px #ffa07a, 
-      0 0 20px #ffa07a, 
-      0 0 25px #ff4500, 
-      0 0 30px #ff4500, 
-      0 0 35px #ff6347;
+    transform: scale(1.1); /* Enlarged size */
   }
-  100% {
-    text-shadow: 
-      0 0 5px #ff4500, 
-      0 0 10px #ff4500, 
-      0 0 15px #ff6347, 
-      0 0 20px #ffa07a, 
-      0 0 25px #ffa07a, 
-      0 0 30px #ff4500;
-  }
-}
-@keyframes vibrate {
-  0% { transform: translate(0, 0); }
-  25% { transform: translate(-1px, 1px); }
-  50% { transform: translate(1px, -1px); }
-  75% { transform: translate(-1px, -1px); }
-  100% { transform: translate(1px, 1px); }
 }
 
 /* Add rounded corners to the image */
@@ -124,7 +82,7 @@ export default {
 
 @media (max-width: 576px) {
   .rounded-image {
-    width: 90%; /* Adjust the image size for smaller screens */
+    width: 100%; /* Adjust the image size for smaller screens */
   }
   .content-container {
     transform: translateY(25%); /* Adjust position downwards for smaller screens */

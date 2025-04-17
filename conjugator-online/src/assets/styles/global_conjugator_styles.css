@@ -8,4 +8,6 @@
     display: flex; /* Use flexbox for alignment */
     flex-direction: column; /* Stack children vertically */
     align-items: center; /* Center children horizontally */
+    width: 100%;
+    max-width: none;
   }

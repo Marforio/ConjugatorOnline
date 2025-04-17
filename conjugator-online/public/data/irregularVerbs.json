@@ -311,7 +311,7 @@
         "past_simple": "sought",
         "past_participle": "sought"
     },
-       "sell":{
+    "sell":{
         "past_simple": "sold",
         "past_participle": "sold"
     },
@@ -371,6 +371,10 @@
         "past_simple": "slid",
         "past_participle": "slid"
     },
+    "slit":{
+        "past_simple": "slit",
+        "past_participle": "slit"
+    },
     "speak":{
         "past_simple": "spoke",
         "past_participle": "spoken"
@@ -379,13 +383,17 @@
         "past_simple": "spent",
         "past_participle": "spent"
     },
+    "spin":{
+        "past_simple": "spun",
+        "past_participle": "spun"
+    },
     "spit":{
         "past_simple": "spat",
         "past_participle": "spat"
     },
-    "spin":{
-        "past_simple": "spun",
-        "past_participle": "spun"
+    "spring":{
+        "past_simple": "sprang",
+        "past_participle": "sprung"
     },
     "stand":{
         "past_simple": "stood",
@@ -394,6 +402,14 @@
     "steal":{
         "past_simple": "stole",
         "past_participle": "stolen"
+    },
+    "stick":{
+        "past_simple": "stuck",
+        "past_participle": "stuck"
+    },
+    "sting":{
+        "past_simple": "stung",
+        "past_participle": "stung"
     },
     "stink":{
         "past_simple": "stank",
@@ -407,9 +423,17 @@
         "past_simple": "swam",
         "past_participle": "swum"
     },
+    "swing":{
+        "past_simple": "swung",
+        "past_participle": "swung"
+    },
     "sweep":{
         "past_simple": "swept",
         "past_participle": "swept"
+    },
+    "swell":{
+        "past_simple": "swelled",
+        "past_participle": "swollen"
     },
     "take":{
         "past_simple": "took",
