@@ -1,11 +1,13 @@
 {
   "compilerOptions": {
-    "types": ["vite/client"],
+    "types": ["vite/client", "vue"],
     "lib": ["dom", "es2015"],
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"]
-    }
+    },
+    "noEmit": true,
+    "skipLibCheck": true, // <-- this avoids checking packages like swiper
   },
   "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.vue"],
 }
