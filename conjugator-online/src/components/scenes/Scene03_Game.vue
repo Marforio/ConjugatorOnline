@@ -1,80 +1,112 @@
-<!-- src/components/scenes/Scene03_Game.vue -->
 <template>
-  <div class="conjugator-container" style="height: 100%">
-    <div id="game-scene">
-      <div id="logo">
-        <p class="display-5 text-center"><span class="border rounded-pill p-3 px-5">Conjugator</span></p>
-      </div> 
-      <div id="sidebar">
-          <h2>Your settings</h2>
-          <p>Name: {{ userName }}</p>
-          <p>Verb Set: {{ gameSettings.verbSet }}</p>
-          <p>Sentence Types: {{ gameSettings.sentenceTypes.join(', ') }}</p>
-          <p>Tenses: {{ gameSettings.tenses.join(', ') }}</p>
+  <div class="game-scene">
+
+    <div class="game-body">
+      <!-- SIDEBAR -->
+      <aside class="sidebar" style="align-content: center;">
+        <img 
+            src="/images/conjugator.png" 
+            alt="Logo" 
+            class="mb-1 rounded-image" 
+            style="width: 95%; height: auto; opacity: 90%;" 
+          />
+        <h2 class="mt-4">Your settings</h2>
+        <p>Name: {{ userName }}</p>
+        <p>Verb Set: {{ gameSettings.verbSet }}</p>
+        <p>Sentence Types: {{ gameSettings?.sentenceTypes?.join(', ') || '' }}</p>
+        <p>Tenses: {{ gameSettings?.tenses?.join(', ') || '' }}</p>
+        <div class="timer-box mt-4 mb-4">
+          <p>Round: {{ roundTimer }}</p>
+          <p>Total: {{ overallTimer }}</p>
       </div>
-      <div id="gamespace">
-          <div id="prompt1">
-            <div class="card" style="width: 18rem;">
-              <div class="card-body">
-                <h5 class="card-title">Person</h5>
-                <p class="h3">{{ currentPrompt.person }}</p>
-              </div>
+        <div class="footer-nav gap-3">
+          <button class="btn btn-secondary" @click="goBack">BACK</button>
+          <button class="btn btn-secondary" @click="quitGame">QUIT</button>
+        </div>
+      </aside>
+
+      <!-- MAIN GAME AREA -->
+      <main v-if="gameStarted === true" class="main-area p-4">
+        <!-- Top: two prompt cards -->
+        <div class="prompt-row-1">
+          <div class="card border-dark-subtle" v-for="(val, idx) in [
+              { title: 'Tense', value: currentPrompt.tense },
+              { title: 'Sentence type', value: currentPrompt.sentenceType }
+            ]" :key="idx">
+            <div class="card-body">
+              <h5 class="card-title">{{ val.title }}</h5>
+              <p class="display-6">{{ val.value }}</p>
             </div>
           </div>
-          <div id="prompt2">
-            <div class="card" style="width: 18rem;">
-              <div class="card-body">
-                <h5 class="card-title">Tense</h5>
-                <p class="h3">{{ currentPrompt.tense }}</p>
-              </div>
+        </div>
+
+        <!-- Middle: Verb card -->
+        <div class="prompt-row-2">
+          <div class="card p-3 border-dark bg-primary-subtle" v-for="(val, idx) in [
+              { title: 'Person', value: currentPrompt.person },
+              { title: 'Verb', value: currentPrompt.verb }
+            ]" :key="idx">
+            <div class="card-body">
+              <h4 class="card-title">{{ val.title }}</h4>
+              <p class="display-1">{{ val.value }}</p>
             </div>
           </div>
-          <div id="prompt3">
-            <div class="card" style="width: 18rem;">
-              <div class="card-body">
-                <h5 class="card-title">Sentence type</h5>
-                <p class="h3">{{ currentPrompt.sentenceType }}</p>
-              </div>
+        </div>
+
+        <!-- Bottom: Answer input -->
+        <div class="answer-section">
+          <div class="d-flex justify-content-center align-items-center gap-2 answer-form-group">
+            <div class="input-group input-group-lg">
+              <span class="input-group-text" id="inputGroup-sizing-lg">Answer:</span>
+              <input v-model="userAnswer" @keyup.enter="submitAnswer" type="text" class="form-control" style="min-width: 200px;" placeholder="include person + verb" />
             </div>
+            <button class="btn btn-lg btn-primary" @click="submitAnswer">{{ submitButtontext }}</button>
           </div>
-          <div id="verb">
-            <div class="card" style="width: 18rem;">
-              <div class="card-body">
-                <h5 class="card-title">VERB</h5>
-                <p class="h3">{{ currentPrompt.verb }}</p>
-              </div>
-            </div>
+        </div> 
+        <!-- FOOTER -->
+        <footer class="game-footer">
+          <div class="scoreboard">
+            <transition name="flash-green" mode="out-in">
+              <span :key="rightCount" class="score">✅ {{ rightCount }}</span>
+            </transition>
+            <transition name="flash-red" mode="out-in">
+              <span :key="wrongCount" class="score">❌ {{ wrongCount }}</span>
+            </transition>  
           </div>
-      </div>
-      <div id="answer">
-            <div v-if="!gameStarted">
-              <button class="btn btn-success" @click="startGame">START</button>
+          <div class="rounds border p-3">
+              <p>Remaining: {{ remainingCount }}</p>
+              <p>Completed rounds: {{ promptCounter }}</p>
             </div>
-            <div v-else class="d-flex justify-content-center align-items-center mb-3">
-              <div>
-                <label>Answer:</label>
-                <input v-model="userAnswer" @keyup.enter="submitAnswer" />
-              </div>
-              <button class="btn btn-primary" @click="submitAnswer">{{ submitButtontext }}</button>
-            </div>
-          </div>
-      <div id="footer" class="d-flex flex-row">
-          <p>Right: {{ rightCount }}</p>
-          <p>Wrong: {{ wrongCount }}</p>
-          <p>Remaining: {{ remainingCount }}</p>
-          <p>Completed rounds: {{ promptCounter }}</p>
-      </div>
-      <div id="timer">
-          <p>Round Timer: {{ roundTimer }}</p>
-          <p>Overall Timer: {{ overallTimer }}</p>
-      </div>
-      <div id="nav" class="d-flex flex-row justify-content-center align-items-center">
-        <button class="btn btn-secondary m-2" @click="goBack">BACK</button>
-        <button class="btn btn-secondary m-2" @click="quitGame">QUIT</button>
-      </div>
+        </footer>
+      </main>
+      <main v-else>
+        <div>
+          <p class="display-3">Game Instructions</p>
+          <p>How to play:</p>
+          <ol>
+            <li>You will be asked to write {{ remainingCount }} conjugations (the game has {{ remainingCount }} rounds )</li>
+            <li>Every round, you will see 4 cards</li>
+            <ul>
+              <li>Person</li>
+              <li>Verb</li>
+              <li>Sentence type (Positive, Negative, or Question)</li>
+              <li>Tense (Past simple, Future simple, Present continuous, etc.)</li>
+            </ul>
+            <li>Write the correct conjugation for that combination of cards</li>
+            <li>Make sure you write both the person (subject) and the verb</li>
+            <li>Don't press the BACK button during the game. You will be able to see the details for every round at the end of the game.</li>
+          </ol>
+          
+
+        </div>
+        <div>
+          <button class="btn btn-lg btn-success" @click="startGame">START THE GAME</button>
+        </div>
+      </main>
     </div>
-   </div> 
+  </div>
 </template>
+
 
 
 <script>
@@ -82,7 +114,17 @@ import Game from '@/assets/scripts/Game';
 import '@/assets/styles/global_conjugator_styles.css';
 
 export default {
-  props: ['gameSettings'],
+  props: {
+  gameSettings: {
+    type: Object,
+    default: () => ({
+      verbSet: '',
+      sentenceTypes: [],
+      tenses: [],
+      numPrompts: 0
+    })
+  }
+},
   data() {
     return {
       userName: 'Player', // Replace with actual user name if available
@@ -110,9 +152,9 @@ export default {
     };
   },
   async mounted() {
-  this.game = new Game(this.gameSettings);
-  this.game.start();
-},
+    this.game = new Game(this.gameSettings);
+    this.game.start();
+  },
   beforeDestroy() {
     clearInterval(this.timerInterval);
     clearInterval(this.intervalId); // Clear the overall timer interval
@@ -124,7 +166,13 @@ export default {
     },
     endGame() {
       this.results = this.game.getResults();
-      this.$emit('gameOver', this.results);
+      const avgTime = ((new Date().getTime() - this.startTime) / 1000 / this.results.length).toFixed(1);
+
+      this.$emit('gameOver', {
+        results: this.results,
+        totalTime: this.overallTimer,
+        avgTime 
+        });
       this.endTimer();
     },
     quitGame() {
@@ -146,159 +194,215 @@ export default {
       this.startRoundTimer();
     },
     updateTimers() {
-    const now = new Date().getTime();
-    const elapsed = Math.floor((now - this.startTime) / 1000); // Total elapsed seconds
-    this.overallTimer = this.formatTime(elapsed); // Format to MM:SS
-  },
+      const now = new Date().getTime();
+      const elapsed = Math.floor((now - this.startTime) / 1000); // Total elapsed seconds
+      this.overallTimer = this.formatTime(elapsed); // Format to MM:SS
+    },
     endTimer() {
-    clearInterval(this.intervalId);
+      clearInterval(this.intervalId);
     },
     startRoundTimer() {
-    this.roundStartTime = new Date().getTime(); // Reset round start time
-    clearInterval(this.roundIntervalId); // Clear any existing interval
-    
-    this.roundIntervalId = setInterval(() => {
-      const now = new Date().getTime();
-      const elapsed = Math.floor((now - this.roundStartTime) / 1000); // Total elapsed seconds
-      this.roundTimer = this.formatTime(elapsed); // Format to MM:SS
-    }, 1000);
-  },
-  formatTime(totalSeconds) {
-    const minutes = Math.floor(totalSeconds / 60);
-    const seconds = totalSeconds % 60;
-    return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-  },
+      this.roundStartTime = new Date().getTime(); // Reset round start time
+      clearInterval(this.roundIntervalId); // Clear any existing interval
+      
+      this.roundIntervalId = setInterval(() => {
+        const now = new Date().getTime();
+        const elapsed = Math.floor((now - this.roundStartTime) / 1000); // Total elapsed seconds
+        this.roundTimer = this.formatTime(elapsed); // Format to MM:SS
+      }, 1000);
+    },
+    formatTime(totalSeconds) {
+      const minutes = Math.floor(totalSeconds / 60);
+      const seconds = totalSeconds % 60;
+      return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+    },
     endRoundTimer() {
       clearInterval(this.roundIntervalId);
     },
     submitAnswer() {
-  const isCorrect = this.game.submitAnswer(this.userAnswer);
-  if (isCorrect) {
-    this.rightCount = this.game.getRightCount();
-  } else {
-    this.wrongCount = this.game.getWrongCount();
-  }
-  this.promptCounter++;
-  this.remainingCount--;
-  this.userAnswer = '';
-  
-  // End the current round timer
-  this.endRoundTimer();
+      const now = new Date().getTime();
+      const elapsedMs = now - this.roundStartTime;
 
-  if (this.remainingCount === 1) {
-    this.submitButtontext = 'FINISH';
-  }
-  if (this.remainingCount === 0) {
-    console.log(this.game.getResults());
-    this.endGame();
-  } else {
-    this.game.nextPrompt();
-    this.updatePrompt();
-    
-    // Start a new round timer
-    this.startRoundTimer();
-  }
-}
+      // Convert milliseconds to seconds with one decimal place
+      const elapsedSecondsDecimal = (elapsedMs / 1000).toFixed(1); // e.g. "12.3"
+
+      const realPrompt = this.game.getCurrentPrompt();
+      realPrompt.elapsedTime = elapsedSecondsDecimal;
+
+      const isCorrect = this.game.submitAnswer(this.userAnswer);
+      if (isCorrect) {
+        this.rightCount = this.game.getRightCount();
+      } else {
+        this.wrongCount = this.game.getWrongCount();
+      }
+      this.promptCounter++;
+      this.remainingCount--;
+      this.userAnswer = '';
+
+      this.endRoundTimer();
+
+      if (this.remainingCount === 1) {
+        this.submitButtontext = 'FINISH';
+      }
+      if (this.remainingCount === 0) {
+        this.endGame();
+      } else {
+        this.game.nextPrompt();
+        this.updatePrompt();
+        this.startRoundTimer();
+      }
+    },
+
 
   }
 };
 </script>
 
 <style scoped>
-#game-scene {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr 1fr;
-  grid-template-rows: auto auto auto auto auto;
-  grid-template-areas: 
-    "logo . timer timer"
-    "sidebar prompt1 prompt2 prompt3"
-    "sidebar verb verb verb"
-    "sidebar answer answer answer"
-    "nav footer footer footer";
+.game-scene {
+  display: flex;
+  flex-direction: column;
+  margin-left: 4%;
+  margin-right: 4%;
+  margin-top: 1%;
+  margin-bottom: 1%;
   height: 100%;
-  max-height: 100%;
-  max-width: 100%;
-  gap: 10px; /* Add spacing between grid items */
+  gap: 10px;
+  padding: 10px;
 }
 
-#logo {
-  grid-area: logo;
-  padding: 10px;
-  text-align: center;
+/* HEADER */
+.game-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
-
-#sidebar {
-  grid-area: sidebar;
-  background-color: #f0f0f0;
-  padding: 10px;
+.timer-box {
+  background: #f8f9fa;
+  padding: 0.5rem 1rem;
   border-radius: 5px;
-  display: flex;
-  flex-direction: column;
+  text-align: right;
 }
 
-#gamespace {
-  grid-column: span 3; /* Ensures proper layout */
-  display: flex;
-  flex-direction: row;
-  align-content: center;
-  flex-wrap: wrap; 
-  max-width: 100%;
-  gap: 15px; /* Adds spacing between prompts */
-}
-
-#prompt1, #prompt2, #prompt3, #verb {
-  flex: 1 0 20%; /* Ensures flexibility */
-}
-
-#footer {
-  grid-area: footer;
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-}
-
-#nav {
-  grid-area: nav;
-  text-align: center;
-}
-
-#timer {
-  grid-area: timer;
-  text-align: center;
-}
-
-#answer {
-  grid-area: answer;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+/* BODY */
+.game-body {
+  display: grid;
+  grid-template-columns: 250px 1fr;
+  flex: 1;
   gap: 10px;
 }
 
-@media (max-width: 576px) {
-  #game-scene {
+/* SIDEBAR */
+.sidebar {
+  background: #f0f0f0;
+  padding: 10px;
+  border-radius: 5px;
+}
+
+/* MAIN GAME AREA */
+.main-area {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.prompt-row-1 {
+  display: flex;
+  gap: 10px;
+  flex: 2;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.prompt-row-2 {
+    display: flex;
+    gap: 10px;
+    flex: 3;  /* 50% bigger than prompt-row-1  */
+    flex-wrap: wrap;
+    justify-content: center;
+    margin: 1rem;
+}
+
+.verb-card {
+  display: flex;
+  justify-content: center;
+}
+
+.answer-section {
+  display: flex;
+  justify-content: center;
+  margin-top: 4rem;
+  margin-bottom: 4rem;
+}
+
+/* FOOTER */
+.game-footer {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  margin-top: 3rem;
+  gap: 3rem; 
+}
+.footer-nav {
+  display: flex;
+  justify-content: center;
+}
+.rounds {
+  display: flex;
+  flex-direction: column;
+  border-color: black;
+}
+.scoreboard {
+  font-size: 3rem;
+  gap: 3rem;
+}
+.score {
+  margin: 2rem;
+}
+ /* Score count transitions */
+ /* Green transition */
+.flash-green-enter-active, .flash-green-leave-active {
+  transition: all 0.7s ease;
+}
+.flash-green-enter {
+  transform: scale(1.5);
+  color: limegreen;
+  opacity: 0.7;
+}
+.flash-green-leave-to {
+  opacity: 0;
+}
+
+/* Red transition */
+.flash-red-enter-active, .flash-red-leave-active {
+  transition: all 0.3s ease;
+}
+.flash-red-enter {
+  transform: scale(1.5);
+  color: crimson;
+  opacity: 0.7;
+}
+.flash-red-leave-to {
+  opacity: 0;
+}
+
+
+
+
+/* Responsive */
+@media (max-width: 768px) {
+  .game-body {
     grid-template-columns: 1fr;
-    grid-template-rows: auto auto auto auto auto auto;
-    grid-template-areas: 
-      "logo"
-      "timer"
-      "prompt1"
-      "prompt2"
-      "prompt3"
-      "verb"
-      "answer"
-      "footer"
-      "nav"
-      ;
   }
-  #sidebar {
-    display: none; /* Hide sidebar on small screens */
+  .sidebar {
+    display: none;
   }
-  #gamespace {
-    flex-direction: column; /* Stack prompts vertically on small screens */
+  .game-footer {
+    flex-direction: column;
   }
-  #footer, #nav {
-    flex-direction: column; /* Stack footer and nav items vertically */
+  .answer-form-group {
+    flex-direction: column;
   }
 }
+
 </style>

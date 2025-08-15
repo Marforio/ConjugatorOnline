@@ -1,6 +1,6 @@
 <!-- src/components/SceneManager.vue -->
 <template>
-  <component :is="currentSceneComponent" @changeScene="changeScene" @startGame="handleStartGame" @gameOver="handleGameOver" :gameSettings="gameSettings" :results="results" />
+  <component :is="currentSceneComponent" @changeScene="changeScene" @startGame="handleStartGame" @gameOver="handleGameOver" :gameSettings="gameSettings" :results="results" :total-time="totalTime" :avg-time="avgTime" />
 </template>
 
 <script>
@@ -16,7 +16,9 @@ export default {
       scenes: { Scene01_Landing, Scene02_Settings, Scene03_Game, Scene04_Results },
       currentScene: 'Scene01_Landing',
       gameSettings: null,
-      results: null
+      results: null,
+      totalTime: '',
+      avgTime: ''
     };
   },
   computed: {
@@ -31,15 +33,25 @@ export default {
       }
     },
     handleStartGame(selections) {
-      console.log('Scene manager received Setting selections:', selections);
       this.gameSettings = markRaw(selections);
       this.changeScene('Scene03_Game');
     },
-    handleGameOver(results) {
-      console.log('Game over, Game Manager received results:', results);
-      this.results = results;
+    handleGameOver(payload) {
+      console.log('Game over, Game Manager received results:', payload);
+      this.results = payload.results;
+      this.totalTime = payload.totalTime;
+      this.avgTime = payload.avgTime;
+
       this.changeScene('Scene04_Results');
       }
+  },
+  watch: {
+    results(newVal) {
+      console.log('ResultsPage received new results:', newVal);
+    }
+  },
+  mounted() {
+    console.log('ResultsPage mounted with results:', this.results);
   }
 };
 </script>

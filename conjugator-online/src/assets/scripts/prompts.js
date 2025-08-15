@@ -23,6 +23,7 @@ class ConjugationPrompt {
         this.promptData = { verb: this.verb, person: this.person, tense: this.tense, 'sentence type': this.sentence };
         this.userAnswer = "";
         this.correct = false;
+        this.elapsedTime = 0
     }
 
     getAnswers() {
@@ -70,7 +71,7 @@ class ConjugationPrompt {
         return this.correct;
     }
     getEvidence() {
-        return { correct: this.correct, userAnswer: this.userAnswer, answers: this.answers };
+        return { correct: this.correct, userAnswer: this.userAnswer, answers: this.answers, elapsedTime: this.elapsedTime };
     }
     
 }

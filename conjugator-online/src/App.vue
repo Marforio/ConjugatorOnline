@@ -1,16 +1,9 @@
 <!-- src/App.vue -->
 <template>
-  <div id="app">
-    <SceneManager />
-  </div>
+  <RouterView />
 </template>
 
-<script>
-import 'bootstrap/dist/css/bootstrap.min.css';
-import 'bootstrap/dist/js/bootstrap.min.js';
-import SceneManager from './components/SceneManager.vue';
-
-export default {
-  components: { SceneManager }
-};
+<script setup>
+import 'bootstrap/dist/css/bootstrap.min.css'
+import 'bootstrap/dist/js/bootstrap.bundle.min.js' // bundle includes Popper.js
 </script>

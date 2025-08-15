@@ -66,15 +66,12 @@ class ConjugationSet {
         try {
             const commonVerbsResponse = await fetch(basedir + 'commonVerbs.json');
             this.commonVerbs = await commonVerbsResponse.json();
-            console.log('Common Verbs:', this.commonVerbs);
 
             const regularVerbsResponse = await fetch(basedir + 'regularVerbs.json');
             this.regularVerbs = await regularVerbsResponse.json();
-            console.log('Regular Verbs:', this.regularVerbs);
 
             const irregularVerbsResponse = await fetch(basedir + 'irregularVerbs.json');
             this.irregularVerbs = await irregularVerbsResponse.json();
-            console.log('Irregular Verbs:', this.irregularVerbs);
 
             let verbSource;
 
@@ -110,31 +107,23 @@ class ConjugationSet {
                 }
 
                 this.PromptDict[i] = { verb, person, tense, sentence, answers };
-                console.log(`PromptDict[${i}] initialized:`, this.PromptDict[i]);
+                
             }
-
-            console.log('Completed PromptDict population:', this.PromptDict);
 
             // Populate answers and PromptList
             for (const i in this.PromptDict) {
                 const { verb, person, tense, sentence } = this.PromptDict[i];
                 const answer = router(verb, person, tense, sentence);
-                console.log('The answer is ', answer);
                 this.PromptDict[i].answers.push(answer);
-                console.log(`PromptDict[${i}] answer:`, answer);
 
                 const alternativeAnswers = abbreviator(tense, person, sentence, answer);
-                console.log(`Alternative answers for PromptDict[${i}]:`, alternativeAnswers);
                 this.PromptDict[i].answers.push(...alternativeAnswers);
                 const answers = this.PromptDict[i].answers;
-                console.log(`PromptDict[${i}] answers:`, answers);
 
                 const prompt = new ConjugationPrompt(i, verb, person, tense, sentence, answers);
                 this.PromptList.push(prompt);
-                console.log(`PromptList[${i - 1}] added:`, prompt);
             }
 
-            console.log('Completed PromptList population:', this.PromptList);
         } catch (error) {
             console.error('Error loading prompts:', error);
         }

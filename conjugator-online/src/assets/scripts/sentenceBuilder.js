@@ -31,7 +31,6 @@ function router(verb, person, tense, sentence) {
     /**
      * Routes the construction of the final sentence string using the imported tense function and the sentenceBuilder function above.
      */
-    console.log('Router received the following arguments:', [ verb, person, tense, sentence ]);
     if (sentence === 'Positive') {
         sentence = 'Declarative';
     }
@@ -55,7 +54,6 @@ function router(verb, person, tense, sentence) {
     }
 
     const result = sentenceBuilder(sentence, person, aux, principal);
-    console.log('Router returning:', result);
     return result;
 }
 

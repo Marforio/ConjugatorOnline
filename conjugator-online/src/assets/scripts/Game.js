@@ -2,6 +2,7 @@
 
 // src/assets/scripts/Game.js
 import { ConjugationSet } from './sets';
+import { toRaw } from 'vue';
 
 class Game {
   constructor(settings) {
@@ -16,6 +17,7 @@ class Game {
     this.rightCount = 0;
     this.wrongCount = 0;
     this.results = [];
+    this.elapsedTimes = {};
   }
 
   async start() {
@@ -34,28 +36,51 @@ class Game {
   submitAnswer(answer) {
     const cleanedAnswer = answer.toLowerCase().replace(/['.]/g, '');
     this.currentPrompt.setUserAnswer(cleanedAnswer);
-    console.log(this.currentPrompt.getAnswers());
     const isCorrect = this.currentPrompt.getCorrect();
-    console.log(isCorrect);
     if (isCorrect) {
-      console.log('Old right count:', this.rightCount);
       this.rightCount++;
-      console.log('New right count:', this.rightCount);
     } else {
       this.wrongCount++;
     }
-    this.results.push({
-      number: this.currentPrompt.getNumber(),
-      ...this.currentPrompt.getResult(),
-    });
-    return isCorrect;
-  }
-  getRemainingCount() {
-    return this.conjugationSet.getRemainingCount();
+      
+    // Instead of adding elapsedTime inside prompt, add it here
+    const promptNumber = this.currentPrompt.getNumber();
+
+    // Store elapsed time from currentPrompt (or pass it as argument)
+    this.elapsedTimes[promptNumber] = this.currentPrompt.elapsedTime;
+    
+    // Get the raw prompt object
+      const rawPrompt = toRaw(this.currentPrompt);
+
+      // Create a plain copy with elapsedTime added
+      const promptCopy = {
+        number: rawPrompt.number,
+        verb: rawPrompt.verb,
+        person: rawPrompt.person,
+        tense: rawPrompt.tense,
+        sentence: rawPrompt.sentence,
+        answers: rawPrompt.answers,
+        correct: rawPrompt.correct,
+        elapsedTime: rawPrompt.elapsedTime,
+        userAnswer: rawPrompt.userAnswer,
+      };
+
+      this.results.push({
+        prompt: promptCopy,
+        number: this.currentPrompt.getNumber(),
+        ...this.currentPrompt.getResult(),
+      });
+
+
+  return isCorrect;
   }
 
   getResults() {
-    return this.results;
+    // When returning results, merge in elapsedTime from separate store
+    return this.results.map(result => ({
+      ...result,
+      elapsedTime: this.elapsedTimes[result.number] || 0,
+    }));
   }
 
   getRightCount() {
