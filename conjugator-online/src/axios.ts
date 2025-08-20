@@ -2,7 +2,7 @@ import axios, { InternalAxiosRequestConfig, AxiosResponse } from "axios";
 import { getAccessToken, refreshToken, clearTokens } from "./services/auth";
 
 const api = axios.create({
-  baseURL: "https://your-backend.azurewebsites.net",
+  baseURL: "https://languagelabsback-feb3ekeqg2hkbrcp.switzerlandnorth-01.azurewebsites.net/",
 });
 
 // Request interceptor

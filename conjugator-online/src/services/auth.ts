@@ -1,7 +1,7 @@
 // src/services/auth.ts
 import axios from "axios";
 
-const API_URL = "https://your-backend.azurewebsites.net";
+const API_URL = "https://languagelabsback-feb3ekeqg2hkbrcp.switzerlandnorth-01.azurewebsites.net/";
 
 export function getAccessToken() {
   return localStorage.getItem("access");
