@@ -1,20 +1,51 @@
 <template>
-  <div class="login-container">
-    <h1>Login</h1>
-    <form @submit.prevent="login">
-      <div>
-        <label>Username:</label>
-        <input v-model="username" type="text" required />
-      </div>
-      <div>
-        <label>Password:</label>
-        <input v-model="password" type="password" required />
-      </div>
-      <button type="submit" :disabled="loading">
-        {{ loading ? 'Logging in...' : 'Login' }}
-      </button>
-      <p v-if="error" class="error">{{ error }}</p>
-    </form>
+  <div class="container d-flex justify-content-center align-items-center vh-100">
+    <div class="card shadow-lg p-4 w-100" style="max-width: 400px;">
+      <h2 class="text-center mb-4">Login</h2>
+
+      <form @submit.prevent="login">
+        <!-- Username -->
+        <div class="mb-3">
+          <label for="username" class="form-label">Username</label>
+          <input
+            id="username"
+            v-model="username"
+            type="text"
+            class="form-control"
+            placeholder="Enter username"
+            required
+          />
+        </div>
+
+        <!-- Password -->
+        <div class="mb-3">
+          <label for="password" class="form-label">Password</label>
+          <input
+            id="password"
+            v-model="password"
+            type="password"
+            class="form-control"
+            placeholder="Enter password"
+            required
+          />
+        </div>
+
+        <!-- Error -->
+        <div v-if="error" class="alert alert-danger py-2">
+          {{ error }}
+        </div>
+
+        <!-- Submit -->
+        <button
+          type="submit"
+          class="btn btn-primary w-100"
+          :disabled="loading"
+        >
+          <span v-if="loading" class="spinner-border spinner-border-sm me-2"></span>
+          {{ loading ? "Logging in..." : "Login" }}
+        </button>
+      </form>
+    </div>
   </div>
 </template>
 
@@ -32,7 +63,7 @@ async function login() {
 
   try {
     const res = await fetch(
-      "https://userauthfunction-dtd8dabncmfpaqgx.switzerlandnorth-01.azurewebsites.net/api/auth/login",
+      "https://languagelabsback-feb3ekeqg2hkbrcp.switzerlandnorth-01.azurewebsites.net/api/students/token/", // JWT login endpoint
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -44,16 +75,15 @@ async function login() {
     );
 
     if (!res.ok) {
-      throw new Error(await res.text());
+      throw new Error("Invalid credentials");
     }
 
     const data = await res.json();
-    console.log("JWT token:", data.token);
+    localStorage.setItem("access_token", data.access);
+    localStorage.setItem("refresh_token", data.refresh);
 
-    // Save JWT token in localStorage
-    localStorage.setItem("jwt", data.token);
-
-    alert("Login successful!");
+    // Redirect after login
+    window.location.href = "/";
   } catch (err: any) {
     error.value = err.message || "Login failed";
   } finally {
@@ -63,12 +93,8 @@ async function login() {
 </script>
 
 <style scoped>
-.login-container {
-  max-width: 300px;
-  margin: auto;
-  padding: 1rem;
-}
-.error {
-  color: red;
+/* Optional custom tweaks */
+.card {
+  border-radius: 1rem;
 }
 </style>
