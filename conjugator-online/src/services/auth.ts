@@ -1,7 +1,5 @@
 // src/services/auth.ts
-import axios from "axios";
-
-const API_URL = "https://languagelabsback-feb3ekeqg2hkbrcp.switzerlandnorth-01.azurewebsites.net/";
+import api from "@/axios";
 
 export function getAccessToken() {
   return localStorage.getItem("access");
@@ -22,7 +20,7 @@ export function clearTokens() {
 }
 
 export async function login(username: string, password: string) {
-  const res = await axios.post(`${API_URL}/api/token/`, { username, password });
+  const res = await api.post("/token/", { username, password });
   saveTokens(res.data.access, res.data.refresh);
   return res.data;
 }
@@ -30,7 +28,8 @@ export async function login(username: string, password: string) {
 export async function refreshToken() {
   const refresh = getRefreshToken();
   if (!refresh) throw new Error("No refresh token");
-  const res = await axios.post(`${API_URL}/api/token/refresh/`, { refresh });
-  saveTokens(res.data.access, refresh);
+
+  const res = await api.post("/token/refresh/", { refresh });
+  saveTokens(res.data.access, refresh); // save new access, keep refresh
   return res.data.access;
 }

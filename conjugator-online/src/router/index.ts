@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from "vue-router";
 import HomeView from "../views/Home.vue";
 import LoginView from "../views/Login.vue";
+import DashboardView from "../views/Dashboard.vue";
 import { getAccessToken } from "@/services/auth";
 
 const router = createRouter({
@@ -19,6 +20,12 @@ const router = createRouter({
       component: () => import("../views/Conjugator.vue"),
       meta: { requiresAuth: true },
     },
+    {
+      path: "/dashboard",
+      name: "dashboard",
+      component: DashboardView,
+      meta: { requiresAuth: true },
+    }
   ],
 });
 

@@ -108,26 +108,26 @@
 </template>
 
 
-
 <script>
+import api from '@/axios';
 import Game from '@/assets/scripts/Game';
 import '@/assets/styles/global_conjugator_styles.css';
 
 export default {
   props: {
-  gameSettings: {
-    type: Object,
-    default: () => ({
-      verbSet: '',
-      sentenceTypes: [],
-      tenses: [],
-      numPrompts: 0
-    })
-  }
-},
+    gameSettings: {
+      type: Object,
+      default: () => ({
+        verbSet: '',
+        sentenceTypes: [],
+        tenses: [],
+        numPrompts: 0
+      })
+    }
+  },
   data() {
     return {
-      userName: 'Player', // Replace with actual user name if available
+      userName: 'Player',
       game: null,
       gameStarted: false,
       currentPrompt: {
@@ -157,24 +157,66 @@ export default {
   },
   beforeDestroy() {
     clearInterval(this.timerInterval);
-    clearInterval(this.intervalId); // Clear the overall timer interval
-    clearInterval(this.roundIntervalId); // Clear the round timer interval
+    clearInterval(this.intervalId);
+    clearInterval(this.roundIntervalId);
   },
   methods: {
     goBack() {
       this.$emit('changeScene', 'Scene02_Settings');
     },
-    endGame() {
+    
+    async endGame() {
       this.results = this.game.getResults();
+
       const avgTime = ((new Date().getTime() - this.startTime) / 1000 / this.results.length).toFixed(1);
+
+      const rounds = this.results.map((r, index) => ({
+        prompt_number: index + 1,                  
+        person: r.person,
+        verb: r.verb,
+        tense: r.tense,
+        sentence_type: r.sentenceType,
+        user_answer: r.userAnswer,
+        is_correct: r.correct,                    
+        elapsed_time: parseFloat(r.elapsedTime)    
+      }));
+
+      const payload = {
+        verb_set: this.gameSettings.verbSet,
+        sentence_types: JSON.stringify(this.gameSettings.sentenceTypes),  
+        tenses: JSON.stringify(this.gameSettings.tenses),                 
+        total_rounds: this.gameSettings.numPrompts,
+        started_at: new Date(this.startTime).toISOString(),
+        finished_at: new Date().toISOString(),
+        total_time: Math.floor((new Date().getTime() - this.startTime) / 1000),
+        avg_time_per_prompt: parseFloat(avgTime),
+        rounds: rounds
+      };
+      console.log('Payload to save:', payload);
+      console.log(localStorage.getItem("access"));
+
+      try {
+        const response = await api.post('/conj-game-sessions/', payload, {
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          });
+        console.log(response.data);
+
+        } catch (error) {
+        console.error('Error saving game session:', error);
+        }
 
       this.$emit('gameOver', {
         results: this.results,
         totalTime: this.overallTimer,
-        avgTime 
-        });
+        avgTime
+      });
+
       this.endTimer();
     },
+
+
     quitGame() {
       this.$emit('changeScene', 'Scene01_Landing');
     },
@@ -195,20 +237,19 @@ export default {
     },
     updateTimers() {
       const now = new Date().getTime();
-      const elapsed = Math.floor((now - this.startTime) / 1000); // Total elapsed seconds
-      this.overallTimer = this.formatTime(elapsed); // Format to MM:SS
+      const elapsed = Math.floor((now - this.startTime) / 1000);
+      this.overallTimer = this.formatTime(elapsed);
     },
     endTimer() {
       clearInterval(this.intervalId);
     },
     startRoundTimer() {
-      this.roundStartTime = new Date().getTime(); // Reset round start time
-      clearInterval(this.roundIntervalId); // Clear any existing interval
-      
+      this.roundStartTime = new Date().getTime();
+      clearInterval(this.roundIntervalId);
       this.roundIntervalId = setInterval(() => {
         const now = new Date().getTime();
-        const elapsed = Math.floor((now - this.roundStartTime) / 1000); // Total elapsed seconds
-        this.roundTimer = this.formatTime(elapsed); // Format to MM:SS
+        const elapsed = Math.floor((now - this.roundStartTime) / 1000);
+        this.roundTimer = this.formatTime(elapsed);
       }, 1000);
     },
     formatTime(totalSeconds) {
@@ -222,9 +263,7 @@ export default {
     submitAnswer() {
       const now = new Date().getTime();
       const elapsedMs = now - this.roundStartTime;
-
-      // Convert milliseconds to seconds with one decimal place
-      const elapsedSecondsDecimal = (elapsedMs / 1000).toFixed(1); // e.g. "12.3"
+      const elapsedSecondsDecimal = (elapsedMs / 1000).toFixed(1);
 
       const realPrompt = this.game.getCurrentPrompt();
       realPrompt.elapsedTime = elapsedSecondsDecimal;
@@ -252,11 +291,10 @@ export default {
         this.startRoundTimer();
       }
     },
-
-
   }
 };
 </script>
+
 
 <style scoped>
 .game-scene {

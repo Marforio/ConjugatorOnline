@@ -19,6 +19,21 @@
         <span class="badge bg-primary rounded-pill">{{ session.score }} pts</span>
       </li>
     </ul>
+
+    <div v-if="errors.length">
+        <h2>Recent Errors</h2>
+        <ul class="list-group">
+            <li v-for="errorItem in errors" :key="errorItem.error_id" class="list-group-item">
+            <span><strong>{{ errorItem.error_code }}</strong> ({{ errorItem.times }}x)</span>
+            <div v-if="errorItem.evidence">
+                {{ errorItem.evidence }}
+            </div>
+            </li>
+        </ul>
+    </div>
+    <div v-else>
+      <p class="text-muted">No recent errors.</p>
+    </div>
   </div>
 </template>
 
@@ -34,23 +49,36 @@ interface GameSession {
   created_at: string;
 }
 
+interface ErrorItem {
+  error_id: string;
+  error_code: string;
+  evidence: string | null;
+  times: number;
+  // Add other fields as exposed by your ErrorSerializer
+}
+
 export default defineComponent({
   name: "Dashboard",
   setup() {
     const sessions = ref<GameSession[]>([]);
+    const errors = ref<ErrorItem[]>([]);
     const loading = ref<boolean>(true);
     const error = ref<string | null>(null);
     let intervalId: number;
 
-    const fetchSessions = async () => {
+    const fetchDashboardData = async () => {
       try {
         loading.value = true;
-        const response = await api.get<GameSession[]>("/api/conj-game-sessions/");
-        sessions.value = response.data;
+        const [sessionsRes, errorsRes] = await Promise.all([
+          api.get<GameSession[]>("/conj-game-sessions/"),
+          api.get<ErrorItem[]>("/errors/"),
+        ]);
+        sessions.value = sessionsRes.data;
+        errors.value = errorsRes.data;
         error.value = null;
       } catch (err: any) {
         console.error(err);
-        error.value = err.response?.data?.detail || "Failed to fetch sessions";
+        error.value = err.response?.data?.detail || "Failed to fetch data";
       } finally {
         loading.value = false;
       }
@@ -62,16 +90,16 @@ export default defineComponent({
     };
 
     onMounted(() => {
-      fetchSessions();
+      fetchDashboardData;
       // Refresh data every 30 seconds
-      intervalId = window.setInterval(fetchSessions, 30000);
+      intervalId = window.setInterval(fetchDashboardData, 80000);
     });
 
     onUnmounted(() => {
       clearInterval(intervalId);
     });
 
-    return { sessions, loading, error, logout };
+    return { sessions, errors, loading, error, logout };
   },
 });
 </script>

@@ -5,6 +5,8 @@
  <RouterLink to="/conjugator">Go to Conjugator</RouterLink>
  <br></br>
  <RouterLink to="/login">Go to Login</RouterLink>
+ <br></br>
+  <RouterLink to="/dashboard">Go to Dashboard</RouterLink>
 
 </template>
 

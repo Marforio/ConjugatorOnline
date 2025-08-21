@@ -1,24 +1,28 @@
+// src/axios.ts
 import axios, { InternalAxiosRequestConfig, AxiosResponse } from "axios";
 import { getAccessToken, refreshToken, clearTokens } from "./services/auth";
 
+// Create an axios instance with baseURL from environment variables
 const api = axios.create({
-  baseURL: "https://languagelabsback-feb3ekeqg2hkbrcp.switzerlandnorth-01.azurewebsites.net/",
+  baseURL: import.meta.env.VITE_API_BASE_URL, // '/api' in dev, full URL in prod
 });
 
-// Request interceptor
+// Request interceptor: attach access token if it exists
 api.interceptors.request.use(
   (config: InternalAxiosRequestConfig): InternalAxiosRequestConfig => {
     const token = getAccessToken();
     if (token) {
+      // Ensure headers object exists
       config.headers = config.headers ?? {};
       config.headers.Authorization = `Bearer ${token}`;
     }
+    console.log("Request headers:", config.headers);
     return config;
   },
   (error) => Promise.reject(error)
 );
 
-// Response interceptor
+// Response interceptor: handle 401 errors and refresh token if needed
 api.interceptors.response.use(
   (response: AxiosResponse) => response,
   async (error) => {
@@ -31,7 +35,7 @@ api.interceptors.response.use(
         const newAccessToken = await refreshToken();
         originalRequest.headers = originalRequest.headers ?? {};
         originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
-        return api(originalRequest); // retry with new token
+        return api(originalRequest); // retry original request with new token
       } catch (err) {
         clearTokens();
         window.location.href = "/login";

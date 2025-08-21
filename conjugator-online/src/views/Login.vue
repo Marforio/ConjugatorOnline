@@ -3,7 +3,7 @@
     <div class="card shadow-lg p-4 w-100" style="max-width: 400px;">
       <h2 class="text-center mb-4">Login</h2>
 
-      <form @submit.prevent="login">
+      <form @submit.prevent="handleLogin">
         <!-- Username -->
         <div class="mb-3">
           <label for="username" class="form-label">Username</label>
@@ -51,41 +51,30 @@
 
 <script setup lang="ts">
 import { ref } from "vue";
+import { login as loginService } from "@/services/auth";
 
 const username = ref("");
 const password = ref("");
 const loading = ref(false);
 const error = ref("");
 
-async function login() {
+async function handleLogin() {
   error.value = "";
   loading.value = true;
 
   try {
-    const res = await fetch(
-      "https://languagelabsback-feb3ekeqg2hkbrcp.switzerlandnorth-01.azurewebsites.net/api/token/", // JWT login endpoint
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          username: username.value,
-          password: password.value,
-        }),
-      }
-    );
-
-    if (!res.ok) {
-      throw new Error("Invalid credentials");
-    }
-
-    const data = await res.json();
-    localStorage.setItem("access_token", data.access);
-    localStorage.setItem("refresh_token", data.refresh);
+    const data = await loginService(username.value, password.value);
+    // Tokens are saved in auth.ts
+    console.log("Login successful", data);
 
     // Redirect after login
     window.location.href = "/";
   } catch (err: any) {
-    error.value = err.message || "Login failed";
+    if (err.response?.status === 401) {
+      error.value = "Invalid credentials";
+    } else {
+      error.value = err.message || "Login failed";
+    }
   } finally {
     loading.value = false;
   }
@@ -93,7 +82,6 @@ async function login() {
 </script>
 
 <style scoped>
-/* Optional custom tweaks */
 .card {
   border-radius: 1rem;
 }

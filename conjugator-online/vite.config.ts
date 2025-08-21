@@ -17,4 +17,13 @@ export default defineConfig({
   esbuild: {
     target: 'es2022', 
   },
+  server: {
+    proxy: {
+      "/api": {
+        target: "https://languagelabsback-feb3ekeqg2hkbrcp.switzerlandnorth-01.azurewebsites.net",
+        changeOrigin: true,
+        secure: false,
+      },
+    },
+  },
 })
