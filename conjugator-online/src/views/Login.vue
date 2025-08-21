@@ -63,7 +63,7 @@ async function login() {
 
   try {
     const res = await fetch(
-      "https://languagelabsback-feb3ekeqg2hkbrcp.switzerlandnorth-01.azurewebsites.net/api/students/token/", // JWT login endpoint
+      "https://languagelabsback-feb3ekeqg2hkbrcp.switzerlandnorth-01.azurewebsites.net/api/token/", // JWT login endpoint
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
