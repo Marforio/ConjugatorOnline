@@ -36,44 +36,40 @@ class Game {
   submitAnswer(answer) {
     const cleanedAnswer = answer.toLowerCase().replace(/['.]/g, '');
     this.currentPrompt.setUserAnswer(cleanedAnswer);
+
     const isCorrect = this.currentPrompt.getCorrect();
     if (isCorrect) {
       this.rightCount++;
     } else {
       this.wrongCount++;
     }
-      
-    // Instead of adding elapsedTime inside prompt, add it here
+
+    // Track elapsed time per prompt number
     const promptNumber = this.currentPrompt.getNumber();
+    this.elapsedTimes[promptNumber] = Number(this.currentPrompt.elapsedTime) || 0;
 
-    // Store elapsed time from currentPrompt (or pass it as argument)
-    this.elapsedTimes[promptNumber] = this.currentPrompt.elapsedTime;
-    
-    // Get the raw prompt object
-      const rawPrompt = toRaw(this.currentPrompt);
+    // Pull the normalized fields from getResult(), but don't spread it
+    const res = this.currentPrompt.getResult(); // now includes userAnswer, correct, correctAnswers, prompt{...}
 
-      // Create a plain copy with elapsedTime added
-      const promptCopy = {
-        number: rawPrompt.number,
-        verb: rawPrompt.verb,
-        person: rawPrompt.person,
-        tense: rawPrompt.tense,
-        sentence: rawPrompt.sentence,
-        answers: rawPrompt.answers,
-        correct: rawPrompt.correct,
-        elapsedTime: rawPrompt.elapsedTime,
-        userAnswer: rawPrompt.userAnswer,
-      };
+    const normalized = {
+      number: promptNumber,
+      prompt: {
+        verb: this.currentPrompt.getVerb(),
+        person: this.currentPrompt.getPerson(),
+        tense: this.currentPrompt.getTense(),
+        sentenceType: this.currentPrompt.getSentenceType(),
+      },
+      userAnswer: res.userAnswer,          // normalized key
+      correct: !!res.correct,              // boolean
+      correctAnswers: res.correctAnswers,  // normalized key (array)
+      elapsedTime: this.elapsedTimes[promptNumber],
+    };
 
-      this.results.push({
-        prompt: promptCopy,
-        number: this.currentPrompt.getNumber(),
-        ...this.currentPrompt.getResult(),
-      });
-
-
-  return isCorrect;
+    this.results.push(normalized);
+    return isCorrect;
   }
+
+
 
   getResults() {
     // When returning results, merge in elapsedTime from separate store

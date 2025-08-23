@@ -16,7 +16,9 @@ api.interceptors.request.use(
       config.headers = config.headers ?? {};
       config.headers.Authorization = `Bearer ${token}`;
     }
+    console.log("Axios request URL:", config.url);
     console.log("Request headers:", config.headers);
+    console.log("Request data:", config.data);
     return config;
   },
   (error) => Promise.reject(error)
@@ -24,10 +26,18 @@ api.interceptors.request.use(
 
 // Response interceptor: handle 401 errors and refresh token if needed
 api.interceptors.response.use(
-  (response: AxiosResponse) => response,
+  (response: AxiosResponse) => {
+    // Log every successful response
+    console.log("Axios response:", response.status, response.data);
+    return response;
+  },
   async (error) => {
+    // Log the error response first
+    console.error("Axios error response:", error.response?.status, error.response?.data);
+
     const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
 
+    // Handle 401 (Unauthorized) and retry once
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
 
@@ -45,5 +55,6 @@ api.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
 
 export default api;

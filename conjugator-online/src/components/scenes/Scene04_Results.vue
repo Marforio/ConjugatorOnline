@@ -45,7 +45,11 @@
           </ul>
           <p></p>
           <p class="card-text"><span class="h6">Acceptable answer(s):</span></p>
-          <p class="card-text ps-3"><em>{{ result['correct answer(s)'].join(', ') }}</em></p>
+          <p class="card-text ps-3"><em>
+    {{ Array.isArray(result['correct answer(s)']) 
+        ? result['correct answer(s)'].join(', ') 
+        : result['correct answer(s)'] }}
+  </em></p>
         </div>
       </div>
     </swiper-slide>
@@ -77,7 +81,10 @@
         <div class="card-header">Question {{ result.number }}</div>
         <div class="card-body">
           <h5 class="card-title">Your answer:</h5>
-          <p v-if="result['user answer'].length > 0" class="fs-4 text-center"><em>{{ result['user answer'] }}</em></p>
+          <p v-if="result['user answer'] && result['user answer'].length > 0" 
+                                          class="fs-4 text-center">
+                                          <em>{{ result['user answer'] }}</em>
+                                        </p>
           <p v-else class="fs-6 text-center">No answer submitted.</p>
           <p class="card-text">This answer is incorrect.</p>
           <p class="card-text">You answered in {{ result['elapsedTime'] }} seconds.</p>
@@ -89,8 +96,11 @@
             <li class="list-group-item bg-warning-subtle">Sentence Type: {{ result.prompt['sentence type'] }}</li>
           </ul>
           <p></p>
-          <p class="card-text"><span class="h6">Correct answer(s):</span></p>
-          <p class="card-text ps-3"><em>{{ result['correct answer(s)'].join(', ') }}</em></p>
+          <p class="card-text"><span class="h6">Acceptable answer(s):</span></p>
+          <p class="card-text ps-3"><em>{{ Array.isArray(result['correct answer(s)']) 
+                                                        ? result['correct answer(s)'].join(', ') 
+                                                        : result['correct answer(s)'] }}
+                                                  </em></p>
         </div>
       </div>
     </swiper-slide>

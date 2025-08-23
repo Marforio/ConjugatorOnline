@@ -37,7 +37,6 @@ export default {
       this.changeScene('Scene03_Game');
     },
     handleGameOver(payload) {
-      console.log('Game over, Game Manager received results:', payload);
       this.results = payload.results;
       this.totalTime = payload.totalTime;
       this.avgTime = payload.avgTime;
@@ -47,11 +46,9 @@ export default {
   },
   watch: {
     results(newVal) {
-      console.log('ResultsPage received new results:', newVal);
     }
   },
   mounted() {
-    console.log('ResultsPage mounted with results:', this.results);
   }
 };
 </script>

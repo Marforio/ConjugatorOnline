@@ -42,10 +42,15 @@ class ConjugationPrompt {
 
     getResult() {
         const resultData = {
-            prompt: this.promptData,
-            'user answer': this.userAnswer,
-            correct: this.correct,
-            'correct answer(s)': this.answers
+            prompt: {
+            verb: this.verb,
+            person: this.person,
+            tense: this.tense,
+            sentenceType: this.sentence,  
+        },
+        userAnswer: this.userAnswer,
+        correct: this.correct,
+        correctAnswers: this.answers,
         };
         return resultData;
     }

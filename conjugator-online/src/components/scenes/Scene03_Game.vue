@@ -167,24 +167,26 @@ export default {
     
     async endGame() {
       this.results = this.game.getResults();
+      console.log("Game results in this.results (spread):", [...this.results]);
 
       const avgTime = ((new Date().getTime() - this.startTime) / 1000 / this.results.length).toFixed(1);
 
       const rounds = this.results.map((r, index) => ({
-        prompt_number: index + 1,                  
-        person: r.person,
-        verb: r.verb,
-        tense: r.tense,
-        sentence_type: r.sentenceType,
+        prompt_number: index + 1,
+        person: r.prompt.person,
+        verb: r.prompt.verb,
+        tense: r.prompt.tense,
+        sentence_type: r.prompt.sentenceType,
         user_answer: r.userAnswer,
-        is_correct: r.correct,                    
-        elapsed_time: parseFloat(r.elapsedTime)    
+        is_correct: r.correct,
+        elapsed_time: parseFloat(r.elapsedTime)
       }));
+
 
       const payload = {
         verb_set: this.gameSettings.verbSet,
-        sentence_types: JSON.stringify(this.gameSettings.sentenceTypes),  
-        tenses: JSON.stringify(this.gameSettings.tenses),                 
+        sentence_types: this.gameSettings.sentenceTypes,  
+        tenses: this.gameSettings.tenses,                 
         total_rounds: this.gameSettings.numPrompts,
         started_at: new Date(this.startTime).toISOString(),
         finished_at: new Date().toISOString(),
@@ -192,19 +194,32 @@ export default {
         avg_time_per_prompt: parseFloat(avgTime),
         rounds: rounds
       };
-      console.log('Payload to save:', payload);
-      console.log(localStorage.getItem("access"));
 
       try {
+        console.log("Access token:", localStorage.getItem("access"));
+        console.log("Refresh token:", localStorage.getItem("refresh"));
+        console.log("Submitting game payload:", JSON.stringify(payload, null, 2));
+
+        console.log("sentence_types in payload:", payload.sentence_types);
+        console.log("tenses in payload:", payload.tenses);
+        if (typeof payload.sentence_types === "string") {
+            payload.sentence_types = JSON.parse(selections.sentenceTypes);
+          }
+        if (typeof payload.tenses === "string") {
+            payload.tenses = JSON.parse(selections.tenses);
+          }
+
         const response = await api.post('/conj-game-sessions/', payload, {
             headers: {
               'Content-Type': 'application/json',
             },
           });
-        console.log(response.data);
+          console.log("Game session saved:", response.data);
+
 
         } catch (error) {
-        console.error('Error saving game session:', error);
+        console.error("Status:", error.response.status);
+        console.error("Response data:", error.response.data);
         }
 
       this.$emit('gameOver', {
