@@ -11,7 +11,6 @@ async function loadIrregularVerbs() {
     try {
       const irregularVerbsResponse = await fetch(basedir + 'irregularVerbs.json');
       irregularVerbs = await irregularVerbsResponse.json();
-      console.log('Irregular verbs loaded:', irregularVerbs);
       return irregularVerbs;
     } catch (error) {
         console.error('Error loading irregular verbs:', error);
@@ -20,7 +19,7 @@ async function loadIrregularVerbs() {
   }
 
   loadIrregularVerbs().then((verbs) => {
-    console.log('Irregular verbs loaded:', verbs);
+    console.log('Irregular verbs loaded.');
   });
   
 const consonants = ['b', 'c', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'm', 'n', 'p', 'q', 'r', 's', 't', 'v', 'w', 'x', 'y', 'z'];

@@ -1,46 +1,76 @@
 <template>
-  <div class="container mt-5">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-      <h1>Dashboard</h1>
-      <button class="btn btn-danger" @click="logout">Logout</button>
-    </div>
+    <!-- Top App Bar -->
+    <TopNavBar />
 
-    <div v-if="loading" class="text-center my-5">
-      <div class="spinner-border text-primary" role="status">
-        <span class="visually-hidden">Loading...</span>
-      </div>
-    </div>
+<!-- Main content area -->
+    <v-main>
+      <v-container>
+        <!-- Tabs Navigation -->
+        <v-tabs v-model="activeTab" class="mt-4">
+          <v-tab value="grammar-feedback">Grammar Feedback</v-tab>
+          <v-tab value="vocabulary">Vocabulary</v-tab>
+          <v-tab value="goals">Goals</v-tab>
+          <v-tab value="conjugation-game">Conjugation Game</v-tab>
+        </v-tabs>
 
-    <div v-else-if="error" class="alert alert-danger">{{ error }}</div>
-
-    <ul v-else class="list-group">
-      <li v-for="session in sessions" :key="session.id" class="list-group-item d-flex justify-content-between align-items-center">
-        <span><strong>{{ session.username }}</strong></span>
-        <span class="badge bg-primary rounded-pill">{{ session.score }} pts</span>
-      </li>
-    </ul>
-
-    <div v-if="errors.length">
-        <h2>Recent Errors</h2>
-        <ul class="list-group">
-            <li v-for="errorItem in errors" :key="errorItem.error_id" class="list-group-item">
-            <span><strong>{{ errorItem.error_code }}</strong> ({{ errorItem.times }}x)</span>
-            <div v-if="errorItem.evidence">
-                {{ errorItem.evidence }}
+        <!-- Tab Content -->
+        <v-window v-model="activeTab" class="mt-5">
+          <v-window-item value="overview">
+            <!-- Overview tab content -->
+            <div v-if="loading" class="text-center my-5">
+              <v-progress-circular indeterminate color="primary"></v-progress-circular>
             </div>
-            </li>
-        </ul>
-    </div>
-    <div v-else>
-      <p class="text-muted">No recent errors.</p>
-    </div>
-  </div>
+            <div v-else-if="error">
+              <v-alert type="error">{{ error }}</v-alert>
+            </div>
+            <v-list v-else>
+              <v-list-item v-for="session in sessions" :key="session.id">
+                <v-list-item-content>
+                  <v-list-item-title>{{ session.username }}</v-list-item-title>
+                </v-list-item-content>
+                <v-list-item-action>
+                  <v-chip color="primary" label>{{ session.score }} pts</v-chip>
+                </v-list-item-action>
+              </v-list-item>
+            </v-list>
+            <div v-if="errors.length">
+              <h2>Recent Errors</h2>
+              <v-list>
+                <v-list-item v-for="errorItem in errors" :key="errorItem.error_id">
+                  <v-list-item-content>
+                    <v-list-item-title>
+                      <strong>{{ errorItem.error_code }}</strong> ({{ errorItem.times }}x)
+                    </v-list-item-title>
+                    <v-list-item-subtitle v-if="errorItem.evidence">
+                      {{ errorItem.evidence }}
+                    </v-list-item-subtitle>
+                  </v-list-item-content>
+                </v-list-item>
+              </v-list>
+            </div>
+            <div v-else>
+              <p class="text-muted">No recent errors.</p>
+            </div>
+          </v-window-item>
+
+          <v-window-item value="analytics">
+            <p>Coming soon...</p>
+          </v-window-item>
+
+          <v-window-item value="settings">
+            <p>Coming soon...</p>
+          </v-window-item>
+        </v-window>
+      </v-container>
+    </v-main>
 </template>
 
 <script lang="ts">
 import { defineComponent, ref, onMounted, onUnmounted } from "vue";
 import api from "@/axios";
-import { clearTokens } from "@/services/auth";
+import { useUserStore } from "@/stores/user";
+import LoggedInFooter from '@/components/LoggedInFooter.vue';
+import TopNavBar from '@/components/TopNavBar.vue';
 
 interface GameSession {
   id: number;
@@ -54,16 +84,29 @@ interface ErrorItem {
   error_code: string;
   evidence: string | null;
   times: number;
-  // Add other fields as exposed by your ErrorSerializer
 }
+let intervalId: ReturnType<typeof setInterval>;
 
-export default defineComponent({
+export default 
+defineComponent({
   name: "Dashboard",
+  components: { TopNavBar, LoggedInFooter },
   setup() {
     const sessions = ref<GameSession[]>([]);
     const errors = ref<ErrorItem[]>([]);
     const loading = ref<boolean>(true);
     const error = ref<string | null>(null);
+    const userStore = useUserStore();
+
+    // Use string keys for active tab and tabs list
+    const activeTab = ref("overview");
+    const tabs = [
+      "grammar-feedback",
+      "vocabulary",
+      "goals",
+      "conjugation-game",
+    ];
+
     let intervalId: number;
 
     const fetchDashboardData = async () => {
@@ -84,14 +127,9 @@ export default defineComponent({
       }
     };
 
-    const logout = () => {
-      clearTokens();
-      window.location.href = "/login";
-    };
 
     onMounted(() => {
-      fetchDashboardData;
-      // Refresh data every 30 seconds
+      fetchDashboardData();
       intervalId = window.setInterval(fetchDashboardData, 80000);
     });
 
@@ -99,13 +137,17 @@ export default defineComponent({
       clearInterval(intervalId);
     });
 
-    return { sessions, errors, loading, error, logout };
+    return {
+      sessions,
+      errors,
+      loading,
+      error,
+      activeTab,
+      tabs,
+      userStore,
+      TopNavBar,
+    };
   },
 });
 </script>
 
-<style scoped>
-.container {
-  max-width: 800px;
-}
-</style>

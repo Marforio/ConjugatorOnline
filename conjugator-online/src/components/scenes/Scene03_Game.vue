@@ -196,12 +196,8 @@ export default {
       };
 
       try {
-        console.log("Access token:", localStorage.getItem("access"));
-        console.log("Refresh token:", localStorage.getItem("refresh"));
         console.log("Submitting game payload:", JSON.stringify(payload, null, 2));
-
-        console.log("sentence_types in payload:", payload.sentence_types);
-        console.log("tenses in payload:", payload.tenses);
+        
         if (typeof payload.sentence_types === "string") {
             payload.sentence_types = JSON.parse(selections.sentenceTypes);
           }
