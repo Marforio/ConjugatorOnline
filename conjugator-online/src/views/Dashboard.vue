@@ -97,11 +97,18 @@ import TopNavBar from '@/components/TopNavBar.vue';
 
 
 interface GameSession {
-  id: number;
-  username: string;
-  score: number;
-  created_at: string;
+  session_id: number;
+  student: number;
+  verb_set: string;
+  sentence_types: string[];
+  tenses: string[];
+  started_at: string;
+  total_rounds: number;
+  correct_count: number;
+  wrong_count: number;
+  avg_time_per_prompt: number;
 }
+
 
 interface ErrorItem {
   error_id: string;
