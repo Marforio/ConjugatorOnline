@@ -210,9 +210,6 @@ export default {
       this.$emit('changeScene', sceneName);
     },
     startGame(predefinedSettings = null) {
-      console.log(this.selectedVerbSet)
-      console.log("Access token in localStorage:", localStorage.getItem("access"));
-      console.log("Refresh token in localStorage:", localStorage.getItem("refresh"));
 
       const selections = predefinedSettings || {
         verbSet: this.selectedVerbSet,

@@ -15,24 +15,15 @@
 
         <!-- Tab Content -->
         <v-window v-model="activeTab" class="mt-5">
-          <v-window-item value="overview">
-            <!-- Overview tab content -->
+          <v-window-item value="grammar-feedback">
+            <!-- Grammar Feedback tab content -->
             <div v-if="loading" class="text-center my-5">
               <v-progress-circular indeterminate color="primary"></v-progress-circular>
             </div>
-            <div v-else-if="error">
-              <v-alert type="error">{{ error }}</v-alert>
+            <div v-else-if="errorsError">
+              <v-alert type="error">{{ errorsError }}</v-alert>
             </div>
-            <v-list v-else>
-              <v-list-item v-for="session in sessions" :key="session.id">
-                <v-list-item-content>
-                  <v-list-item-title>{{ session.username }}</v-list-item-title>
-                </v-list-item-content>
-                <v-list-item-action>
-                  <v-chip color="primary" label>{{ session.score }} pts</v-chip>
-                </v-list-item-action>
-              </v-list-item>
-            </v-list>
+            
             <div v-if="errors.length">
               <h2>Recent Errors</h2>
               <v-list>
@@ -53,13 +44,45 @@
             </div>
           </v-window-item>
 
-          <v-window-item value="analytics">
+          <v-window-item value="vocabulary">
             <p>Coming soon...</p>
           </v-window-item>
 
-          <v-window-item value="settings">
+          <v-window-item value="goals">
             <p>Coming soon...</p>
           </v-window-item>
+
+          <v-window-item value="conjugation-game">
+            <div v-if="loading" class="text-center my-5">
+              <v-progress-circular indeterminate color="primary"></v-progress-circular>
+            </div>
+
+            <div v-else-if="conjGameError">
+              <v-alert type="error">{{ conjGameError }}</v-alert>
+            </div>
+
+            <v-data-table
+              v-else
+              :headers="tableHeaders"
+              :items="sessions"
+              class="elevation-1"
+              item-value="session_id"
+              :items-per-page="5"
+            >
+              <template #item.started_at="{ item }">
+                {{ new Date(item.started_at).toLocaleString() }}
+              </template>
+
+              <template #item.tenses="{ item }">
+                {{ item.tenses.join(', ') }}
+              </template>
+
+              <template #item.sentence_types="{ item }">
+                {{ item.sentence_types.join(', ') }}
+              </template>
+            </v-data-table>
+          </v-window-item>
+
         </v-window>
       </v-container>
     </v-main>
@@ -71,6 +94,7 @@ import api from "@/axios";
 import { useUserStore } from "@/stores/user";
 import LoggedInFooter from '@/components/LoggedInFooter.vue';
 import TopNavBar from '@/components/TopNavBar.vue';
+
 
 interface GameSession {
   id: number;
@@ -95,7 +119,8 @@ defineComponent({
     const sessions = ref<GameSession[]>([]);
     const errors = ref<ErrorItem[]>([]);
     const loading = ref<boolean>(true);
-    const error = ref<string | null>(null);
+    const errorsError = ref<string | null>(null);
+    const conjGameError = ref<string | null>(null);
     const userStore = useUserStore();
 
     // Use string keys for active tab and tabs list
@@ -107,30 +132,62 @@ defineComponent({
       "conjugation-game",
     ];
 
+    const tableHeaders = [
+      { title: "Session ID", value: "session_id" },
+      { title: "Correct Count", value: "correct_count"},
+      { title: "Incorrect Count", value: "wrong_count"},
+      { title: "Verb Set", value: "verb_set" },
+      { title: "Tenses", value: "tenses" },
+      { title: "Sentence Types", value: "sentence_types" },
+      { title: "Started At", value: "started_at" },
+      { title: "Total Rounds", value: "total_rounds" },
+      { title: "Avg Time (s)", value: "avg_time_per_prompt" },
+    ];
+
+
     let intervalId: number;
 
-    const fetchDashboardData = async () => {
+    const fetchErrorDashboardData = async () => {
+      loading.value = true;
+      errorsError.value = null;
+
+
       try {
-        loading.value = true;
-        const [sessionsRes, errorsRes] = await Promise.all([
-          api.get<GameSession[]>("/conj-game-sessions/"),
-          api.get<ErrorItem[]>("/errors/"),
-        ]);
-        sessions.value = sessionsRes.data;
+        const errorsRes = await api.get<ErrorItem[]>("/errors/");
         errors.value = errorsRes.data;
-        error.value = null;
       } catch (err: any) {
-        console.error(err);
-        error.value = err.response?.data?.detail || "Failed to fetch data";
-      } finally {
-        loading.value = false;
+        console.error("Errors fetch failed:", err);
+        errorsError.value = errorsError.value
+          ? `${errorsError.value}; Failed to fetch errors`
+          : "Failed to fetch errors";
       }
+
+      loading.value = false;
+    };
+    const fetchConjGameSessionsDashboardData = async () => {
+      loading.value = true;
+      conjGameError.value = null;
+
+      try {
+        const sessionsRes = await api.get<GameSession[]>("/conj-game-sessions/");
+        sessions.value = sessionsRes.data;
+      } catch (err: any) {
+        console.error("Conj game sessions fetch failed:", err);
+        conjGameError.value = conjGameError.value
+          ? `${conjGameError.value}; Failed to fetch sessions`
+          : "Failed to fetch sessions";
+      }
+
+      loading.value = false;
     };
 
 
+
     onMounted(() => {
-      fetchDashboardData();
-      intervalId = window.setInterval(fetchDashboardData, 80000);
+      fetchErrorDashboardData();
+      intervalId = window.setInterval(fetchErrorDashboardData, 80000);
+      fetchConjGameSessionsDashboardData();
+      intervalId = window.setInterval(fetchConjGameSessionsDashboardData, 80000);
     });
 
     onUnmounted(() => {
@@ -141,11 +198,13 @@ defineComponent({
       sessions,
       errors,
       loading,
-      error,
+      errorsError,
+      conjGameError,
       activeTab,
       tabs,
       userStore,
       TopNavBar,
+      tableHeaders,
     };
   },
 });

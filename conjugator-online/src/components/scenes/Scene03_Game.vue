@@ -63,6 +63,7 @@
             <button class="btn btn-lg btn-primary" @click="submitAnswer">{{ submitButtontext }}</button>
           </div>
         </div> 
+        <v-progress-linear :model-value="progressValue"></v-progress-linear>
         <!-- FOOTER -->
         <footer class="game-footer">
           <div class="scoreboard">
@@ -105,6 +106,14 @@
       </main>
     </div>
   </div>
+
+  <!-- Blocking dialog while loading -->
+  <v-dialog v-model="showBlockingDialog" persistent fullscreen transition="fade-transition">
+    <v-card class="d-flex align-center justify-center" color="transparent" elevation="0">
+      <v-progress-circular indeterminate color="primary" size="64" />
+    </v-card>
+  </v-dialog>
+
 </template>
 
 
@@ -149,6 +158,8 @@ export default {
       intervalId: null,
       roundStartTime: null,
       roundIntervalId: null,
+      showBlockingDialog: false,
+
     };
   },
   async mounted() {
@@ -160,12 +171,18 @@ export default {
     clearInterval(this.intervalId);
     clearInterval(this.roundIntervalId);
   },
+  computed: {
+    progressValue() {
+      return ((this.promptCounter) / this.gameSettings.numPrompts) * 100;
+    }
+  },
   methods: {
     goBack() {
       this.$emit('changeScene', 'Scene02_Settings');
     },
     
     async endGame() {
+      this.showBlockingDialog = true;
       this.results = this.game.getResults();
       console.log("Game results in this.results (spread):", [...this.results]);
 
@@ -181,7 +198,6 @@ export default {
         is_correct: r.correct,
         elapsed_time: parseFloat(r.elapsedTime)
       }));
-
 
       const payload = {
         verb_set: this.gameSettings.verbSet,
@@ -218,13 +234,18 @@ export default {
         console.error("Response data:", error.response.data);
         }
 
-      this.$emit('gameOver', {
-        results: this.results,
-        totalTime: this.overallTimer,
-        avgTime
-      });
+      // Delay to ensure dialog is visible long enough
+      setTimeout(() => {
+        this.showBlockingDialog = false;
 
-      this.endTimer();
+        this.$emit('gameOver', {
+          results: this.results,
+          totalTime: this.overallTimer,
+          avgTime
+        });
+
+        this.endTimer();
+      }, 1000);
     },
 
 

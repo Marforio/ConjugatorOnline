@@ -24,16 +24,6 @@ export async function login(username: string, password: string) {
   const res = await api.post("/token/", { username, password });
   saveTokens(res.data.access, res.data.refresh);
 
-  try {
-      const studentRes = await api.get("/me/");
-      const userStore = useUserStore();
-      userStore.setInitials(studentRes.data.initials);
-      console.log("Fetched student initials:", studentRes.data.initials);
-    } catch (studentError) {
-      console.warn("Failed to fetch student initials:", studentError);
-      // Optionally: fallback or notify user
-    }
-
   return res.data;
 }
 

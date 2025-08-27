@@ -19,9 +19,6 @@
         <span class="text-body-secondary fs-2 beating-text">Put your conjugation to the test!</span>
       </h1>
     </div>
-    <RouterLink to="/" class="btn" style="width: 200px; margin: auto; margin-top: 20px;">
-      <span class="fs-4">Home</span>
-    </RouterLink>
   </div>
 </template>
 

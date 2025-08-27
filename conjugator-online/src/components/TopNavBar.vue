@@ -35,8 +35,7 @@
 
     <v-app-bar-divider class="mx-3"></v-app-bar-divider>
 
-    <span v-if="userStore.initials">Hello {{ userStore.initials }}!</span>
-    <span v-else class="text-body-1">Welcome!</span>
+    <span>Hello <InitialsText></InitialsText></span>
 
     <v-app-divider class="mx-3"></v-app-divider>
 
@@ -50,15 +49,17 @@
 import { defineComponent } from 'vue';
 import { useUserStore } from "@/stores/user";
 import { clearTokens } from "@/services/auth";
+import InitialsText from './InitialsText.vue';
 
 export default defineComponent({
   name: "TopNavBar",
+  components: { InitialsText },
   setup() {
     const userStore = useUserStore();
 
     const logout = () => {
       clearTokens();
-      userStore.clearInitials();
+      userStore.clearStudent();
       window.location.href = '/';
     };
 

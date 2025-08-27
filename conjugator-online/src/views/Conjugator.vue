@@ -1,7 +1,6 @@
 <template>
     <SceneManager />
     <LoggedInFooter />
-    
 </template>
 
 <script>

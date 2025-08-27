@@ -4,23 +4,19 @@
       <v-icon>mdi-home</v-icon>
     </v-btn>
     <div class="text-center px-6">
-      Logged in as <strong>{{ userStore.initials }}</strong>
+      Logged in as <InitialsText />
     </div>
   </v-footer>
 </template>
 
-
 <script>
-import { useUserStore } from "@/stores/user";
 import HomeButton from "./HomeButton.vue";
+import InitialsText from "./InitialsText.vue";
 
 export default {
-    components: { HomeButton },
-  setup() {
-    const userStore = useUserStore();
-    return { userStore }
-    } 
+  components: {
+    HomeButton,
+    InitialsText
   }
-
-
+};
 </script>
