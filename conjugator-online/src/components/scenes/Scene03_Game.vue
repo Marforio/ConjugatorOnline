@@ -204,6 +204,8 @@ export default {
         sentence_types: this.gameSettings.sentenceTypes,  
         tenses: this.gameSettings.tenses,                 
         total_rounds: this.gameSettings.numPrompts,
+        correct_count: this.rightCount,
+        wrong_count: this.wrongCount,
         started_at: new Date(this.startTime).toISOString(),
         finished_at: new Date().toISOString(),
         total_time: Math.floor((new Date().getTime() - this.startTime) / 1000),

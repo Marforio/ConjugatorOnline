@@ -60,28 +60,64 @@
             <div v-else-if="conjGameError">
               <v-alert type="error">{{ conjGameError }}</v-alert>
             </div>
+            <div v-else>
+              <PieChart :data="totalRightWrongChartData" />
+              <div v-for="session in sessions" :key="session.session_id" class="mt-6">
+                <v-expansion-panels>
+                  <v-expansion-panel>
+                    <v-expansion-panel-title>
+                      Game {{ session.session_id }} — {{ new Date(session.started_at).toLocaleString() }} —
+                      {{ session.correct_count }} Correct, {{ session.wrong_count }} Incorrect — {{ session.tenses.join(', ').slice(0,50) }}
+                    </v-expansion-panel-title>
+                    <v-expansion-panel-text>
+                      <div v-if="session.rounds?.length" >
+                        <v-table>
+                        <thead>
+                          <tr>
+                            <th>Prompt #</th>
+                            <th>Person</th>
+                            <th>Verb</th>
+                            <th>Tense</th>
+                            <th>Sentence Type</th>
+                            <th>User Answer</th>
+                            <th>Correct?</th>
+                            <th>Time (s)</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr
+                            v-for="round in session.rounds" :key="`${session.session_id}-${round.prompt_number}`"
+                          >
+                            <td>{{ round.prompt_number }}</td>
+                            <td>{{ round.person }}</td>
+                            <td>{{ round.verb }}</td>
+                            <td>{{ round.tense }}</td>
+                            <td>{{ round.sentence_type }}</td>
+                            <td>{{ round.user_answer }}</td>
+                            <td>
+                              <v-icon :color="round.is_correct ? 'green' : 'red'">
+                                {{ round.is_correct ? 'mdi-check-circle' : 'mdi-close-circle' }}
+                              </v-icon>
+                            </td>
+                            <td>{{ round.elapsed_time?.toFixed(2) ?? '—' }}</td>
+                          </tr>
+                        </tbody>
+                      </v-table>
+                    </div>
+                    <div v-else>
+                      <p class="text-muted">No rounds data available for this session.</p>
+                    </div>
+               
+                    
+                  </v-expansion-panel-text>
+                </v-expansion-panel>
+              </v-expansion-panels>
+            </div>
+          </div>
+            
 
-            <v-data-table
-              v-else
-              :headers="tableHeaders"
-              :items="sessions"
-              class="elevation-1"
-              item-value="session_id"
-              :items-per-page="5"
-            >
-              <template #item.started_at="{ item }">
-                {{ new Date(item.started_at).toLocaleString() }}
-              </template>
-
-              <template #item.tenses="{ item }">
-                {{ item.tenses.join(', ') }}
-              </template>
-
-              <template #item.sentence_types="{ item }">
-                {{ item.sentence_types.join(', ') }}
-              </template>
-            </v-data-table>
           </v-window-item>
+
 
         </v-window>
       </v-container>
@@ -89,12 +125,12 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, onMounted, onUnmounted } from "vue";
+import { defineComponent, ref, onMounted, onUnmounted, computed } from "vue";
 import api from "@/axios";
 import { useUserStore } from "@/stores/user";
 import LoggedInFooter from '@/components/LoggedInFooter.vue';
 import TopNavBar from '@/components/TopNavBar.vue';
-
+import PieChart from "@/components/charts/PieChart.vue";
 
 interface GameSession {
   session_id: number;
@@ -107,6 +143,7 @@ interface GameSession {
   correct_count: number;
   wrong_count: number;
   avg_time_per_prompt: number;
+  rounds: any[];
 }
 
 
@@ -121,7 +158,7 @@ let intervalId: ReturnType<typeof setInterval>;
 export default 
 defineComponent({
   name: "Dashboard",
-  components: { TopNavBar, LoggedInFooter },
+  components: { TopNavBar, LoggedInFooter, PieChart },
   setup() {
     const sessions = ref<GameSession[]>([]);
     const errors = ref<ErrorItem[]>([]);
@@ -129,6 +166,18 @@ defineComponent({
     const errorsError = ref<string | null>(null);
     const conjGameError = ref<string | null>(null);
     const userStore = useUserStore();
+    const totalCorrect = computed(() =>
+      sessions.value.reduce((sum, session) => sum + session.correct_count, 0)
+    );
+    const totalIncorrect = computed(() =>
+      sessions.value.reduce((sum, session) => sum + session.wrong_count, 0)
+    );
+    const totalRightWrongChartData = computed(() => [
+      { label: 'Correct', value: totalCorrect.value },
+      { label: 'Incorrect', value: totalIncorrect.value },
+    ]);
+
+
 
     // Use string keys for active tab and tabs list
     const activeTab = ref("overview");
@@ -139,17 +188,6 @@ defineComponent({
       "conjugation-game",
     ];
 
-    const tableHeaders = [
-      { title: "Session ID", value: "session_id" },
-      { title: "Correct Count", value: "correct_count"},
-      { title: "Incorrect Count", value: "wrong_count"},
-      { title: "Verb Set", value: "verb_set" },
-      { title: "Tenses", value: "tenses" },
-      { title: "Sentence Types", value: "sentence_types" },
-      { title: "Started At", value: "started_at" },
-      { title: "Total Rounds", value: "total_rounds" },
-      { title: "Avg Time (s)", value: "avg_time_per_prompt" },
-    ];
 
 
     let intervalId: number;
@@ -192,10 +230,14 @@ defineComponent({
 
     onMounted(() => {
       fetchErrorDashboardData();
-      intervalId = window.setInterval(fetchErrorDashboardData, 80000);
       fetchConjGameSessionsDashboardData();
-      intervalId = window.setInterval(fetchConjGameSessionsDashboardData, 80000);
+
+      intervalId = window.setInterval(() => {
+        fetchErrorDashboardData();
+        fetchConjGameSessionsDashboardData();
+      }, 80000);
     });
+
 
     onUnmounted(() => {
       clearInterval(intervalId);
@@ -211,7 +253,8 @@ defineComponent({
       tabs,
       userStore,
       TopNavBar,
-      tableHeaders,
+      PieChart,
+      totalRightWrongChartData,
     };
   },
 });
