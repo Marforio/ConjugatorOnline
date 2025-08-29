@@ -28,6 +28,20 @@ interface ErrorItem {
   error_code: string;
   evidence: string | null;
   times: number;
+  feedback: Feedback;
+}
+interface Feedback {
+  feedback_id: string;
+  student?: {
+    name?: string;
+    // Add other student fields if needed
+  };
+  course?: {
+    name?: string;
+    // Add other course fields if needed
+  };
+  date?: string;
+  content?: string;
 }
 
 export default defineComponent({
@@ -57,12 +71,14 @@ export default defineComponent({
     };
 
     const processedErrors = computed(() =>
-      errors.value.map(({ error_code, times, evidence }) => ({
-        error_code,
-        times,
-        evidence,
-      })) ?? []
-    );
+        errors.value.map(({ error_code, times, evidence, feedback }) => ({
+            error_code,
+            times,
+            evidence,
+            feedback: feedback?.feedback_id ?? 'Unknown Feedback'
+        })) ?? []
+        );
+
 
     onMounted(() => {
       fetchErrorDashboardData();

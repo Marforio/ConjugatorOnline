@@ -33,28 +33,46 @@ export default {
       const width = this.svgWidth - margin.left - margin.right;
       const height = this.svgHeight - margin.top - margin.bottom;
 
-      // Group by error_code and feedback
-        const nested = d3.group(this.errorData, d => d.error_code, d => d.feedback);
+      // 🔹 Build a map: feedback_id string -> full row
+      const feedbackMap = new Map();
+      this.errorData.forEach(d => {
+        if (d.feedback) {
+          feedbackMap.set(d.feedback, d);
+        }
+      });
 
-        // Create a flat structure for stacking
-        const stackData = [];
+      // 🔹 Group by error_code and feedback_id
+      const nested = d3.group(
+        this.errorData,
+        d => d.error_code,
+        d => d.feedback
+      );
 
-        for (const [error_code, feedbackGroup] of nested.entries()) {
+      // 🔹 Flatten for stacking
+      const stackData = [];
+      for (const [error_code, feedbackGroup] of nested.entries()) {
         const entry = { error_code };
-        for (const [feedback, items] of feedbackGroup.entries()) {
-            entry[feedback] = d3.sum(items, d => d.times);
+        for (const [feedback_id, items] of feedbackGroup.entries()) {
+          entry[feedback_id] = d3.sum(items, d => d.times);
         }
         stackData.push(entry);
-        }
+      }
 
-        // Extract feedback keys
-        const feedbackKeys = Array.from(
-        new Set(this.errorData.map(d => d.feedback))
-        );
+      // 🔹 Extract feedback IDs
+      const feedbackKeys = Array.from(feedbackMap.keys());
 
-      
+      // 🔹 Date decoder
+      function decodeDate(raw) {
+        if (!raw || raw === 'Unknown date') return raw;
+        const match = raw.match(/_(\d{4})(\d{2})(\d{2})_(\d{2})(\d{2})/);
+        if (!match) return raw;
+        const [, year, month, day, hour, minute] = match;
+        return `${day}/${month}/${year} at ${hour}:${minute}`;
+      }
+
+      // 🔹 Prepare SVG
       const svg = d3.select(this.$refs.svg);
-      svg.selectAll('*').remove(); // Clear previous chart
+      svg.selectAll('*').remove();
 
       const chart = svg.append('g')
         .attr('transform', `translate(${margin.left},${margin.top})`);
@@ -64,25 +82,20 @@ export default {
         .range([0, width])
         .padding(0.2);
 
-        const y = d3.scaleLinear()
-        .domain([
-            0,
-            d3.max(stackData, d =>
-            d3.sum(feedbackKeys, key => d[key] || 0)
-            )
-        ])
+      const y = d3.scaleLinear()
+        .domain([0, d3.max(stackData, d => d3.sum(feedbackKeys, key => d[key] || 0))])
         .nice()
         .range([height, 0]);
 
-        const color = d3.scaleOrdinal()
+      const color = d3.scaleOrdinal()
         .domain(feedbackKeys)
-        .range(d3.schemeCategory10); // or your own palette
+        .range(d3.schemeTableau10);
 
-        const stackedSeries = d3.stack()
-            .keys(feedbackKeys)
-            .value((d, key) => d[key] || 0)(stackData);
+      const stackedSeries = d3.stack()
+        .keys(feedbackKeys)
+        .value((d, key) => d[key] || 0)(stackData);
 
-
+      // 🔹 Axes
       chart.append('g')
         .attr('transform', `translate(0,${height})`)
         .call(d3.axisBottom(x));
@@ -92,66 +105,36 @@ export default {
 
       const tooltip = d3.select(this.$refs.tooltip);
 
-      chart.selectAll('.bar')
-        .data(this.errorData)
+      // 🔹 Draw bars
+      chart.selectAll('g.layer')
+        .data(stackedSeries)
+        .enter()
+        .append('g')
+        .attr('class', 'layer')
+        .attr('fill', d => color(d.key))
+        .selectAll('rect')
+        .data(d => d)
         .enter()
         .append('rect')
-        .attr('class', 'bar')
-        .attr('x', d => x(d.error_code))
-        .attr('y', d => y(d.times))
+        .attr('x', d => x(d.data.error_code))
+        .attr('y', d => y(d[1]))
+        .attr('height', d => y(d[0]) - y(d[1]))
         .attr('width', x.bandwidth())
-        .attr('height', d => height - y(d.times))
-        .attr('fill', '#69b3a2')
         .on('mouseover', (event, d) => {
+          const feedbackId = event.currentTarget.parentNode.__data__.key;
+          const row = feedbackMap.get(feedbackId);
+          const decodedDate = decodeDate(row?.date ?? 'Unknown date');
+
           tooltip
             .style('opacity', 1)
-            .html(`<strong>${d.error_code}</strong><br/>${d.evidence}`)
+            .html(`Feedback from ${decodedDate}: ${d[1] - d[0]} errors`)
             .style('left', `${event.pageX + 10}px`)
             .style('top', `${event.pageY - 28}px`);
         })
-        .on('mouseout', () => {
-          tooltip.style('opacity', 0);
-        })
+        .on('mouseout', () => tooltip.style('opacity', 0))
         .on('click', (_, d) => {
-          this.selectedEvidence = d.evidence;
+          this.selectedEvidence = `Error ${d.data.error_code}`;
         });
-        
-        chart.selectAll('g.layer')
-            .data(stackedSeries)
-            .enter()
-            .append('g')
-            .attr('class', 'layer')
-            .attr('fill', d => color(d.key))
-            .selectAll('rect')
-            .data(d => d)
-            .enter()
-            .append('rect')
-            .attr('x', d => x(d.data.error_code))
-            .attr('y', d => y(d[1]))
-            .attr('height', d => y(d[0]) - y(d[1]))
-            .attr('width', x.bandwidth())
-            .on('mouseover', (event, d) => {
-                const feedback = event.currentTarget.parentNode.__data__.key;
-                tooltip
-                .style('opacity', 1)
-                .html(`<strong>${d.data.error_code}</strong><br/>${feedback}: ${d[1] - d[0]} errors`)
-                .style('left', `${event.pageX + 10}px`)
-                .style('top', `${event.pageY - 28}px`);
-            })
-            .on('mouseout', () => {
-                tooltip.style('opacity', 0);
-            })
-            .on('click', (_, d) => {
-                this.selectedEvidence = `Error ${d.data.error_code}`;
-            });
-        chart.append('g')
-            .attr('transform', `translate(0,${height})`)
-            .call(d3.axisBottom(x));
-
-            chart.append('g')
-            .call(d3.axisLeft(y));
-
-
     }
   },
   watch: {
@@ -164,6 +147,7 @@ export default {
   }
 };
 </script>
+
 
 <style scoped>
 .bar:hover {

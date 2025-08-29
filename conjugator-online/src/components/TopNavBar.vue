@@ -1,63 +1,99 @@
 <template>
-  <v-app-bar app>
-    <v-btn :to="{ name: 'home' }">
-      <v-app-bar-title>Language Labs</v-app-bar-title>
-    </v-btn>
+    <!-- Navigation Drawer for Mobile -->
+    <v-navigation-drawer
+      v-model="drawer"
+      temporary
+      class="d-sm-none"
+    >
+      <v-list>
+        <v-list-item :to="{ name: 'home' }">
+          <v-list-item-title>Home</v-list-item-title>
+        </v-list-item>
+        <v-list-item href="https://book.language-labs.ch">
+          <v-list-item-title>Grammar Book</v-list-item-title>
+        </v-list-item>
+        <v-list-item :to="{ name: 'conjugator' }">
+          <v-list-item-title>Conjugator Game</v-list-item-title>
+        </v-list-item>
+        <v-divider />
+        <v-list-item>
+          <v-list-item-title>Hello <InitialsText /></v-list-item-title>
+        </v-list-item>
+        <v-list-item>
+          <LogOutButton />
+        </v-list-item>
+      </v-list>
+    </v-navigation-drawer>
 
-    <v-spacer></v-spacer>
+    <!-- App Bar -->
+    <v-app-bar app>
+      <!-- Mobile Nav Icon -->
+      <v-app-bar-nav-icon
+        @click="drawer = !drawer"
+        class="d-sm-none"
+      />
 
-    <!-- Home Button with Tooltip -->
-    <v-tooltip text="Go to Homepage" location="bottom">
-       <template v-slot:activator="{ props }">
-        <v-btn icon v-bind="props" :to="{ name: 'home' }">
-        <v-icon>mdi-home</v-icon>
+      <!-- Title -->
+      <v-btn :to="{ name: 'home' }" class="text-none">
+        <v-app-bar-title>Language Labs</v-app-bar-title>
+      </v-btn>
+
+      <v-spacer></v-spacer>
+
+      <!-- Desktop Icons -->
+      <div class="d-none d-sm-flex">
+        <v-tooltip text="Go to Homepage" location="bottom">
+          <template v-slot:activator="{ props }">
+            <v-btn icon v-bind="props" :to="{ name: 'home' }">
+              <v-icon>mdi-home</v-icon>
             </v-btn>
-        </template>
-    </v-tooltip>
+          </template>
+        </v-tooltip>
 
-    <!-- Grammar Book site Link with Tooltip -->
-    <v-tooltip text="Go to Grammar Book" location="bottom">
-        <template v-slot:activator="{ props }">
+        <v-tooltip text="Go to Grammar Book" location="bottom">
+          <template v-slot:activator="{ props }">
             <v-btn icon v-bind="props" href="https://book.language-labs.ch">
-        <v-icon>mdi-book-open-variant</v-icon>
-        </v-btn>
-        </template>
-    </v-tooltip>
+              <v-icon>mdi-book-open-variant</v-icon>
+            </v-btn>
+          </template>
+        </v-tooltip>
 
-    <!-- Conjugator Button with Tooltip -->
-    <v-tooltip text="Open Conjugator Game" location="bottom">
-        <template v-slot:activator="{ props }">
+        <v-tooltip text="Open Conjugator Game" location="bottom">
+          <template v-slot:activator="{ props }">
             <v-btn icon v-bind="props" :to="{ name: 'conjugator' }">
-        <v-icon>mdi-controller</v-icon>
-        </v-btn>
-        </template>
-    </v-tooltip>
+              <v-icon>mdi-controller</v-icon>
+            </v-btn>
+          </template>
+        </v-tooltip>
 
-    <v-app-bar-divider class="mx-3"></v-app-bar-divider>
+        <v-app-bar-divider class="mx-3" />
 
-    <span>Hello <InitialsText></InitialsText></span>
+        <span>Hello <InitialsText /></span>
 
-    <v-app-divider class="mx-3"></v-app-divider>
+        <v-app-bar-divider class="mx-3" />
 
-    <!-- Logout Button-->
-    <LogOutButton />
-
-  </v-app-bar>
+        <LogOutButton />
+      </div>
+    </v-app-bar>
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, ref } from 'vue';
 import { useUserStore } from "@/stores/user";
 import InitialsText from './InitialsText.vue';
 import LogOutButton from './LogOutButton.vue';
 
 export default defineComponent({
   name: "TopNavBar",
-  components: { InitialsText, LogOutButton },
+  components: {
+    InitialsText,
+    LogOutButton,
+  },
   setup() {
     const userStore = useUserStore();
+    const drawer = ref(false);
 
-    return { userStore }; // ✅ Make sure userStore is returned!
+    return { userStore, drawer };
   },
 });
 </script>

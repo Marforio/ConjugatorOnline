@@ -6,12 +6,30 @@
     <v-main>
       <v-container>
         <!-- Tabs Navigation -->
-        <v-tabs v-model="activeTab" class="mt-4">
-          <v-tab value="grammar-feedback">Grammar Feedback</v-tab>
-          <v-tab value="vocabulary">Vocabulary</v-tab>
-          <v-tab value="goals">Goals</v-tab>
-          <v-tab value="conjugation-game">Conjugation Game</v-tab>
+        <v-select
+          v-if="isMobile"
+          v-model="activeTab"
+          :items="tabItems"
+          item-title="label"
+          item-value="value"
+          label="Select section"
+          class="mt-4"
+          dense
+          outlined
+        />
+
+        <v-tabs
+          v-else
+          v-model="activeTab"
+          class="mt-4"
+          show-arrows
+          grow
+        >
+          <v-tab v-for="item in tabItems" :key="item.value" :value="item.value">
+            {{ item.label }}
+          </v-tab>
         </v-tabs>
+
 
         <!-- Tab Content -->
         <v-window v-model="activeTab" class="mt-5">
@@ -162,11 +180,13 @@
 import { defineComponent, ref, onMounted, computed } from "vue";
 import api from "@/axios";
 import { useUserStore } from "@/stores/user";
+import { useDisplay } from 'vuetify';
 import LoggedInFooter from '@/components/LoggedInFooter.vue';
 import TopNavBar from '@/components/TopNavBar.vue';
 import PieChart from "@/components/charts/PieChart.vue";
 import BarChart from "@/components/charts/BarChart.vue";
 import ErrorsDataTab from "@/components/ErrorsDataTab.vue";
+
 
 interface GameSession {
   session_id: number;
@@ -211,13 +231,16 @@ defineComponent({
 
 
     // Use string keys for active tab and tabs list
-    const activeTab = ref("overview");
-    const tabs = [
-      "grammar-feedback",
-      "vocabulary",
-      "goals",
-      "conjugation-game",
+    const activeTab = ref('grammar-feedback');
+    const tabItems = [
+      { value: 'grammar-feedback', label: 'Grammar Feedback' },
+      { value: 'vocabulary', label: 'Vocabulary' },
+      { value: 'goals', label: 'Goals' },
+      { value: 'conjugation-game', label: 'Conjugation Game' },
     ];
+
+    const { smAndDown } = useDisplay();
+    const isMobile = computed(() => smAndDown.value);
     const BarchartColorPalette = [
       '#4CAF50', '#2196F3', '#FFC107', '#E91E63', '#9C27B0', '#FF5722'
     ];
@@ -311,7 +334,8 @@ defineComponent({
       errorsError,
       conjGameError,
       activeTab,
-      tabs,
+      tabItems, 
+      isMobile,
       userStore,
       TopNavBar,
       PieChart,
