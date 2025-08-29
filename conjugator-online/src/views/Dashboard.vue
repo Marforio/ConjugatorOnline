@@ -198,10 +198,10 @@ defineComponent({
       sessions.value.reduce((sum, session) => sum + session.total_rounds, 0)
     );
     const totalPercentCorrect = computed(() =>
-      (sessions.value.reduce((sum, session) => sum + session.correct_count, 0) / totalRoundsPlayed.value * 100).toFixed(0)
+      Number((sessions.value.reduce((sum, session) => sum + session.correct_count, 0) / totalRoundsPlayed.value * 100).toFixed(0))
     );
     const totalPercentIncorrect = computed(() =>
-      (sessions.value.reduce((sum, session) => sum + session.wrong_count, 0) / totalRoundsPlayed.value * 100).toFixed(0)
+      Number((sessions.value.reduce((sum, session) => sum + session.wrong_count, 0) / totalRoundsPlayed.value * 100).toFixed(0))
     );
     const totalRightWrongChartData = computed(() => [
       { label:'Correct', value: totalPercentCorrect.value },
