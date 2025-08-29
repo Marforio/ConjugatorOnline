@@ -4,7 +4,7 @@
     "module": "ESNext",
     "moduleResolution": "Node",
     "types": ["vite/client", "vue"],
-    "lib": ["dom", "es2015"],
+    "lib": ["dom", "es2019"],
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"]

@@ -108,7 +108,8 @@
     <div class="wrong-button-next swiper-button-next"></div>
   </swiper>
 
-  <button @click="goToScene('Scene02_Settings')">PLAY AGAIN</button>
+  <v-btn class="mx-3" @click="goToScene('Scene02_Settings')">PLAY AGAIN</v-btn>
+  <v-btn class="mx-3" href="/dashboard">See game data in my dashboard</v-btn>
 </div>
 </template>
 

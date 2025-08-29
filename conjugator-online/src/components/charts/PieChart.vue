@@ -6,11 +6,16 @@
 import { defineComponent, onMounted, watch, ref } from 'vue';
 import * as d3 from 'd3';
 
+interface ChartData {
+  label: string;
+  value: number;
+}
+
 export default defineComponent({
   name: 'PieChart',
   props: {
     data: {
-      type: Array as () => { label: string; value: number }[],
+      type: Array as () => ChartData[],
       required: true
     },
     width: {
@@ -34,7 +39,7 @@ export default defineComponent({
 
       const radius = Math.min(props.width, props.height) / 2;
       const color = d3.scaleOrdinal<string>()
-        .domain(props.data.map(d => d.label))
+        .domain(props.data.map((d: ChartData) => d.label))
         .range(props.colors);
 
       const svg = d3.select(chartContainer.value)
@@ -45,8 +50,8 @@ export default defineComponent({
         .append('g')
         .attr('transform', `translate(${props.width / 2}, ${props.height / 2})`);
 
-      const pie = d3.pie<{ label: string; value: number }>().value(d => d.value);
-      const arc = d3.arc<d3.PieArcDatum<{ label: string; value: number }>>()
+      const pie = d3.pie<ChartData>().value((d: ChartData) => d.value);
+      const arc = d3.arc<d3.PieArcDatum<ChartData>>()
         .innerRadius(0)
         .outerRadius(radius);
 
@@ -54,16 +59,16 @@ export default defineComponent({
         .data(pie(props.data))
         .enter()
         .append('path')
-        .attr('d', arc)
-        .attr('fill', d => color(d.data.label));
+        .attr('d', (d: d3.PieArcDatum<ChartData>) => arc(d)!)
+        .attr('fill', (d: d3.PieArcDatum<ChartData>) => color(d.data.label));
 
       svg.selectAll('text')
-        .data(pie(props.data))
+        .data(pie(props.data).filter(d => d.data.value > 0)) 
         .enter()
         .append('text')
-        .attr('transform', d => `translate(${arc.centroid(d)})`)
+        .attr('transform', (d: d3.PieArcDatum<ChartData>) => `translate(${arc.centroid(d)})`)
         .attr('text-anchor', 'middle')
-        .text(d => `${d.data.label}: ${d.data.value}`);
+        .text((d: d3.PieArcDatum<ChartData>) => `${d.data.value}%`);
     };
 
     onMounted(drawChart);
@@ -79,4 +84,3 @@ export default defineComponent({
   margin-top: 1rem;
 }
 </style>
-

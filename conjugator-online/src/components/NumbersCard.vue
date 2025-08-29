@@ -17,6 +17,6 @@ defineProps<{
 <style scoped>
 .v-card {
   min-width: 150px;
-  max-width: 250px;
+  max-width: 300px;
 }
 </style>

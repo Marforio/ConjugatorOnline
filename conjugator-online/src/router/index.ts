@@ -32,7 +32,10 @@ const router = createRouter({
 router.beforeEach((to, _, next) => {
   const isAuthenticated = !!getAccessToken();
   if (to.meta.requiresAuth && !isAuthenticated) {
-    next("/login");
+    next({
+      path: "/login",
+      query: { redirect: to.fullPath } // Save intended page
+    });
   } else {
     next();
   }

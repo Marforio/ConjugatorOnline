@@ -15,8 +15,8 @@
         </template>
     </v-tooltip>
 
-    <!-- Book Link with Tooltip -->
-    <v-tooltip text="Open Booking Page" location="bottom">
+    <!-- Grammar Book site Link with Tooltip -->
+    <v-tooltip text="Go to Grammar Book" location="bottom">
         <template v-slot:activator="{ props }">
             <v-btn icon v-bind="props" href="https://book.language-labs.ch">
         <v-icon>mdi-book-open-variant</v-icon>
@@ -25,7 +25,7 @@
     </v-tooltip>
 
     <!-- Conjugator Button with Tooltip -->
-    <v-tooltip text="Open Conjugator" location="bottom">
+    <v-tooltip text="Open Conjugator Game" location="bottom">
         <template v-slot:activator="{ props }">
             <v-btn icon v-bind="props" :to="{ name: 'conjugator' }">
         <v-icon>mdi-controller</v-icon>
@@ -40,7 +40,7 @@
     <v-app-divider class="mx-3"></v-app-divider>
 
     <!-- Logout Button-->
-      <v-btn color="error" @click="logout">Logout</v-btn>
+    <LogOutButton />
 
   </v-app-bar>
 </template>
@@ -48,22 +48,16 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 import { useUserStore } from "@/stores/user";
-import { clearTokens } from "@/services/auth";
 import InitialsText from './InitialsText.vue';
+import LogOutButton from './LogOutButton.vue';
 
 export default defineComponent({
   name: "TopNavBar",
-  components: { InitialsText },
+  components: { InitialsText, LogOutButton },
   setup() {
     const userStore = useUserStore();
 
-    const logout = () => {
-      clearTokens();
-      userStore.clearStudent();
-      window.location.href = '/';
-    };
-
-    return { userStore, logout }; // ✅ Make sure userStore is returned!
+    return { userStore }; // ✅ Make sure userStore is returned!
   },
 });
 </script>

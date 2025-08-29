@@ -27,58 +27,74 @@
 
       <!-- MAIN GAME AREA -->
       <main v-if="gameStarted === true" class="main-area p-4">
-        <!-- Top: two prompt cards -->
-        <div class="prompt-row-1">
-          <div class="card border-dark-subtle" v-for="(val, idx) in [
-              { title: 'Tense', value: currentPrompt.tense },
-              { title: 'Sentence type', value: currentPrompt.sentenceType }
-            ]" :key="idx">
-            <div class="card-body">
-              <h5 class="card-title">{{ val.title }}</h5>
-              <p class="display-6">{{ val.value }}</p>
-            </div>
-          </div>
-        </div>
+        
+        <!-- Prompt Card -->
+          <!-- Prompt Card -->
+          <v-card class="pa-6" elevation="2" color="grey-lighten-4">
+          <v-card-title class="text-h5 text-center text-primary">Verb</v-card-title>
+          <v-card-text class="text-center">
+          <div class="text-h1 font-weight-bold mb-6">{{ currentPrompt.verb }}</div>
+          <v-row justify="center" align="center">
+            <v-col cols="12" md="4">
+              <div class="text-subtitle-2 text-grey-darken-1">Person</div>
+              <div class="text-body-1">{{ currentPrompt.person }}</div>
+            </v-col>
+            <v-col cols="12" md="4">
+              <div class="text-subtitle-2 text-grey-darken-1">Tense</div>
+              <div class="text-body-1">{{ currentPrompt.tense }}</div>
+            </v-col>
+            <v-col cols="12" md="4">
+              <div class="text-subtitle-2 text-grey-darken-1">Sentence Type</div>
+              <div class="text-body-1">{{ currentPrompt.sentenceType }}</div>
+            </v-col>
+          </v-row>
+          </v-card-text>
+          </v-card>
 
-        <!-- Middle: Verb card -->
-        <div class="prompt-row-2">
-          <div class="card p-3 border-dark bg-primary-subtle" v-for="(val, idx) in [
-              { title: 'Person', value: currentPrompt.person },
-              { title: 'Verb', value: currentPrompt.verb }
-            ]" :key="idx">
-            <div class="card-body">
-              <h4 class="card-title">{{ val.title }}</h4>
-              <p class="display-1">{{ val.value }}</p>
-            </div>
-          </div>
-        </div>
+          <!-- Answer Input -->
+          <v-row class="mt-6" justify="center" align="center">
+          <v-col cols="12" md="8">
+          <v-text-field
+            v-model="userAnswer"
+            @keyup.enter="submitAnswer"
+            label="Answer"
+            placeholder="include person + verb"
+            variant="outlined"
+            density="comfortable"
+          ></v-text-field>
+          </v-col>
+          <v-col cols="12" md="2">
+          <v-btn color="primary" size="large" @click="submitAnswer">
+            {{ submitButtontext }}
+          </v-btn>
+          </v-col>
+          </v-row>
 
-        <!-- Bottom: Answer input -->
-        <div class="answer-section">
-          <div class="d-flex justify-content-center align-items-center gap-2 answer-form-group">
-            <div class="input-group input-group-lg">
-              <span class="input-group-text" id="inputGroup-sizing-lg">Answer:</span>
-              <input v-model="userAnswer" @keyup.enter="submitAnswer" type="text" class="form-control" style="min-width: 200px;" placeholder="include person + verb" />
+          <!-- Progress Bar -->
+          <v-progress-linear :model-value="progressValue" height="10" color="primary" class="my-4"></v-progress-linear>
+
+          <!-- Footer -->
+          <v-footer class="pa-4 game-footer" color="grey-lighten-3">
+          <v-row justify="space-between" align="center">
+          <v-col cols="12" md="6">
+            <div class="scoreboard d-flex gap-4">
+              <transition name="flash-green" mode="out-in">
+                <span :key="rightCount" class="text-success text-h6">✅ {{ rightCount }}</span>
+              </transition>
+              <transition name="flash-red" mode="out-in">
+                <span :key="wrongCount" class="text-error text-h6">❌ {{ wrongCount }}</span>
+              </transition>
             </div>
-            <button class="btn btn-lg btn-primary" @click="submitAnswer">{{ submitButtontext }}</button>
-          </div>
-        </div> 
-        <v-progress-linear :model-value="progressValue"></v-progress-linear>
-        <!-- FOOTER -->
-        <footer class="game-footer">
-          <div class="scoreboard">
-            <transition name="flash-green" mode="out-in">
-              <span :key="rightCount" class="score">✅ {{ rightCount }}</span>
-            </transition>
-            <transition name="flash-red" mode="out-in">
-              <span :key="wrongCount" class="score">❌ {{ wrongCount }}</span>
-            </transition>  
-          </div>
-          <div class="rounds border p-3">
+          </v-col>
+          <v-col cols="12" md="6">
+            <v-card flat class="pa-2">
               <p>Remaining: {{ remainingCount }}</p>
               <p>Completed rounds: {{ promptCounter }}</p>
-            </div>
-        </footer>
+            </v-card>
+          </v-col>
+          </v-row>
+          </v-footer>
+
       </main>
       <main v-else>
         <div>
@@ -196,6 +212,7 @@ export default {
         sentence_type: r.prompt.sentenceType,
         user_answer: r.userAnswer,
         is_correct: r.correct,
+        acceptable_answers: Array.isArray(r.correctAnswers) ? r.correctAnswers : [],
         elapsed_time: parseFloat(r.elapsedTime)
       }));
 

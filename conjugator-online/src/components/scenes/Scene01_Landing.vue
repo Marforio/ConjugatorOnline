@@ -44,7 +44,7 @@ export default {
 
 .content-container {
   margin-top: auto; /* Push the content to the vertical center */
-  transform: translateY(5%); /* Adjust position downwards */
+  transform: translateY(-20%); /* Adjust position downwards */
   text-align: center; /* Center align the text */
 }
 .beating-text {

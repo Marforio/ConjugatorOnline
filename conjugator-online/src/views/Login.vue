@@ -51,12 +51,17 @@
 
 <script setup lang="ts">
 import { ref } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import { login as loginService } from "@/services/auth";
 
 const username = ref("");
 const password = ref("");
 const loading = ref(false);
 const error = ref("");
+
+// Grab current route and router instance
+const route = useRoute();
+const router = useRouter();
 
 async function handleLogin() {
   error.value = "";
@@ -67,8 +72,9 @@ async function handleLogin() {
     // Tokens are saved in auth.ts
     console.log("Login successful", data);
 
-    // Redirect after login
-    window.location.href = "/";
+    // On success, redirect to intended page or home
+    const redirectPath = route.query.redirect || "/";
+    router.replace(redirectPath as string);
   } catch (err: any) {
     if (err.response?.status === 401) {
       error.value = "Invalid credentials";

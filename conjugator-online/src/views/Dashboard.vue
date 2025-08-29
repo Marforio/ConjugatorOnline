@@ -24,24 +24,10 @@
               <v-alert type="error">{{ errorsError }}</v-alert>
             </div>
             
-            <div v-if="errors.length">
-              <h2>Recent Errors</h2>
-              <v-list>
-                <v-list-item v-for="errorItem in errors" :key="errorItem.error_id">
-                  <v-list-item-content>
-                    <v-list-item-title>
-                      <strong>{{ errorItem.error_code }}</strong> ({{ errorItem.times }}x)
-                    </v-list-item-title>
-                    <v-list-item-subtitle v-if="errorItem.evidence">
-                      {{ errorItem.evidence }}
-                    </v-list-item-subtitle>
-                  </v-list-item-content>
-                </v-list-item>
-              </v-list>
-            </div>
             <div v-else>
-              <p class="text-muted">No recent errors.</p>
+              <ErrorsDataTab />
             </div>
+              
           </v-window-item>
 
           <v-window-item value="vocabulary">
@@ -61,7 +47,53 @@
               <v-alert type="error">{{ conjGameError }}</v-alert>
             </div>
             <div v-else>
-              <PieChart :data="totalRightWrongChartData" />
+              <v-card class="pa-4 mb-6" elevation="2" style="max-width: 300px; margin-top: 16px; margin-left: 16px;"> 
+                <v-card-title class="text-h5 font-weight-bold">Total accuracy</v-card-title>
+                <v-card-text>
+                  <div class="d-flex flex-column align-center">
+                    <PieChart :data="totalRightWrongChartData" />
+
+                    <div class="text-subtitle-1 mt-4">
+                      {{ sessions.length }} game{{ sessions.length !== 1 ? 's' : '' }} played
+                    </div>
+
+                    <div class="text-subtitle-2">
+                      {{ totalRoundsPlayed }} total rounds
+                    </div>
+                  </div>
+                </v-card-text>
+              </v-card>
+
+              <v-card class="pa-4 mb-6" elevation="2" style="min-width: 500px; max-width: 700px; margin-top: 16px; margin-left: 16px;"> 
+                <v-card-title class="text-h5 font-weight-bold">Tense accuracy</v-card-title>
+                <v-card-text>
+                  <div class="d-flex flex-column align-center">
+                    <BarChart :data="tenseAccuracyData" :width="500" :height="300" color="#4CAF50" />
+
+                    <div class="text-subtitle-1 mt-4">
+                      Percentage of correct answers by tense
+                    </div>
+
+                  </div>
+                </v-card-text>
+              </v-card>
+
+              <v-card class="pa-4 mb-6" elevation="2" style="min-width: 500px; max-width: 700px; margin-top: 16px; margin-left: 16px;"> 
+                <v-card-title class="text-h5 font-weight-bold">Sentence type accuracy</v-card-title>
+                <v-card-text>
+                  <div class="d-flex flex-column align-center">
+                    <BarChart :data="sentenceTypeAccuracyData" :width="500" :height="300" color="#2196F3" />
+
+                    <div class="text-subtitle-1 mt-4">
+                      Percentage of correct answers by sentence type
+                    </div>
+
+                  </div>
+                </v-card-text>
+              </v-card>
+              <v-divider></v-divider>
+
+              <div class="text-h5 mt-5">Game details</div>
               <div v-for="session in sessions" :key="session.session_id" class="mt-6">
                 <v-expansion-panels>
                   <v-expansion-panel>
@@ -81,6 +113,7 @@
                             <th>Sentence Type</th>
                             <th>User Answer</th>
                             <th>Correct?</th>
+                            <th>Acceptable Answers</th>
                             <th>Time (s)</th>
                           </tr>
                         </thead>
@@ -99,6 +132,7 @@
                                 {{ round.is_correct ? 'mdi-check-circle' : 'mdi-close-circle' }}
                               </v-icon>
                             </td>
+                            <td>{{ round.acceptable_answers?.join(' / ') }}</td>
                             <td>{{ round.elapsed_time?.toFixed(2) ?? '—' }}</td>
                           </tr>
                         </tbody>
@@ -125,12 +159,14 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, onMounted, onUnmounted, computed } from "vue";
+import { defineComponent, ref, onMounted, computed } from "vue";
 import api from "@/axios";
 import { useUserStore } from "@/stores/user";
 import LoggedInFooter from '@/components/LoggedInFooter.vue';
 import TopNavBar from '@/components/TopNavBar.vue';
 import PieChart from "@/components/charts/PieChart.vue";
+import BarChart from "@/components/charts/BarChart.vue";
+import ErrorsDataTab from "@/components/ErrorsDataTab.vue";
 
 interface GameSession {
   session_id: number;
@@ -146,35 +182,30 @@ interface GameSession {
   rounds: any[];
 }
 
-
-interface ErrorItem {
-  error_id: string;
-  error_code: string;
-  evidence: string | null;
-  times: number;
-}
 let intervalId: ReturnType<typeof setInterval>;
 
 export default 
 defineComponent({
   name: "Dashboard",
-  components: { TopNavBar, LoggedInFooter, PieChart },
+  components: { TopNavBar, LoggedInFooter, PieChart, BarChart, ErrorsDataTab },
   setup() {
     const sessions = ref<GameSession[]>([]);
-    const errors = ref<ErrorItem[]>([]);
     const loading = ref<boolean>(true);
     const errorsError = ref<string | null>(null);
     const conjGameError = ref<string | null>(null);
     const userStore = useUserStore();
-    const totalCorrect = computed(() =>
-      sessions.value.reduce((sum, session) => sum + session.correct_count, 0)
+    const totalRoundsPlayed = computed(() =>
+      sessions.value.reduce((sum, session) => sum + session.total_rounds, 0)
     );
-    const totalIncorrect = computed(() =>
-      sessions.value.reduce((sum, session) => sum + session.wrong_count, 0)
+    const totalPercentCorrect = computed(() =>
+      (sessions.value.reduce((sum, session) => sum + session.correct_count, 0) / totalRoundsPlayed.value * 100).toFixed(0)
+    );
+    const totalPercentIncorrect = computed(() =>
+      (sessions.value.reduce((sum, session) => sum + session.wrong_count, 0) / totalRoundsPlayed.value * 100).toFixed(0)
     );
     const totalRightWrongChartData = computed(() => [
-      { label: 'Correct', value: totalCorrect.value },
-      { label: 'Incorrect', value: totalIncorrect.value },
+      { label:'Correct', value: totalPercentCorrect.value },
+      { label:'Incorrect', value: totalPercentIncorrect.value }
     ]);
 
 
@@ -187,28 +218,14 @@ defineComponent({
       "goals",
       "conjugation-game",
     ];
+    const BarchartColorPalette = [
+      '#4CAF50', '#2196F3', '#FFC107', '#E91E63', '#9C27B0', '#FF5722'
+    ];
 
 
 
     let intervalId: number;
 
-    const fetchErrorDashboardData = async () => {
-      loading.value = true;
-      errorsError.value = null;
-
-
-      try {
-        const errorsRes = await api.get<ErrorItem[]>("/errors/");
-        errors.value = errorsRes.data;
-      } catch (err: any) {
-        console.error("Errors fetch failed:", err);
-        errorsError.value = errorsError.value
-          ? `${errorsError.value}; Failed to fetch errors`
-          : "Failed to fetch errors";
-      }
-
-      loading.value = false;
-    };
     const fetchConjGameSessionsDashboardData = async () => {
       loading.value = true;
       conjGameError.value = null;
@@ -225,27 +242,71 @@ defineComponent({
 
       loading.value = false;
     };
+    const tenseAccuracyData = computed(() => {
+      const rounds = sessions.value.flatMap(session => session.rounds || []);
+      const tenseGroups: Record<string, { correct: number; total: number }> = {};
 
+      for (const round of rounds) {
+        const tense = round.tense;
+        if (!tenseGroups[tense]) {
+          tenseGroups[tense] = { correct: 0, total: 0 };
+        }
+        tenseGroups[tense].total += 1;
+        if (round.is_correct) {
+          tenseGroups[tense].correct += 1;
+        }
+      }
+
+      return Object.entries(tenseGroups).map(([tense, stats], index: number) => ({
+        label: tense,
+        value: parseFloat(((stats.correct / stats.total) * 100).toFixed(0)),
+        correct: stats.correct,
+        total: stats.total,
+        color: BarchartColorPalette[index % BarchartColorPalette.length]
+      }));
+    });
+
+    const sentenceTypeAccuracyData = computed(() => {
+      const rounds = sessions.value.flatMap(session => session.rounds || []);
+      const typeGroups: Record<string, { correct: number; total: number }> = {};
+
+      for (const round of rounds) {
+        const type = round.sentence_type;
+        if (!typeGroups[type]) {
+          typeGroups[type] = { correct: 0, total: 0 };
+        }
+        typeGroups[type].total += 1;
+        if (round.is_correct) {
+          typeGroups[type].correct += 1;
+        }
+      }
+
+      return Object.entries(typeGroups).map(([type, stats], index: number) => ({
+        label: type,
+        value: parseFloat(((stats.correct / stats.total) * 100).toFixed(0)),
+        correct: stats.correct,
+        total: stats.total,
+        color: BarchartColorPalette[index % BarchartColorPalette.length]
+      }));
+    });
 
 
     onMounted(() => {
-      fetchErrorDashboardData();
       fetchConjGameSessionsDashboardData();
 
-      intervalId = window.setInterval(() => {
-        fetchErrorDashboardData();
-        fetchConjGameSessionsDashboardData();
-      }, 80000);
+      //intervalId = window.setInterval(() => {
+      //  fetchErrorDashboardData();
+      //  fetchConjGameSessionsDashboardData();
+      //}, 80000);
     });
 
 
-    onUnmounted(() => {
-      clearInterval(intervalId);
-    });
+    //onUnmounted(() => {
+    //  clearInterval(intervalId);
+    //});
 
     return {
       sessions,
-      errors,
       loading,
       errorsError,
       conjGameError,
@@ -255,6 +316,9 @@ defineComponent({
       TopNavBar,
       PieChart,
       totalRightWrongChartData,
+      totalRoundsPlayed,
+      tenseAccuracyData,
+      sentenceTypeAccuracyData,
     };
   },
 });
