@@ -82,7 +82,12 @@
                 </v-card-text>
               </v-card>
 
-              <v-card class="pa-4 mb-6" elevation="2" style="min-width: 500px; max-width: 700px; margin-top: 16px; margin-left: 16px;"> 
+              <v-card class="pa-4 mb-6" elevation="2" :style="{
+                minWidth: xs ? '300px' : '500px', 
+                maxWidth: xs ? '500px' : '700px', 
+                marginLeft: xs ? '5px' : '16px',
+                marginRight: xs ? '5px' : '16px',}">
+
                 <v-card-title class="text-h5 font-weight-bold">Tense accuracy</v-card-title>
                 <v-card-text>
                   <div class="d-flex flex-column align-center">
@@ -96,7 +101,11 @@
                 </v-card-text>
               </v-card>
 
-              <v-card class="pa-4 mb-6" elevation="2" style="min-width: 500px; max-width: 700px; margin-top: 16px; margin-left: 16px;"> 
+              <v-card class="pa-4 mb-6" elevation="2" :style="{
+                minWidth: xs ? '300px' : '500px', 
+                maxWidth: xs ? '500px' : '700px', 
+                marginLeft: xs ? '5px' : '16px',
+                marginRight: xs ? '5px' : '16px'}"> 
                 <v-card-title class="text-h5 font-weight-bold">Sentence type accuracy</v-card-title>
                 <v-card-text>
                   <div class="d-flex flex-column align-center">
@@ -111,63 +120,69 @@
               </v-card>
               <v-divider></v-divider>
 
-              <div class="text-h5 mt-5">Game details</div>
-              <div v-for="session in sessions" :key="session.session_id" class="mt-6">
-                <v-expansion-panels>
-                  <v-expansion-panel>
-                    <v-expansion-panel-title>
-                      Game {{ session.session_id }} — {{ new Date(session.started_at).toLocaleString() }} —
-                      {{ session.correct_count }} Correct, {{ session.wrong_count }} Incorrect — {{ session.tenses.join(', ').slice(0,50) }}
-                    </v-expansion-panel-title>
-                    <v-expansion-panel-text>
-                      <div v-if="session.rounds?.length" >
-                        <v-table>
-                        <thead>
-                          <tr>
-                            <th>Prompt #</th>
-                            <th>Person</th>
-                            <th>Verb</th>
-                            <th>Tense</th>
-                            <th>Sentence Type</th>
-                            <th>User Answer</th>
-                            <th>Correct?</th>
-                            <th>Acceptable Answers</th>
-                            <th>Time (s)</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          <tr
-                            v-for="round in session.rounds" :key="`${session.session_id}-${round.prompt_number}`"
-                          >
-                            <td>{{ round.prompt_number }}</td>
-                            <td>{{ round.person }}</td>
-                            <td>{{ round.verb }}</td>
-                            <td>{{ round.tense }}</td>
-                            <td>{{ round.sentence_type }}</td>
-                            <td>{{ round.user_answer }}</td>
-                            <td>
-                              <v-icon :color="round.is_correct ? 'green' : 'red'">
-                                {{ round.is_correct ? 'mdi-check-circle' : 'mdi-close-circle' }}
-                              </v-icon>
-                            </td>
-                            <td>{{ round.acceptable_answers?.join(' / ') }}</td>
-                            <td>{{ round.elapsed_time?.toFixed(2) ?? '—' }}</td>
-                          </tr>
-                        </tbody>
-                      </v-table>
-                    </div>
-                    <div v-else>
-                      <p class="text-muted">No rounds data available for this session.</p>
-                    </div>
-               
-                    
-                  </v-expansion-panel-text>
-                </v-expansion-panel>
-              </v-expansion-panels>
-            </div>
-          </div>
+              <v-card class="pa-4 mb-6" elevation="2" :style="{
+                minWidth: xs ? '300px' : '95%', 
+                maxWidth: xs ? '500px' : '95%', 
+                marginLeft: xs ? '5px' : '16px',
+                marginRight: xs ? '5px' : '16px',
+                marginTop: '20px',
+                }"> 
+                <div class="text-h5 mt-2" >Game details</div>
+                <div v-for="session in sessions" :key="session.session_id" class="mt-6">
+                  <v-expansion-panels>
+                    <v-expansion-panel>
+                      <v-expansion-panel-title>
+                        <span class="font-weight-medium">Game {{ session.session_id }} —
+                        {{ session.correct_count }} Correct, {{ session.wrong_count }} Incorrect</span> — {{ new Date(session.started_at).toLocaleString() }} — {{ session.tenses.join(', ').slice(0,50) }}
+                      </v-expansion-panel-title>
+                      <v-expansion-panel-text>
+                        <div v-if="session.rounds?.length" >
+                          <v-table>
+                          <thead>
+                            <tr>
+                              <th>Prompt #</th>
+                              <th>Person</th>
+                              <th>Verb</th>
+                              <th>Tense</th>
+                              <th>Sentence Type</th>
+                              <th>User Answer</th>
+                              <th>Correct?</th>
+                              <th>Acceptable Answers</th>
+                              <th>Time (s)</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr
+                              v-for="round in session.rounds" :key="`${session.session_id}-${round.prompt_number}`"
+                            >
+                              <td>{{ round.prompt_number }}</td>
+                              <td>{{ round.person }}</td>
+                              <td>{{ round.verb }}</td>
+                              <td>{{ round.tense }}</td>
+                              <td>{{ round.sentence_type }}</td>
+                              <td>{{ round.user_answer }}</td>
+                              <td>
+                                <v-icon :color="round.is_correct ? 'green' : 'red'">
+                                  {{ round.is_correct ? 'mdi-check-circle' : 'mdi-close-circle' }}
+                                </v-icon>
+                              </td>
+                              <td>{{ round.acceptable_answers?.join(' / ') }}</td>
+                              <td>{{ round.elapsed_time?.toFixed(2) ?? '—' }}</td>
+                            </tr>
+                          </tbody>
+                        </v-table>
+                      </div>
+                      <div v-else>
+                        <p class="text-muted">No rounds data available for this session.</p>
+                      </div>
+                    </v-expansion-panel-text>
+                  </v-expansion-panel>
+                </v-expansion-panels>
+                </div>
+                </v-card>
+              </div>
+           
             
-
           </v-window-item>
 
 
@@ -239,7 +254,7 @@ defineComponent({
       { value: 'conjugation-game', label: 'Conjugation Game' },
     ];
 
-    const { smAndDown } = useDisplay();
+    const { xs, smAndDown } = useDisplay();
     const isMobile = computed(() => smAndDown.value);
     const BarchartColorPalette = [
       '#4CAF50', '#2196F3', '#FFC107', '#E91E63', '#9C27B0', '#FF5722'
@@ -343,6 +358,8 @@ defineComponent({
       totalRoundsPlayed,
       tenseAccuracyData,
       sentenceTypeAccuracyData,
+      smAndDown,
+      xs
     };
   },
 });

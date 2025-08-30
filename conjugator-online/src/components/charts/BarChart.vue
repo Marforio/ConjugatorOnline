@@ -3,15 +3,16 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, watch, ref } from 'vue';
+import { defineComponent, onMounted, watch, ref, computed } from 'vue';
 import * as d3 from 'd3';
+import { useDisplay } from 'vuetify';
 
 interface ChartData {
   label: string;
   value: number;
   correct: number;
   total: number;
-    color: string;
+  color: string;
 }
 
 export default defineComponent({
@@ -36,8 +37,18 @@ export default defineComponent({
   },
   setup(props) {
     const chartContainer = ref<HTMLElement | null>(null);
-    const marginBottom = 50; // extra space for labels
-    const marginLeft = 18; 
+    const marginBottom = 50;
+    const marginLeft = 18;
+
+    const { xs, smAndUp } = useDisplay();
+
+    const responsiveWidth = computed(() => {
+      if (smAndUp.value) return Math.max(props.width, 500);
+      return 300; // smaller width for phones
+    });
+
+    const labelFontSize = computed(() => (xs.value ? '9px' : '11px'));
+    const labelRotation = computed(() => (xs.value ? -15 : -30));
 
     const drawChart = () => {
       if (!chartContainer.value) return;
@@ -45,22 +56,21 @@ export default defineComponent({
       const svg = d3.select(chartContainer.value)
         .html('')
         .append('svg')
-        .attr('width', props.width + marginLeft)
+        .attr('width', responsiveWidth.value + marginLeft)
         .attr('height', props.height + marginBottom);
 
-    const chartGroup = svg.append('g')
-        .attr('transform', `translate(${marginLeft}, 0)`); // ← shift everything right
+      const chartGroup = svg.append('g')
+        .attr('transform', `translate(${marginLeft}, 0)`);
 
       const x = d3.scaleBand()
         .domain(props.data.map((d: ChartData) => d.label))
-        .range([0, props.width])
+        .range([0, responsiveWidth.value])
         .padding(0.1);
 
       const yMax = d3.max(props.data, (d: ChartData) => d.value)!;
       const y = d3.scaleLinear()
-        .domain([0, yMax * 1.1]) // ← add 10% headroom
+        .domain([0, yMax * 1.1])
         .range([props.height - 20, 0]);
-
 
       chartGroup.selectAll('rect')
         .data(props.data)
@@ -71,45 +81,49 @@ export default defineComponent({
         .attr('width', x.bandwidth())
         .attr('height', (d: ChartData) => props.height - 20 - y(d.value))
         .attr('fill', (d: ChartData) => d.color)
-        .each(function (d: ChartData) {
-            d3.select(this)
-            .append('title')
-            .text(`${d.correct}/${d.total} correct`);
-        });
+        .append('title')
+        .text((d: ChartData) => `${d.correct}/${d.total} correct`);
 
-      chartGroup.selectAll('text')
+      chartGroup.selectAll('text.value-label')
         .data(props.data)
         .enter()
         .append('text')
+        .attr('class', 'value-label')
         .attr('x', (d: ChartData) => x(d.label)! + x.bandwidth() / 2)
         .attr('y', (d: ChartData) => y(d.value) - 5)
         .attr('text-anchor', 'middle')
+        .attr('font-size', '10px')
         .text((d: ChartData) => `${d.value}%`);
 
-      chartGroup.selectAll('.x-label')
+      chartGroup.selectAll('text.x-label')
         .data(props.data)
         .enter()
         .append('text')
         .attr('class', 'x-label')
         .attr('x', (d: ChartData) => x(d.label)! + x.bandwidth() / 2)
-        .attr('y', props.height - 5) // near bottom of chart
-        .attr('font-size', '10px')
-        .attr('transform', (d: ChartData) => `rotate(-30, ${x(d.label)! + x.bandwidth() / 2}, ${props.height - 5})`)
+        .attr('y', props.height)
+        .attr('font-size', labelFontSize.value)
+        .attr('transform', (d: ChartData) =>
+          `rotate(${labelRotation.value}, ${x(d.label)! + x.bandwidth() / 2}, ${props.height})`
+        )
         .attr('text-anchor', 'end')
-        .text((d: ChartData) => d.label)
-        .attr('y', props.height) ;
+        .text((d: ChartData) => d.label);
     };
 
     onMounted(drawChart);
     watch(() => props.data, drawChart, { deep: true });
+    watch(responsiveWidth, drawChart); // redraw on screen size change
 
-    return { chartContainer };
+    return { chartContainer};
   }
 });
 </script>
 
+
 <style scoped>
 .bar-chart {
   margin-top: 1rem;
+  overflow-x: auto;
 }
+
 </style>
