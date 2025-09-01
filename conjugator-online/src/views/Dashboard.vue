@@ -191,7 +191,6 @@ import { defineComponent, ref, onMounted, computed } from "vue";
 import api from "@/axios";
 import { useUserStore } from "@/stores/user";
 import { useDisplay } from 'vuetify';
-import LoggedInFooter from '@/components/LoggedInFooter.vue';
 import TopNavBar from '@/components/TopNavBar.vue';
 import PieChart from "@/components/charts/PieChart.vue";
 import BarChart from "@/components/charts/BarChart.vue";
@@ -217,7 +216,7 @@ let intervalId: ReturnType<typeof setInterval>;
 export default 
 defineComponent({
   name: "Dashboard",
-  components: { TopNavBar, LoggedInFooter, PieChart, BarChart, ErrorsDataTab },
+  components: { TopNavBar, PieChart, BarChart, ErrorsDataTab },
   setup() {
     const sessions = ref<GameSession[]>([]);
     const loading = ref<boolean>(true);

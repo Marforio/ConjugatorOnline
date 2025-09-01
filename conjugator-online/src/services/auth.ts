@@ -1,6 +1,5 @@
 // src/services/auth.ts
 import api from "@/axios";
-import { useUserStore } from "@/stores/user";
 
 export function getAccessToken() {
   return localStorage.getItem("access");
@@ -23,7 +22,6 @@ export function clearTokens() {
 export async function login(username: string, password: string) {
   const res = await api.post("/token/", { username, password });
   saveTokens(res.data.access, res.data.refresh);
-
   return res.data;
 }
 
@@ -32,6 +30,6 @@ export async function refreshToken() {
   if (!refresh) throw new Error("No refresh token");
 
   const res = await api.post("/token/refresh/", { refresh });
-  saveTokens(res.data.access, refresh); // save new access, keep refresh
+  saveTokens(res.data.access, refresh); // keep refresh token
   return res.data.access;
 }

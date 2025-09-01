@@ -8,13 +8,21 @@
 <script setup>
 import { onMounted, computed } from "vue";
 import { useUserStore } from "@/stores/user";
+import { getAccessToken } from "@/services/auth"; 
 import api from "@/axios";
 
 const userStore = useUserStore();
 const initials = computed(() => userStore.student?.initials);
 
-// Fetch student info on mount
+// Fetch student info only if token exists
 onMounted(async () => {
+  const token = getAccessToken();
+  if (!token) {
+    console.warn("No access token — skipping student fetch.");
+    userStore.clearStudent();
+    return;
+  }
+
   try {
     const res = await api.get("/students/");
     const studentData = Array.isArray(res.data) ? res.data[0] : res.data;
@@ -31,4 +39,5 @@ onMounted(async () => {
     userStore.clearStudent();
   }
 });
+
 </script>

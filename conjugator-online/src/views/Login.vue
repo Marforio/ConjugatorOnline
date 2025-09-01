@@ -1,52 +1,54 @@
 <template>
-  <div class="container d-flex justify-content-center align-items-center vh-100">
-    <div class="card shadow-lg p-4 w-100" style="max-width: 400px;">
-      <h2 class="text-center mb-4">Login</h2>
+  <v-container fluid class="d-flex align-center justify-center" style="min-height: 100vh;">
+    <v-card class="pa-8" max-width="560" elevation="4">
+      <v-card-title class="text-h5 text-center mb-4">Welcome Back</v-card-title>
 
-      <form @submit.prevent="handleLogin">
-        <!-- Username -->
-        <div class="mb-3">
-          <label for="username" class="form-label">Username</label>
-          <input
-            id="username"
-            v-model="username"
-            type="text"
-            class="form-control"
-            placeholder="Enter username"
-            required
-          />
-        </div>
+      <v-card-text>
+        <v-form @submit.prevent="handleLogin">
+          <v-row dense>
+            <v-col cols="12" class="mb-3">
+              <v-text-field
+                v-model="username"
+                label="Username"
+                placeholder="Enter username"
+                density="comfortable"
+                required
+              />
+            </v-col>
 
-        <!-- Password -->
-        <div class="mb-3">
-          <label for="password" class="form-label">Password</label>
-          <input
-            id="password"
-            v-model="password"
-            type="password"
-            class="form-control"
-            placeholder="Enter password"
-            required
-          />
-        </div>
+            <v-col cols="12" class="mb-3">
+              <v-text-field
+                v-model="password"
+                label="Password"
+                placeholder="Enter password"
+                type="password"
+                density="comfortable"
+                required
+              />
+            </v-col>
 
-        <!-- Error -->
-        <div v-if="error" class="alert alert-danger py-2">
-          {{ error }}
-        </div>
+            <v-col cols="12" v-if="error">
+              <v-alert type="error" dense class="mb-3">
+                {{ error }}
+              </v-alert>
+            </v-col>
 
-        <!-- Submit -->
-        <button
-          type="submit"
-          class="btn btn-primary w-100"
-          :disabled="loading"
-        >
-          <span v-if="loading" class="spinner-border spinner-border-sm me-2"></span>
-          {{ loading ? "Logging in..." : "Login" }}
-        </button>
-      </form>
-    </div>
-  </div>
+            <v-col cols="12">
+              <v-btn
+                type="submit"
+                color="primary"
+                block
+                size="large"
+                :loading="loading"
+              >
+                Login
+              </v-btn>
+            </v-col>
+          </v-row>
+        </v-form>
+      </v-card-text>
+    </v-card>
+  </v-container>
 </template>
 
 <script setup lang="ts">
@@ -59,7 +61,6 @@ const password = ref("");
 const loading = ref(false);
 const error = ref("");
 
-// Grab current route and router instance
 const route = useRoute();
 const router = useRouter();
 
@@ -69,18 +70,14 @@ async function handleLogin() {
 
   try {
     const data = await loginService(username.value, password.value);
-    // Tokens are saved in auth.ts
     console.log("Login successful", data);
 
-    // On success, redirect to intended page or home
-    const redirectPath = route.query.redirect || "/";
-    router.replace(redirectPath as string);
+    const redirectPath = (route.query.redirect as string) || "/";
+    router.replace(redirectPath);
   } catch (err: any) {
-    if (err.response?.status === 401) {
-      error.value = "Invalid credentials";
-    } else {
-      error.value = err.message || "Login failed";
-    }
+    error.value = err.response?.status === 401
+      ? "Invalid credentials"
+      : err.message || "Login failed";
   } finally {
     loading.value = false;
   }
@@ -88,7 +85,16 @@ async function handleLogin() {
 </script>
 
 <style scoped>
-.card {
-  border-radius: 1rem;
+.v-card {
+  border-radius: 12px;
 }
+
+.v-text-field input {
+  font-size: 1rem;
+}
+
+.v-btn {
+  font-weight: 600;
+}
+
 </style>

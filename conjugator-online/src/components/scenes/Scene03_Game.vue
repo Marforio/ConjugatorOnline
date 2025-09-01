@@ -1,141 +1,169 @@
 <template>
-  <div class="game-scene">
+  <v-container fluid class="pa-0">
 
-    <div class="game-body">
-      <!-- SIDEBAR -->
-      <aside class="sidebar" style="align-content: center;">
-        <img 
-            src="/images/conjugator.png" 
-            alt="Logo" 
-            class="mb-1 rounded-image" 
-            style="width: 95%; height: auto; opacity: 90%;" 
-          />
-        <h2 class="mt-4">Your settings</h2>
-        <p>Name:  <InitialsText /></p>
-        <p>Verb Set: {{ gameSettings.verbSet }}</p>
-        <p>Sentence Types: {{ gameSettings?.sentenceTypes?.join(', ') || '' }}</p>
-        <p>Tenses: {{ gameSettings?.tenses?.join(', ') || '' }}</p>
-        <div class="timer-box mt-4 mb-4">
-          <p>Round: {{ roundTimer }}</p>
-          <p>Total: {{ overallTimer }}</p>
+    <!-- Navigation Drawer -->
+    <v-navigation-drawer
+      permanent
+      width="280"
+      class="pa-4 d-flex flex-column align-center"
+    >
+      <v-img
+        src="/images/conjugator.png"
+        alt="Logo"
+        class="mb-4 rounded-lg"
+        max-width="220"
+        aspect-ratio="1"
+        cover
+      />
+
+      <h2 class="text-h6 font-weight-bold mb-2">Your Settings</h2>
+
+      <v-list density="compact" lines="one">
+        <v-list-item>
+          <v-list-item-title>Name: <InitialsText /></v-list-item-title>
+        </v-list-item>
+        <v-list-item>
+          <v-list-item-title>Verb Set: {{ gameSettings.verbSet }}</v-list-item-title>
+        </v-list-item>
+        <v-list-item>
+          <v-list-item-title>
+            Sentence Types: {{ gameSettings?.sentenceTypes?.join(', ') || '' }}
+          </v-list-item-title>
+        </v-list-item>
+        <v-list-item>
+          <v-list-item-title>
+            Tenses: {{ gameSettings?.tenses?.join(', ') || '' }}
+          </v-list-item-title>
+        </v-list-item>
+      </v-list>
+
+      <v-card class="mt-6 mb-6 pa-3 text-center" color="grey-lighten-4" elevation="2">
+        <div class="text-subtitle-1 font-weight-medium">Round: {{ roundTimer }}</div>
+        <div class="text-subtitle-1 font-weight-medium">Total: {{ overallTimer }}</div>
+      </v-card>
+
+      <div class="mt-auto d-flex justify-space-between align-center w-100">
+        <v-btn icon elevation="0" size="large" class="ms-3" @click="goBack">
+          <v-icon>mdi-arrow-left-circle</v-icon>
+        </v-btn>
+        <v-btn color="error" variant="flat" class="me-3" @click="quitGame">QUIT</v-btn>
       </div>
-        <div class="footer-nav gap-3">
-          <v-btn icon elevation class="m-3" large @click="goBack">
+    </v-navigation-drawer>
+
+    <!-- Main game area -->
+    <v-container fluid class="pa-4 d-flex justify-center align-center">
+      <div v-if="!gameStarted">
+        <!-- Instructions -->
+        <h1 class="text-h3 mb-6">Game Instructions</h1>
+        <p>How to play:</p>
+        <ol>
+          <li>You must write {{ remainingCount }} conjugations.</li>
+          <li>Every round, you will see:</li>
+          <ul>
+            <li>a verb</li>
+            <li>a person (subject)</li>
+            <li>a sentence type</li>
+            <li>a tense</li>
+          </ul>
+          <li>Write the correct conjugation for that combination</li>
+          <li>REMEMBER:</li>
+          <ul>
+            <li>Include both subject and verb</li>
+            <li>Contractions are allowed</li>
+            <li>Don't press BACK during the game</li>
+            <li>Details are shown at the end and in your dashboard</li>
+          </ul>
+        </ol>
+
+        <div class="d-flex justify-center mt-12">
+          <v-btn color="success" large @click="startGame">START THE GAME</v-btn>
+        </div>
+
+        <div v-if="$vuetify.display.xs" class="d-flex justify-center mt-6">
+          <v-btn icon elevation large @click="goBack">
             <v-icon>mdi-arrow-left-circle</v-icon>
           </v-btn>
-          <button class="btn btn-warning" style="max-height: 50px; align-self: center;" @click="quitGame">QUIT</button>
         </div>
-      </aside>
+      </div>
 
-      <!-- MAIN GAME AREA -->
-      <main v-if="gameStarted === true" class="main-area p-4">
-        
-        <!-- Prompt Card -->
-          <!-- Prompt Card -->
-          <v-card class="pa-6" elevation="2" color="grey-lighten-4">
+      <div v-else>
+        <!-- Active Game -->
+        <v-card class="pa-6 mb-6" elevation="2" color="grey-lighten-4">
           <v-card-title class="text-h5 text-center text-primary">Verb</v-card-title>
           <v-card-text class="text-center">
-          <div class="text-h1 font-weight-bold mb-6">{{ currentPrompt.verb }}</div>
-          <v-row justify="center" align="center">
-            <v-col cols="12" md="4">
-              <div class="text-subtitle-2 text-grey-darken-1">Person</div>
-              <div class="text-body-1">{{ currentPrompt.person }}</div>
-            </v-col>
-            <v-col cols="12" md="4">
-              <div class="text-subtitle-2 text-grey-darken-1">Tense</div>
-              <div class="text-body-1">{{ currentPrompt.tense }}</div>
-            </v-col>
-            <v-col cols="12" md="4">
-              <div class="text-subtitle-2 text-grey-darken-1">Sentence Type</div>
-              <div class="text-body-1">{{ currentPrompt.sentenceType }}</div>
-            </v-col>
-          </v-row>
+            <div class="text-h1 font-weight-bold mb-6">{{ currentPrompt.verb }}</div>
+            <v-row justify="center" align="center">
+              <v-col cols="12" md="4">
+                <div class="text-subtitle-2 text-grey-darken-1">Person</div>
+                <div class="text-body-1">{{ currentPrompt.person }}</div>
+              </v-col>
+              <v-col cols="12" md="4">
+                <div class="text-subtitle-2 text-grey-darken-1">Tense</div>
+                <div class="text-body-1">{{ currentPrompt.tense }}</div>
+              </v-col>
+              <v-col cols="12" md="4">
+                <div class="text-subtitle-2 text-grey-darken-1">Sentence Type</div>
+                <div class="text-body-1">{{ currentPrompt.sentenceType }}</div>
+              </v-col>
+            </v-row>
           </v-card-text>
-          </v-card>
+        </v-card>
 
-          <!-- Answer Input -->
-          <v-row class="mt-6" justify="center" align="center">
+        <v-row justify="center" align="center" class="mb-6">
           <v-col cols="12" md="8">
-          <v-text-field
-            v-model="userAnswer"
-            @keyup.enter="submitAnswer"
-            label="Answer"
-            placeholder="include person + verb"
-            variant="outlined"
-            density="comfortable"
-          ></v-text-field>
+            <v-text-field
+              v-model="userAnswer"
+              @keyup.enter="submitAnswer"
+              label="Answer"
+              placeholder="Include person + verb"
+              variant="outlined"
+              density="comfortable"
+            ></v-text-field>
           </v-col>
           <v-col cols="12" md="2">
-          <v-btn color="primary" size="large" @click="submitAnswer">
-            {{ submitButtontext }}
-          </v-btn>
+            <v-btn color="primary" large @click="submitAnswer">{{ submitButtontext }}</v-btn>
           </v-col>
-          </v-row>
+        </v-row>
 
-          <!-- Progress Bar -->
-          <v-progress-linear :model-value="progressValue" height="10" color="primary" class="my-4"></v-progress-linear>
+        <v-progress-linear
+          :model-value="progressValue"
+          height="10"
+          color="primary"
+          class="my-4"
+        ></v-progress-linear>
 
-          <!-- Footer -->
-          <v-footer class="pa-4 game-footer" color="grey-lighten-3">
+        <v-footer class="pa-4 game-footer" color="grey-lighten-3">
           <v-row justify="space-between" align="center">
-          <v-col cols="12" md="6">
-            <div class="scoreboard d-flex gap-4">
-              <transition name="flash-green" mode="out-in">
-                <span :key="rightCount" class="text-success text-h6">✅ {{ rightCount }}</span>
-              </transition>
-              <transition name="flash-red" mode="out-in">
-                <span :key="wrongCount" class="text-error text-h6">❌ {{ wrongCount }}</span>
-              </transition>
-            </div>
-          </v-col>
-          <v-col cols="12" md="6">
-            <v-card flat class="pa-2">
-              <p>Remaining: {{ remainingCount }}</p>
-              <p>Completed rounds: {{ promptCounter }}</p>
-            </v-card>
-          </v-col>
+            <v-col cols="12" md="6">
+              <div class="scoreboard d-flex gap-4">
+                <transition name="flash-green" mode="out-in">
+                  <span :key="rightCount" class="text-success text-h6">✅ {{ rightCount }}</span>
+                </transition>
+                <transition name="flash-red" mode="out-in">
+                  <span :key="wrongCount" class="text-error text-h6">❌ {{ wrongCount }}</span>
+                </transition>
+              </div>
+            </v-col>
+            <v-col cols="12" md="6">
+              <v-card flat class="pa-2">
+                <p>Remaining: {{ remainingCount }}</p>
+                <p>Completed rounds: {{ promptCounter }}</p>
+              </v-card>
+            </v-col>
           </v-row>
-          </v-footer>
+        </v-footer>
+      </div>
+    </v-container>
 
-      </main>
-      <main v-else>
-        <div>
-          <p class="display-3">Game Instructions</p>
-          <p>How to play:</p>
-          <ol>
-            <li>You will be asked to write {{ remainingCount }} conjugations (the game has {{ remainingCount }} rounds )</li>
-            <li>Every round, you will see 4 cards</li>
-            <ul>
-              <li>Person</li>
-              <li>Verb</li>
-              <li>Sentence type (Positive, Negative, or Question)</li>
-              <li>Tense (Past simple, Future simple, Present continuous, etc.)</li>
-            </ul>
-            <li>Write the correct conjugation for that combination of cards</li>
-            <li>Make sure you write both the person (subject) and the verb</li>
-            <li>Don't press the BACK button during the game. You will be able to see the details for every round at the end of the game.</li>
-          </ol>
-          
-
-        </div>
-        <div>
-          <v-btn icon elevation class="m-3" large @click="goBack">
-            <v-icon>mdi-arrow-left-circle</v-icon>
-          </v-btn>
-          <button class="btn btn-lg btn-success" @click="startGame">START THE GAME</button>
-        </div>
-      </main>
-    </div>
-  </div>
-
-  <!-- Blocking dialog while loading -->
-  <v-dialog v-model="showBlockingDialog" persistent fullscreen transition="fade-transition">
-    <v-card class="d-flex align-center justify-center" color="transparent" elevation="0">
-      <v-progress-circular indeterminate color="primary" size="64" />
-    </v-card>
-  </v-dialog>
-
+    <!-- Blocking dialog while loading -->
+    <v-dialog v-model="showBlockingDialog" persistent fullscreen transition="fade-transition">
+      <v-card class="d-flex align-center justify-center" color="transparent" elevation="0">
+        <v-progress-circular indeterminate color="primary" size="64" />
+      </v-card>
+    </v-dialog>
+  </v-container>
 </template>
+
 
 
 <script>
@@ -355,150 +383,5 @@ export default {
 
 
 <style scoped>
-.game-scene {
-  display: flex;
-  flex-direction: column;
-  margin-left: 4%;
-  margin-right: 4%;
-  margin-top: 1%;
-  margin-bottom: 1%;
-  height: 100%;
-  gap: 10px;
-  padding: 10px;
-}
-
-/* HEADER */
-.game-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-.timer-box {
-  background: #f8f9fa;
-  padding: 0.5rem 1rem;
-  border-radius: 5px;
-  text-align: right;
-}
-
-/* BODY */
-.game-body {
-  display: grid;
-  grid-template-columns: 250px 1fr;
-  flex: 1;
-  gap: 10px;
-}
-
-/* SIDEBAR */
-.sidebar {
-  background: #f0f0f0;
-  padding: 10px;
-  border-radius: 5px;
-}
-
-/* MAIN GAME AREA */
-.main-area {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-}
-
-.prompt-row-1 {
-  display: flex;
-  gap: 10px;
-  flex: 2;
-  flex-wrap: wrap;
-  justify-content: center;
-}
-.prompt-row-2 {
-    display: flex;
-    gap: 10px;
-    flex: 3;  /* 50% bigger than prompt-row-1  */
-    flex-wrap: wrap;
-    justify-content: center;
-    margin: 1rem;
-}
-
-.verb-card {
-  display: flex;
-  justify-content: center;
-}
-
-.answer-section {
-  display: flex;
-  justify-content: center;
-  margin-top: 4rem;
-  margin-bottom: 4rem;
-}
-
-/* FOOTER */
-.game-footer {
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  align-items: center;
-  margin-top: 3rem;
-  gap: 3rem; 
-}
-.footer-nav {
-  display: flex;
-  justify-content: center;
-}
-.rounds {
-  display: flex;
-  flex-direction: column;
-  border-color: black;
-}
-.scoreboard {
-  font-size: 3rem;
-  gap: 3rem;
-}
-.score {
-  margin: 2rem;
-}
- /* Score count transitions */
- /* Green transition */
-.flash-green-enter-active, .flash-green-leave-active {
-  transition: all 0.7s ease;
-}
-.flash-green-enter {
-  transform: scale(1.5);
-  color: limegreen;
-  opacity: 0.7;
-}
-.flash-green-leave-to {
-  opacity: 0;
-}
-
-/* Red transition */
-.flash-red-enter-active, .flash-red-leave-active {
-  transition: all 0.3s ease;
-}
-.flash-red-enter {
-  transform: scale(1.5);
-  color: crimson;
-  opacity: 0.7;
-}
-.flash-red-leave-to {
-  opacity: 0;
-}
-
-
-
-
-/* Responsive */
-@media (max-width: 768px) {
-  .game-body {
-    grid-template-columns: 1fr;
-  }
-  .sidebar {
-    display: none;
-  }
-  .game-footer {
-    flex-direction: column;
-  }
-  .answer-form-group {
-    flex-direction: column;
-  }
-}
 
 </style>

@@ -17,5 +17,9 @@ import TopNavBar from '@/components/TopNavBar.vue'
 const route = useRoute()
 
 // Hide nav bar on home page
-const showNav = computed(() => route.name !== 'home' && route.name !== 'conjugator')
+const showNav = computed(() => {
+  const name = route.name || ''
+  return name !== 'home' && name !== 'conjugator'
+})
+
 </script>

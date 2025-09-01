@@ -1,111 +1,120 @@
 <template>
   <v-sheet height="100vh" class="pa-6" color="grey-lighten-4">
     <!-- Large screens: side-by-side layout -->
-    <v-row v-if="$vuetify.display.lgAndUp" dense>
-      <!-- Quick Play Section -->
-      <v-col cols="12" lg="6">
-        <v-card class="pa-6" color="white" elevation="2">
-          <h2 class="text-h5 mb-3">Quick Play</h2>
-          <p class="text-body-1 mb-6">Choose a predefined game package</p>
-
+    <v-container v-if="$vuetify.display.smAndUp">
+      <div class="text-h3 mb-4">Game settings</div>
           <v-row dense>
-            <v-col cols="12" sm="6" v-for="btn in quickPlayButtons" :key="btn.label">
-              <v-btn
-                block
-                :color="btn.color"
-                class="quick-play-btn"
-                @click="startGame(btn.settings)"
-              >
-                {{ btn.label }}
-              </v-btn>
+            <!-- Quick Play Section -->
+            <v-col cols="12" lg="6">
+              <v-card class="pa-6" color="white" elevation="2">
+                <h2 class="text-h5 mb-3">Quick Play</h2>
+                <p class="text-body-1 mb-6">Choose a predefined game package</p>
+
+                <v-row dense>
+                  <v-col cols="12" sm="6" v-for="(btn, index) in quickPlayButtons" :key="btn.label">
+                    <v-btn
+                      block
+                      :color="colors[index % colors.length]" 
+                      class="quick-play-btn"
+                      @click="startGame(btn.settings)"
+                    >
+                      {{ btn.label }}
+                    </v-btn>
+                  </v-col>
+                </v-row>
+              </v-card>
             </v-col>
+
+            <!-- Custom Play Section -->
+            <v-col cols="12" lg="6">
+            <v-card class="pa-3" color="white" elevation="1">
+              <h2 class="text-h5 mb-2">Custom Play</h2>
+              <p class="text-body-1 mb-6">Define your own settings</p>
+
+              <!-- Verb Set -->
+              <v-card class="mb-2" color="grey-lighten-3" flat>
+                <v-card-text class="py-2 px-3">
+                  <h5 class="text-subtitle-2 mb-2">Verb set</h5>
+                  <v-radio-group v-model="selectedVerbSet" row density="compact">
+                    <v-radio
+                      v-for="set in options.verb_sets"
+                      :key="set"
+                      :label="set"
+                      :value="set"
+                      density="compact"
+                    />
+                  </v-radio-group>
+                </v-card-text>
+              </v-card>
+
+              <!-- Sentence Types -->
+              <v-card class="mb-2" color="grey-lighten-3" flat>
+                <v-card-text class="py-2 px-3">
+                  <h5 class="text-subtitle-2 mb-2">Sentence types</h5>
+                  <v-row dense>
+                    <v-col cols="12" sm="6" md="4" v-for="type in options.sentence_types" :key="type">
+                      <v-checkbox
+                        v-model="selectedSentenceTypes"
+                        :label="type"
+                        :value="type"
+                        hide-details
+                        density="compact"
+                      />
+                    </v-col>
+                  </v-row>
+                </v-card-text>
+              </v-card>
+
+              <!-- Tenses -->
+              <v-card class="mb-2" color="grey-lighten-3" flat>
+                <v-card-text class="py-2 px-3">
+                  <h5 class="text-subtitle-2 mb-2">Tenses</h5>
+                  <v-row dense>
+                    <v-col cols="12" sm="6" md="4" v-for="tense in options.tenses" :key="tense">
+                      <v-checkbox
+                        v-model="selectedTenses"
+                        :label="tense"
+                        :value="tense"
+                        hide-details
+                        density="compact"
+                      />
+                    </v-col>
+                  </v-row>
+                </v-card-text>
+              </v-card>
+
+              <!-- Number of Questions -->
+              <v-card class="mb-2" color="grey-lighten-3" flat>
+                <v-card-text class="py-2 px-3">
+                  <span class="text-subtitle-2 mb-2">Number of questions</span>
+                  <span><v-text-field
+                    v-model.number="numPrompts"
+                    type="number"
+                    min="3"
+                    max="50"
+                    density="compact"
+                    hide-details
+                    class="mx-auto"
+                    style="max-width: 100px"
+                  /></span>
+                </v-card-text>
+              </v-card>
+
+              <!-- Start Button -->
+              <v-btn block color="primary" :disabled="!optionsLoaded" class="mt-2" @click="() => startGame(selections)">
+                Start with custom settings
+              </v-btn>
+            </v-card>
+          </v-col>
+
           </v-row>
-        </v-card>
-      </v-col>
-
-      <!-- Custom Play Section -->
-      <v-col cols="12" lg="6">
-      <v-card class="pa-3" color="white" elevation="1">
-        <h2 class="text-h5 mb-2">Custom Play</h2>
-        <p class="text-body-1 mb-6">Define your own settings</p>
-
-        <!-- Verb Set -->
-        <v-card class="mb-2" color="grey-lighten-3" flat>
-          <v-card-text class="py-2 px-3">
-            <h5 class="text-subtitle-2 mb-2">Verb set</h5>
-            <v-radio-group v-model="selectedVerbSet" row density="compact">
-              <v-radio
-                v-for="set in options.verb_sets"
-                :key="set"
-                :label="set"
-                :value="set"
-                density="compact"
-              />
-            </v-radio-group>
-          </v-card-text>
-        </v-card>
-
-        <!-- Sentence Types -->
-        <v-card class="mb-2" color="grey-lighten-3" flat>
-          <v-card-text class="py-2 px-3">
-            <h5 class="text-subtitle-2 mb-2">Sentence types</h5>
-            <v-row dense>
-              <v-col cols="12" sm="6" md="4" v-for="type in options.sentence_types" :key="type">
-                <v-checkbox
-                  v-model="selectedSentenceTypes"
-                  :label="type"
-                  :value="type"
-                  hide-details
-                  density="compact"
-                />
-              </v-col>
-            </v-row>
-          </v-card-text>
-        </v-card>
-
-        <!-- Tenses -->
-        <v-card class="mb-2" color="grey-lighten-3" flat>
-          <v-card-text class="py-2 px-3">
-            <h5 class="text-subtitle-2 mb-2">Tenses</h5>
-            <v-row dense>
-              <v-col cols="12" sm="6" md="4" v-for="tense in options.tenses" :key="tense">
-                <v-checkbox
-                  v-model="selectedTenses"
-                  :label="tense"
-                  :value="tense"
-                  hide-details
-                  density="compact"
-                />
-              </v-col>
-            </v-row>
-          </v-card-text>
-        </v-card>
-
-        <!-- Number of Questions -->
-        <v-card class="mb-2" color="grey-lighten-3" flat>
-          <v-card-text class="py-2 px-3">
-            <span class="text-subtitle-2 mb-2">Number of questions</span>
-            <span><v-text-field
-              v-model.number="numPrompts"
-              type="number"
-              min="3"
-              max="50"
-              density="compact"
-              hide-details
-              class="mx-auto"
-              style="max-width: 100px"
-            /></span>
-          </v-card-text>
-        </v-card>
-
-        <!-- Start Button -->
-        <v-btn block color="primary" :disabled="!optionsLoaded" class="mt-2" @click="() => startGame(selections)">
-          Start with custom settings
+          <div class="d-flex justify-center mt-6">
+        <v-btn icon elevation="0" size="large" @click="goToScene('Scene01_Landing')">
+          <v-icon>mdi-arrow-left-circle</v-icon>
         </v-btn>
-      </v-card>
-    </v-col>
-
-    </v-row>
+      </div>
+    </v-container>
+    
 
     <!-- Mid and lower screens: expansion panels -->
     <v-container v-else>
@@ -117,10 +126,16 @@
           <v-expansion-panel-title class="text-subtitle-2">Quick Play</v-expansion-panel-title>
           <v-expansion-panel-text>
             <v-row dense>
-              <v-col cols="6" xs="6" sm="6" v-for="btn in quickPlayButtons" :key="btn.label">
+              <v-col
+                cols="6"
+                xs="6"
+                sm="6"
+                v-for="(btn, index) in quickPlayButtons"
+                :key="btn.label"
+              >
                 <v-btn
                   block
-                  color="primary"
+                  :color="colors[index % colors.length]" 
                   class="quick-btn"
                   @click="startGame(btn.settings)"
                 >
@@ -139,46 +154,45 @@
           <v-expansion-panel-text>
             <v-row dense>
               <v-col cols="12">
-                <div class="text-caption font-weight-medium mb-1">Choose Verb Set</div>
-                <v-radio-group v-model="selectedVerbSet" row density="compact">
-                  <v-radio
-                    v-for="set in options.verb_sets"
-                    :key="set"
-                    :label="set"
-                    :value="set"
-                    density="compact"
-                  />
-                </v-radio-group>
+                <v-select
+                  v-model="selectedVerbSet"
+                  :items="options.verb_sets"
+                  label="Verb set"
+                  density="compact"
+                  variant="outlined"
+                  hide-details
+                />
               </v-col>
             </v-row>
-
-            <div class="text-caption font-weight-medium mt-3 mb-1">Sentence Types</div>
             <v-row dense>
-              <v-col cols="4" v-for="type in options.sentence_types" :key="type">
-                <v-checkbox
+              <v-col cols="12">
+                <v-select
                   v-model="selectedSentenceTypes"
-                  :label="type"
-                  :value="type"
+                  :items=options.sentence_types
+                  label="Sentence types"
                   hide-details
+                  variant="outlined"
                   density="compact"
+                  multiple
                 />
               </v-col>
             </v-row>
 
-            <div class="text-caption font-weight-medium mt-3 mb-1">Tenses</div>
             <v-row dense>
-              <v-col cols="4" v-for="tense in options.tenses" :key="tense">
-                <v-checkbox
+              <v-col cols="12">
+                <v-select
                   v-model="selectedTenses"
-                  :label="tense"
-                  :value="tense"
+                  :items=options.tenses
+                  label="Tenses"
                   hide-details
                   density="compact"
+                  variant="outlined"
+                  multiple
                 />
               </v-col>
             </v-row>
 
-            <v-row justify="start" class="mt-2">
+            <v-row justify="start" class="mt-1">
               <v-col cols="6">
                 <v-text-field
                   v-model.number="numPrompts"
@@ -188,12 +202,12 @@
                   label="Questions"
                   density="compact"
                   hide-details
-                  style="max-width: 120px"
+                  style="max-width: 180px"
                 />
               </v-col>
             </v-row>
 
-            <v-btn block color="success" class="mt-2" :disabled="!optionsLoaded" @click="() => startGame(selections)">
+            <v-btn block color="success" class="mt-4" :disabled="!optionsLoaded" @click="() => startGame(selections)">
               Start with custom settings
             </v-btn>
           </v-expansion-panel-text>
@@ -222,6 +236,7 @@ export default {
       selectedSentenceTypes: [],
       selectedTenses: [],
       numPrompts: 10,
+      colors: ["blue lighten-2", "green darken-2", "purple lighten-2", "red lighten-3", "orange lighten-2", "brown lighten-2", "pink lighten-2", "grey darken-2"],
       optionsLoaded: false,
     };
   },

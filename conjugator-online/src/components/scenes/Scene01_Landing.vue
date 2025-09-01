@@ -25,11 +25,13 @@
       </v-col>
     </v-row>
     <v-row align="center" justify="center" class="flex-grow-1 text-center mt-5">
-      <v-btn icon elevation class="m-3" large @click="goToScene('Scene01_Landing')">
-        <v-icon>mdi-arrow-left-circle</v-icon>
-      </v-btn>
       <v-btn elevation class="text-h5 m-3" size="x-large" color="success" @click="goToScene('Scene02_Settings')">
         Play!
+      </v-btn>
+    </v-row>  
+    <v-row>
+      <v-btn icon elevation class="m-3" large :to="{ name: 'home' }">
+        <v-icon>mdi-arrow-left-circle</v-icon>
       </v-btn>
     </v-row>
     

@@ -2,56 +2,53 @@
 import axios, { InternalAxiosRequestConfig, AxiosResponse } from "axios";
 import { getAccessToken, refreshToken, clearTokens } from "./services/auth";
 
-// Create an axios instance with baseURL from environment variables
+// Create an Axios instance
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL, // '/api' in dev, full URL in prod
+  baseURL: import.meta.env.VITE_API_BASE_URL, // must be set in .env
 });
 
-// Request interceptor: attach access token if it exists
+// Request interceptor: attach access token only if exists
 api.interceptors.request.use(
-  (config: InternalAxiosRequestConfig): InternalAxiosRequestConfig => {
+  (config: InternalAxiosRequestConfig) => {
+    // Always allow auth endpoints
+    if (config.url?.includes("/login") || config.url?.includes("/token/")) {
+      return config;
+    }
+
     const token = getAccessToken();
     if (token) {
-      // Ensure headers object exists
       config.headers = config.headers ?? {};
       config.headers.Authorization = `Bearer ${token}`;
     }
+    // If no token, let the request go through and let backend handle 401
     return config;
   },
   (error) => Promise.reject(error)
 );
 
-// Response interceptor: handle 401 errors and refresh token if needed
+// Response interceptor: refresh token on 401
 api.interceptors.response.use(
-  (response: AxiosResponse) => {
-    // Log every successful response
-    console.log("Axios response:", response.status, response.data);
-    return response;
-  },
+  (response: AxiosResponse) => response,
   async (error) => {
-    // Log the error response first
-    console.error("Axios error response:", error.response?.status, error.response?.data);
-
     const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
 
-    // Handle 401 (Unauthorized) and retry once
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
 
       try {
-        const newAccessToken = await refreshToken();
+        const newToken = await refreshToken();
         originalRequest.headers = originalRequest.headers ?? {};
-        originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
-        return api(originalRequest); // retry original request with new token
-      } catch (err) {
+        originalRequest.headers.Authorization = `Bearer ${newToken}`;
+        return api(originalRequest);
+      } catch {
         clearTokens();
         window.location.href = "/login";
+        return Promise.reject(error);
       }
     }
 
     return Promise.reject(error);
   }
 );
-
 
 export default api;
