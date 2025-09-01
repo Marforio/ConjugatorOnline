@@ -1,336 +1,306 @@
 <template>
-  <div class="settings-scene">
-    <div class="settings-layout">
-      <div class="quick-play-settings-layout">
-        <h2 id="quick-play-header" class="display-3 mb-3">Quick Play</h2>
-        <p class="lead mb-4">Choose a predefined game package.</p>
-        <div class="settings-card-container">
-          <button class="btn btn-lg btn-success mb-3" 
-          @click="startGame({
-            verbSet: 'Irregular verbs only',
-            sentenceTypes: ['Positive'],
-            tenses: ['Past simple'],
-            numPrompts: 25
-          })">
-          Irregular verbs basic
-          </button>
-          <button class="btn btn-lg btn-warning mb-3" 
-                  @click="startGame({
-                    verbSet: 'Irregular verbs only',
-                    sentenceTypes: ['Positive'],
-                    tenses: ['Past simple', 'Present perfect'],
-                    numPrompts: 25
-                  })">
-            Irregular verbs advanced
-          </button>
+  <v-sheet height="100vh" class="pa-6" color="grey-lighten-4">
+    <!-- Large screens: side-by-side layout -->
+    <v-row v-if="$vuetify.display.lgAndUp" dense>
+      <!-- Quick Play Section -->
+      <v-col cols="12" lg="6">
+        <v-card class="pa-6" color="white" elevation="2">
+          <h2 class="text-h5 mb-3">Quick Play</h2>
+          <p class="text-body-1 mb-6">Choose a predefined game package</p>
 
-          <button class="btn btn-lg btn-info mb-3" 
-                  @click="startGame({
-                    verbSet: 'Common verbs (Reg + Irreg)',
-                    sentenceTypes: ['Positive', 'Negative', 'Questions'],
-                    tenses: ['Past simple'],
-                    numPrompts: 20
-                  })">
-            Past simple
-          </button>
+          <v-row dense>
+            <v-col cols="12" sm="6" v-for="btn in quickPlayButtons" :key="btn.label">
+              <v-btn
+                block
+                :color="btn.color"
+                class="quick-play-btn"
+                @click="startGame(btn.settings)"
+              >
+                {{ btn.label }}
+              </v-btn>
+            </v-col>
+          </v-row>
+        </v-card>
+      </v-col>
 
-          <button class="btn btn-lg btn-dark mb-3" 
-                  @click="startGame({
-                    verbSet: 'Common verbs (Reg + Irreg)',
-                    sentenceTypes: ['Positive', 'Negative'],
-                    tenses: ['Past simple', 'Present perfect'],
-                    numPrompts: 20
-                  })">
-            Past simple vs present perfect
-          </button>
+      <!-- Custom Play Section -->
+      <v-col cols="12" lg="6">
+      <v-card class="pa-3" color="white" elevation="1">
+        <h2 class="text-h5 mb-2">Custom Play</h2>
+        <p class="text-body-1 mb-6">Define your own settings</p>
 
-          <button class="btn btn-lg btn-primary mb-3" 
-                  @click="startGame({
-                    verbSet: 'Common verbs (Reg + Irreg)',
-                    sentenceTypes: ['Positive', 'Negative', 'Questions'],
-                    tenses: ['Present simple', 'Present continuous'],
-                    numPrompts: 25
-                  })">
-            Present simple and continuous
-          </button>
+        <!-- Verb Set -->
+        <v-card class="mb-2" color="grey-lighten-3" flat>
+          <v-card-text class="py-2 px-3">
+            <h5 class="text-subtitle-2 mb-2">Verb set</h5>
+            <v-radio-group v-model="selectedVerbSet" row density="compact">
+              <v-radio
+                v-for="set in options.verb_sets"
+                :key="set"
+                :label="set"
+                :value="set"
+                density="compact"
+              />
+            </v-radio-group>
+          </v-card-text>
+        </v-card>
 
-          <button class="btn btn-lg btn-danger mb-3" 
-                  @click="startGame({
-                    verbSet: 'Common verbs (Reg + Irreg)',
-                    sentenceTypes: ['Negative'],
-                    tenses: ['Present simple', 'Past simple', 'Future simple', 'Recommendation', 'Present continuous', 'Present perfect'],
-                    numPrompts: 25
-                  })">
-            All negatives
-          </button>
+        <!-- Sentence Types -->
+        <v-card class="mb-2" color="grey-lighten-3" flat>
+          <v-card-text class="py-2 px-3">
+            <h5 class="text-subtitle-2 mb-2">Sentence types</h5>
+            <v-row dense>
+              <v-col cols="12" sm="6" md="4" v-for="type in options.sentence_types" :key="type">
+                <v-checkbox
+                  v-model="selectedSentenceTypes"
+                  :label="type"
+                  :value="type"
+                  hide-details
+                  density="compact"
+                />
+              </v-col>
+            </v-row>
+          </v-card-text>
+        </v-card>
 
-          <button class="btn btn-lg btn-light mb-3" 
-                  @click="startGame({
-                    verbSet: 'Common verbs (Reg + Irreg)',
-                    sentenceTypes: ['Questions'],
-                    tenses:['Present simple', 'Past simple', 'Future simple', 'Recommendation', 'Present continuous', 'Present perfect'],
-                    numPrompts: 25
-                  })">
-            All questions
-          </button>
-        </div>
+        <!-- Tenses -->
+        <v-card class="mb-2" color="grey-lighten-3" flat>
+          <v-card-text class="py-2 px-3">
+            <h5 class="text-subtitle-2 mb-2">Tenses</h5>
+            <v-row dense>
+              <v-col cols="12" sm="6" md="4" v-for="tense in options.tenses" :key="tense">
+                <v-checkbox
+                  v-model="selectedTenses"
+                  :label="tense"
+                  :value="tense"
+                  hide-details
+                  density="compact"
+                />
+              </v-col>
+            </v-row>
+          </v-card-text>
+        </v-card>
+
+        <!-- Number of Questions -->
+        <v-card class="mb-2" color="grey-lighten-3" flat>
+          <v-card-text class="py-2 px-3">
+            <span class="text-subtitle-2 mb-2">Number of questions</span>
+            <span><v-text-field
+              v-model.number="numPrompts"
+              type="number"
+              min="3"
+              max="50"
+              density="compact"
+              hide-details
+              class="mx-auto"
+              style="max-width: 100px"
+            /></span>
+          </v-card-text>
+        </v-card>
+
+        <!-- Start Button -->
+        <v-btn block color="primary" :disabled="!optionsLoaded" class="mt-2" @click="() => startGame(selections)">
+          Start with custom settings
+        </v-btn>
+      </v-card>
+    </v-col>
+
+    </v-row>
+
+    <!-- Mid and lower screens: expansion panels -->
+    <v-container v-else>
+      <div class="text-h4 mb-4">Game settings</div>
+
+      <v-expansion-panels accordion class="m-2">
+        <!-- Quick Play -->
+        <v-expansion-panel>
+          <v-expansion-panel-title class="text-subtitle-2">Quick Play</v-expansion-panel-title>
+          <v-expansion-panel-text>
+            <v-row dense>
+              <v-col cols="6" xs="6" sm="6" v-for="btn in quickPlayButtons" :key="btn.label">
+                <v-btn
+                  block
+                  color="primary"
+                  class="quick-btn"
+                  @click="startGame(btn.settings)"
+                >
+                  <div class="btn-label">
+                    {{ btn.label }}
+                  </div>
+                </v-btn>
+              </v-col>
+            </v-row>
+          </v-expansion-panel-text>
+        </v-expansion-panel>
+
+        <!-- Custom Play -->
+        <v-expansion-panel>
+          <v-expansion-panel-title class="text-subtitle-2">Custom Play</v-expansion-panel-title>
+          <v-expansion-panel-text>
+            <v-row dense>
+              <v-col cols="12">
+                <div class="text-caption font-weight-medium mb-1">Choose Verb Set</div>
+                <v-radio-group v-model="selectedVerbSet" row density="compact">
+                  <v-radio
+                    v-for="set in options.verb_sets"
+                    :key="set"
+                    :label="set"
+                    :value="set"
+                    density="compact"
+                  />
+                </v-radio-group>
+              </v-col>
+            </v-row>
+
+            <div class="text-caption font-weight-medium mt-3 mb-1">Sentence Types</div>
+            <v-row dense>
+              <v-col cols="4" v-for="type in options.sentence_types" :key="type">
+                <v-checkbox
+                  v-model="selectedSentenceTypes"
+                  :label="type"
+                  :value="type"
+                  hide-details
+                  density="compact"
+                />
+              </v-col>
+            </v-row>
+
+            <div class="text-caption font-weight-medium mt-3 mb-1">Tenses</div>
+            <v-row dense>
+              <v-col cols="4" v-for="tense in options.tenses" :key="tense">
+                <v-checkbox
+                  v-model="selectedTenses"
+                  :label="tense"
+                  :value="tense"
+                  hide-details
+                  density="compact"
+                />
+              </v-col>
+            </v-row>
+
+            <v-row justify="start" class="mt-2">
+              <v-col cols="6">
+                <v-text-field
+                  v-model.number="numPrompts"
+                  type="number"
+                  min="3"
+                  max="50"
+                  label="Questions"
+                  density="compact"
+                  hide-details
+                  style="max-width: 120px"
+                />
+              </v-col>
+            </v-row>
+
+            <v-btn block color="success" class="mt-2" :disabled="!optionsLoaded" @click="() => startGame(selections)">
+              Start with custom settings
+            </v-btn>
+          </v-expansion-panel-text>
+        </v-expansion-panel>
+      </v-expansion-panels>
+
+      <!-- Back Button -->
+      <div class="d-flex justify-center mt-6">
+        <v-btn icon elevation="0" size="large" @click="goToScene('Scene01_Landing')">
+          <v-icon>mdi-arrow-left-circle</v-icon>
+        </v-btn>
       </div>
+    </v-container>
 
-      <div custom-play-settings-layout>
-        <h2 id="custom-play-header" class="display-3 mb-3">Custom Play</h2>
-        <p class="lead mb-4">Define your own settings!</p>
-        <div class="settings-card-container">
-          <!-- Verb Sets Card -->
-          <div class="card mb-3 bg-secondary">
-            <div class="card-body">
-              <h5 class="card-title mb-3">Verb set</h5>
-              <div class="d-flex flex-wrap align-items-center checkbox-container">
-                <div 
-                  v-for="set in options.verb_sets" 
-                  :key="set" 
-                  class="form-check form-check-inline me-3">
-                  <input 
-                    class="form-check-input" 
-                    type="radio" 
-                    :id="set" 
-                    :value="set" 
-                    v-model="selectedVerbSet">
-                  <label class="form-check-label" :for="set">{{ set }}</label>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Sentence Types Card -->
-          <div class="card mb-3 bg-secondary">
-            <div class="card-body">
-              <h5 class="card-title mb-3">Sentence types</h5>
-              <div class="d-flex flex-wrap align-items-center checkbox-container">
-                <div 
-                  v-for="type in options.sentence_types" 
-                  :key="type" 
-                  class="form-check form-check-inline me-3">
-                  <input 
-                    class="form-check-input" 
-                    type="checkbox" 
-                    :id="type" 
-                    :value="type" 
-                    v-model="selectedSentenceTypes">
-                  <label class="form-check-label" :for="type">{{ type }}</label>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Tenses Card -->
-          <div class="card mb-3 bg-secondary">
-            <div class="card-body">
-              <h5 class="card-title mb-3">Tenses</h5>
-              <div class="d-flex flex-wrap align-items-center checkbox-container">
-                <div 
-                  v-for="tense in options.tenses" 
-                  :key="tense" 
-                  class="form-check form-check-inline me-3">
-                  <input 
-                    class="form-check-input" 
-                    type="checkbox" 
-                    :id="tense" 
-                    :value="tense" 
-                    v-model="selectedTenses">
-                  <label class="form-check-label" :for="tense">{{ tense }}</label>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Number of Prompts Card -->
-          <div class="card mb-3 bg-secondary">
-            <div class="card-body">
-              <h5 class="card-title mb-3" for="numPrompts">Number of questions</h5>
-              <div class="d-flex flex-wrap align-items-center justify-content-center py-5">
-                <input style="width: 80px;"
-                    id="numPrompts" 
-                    type="number" 
-                    v-model.number="numPrompts" 
-                    min="3" 
-                    max="50" 
-                    class="form-control" 
-                    required>
-              </div>
-            </div>
-          </div>
-        </div>
-        <button :disabled="!optionsLoaded" @click="() => startGame(selections)" class="btn btn-lg btn-primary">Start with custom settings</button>
-      </div>
-    </div>
-    <div id="buttons-container">
-      <button @click="goToScene('Scene01_Landing')" class="btn btn-sm btn-secondary">BACK</button>
-    </div>
-  </div>
+  </v-sheet>
+    
 </template>
 
 
 <script>
-import '@/assets/styles/global_conjugator_styles.css';
-
 export default {
   data() {
     return {
-      options: {
-        sentence_types: [],
-        verb_sets: [],
-        tenses: []
-        },
+      options: { sentence_types: [], verb_sets: [], tenses: [] },
       selectedVerbSet: '',
       selectedSentenceTypes: [],
       selectedTenses: [],
       numPrompts: 10,
-      optionsLoaded: false
+      optionsLoaded: false,
     };
   },
-  async created() {
-    try {
-      // Fetch the JSON file from the public folder
-      const response = await fetch('/data/set_options.json');
-      if (!response.ok) {
-        throw new Error(`Failed to fetch set_options.json: ${response.statusText}`);
-      }
-      const options = await response.json();
-      this.options = options;
-      this.selectedVerbSet = options.verb_sets[0];
-      this.selectedSentenceTypes = options.sentence_types;
-      this.selectedTenses = options.tenses;
-      this.optionsLoaded = true
-    } catch (error) {
-      console.error('Error loading options:', error);
-    }
-  },
-  methods: {
-    goToScene(sceneName) {
-      this.$emit('changeScene', sceneName);
-    },
-    startGame(predefinedSettings = null) {
-
-      const selections = predefinedSettings || {
+  computed: {
+    selections() {
+      return {
         verbSet: this.selectedVerbSet,
         sentenceTypes: this.selectedSentenceTypes,
         tenses: this.selectedTenses,
-        numPrompts: this.numPrompts
+        numPrompts: this.numPrompts,
       };
-      console.log(selections);
+    },
+    quickPlayButtons() {
+      return [
+        { label: 'Irregular verbs basic', color: 'success', settings: { verbSet: 'Irregular verbs only', sentenceTypes: ['Positive'], tenses: ['Past simple'], numPrompts: 25 } },
+        { label: 'Irregular verbs advanced', color: 'warning', settings: { verbSet: 'Irregular verbs only', sentenceTypes: ['Positive'], tenses: ['Past simple', 'Present perfect'], numPrompts: 25 } },
+        { label: 'Past simple', color: 'info', settings: { verbSet: 'Common verbs (Reg + Irreg)', sentenceTypes: ['Positive', 'Negative', 'Questions'], tenses: ['Past simple'], numPrompts: 20 } },
+        { label: 'Past simple vs present perfect', color: 'secondary', settings: { verbSet: 'Common verbs (Reg + Irreg)', sentenceTypes: ['Positive', 'Negative'], tenses: ['Past simple', 'Present perfect'], numPrompts: 20 } },
+        { label: 'Present simple and continuous', color: 'primary', settings: { verbSet: 'Common verbs (Reg + Irreg)', sentenceTypes: ['Positive', 'Negative', 'Questions'], tenses: ['Present simple', 'Present continuous'], numPrompts: 25 } },
+        { label: 'All negatives', color: 'error', settings: { verbSet: 'Common verbs (Reg + Irreg)', sentenceTypes: ['Negative'], tenses: ['Present simple','Past simple','Future simple','Recommendation','Present continuous','Present perfect'], numPrompts: 25 } },
+        { label: 'All questions', color: 'grey', settings: { verbSet: 'Common verbs (Reg + Irreg)', sentenceTypes: ['Questions'], tenses: ['Present simple','Past simple','Future simple','Recommendation','Present continuous','Present perfect'], numPrompts: 25 } },
+      ];
+    },
+  },
+  async created() {
+    try {
+      const res = await fetch('/data/set_options.json');
+      const opts = await res.json();
+      this.options = opts;
+      this.selectedVerbSet = opts.verb_sets[0];
+      this.selectedSentenceTypes = opts.sentence_types;
+      this.selectedTenses = opts.tenses;
+      this.optionsLoaded = true;
+    } catch (e) {
+      console.error('Error loading options:', e);
+    }
+  },
+  methods: {
+    goToScene(name) { this.$emit('changeScene', name); },
+    startGame(settings = null) {
+      const selections = settings || this.selections;
       this.$emit('startGame', selections);
       this.goToScene('Scene03_Game');
-    }
-  }
-}
+    },
+  },
+};
 </script>
 
-
 <style scoped>
-
-  .settings-scene {
-    text-align: center;
-    padding: 40px 60px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    height: 100%;
-    width: 100%;
-    gap: 20px;
-    color: white;
-    background-image: url("/images/conjugator.png");
-    background-size: cover;      /* Makes the image cover the whole div */
-    background-position: center; /* Centers the image */
-    background-repeat: no-repeat; /* Prevents tiling */
-    width: 100%;
-  }
-  .settings-layout {
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    gap: 0;
-    overflow: hidden;
-    margin-bottom: 2rem;
-  }
-  .quick-play-settings-layout,
-  .custom-play-settings-layout {
-    flex: 1 1 50%;
-    padding: 50px;
-    box-sizing: border-box;
-    background-color: rgba(0, 0, 0, 0.5)
-  }
-  #buttons-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 50px;
-  }
-  .settings-card-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-    padding: 5%;
-    justify-content: center;
-    gap: 20px;
-    width: 100%;
-    color: white;
-  }
-  .settings-card-container > * {
-  width: 100%;
+.quick-play-btn {
+  height: 100px;
+  max-width: 100px;
+  white-space: normal;
+  text-align: center;
+  font-size: 0.8rem;
+  line-height: 1.1;
+}
+.quick-btn {
+  height: auto;
+  min-height: 90px;
+  max-width: 100%;
+  text-align: center;
+  padding: 8px;
 }
 
-#settings-header {
-  font-size: 4rem; 
+.quick-btn .btn-label {
+  white-space: normal;
+  word-break: break-word;
+  font-size: 0.75rem;
+  line-height: 1.2;
+  display: block;
 }
 
-#quick-play-header,
-#custom-play-header {
-  font-size: 2.2rem;
+.v-expansion-panel-title {
+  font-size: 0.9rem;
 }
-
-.lead {
-  font-size: 1.5rem; /* tighten spacing */
-}
-.card-body {
-  padding: 15px;
-}
-
-.btn-lg {
-  padding: 8px 16px;
-  font-size: 1rem;
+.v-expansion-panel-text {
+  font-size: 0.8rem;
 }
 
 
-@media (max-width: 576px) {
-  #settings-header {
-    font-size: 2rem; /* Smaller font size for smartphone-sized screens */
-    }
-  }
-  @media (max-width: 768px) {
-  .settings-layout {
-    flex-direction: column;
-  }
-
-  .quick-play-settings-layout {
-    border-right: none;
-    border-bottom: 2px solid #666;
-  }
-}
-  
-  /* Custom styles for checkbox containers */
-  .checkbox-container {
-    display: inline-flex;
-    flex-wrap: wrap;
-    gap: 10px; /* Adjusts spacing between items */
-  }
-  
-  .checkbox-item {
-    display: inline-flex;
-    align-items: center;
-  }
-  
-  .checkbox-item input {
-    margin-right: 5px;
-  }
-
-  
-  </style>
+</style>

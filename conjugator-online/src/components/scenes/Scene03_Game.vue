@@ -11,7 +11,7 @@
             style="width: 95%; height: auto; opacity: 90%;" 
           />
         <h2 class="mt-4">Your settings</h2>
-        <p>Name: {{ userName }}</p>
+        <p>Name:  <InitialsText /></p>
         <p>Verb Set: {{ gameSettings.verbSet }}</p>
         <p>Sentence Types: {{ gameSettings?.sentenceTypes?.join(', ') || '' }}</p>
         <p>Tenses: {{ gameSettings?.tenses?.join(', ') || '' }}</p>
@@ -20,8 +20,10 @@
           <p>Total: {{ overallTimer }}</p>
       </div>
         <div class="footer-nav gap-3">
-          <button class="btn btn-secondary" @click="goBack">BACK</button>
-          <button class="btn btn-secondary" @click="quitGame">QUIT</button>
+          <v-btn icon elevation class="m-3" large @click="goBack">
+            <v-icon>mdi-arrow-left-circle</v-icon>
+          </v-btn>
+          <button class="btn btn-warning" style="max-height: 50px; align-self: center;" @click="quitGame">QUIT</button>
         </div>
       </aside>
 
@@ -117,6 +119,9 @@
 
         </div>
         <div>
+          <v-btn icon elevation class="m-3" large @click="goBack">
+            <v-icon>mdi-arrow-left-circle</v-icon>
+          </v-btn>
           <button class="btn btn-lg btn-success" @click="startGame">START THE GAME</button>
         </div>
       </main>
@@ -137,8 +142,10 @@
 import api from '@/axios';
 import Game from '@/assets/scripts/Game';
 import '@/assets/styles/global_conjugator_styles.css';
+import InitialsText from '../InitialsText.vue';
 
 export default {
+  components: { InitialsText },
   props: {
     gameSettings: {
       type: Object,

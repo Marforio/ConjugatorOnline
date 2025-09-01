@@ -44,7 +44,7 @@
           color="success"
           :to="{ name: 'dashboard' }"
         >
-          <v-icon large >mdi-view-dashboard</v-icon>
+          <v-icon large >mdi-chart-bar</v-icon>
           <span class="subtitle-1 font-weight-medium px-2">Dashboard</span>
         </v-btn>
       </v-col>

@@ -1,93 +1,77 @@
 <template>
-  <div class="container h-100 d-flex flex-column">
-    <div class="content-container justify-content-center">
-      <h1 class="display-1 text-center">
-        <div 
-          class="image-link" 
-          @click="goToScene('Scene02_Settings')" 
-          role="button" 
+  <v-container fluid class="fill-height d-flex flex-column mt-5">
+    <v-row align="center" justify="center" class="flex-grow-1 text-center">
+      <v-col cols="12">
+        <!-- Clickable Image -->
+        <div
+          class="image-link"
+          @click="goToScene('Scene02_Settings')"
+          role="button"
           tabindex="0"
         >
-          <img 
-            src="/images/conjugator.png" 
-            alt="Logo" 
-            class="mb-1 rounded-image" 
-            style="width: 60%; height: auto;" 
+          <v-img
+            src="/images/conjugator.png"
+            alt="Logo"
+            class="mb-4 rounded-image"
+            width="100%"
+            contain
           />
         </div>
-        
-        <span class="text-body-secondary fs-2 beating-text">Put your conjugation to the test!</span>
-      </h1>
-    </div>
-  </div>
+
+        <!-- Beating subtitle -->
+        <h2 class="beating-text">
+          Put your conjugation to the test!
+        </h2>
+      </v-col>
+    </v-row>
+    <v-row align="center" justify="center" class="flex-grow-1 text-center mt-5">
+      <v-btn icon elevation class="m-3" large @click="goToScene('Scene01_Landing')">
+        <v-icon>mdi-arrow-left-circle</v-icon>
+      </v-btn>
+      <v-btn elevation class="text-h5 m-3" size="x-large" color="success" @click="goToScene('Scene02_Settings')">
+        Play!
+      </v-btn>
+    </v-row>
+    
+    
+  </v-container>
 </template>
 
 <script>
-import { RouterLink } from 'vue-router';
-
 export default {
   methods: {
     goToScene(sceneName) {
-      this.$emit('changeScene', sceneName);
-    }
-  }
+      this.$emit("changeScene", sceneName);
+    },
+  },
 };
 </script>
 
 <style scoped>
-.container {
-  height: 100%; /* Full viewport height */
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start; /* Start alignment for children */
-}
-
-.content-container {
-  margin-top: auto; /* Push the content to the vertical center */
-  transform: translateY(-20%); /* Adjust position downwards */
-  text-align: center; /* Center align the text */
-}
 .beating-text {
   display: inline-block;
   color: #134376; /* Base blue color */
   animation: beat 2.5s infinite ease-in-out;
 }
+
 @keyframes beat {
   0%, 100% {
-    transform: scale(1); /* Normal size */
+    transform: scale(1);
   }
   50% {
-    transform: scale(1.1); /* Enlarged size */
+    transform: scale(1.1);
   }
 }
 
-/* Add rounded corners to the image */
+/* Rounded + hover image styles */
 .rounded-image {
-  border-radius: 15px; /* Adjust the value for more or less rounding */
-  transition: transform 0.3s ease, box-shadow 0.3s ease; /* Smooth hover effect */
+  border-radius: 15px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-/* Hover effect for the image */
 .rounded-image:hover {
-  transform: scale(1.05); /* Slightly enlarge the image */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Add a shadow */
+  transform: scale(1.05);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   cursor: pointer;
-}
-
-/* Hover effect for the button */
-.hover-effect:hover {
-  background-color: #0056b3; /* Darker shade of blue */
-  transform: scale(1.05); /* Slightly enlarge the button */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Add a shadow */
-  transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
-}
-
-@media (max-width: 576px) {
-  .rounded-image {
-    width: 100%; /* Adjust the image size for smaller screens */
-  }
-  .content-container {
-    transform: translateY(25%); /* Adjust position downwards for smaller screens */
-  }
 }
 </style>

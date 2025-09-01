@@ -15,5 +15,5 @@
     "strict": true,
     "skipLibCheck": true, // <-- this avoids checking packages like swiper
   },
-  "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.vue"],
+  "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.vue", "src/assets/scripts/errorsData.js"],
 }

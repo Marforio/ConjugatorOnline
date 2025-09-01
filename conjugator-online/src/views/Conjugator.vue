@@ -1,15 +1,16 @@
 <template>
+  <v-container>
     <SceneManager />
-    <LoggedInFooter />
+  </v-container>
 </template>
 
 <script>
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.min.js';
 import SceneManager from '@/components/SceneManager.vue';
-import LoggedInFooter from '@/components/LoggedInFooter.vue';
+import TopNavBar from '@/components/TopNavBar.vue';
 
 export default {
-  components: { SceneManager, LoggedInFooter }
+  components: { SceneManager, TopNavBar }
 }
 </script>

@@ -1,7 +1,6 @@
 import { createRouter, createWebHistory } from "vue-router";
 import HomeView from "../views/Home.vue";
 import LoginView from "../views/Login.vue";
-import DashboardView from "../views/Dashboard.vue";
 import { getAccessToken } from "@/services/auth";
 
 const router = createRouter({
@@ -37,6 +36,12 @@ const router = createRouter({
       name: "exercise-detail",
       component: () => import("../views/ExerciseDetail.vue"),
       meta: { requiresAuth: true }
+    },
+    {
+      path: "/games",
+      name: "games",
+      component: () => import("../views/Games.vue"),
+      meta: { requiresAuth: true}
     }
   ],
 });

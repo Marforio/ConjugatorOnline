@@ -6,19 +6,29 @@
       class="d-sm-none"
     >
       <v-list>
+        <v-list-item>
+          <v-list-item-title>Hello <InitialsText /></v-list-item-title>
+        </v-list-item>
+        <v-divider></v-divider>
         <v-list-item :to="{ name: 'home' }">
           <v-list-item-title>Home</v-list-item-title>
         </v-list-item>
         <v-list-item href="https://book.language-labs.ch">
           <v-list-item-title>Grammar Book</v-list-item-title>
         </v-list-item>
+        <v-list-item :to="{ name: 'dashboard' }">
+          <v-list-item-title>My Dashboard</v-list-item-title>
+        </v-list-item>
+        <v-list-item :to="{ name: 'exercises' }" :disable="true">
+          <v-list-item-title>Exercises</v-list-item-title>
+        </v-list-item>
         <v-list-item :to="{ name: 'conjugator' }">
           <v-list-item-title>Conjugator Game</v-list-item-title>
         </v-list-item>
-        <v-divider />
-        <v-list-item>
-          <v-list-item-title>Hello <InitialsText /></v-list-item-title>
+        <v-list-item :to="{ name: 'games' }" :disable="true">
+          <v-list-item-title>Other Games</v-list-item-title>
         </v-list-item>
+        <v-divider />
         <v-list-item>
           <LogOutButton />
         </v-list-item>
@@ -34,7 +44,7 @@
       />
 
       <!-- Title -->
-      <v-btn :to="{ name: 'home' }" class="text-none">
+      <v-btn :to="{ name: 'home' }" class="text-none ms-4">
         <v-app-bar-title>Language Labs</v-app-bar-title>
       </v-btn>
 
@@ -60,7 +70,7 @@
 
         <v-tooltip text="Go to Exercises" location="bottom">
           <template v-slot:activator="{ props }">
-            <v-btn icon v-bind="props" :to="{ name: 'exercises'}">
+            <v-btn icon v-bind="props" :to="{ name: 'exercises' }" :disabled="true">
               <v-icon>mdi-tools</v-icon>
             </v-btn>
           </template>
@@ -70,6 +80,14 @@
           <template v-slot:activator="{ props }">
             <v-btn icon v-bind="props" :to="{ name: 'conjugator' }">
               <v-icon>mdi-controller</v-icon>
+            </v-btn>
+          </template>
+        </v-tooltip>
+
+        <v-tooltip text="More Grammar Games" location="bottom">
+          <template v-slot:activator="{ props }">
+            <v-btn icon v-bind="props" :to="{ name: 'games' }" :disabled="true">
+              <v-icon>mdi-gamepad-round-outline</v-icon>
             </v-btn>
           </template>
         </v-tooltip>
@@ -106,6 +124,9 @@ export default defineComponent({
   setup() {
     const userStore = useUserStore();
     const drawer = ref(false);
+    const disabledExercises = ref(true); 
+    const disabledGame = ref(false);
+
 
     return { userStore, drawer };
   },

@@ -37,7 +37,6 @@ import ErrorHorizontalBarChart from "./charts/ErrorHorizontalBarChart.vue";
 import InitialsText from "./InitialsText.vue";
 import api from "@/axios";
 import { useDisplay } from 'vuetify';
-import { errorsData } from "@/assets/scripts/errorsData";
 
 
 interface ErrorItem {

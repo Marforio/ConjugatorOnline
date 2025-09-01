@@ -1,11 +1,21 @@
-<!-- src/App.vue -->
 <template>
   <v-app>
-    <RouterView />
+    <!-- Conditionally show TopNavBar -->
+    <TopNavBar v-if="showNav" />
+
+    <v-main>
+      <RouterView />
+    </v-main>
   </v-app>
 </template>
 
 <script setup>
-import 'bootstrap/dist/css/bootstrap.min.css'
-import 'bootstrap/dist/js/bootstrap.bundle.min.js' // bundle includes Popper.js
+import { useRoute } from 'vue-router'
+import { computed } from 'vue'
+import TopNavBar from '@/components/TopNavBar.vue'
+
+const route = useRoute()
+
+// Hide nav bar on home page
+const showNav = computed(() => route.name !== 'home' && route.name !== 'conjugator')
 </script>
