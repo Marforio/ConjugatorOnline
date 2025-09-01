@@ -25,6 +25,18 @@ const router = createRouter({
       name: "dashboard",
       component: () => import("../views/Dashboard.vue"),
       meta: { requiresAuth: true },
+    },
+    {
+      path: "/exercises",
+      name: "exercises",
+      component: () => import("../views/Exercises.vue"),
+      meta: { requiresAuth: true}
+    },
+    {
+      path: "/exercises/:errorCode",
+      name: "exercise-detail",
+      component: () => import("../views/ExerciseDetail.vue"),
+      meta: { requiresAuth: true }
     }
   ],
 });

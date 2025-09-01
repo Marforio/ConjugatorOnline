@@ -32,7 +32,7 @@
 
 
         <!-- Tab Content -->
-        <v-window v-model="activeTab" class="mt-5">
+        <v-window v-model="activeTab" class="mt-5" touchless>
           <v-window-item value="grammar-feedback">
             <!-- Grammar Feedback tab content -->
             <div v-if="loading" class="text-center my-5">

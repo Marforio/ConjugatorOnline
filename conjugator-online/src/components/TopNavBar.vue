@@ -58,6 +58,14 @@
           </template>
         </v-tooltip>
 
+        <v-tooltip text="Go to Exercises" location="bottom">
+          <template v-slot:activator="{ props }">
+            <v-btn icon v-bind="props" :to="{ name: 'exercises'}">
+              <v-icon>mdi-tools</v-icon>
+            </v-btn>
+          </template>
+        </v-tooltip>
+
         <v-tooltip text="Open Conjugator Game" location="bottom">
           <template v-slot:activator="{ props }">
             <v-btn icon v-bind="props" :to="{ name: 'conjugator' }">
@@ -66,11 +74,17 @@
           </template>
         </v-tooltip>
 
-        <v-app-bar-divider class="mx-3" />
+        <v-tooltip text="Go to Dashboard" location="bottom">
+          <template v-slot:activator="{ props }">
+            <v-btn icon v-bind="props" :to="{ name: 'dashboard' }">
+              <v-icon>mdi-chart-bar</v-icon>
+            </v-btn>
+          </template>
+        </v-tooltip>
 
-        <span>Hello <InitialsText /></span>
-
-        <v-app-bar-divider class="mx-3" />
+        
+        <span style="align-self: center; margin-left: 50px; margin-right: 50px;">Hello <InitialsText /></span>
+        
 
         <LogOutButton />
       </div>

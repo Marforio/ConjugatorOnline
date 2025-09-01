@@ -6,12 +6,42 @@
     </div>
 
     <!-- Floating popover -->
-    <div
-      v-if="popover.visible"
-      class="popover-card"
-      :style="{ top: popover.y + 'px', left: popover.x + 'px' }"
-      v-html="selectedEvidence"
-    ></div>
+    <v-card
+        v-if="popover.visible && selectedEvidence"
+        class="popover-card"
+        :style="{ top: popover.y + 'px', left: popover.x + 'px' }"
+        elevation="6"
+        max-width="300"
+        >
+        <v-list density="compact">
+            <v-list-subheader>
+            <span class="text-uppercase">{{ selectedEvidence.error }}</span>
+            </v-list-subheader>
+            <v-list-item class="text-body-2">
+                {{ selectedEvidence.description }} ( see <span v-html="selectedEvidence.reference"></span> )
+            </v-list-item>
+        </v-list>
+        </v-card>
+
+        <!-- infobox (always below, fixed width, doesn’t affect chart height) -->
+        <div id="infoCard" v-if="selectedEvidence">
+            <v-list density="compact">
+                <v-list-item>
+                <strong>Examples of your errors: </strong>
+                <em>{{ selectedEvidence.evidence }}</em>
+                </v-list-item>
+                <v-list-item>
+                <strong>How to fix the error:</strong>
+                {{ selectedEvidence.recommendation }}. For example, {{ selectedEvidence.examples }}
+                </v-list-item>
+                <v-list-item>
+                <strong>Reference:</strong>
+                for a complete explanation, go to
+                <span v-html="selectedEvidence.reference"></span>
+                in the grammar book
+                </v-list-item>
+            </v-list>
+        </div>
   </div>
 </template>
 
@@ -63,7 +93,7 @@ export default {
       this.svgHeight = Math.max(200, errorCodes.length * 50);
     },
     drawChart() {
-      const margin = { top: 20, right: 40, bottom: 20, left: 100 };
+      const margin = { top: 20, right: 40, bottom: 20, left: 50 };
       const width = this.svgWidth - margin.left - margin.right;
       const height = this.svgHeight - margin.top - margin.bottom;
 
@@ -78,22 +108,31 @@ export default {
         .append('g')
         .attr('transform', `translate(${margin.left},${margin.top})`);
 
-      // group data
       const feedbackKeys = Array.from(
         new Set(this.errorData.map(d => d.feedback).filter(Boolean))
       );
 
       const nested = d3.group(this.errorData, d => d.error_code, d => d.feedback);
       const stackData = [];
+
       nested.forEach((feedbackGroup, error_code) => {
-        const entry = { error_code };
+        const exampleError = this.errorData.find(e => e.error_code === error_code);
+        const entry = {
+          error_code,
+          evidence: exampleError?.evidence ?? '',
+          description: exampleError?.description ?? '',
+          recommendation: exampleError?.recommendation ?? '',
+          examples: exampleError?.examples ?? '',
+          reference: exampleError?.reference ?? ''
+        };
+
         feedbackGroup.forEach((items, feedbackId) => {
           entry[feedbackId] = d3.sum(items, d => d.times);
         });
+
         stackData.push(entry);
       });
 
-      // sort
       stackData.sort((a, b) => {
         const totalA = feedbackKeys.reduce((sum, key) => sum + (a[key] || 0), 0);
         const totalB = feedbackKeys.reduce((sum, key) => sum + (b[key] || 0), 0);
@@ -120,14 +159,12 @@ export default {
         .domain(feedbackKeys)
         .range(d3.schemeTableau10);
 
-      // stack series
       const stackedSeries = d3.stack()
         .keys(feedbackKeys)
         .value((d, key) => d[key] || 0)(stackData);
 
       const tooltipContainer = this.$refs.container;
 
-      // draw stacked bars
       chart.selectAll('g.layer')
         .data(stackedSeries)
         .enter()
@@ -142,42 +179,11 @@ export default {
         .attr('height', y.bandwidth())
         .attr('width', d => x(d[1]) - x(d[0]))
         .on('click', (event, d) => {
-            // Get data for the popover 
-            const errorDetails = errorsData[d.data.error_code];
-            if (errorDetails) {
-                this.selectedEvidence = `
-                <strong>Error ${d.data.error_code}</strong><br>
-                <em>${errorDetails.description}</em><br>
-                See ${errorDetails.reference}
-                `;
-            } else {
-                this.selectedEvidence = `No details found for error ${d.data.error_code}`;
-            }
+          this.showPopover(d.data);
+        });
 
-            // Fixed position: lower right of container
-            const popoverHeight = 100;           // Estimate or measure popover height
-            const contRect = tooltipContainer.getBoundingClientRect();
-            const popoverWidth = 150;
-            const padding = 24;
+      chart.append('g').call(d3.axisLeft(y));
 
-            // Position: Vertically centered (or adjust slightly up)
-            let relativeY = contRect.height / 2 - popoverHeight / 2 ; // -30 moves it further up
-            let relativeX = contRect.width - popoverWidth - padding;
-
-            relativeY = Math.max(0, relativeY);
-
-            this.popover.visible = true;
-            this.popover.x = relativeX;
-            this.popover.y = relativeY;
-
-                        });
-
-
-      // add error_code labels on left
-      chart.append('g')
-        .call(d3.axisLeft(y));
-
-      // add totals to right of bars
       chart.selectAll('.bar-total')
         .data(stackData)
         .enter()
@@ -188,10 +194,50 @@ export default {
         .attr('dominant-baseline', 'middle')
         .attr('font-size', '12px')
         .text(d => d3.sum(feedbackKeys, k => d[k] || 0));
+    },
+    showPopover(errorItem) {
+      const error_code = errorItem.error_code;
+      const evidenceText = errorItem.evidence || 'No evidence available';
+      const errorDetails = errorsData[error_code];
+
+      if (errorDetails) {
+        this.selectedEvidence = {
+          error: `Error ${error_code}`,
+          description: errorDetails.description,
+          evidence: `"${evidenceText}"`,
+          recommendation: errorDetails.recommendation,
+          examples: errorDetails.examples,
+          reference: errorDetails.reference
+        };
+      } else {
+        this.selectedEvidence = {
+          error: `Error ${error_code}`,
+          description: 'No details found',
+          evidence: '',
+          recommendation: '',
+          examples: '',
+          reference: ''
+        };
+      }
+
+      const popoverHeight = 100;
+      const contRect = this.$refs.container.getBoundingClientRect();
+      const popoverWidth = 150;
+      const padding = 24;
+
+      let relativeY = contRect.height / 2 - popoverHeight / 2;
+      let relativeX = contRect.width - popoverWidth - padding;
+
+      relativeY = Math.max(0, relativeY);
+
+      this.popover.visible = true;
+      this.popover.x = relativeX;
+      this.popover.y = relativeY;
     }
   }
 };
 </script>
+
 
 <style scoped>
 .chart-wrapper {
@@ -208,11 +254,6 @@ export default {
 .popover-card {
   position: absolute;
   z-index: 1000;
-  max-width: 150px;
-  background: white;
-  border: 1px solid #aaa;
-  border-radius: 6px;
-  padding: 10px;
-  box-shadow: 0px 4px 12px rgba(0,0,0,0.15);
 }
+
 </style>

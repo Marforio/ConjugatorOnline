@@ -5,22 +5,11 @@
                     maxWidth: xs ? '500px' : '95%', 
                     marginLeft: xs ? '5px' : '15px',
                     marginRight: xs ? '5px' : '15px',}">
-            <v-card-title class="text-h5 font-weight-bold"> <InitialsText/>'s most frequent errors</v-card-title>
+            <v-card-title class="text-h5 font-weight-bold"> <InitialsText/>'s errors</v-card-title>
             <ErrorHorizontalBarChart :errorData="processedErrors" />
             
         
         </v-card>
-        <h2>Evidence of your errors</h2>
-        <v-list>
-            <v-list-item v-for="errorItem in errors" :key="errorItem.error_id">
-                <v-list-item-title>
-                <strong>{{ errorItem.error_code }}</strong> ({{ errorItem.times }}x)
-                </v-list-item-title>
-                <v-list-item-subtitle v-if="errorItem.evidence">
-                {{ errorItem.evidence }}
-                </v-list-item-subtitle>
-            </v-list-item>
-        </v-list>
     </div>
     <div v-else>
         <v-card class="pa-4 mb-6" elevation="2" :style="{

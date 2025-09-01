@@ -1,6 +1,6 @@
 
 <template>
-    <v-btn color="error" @click="logout">Logout</v-btn>
+    <v-btn color="error" @click="logout" style="align-self: center; margin-right: 15px;">Logout</v-btn>
 </template>
 
 <script lang="ts">

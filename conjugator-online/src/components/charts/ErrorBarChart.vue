@@ -4,15 +4,52 @@
     <div class="chart-container" ref="container">
       <svg ref="svg" :width="svgWidth" :height="svgHeight"></svg>
       <!-- Floating popover box pinned top-right of chart -->
-      <div
-        v-if="popover.visible"
+      <v-card
+        v-if="popover.visible && selectedEvidence"
         class="popover-card"
         :style="{ top: popover.y + 'px', left: popover.x + 'px' }"
-        v-html="selectedEvidencePopover"
-      ></div>
+        elevation="6"
+        max-width="300"
+        >
+        <v-list density="compact">
+            <v-list-subheader>
+            <span class="text-uppercase text-high-emphasis">{{ selectedEvidence.error }}</span>
+            </v-list-subheader>
+            <v-list-item class="text-body-1">
+                {{ selectedEvidence.description }} ( see <span v-html="selectedEvidence.reference"></span> )
+            </v-list-item>
+        </v-list>
+      </v-card>
+
+
     </div>
     <!-- infobox (always below, fixed width, doesn’t affect chart height) -->
-    <div id="infoCard" v-html="selectedEvidenceInfobox || 'Click a bar to see error details'"></div>
+    <div class="info-wrapper" ref="infoWrapper">
+        <v-card v-if="selectedEvidence" class="info-card" max-width="100%" width="100%">
+        <v-list density="compact">
+            <v-list-subheader>
+            <span class="text-uppercase text-high-emphasis">{{ selectedEvidence.error }} :</span>
+            {{ selectedEvidence.description }}
+            </v-list-subheader>
+            <v-list-item>
+            <strong>Examples of your errors: </strong>
+            <em>{{ selectedEvidence.evidence }}</em>
+            </v-list-item>
+            <v-list-item>
+            <strong>How to fix the error:</strong>
+            {{ selectedEvidence.recommendation }}. For example, {{ selectedEvidence.examples }}
+            </v-list-item>
+            <v-list-item>
+            <strong>Reference:</strong>
+            for a complete explanation, go to
+            <span v-html="selectedEvidence.reference"></span>
+            in the grammar book
+            </v-list-item>
+        </v-list>
+        </v-card>
+
+    </div>    
+        
   </div>
 </template>
 
@@ -31,10 +68,9 @@ export default {
   },
   data() {
     return {
-      svgWidth: 800,
+      svgWidth: 1000,
       svgHeight: 400, // default min, will be recalculated
-      selectedEvidencePopover: null,
-      selectedEvidenceInfobox: null,
+      selectedEvidence: null,
       popover: {
         visible: false,
         x: 0,
@@ -49,6 +85,11 @@ export default {
     }
     this.calculateSvgHeight();
     this.drawChart();
+    window.addEventListener('resize', this.updatePopoverPosition);
+
+  },
+  beforeUnmount() {
+    window.removeEventListener('resize', this.updatePopoverPosition);
   },
   watch: {
     errorData: {
@@ -83,6 +124,19 @@ export default {
       ) || 0;
       this.svgHeight = Math.max(400, maxTotal * 10);
     },
+    updatePopoverPosition() {
+        if (!this.popover.visible || !this.$refs.container) return;
+
+        const contRect = this.$refs.container.getBoundingClientRect();
+        const popoverWidth = 200;
+        const padding = 24;
+
+        let relativeX = contRect.width - popoverWidth - padding;
+        let relativeY = padding;
+
+        this.popover.x = Math.max(0, relativeX);
+        this.popover.y = Math.max(0, relativeY);
+        },
     drawChart() {
         const margin = { top: 20, right: 30, bottom: 40, left: 50 };
         const width = this.svgWidth - margin.left - margin.right;
@@ -91,7 +145,10 @@ export default {
         const svg = d3
             .select(this.$refs.svg)
             .attr('width', this.svgWidth)
-            .attr('height', this.svgHeight);
+            .attr('height', this.svgHeight)
+            .attr('width', this.svgWidth).style('min-width', this.svgWidth + 'px')
+            .style('min-width', this.svgWidth + 'px');
+
 
         svg.selectAll('*').remove();
         const chart = svg
@@ -214,21 +271,24 @@ export default {
 
         const errorDetails = errorsData[error_code];
         if (errorDetails) {
-            this.selectedEvidencePopover = `
-            <strong>Error ${error_code}</strong><br>
-            <em>${errorDetails.description}</em><br>
-            See: ${errorDetails.reference}
-            `;
-            this.selectedEvidenceInfobox = `
-            <strong>Error ${error_code}</strong> | <em>${errorDetails.description}</em><br>
-            <strong>Evidence of your errors:</strong> ${evidenceText}<br>
-            <strong>Recommendation:</strong> ${errorDetails.recommendation}<br>
-            <strong>Examples:</strong> ${errorDetails.examples}<br>
-            <strong>For a complete explanation:</strong> ${errorDetails.reference}
-            `
-        } else {
-            this.selectedEvidencePopover = `No details found for error ${error_code}`;
-        }
+            this.selectedEvidence = {
+                error: `Error ${error_code}`,
+                description: errorDetails.description,
+                evidence: `"${evidenceText}"`,
+                recommendation: errorDetails.recommendation,
+                examples: errorDetails.examples,
+                reference: errorDetails.reference // raw HTML allowed here
+                };
+            } else {
+                this.selectedEvidence = {
+                error: `Error ${error_code}`,
+                description: 'No details found',
+                evidence: '',
+                recommendation: '',
+                examples: '',
+                reference: ''
+                };
+            }
 
         // Fixed position: near top right of chart container
         const container = this.$refs.container;
@@ -236,7 +296,7 @@ export default {
         const popoverWidth = 300;
         const padding = 24;
 
-        let relativeX = contRect.width - popoverWidth - padding;
+        let relativeX = contRect.width - popoverWidth - padding - 150;
         let relativeY = padding; // Top right, padding from top
 
         relativeX = Math.max(0, relativeX);
@@ -265,29 +325,37 @@ export default {
   position: relative;
   overflow-x: auto;
   overflow-y: hidden;
-  max-width: 100%;
+  width: 100%;
+  max-width: 100vw;
+  min-width: 0; /* allows flex shrinking if used inside a flex parent */
+  box-sizing: border-box;
+  display: block; /* block or flex both work, avoid nested flex column */
+  /* Remove any flex-direction from .chart-container */
 }
-#infoCard {
-  padding: 10px;
-  border: 1px solid #aaa;
-  background: #f9f9f9;
-  font-family: sans-serif;
-  width: 100%; /* span full width below chart */
-  min-height: 100px; /* consistent space even if empty */
-}
+
 
 .popover-card {
   position: absolute;
   z-index: 1000;
-  max-width: 300px;
-  max-height: 200px;
-  background: white;
-  border: 1px solid #aaa;
-  border-radius: 6px;
-  padding: 10px;
-  font-size: 13px;
-  line-height: 1.3;
-  overflow-y: auto;
-  box-shadow: 0px 4px 12px rgba(0,0,0,0.15);
 }
+.info-wrapper {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: auto;
+  box-sizing: border-box;
+  display: block; /* Not flex or grid */
+}
+
+.info-card {
+  max-width: 100%;
+  min-width: 0;
+  width: 100%;
+  box-sizing: border-box;
+  /* Remove fixed pixel width if present */
+}
+
+
+
+
 </style>
