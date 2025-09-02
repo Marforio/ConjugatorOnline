@@ -29,7 +29,6 @@ onMounted(async () => {
 
     if (studentData) {
       userStore.setStudent(studentData);
-      console.log("Fetched student info:", studentData);
     } else {
       console.warn("No student record found for this user.");
       userStore.clearStudent();

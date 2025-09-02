@@ -59,9 +59,13 @@
       <div v-else-if="conjGameError">
         <v-alert type="error">{{ conjGameError }}</v-alert>
       </div>
-      <div v-else>
-        <v-card class="pa-4 mb-6" elevation="2" style="max-width: 300px; margin-top: 16px; margin-left: 16px;"> 
-          <v-card-title class="text-h5 font-weight-bold">Total accuracy</v-card-title>
+      <div v-else class="d-flex flex-wrap align-start pa-2">
+        <v-card class="pa-4 mb-6" elevation="2" style="flex: 1 1;" :style="{
+          minWidth: xs ? '300px' : '400px', 
+          maxWidth: xs ? '500px' : '650px', 
+          marginLeft: xs ? '5px' : '16px',
+          marginRight: xs ? '5px' : '16px',}">
+          <v-card-title class="text-h5 font-weight-bold">Conjugation accuracy</v-card-title>
           <v-card-text>
             <div class="d-flex flex-column align-center">
               <PieChart :data="totalRightWrongChartData" />
@@ -77,16 +81,16 @@
           </v-card-text>
         </v-card>
 
-        <v-card class="pa-4 mb-6" elevation="2" :style="{
-          minWidth: xs ? '300px' : '500px', 
-          maxWidth: xs ? '500px' : '700px', 
+        <v-card class="pa-4 mb-6" elevation="2" style="flex: 1 1;" :style="{
+          minWidth: xs ? '300px' : '400px', 
+          maxWidth: xs ? '500px' : '650px', 
           marginLeft: xs ? '5px' : '16px',
           marginRight: xs ? '5px' : '16px',}">
 
           <v-card-title class="text-h5 font-weight-bold">Tense accuracy</v-card-title>
           <v-card-text>
             <div class="d-flex flex-column align-center">
-              <BarChart :data="tenseAccuracyData" :width="500" :height="300" color="#4CAF50" />
+              <BarChart :data="tenseAccuracyData" :width="400" :height="300" color="#4CAF50" />
 
               <div class="text-subtitle-1 mt-4">
                 Percentage of correct answers by tense
@@ -96,9 +100,9 @@
           </v-card-text>
         </v-card>
 
-        <v-card class="pa-4 mb-6" elevation="2" :style="{
-          minWidth: xs ? '300px' : '500px', 
-          maxWidth: xs ? '500px' : '700px', 
+        <v-card class="flex: 1 1; pa-4 mb-6" elevation="2" :style="{
+          minWidth: xs ? '300px' : '400px', 
+          maxWidth: xs ? '500px' : '650px', 
           marginLeft: xs ? '5px' : '16px',
           marginRight: xs ? '5px' : '16px'}"> 
           <v-card-title class="text-h5 font-weight-bold">Sentence type accuracy</v-card-title>
@@ -113,6 +117,46 @@
             </div>
           </v-card-text>
         </v-card>
+
+        <v-sheet
+          elevation="2"
+          class="m-3 p-4 d-flex flex-wrap" 
+        >
+          <h3 class="text-h5 font-weight-bold w-100">Irregular verbs</h3>
+          <p class="text-subtitle-1 w-100">
+            For past simple, only the positive verb forms are counted
+          </p>
+
+          <!-- Cards will wrap into rows -->
+          <NumbersCard
+            class="ma-2 flex-grow-1"
+            :value="totalAllIrregsUsedOnce > 0 ? totalAllIrregsUsedOnce : 0"
+            title="Past simple"
+            label="irregular verbs written correctly at least 1x"
+          />
+
+          <NumbersCard
+            class="ma-2 flex-grow-1"
+            :value="totalAllIrregsUsedOnce > 0 ? (totalAllIrregsUsedOnce/136*100).toFixed(0) + '%': '0%'"
+            title="Past simple ALL"
+            label="of ALL irregular verbs used at least 1x (out of a total of 136)"
+          />
+
+          <NumbersCard
+            class="ma-2 flex-grow-1"
+            :value="totalAllIrregsUsedOnceParticiple > 0 ? totalAllIrregsUsedOnceParticiple : 0"
+            title="Present perfect"
+            label="irregular verbs written correctly at least 1x"
+          />
+
+          <NumbersCard
+            class="ma-2 flex-grow-1"
+            :value="totalAllIrregsUsedOnceParticiple > 0 ? (totalAllIrregsUsedOnceParticiple/136*100).toFixed(0) + '%': '0%'"
+            title="Present perfect ALL"
+            label="of ALL irregular verbs used at least 1x (out of a total of 136)"
+          />
+        </v-sheet>
+
         <v-divider></v-divider>
 
         <v-card class="pa-4 mb-6" elevation="2" :style="{
@@ -122,7 +166,7 @@
           marginRight: xs ? '5px' : '16px',
           marginTop: '20px',
           }"> 
-          <div class="text-h5 mt-2" >Game details</div>
+          <div class="text-h5 mt-2" >Game details ({{ sessions.length }} game{{ sessions.length !== 1 ? 's' : '' }} played)</div>
           <div v-for="session in sessions" :key="session.session_id" class="mt-6">
             <v-expansion-panels>
               <v-expansion-panel>
@@ -190,11 +234,16 @@
 import { defineComponent, ref, onMounted, computed } from "vue";
 import api from "@/axios";
 import { useUserStore } from "@/stores/user";
-import { useDisplay } from 'vuetify';
-import TopNavBar from '@/components/TopNavBar.vue';
+import { useDisplay } from "vuetify";
+import TopNavBar from "@/components/TopNavBar.vue";
 import PieChart from "@/components/charts/PieChart.vue";
 import BarChart from "@/components/charts/BarChart.vue";
 import ErrorsDataTab from "@/components/ErrorsDataTab.vue";
+import NumbersCard from "@/components/NumbersCard.vue";
+import { useRouter, useRoute } from 'vue-router';
+
+const router = useRouter();
+const route = useRoute();
 
 
 interface GameSession {
@@ -211,52 +260,122 @@ interface GameSession {
   rounds: any[];
 }
 
-let intervalId: ReturnType<typeof setInterval>;
-
-export default 
-defineComponent({
+export default defineComponent({
   name: "Dashboard",
-  components: { TopNavBar, PieChart, BarChart, ErrorsDataTab },
+  components: { TopNavBar, PieChart, BarChart, ErrorsDataTab, NumbersCard },
   setup() {
+    const router = useRouter();
+    const route = useRoute();
     const sessions = ref<GameSession[]>([]);
     const loading = ref<boolean>(true);
     const errorsError = ref<string | null>(null);
     const conjGameError = ref<string | null>(null);
+    const irregularVerbs = ref<Record<string, any>>({});
+    const irregularVerbCounts = ref<Record<string, number>>({});
+    const irregularParticipleVerbCounts = ref<Record<string, number>>({})
+
     const userStore = useUserStore();
+
     const totalRoundsPlayed = computed(() =>
       sessions.value.reduce((sum, session) => sum + session.total_rounds, 0)
     );
-    const totalPercentCorrect = computed(() =>
-      Number((sessions.value.reduce((sum, session) => sum + session.correct_count, 0) / totalRoundsPlayed.value * 100).toFixed(0))
-    );
-    const totalPercentIncorrect = computed(() =>
-      Number((sessions.value.reduce((sum, session) => sum + session.wrong_count, 0) / totalRoundsPlayed.value * 100).toFixed(0))
-    );
     const totalRightWrongChartData = computed(() => [
-      { label:'Correct', value: totalPercentCorrect.value },
-      { label:'Incorrect', value: totalPercentIncorrect.value }
+      { label: "Correct", value: totalPercentCorrect.value },
+      { label: "Incorrect", value: totalPercentIncorrect.value },
     ]);
 
+    const totalPercentCorrect = computed(() =>
+      Number(
+        (
+          (sessions.value.reduce(
+            (sum, session) => sum + session.correct_count,
+            0
+          ) /
+            totalRoundsPlayed.value) *
+          100
+        ).toFixed(0)
+      )
+    );
 
+    const totalPercentIncorrect = computed(() =>
+      Number(
+        (
+          (sessions.value.reduce(
+            (sum, session) => sum + session.wrong_count,
+            0
+          ) /
+            totalRoundsPlayed.value) *
+          100
+        ).toFixed(0)
+      )
+    );
 
-    // Use string keys for active tab and tabs list
-    const activeTab = ref('grammar-feedback');
+    // irregular verb usage data
+    const totalAllIrregsUsedOnce = computed(() =>
+        Object.values(irregularVerbCounts.value).filter((count) => count >= 1).length
+      );
+
+      const totalAllIrregsUsedTwice = computed(() =>
+        Object.values(irregularVerbCounts.value).filter((count) => count >= 2).length
+      );
+
+      const totalAllIrregsUsedThrice = computed(() =>
+        Object.values(irregularVerbCounts.value).filter((count) => count >= 3).length
+      );
+
+      // Object of verbs with count > 0
+      const AllIrregsVerbsWithCounts = computed(() =>
+        Object.fromEntries(
+          Object.entries(irregularVerbCounts.value).filter(([_, count]) => count > 0)
+        )
+      );
+
+      // List of verbs not used yet
+      const AllIrregsUnusedVerbs = computed(() =>
+        Object.keys(irregularVerbCounts.value).filter(
+          (verb) => irregularVerbCounts.value[verb] === 0
+        )
+      );
+
+      const totalAllIrregsUsedOnceParticiple = computed(() =>
+        Object.values(irregularParticipleVerbCounts.value).filter((count) => count >= 1).length
+    );
+
+    const activeTab = ref("grammar-feedback");
     const tabItems = [
-      { value: 'grammar-feedback', label: 'Grammar Feedback' },
-      { value: 'vocabulary', label: 'Vocabulary' },
-      { value: 'goals', label: 'Goals' },
-      { value: 'conjugation-game', label: 'Conjugation Game' },
+      { value: "grammar-feedback", label: "Grammar Feedback" },
+      { value: "vocabulary", label: "Vocabulary" },
+      { value: "goals", label: "Goals" },
+      { value: "conjugation-game", label: "Conjugation Game" },
     ];
 
     const { xs, smAndDown } = useDisplay();
     const isMobile = computed(() => smAndDown.value);
     const BarchartColorPalette = [
-      '#4CAF50', '#2196F3', '#FFC107', '#E91E63', '#9C27B0', '#FF5722'
+      "#4CAF50",
+      "#2196F3",
+      "#FFC107",
+      "#E91E63",
+      "#9C27B0",
+      "#FF5722",
     ];
 
+    // Fetch irregular verbs JSON
+    const fetchIrregularVerbs = async () => {
+      try {
+        const res = await fetch("/data/irregularVerbs.json");
+        const data = await res.json();
+        irregularVerbs.value = data;
 
-
-    let intervalId: number;
+        // initialize counters
+        irregularVerbCounts.value = Object.keys(data).reduce(
+          (acc, verb) => ({ ...acc, [verb]: 0 }),
+          {}
+        );
+      } catch (err) {
+        console.error("Failed to load irregular verbs JSON:", err);
+      }
+    };
 
     const fetchConjGameSessionsDashboardData = async () => {
       loading.value = true;
@@ -265,6 +384,9 @@ defineComponent({
       try {
         const sessionsRes = await api.get<GameSession[]>("/conj-game-sessions/");
         sessions.value = sessionsRes.data;
+
+        // After fetching, count irregular verbs
+        updateIrregularVerbCounts();
       } catch (err: any) {
         console.error("Conj game sessions fetch failed:", err);
         conjGameError.value = conjGameError.value
@@ -274,8 +396,41 @@ defineComponent({
 
       loading.value = false;
     };
+
+    // Count correct irregular verb answers
+    const updateIrregularVerbCounts = () => {
+      if (!irregularVerbs.value) return;
+
+      // reset counts
+      for (const verb of Object.keys(irregularVerbCounts.value)) {
+        irregularVerbCounts.value[verb] = 0;
+        irregularParticipleVerbCounts.value[verb] = 0;
+      }
+
+      const rounds = sessions.value.flatMap((s) => s.rounds || []);
+
+      for (const round of rounds) {
+        const verb = round.verb?.toLowerCase();
+        if (
+          irregularVerbs.value[verb] &&
+          round.tense === "Past simple" &&
+          round.sentence_type === "Positive" &&
+          round.is_correct
+        ) {
+          irregularVerbCounts.value[verb] += 1;
+        }
+        if (
+          irregularVerbs.value[verb] &&
+          round.tense === "Present perfect" &&
+          round.is_correct
+        ) {
+          irregularParticipleVerbCounts.value[verb] += 1;
+        }
+      } 
+    };
+
     const tenseAccuracyData = computed(() => {
-      const rounds = sessions.value.flatMap(session => session.rounds || []);
+      const rounds = sessions.value.flatMap((session) => session.rounds || []);
       const tenseGroups: Record<string, { correct: number; total: number }> = {};
 
       for (const round of rounds) {
@@ -289,17 +444,19 @@ defineComponent({
         }
       }
 
-      return Object.entries(tenseGroups).map(([tense, stats], index: number) => ({
-        label: tense,
-        value: parseFloat(((stats.correct / stats.total) * 100).toFixed(0)),
-        correct: stats.correct,
-        total: stats.total,
-        color: BarchartColorPalette[index % BarchartColorPalette.length]
-      }));
+      return Object.entries(tenseGroups).map(
+        ([tense, stats], index: number) => ({
+          label: tense,
+          value: parseFloat(((stats.correct / stats.total) * 100).toFixed(0)),
+          correct: stats.correct,
+          total: stats.total,
+          color: BarchartColorPalette[index % BarchartColorPalette.length],
+        })
+      );
     });
 
     const sentenceTypeAccuracyData = computed(() => {
-      const rounds = sessions.value.flatMap(session => session.rounds || []);
+      const rounds = sessions.value.flatMap((session) => session.rounds || []);
       const typeGroups: Record<string, { correct: number; total: number }> = {};
 
       for (const round of rounds) {
@@ -313,29 +470,30 @@ defineComponent({
         }
       }
 
-      return Object.entries(typeGroups).map(([type, stats], index: number) => ({
-        label: type,
-        value: parseFloat(((stats.correct / stats.total) * 100).toFixed(0)),
-        correct: stats.correct,
-        total: stats.total,
-        color: BarchartColorPalette[index % BarchartColorPalette.length]
-      }));
+      return Object.entries(typeGroups).map(
+        ([type, stats], index: number) => ({
+          label: type,
+          value: parseFloat(((stats.correct / stats.total) * 100).toFixed(0)),
+          correct: stats.correct,
+          total: stats.total,
+          color: BarchartColorPalette[index % BarchartColorPalette.length],
+        })
+      );
     });
 
-
-    onMounted(() => {
-      fetchConjGameSessionsDashboardData();
-
-      //intervalId = window.setInterval(() => {
-      //  fetchErrorDashboardData();
-      //  fetchConjGameSessionsDashboardData();
-      //}, 80000);
+    onMounted(async () => {
+      await fetchIrregularVerbs();
+      await fetchConjGameSessionsDashboardData();
+      setInitialTabFromRoute();
     });
 
+    function setInitialTabFromRoute() {
+      const tabFromRoute = route.query.tab;
+      const isValidTab = typeof tabFromRoute === "string" && tabItems.some(t => t.value === tabFromRoute);
 
-    //onUnmounted(() => {
-    //  clearInterval(intervalId);
-    //});
+      activeTab.value = isValidTab ? tabFromRoute : tabItems[0].value; // fallback to first tab
+    }
+
 
     return {
       sessions,
@@ -343,7 +501,7 @@ defineComponent({
       errorsError,
       conjGameError,
       activeTab,
-      tabItems, 
+      tabItems,
       isMobile,
       userStore,
       TopNavBar,
@@ -353,7 +511,10 @@ defineComponent({
       tenseAccuracyData,
       sentenceTypeAccuracyData,
       smAndDown,
-      xs
+      xs,
+      irregularVerbCounts, 
+      totalAllIrregsUsedOnce, 
+      totalAllIrregsUsedOnceParticiple
     };
   },
 });

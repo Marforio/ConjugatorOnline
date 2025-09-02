@@ -88,7 +88,7 @@
 
       <div v-else>
         <!-- Active Game -->
-         <v-card class="pa-6 mb-6 d-flex justify-center align-center rounded-lg" height="50px" :style="{ width: $vuetify.display.mdAndUp ? '450px' : '280px',
+         <v-card v-if="$vuetify.display.smAndUp" class="pa-6 mb-6 d-flex justify-center align-center rounded-lg" height="50px" :style="{ width: $vuetify.display.mdAndUp ? '450px' : '280px',
                                                                                                         gap: $vuetify.display.mdAndUp ? '40px' : '20px'}
             " elevation="2" color="grey-lighten-4">
           <span class="text-subtitle-2 font-weight-medium" style="text-align: align-center"><v-icon>mdi-timer-sand</v-icon style="text-align: align-center"> Round  {{ roundTimer }}</span>

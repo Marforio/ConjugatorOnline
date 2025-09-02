@@ -101,8 +101,8 @@
               </v-card>
 
               <!-- Start Button -->
-              <v-btn block color="primary" :disabled="!optionsLoaded" class="mt-2" @click="() => startGame(selections)">
-                Start with custom settings
+              <v-btn block color="success" :disabled="!optionsLoaded" class="mt-2" @click="() => startGame(selections)">
+                Confirm custom settings
               </v-btn>
             </v-card>
           </v-col>
@@ -208,7 +208,7 @@
             </v-row>
 
             <v-btn block color="success" class="mt-4" :disabled="!optionsLoaded" @click="() => startGame(selections)">
-              Start with custom settings
+              Confirm settings
             </v-btn>
           </v-expansion-panel-text>
         </v-expansion-panel>

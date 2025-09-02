@@ -1,24 +1,33 @@
- <template>
+<template>
   <v-container v-if="results" fluid class="pa-4">
+    <!-- Heading -->
     <v-row v-if="$vuetify.display.lgAndUp" class="m-2" justify="center">
-      <h1 class="text-h2">Conjugation game results</h1>
+      <h1 class="text-h2">Conjugation Game Results</h1>
     </v-row>
-    <v-row
-      align="start"
-      justify="center"
-      class="settings-scene"
-    >
+
+    <v-row align="start" justify="center" class="settings-scene">
       <!-- Left Column: Summary + Chart -->
       <v-col cols="12" lg="5">
         <v-card class="pa-4 mb-1" elevation="2" rounded="lg">
           <v-card-title class="text-h5">Results</v-card-title>
           <v-card-text class="text-body-2">
-            <div><span class="text-subtitle-1">Accuracy: </span><span>{{ results.correct_count }} correct answers out of {{ results.total_rounds }}. That's {{ percentCorrect }}%!</span></div>
             <div>
-              <span class="text-subtitle-1">Speed: </span>Your average response time was: {{ this.results.avg_time_per_prompt }} seconds.
-              <span v-if="this.results.avg_time_per_prompt < 10 && percentCorrect > 70">Nice work! Your speed and accuracy show that you are good at conjugation!</span>
+              <span class="text-subtitle-1">Accuracy: </span>
+              <span>
+                {{ results.correct_count }} correct answers out of {{ results.total_rounds }}.
+                That's {{ percentCorrect }}%!
+              </span>
             </div>
-            <div id="pie-chart" class="mt-5 mb-2"></div>
+            <div>
+              <span class="text-subtitle-1">Speed: </span>
+              Your average response time was: {{ results.avg_time_per_prompt }} seconds.
+              <span v-if="results.avg_time_per_prompt < 10 && percentCorrect > 70">
+                Nice work! Your speed and accuracy show that you are good at conjugation!
+              </span>
+            </div>
+            <v-responsive max-width="500" class="mx-auto mt-5 mb-2">
+              <div id="pie-chart"></div>
+            </v-responsive>
           </v-card-text>
         </v-card>
       </v-col>
@@ -57,19 +66,19 @@
                   :key="'correct-' + index"
                 >
                   <v-card class="mx-auto my-3" color="green-lighten-5" max-width="300" elevation="2">
-                    <v-card-title>Question {{ result.number }}</v-card-title>
+                    <v-card-title>Question {{ result.prompt_number }}</v-card-title>
                     <v-card-text>
-                      <p class="text-center text-h6"><em>{{ result['user answer'] }}</em></p>
-                      <p>You got it right in {{ result['elapsedTime'] }} seconds.</p>
+                      <p class="text-center text-h6"><em>{{ result.user_answer }}</em></p>
+                      <p>You got it right in {{ result.elapsed_time }} seconds.</p>
                       <p class="font-weight-medium">Prompt:</p>
                       <ul>
-                        <li>Verb: {{ result.prompt.verb }}</li>
-                        <li>Person: {{ result.prompt.person }}</li>
-                        <li>Tense: {{ result.prompt.tense }}</li>
-                        <li>Sentence Type: {{ result.prompt['sentence type'] }}</li>
+                        <li>Verb: {{ result.verb }}</li>
+                        <li>Person: {{ result.person }}</li>
+                        <li>Tense: {{ result.tense }}</li>
+                        <li>Sentence Type: {{ result.sentence_type }}</li>
                       </ul>
                       <p class="font-weight-medium">Acceptable answer(s):</p>
-                      <p><em>{{ Array.isArray(result['correct answer(s)']) ? result['correct answer(s)'].join(', ') : result['correct answer(s)'] }}</em></p>
+                      <p><em>{{ result.acceptable_answers.join(', ') }}</em></p>
                     </v-card-text>
                   </v-card>
                 </swiper-slide>
@@ -97,8 +106,8 @@
                 }"
                 :breakpoints="{
                   0: { slidesPerView: 1 },
-                  640: { slidesPerView: 2 },
-                  1024: { slidesPerView: 4 }
+                  350: { slidesPerView: 2 },
+                  624: { slidesPerView: 3 }
                 }"
               >
                 <swiper-slide
@@ -106,22 +115,22 @@
                   :key="'wrong-' + index"
                 >
                   <v-card class="mx-auto my-3" color="amber-lighten-5" max-width="300" elevation="2">
-                    <v-card-title>Question {{ result.number }}</v-card-title>
+                    <v-card-title>Question {{ result.prompt_number }}</v-card-title>
                     <v-card-text>
                       <p class="text-center text-h6">
-                        <em v-if="result['user answer']">{{ result['user answer'] }}</em>
+                        <em v-if="result.user_answer">{{ result.user_answer }}</em>
                         <span v-else>No answer submitted.</span>
                       </p>
-                      <p>Incorrect. Time: {{ result['elapsedTime'] }} seconds.</p>
+                      <p>Incorrect. Time: {{ result.elapsed_time }} seconds.</p>
                       <p class="font-weight-medium">Prompt:</p>
                       <ul>
-                        <li>Verb: {{ result.prompt.verb }}</li>
-                        <li>Person: {{ result.prompt.person }}</li>
-                        <li>Tense: {{ result.prompt.tense }}</li>
-                        <li>Sentence Type: {{ result.prompt['sentence type'] }}</li>
+                        <li>Verb: {{ result.verb }}</li>
+                        <li>Person: {{ result.person }}</li>
+                        <li>Tense: {{ result.tense }}</li>
+                        <li>Sentence Type: {{ result.sentence_type }}</li>
                       </ul>
                       <p class="font-weight-medium">Acceptable answer(s):</p>
-                      <p><em>{{ Array.isArray(result['correct answer(s)']) ? result['correct answer(s)'].join(', ') : result['correct answer(s)'] }}</em></p>
+                      <p><em>{{ result.acceptable_answers.join(', ') }}</em></p>
                     </v-card-text>
                   </v-card>
                 </swiper-slide>
@@ -131,20 +140,19 @@
             </v-expansion-panel-text>
           </v-expansion-panel>
         </v-expansion-panels>
-
-        
       </v-col>
     </v-row>
+
+    <!-- Action Buttons -->
     <v-row class="d-flex justify-center align-center mt-4 gap-4">
-      <!-- Action Buttons -->
-        <v-btn @click="goToScene('Scene02_Settings')">PLAY AGAIN</v-btn>
-        <v-btn href="/dashboard">GO TO dashboard</v-btn>
-        <HomeButton />
+      <v-btn @click="goToScene('Scene02_Settings')">PLAY AGAIN</v-btn>
+      <router-link :to="{ path: '/dashboard', query: { tab: 'conjugation-game' } }">
+        <v-btn>GO TO Dashboard</v-btn>
+      </router-link>
+      <HomeButton />
     </v-row>
   </v-container>
 </template>
-
-
 
 <script>
 import * as d3 from "d3";
@@ -168,75 +176,64 @@ export default {
     HomeButton
   },
   props: {
-    results: {
-      type: Object,
-      required: true
-    },
-    totalTime: {
-      type: String,
-      default: 0,
-    },
-    avgTime: {
-      type: String,
-      default: 0,
-    },
+    results: { type: Object, required: true }
   },
-  computed: {  
+  computed: {
     correctResults() {
       return Array.isArray(this.results?.rounds)
-        ? this.results.rounds.filter(r => r?.correct === true)
+        ? this.results.rounds.filter(r => r.is_correct === true)
         : [];
     },
     wrongResults() {
       return Array.isArray(this.results?.rounds)
-        ? this.results.rounds.filter(r => r?.correct === false)
+        ? this.results.rounds.filter(r => r.is_correct === false)
         : [];
     },
     percentCorrect() {
-      return (this.results.correct_count / this.results.total_rounds * 100).toFixed(0)
+      return ((this.results.correct_count / this.results.total_rounds) * 100).toFixed(0);
     },
     percentIncorrect() {
-      return (this.results.wrong_count / this.results.total_rounds * 100).toFixed(0)
+      return ((this.results.wrong_count / this.results.total_rounds) * 100).toFixed(0);
     },
     chartData() {
-      const correctCount = this.results.correct_count;
-      const wrongCount = this.results.wrong_count;
       return [
-        { label: "Correct", value: correctCount },
-        { label: "Wrong", value: wrongCount },
+        { label: "Correct", value: this.results.correct_count },
+        { label: "Wrong", value: this.results.wrong_count },
       ];
     }
-}
-,
+  },
   methods: {
     goToScene(sceneName) {
       this.$emit("changeScene", sceneName);
     },
     renderPieChart() {
-      const width = 300;
-      const height = 300;
+      const container = d3.select("#pie-chart").node();
+      const containerWidth = container.getBoundingClientRect().width;
+      const size = Math.min(containerWidth - 25); // responsive but capped at 300px
+
+      const width = size;
+      const height = size;
       const radius = Math.min(width, height) / 2;
 
-      const svg = d3
-        .select("#pie-chart")
+      d3.select("#pie-chart").selectAll("*").remove(); // clear old chart
+
+      const svg = d3.select("#pie-chart")
         .append("svg")
         .attr("width", width)
         .attr("height", height)
         .append("g")
         .attr("transform", `translate(${width / 2}, ${height / 2})`);
 
-      const color = d3
-        .scaleOrdinal()
+      const color = d3.scaleOrdinal()
         .domain(this.chartData.map((d) => d.label))
-        .range(["#4CAF50", "#F44336"]); // Colors for correct (green) and wrong (red)
+        .range(["#4CAF50", "#F44336"]);
 
       const pie = d3.pie().value((d) => d.value);
       const dataReady = pie(this.chartData);
 
       const arc = d3.arc().innerRadius(0).outerRadius(radius);
 
-      svg
-        .selectAll("path")
+      svg.selectAll("path")
         .data(dataReady)
         .join("path")
         .attr("d", arc)
@@ -244,9 +241,7 @@ export default {
         .attr("stroke", "white")
         .style("stroke-width", "2px");
 
-      // Add labels
-      svg
-        .selectAll("text")
+      svg.selectAll("text")
         .data(dataReady)
         .join("text")
         .text((d) => `${d.data.label}: ${d.data.value}`)
@@ -257,7 +252,7 @@ export default {
   },
   mounted() {
     this.renderPieChart();
-  },
+  }
 };
 </script>
 
@@ -276,6 +271,4 @@ export default {
   display: flex;
   justify-content: center;
 }
-
-
 </style>
