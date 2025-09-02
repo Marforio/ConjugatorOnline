@@ -12,14 +12,14 @@
           <v-img
             src="/images/conjugator.png"
             alt="Logo"
-            class="mb-4 rounded-image"
+            class="m-2 rounded-image"
             width="100%"
             contain
           />
         </div>
 
         <!-- Beating subtitle -->
-        <h2 class="beating-text">
+        <h2 class="beating-text mt-3 mb-5">
           Put your conjugation to the test!
         </h2>
       </v-col>

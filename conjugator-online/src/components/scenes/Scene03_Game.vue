@@ -1,63 +1,63 @@
 <template>
-  <v-container fluid class="pa-0">
+  <v-container fluid class="pa-0 d-flex" style="height: 100vh;">
 
     <!-- Navigation Drawer -->
     <v-navigation-drawer
-      permanent
+    v-if="$vuetify.display.smAndUp"  
+    permanent
       width="280"
-      class="pa-4 d-flex flex-column align-center"
+      class="pa-4 d-flex flex-column align-center ml-3 align-self-center"
     >
       <v-img
         src="/images/conjugator.png"
         alt="Logo"
-        class="mb-4 rounded-lg"
+        class="m-4 rounded-lg"
         max-width="220"
         aspect-ratio="1"
         cover
       />
 
-      <h2 class="text-h6 font-weight-bold mb-2">Your Settings</h2>
+      <h2 class="text-h6 font-weight-bold">Your Settings</h2>
 
       <v-list density="compact" lines="one">
         <v-list-item>
-          <v-list-item-title>Name: <InitialsText /></v-list-item-title>
+          <v-list-item-title v-if="isAuthenticated"><span class="font-weight-medium">Name:</span> <InitialsText /></v-list-item-title>
         </v-list-item>
         <v-list-item>
-          <v-list-item-title>Verb Set: {{ gameSettings.verbSet }}</v-list-item-title>
+          <v-list-item-title style="text-wrap: wrap;"><span class="font-weight-medium">Verb set:</span> {{ gameSettings.verbSet }}</v-list-item-title>
         </v-list-item>
         <v-list-item>
-          <v-list-item-title>
-            Sentence Types: {{ gameSettings?.sentenceTypes?.join(', ') || '' }}
+          <v-list-item-title style="text-wrap: wrap;">
+            <span class="font-weight-medium">Sentence types:</span> {{ gameSettings?.sentenceTypes?.join(', ') || '' }}
           </v-list-item-title>
         </v-list-item>
         <v-list-item>
-          <v-list-item-title>
-            Tenses: {{ gameSettings?.tenses?.join(', ') || '' }}
+          <v-list-item-title style="text-wrap: wrap;">
+            <span class="font-weight-medium">Tenses: </span>{{ gameSettings?.tenses?.join(', ') || '' }}
           </v-list-item-title>
+        </v-list-item>
+        <v-list-item>
+            <span class="font-weight-medium">Rounds: </span>{{ remainingCount }} 
         </v-list-item>
       </v-list>
 
-      <v-card class="mt-6 mb-6 pa-3 text-center" color="grey-lighten-4" elevation="2">
-        <div class="text-subtitle-1 font-weight-medium">Round: {{ roundTimer }}</div>
-        <div class="text-subtitle-1 font-weight-medium">Total: {{ overallTimer }}</div>
-      </v-card>
+      <v-divider class="mt-5 mb-6"></v-divider>
 
-      <div class="mt-auto d-flex justify-space-between align-center w-100">
+      <div class="mt-auto d-flex justify-space-between align-center w-100 px-3">
         <v-btn icon elevation="0" size="large" class="ms-3" @click="goBack">
           <v-icon>mdi-arrow-left-circle</v-icon>
         </v-btn>
-        <v-btn color="error" variant="flat" class="me-3" @click="quitGame">QUIT</v-btn>
+        <v-btn v-if="gameStarted" color="error" variant="flat" class="me-3" @click="quitGame">QUIT</v-btn>
       </div>
     </v-navigation-drawer>
 
     <!-- Main game area -->
-    <v-container fluid class="pa-4 d-flex justify-center align-center">
+    <v-container fluid class="pa-2 d-flex justify-center align-center">
       <div v-if="!gameStarted">
         <!-- Instructions -->
         <h1 class="text-h3 mb-6">Game Instructions</h1>
-        <p>How to play:</p>
         <ol>
-          <li>You must write {{ remainingCount }} conjugations.</li>
+          <li>You must write {{ remainingCount }} conjugations ({{ remainingCount }}  rounds).</li>
           <li>Every round, you will see:</li>
           <ul>
             <li>a verb</li>
@@ -88,10 +88,21 @@
 
       <div v-else>
         <!-- Active Game -->
-        <v-card class="pa-6 mb-6" elevation="2" color="grey-lighten-4">
+         <v-card class="pa-6 mb-6 d-flex justify-center align-center rounded-lg" height="50px" :style="{ width: $vuetify.display.mdAndUp ? '450px' : '280px',
+                                                                                                        gap: $vuetify.display.mdAndUp ? '40px' : '20px'}
+            " elevation="2" color="grey-lighten-4">
+          <span class="text-subtitle-2 font-weight-medium" style="text-align: align-center"><v-icon>mdi-timer-sand</v-icon style="text-align: align-center"> Round  {{ roundTimer }}</span>
+          <v-divider vertical v-if="$vuetify.display.mdAndUp" color="white"></v-divider>
+          <span class="text-subtitle-2 font-weight-medium" style="text-align: align-center"><v-icon>mdi-timer</v-icon style="text-align: align-center"> Total  {{ overallTimer }}</span>
+        </v-card>
+
+        <v-card class="pa-6 mb-6" height="350px" :style="{ width: $vuetify.display.mdAndUp ? '450px' : '280px',
+                                                          height: $vuetify.display.mdAndUp ? '280px' : '350px'
+         }" elevation="2" color="grey-lighten-4">
           <v-card-title class="text-h5 text-center text-primary">Verb</v-card-title>
           <v-card-text class="text-center">
-            <div class="text-h1 font-weight-bold mb-6">{{ currentPrompt.verb }}</div>
+            <div v-if="$vuetify.display.mdAndUp" class="text-h2 font-weight-bold mb-6">{{ currentPrompt.verb }}</div>
+            <div v-else="$vuetify.display.mdAndUp" class="text-h4 font-weight-bold mb-6">{{ currentPrompt.verb }}</div>
             <v-row justify="center" align="center">
               <v-col cols="12" md="4">
                 <div class="text-subtitle-2 text-grey-darken-1">Person</div>
@@ -119,11 +130,19 @@
               variant="outlined"
               density="comfortable"
             ></v-text-field>
-          </v-col>
-          <v-col cols="12" md="2">
-            <v-btn color="primary" large @click="submitAnswer">{{ submitButtontext }}</v-btn>
+
+            <!-- Submit Button -->
+            <div
+              class="d-flex justify-center"
+              :class="$vuetify.display.xs ? 'mt-2' : 'mt-4'"
+            >
+              <v-btn color="primary" large @click="submitAnswer">
+                {{ submitButtontext }}
+              </v-btn>
+            </div>
           </v-col>
         </v-row>
+
 
         <v-progress-linear
           :model-value="progressValue"
@@ -132,25 +151,50 @@
           class="my-4"
         ></v-progress-linear>
 
-        <v-footer class="pa-4 game-footer" color="grey-lighten-3">
-          <v-row justify="space-between" align="center">
+        <v-footer class="pa-4 game-footer rounded-lg" color="grey-lighten-3" elevation="2">
+          <v-row justify="center" align="center">
             <v-col cols="12" md="6">
-              <div class="scoreboard d-flex gap-4">
+              <div class="scoreboard d-flex justify-center align-center" :style="{ 
+                                                        gap: $vuetify.display.mdAndUp ? '50px' : '15px',
+                                                        height: $vuetify.display.xs ? '20px' : 'auto'
+                                                        }">
+                <!-- Correct -->
                 <transition name="flash-green" mode="out-in">
-                  <span :key="rightCount" class="text-success text-h6">✅ {{ rightCount }}</span>
+                  <span :key="rightCount" class="text-success text-h6 text-center">✅ {{ rightCount }}</span>
                 </transition>
+
+                <!-- Incorrect -->
                 <transition name="flash-red" mode="out-in">
-                  <span :key="wrongCount" class="text-error text-h6">❌ {{ wrongCount }}</span>
+                  <span :key="wrongCount" class="text-error text-h6 text-center">❌ {{ wrongCount }}</span>
+                </transition>
+
+                <v-divider vertical></v-divider>
+
+                <!-- Remaining -->
+                <transition name="flash-black" mode="out-in">
+                  <v-tooltip text="Remaining" location="right">
+                    <template #activator="{ props }">
+                      <span :key="remainingCount" class="text-black text-h6 text-center" v-bind="props">
+                        <v-icon color="black">mdi-tray-full</v-icon> {{ remainingCount }}
+                      </span>
+                    </template>
+                  </v-tooltip>
+                </transition>
+
+                <!-- Completed -->
+                <transition name="flash-black" mode="out-in">
+                  <v-tooltip text="Completed" location="right">
+                    <template #activator="{ props }">
+                      <span :key="promptCounter" class="text-black text-h6 text-center" v-bind="props">
+                        <v-icon color="black">mdi-archive-check</v-icon> {{ promptCounter }}
+                      </span>
+                    </template>
+                  </v-tooltip>
                 </transition>
               </div>
             </v-col>
-            <v-col cols="12" md="6">
-              <v-card flat class="pa-2">
-                <p>Remaining: {{ remainingCount }}</p>
-                <p>Completed rounds: {{ promptCounter }}</p>
-              </v-card>
-            </v-col>
           </v-row>
+
         </v-footer>
       </div>
     </v-container>
@@ -168,6 +212,7 @@
 
 <script>
 import api from '@/axios';
+import { getAccessToken } from '@/services/auth';
 import Game from '@/assets/scripts/Game';
 import '@/assets/styles/global_conjugator_styles.css';
 import InitialsText from '../InitialsText.vue';
@@ -225,6 +270,9 @@ export default {
   computed: {
     progressValue() {
       return ((this.promptCounter) / this.gameSettings.numPrompts) * 100;
+    },
+    isAuthenticated() { 
+      return !!getAccessToken();
     }
   },
   methods: {
@@ -292,11 +340,7 @@ export default {
       setTimeout(() => {
         this.showBlockingDialog = false;
 
-        this.$emit('gameOver', {
-          results: this.results,
-          totalTime: this.overallTimer,
-          avgTime
-        });
+        this.$emit('gameOver', payload );
 
         this.endTimer();
       }, 1000);
@@ -383,5 +427,13 @@ export default {
 
 
 <style scoped>
+.scoreboard {
+  gap: 24px;
+}
+
+.text-black {
+  color: #000;
+}
+
 
 </style>

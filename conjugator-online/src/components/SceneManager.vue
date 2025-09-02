@@ -37,18 +37,9 @@ export default {
       this.changeScene('Scene03_Game');
     },
     handleGameOver(payload) {
-      this.results = payload.results;
-      this.totalTime = payload.totalTime;
-      this.avgTime = payload.avgTime;
-
+      this.results = payload;
       this.changeScene('Scene04_Results');
       }
   },
-  watch: {
-    results(newVal) {
-    }
-  },
-  mounted() {
-  }
 };
 </script>

@@ -1,117 +1,149 @@
-<template>
-<div class="settings-scene">
-  <h1>Results page</h1>
-  <p>Game results: {{ correctResults.length }} correct answers!</p>
-  <p>Your average response time was {{ avgTime }} seconds.</p>
-  <div id="pie-chart"></div>
-  <h3>Correct answers</h3>
-  <div v-if="correctResults.length === 0" class="alert" role="alert">
-    No correct answers :-(
-  </div>
-  <swiper
-    v-if="correctResults.length > 0"
-    ref="correctSwiperRef"
-    :slides-per-view="2"
-    :space-between="20"
-    :modules="swiperModules"
-    class="mySwiper"
-    :navigation="{
-      prevEl: '.correct-button-prev',
-      nextEl: '.correct-button-next'
-      }"
-    :breakpoints="{
-      0: { slidesPerView: 1 },     // phones
-      640: { slidesPerView: 2 },   // small tablets
-      1024: { slidesPerView: 4 }   // desktops
-    }"
-  >
-    <swiper-slide
-      v-for="(result, index) in correctResults"
-      :key="'correct-' + index"
+ <template>
+  <v-container v-if="results" fluid class="pa-4">
+    <v-row v-if="$vuetify.display.lgAndUp" class="m-2" justify="center">
+      <h1 class="text-h2">Conjugation game results</h1>
+    </v-row>
+    <v-row
+      align="start"
+      justify="center"
+      class="settings-scene"
     >
-      <div class="card border-success bg-success-subtle mb-3" style="max-width: 18rem; margin: auto;">
-        <div class="card-header">Question {{ result.number }}</div>
-        <div class="card-body">
-          <h5 class="card-title">Your answer:</h5>
-          <p class="fs-4 text-center"><em>{{ result['user answer'] }}</em></p>
-          <p class="card-text">Great job! You got it right.</p>
-          <p class="card-text">You answered in {{ result['elapsedTime'] }} seconds.</p>
-          <p class="card-text h6">Prompt:</p>
-          <ul class="list-group list-group-flush">
-            <li class="list-group-item bg-success-subtle">Verb: {{ result.prompt.verb }}</li>
-            <li class="list-group-item bg-success-subtle">Person: {{ result.prompt.person }}</li>
-            <li class="list-group-item bg-success-subtle">Tense: {{ result.prompt.tense }}</li>
-            <li class="list-group-item bg-success-subtle">Sentence Type: {{ result.prompt['sentence type'] }}</li>
-          </ul>
-          <p></p>
-          <p class="card-text"><span class="h6">Acceptable answer(s):</span></p>
-          <p class="card-text ps-3"><em>
-    {{ Array.isArray(result['correct answer(s)']) 
-        ? result['correct answer(s)'].join(', ') 
-        : result['correct answer(s)'] }}
-  </em></p>
-        </div>
-      </div>
-    </swiper-slide>
-    <div class="correct-button-prev swiper-button-prev"></div>
-    <div class="correct-button-next swiper-button-next"></div>
-  </swiper>
+      <!-- Left Column: Summary + Chart -->
+      <v-col cols="12" lg="5">
+        <v-card class="pa-4 mb-1" elevation="2" rounded="lg">
+          <v-card-title class="text-h5">Results</v-card-title>
+          <v-card-text class="text-body-2">
+            <div><span class="text-subtitle-1">Accuracy: </span><span>{{ results.correct_count }} correct answers out of {{ results.total_rounds }}. That's {{ percentCorrect }}%!</span></div>
+            <div>
+              <span class="text-subtitle-1">Speed: </span>Your average response time was: {{ this.results.avg_time_per_prompt }} seconds.
+              <span v-if="this.results.avg_time_per_prompt < 10 && percentCorrect > 70">Nice work! Your speed and accuracy show that you are good at conjugation!</span>
+            </div>
+            <div id="pie-chart" class="mt-5 mb-2"></div>
+          </v-card-text>
+        </v-card>
+      </v-col>
 
-  <h3>Incorrect answers</h3>
-  <swiper
-    v-if="wrongResults.length > 0"
-    :modules="swiperModules"
-    :slides-per-view="2"
-    :space-between="20"
-    :navigation="{
-      prevEl: '.wrong-button-prev',
-      nextEl: '.wrong-button-next'
-    }"
-    :breakpoints="{
-      0: { slidesPerView: 1 },     // phones
-      640: { slidesPerView: 2 },   // small tablets
-      1024: { slidesPerView: 4 }   // desktops
-    }"
-    class="mySwiper">
-    <swiper-slide
-      v-for="(result, index) in wrongResults"
-      :key="'wrong-' + index"
-    >
-      <div class="card border-warning bg-warning-subtle mb-3" style="margin: auto;">
-        <div class="card-header">Question {{ result.number }}</div>
-        <div class="card-body">
-          <h5 class="card-title">Your answer:</h5>
-          <p v-if="result['user answer'] && result['user answer'].length > 0" 
-                                          class="fs-4 text-center">
-                                          <em>{{ result['user answer'] }}</em>
-                                        </p>
-          <p v-else class="fs-6 text-center">No answer submitted.</p>
-          <p class="card-text">This answer is incorrect.</p>
-          <p class="card-text">You answered in {{ result['elapsedTime'] }} seconds.</p>
-          <p class="card-text h6">Prompt:</p>
-          <ul class="list-group list-group-flush">
-            <li class="list-group-item bg-warning-subtle">Verb: {{ result.prompt.verb }}</li>
-            <li class="list-group-item bg-warning-subtle">Person: {{ result.prompt.person }}</li>
-            <li class="list-group-item bg-warning-subtle">Tense: {{ result.prompt.tense }}</li>
-            <li class="list-group-item bg-warning-subtle">Sentence Type: {{ result.prompt['sentence type'] }}</li>
-          </ul>
-          <p></p>
-          <p class="card-text"><span class="h6">Acceptable answer(s):</span></p>
-          <p class="card-text ps-3"><em>{{ Array.isArray(result['correct answer(s)']) 
-                                                        ? result['correct answer(s)'].join(', ') 
-                                                        : result['correct answer(s)'] }}
-                                                  </em></p>
-        </div>
-      </div>
-    </swiper-slide>
-    <div class="wrong-button-prev swiper-button-prev"></div>
-    <div class="wrong-button-next swiper-button-next"></div>
-  </swiper>
+      <!-- Right Column: Expansion Panels -->
+      <v-col cols="12" lg="7">
+        <v-expansion-panels multiple>
+          <!-- Correct Answers Panel -->
+          <v-expansion-panel>
+            <v-expansion-panel-title>
+              Correct Answers ({{ results.correct_count }})
+            </v-expansion-panel-title>
+            <v-expansion-panel-text>
+              <div v-if="correctResults.length === 0">
+                <v-alert type="info" dense>No correct answers 😢</v-alert>
+              </div>
+              <swiper
+                v-else
+                ref="correctSwiperRef"
+                :modules="swiperModules"
+                :slides-per-view="2"
+                :space-between="20"
+                class="mySwiper"
+                :navigation="{
+                  prevEl: '.correct-button-prev',
+                  nextEl: '.correct-button-next'
+                }"
+                :breakpoints="{
+                  0: { slidesPerView: 1 },
+                  350: { slidesPerView: 2 },
+                  624: { slidesPerView: 3 }
+                }"
+              >
+                <swiper-slide
+                  v-for="(result, index) in correctResults"
+                  :key="'correct-' + index"
+                >
+                  <v-card class="mx-auto my-3" color="green-lighten-5" max-width="300" elevation="2">
+                    <v-card-title>Question {{ result.number }}</v-card-title>
+                    <v-card-text>
+                      <p class="text-center text-h6"><em>{{ result['user answer'] }}</em></p>
+                      <p>You got it right in {{ result['elapsedTime'] }} seconds.</p>
+                      <p class="font-weight-medium">Prompt:</p>
+                      <ul>
+                        <li>Verb: {{ result.prompt.verb }}</li>
+                        <li>Person: {{ result.prompt.person }}</li>
+                        <li>Tense: {{ result.prompt.tense }}</li>
+                        <li>Sentence Type: {{ result.prompt['sentence type'] }}</li>
+                      </ul>
+                      <p class="font-weight-medium">Acceptable answer(s):</p>
+                      <p><em>{{ Array.isArray(result['correct answer(s)']) ? result['correct answer(s)'].join(', ') : result['correct answer(s)'] }}</em></p>
+                    </v-card-text>
+                  </v-card>
+                </swiper-slide>
+                <div class="correct-button-prev swiper-button-prev"></div>
+                <div class="correct-button-next swiper-button-next"></div>
+              </swiper>
+            </v-expansion-panel-text>
+          </v-expansion-panel>
 
-  <v-btn class="mx-3" @click="goToScene('Scene02_Settings')">PLAY AGAIN</v-btn>
-  <v-btn class="mx-3" href="/dashboard">See game data in my dashboard</v-btn>
-</div>
+          <!-- Incorrect Answers Panel -->
+          <v-expansion-panel>
+            <v-expansion-panel-title>
+              Incorrect Answers ({{ results.wrong_count }})
+            </v-expansion-panel-title>
+            <v-expansion-panel-text>
+              <swiper
+                v-if="wrongResults.length > 0"
+                :modules="swiperModules"
+                :slides-per-view="2"
+                :space-between="20"
+                class="mySwiper"
+                :navigation="{
+                  prevEl: '.wrong-button-prev',
+                  nextEl: '.wrong-button-next'
+                }"
+                :breakpoints="{
+                  0: { slidesPerView: 1 },
+                  640: { slidesPerView: 2 },
+                  1024: { slidesPerView: 4 }
+                }"
+              >
+                <swiper-slide
+                  v-for="(result, index) in wrongResults"
+                  :key="'wrong-' + index"
+                >
+                  <v-card class="mx-auto my-3" color="amber-lighten-5" max-width="300" elevation="2">
+                    <v-card-title>Question {{ result.number }}</v-card-title>
+                    <v-card-text>
+                      <p class="text-center text-h6">
+                        <em v-if="result['user answer']">{{ result['user answer'] }}</em>
+                        <span v-else>No answer submitted.</span>
+                      </p>
+                      <p>Incorrect. Time: {{ result['elapsedTime'] }} seconds.</p>
+                      <p class="font-weight-medium">Prompt:</p>
+                      <ul>
+                        <li>Verb: {{ result.prompt.verb }}</li>
+                        <li>Person: {{ result.prompt.person }}</li>
+                        <li>Tense: {{ result.prompt.tense }}</li>
+                        <li>Sentence Type: {{ result.prompt['sentence type'] }}</li>
+                      </ul>
+                      <p class="font-weight-medium">Acceptable answer(s):</p>
+                      <p><em>{{ Array.isArray(result['correct answer(s)']) ? result['correct answer(s)'].join(', ') : result['correct answer(s)'] }}</em></p>
+                    </v-card-text>
+                  </v-card>
+                </swiper-slide>
+                <div class="wrong-button-prev swiper-button-prev"></div>
+                <div class="wrong-button-next swiper-button-next"></div>
+              </swiper>
+            </v-expansion-panel-text>
+          </v-expansion-panel>
+        </v-expansion-panels>
+
+        
+      </v-col>
+    </v-row>
+    <v-row class="d-flex justify-center align-center mt-4 gap-4">
+      <!-- Action Buttons -->
+        <v-btn @click="goToScene('Scene02_Settings')">PLAY AGAIN</v-btn>
+        <v-btn href="/dashboard">GO TO dashboard</v-btn>
+        <HomeButton />
+    </v-row>
+  </v-container>
 </template>
+
 
 
 <script>
@@ -122,6 +154,7 @@ import { Navigation } from 'swiper/modules';
 import { markRaw } from "vue";
 import 'swiper/css';
 import 'swiper/css/navigation';
+import HomeButton from "../HomeButton.vue";
 
 export default {
   data() {
@@ -132,11 +165,12 @@ export default {
   components: {
     Swiper,
     SwiperSlide,
+    HomeButton
   },
   props: {
     results: {
-      type: Array,
-      default: () => [],
+      type: Object,
+      required: true
     },
     totalTime: {
       type: String,
@@ -147,25 +181,33 @@ export default {
       default: 0,
     },
   },
-  computed: {
-    normalizedResults() {
-      return this.results; // Already an array, no transformation needed
-    },
+  computed: {  
     correctResults() {
-    return this.results.filter((r) => r && r.correct === true);
+      return Array.isArray(this.results?.rounds)
+        ? this.results.rounds.filter(r => r?.correct === true)
+        : [];
     },
     wrongResults() {
-    return this.results.filter((r) => r && r.correct === false);
+      return Array.isArray(this.results?.rounds)
+        ? this.results.rounds.filter(r => r?.correct === false)
+        : [];
+    },
+    percentCorrect() {
+      return (this.results.correct_count / this.results.total_rounds * 100).toFixed(0)
+    },
+    percentIncorrect() {
+      return (this.results.wrong_count / this.results.total_rounds * 100).toFixed(0)
     },
     chartData() {
-      const correctCount = this.results.filter((r) => r.correct).length;
-      const wrongCount = this.results.length - correctCount;
+      const correctCount = this.results.correct_count;
+      const wrongCount = this.results.wrong_count;
       return [
         { label: "Correct", value: correctCount },
         { label: "Wrong", value: wrongCount },
       ];
-    },
-  },
+    }
+}
+,
   methods: {
     goToScene(sceneName) {
       this.$emit("changeScene", sceneName);
@@ -220,14 +262,7 @@ export default {
 </script>
 
 <style scoped>
-.settings-scene {
-  width: 100%;
-  max-width: none;
-  padding: 1rem;
-  box-sizing: border-box;
-}
 #pie-chart {
-  margin: 20px auto;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -236,18 +271,11 @@ export default {
   width: 100%;
   max-width: 1200px;
   margin: 2rem auto;
-  touch-action: pan-y; /* allows horizontal swiping */
-  overflow: hidden; 
 }
 .swiper-slide {
-  width: 100% !important; /* Prevent Swiper from forcing a small width */
-  max-width: 250px; /* Set a max width for the card */
   display: flex;
   justify-content: center;
 }
-.card {
-  width: 100%;
-  max-width: 300px;
-}
+
 
 </style>
