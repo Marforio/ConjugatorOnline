@@ -4,7 +4,10 @@ import { ref, computed } from "vue";
 import { apiLogin, apiRefresh, saveTokens, clearTokens, getAccessToken, getRefreshToken } from "@/services/auth";
 
 export const useAuthStore = defineStore("auth", () => {
-  const access = ref<string | null>(getAccessToken());
+  const access = ref<string | null>(null);
+    if (typeof window !== 'undefined') {
+    access.value = getAccessToken();
+    }
   const refresh = ref<string | null>(getRefreshToken());
 
   const isLoggedIn = computed(() => !!access.value);
@@ -30,7 +33,6 @@ export const useAuthStore = defineStore("auth", () => {
   }
 
   return {
-    useAuthStore,
     access,
     refresh,
     isLoggedIn,
