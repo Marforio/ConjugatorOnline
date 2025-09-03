@@ -1,6 +1,5 @@
 <template>
   <v-container fluid class="pa-0 d-flex" style="height: 100vh;">
-
     <!-- Navigation Drawer -->
     <v-navigation-drawer
     v-if="$vuetify.display.smAndUp"  
@@ -199,6 +198,17 @@
       </div>
     </v-container>
 
+    <v-snackbar
+      v-model="snackbar.show"
+      :color="snackbar.color"
+      timeout="2500"
+      location="top"
+      elevation="4"
+    >
+      {{ snackbar.message }}
+    </v-snackbar>
+
+
     <!-- Blocking dialog while loading -->
     <v-dialog v-model="showBlockingDialog" persistent fullscreen transition="fade-transition">
       <v-card class="d-flex align-center justify-center" color="transparent" elevation="0">
@@ -255,6 +265,12 @@ export default {
       roundStartTime: null,
       roundIntervalId: null,
       showBlockingDialog: false,
+      snackbar: {
+        show: false,
+        message: '',
+        color: 'success'
+      },
+
 
     };
   },
@@ -399,6 +415,18 @@ export default {
       realPrompt.elapsedTime = elapsedSecondsDecimal;
 
       const isCorrect = this.game.submitAnswer(this.userAnswer);
+
+      // Trigger snackbar
+      this.snackbar.message = isCorrect
+        ? `Yes! "${this.userAnswer}" is correct!`
+        : `Sorry, "${this.userAnswer}" is wrong!`;
+      this.snackbar.color = isCorrect ? 'success' : 'warning';
+      // Reset and re-trigger the snackbar cleanly
+      this.snackbar.show = false;
+      this.$nextTick(() => {
+        this.snackbar.show = true;});
+
+
       if (isCorrect) {
         this.rightCount = this.game.getRightCount();
       } else {

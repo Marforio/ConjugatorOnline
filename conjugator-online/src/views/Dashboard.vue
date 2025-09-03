@@ -60,63 +60,55 @@
         <v-alert type="error">{{ conjGameError }}</v-alert>
       </div>
       <div v-else class="d-flex flex-wrap align-start pa-2">
-        <v-card class="pa-4 mb-6" elevation="2" style="flex: 1 1;" :style="{
-          minWidth: xs ? '300px' : '400px', 
-          maxWidth: xs ? '500px' : '650px', 
-          marginLeft: xs ? '5px' : '16px',
-          marginRight: xs ? '5px' : '16px',}">
-          <v-card-title class="text-h5 font-weight-bold">Conjugation accuracy</v-card-title>
-          <v-card-text>
-            <div class="d-flex flex-column align-center">
+        <v-row dense>
+        <!-- Conjugation accuracy -->
+        <v-col cols="12" lg="6">
+          <v-card class="chart-card pa-4" elevation="2">
+            <v-card-title class="text-h5 font-weight-bold">
+              Conjugation accuracy
+            </v-card-title>
+            <v-card-text class="d-flex flex-column align-center flex-grow-1">
               <PieChart :data="totalRightWrongChartData" />
-
               <div class="text-subtitle-1 mt-4">
                 {{ sessions.length }} game{{ sessions.length !== 1 ? 's' : '' }} played
               </div>
-
               <div class="text-subtitle-2">
                 {{ totalRoundsPlayed }} total rounds
               </div>
-            </div>
-          </v-card-text>
-        </v-card>
+            </v-card-text>
+          </v-card>
+        </v-col>
 
-        <v-card class="pa-4 mb-6" elevation="2" style="flex: 1 1;" :style="{
-          minWidth: xs ? '300px' : '400px', 
-          maxWidth: xs ? '500px' : '650px', 
-          marginLeft: xs ? '5px' : '16px',
-          marginRight: xs ? '5px' : '16px',}">
-
-          <v-card-title class="text-h5 font-weight-bold">Tense accuracy</v-card-title>
-          <v-card-text>
-            <div class="d-flex flex-column align-center">
-              <BarChart :data="tenseAccuracyData" :width="400" :height="300" color="#4CAF50" />
-
+        <!-- Tense accuracy -->
+        <v-col cols="12" lg="6">
+          <v-card class="chart-card pa-4" elevation="2">
+            <v-card-title class="text-h5 font-weight-bold">
+              Tense accuracy
+            </v-card-title>
+            <v-card-text class="d-flex flex-column align-center flex-grow-1">
+              <BarChart :data="tenseAccuracyData" :width="400" :height="250" color="#4CAF50" />
               <div class="text-subtitle-1 mt-4">
                 Percentage of correct answers by tense
               </div>
+            </v-card-text>
+          </v-card>
+        </v-col>
 
-            </div>
-          </v-card-text>
-        </v-card>
-
-        <v-card class="flex: 1 1; pa-4 mb-6" elevation="2" :style="{
-          minWidth: xs ? '300px' : '400px', 
-          maxWidth: xs ? '500px' : '650px', 
-          marginLeft: xs ? '5px' : '16px',
-          marginRight: xs ? '5px' : '16px'}"> 
-          <v-card-title class="text-h5 font-weight-bold">Sentence type accuracy</v-card-title>
-          <v-card-text>
-            <div class="d-flex flex-column align-center">
-              <BarChart :data="sentenceTypeAccuracyData" :width="500" :height="300" color="#2196F3" />
-
+        <!-- Sentence type accuracy -->
+        <v-col cols="12" lg="6">
+          <v-card class="chart-card pa-4" elevation="2">
+            <v-card-title class="text-h5 font-weight-bold">
+              Sentence type accuracy
+            </v-card-title>
+            <v-card-text class="d-flex flex-column align-center flex-grow-1">
+              <BarChart :data="sentenceTypeAccuracyData" :width="400" :height="250" color="#2196F3" />
               <div class="text-subtitle-1 mt-4">
                 Percentage of correct answers by sentence type
               </div>
-
-            </div>
-          </v-card-text>
-        </v-card>
+            </v-card-text>
+          </v-card>
+        </v-col>
+      </v-row>
 
         <v-sheet
           elevation="2"
@@ -137,7 +129,7 @@
 
           <NumbersCard
             class="ma-2 flex-grow-1"
-            :value="totalAllIrregsUsedOnce > 0 ? (totalAllIrregsUsedOnce/136*100).toFixed(0) + '%': '0%'"
+            :value="totalAllIrregsUsedOnce > 0 ? (totalAllIrregsUsedOnce/130*100).toFixed(0) + '%': '0%'"
             title="Past simple ALL"
             label="of ALL irregular verbs used at least 1x (out of a total of 136)"
           />
@@ -151,7 +143,7 @@
 
           <NumbersCard
             class="ma-2 flex-grow-1"
-            :value="totalAllIrregsUsedOnceParticiple > 0 ? (totalAllIrregsUsedOnceParticiple/136*100).toFixed(0) + '%': '0%'"
+            :value="totalAllIrregsUsedOnceParticiple > 0 ? (totalAllIrregsUsedOnceParticiple/130*100).toFixed(0) + '%': '0%'"
             title="Present perfect ALL"
             label="of ALL irregular verbs used at least 1x (out of a total of 136)"
           />
@@ -519,4 +511,18 @@ export default defineComponent({
   },
 });
 </script>
+
+<style scoped>
+.chart-card {
+  min-height: 500px;   /* keeps them equal height */
+  display: flex;
+  flex-direction: column;
+}
+.chart-card .v-card-text {
+  flex-grow: 1;        /* stretch content evenly */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+</style>
 

@@ -1,6 +1,7 @@
 // src/stores/user.ts
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import { defineStore } from "pinia";
+import { getAccessToken, clearTokens } from "@/services/auth";
 
 interface User {
   id: number;
@@ -17,6 +18,7 @@ interface Student {
 
 export const useUserStore = defineStore("user", () => {
   const student = ref<Student | null>(null);
+  const accessToken = ref<string | null>(getAccessToken()); // init from localStorage
 
   function setStudent(data: Student) {
     student.value = data;
@@ -24,7 +26,15 @@ export const useUserStore = defineStore("user", () => {
 
   function clearStudent() {
     student.value = null;
+    accessToken.value = null;
+    clearTokens();
   }
 
-  return { student, setStudent, clearStudent };
+  function setAccessToken(token: string) {
+    accessToken.value = token;
+  }
+
+  const isAuthenticated = computed(() => !!accessToken.value);
+
+  return { student, accessToken, setStudent, clearStudent, setAccessToken, isAuthenticated };
 });

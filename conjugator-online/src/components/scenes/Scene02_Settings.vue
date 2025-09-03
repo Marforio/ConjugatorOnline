@@ -251,13 +251,16 @@ export default {
     },
     quickPlayButtons() {
       return [
-        { label: 'Irregular verbs basic', color: 'success', settings: { verbSet: 'Irregular verbs only', sentenceTypes: ['Positive'], tenses: ['Past simple'], numPrompts: 25 } },
-        { label: 'Irregular verbs advanced', color: 'warning', settings: { verbSet: 'Irregular verbs only', sentenceTypes: ['Positive'], tenses: ['Past simple', 'Present perfect'], numPrompts: 25 } },
-        { label: 'Past simple', color: 'info', settings: { verbSet: 'Common verbs (Reg + Irreg)', sentenceTypes: ['Positive', 'Negative', 'Questions'], tenses: ['Past simple'], numPrompts: 20 } },
-        { label: 'Past simple vs present perfect', color: 'secondary', settings: { verbSet: 'Common verbs (Reg + Irreg)', sentenceTypes: ['Positive', 'Negative'], tenses: ['Past simple', 'Present perfect'], numPrompts: 20 } },
-        { label: 'Present simple and continuous', color: 'primary', settings: { verbSet: 'Common verbs (Reg + Irreg)', sentenceTypes: ['Positive', 'Negative', 'Questions'], tenses: ['Present simple', 'Present continuous'], numPrompts: 25 } },
-        { label: 'All negatives', color: 'error', settings: { verbSet: 'Common verbs (Reg + Irreg)', sentenceTypes: ['Negative'], tenses: ['Present simple','Past simple','Future simple','Recommendation','Present continuous','Present perfect'], numPrompts: 25 } },
-        { label: 'All questions', color: 'grey', settings: { verbSet: 'Common verbs (Reg + Irreg)', sentenceTypes: ['Questions'], tenses: ['Present simple','Past simple','Future simple','Recommendation','Present continuous','Present perfect'], numPrompts: 25 } },
+        { label: 'Negatives training', color: 'error', settings: { verbSet: 'Regular verbs only', sentenceTypes: ['Negative'], tenses: ['Present simple','Past simple','Future simple','Recommendation','Present continuous','Present perfect'], numPrompts: 20 } },
+        { label: 'Questions training', color: 'grey', settings: { verbSet: 'Common verbs (Reg + Irreg)', sentenceTypes: ['Questions'], tenses: ['Present simple','Past simple','Future simple','Recommendation','Present continuous','Present perfect'], numPrompts: 20 } },
+        { label: 'Present simple and continuous', color: 'magenta lighten-2', settings: { verbSet: 'Common verbs (Reg + Irreg)', sentenceTypes: ['Positive', 'Negative', 'Questions'], tenses: ['Present simple', 'Present continuous'], numPrompts: 20 } },
+        { label: 'Past simple training', color: 'info', settings: { verbSet: 'Common verbs (Reg + Irreg)', sentenceTypes: ['Positive', 'Negative', 'Questions'], tenses: ['Past simple'], numPrompts: 20 } },
+        { label: 'Irregs Basic 20x past simple', color: 'blue lighten-2', settings: { verbSet: 'Basic 75 Irregs', sentenceTypes: ['Positive'], tenses: ['Past simple'], numPrompts: 20 } },
+        { label: 'Irregs Basic 20x pres. perf.', color: 'brown lighten-2', settings: { verbSet: 'Basic 75 Irregs', sentenceTypes: ['Positive', 'Negative', 'Questions'], tenses: ['Present perfect'], numPrompts: 20 } },
+        { label: 'Irregs Master 20x past simple', color: 'green lighten-2', settings: { verbSet: 'Master 110 Irregs', sentenceTypes: ['Positive'], tenses: ['Past simple'], numPrompts: 20 } },
+        { label: 'Irregs Master 20x pres. perf.', color: 'red lighten-2', settings: { verbSet: 'Master 110 Irregs', sentenceTypes: ['Positive', 'Negative', 'Questions'], tenses: ['Present perfect'], numPrompts: 20 } },
+        { label: 'Past simple vs present perfect', color: 'pink', settings: { verbSet: 'Common verbs (Reg + Irreg)', sentenceTypes: ['Positive', 'Negative', 'Questions'], tenses: ['Past simple', 'Present perfect'], numPrompts: 20 } },
+        { label: 'All tenses and sentences', color: 'green', settings: { verbSet: 'Common verbs (Reg + Irreg)', sentenceTypes: ['Positive', 'Negative', 'Questions'], tenses: ['Present simple','Past simple','Future simple','Recommendation','Present continuous','Present perfect'], numPrompts: 25 } },
       ];
     },
   },

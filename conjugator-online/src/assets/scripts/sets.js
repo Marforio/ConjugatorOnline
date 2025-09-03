@@ -50,6 +50,9 @@ class ConjugationSet {
     static IRREGULAR_VERBS = '/data/irregularVerbs.json';
     static COMMON_VERBS = '/data/commonVerbs.json';
     static REGULAR_VERBS = '/data/regularVerbs.json';
+    static IRREGULAR_VERBS_75 = 'data/irregBasic75.json';
+    static IRREGULAR_VERBS_110 = 'data/irregMaster110.json';
+    static IRREGULAR_VERBS_GOAT_50 = 'data/irregGOAT50.json';
 
     constructor(type, tenses, sentences, length) {
         this.type = type;
@@ -73,6 +76,15 @@ class ConjugationSet {
             const irregularVerbsResponse = await fetch(basedir + 'irregularVerbs.json');
             this.irregularVerbs = await irregularVerbsResponse.json();
 
+            const Basic75VerbsResponse = await fetch(basedir + 'irregBasic75.json');
+            this.irregularVerbs75 = await Basic75VerbsResponse.json()
+
+            const Master110VerbsResponse = await fetch(basedir + 'irregMaster110.json');
+            this.irregularVerbs110 = await Master110VerbsResponse.json()
+
+            const GOAT50IrregsResponse = await fetch(basedir + 'irregGOAT50.json');
+            this.irregularVerbsGOAT50 = await GOAT50IrregsResponse.json()
+
             let verbSource;
 
             // Determine verb source based on type
@@ -80,9 +92,16 @@ class ConjugationSet {
                 verbSource = this.commonVerbs;
             } else if (this.type === 'Regular verbs only') {
                 verbSource = this.regularVerbs;
-            } else if (this.type === 'Irregular verbs only') {
+            }  else if (this.type === "Basic 75 Irregs") {
+                verbSource = Object.keys(this.irregularVerbs75)
+            } else if (this.type === "Master 110 Irregs") {
+                verbSource = Object.keys(this.irregularVerbs110)
+            } else if (this.type === 'Shakespeare 130 Irregs') {
                 verbSource = Object.keys(this.irregularVerbs);
-            } else {
+            } else if (this.type === "GOAT 50 Hard Irregs Only") {
+                verbSource = Object.keys(this.irregularVerbsGOAT50)
+            }
+            else {
                 console.error('Invalid type:', this.type);
                 verbSource = [];
             }

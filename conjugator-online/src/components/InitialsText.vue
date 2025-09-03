@@ -1,24 +1,23 @@
-
 <template>
   <span>
-    {{ initials ?? 'Ghost' }}
+    {{ initials ?? "Ghost" }}
   </span>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { onMounted, computed } from "vue";
 import { useUserStore } from "@/stores/user";
-import { getAccessToken } from "@/services/auth"; 
+import { useAuthStore } from "@/stores/auth";
 import api from "@/axios";
 
 const userStore = useUserStore();
+const auth = useAuthStore();
+
 const initials = computed(() => userStore.student?.initials);
 
-// Fetch student info only if token exists
 onMounted(async () => {
-  const token = getAccessToken();
-  if (!token) {
-    console.warn("No access token — skipping student fetch.");
+  if (!auth.isLoggedIn) {
+    console.warn("Not logged in — skipping student fetch.");
     userStore.clearStudent();
     return;
   }
@@ -38,5 +37,4 @@ onMounted(async () => {
     userStore.clearStudent();
   }
 });
-
 </script>

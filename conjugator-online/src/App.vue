@@ -19,7 +19,7 @@ const route = useRoute()
 // Hide nav bar on home page
 const showNav = computed(() => {
   const name = route.name || ''
-  return name !== 'home' && name !== 'conjugator'
+  return name !== 'home' && name !== 'conjugator' && name !== 'login'
 })
 
 </script>

@@ -57,8 +57,8 @@
                 }"
                 :breakpoints="{
                   0: { slidesPerView: 1 },
-                  350: { slidesPerView: 2 },
-                  624: { slidesPerView: 3 }
+                  500: { slidesPerView: 2 },
+                  700: { slidesPerView: 3 }
                 }"
               >
                 <swiper-slide
@@ -68,8 +68,9 @@
                   <v-card class="mx-auto my-3" color="green-lighten-5" max-width="300" elevation="2">
                     <v-card-title>Question {{ result.prompt_number }}</v-card-title>
                     <v-card-text>
+                      <p class="text-subtitle-1">Your answer:</p>
                       <p class="text-center text-h6"><em>{{ result.user_answer }}</em></p>
-                      <p>You got it right in {{ result.elapsed_time }} seconds.</p>
+                      <p>Congrats! You got it right in {{ result.elapsed_time }} seconds.</p>
                       <p class="font-weight-medium">Prompt:</p>
                       <ul>
                         <li>Verb: {{ result.verb }}</li>
@@ -106,8 +107,8 @@
                 }"
                 :breakpoints="{
                   0: { slidesPerView: 1 },
-                  350: { slidesPerView: 2 },
-                  624: { slidesPerView: 3 }
+                  500: { slidesPerView: 2 },
+                  700: { slidesPerView: 3 }
                 }"
               >
                 <swiper-slide
@@ -117,11 +118,13 @@
                   <v-card class="mx-auto my-3" color="amber-lighten-5" max-width="300" elevation="2">
                     <v-card-title>Question {{ result.prompt_number }}</v-card-title>
                     <v-card-text>
+                      <p class="text-subtitle-1">Your answer:</p>
                       <p class="text-center text-h6">
                         <em v-if="result.user_answer">{{ result.user_answer }}</em>
                         <span v-else>No answer submitted.</span>
                       </p>
-                      <p>Incorrect. Time: {{ result.elapsed_time }} seconds.</p>
+                      <p>This answer is incorrect. </p>
+                      <p>Time elapsed: {{ result.elapsed_time }} seconds.</p>
                       <p class="font-weight-medium">Prompt:</p>
                       <ul>
                         <li>Verb: {{ result.verb }}</li>

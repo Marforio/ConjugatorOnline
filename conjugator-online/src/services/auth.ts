@@ -19,17 +19,11 @@ export function clearTokens() {
   localStorage.removeItem("refresh");
 }
 
-export async function login(username: string, password: string) {
-  const res = await api.post("/token/", { username, password });
-  saveTokens(res.data.access, res.data.refresh);
-  return res.data;
+// API calls only
+export async function apiLogin(username: string, password: string) {
+  return api.post("/token/", { username, password });
 }
 
-export async function refreshToken() {
-  const refresh = getRefreshToken();
-  if (!refresh) throw new Error("No refresh token");
-
-  const res = await api.post("/token/refresh/", { refresh });
-  saveTokens(res.data.access, refresh); // keep refresh token
-  return res.data.access;
+export async function apiRefresh(refresh: string) {
+  return api.post("/token/refresh/", { refresh });
 }
