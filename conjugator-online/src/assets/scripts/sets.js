@@ -105,7 +105,6 @@ class ConjugationSet {
                 console.error('Invalid type:', this.type);
                 verbSource = [];
             }
-            console.log('Selected verb source:', verbSource);
 
             if (!verbSource || verbSource.length === 0) {
                 console.error('Verb source is empty. Check your data files and type.');

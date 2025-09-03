@@ -1,10 +1,12 @@
 {
-    "present_simple": ["occasionaly", "rarely", "sometimes", "seldom", "always", "usually", "often", "regularly", "here and there", "every day",
+    "present_simple": ["occasionally", "rarely", "sometimes", "seldom", "always", "usually", "often", "regularly", "here and there", "every day",
                         "every week", "every month", "every year", "twice a week", "once a month", "once a year",
                         "on Mondays", "on Tuesdays", "on Wednesdays", "on Thursdays", "on Fridays", "on Saturdays",
                         "on Sundays"],
-    "present_continuous": ["now", "currently", "at the moment", "today"],
-    "past_simple": ["yesterday", "last week", "last month", "last year", "2 weeks ago", "5 years ago", "in 2008", "in 1990"],
+    "present_continuous": ["now", "currently", "at the moment", "right now", "as we speak"],
+    "past_simple": ["yesterday", "last week", "last month", "last year", "2 weeks ago", "5 years ago", "in 2008", "when I was a child"],
     "present_perfect": ["since 2020", "since 2003", "in the last 3 months", "for the last 5 years", "for 2 weeks",
-                         "in my life", "so far", "up to now", "until now", "recently", "lately"]
+                         "in my life", "so far", "up to now", "until now", "recently", "lately"],
+    "future_simple": ["next week", "in 2030", "when I graduate", "in 2 years", "next summer", "in the future"],
+    "recommendation": ["recommendation"]
 }

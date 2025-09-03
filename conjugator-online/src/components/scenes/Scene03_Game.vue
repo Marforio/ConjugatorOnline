@@ -22,25 +22,27 @@
         <v-list-item>
           <v-list-item-title v-if="isAuthenticated"><span class="font-weight-medium">Name:</span> <InitialsText /></v-list-item-title>
         </v-list-item>
+        <v-divider></v-divider>
         <v-list-item>
           <v-list-item-title style="text-wrap: wrap;"><span class="font-weight-medium">Verb set:</span> {{ gameSettings.verbSet }}</v-list-item-title>
         </v-list-item>
         <v-list-item>
-          <v-list-item-title style="text-wrap: wrap;">
-            <span class="font-weight-medium">Sentence types:</span> {{ gameSettings?.sentenceTypes?.join(', ') || '' }}
-          </v-list-item-title>
-        </v-list-item>
-        <v-list-item>
-          <v-list-item-title style="text-wrap: wrap;">
-            <span class="font-weight-medium">Tenses: </span>{{ gameSettings?.tenses?.join(', ') || '' }}
-          </v-list-item-title>
-        </v-list-item>
-        <v-list-item>
             <span class="font-weight-medium">Rounds: </span>{{ remainingCount }} 
         </v-list-item>
+        <v-divider></v-divider>
+        <v-list-item>
+          <v-list-item-title style="text-wrap: wrap;">
+            <span class="font-weight-medium">Sentence type(s):</span> {{ gameSettings?.sentenceTypes?.join(', ') || '' }}
+          </v-list-item-title>
+        </v-list-item>
+        <v-list-item>
+          <v-list-item-title style="text-wrap: wrap;">
+            <span class="font-weight-medium">Tense(s): </span>{{ gameSettings?.tenses?.join(', ') || '' }}
+          </v-list-item-title>
+        </v-list-item>
+        <v-switch :model-value="true" :label="showKeyword ? 'See time reference' : 'See tense name'" v-model="showKeyword" label="Time reference" class="ms-6" />
       </v-list>
-
-      <v-divider class="mt-5 mb-6"></v-divider>
+      <v-divider></v-divider>
 
       <div class="mt-auto d-flex justify-space-between align-center w-100 px-3">
         <v-btn icon elevation="0" size="large" class="ms-3" @click="goBack">
@@ -90,9 +92,10 @@
          <v-card v-if="$vuetify.display.smAndUp" class="pa-6 mb-6 d-flex justify-center align-center rounded-lg" height="50px" :style="{ width: $vuetify.display.mdAndUp ? '450px' : '280px',
                                                                                                         gap: $vuetify.display.mdAndUp ? '40px' : '20px'}
             " elevation="2" color="grey-lighten-4">
-          <span class="text-subtitle-2 font-weight-medium" style="text-align: align-center"><v-icon>mdi-timer-sand</v-icon style="text-align: align-center"> Round  {{ roundTimer }}</span>
+          <span class="text-subtitle-2" style="text-align: align-center"><v-icon>mdi-timer-sand</v-icon style="text-align: align-center"> Round  {{ roundTimer }}</span>
           <v-divider vertical v-if="$vuetify.display.mdAndUp" color="white"></v-divider>
-          <span class="text-subtitle-2 font-weight-medium" style="text-align: align-center"><v-icon>mdi-timer</v-icon style="text-align: align-center"> Total  {{ overallTimer }}</span>
+          <span class="text-subtitle-2" style="text-align: align-center"><v-icon>mdi-timer</v-icon style="text-align: align-center"> Total  {{ overallTimer }}</span>
+
         </v-card>
 
         <v-card class="pa-6 mb-6" height="350px" :style="{ width: $vuetify.display.mdAndUp ? '450px' : '280px',
@@ -102,15 +105,25 @@
           <v-card-text class="text-center">
             <div v-if="$vuetify.display.mdAndUp" class="text-h2 font-weight-bold mb-6">{{ currentPrompt.verb }}</div>
             <div v-else="$vuetify.display.mdAndUp" class="text-h4 font-weight-bold mb-6">{{ currentPrompt.verb }}</div>
+            
             <v-row justify="center" align="center">
               <v-col cols="12" md="4">
                 <div class="text-subtitle-2 text-grey-darken-1">Person</div>
                 <div class="text-body-1">{{ currentPrompt.person }}</div>
               </v-col>
-              <v-col cols="12" md="4">
-                <div class="text-subtitle-2 text-grey-darken-1">Tense</div>
-                <div class="text-body-1">{{ currentPrompt.tense }}</div>
+
+              <v-col v-if="$vuetify.display.smAndUp" cols="12" md="4">
+                <div class="text-subtitle-2 text-grey-darken-1">{{ displayedTenseHeader }}</div>
+                <div class="text-body-1 text-center">{{ displayedTense }}</div>
               </v-col>
+              <v-col v-else cols="12" md="4">
+                <div class="d-flex justify-space-between align-center">
+                  <div  class="text-subtitle-2 text-grey-darken-1 mx-auto">{{ displayedTenseHeader }}</div>
+                    <v-switch v-model="showKeyword" density="compact" hide-details />
+                </div>
+                <div class="text-body-1 text-center">{{ displayedTense }}</div>
+              </v-col>
+
               <v-col cols="12" md="4">
                 <div class="text-subtitle-2 text-grey-darken-1">Sentence Type</div>
                 <div class="text-body-1">{{ currentPrompt.sentenceType }}</div>
@@ -195,6 +208,11 @@
           </v-row>
 
         </v-footer>
+        <div v-if="$vuetify.display.xs" class="d-flex justify-center mt-6">
+          <v-btn icon elevation large @click="goBack">
+            <v-icon>mdi-arrow-left-circle</v-icon>
+          </v-btn>
+        </div>
       </div>
     </v-container>
 
@@ -224,7 +242,6 @@
 import api from '@/axios';
 import { getAccessToken } from '@/services/auth';
 import Game from '@/assets/scripts/Game';
-import '@/assets/styles/global_conjugator_styles.css';
 import InitialsText from '../InitialsText.vue';
 
 export default {
@@ -270,13 +287,15 @@ export default {
         message: '',
         color: 'success'
       },
-
+      showKeyword: true,
+      keywords: {},
 
     };
   },
   async mounted() {
     this.game = new Game(this.gameSettings);
     this.game.start();
+    this.tenseKeyWords();
   },
   beforeDestroy() {
     clearInterval(this.timerInterval);
@@ -289,13 +308,41 @@ export default {
     },
     isAuthenticated() { 
       return !!getAccessToken();
+    },
+    displayedTense() {
+      if (!this.showKeyword) return this.currentPrompt.tense;
+
+      const tenseKey = this.currentPrompt.tense.toLowerCase().replace(/\s/g, '_');
+      const options = this.keywords[tenseKey];
+
+      if (Array.isArray(options) && options.length > 0) {
+        const randomIndex = Math.floor(Math.random() * options.length);
+        return options[randomIndex];
+      }
+
+      return this.currentPrompt.tense;
+    },
+    displayedTenseHeader() {
+      if (!this.showKeyword) return "Tense";
+      return "Time reference"
     }
+
+
   },
   methods: {
     goBack() {
       this.$emit('changeScene', 'Scene02_Settings');
     },
-    
+    async tenseKeyWords() {
+      try {
+        const res = await fetch('/data/tenseKeywords.json');
+        this.keywords = await res.json();
+      } catch (e) {
+        console.error('Error loading tense keywords:', e);
+      }
+    },
+
+
     async endGame() {
       this.showBlockingDialog = true;
       this.results = this.game.getResults();

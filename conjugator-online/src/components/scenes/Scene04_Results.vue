@@ -159,7 +159,6 @@
 
 <script>
 import * as d3 from "d3";
-import '@/assets/styles/global_conjugator_styles.css';
 import { Swiper, SwiperSlide } from 'swiper/vue';
 import { Navigation } from 'swiper/modules';
 import { markRaw } from "vue";
