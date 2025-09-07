@@ -114,7 +114,7 @@
 
               <v-col v-if="$vuetify.display.smAndUp" cols="12" md="4">
                 <div class="text-subtitle-2 text-grey-darken-1">{{ displayedTenseHeader }}</div>
-                <div class="text-body-1 text-center">{{ displayedTense }}</div>
+                <div class="text-body-1 text-center">{{ randomTenseDisplay }}</div>
               </v-col>
               <v-col v-else cols="12" md="4">
                 <div class="d-flex justify-space-between align-center">
@@ -288,14 +288,16 @@ export default {
         color: 'success'
       },
       showKeyword: true,
+      randomTenseDisplay: '',
       keywords: {},
 
     };
   },
   async mounted() {
     this.game = new Game(this.gameSettings);
+    await this.tenseKeyWords();  // wait for keywords to load
     this.game.start();
-    this.tenseKeyWords();
+    this.updatePrompt();   
   },
   beforeDestroy() {
     clearInterval(this.timerInterval);
@@ -309,24 +311,10 @@ export default {
     isAuthenticated() { 
       return !!getAccessToken();
     },
-    displayedTense() {
-      if (!this.showKeyword) return this.currentPrompt.tense;
-
-      const tenseKey = this.currentPrompt.tense.toLowerCase().replace(/\s/g, '_');
-      const options = this.keywords[tenseKey];
-
-      if (Array.isArray(options) && options.length > 0) {
-        const randomIndex = Math.floor(Math.random() * options.length);
-        return options[randomIndex];
-      }
-
-      return this.currentPrompt.tense;
-    },
     displayedTenseHeader() {
       if (!this.showKeyword) return "Tense";
       return "Time reference"
     }
-
 
   },
   methods: {
@@ -341,7 +329,31 @@ export default {
         console.error('Error loading tense keywords:', e);
       }
     },
+    updateRandomTense() {
+      if (!this.showKeyword) {
+        this.randomTenseDisplay = this.currentPrompt.tense;
+        return;
+      }
 
+      const tenseKey = this.currentPrompt.tense.toLowerCase().replace(/\s/g, '_');
+      const options = this.keywords[tenseKey];
+
+      if (Array.isArray(options) && options.length > 0) {
+        let randomIndex;
+
+        // Ensure new random index is different from the previous one
+        do {
+          randomIndex = Math.floor(Math.random() * options.length);
+        } while (
+          options.length > 1 && 
+          options[randomIndex] === this.randomTenseDisplay
+        );
+
+        this.randomTenseDisplay = options[randomIndex];
+      } else {
+        this.randomTenseDisplay = this.currentPrompt.tense;
+      }
+    },
 
     async endGame() {
       this.showBlockingDialog = true;
@@ -350,31 +362,32 @@ export default {
 
       const avgTime = ((new Date().getTime() - this.startTime) / 1000 / this.results.length).toFixed(1);
 
-      const rounds = this.results.map((r, index) => ({
-        prompt_number: index + 1,
-        person: r.prompt.person,
-        verb: r.prompt.verb,
-        tense: r.prompt.tense,
-        sentence_type: r.prompt.sentenceType,
-        user_answer: r.userAnswer,
-        is_correct: r.correct,
-        acceptable_answers: Array.isArray(r.correctAnswers) ? r.correctAnswers : [],
-        elapsed_time: parseFloat(r.elapsedTime)
-      }));
+    const rounds = this.results.map((r, index) => ({
+      prompt_number: index + 1,
+      person: r.prompt.person,
+      verb: r.prompt.verb,
+      tense: r.prompt.tense,
+      sentence_type: r.prompt.sentenceType,
+      user_answer: r.userAnswer,
+      is_correct: r.correct,
+      acceptable_answers: Array.isArray(r.correctAnswers) ? r.correctAnswers : [],
+      elapsed_time: parseFloat(r.elapsedTime),
+    }));
 
-      const payload = {
-        verb_set: this.gameSettings.verbSet,
-        sentence_types: this.gameSettings.sentenceTypes,  
-        tenses: this.gameSettings.tenses,                 
-        total_rounds: this.gameSettings.numPrompts,
-        correct_count: this.rightCount,
-        wrong_count: this.wrongCount,
-        started_at: new Date(this.startTime).toISOString(),
-        finished_at: new Date().toISOString(),
-        total_time: Math.floor((new Date().getTime() - this.startTime) / 1000),
-        avg_time_per_prompt: parseFloat(avgTime),
-        rounds: rounds
-      };
+    const payload = {
+      verb_set: this.gameSettings.verbSet,
+      sentence_types: this.gameSettings.sentenceTypes,
+      tenses: this.gameSettings.tenses,
+      total_rounds: this.gameSettings.numPrompts,
+      correct_count: this.rightCount,
+      wrong_count: this.wrongCount,
+      started_at: new Date(this.startTime).toISOString(),
+      finished_at: new Date().toISOString(),
+      total_time: Math.floor((new Date().getTime() - this.startTime) / 1000),
+      avg_time_per_prompt: parseFloat(avgTime),
+      rounds: rounds   // no session or session_id here
+    };
+
 
       try {
         console.log("Submitting game payload:", JSON.stringify(payload, null, 2));
@@ -426,6 +439,10 @@ export default {
       this.currentPrompt.verb = prompt.getVerb();
       this.currentPrompt.tense = prompt.getTense();
       this.currentPrompt.sentenceType = prompt.getSentenceType();
+
+      // Ensure a fresh random tense keyword is selected
+      this.updateRandomTense();
+
       this.startRoundTimer();
     },
     updateTimers() {

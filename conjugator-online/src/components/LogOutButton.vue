@@ -4,7 +4,7 @@
     @click="logout"
     style="align-self: center; margin-right: 15px;"
   >
-    Logout
+    Log out
   </v-btn>
 </template>
 

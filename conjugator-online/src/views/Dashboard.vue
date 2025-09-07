@@ -1,226 +1,254 @@
 <template>
-<v-container>
-  <!-- Tabs Navigation -->
-  <v-select
-    v-if="isMobile"
-    v-model="activeTab"
-    :items="tabItems"
-    item-title="label"
-    item-value="value"
-    label="Select section"
-    class="mt-4"
-    dense
-    outlined
-  />
+  <v-container>
+    <!-- Tabs Navigation -->
+    <v-select
+      v-if="isMobile"
+      v-model="activeTab"
+      :items="tabItems"
+      item-title="label"
+      item-value="value"
+      label="Select section"
+      class="mt-4"
+      dense
+      outlined
+    />
 
-  <v-tabs
-    v-else
-    v-model="activeTab"
-    class="mt-4"
-    show-arrows
-    grow
-  >
-    <v-tab v-for="item in tabItems" :key="item.value" :value="item.value">
-      {{ item.label }}
-    </v-tab>
-  </v-tabs>
+    <v-tabs
+      v-else
+      v-model="activeTab"
+      class="mt-4"
+      show-arrows
+      grow
+    >
+      <v-tab v-for="item in tabItems" :key="item.value" :value="item.value">
+        {{ item.label }}
+      </v-tab>
+    </v-tabs>
 
+    <!-- Tab Content -->
+    <v-window v-model="activeTab" class="mt-5" touchless>
+      <v-window-item value="grammar-feedback">
+        <div v-if="loading" class="text-center my-5">
+          <v-progress-circular indeterminate color="primary" />
+        </div>
+        <div v-else-if="errorsError">
+          <v-alert type="error">{{ errorsError }}</v-alert>
+        </div>
+        <div v-else>
+          <ErrorsDataTab />
+        </div>
+      </v-window-item>
 
-  <!-- Tab Content -->
-  <v-window v-model="activeTab" class="mt-5" touchless>
-    <v-window-item value="grammar-feedback">
-      <!-- Grammar Feedback tab content -->
-      <div v-if="loading" class="text-center my-5">
-        <v-progress-circular indeterminate color="primary"></v-progress-circular>
-      </div>
-      <div v-else-if="errorsError">
-        <v-alert type="error">{{ errorsError }}</v-alert>
-      </div>
-      
-      <div v-else>
-        <ErrorsDataTab />
-      </div>
-        
-    </v-window-item>
+      <v-window-item value="vocabulary">
+        <VocabDataTab />
+      </v-window-item>
 
-    <v-window-item value="vocabulary">
-      <p>Coming soon...</p>
-    </v-window-item>
+      <v-window-item value="goals">
+        <GoalsDataTab />
+      </v-window-item>
 
-    <v-window-item value="goals">
-      <p>Coming soon...</p>
-    </v-window-item>
+      <v-window-item value="conjugation-game">
+        <div v-if="loading" class="text-center my-5">
+          <v-progress-circular indeterminate color="primary" />
+        </div>
+        <div v-else-if="conjGameError">
+          <v-alert type="error">{{ conjGameError }}</v-alert>
+        </div>
+        <div v-else class="d-flex flex-wrap align-start pa-2">
+          <v-row dense>
+            <!-- Conjugation accuracy -->
+            <v-col cols="12" lg="6">
+              <v-card class="chart-card pa-4" elevation="2">
+                <v-card-title class="text-h5 font-weight-bold">Conjugation accuracy</v-card-title>
+                <v-card-text class="d-flex flex-column align-center flex-grow-1">
+                  <PieChart :data="totalRightWrongChartData" />
+                  <div class="text-subtitle-1 mt-4">
+                    {{ sessions.length }} game{{ sessions.length !== 1 ? 's' : '' }} played
+                  </div>
+                  <div class="text-subtitle-2">
+                    {{ totalRoundsPlayed }} total rounds
+                  </div>
+                </v-card-text>
+              </v-card>
+            </v-col>
 
-    <v-window-item value="conjugation-game">
-      <div v-if="loading" class="text-center my-5">
-        <v-progress-circular indeterminate color="primary"></v-progress-circular>
-      </div>
+            <!-- Tense accuracy -->
+            <v-col cols="12" lg="6">
+              <v-card class="chart-card pa-4" elevation="2">
+                <v-card-title class="text-h5 font-weight-bold">Tense accuracy</v-card-title>
+                <v-card-text class="d-flex flex-column align-center flex-grow-1">
+                  <BarChart :data="tenseAccuracyData" :width="400" :height="250" color="#4CAF50" />
+                  <div class="text-subtitle-1 mt-4">Percentage of correct answers by tense</div>
+                </v-card-text>
+              </v-card>
+            </v-col>
 
-      <div v-else-if="conjGameError">
-        <v-alert type="error">{{ conjGameError }}</v-alert>
-      </div>
-      <div v-else class="d-flex flex-wrap align-start pa-2">
-        <v-row dense>
-        <!-- Conjugation accuracy -->
-        <v-col cols="12" lg="6">
-          <v-card class="chart-card pa-4" elevation="2">
-            <v-card-title class="text-h5 font-weight-bold">
-              Conjugation accuracy
-            </v-card-title>
-            <v-card-text class="d-flex flex-column align-center flex-grow-1">
-              <PieChart :data="totalRightWrongChartData" />
-              <div class="text-subtitle-1 mt-4">
-                {{ sessions.length }} game{{ sessions.length !== 1 ? 's' : '' }} played
+            <!-- Sentence type accuracy -->
+            <v-col cols="12" lg="6">
+              <v-card class="chart-card pa-4" elevation="2">
+                <v-card-title class="text-h5 font-weight-bold">Sentence type accuracy</v-card-title>
+                <v-card-text class="d-flex flex-column align-center flex-grow-1">
+                  <BarChart :data="sentenceTypeAccuracyData" :width="400" :height="250" color="#2196F3" />
+                  <div class="text-subtitle-1 mt-4">Percentage of correct answers by sentence type</div>
+                </v-card-text>
+              </v-card>
+            </v-col>
+
+            <v-col cols="12" lg="6">
+              <NumbersCard
+                class="ma-2 flex-grow-1"
+                :value="(userStore.totalCorrect ?? 0).toString()"
+                title="Total correct"
+                label="total correct conjugations on the Conjugator game"
+              />
+            </v-col>
+          </v-row>
+
+          
+
+          <v-sheet elevation="2" class="m-3 p-4 d-flex flex-wrap">
+            <h3 class="text-h5 font-weight-bold w-100">Irregular verbs</h3>
+            <p class="text-subtitle-1 w-100">
+              For past simple, only the positive verb forms are counted
+            </p>
+
+            <NumbersCard
+              class="ma-2 flex-grow-1"
+              :value="(userStore.tenseStats?.discovered_verbs_ps ?? 0).toString()"
+              title="Past simple discovery"
+              label="irregular verbs written correctly 1x"
+            />
+
+            <NumbersCard
+              class="ma-2 flex-grow-1"
+              :value="(userStore.tenseStats?.mastered_verbs_ps ?? 0).toString()"
+              title="Past simple ALL"
+              label="of ALL irregular verbs used at least 1x (out of a total of 136)"
+            />
+
+            <NumbersCard
+              class="ma-2 flex-grow-1"
+              value="0%"
+              title="Present perfect"
+              label="irregular verbs written correctly at least 1x"
+            />
+
+            <NumbersCard
+              class="ma-2 flex-grow-1"
+              value="0%"
+              title="Present perfect ALL"
+              label="of ALL irregular verbs used at least 1x (out of a total of 136)"
+            />
+          </v-sheet>
+
+          <v-card class="p-4">
+            <v-card-title>Verb Usage Dashboard</v-card-title>
+            <v-card-text>
+              <div v-if="userStore.loadingVerbUsage">Loading...</div>
+              <div v-else-if="userStore.verbUsageError" class="text-red-500">
+                {{ userStore.verbUsageError }}
               </div>
-              <div class="text-subtitle-2">
-                {{ totalRoundsPlayed }} total rounds
+              <div v-else>
+                <h3>Tier Stats</h3>
+                <ul>
+                  <li v-for="tier in userStore.tierStats" :key="tier.tier_name">
+                    {{ tier.tier_name }} — Discovered: {{ tier.discovered_count }}/{{ tier.total }} ({{ tier.discovered_pct }}%)
+                    — Mastered: {{ tier.mastered_count }}/{{ tier.total }} ({{ tier.mastered_pct }}%)
+                  </li>
+                </ul>
+
+                <h3 class="mt-4">Tense Stats</h3>
+                <pre>{{ userStore.tenseStats }}</pre>
+
+                <h3 class="mt-4">First 5 Verbs</h3>
+                <ul>
+                  <li v-for="verb in userStore.verbUsage.slice(0, 5)" :key="verb.verb">
+                    {{ verb.verb }} — Correct (PS): {{ verb.past_simple.correct }}, Correct (PP): {{ verb.present_perfect.correct }}
+                  </li>
+                </ul>
               </div>
             </v-card-text>
           </v-card>
-        </v-col>
 
-        <!-- Tense accuracy -->
-        <v-col cols="12" lg="6">
-          <v-card class="chart-card pa-4" elevation="2">
-            <v-card-title class="text-h5 font-weight-bold">
-              Tense accuracy
-            </v-card-title>
-            <v-card-text class="d-flex flex-column align-center flex-grow-1">
-              <BarChart :data="tenseAccuracyData" :width="400" :height="250" color="#4CAF50" />
-              <div class="text-subtitle-1 mt-4">
-                Percentage of correct answers by tense
-              </div>
-            </v-card-text>
-          </v-card>
-        </v-col>
+          <v-divider />
 
-        <!-- Sentence type accuracy -->
-        <v-col cols="12" lg="6">
-          <v-card class="chart-card pa-4" elevation="2">
-            <v-card-title class="text-h5 font-weight-bold">
-              Sentence type accuracy
-            </v-card-title>
-            <v-card-text class="d-flex flex-column align-center flex-grow-1">
-              <BarChart :data="sentenceTypeAccuracyData" :width="400" :height="250" color="#2196F3" />
-              <div class="text-subtitle-1 mt-4">
-                Percentage of correct answers by sentence type
-              </div>
-            </v-card-text>
-          </v-card>
-        </v-col>
-      </v-row>
-
-        <v-sheet
-          elevation="2"
-          class="m-3 p-4 d-flex flex-wrap" 
-        >
-          <h3 class="text-h5 font-weight-bold w-100">Irregular verbs</h3>
-          <p class="text-subtitle-1 w-100">
-            For past simple, only the positive verb forms are counted
-          </p>
-
-          <!-- Cards will wrap into rows -->
-          <NumbersCard
-            class="ma-2 flex-grow-1"
-            :value="totalAllIrregsUsedOnce > 0 ? totalAllIrregsUsedOnce : 0"
-            title="Past simple"
-            label="irregular verbs written correctly at least 1x"
-          />
-
-          <NumbersCard
-            class="ma-2 flex-grow-1"
-            :value="totalAllIrregsUsedOnce > 0 ? (totalAllIrregsUsedOnce/130*100).toFixed(0) + '%': '0%'"
-            title="Past simple ALL"
-            label="of ALL irregular verbs used at least 1x (out of a total of 136)"
-          />
-
-          <NumbersCard
-            class="ma-2 flex-grow-1"
-            :value="totalAllIrregsUsedOnceParticiple > 0 ? totalAllIrregsUsedOnceParticiple : 0"
-            title="Present perfect"
-            label="irregular verbs written correctly at least 1x"
-          />
-
-          <NumbersCard
-            class="ma-2 flex-grow-1"
-            :value="totalAllIrregsUsedOnceParticiple > 0 ? (totalAllIrregsUsedOnceParticiple/130*100).toFixed(0) + '%': '0%'"
-            title="Present perfect ALL"
-            label="of ALL irregular verbs used at least 1x (out of a total of 136)"
-          />
-        </v-sheet>
-
-        <v-divider></v-divider>
-
-        <v-card class="pa-4 mb-6" elevation="2" :style="{
-          minWidth: xs ? '300px' : '95%', 
-          maxWidth: xs ? '500px' : '95%', 
-          marginLeft: xs ? '5px' : '16px',
-          marginRight: xs ? '5px' : '16px',
-          marginTop: '20px',
-          }"> 
-          <div class="text-h5 mt-2" >Game details ({{ sessions.length }} game{{ sessions.length !== 1 ? 's' : '' }} played)</div>
-          <div v-for="session in sessions" :key="session.session_id" class="mt-6">
-            <v-expansion-panels>
-              <v-expansion-panel>
-                <v-expansion-panel-title>
-                  <span class="font-weight-medium">Game {{ session.session_id }} —
-                  {{ session.correct_count }} Correct, {{ session.wrong_count }} Incorrect</span> — {{ new Date(session.started_at).toLocaleString() }} — {{ session.tenses.join(', ').slice(0,50) }}
-                </v-expansion-panel-title>
-                <v-expansion-panel-text>
-                  <div v-if="session.rounds?.length" >
-                    <v-table>
-                    <thead>
-                      <tr>
-                        <th>Prompt #</th>
-                        <th>Person</th>
-                        <th>Verb</th>
-                        <th>Tense</th>
-                        <th>Sentence Type</th>
-                        <th>User Answer</th>
-                        <th>Correct?</th>
-                        <th>Acceptable Answers</th>
-                        <th>Time (s)</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr
-                        v-for="round in session.rounds" :key="`${session.session_id}-${round.prompt_number}`"
-                      >
-                        <td>{{ round.prompt_number }}</td>
-                        <td>{{ round.person }}</td>
-                        <td>{{ round.verb }}</td>
-                        <td>{{ round.tense }}</td>
-                        <td>{{ round.sentence_type }}</td>
-                        <td>{{ round.user_answer }}</td>
-                        <td>
-                          <v-icon :color="round.is_correct ? 'green' : 'red'">
-                            {{ round.is_correct ? 'mdi-check-circle' : 'mdi-close-circle' }}
-                          </v-icon>
-                        </td>
-                        <td>{{ round.acceptable_answers?.join(' / ') }}</td>
-                        <td>{{ round.elapsed_time?.toFixed(2) ?? '—' }}</td>
-                      </tr>
-                    </tbody>
-                  </v-table>
-                </div>
-                <div v-else>
-                  <p class="text-muted">No rounds data available for this session.</p>
-                </div>
-              </v-expansion-panel-text>
-            </v-expansion-panel>
-          </v-expansion-panels>
-          </div>
+          <v-card
+            class="pa-4 mb-6"
+            elevation="2"
+            :style="{
+              minWidth: xs ? '300px' : '95%',
+              maxWidth: xs ? '500px' : '95%',
+              marginLeft: xs ? '5px' : '16px',
+              marginRight: xs ? '5px' : '16px',
+              marginTop: '20px',
+            }"
+          >
+            <div class="text-h5 mt-2">
+              Game details ({{ sessions.length }} game{{ sessions.length !== 1 ? 's' : '' }} played)
+            </div>
+            <div v-for="session in sessions" :key="session.session_id" class="mt-6">
+              <v-expansion-panels>
+                <v-expansion-panel>
+                  <v-expansion-panel-title>
+                    <span class="font-weight-medium">
+                      Game {{ session.session_id }} — {{ session.correct_count }} Correct, {{ session.wrong_count }} Incorrect
+                    </span>
+                    — {{ new Date(session.started_at).toLocaleString() }} — {{ session.tenses.join(', ').slice(0, 50) }}
+                  </v-expansion-panel-title>
+                  <v-expansion-panel-text>
+                    <div v-if="session.rounds?.length">
+                      <v-table>
+                        <thead>
+                          <tr>
+                            <th>Prompt #</th>
+                            <th>Person</th>
+                            <th>Verb</th>
+                            <th>Tense</th>
+                            <th>Sentence Type</th>
+                            <th>User Answer</th>
+                            <th>Acceptable Answers</th>
+                            <th>Correct?</th>
+                            <th>Typo?</th>
+                            <th>Time (s)</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr
+                            v-for="round in session.rounds"
+                            :key="`${session.session_id}-${round.prompt_number}`"
+                          >
+                            <td>{{ round.prompt_number }}</td>
+                            <td>{{ round.person }}</td>
+                            <td>{{ round.verb }}</td>
+                            <td>{{ round.tense }}</td>
+                            <td>{{ round.sentence_type }}</td>
+                            <td>{{ round.user_answer }}</td>
+                                                        <td>{{ round.acceptable_answers?.join(' / ') }}</td>
+                            <td>
+                              <v-icon :color="round.is_correct ? 'green' : 'red'">
+                                {{ round.is_correct ? 'mdi-check-circle' : 'mdi-close-circle' }}
+                              </v-icon>
+                            </td>
+                            <td>{{ round.typo }}</td>
+                            <td>{{ round.elapsed_time?.toFixed(2) ?? '—' }}</td>
+                          </tr>
+                        </tbody>
+                      </v-table>
+                    </div>
+                    <div v-else>
+                      <p class="text-muted">No rounds data available for this session.</p>
+                    </div>
+                  </v-expansion-panel-text>
+                </v-expansion-panel>
+              </v-expansion-panels>
+            </div>
           </v-card>
         </div>
-      
-      
-    </v-window-item>
-
-
-  </v-window>
-</v-container>
-
+      </v-window-item>
+    </v-window>
+  </v-container>
 </template>
+
 
 <script lang="ts">
 import { defineComponent, ref, onMounted, computed } from "vue";
@@ -233,9 +261,8 @@ import BarChart from "@/components/charts/BarChart.vue";
 import ErrorsDataTab from "@/components/ErrorsDataTab.vue";
 import NumbersCard from "@/components/NumbersCard.vue";
 import { useRouter, useRoute } from 'vue-router';
-
-const router = useRouter();
-const route = useRoute();
+import VocabDataTab from "@/components/VocabDataTab.vue";
+import GoalsDataTab from "@/components/GoalsDataTab.vue";
 
 
 interface GameSession {
@@ -254,7 +281,7 @@ interface GameSession {
 
 export default defineComponent({
   name: "Dashboard",
-  components: { TopNavBar, PieChart, BarChart, ErrorsDataTab, NumbersCard },
+  components: { TopNavBar, NumbersCard, PieChart, BarChart, ErrorsDataTab, VocabDataTab, GoalsDataTab },
   setup() {
     const router = useRouter();
     const route = useRoute();
@@ -262,9 +289,16 @@ export default defineComponent({
     const loading = ref<boolean>(true);
     const errorsError = ref<string | null>(null);
     const conjGameError = ref<string | null>(null);
-    const irregularVerbs = ref<Record<string, any>>({});
-    const irregularVerbCounts = ref<Record<string, number>>({});
-    const irregularParticipleVerbCounts = ref<Record<string, number>>({})
+    const verbUsage = ref<any[]>([]);
+    const tierStats = ref<any[]>([]);
+    interface TenseStats {
+        discovered_verbs_ps: string[];
+        discovered_verbs_pp: string[];
+        mastered_verbs_ps: string[];
+        mastered_verbs_pp: string[];
+      }
+
+const tenseStats = ref<TenseStats | null>(null);
 
     const userStore = useUserStore();
 
@@ -302,43 +336,13 @@ export default defineComponent({
       )
     );
 
-    // irregular verb usage data
-    const totalAllIrregsUsedOnce = computed(() =>
-        Object.values(irregularVerbCounts.value).filter((count) => count >= 1).length
-      );
-
-      const totalAllIrregsUsedTwice = computed(() =>
-        Object.values(irregularVerbCounts.value).filter((count) => count >= 2).length
-      );
-
-      const totalAllIrregsUsedThrice = computed(() =>
-        Object.values(irregularVerbCounts.value).filter((count) => count >= 3).length
-      );
-
-      // Object of verbs with count > 0
-      const AllIrregsVerbsWithCounts = computed(() =>
-        Object.fromEntries(
-          Object.entries(irregularVerbCounts.value).filter(([_, count]) => count > 0)
-        )
-      );
-
-      // List of verbs not used yet
-      const AllIrregsUnusedVerbs = computed(() =>
-        Object.keys(irregularVerbCounts.value).filter(
-          (verb) => irregularVerbCounts.value[verb] === 0
-        )
-      );
-
-      const totalAllIrregsUsedOnceParticiple = computed(() =>
-        Object.values(irregularParticipleVerbCounts.value).filter((count) => count >= 1).length
-    );
 
     const activeTab = ref("grammar-feedback");
     const tabItems = [
-      { value: "grammar-feedback", label: "Grammar Feedback" },
+      { value: "grammar-feedback", label: "Errors Feedback" },
       { value: "vocabulary", label: "Vocabulary" },
       { value: "goals", label: "Goals" },
-      { value: "conjugation-game", label: "Conjugation Game" },
+      { value: "conjugation-game", label: "Conjugator" },
     ];
 
     const { xs, smAndDown } = useDisplay();
@@ -352,23 +356,6 @@ export default defineComponent({
       "#FF5722",
     ];
 
-    // Fetch irregular verbs JSON
-    const fetchIrregularVerbs = async () => {
-      try {
-        const res = await fetch("/data/irregularVerbs.json");
-        const data = await res.json();
-        irregularVerbs.value = data;
-
-        // initialize counters
-        irregularVerbCounts.value = Object.keys(data).reduce(
-          (acc, verb) => ({ ...acc, [verb]: 0 }),
-          {}
-        );
-      } catch (err) {
-        console.error("Failed to load irregular verbs JSON:", err);
-      }
-    };
-
     const fetchConjGameSessionsDashboardData = async () => {
       loading.value = true;
       conjGameError.value = null;
@@ -377,8 +364,6 @@ export default defineComponent({
         const sessionsRes = await api.get<GameSession[]>("/conj-game-sessions/");
         sessions.value = sessionsRes.data;
 
-        // After fetching, count irregular verbs
-        updateIrregularVerbCounts();
       } catch (err: any) {
         console.error("Conj game sessions fetch failed:", err);
         conjGameError.value = conjGameError.value
@@ -387,38 +372,6 @@ export default defineComponent({
       }
 
       loading.value = false;
-    };
-
-    // Count correct irregular verb answers
-    const updateIrregularVerbCounts = () => {
-      if (!irregularVerbs.value) return;
-
-      // reset counts
-      for (const verb of Object.keys(irregularVerbCounts.value)) {
-        irregularVerbCounts.value[verb] = 0;
-        irregularParticipleVerbCounts.value[verb] = 0;
-      }
-
-      const rounds = sessions.value.flatMap((s) => s.rounds || []);
-
-      for (const round of rounds) {
-        const verb = round.verb?.toLowerCase();
-        if (
-          irregularVerbs.value[verb] &&
-          round.tense === "Past simple" &&
-          round.sentence_type === "Positive" &&
-          round.is_correct
-        ) {
-          irregularVerbCounts.value[verb] += 1;
-        }
-        if (
-          irregularVerbs.value[verb] &&
-          round.tense === "Present perfect" &&
-          round.is_correct
-        ) {
-          irregularParticipleVerbCounts.value[verb] += 1;
-        }
-      } 
     };
 
     const tenseAccuracyData = computed(() => {
@@ -474,8 +427,8 @@ export default defineComponent({
     });
 
     onMounted(async () => {
-      await fetchIrregularVerbs();
       await fetchConjGameSessionsDashboardData();
+      userStore.fetchVerbUsageDashboardData();
       setInitialTabFromRoute();
     });
 
@@ -504,9 +457,9 @@ export default defineComponent({
       sentenceTypeAccuracyData,
       smAndDown,
       xs,
-      irregularVerbCounts, 
-      totalAllIrregsUsedOnce, 
-      totalAllIrregsUsedOnceParticiple
+      verbUsage,
+      tierStats,
+      tenseStats
     };
   },
 });

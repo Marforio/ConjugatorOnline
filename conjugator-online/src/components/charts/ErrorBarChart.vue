@@ -5,27 +5,31 @@
       <svg ref="svg" :width="svgWidth" :height="svgHeight"></svg>
       <!-- Floating popover box pinned top-right of chart -->
       <v-card
-        v-if="popover.visible && selectedEvidence"
         class="popover-card"
-        :style="{ top: popover.y + 'px', left: popover.x + 'px' }"
+        :style="{ top: popover.y + 'px', left: popover.x + 'px', maxWidth: '300px', width: 'auto' }"
         elevation="6"
-        max-width="300"
         >
         <v-list density="compact">
-            <v-list-subheader>
-            <span class="text-uppercase text-high-emphasis">{{ selectedEvidence.error }}</span>
-            </v-list-subheader>
-            <v-list-item class="text-body-1">
-                {{ selectedEvidence.description }} ( see <span v-html="selectedEvidence.reference"></span> )
-            </v-list-item>
+          <v-list-subheader>
+            <span class="text-uppercase">
+              {{ selectedEvidence ? selectedEvidence.error : "Error Info" }}
+            </span>
+          </v-list-subheader>
+
+          <v-list-item v-if="!selectedEvidence" class="text-body-2">
+            Click on a bar for information on the error
+          </v-list-item>
+
+          <v-list-item v-else class="text-body-2">
+            {{ selectedEvidence.description }}
+            ( see <span v-html="selectedEvidence.reference"></span> )
+          </v-list-item>
         </v-list>
       </v-card>
-
-
     </div>
     <!-- infobox (always below, fixed width, doesn’t affect chart height) -->
-    <div class="info-wrapper" ref="infoWrapper">
-        <v-card v-if="selectedEvidence" class="info-card" max-width="100%" width="100%">
+    <div class="info-wrapper" ref="infoWrapper" style="display: flex; justify-content: center;">
+        <v-card v-if="selectedEvidence" class="info-card" max-width="90%" width="90%">
         <v-list density="compact">
             <v-list-subheader>
             <span class="text-uppercase text-high-emphasis">{{ selectedEvidence.error }} :</span>
@@ -37,13 +41,9 @@
             </v-list-item>
             <v-list-item>
             <strong>How to fix the error:</strong>
-            {{ selectedEvidence.recommendation }}. For example, {{ selectedEvidence.examples }}
-            </v-list-item>
-            <v-list-item>
-            <strong>Reference:</strong>
-            for a complete explanation, go to
+            {{ selectedEvidence.recommendation }}. For example, {{ selectedEvidence.examples }}. <u>For a complete explanation</u>, go to
             <span v-html="selectedEvidence.reference"></span>
-            in the grammar book
+            in the grammar book.
             </v-list-item>
         </v-list>
         </v-card>
@@ -72,9 +72,8 @@ export default {
       svgHeight: 400, // default min, will be recalculated
       selectedEvidence: null,
       popover: {
-        visible: false,
-        x: 0,
-        y: 0
+        x: 300,
+        y: 30
       }
     };
   },
@@ -85,6 +84,7 @@ export default {
     }
     this.calculateSvgHeight();
     this.drawChart();
+    this.updatePopoverPosition();
     window.addEventListener('resize', this.updatePopoverPosition);
 
   },
@@ -138,7 +138,7 @@ export default {
         this.popover.y = Math.max(0, relativeY);
         },
     drawChart() {
-        const margin = { top: 20, right: 30, bottom: 40, left: 50 };
+        const margin = { top: 30, right: 40, bottom: 50, left: 60 };
         const width = this.svgWidth - margin.left - margin.right;
         const height = this.svgHeight - margin.top - margin.bottom;
 
@@ -260,10 +260,28 @@ export default {
           .attr('height', d => y(d[0]) - y(d[1]))
           .attr('width', x.bandwidth())
           .on('click', (event, d) => {
-            console.log('Clicked stacked bar data:', d.data);
             this.showPopover(d.data);
           });
       }
+      chart
+      .selectAll(".bar-total")
+      .data(stackData)
+      .enter()
+      .append("text")
+      .attr("class", "bar-total")
+      .attr("x", d => {
+        // center above the stacked bar
+        const total = d3.sum(feedbackKeys, k => d[k] || 0);
+        return x(d.error_code) + x.bandwidth() / 2;
+      })
+      .attr("y", d => {
+        const total = d3.sum(feedbackKeys, k => d[k] || 0);
+        return y(total) - 4; // 4px above the top
+      })
+      .attr("text-anchor", "middle") // horizontally center
+      .attr("dominant-baseline", "alphabetic") // position above the bar
+      .attr("font-size", "12px")
+      .text(d => d3.sum(feedbackKeys, k => d[k] || 0));
     },
     showPopover(errorItem) {
         const error_code = errorItem.error_code;
@@ -302,7 +320,6 @@ export default {
         relativeX = Math.max(0, relativeX);
         relativeY = Math.max(0, relativeY);
 
-        this.popover.visible = true;
         this.popover.x = relativeX;
         this.popover.y = relativeY;
         }
@@ -318,39 +335,52 @@ export default {
 .chart-wrapper {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: stretch; /* ✅ instead of flex-start */
   gap: 20px;
+  padding: 16px 24px;
+  box-sizing: border-box;
+  width: 100%;  /* ✅ fill parent, allow overflow to trigger */
 }
+
+
 .chart-container {
   position: relative;
   overflow-x: auto;
   overflow-y: hidden;
+
   width: 100%;
   max-width: 100vw;
-  min-width: 0; /* allows flex shrinking if used inside a flex parent */
+  min-width: 0;
+
   box-sizing: border-box;
-  display: block; /* block or flex both work, avoid nested flex column */
-  /* Remove any flex-direction from .chart-container */
+  display: block;
+
+  /* ✅ allow the inner SVG to dictate scroll width */
+  white-space: nowrap;
 }
+
 
 
 .popover-card {
   position: absolute;
   z-index: 1000;
+  /* let content grow naturally */
+  max-width: 300px; 
+  min-width: 200px; /* optional */
+  width: auto; 
+  white-space: normal; /* allow wrapping */
+  word-break: break-word; /* prevent overflow with long words */
 }
 .info-wrapper {
-  width: 100%;
   max-width: 100%;
   min-width: 0;
   overflow-x: auto;
   box-sizing: border-box;
-  display: block; /* Not flex or grid */
+  display: block;
 }
 
+
 .info-card {
-  max-width: 100%;
-  min-width: 0;
-  width: 100%;
   box-sizing: border-box;
   /* Remove fixed pixel width if present */
 }
