@@ -234,6 +234,7 @@ export default {
 .chart-wrapper {
   position: relative;
   margin-top: 5%;
+  padding: 8%;
 }
 
 .chart-container {

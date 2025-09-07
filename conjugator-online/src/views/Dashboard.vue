@@ -114,61 +114,47 @@
 
             <NumbersCard
               class="ma-2 flex-grow-1"
-              :value="(userStore.tenseStats?.discovered_verbs_ps ?? 0).toString()"
-              title="Past simple discovery"
-              label="irregular verbs written correctly 1x"
+              :value="`${userStore.tierStats?.[0]?.discovered_pct_ps ?? 0}%`"
+              title="Basic 75 past simple"
+              label="Discovered irregular verbs (written correctly 1x)"
             />
 
             <NumbersCard
               class="ma-2 flex-grow-1"
-              :value="(userStore.tenseStats?.mastered_verbs_ps ?? 0).toString()"
-              title="Past simple ALL"
-              label="of ALL irregular verbs used at least 1x (out of a total of 136)"
+              :value="`${userStore.tierStats?.[0]?.mastered_pct_ps ?? 0}%`"
+              title="Master 110 present perfect"
+              label="Mastered irregular verbs (used correctly 3x)"
             />
 
             <NumbersCard
               class="ma-2 flex-grow-1"
-              value="0%"
-              title="Present perfect"
-              label="irregular verbs written correctly at least 1x"
+              :value="`${userStore.tierStats?.[1]?.discovered_pct_ps ?? 0}%`"
+              title="Master 110 past simple"
+              label="Discovered irregular verbs (written correctly 1x)"
             />
 
             <NumbersCard
               class="ma-2 flex-grow-1"
-              value="0%"
-              title="Present perfect ALL"
-              label="of ALL irregular verbs used at least 1x (out of a total of 136)"
+              :value="`${userStore.tierStats?.[1]?.mastered_pct_pp ?? 0}%`"
+              title="Master 110 present perfect"
+              label="Mastered irregular verbs (used correctly 3x)"
+            />
+
+            <NumbersCard
+              class="ma-2 flex-grow-1"
+              :value="`${userStore.tierStats?.[2]?.discovered_pct_ps ?? 0}%`"
+              title="All Irregs past simple"
+              label="Discovered irregular verbs (written correctly 1x)"
+            />
+
+            <NumbersCard
+              class="ma-2 flex-grow-1"
+              :value="`${userStore.tierStats?.[2]?.mastered_pct_pp ?? 0}%`"
+              title="All irregs present perfect"
+              label="Mastered irregular verbs (used correctly 3x)"
             />
           </v-sheet>
 
-          <v-card class="p-4">
-            <v-card-title>Verb Usage Dashboard</v-card-title>
-            <v-card-text>
-              <div v-if="userStore.loadingVerbUsage">Loading...</div>
-              <div v-else-if="userStore.verbUsageError" class="text-red-500">
-                {{ userStore.verbUsageError }}
-              </div>
-              <div v-else>
-                <h3>Tier Stats</h3>
-                <ul>
-                  <li v-for="tier in userStore.tierStats" :key="tier.tier_name">
-                    {{ tier.tier_name }} — Discovered: {{ tier.discovered_count }}/{{ tier.total }} ({{ tier.discovered_pct }}%)
-                    — Mastered: {{ tier.mastered_count }}/{{ tier.total }} ({{ tier.mastered_pct }}%)
-                  </li>
-                </ul>
-
-                <h3 class="mt-4">Tense Stats</h3>
-                <pre>{{ userStore.tenseStats }}</pre>
-
-                <h3 class="mt-4">First 5 Verbs</h3>
-                <ul>
-                  <li v-for="verb in userStore.verbUsage.slice(0, 5)" :key="verb.verb">
-                    {{ verb.verb }} — Correct (PS): {{ verb.past_simple.correct }}, Correct (PP): {{ verb.present_perfect.correct }}
-                  </li>
-                </ul>
-              </div>
-            </v-card-text>
-          </v-card>
 
           <v-divider />
 
