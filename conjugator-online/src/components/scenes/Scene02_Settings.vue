@@ -101,9 +101,37 @@
               </v-card>
 
               <!-- Start Button -->
-              <v-btn block color="success" :disabled="!optionsLoaded" class="mt-2" @click="() => startGame(selections)">
-                Confirm custom settings
-              </v-btn>
+               <div class="d-flex justify-center mt-2">
+                <v-tooltip
+                  v-if="selectedTenses.length === 0 || selectedSentenceTypes.length === 0"
+                  location="top"
+                  text="Select at least 1 sentence type and 1 tense"
+                >
+                  <template #activator="{ props }">
+                    <div v-bind="props">
+                      <v-btn
+                        color="success"
+                        class="mt-2 mx-auto"
+                        style="max-width: 300px; pointer-events: none; opacity: 0.6;"
+                      >
+                        Confirm custom settings
+                      </v-btn>
+                    </div>
+                  </template>
+                </v-tooltip>
+
+                <!-- Fallback when button is enabled -->
+                <v-btn
+                  v-else
+                  color="success"
+                  class="mt-2 mx-auto"
+                  style="max-width: 300px;"
+                  @click="() => startGame(selections)"
+                >
+                  Confirm custom settings
+                </v-btn>
+              </div>
+
             </v-card>
           </v-col>
 
@@ -270,8 +298,8 @@ export default {
       const opts = await res.json();
       this.options = opts;
       this.selectedVerbSet = opts.verb_sets[0];
-      this.selectedSentenceTypes = opts.sentence_types;
-      this.selectedTenses = opts.tenses;
+      this.selectedSentenceTypes = [];
+      this.selectedTenses = [];
       this.optionsLoaded = true;
     } catch (e) {
       console.error('Error loading options:', e);

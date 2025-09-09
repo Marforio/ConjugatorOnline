@@ -98,9 +98,9 @@
 
         </v-card>
 
-        <v-card class="pa-6 mb-6" height="350px" :style="{ width: $vuetify.display.mdAndUp ? '450px' : '280px',
+        <v-card class="mb-6" height="350px" :style="{ width: $vuetify.display.mdAndUp ? '450px' : '280px',
                                                           height: $vuetify.display.mdAndUp ? '280px' : '350px'
-         }" elevation="2" color="grey-lighten-4">
+         }" :class="$vuetify.display.smAndUp ? 'pa-6' : 'pa-2'" elevation="2" color="grey-lighten-4">
           <v-card-title class="text-h5 text-center text-primary">Verb</v-card-title>
           <v-card-text class="text-center">
             <div v-if="$vuetify.display.mdAndUp" class="text-h2 font-weight-bold mb-6">{{ currentPrompt.verb }}</div>
@@ -111,22 +111,28 @@
                 <div class="text-subtitle-2 text-grey-darken-1">Person</div>
                 <div class="text-body-1">{{ currentPrompt.person }}</div>
               </v-col>
-
+              <v-col cols="12" md="4">
+                <div class="text-subtitle-2 text-grey-darken-1">Sentence Type</div>
+                <div class="text-body-1">{{ currentPrompt.sentenceType }}</div>
+              </v-col>
               <v-col v-if="$vuetify.display.smAndUp" cols="12" md="4">
                 <div class="text-subtitle-2 text-grey-darken-1">{{ displayedTenseHeader }}</div>
                 <div class="text-body-1 text-center">{{ randomTenseDisplay }}</div>
               </v-col>
               <v-col v-else cols="12" md="4">
-                <div class="d-flex justify-space-between align-center">
-                  <div  class="text-subtitle-2 text-grey-darken-1 mx-auto">{{ displayedTenseHeader }}</div>
-                    <v-switch v-model="showKeyword" density="compact" hide-details />
+                <div class="d-flex flex-column align-center">
+                  <div class="d-flex align-center justify-center mb-2" style="gap: 25px;">
+                    <div class="text-subtitle-2 text-grey-darken-1">{{ displayedTenseHeader }}</div>
+                    <v-switch
+                      v-model="showKeyword"
+                      density="compact"
+                      hide-details
+                      class="ma-0 pa-0"
+                      style="margin-bottom: -4px;"
+                    />
+                  </div>
+                  <div class="text-body-1 text-center">{{ randomTenseDisplay }}</div>
                 </div>
-                <div class="text-body-1 text-center">{{ displayedTense }}</div>
-              </v-col>
-
-              <v-col cols="12" md="4">
-                <div class="text-subtitle-2 text-grey-darken-1">Sentence Type</div>
-                <div class="text-body-1">{{ currentPrompt.sentenceType }}</div>
               </v-col>
             </v-row>
           </v-card-text>
