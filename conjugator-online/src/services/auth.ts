@@ -9,14 +9,17 @@ export function getRefreshToken() {
   return localStorage.getItem("refresh");
 }
 
-export function saveTokens(access: string, refresh: string) {
+export function saveTokens(access: string, refresh: string, expiresIn: number = 3600) {
+  const expiry = Date.now() + expiresIn * 1000;
   localStorage.setItem("access", access);
   localStorage.setItem("refresh", refresh);
+  localStorage.setItem("access_expiry", expiry.toString());
 }
 
 export function clearTokens() {
   localStorage.removeItem("access");
   localStorage.removeItem("refresh");
+  localStorage.removeItem("access_expiry");
 }
 
 // API calls only

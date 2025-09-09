@@ -36,23 +36,27 @@ export const useAuthStore = defineStore("auth", () => {
   }
 
   async function validateSession(): Promise<boolean> {
-  if (!access.value) return false;
+    if (!access.value) return false;
 
-  try {
-    await apiValidateToken(); // token is valid
-    return true;
-  } catch {
     try {
-      await refreshAccessToken(); // try to refresh
-      await apiValidateToken();   // validate again
+      await apiValidateToken(); // token is valid
       return true;
     } catch {
-      logout(); // clear tokens and reset store
-      return false;
+      try {
+        await refreshAccessToken(); // try to refresh
+        await apiValidateToken();   // validate again
+        return true;
+      } catch {
+        logout(); // clear tokens and reset store
+        return false;
+      }
     }
   }
-}
 
+function isAccessTokenExpired(): boolean {
+    const expiry = parseInt(localStorage.getItem("access_expiry") || "0");
+    return Date.now() > expiry;
+  }
 
   return {
     access,
@@ -61,6 +65,7 @@ export const useAuthStore = defineStore("auth", () => {
     login,
     logout,
     refreshAccessToken,
-    validateSession
+    validateSession,
+    isAccessTokenExpired
   };
 });

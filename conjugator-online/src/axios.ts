@@ -18,6 +18,12 @@ api.interceptors.request.use(
       return config;
     }
 
+    if (auth.isAccessTokenExpired()) {
+      auth.logout();
+      window.location.href = "/login";
+      return Promise.reject(new Error("Access token expired"));
+    }
+
     if (auth.access || getAccessToken()) {
       config.headers = config.headers ?? {};
       config.headers.Authorization = `Bearer ${auth.access || getAccessToken()}`;

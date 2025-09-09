@@ -13,13 +13,20 @@
 import { useRoute } from 'vue-router'
 import { computed } from 'vue'
 import TopNavBar from '@/components/TopNavBar.vue'
+import { useInactivityTimeout } from "@/composables/useInactivityTimeout";
+import { useAuthStore } from './stores/auth';
 
 const route = useRoute()
+const auth = useAuthStore()
 
 // Hide nav bar on home page
 const showNav = computed(() => {
   const name = route.name || ''
   return name !== 'home' && name !== 'conjugator' && name !== 'login'
 })
+
+if (auth.isLoggedIn && !auth.isAccessTokenExpired()) {
+  useInactivityTimeout();
+}
 
 </script>

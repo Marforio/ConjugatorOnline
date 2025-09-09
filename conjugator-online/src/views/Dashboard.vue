@@ -82,7 +82,7 @@
                   <div class="text-h6 mb-2">Game Accuracy Trend</div>
                   <v-sparkline
                     :model-value="sessionAccuracyTrend"
-                    :gradient = "sparklineGradients[2]"
+                    :gradient="sparklineGradients[2]"
                     color="blue"
                     line-width="3"
                     stroke-linecap="round"
@@ -91,9 +91,25 @@
                     auto-draw-easing="ease"
                     padding="20"
                     smooth
-                    :labels="sessionAccuracyTrend.map((_, i) => `${_}%`)" 
-                    :show-labels="false"  
+                    :labels="
+                      sessionAccuracyTrend.length > 8
+                        ? sessionAccuracyTrend.map((val, i, arr) => {
+                            const lastIndex = arr.length - 1
+                            // Always show first, last, and 3 evenly spaced in between
+                            const showIndices = [
+                              0,
+                              Math.floor(arr.length * 0.25),
+                              Math.floor(arr.length * 0.5),
+                              Math.floor(arr.length * 0.75),
+                              lastIndex,
+                            ]
+                            return showIndices.includes(i) ? `${val}%` : ''
+                          })
+                        : sessionAccuracyTrend.map(val => `${val}%`)
+                    "
+                    :show-labels="true"
                   />
+
                   <div class="text-caption text-muted mt-2">
                     Accuracy per game played
                   </div>
