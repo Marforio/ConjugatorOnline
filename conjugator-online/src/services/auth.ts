@@ -27,3 +27,7 @@ export async function apiLogin(username: string, password: string) {
 export async function apiRefresh(refresh: string) {
   return api.post("/token/refresh/", { refresh });
 }
+export async function apiValidateToken() {
+  return api.get("/token/validate/");
+}
+

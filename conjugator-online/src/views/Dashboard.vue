@@ -87,7 +87,6 @@
                     line-width="3"
                     stroke-linecap="round"
                     auto-draw
-                    type="trend"
                     auto-draw-duration="1200"
                     auto-draw-easing="ease"
                     padding="20"
@@ -575,15 +574,16 @@ const tenseStats = ref<TenseStats | null>(null);
     };
 
     const sessionAccuracyTrend = computed(() => {
-  return sessions.value
-    .map(session => {
-      const total = session.total_rounds ?? 0
-      return total
-        ? Number(((session.correct_count / total) * 100).toFixed(0))
-        : null
+      return sessions.value
+        .reverse()
+        .map(session => {
+          const total = session.total_rounds ?? 0
+          return total
+            ? Number(((session.correct_count / total) * 100).toFixed(0))
+            : null
+        })
+        .filter((x): x is number => x !== null) // type guard to keep only numbers
     })
-    .filter((x): x is number => x !== null) // type guard to keep only numbers
-})
 
 // unwrap the computed into a plain array
 const sessionAccuracyTrendArray = computed(() => sessionAccuracyTrend.value)
@@ -646,6 +646,7 @@ const sessionAccuracyTrendArray = computed(() => sessionAccuracyTrend.value)
       await fetchConjGameSessionsDashboardData();
       userStore.fetchVerbUsageDashboardData();
       setInitialTabFromRoute();
+      console.log("SessionAccTrend: ", sessionAccuracyTrend )
     });
 
     function setInitialTabFromRoute() {

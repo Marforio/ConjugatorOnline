@@ -1,7 +1,8 @@
 // src/stores/auth.ts
 import { defineStore } from "pinia";
-import { ref, computed } from "vue";
-import { apiLogin, apiRefresh, saveTokens, clearTokens, getAccessToken, getRefreshToken } from "@/services/auth";
+import { ref, computed, nextTick } from "vue";
+import { apiLogin, apiRefresh, apiValidateToken, saveTokens, clearTokens, getAccessToken, getRefreshToken } from "@/services/auth";
+
 
 export const useAuthStore = defineStore("auth", () => {
   const access = ref<string | null>(null);
@@ -17,7 +18,9 @@ export const useAuthStore = defineStore("auth", () => {
     access.value = res.data.access;
     refresh.value = res.data.refresh;
     saveTokens(res.data.access, res.data.refresh);
+    return res.data.access; // return the token
   }
+
 
   async function refreshAccessToken() {
     if (!refresh.value) throw new Error("No refresh token");
@@ -32,6 +35,25 @@ export const useAuthStore = defineStore("auth", () => {
     clearTokens();
   }
 
+  async function validateSession(): Promise<boolean> {
+  if (!access.value) return false;
+
+  try {
+    await apiValidateToken(); // token is valid
+    return true;
+  } catch {
+    try {
+      await refreshAccessToken(); // try to refresh
+      await apiValidateToken();   // validate again
+      return true;
+    } catch {
+      logout(); // clear tokens and reset store
+      return false;
+    }
+  }
+}
+
+
   return {
     access,
     refresh,
@@ -39,5 +61,6 @@ export const useAuthStore = defineStore("auth", () => {
     login,
     logout,
     refreshAccessToken,
+    validateSession
   };
 });

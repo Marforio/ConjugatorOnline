@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import { getAccessToken, getRefreshToken } from '@/services/auth'
-
+import { useAuthStore } from '@/stores/auth'
+import { nextTick } from 'vue'
 import Login from '@/views/Login.vue'
 import Home from '@/views/Home.vue'
 import Conjugator from '@/views/Conjugator.vue'
@@ -25,17 +25,18 @@ const router = createRouter({
 })
 
 // Global auth guard
-router.beforeEach((to, from, next) => {
-  const access = getAccessToken()
-  const refresh = getRefreshToken()
+router.beforeEach(async (to, from, next) => {
+  const auth = useAuthStore();
 
-  if (to.meta.requiresAuth && (!access || !refresh)) {
-    // Redirect unauthenticated users to login
-    return next({ name: 'login' })
+  await nextTick(); // ensures reactive state is settled
+
+  if (to.meta.requiresAuth) {
+    const valid = await auth.validateSession();
+    if (!valid) return next({ name: 'login' });
   }
 
-  // Logged in or route doesn’t require auth
-  next()
-})
+  next();
+});
+
 
 export default router

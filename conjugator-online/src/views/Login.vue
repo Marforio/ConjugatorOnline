@@ -66,6 +66,8 @@ import { ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
 import { useUserStore } from "@/stores/user";
+import { apiValidateToken } from "@/services/auth";
+import api from '@/axios'
 
 const auth = useAuthStore();
 const userStore = useUserStore();
@@ -84,12 +86,15 @@ async function handleLogin() {
   loading.value = true;
 
   try {
-    await auth.login(username.value, password.value);
-    if (auth.access) {
-      userStore.setAccessToken(auth.access);
-    }
+    const token = await auth.login(username.value, password.value);
 
-    // Redirect to "redirect" query param if present, else home
+    // Manually attach token to Axios headers before validation
+    api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+
+    await apiValidateToken(); // now it will succeed
+
+    userStore.setAccessToken(token);
+
     const redirectPath = (route.query.redirect as string) || "/dashboard";
     router.replace(redirectPath);
   } catch (err: any) {
@@ -97,15 +102,16 @@ async function handleLogin() {
       err.response?.status === 401
         ? "Invalid username or password"
         : err.message || "Login failed";
-        showError.value = true;
+    showError.value = true;
 
-        setTimeout(() => {
-          showError.value = false;
-        }, 7000); // Show for 5 seconds
+    setTimeout(() => {
+      showError.value = false;
+    }, 7000);
   } finally {
     loading.value = false;
   }
 }
+
 </script>
 
 <style scoped>

@@ -1,6 +1,7 @@
 // src/axios.ts
 import axios, { InternalAxiosRequestConfig, AxiosResponse } from "axios";
 import { useAuthStore } from "@/stores/auth";
+import { getAccessToken } from "./services/auth";
 
 // Create an Axios instance
 const api = axios.create({
@@ -17,9 +18,9 @@ api.interceptors.request.use(
       return config;
     }
 
-    if (auth.access) {
+    if (auth.access || getAccessToken()) {
       config.headers = config.headers ?? {};
-      config.headers.Authorization = `Bearer ${auth.access}`;
+      config.headers.Authorization = `Bearer ${auth.access || getAccessToken()}`;
     }
 
     return config;
