@@ -13,7 +13,7 @@
         <v-list-item :to="{ name: 'home' }">
           <v-list-item-title>Home</v-list-item-title>
         </v-list-item>
-        <v-list-item href="https://book.language-labs.ch">
+        <v-list-item href="https://book.language-labs.ch" target='_blank'>
           <v-list-item-title>Grammar Book</v-list-item-title>
         </v-list-item>
         <v-list-item :to="{ name: 'dashboard' }">
@@ -62,7 +62,7 @@
 
         <v-tooltip text="Go to Grammar Book" location="bottom">
           <template v-slot:activator="{ props }">
-            <v-btn icon v-bind="props" href="https://book.language-labs.ch">
+            <v-btn icon v-bind="props" href="https://book.language-labs.ch" target='_blank'>
               <v-icon>mdi-book-open-variant</v-icon>
             </v-btn>
           </template>

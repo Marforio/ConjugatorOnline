@@ -48,6 +48,14 @@
         <v-btn icon elevation="0" size="large" class="ms-3" @click="goBack">
           <v-icon>mdi-arrow-left-circle</v-icon>
         </v-btn>
+        <v-tooltip text="Summary of tense keywords" location="top">
+          <template v-slot:activator="{ props }">
+            <v-btn icon elevation="0" size="large" class="me-3" v-bind="props" href="https://book.language-labs.ch/ch4#tense-keyword-summary" target='_blank'>
+              <v-icon>mdi-lifebuoy</v-icon>
+            </v-btn>
+          </template>
+        </v-tooltip>
+        
         <v-btn v-if="gameStarted" color="error" variant="flat" class="me-3" @click="quitGame">QUIT</v-btn>
       </div>
     </v-navigation-drawer>
@@ -63,7 +71,7 @@
           <ul>
             <li>a verb</li>
             <li>a person (subject)</li>
-            <li>a sentence type</li>
+            <li>a sentence type or temporal reference</li>
             <li>a tense</li>
           </ul>
           <li>Write the correct conjugation for that combination</li>
@@ -75,6 +83,18 @@
             <li>Details are shown at the end and in your dashboard</li>
           </ul>
         </ol>
+
+        <div class="d-flex justify-center align-center mt-6 pa-3">
+          <span class="text-h6">Can't remember tense names? Need a conjugation refresher?</span>
+          <span class="ms-4 me-4">→ → →</span>
+          <v-tooltip text="Summary of tense keywords" location="top">
+          <template v-slot:activator="{ props }">
+            <v-btn icon v-bind="props" href="https://book.language-labs.ch/ch4#tense-keyword-summary" target='_blank'>
+              <v-icon>mdi-lifebuoy</v-icon>
+            </v-btn>
+          </template>
+        </v-tooltip>
+        </div>
 
         <div class="d-flex justify-center mt-12">
           <v-btn color="success" large @click="startGame">START THE GAME</v-btn>

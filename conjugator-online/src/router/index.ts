@@ -28,15 +28,30 @@ const router = createRouter({
 router.beforeEach(async (to, from, next) => {
   const auth = useAuthStore();
 
-  await nextTick(); // ensures reactive state is settled
+  await nextTick(); // ensure store is hydrated
 
-  if (to.meta.requiresAuth) {
-    const valid = await auth.validateSession();
-    if (!valid) return next({ name: 'login' });
+  if (!to.meta.requiresAuth) return next(); // no auth needed
+
+  // Try to validate session
+  const valid = await auth.validateSession();
+
+  if (valid) return next();
+
+  // If refresh token exists, try silent recovery
+  if (auth.refresh) {
+    try {
+      await auth.refreshAccessToken();
+      const revalidated = await auth.validateSession();
+      if (revalidated) return next();
+    } catch {
+      // Silent fail — fall through to redirect
+    }
   }
 
-  next();
+  // Final fallback: redirect to login
+  next({ name: "login", query: { redirect: to.fullPath } });
 });
+
 
 
 export default router

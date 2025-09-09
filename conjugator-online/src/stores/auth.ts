@@ -36,22 +36,47 @@ export const useAuthStore = defineStore("auth", () => {
   }
 
   async function validateSession(): Promise<boolean> {
-    if (!access.value) return false;
+  await nextTick(); // ensure reactive state is settled
 
+  // No access token? Try to hydrate from localStorage
+  if (!access.value) {
+    access.value = getAccessToken();
+    refresh.value = getRefreshToken();
+  }
+
+  // If still no token, user is not logged in
+  if (!access.value) return false;
+
+  // Check if access token is expired
+  if (isAccessTokenExpired()) {
     try {
-      await apiValidateToken(); // token is valid
+      await refreshAccessToken(); // attempt silent recovery
+      await apiValidateToken();   // confirm new token
       return true;
     } catch {
-      try {
-        await refreshAccessToken(); // try to refresh
-        await apiValidateToken();   // validate again
-        return true;
-      } catch {
-        logout(); // clear tokens and reset store
-        return false;
-      }
+      // Optional: show modal before logout
+      logout();
+      return false;
     }
   }
+
+  // Token exists and is not expired — validate it
+  try {
+    await apiValidateToken();
+    return true;
+  } catch {
+    // Token might be invalid despite not being expired
+    try {
+      await refreshAccessToken();
+      await apiValidateToken();
+      return true;
+    } catch {
+      logout();
+      return false;
+    }
+  }
+}
+
 
 function isAccessTokenExpired(): boolean {
     const expiry = parseInt(localStorage.getItem("access_expiry") || "0");
