@@ -55,7 +55,11 @@
           <v-alert type="error">{{ conjGameError }}</v-alert>
         </div>
         <div v-else class="d-flex flex-wrap align-start pa-2">
-          <v-row dense>
+          <div v-if="!sessions.length">
+            <h3 class="m-5 text-center">No data to display.</h3>
+          </div>
+          <div v-else>
+            <v-row dense>
             <!-- Conjugation accuracy -->
             <v-col cols="12" lg="6">
               <v-card class="chart-card pa-4" elevation="2">
@@ -70,6 +74,51 @@
                   </div>
                 </v-card-text>
               </v-card>
+            </v-col>
+            <!-- Some Numbers -->
+            <v-col cols="12" lg="6">
+              <v-card class="chart-card pa-2" v-if="sessionAccuracyTrend.length > 1" elevation="2">
+                    <v-card  elevation="1" class="pa-4 mb-2">
+                  <div class="text-h6 mb-2">Game Accuracy Trend</div>
+                  <v-sparkline
+                    :model-value="sessionAccuracyTrend"
+                    :gradient = "sparklineGradients[2]"
+                    color="blue"
+                    line-width="3"
+                    stroke-linecap="round"
+                    auto-draw
+                    type="trend"
+                    auto-draw-duration="1200"
+                    auto-draw-easing="ease"
+                    padding="20"
+                    smooth
+                    :labels="sessionAccuracyTrend.map((_, i) => `${_}%`)" 
+                    :show-labels="false"  
+                  />
+                  <div class="text-caption text-muted mt-2">
+                    Accuracy per game played
+                  </div>
+                  
+                </v-card>
+                <div style="display: flex;">
+                  <NumbersCard
+                    class="ma-2 flex-grow-1"
+                    :value="(userStore.totalCorrect ?? 0).toString()"
+                    title="Total correct"
+                    label="Conjugations (rounds) in the Conjugator game"
+                  />
+                  <NumbersCard
+                    class="ma-2 flex-grow-1"
+                    :value="avgTimePerRound"
+                    title="Avg speed"
+                    label="Seconds per answer (round)"
+                  />
+                </div>
+              </v-card>
+                
+      
+    
+
             </v-col>
 
             <!-- Tense accuracy -->
@@ -94,68 +143,218 @@
               </v-card>
             </v-col>
 
-            <v-col cols="12" lg="6">
-              <NumbersCard
-                class="ma-2 flex-grow-1"
-                :value="(userStore.totalCorrect ?? 0).toString()"
-                title="Total correct"
-                label="total correct conjugations on the Conjugator game"
-              />
-            </v-col>
+          
           </v-row>
 
+          <v-divider />
+
+          <h3 class="text-h4 mt-6 mb-4 mx-5 font-weight-bold w-100">Irregular verbs</h3>
+          <v-row dense>
+          <v-col cols="12" lg="6">
+            <v-sheet elevation="2" class="p-4 w-100 d-flex flex-column gap-4">
+              
+              <h5 class="text-h6">Past simple</h5>
+
+              <!-- Basic 75 past simple -->
+              <div>
+                <div class="font-weight-medium mb-2">Basic 75 irregs</div>
+                <v-progress-linear
+                  :model-value="userStore.tierStats?.[0]?.discovered_pct_ps ?? 0"
+                  height="22"
+                  color="blue darken-2"
+                  striped
+                  rounded
+                  class="mb-1"
+                >
+                  <template #default>
+                    <span>{{ userStore.tierStats?.[0]?.discovered_pct_ps ?? 0 }}%</span>
+                  </template>
+                </v-progress-linear>
+                <div class="text-caption text-muted">Discovered (written correctly 1x)</div>
+                <v-progress-linear
+                  :model-value="userStore.tierStats?.[0]?.mastered_pct_ps ?? 0"
+                  height="22"
+                  color="primary"
+                  striped
+                  rounded
+                  class="mb-1"
+                >
+                  <template #default>
+                    <span>{{ userStore.tierStats?.[0]?.mastered_pct_ps ?? 0 }}%</span>
+                  </template>
+                </v-progress-linear>
+                <div class="text-caption text-muted">Mastered (written correctly 3x)</div>
+              </div>
+
+              <!-- Master 110 past simple -->
+              <div>
+                <div class="font-weight-medium mb-2">Master 110 irregs</div>
+                <v-progress-linear
+                  :model-value="userStore.tierStats?.[1]?.discovered_pct_ps ?? 0"
+                  height="22"
+                  color="green darken-2"
+                  striped
+                  rounded
+                  class="mb-1"
+                >
+                  <template #default>
+                    <span>{{ userStore.tierStats?.[1]?.discovered_pct_ps ?? 0 }}%</span>
+                  </template>
+                </v-progress-linear>
+                <div class="text-caption text-muted">Discovered (written correctly 1x)</div>
+                <v-progress-linear
+                  :model-value="userStore.tierStats?.[1]?.mastered_pct_ps ?? 0"
+                  height="22"
+                  color="success"
+                  striped
+                  rounded
+                  class="mb-1"
+                >
+                  <template #default>
+                    <span>{{ userStore.tierStats?.[1]?.mastered_pct_ps ?? 0 }}%</span>
+                  </template>
+                </v-progress-linear>
+                <div class="text-caption text-muted">Mastered (written correctly 3x)</div>
+              </div>
+              <!-- All Irregs past simple -->
+              <div>
+                <div class="font-weight-medium mb-2">All 130 irregs</div>
+                <v-progress-linear
+                  :model-value="userStore.tierStats?.[2]?.discovered_pct_ps ?? 0"
+                  height="22"
+                  color="purple"
+                  striped
+                  rounded
+                  class="mb-1"
+                >
+                  <template #default>
+                    <span>{{ userStore.tierStats?.[2]?.discovered_pct_ps ?? 0 }}%</span>
+                  </template>
+                </v-progress-linear>
+                <div class="text-caption text-muted">Discovered (written correctly 1x)</div>
+                <v-progress-linear
+                  :model-value="userStore.tierStats?.[2]?.mastered_pct_ps ?? 0"
+                  height="22"
+                  color="deep-purple"
+                  striped
+                  rounded
+                  class="mb-1"
+                >
+                  <template #default>
+                    <span>{{ userStore.tierStats?.[2]?.mastered_pct_ps ?? 0 }}%</span>
+                  </template>
+                </v-progress-linear>
+                <div class="text-caption text-muted">Mastered (written correctly 3x)</div>
+              </div>
+
+            </v-sheet>
+          </v-col>
+
+
+
+          <v-col cols="12" lg="6">
+            <v-sheet elevation="2" class="p-4 w-100 d-flex flex-column gap-4">
+              <h5 class="text-h6">Present perfect</h5>
+              
+              <!-- Basic 75 present perfect -->
+              <div>
+                <div class="font-weight-medium mb-2">Basic 75 irregs</div>
+                <v-progress-linear
+                  :model-value="userStore.tierStats?.[0]?.discovered_pct_pp ?? 0"
+                  height="22"
+                  color="red lighten-2"
+                  striped
+                  rounded
+                  class="mb-1"
+                >
+                  <template #default>
+                    <span>{{ userStore.tierStats?.[0]?.discovered_pct_pp ?? 0 }}%</span>
+                  </template>
+                </v-progress-linear>
+                <div class="text-caption text-muted">Discovered (written correctly 1x)</div>
+                <v-progress-linear
+                  :model-value="userStore.tierStats?.[0]?.mastered_pct_pp ?? 0"
+                  height="22"
+                  color="red"
+                  striped
+                  rounded
+                  class="mb-1"
+                >
+                  <template #default>
+                    <span>{{ userStore.tierStats?.[0]?.mastered_pct_pp ?? 0 }}%</span>
+                  </template>
+                </v-progress-linear>
+                <div class="text-caption text-muted">Mastered (written correctly 3x)</div>
+              </div>
+              
+              <!-- Master 110 present perfect -->
+              <div>
+                <div class="font-weight-medium mb-2">Master 110 irregs</div>
+                <v-progress-linear
+                  :model-value="userStore.tierStats?.[1]?.discovered_pct_pp ?? 0"
+                  height="22"
+                  color="yellow darken-2"
+                  striped
+                  rounded
+                  class="mb-1"
+                >
+                  <template #default>
+                    <span>{{ userStore.tierStats?.[1]?.discovered_pct_pp ?? 0 }}%</span>
+                  </template>
+                </v-progress-linear>
+                <div class="text-caption text-muted">Discovered (written correctly 1x)</div>
+                <v-progress-linear
+                  :model-value="userStore.tierStats?.[1]?.mastered_pct_pp ?? 0"
+                  height="22"
+                  color="orange"
+                  striped
+                  rounded
+                  class="mb-1"
+                >
+                  <template #default>
+                    <span>{{ userStore.tierStats?.[1]?.mastered_pct_pp ?? 0 }}%</span>
+                  </template>
+                </v-progress-linear>
+                <div class="text-caption text-muted">Mastered (written correctly 3x)</div>
+              </div>
+
+              <!-- All Irregs present perfect -->
+
+              <div>
+                <div class="font-weight-medium mb-2">All 130 irregs</div>
+                <v-progress-linear
+                  :model-value="userStore.tierStats?.[2]?.discovered_pct_pp ?? 0"
+                  height="22"
+                  color="brown lighten-2"
+                  striped
+                  rounded
+                  class="mb-1"
+                >
+                  <template #default>
+                    <span>{{ userStore.tierStats?.[2]?.discovered_pct_pp ?? 0 }}%</span>
+                  </template>
+                </v-progress-linear>
+                <div class="text-caption text-muted">Discovered (written correctly 1x)</div>
+                <v-progress-linear
+                  :model-value="userStore.tierStats?.[2]?.mastered_pct_pp ?? 0"
+                  height="22"
+                  color="brown darken-2"
+                  striped
+                  rounded
+                  class="mb-1"
+                >
+                  <template #default>
+                    <span>{{ userStore.tierStats?.[2]?.mastered_pct_pp ?? 0 }}%</span>
+                  </template>
+                </v-progress-linear>
+                <div class="text-caption text-muted">Mastered (written correctly 3x)</div>
+              </div>
+
+            </v-sheet>
+          </v-col>
           
-
-          <v-sheet elevation="2" class="m-3 p-4 d-flex flex-wrap">
-            <h3 class="text-h5 font-weight-bold w-100">Irregular verbs</h3>
-            <p class="text-subtitle-1 w-100">
-              For past simple, only the positive verb forms are counted
-            </p>
-
-            <NumbersCard
-              class="ma-2 flex-grow-1"
-              :value="`${userStore.tierStats?.[0]?.discovered_pct_ps ?? 0}%`"
-              title="Basic 75 past simple"
-              label="Discovered irregular verbs (written correctly 1x)"
-            />
-
-            <NumbersCard
-              class="ma-2 flex-grow-1"
-              :value="`${userStore.tierStats?.[0]?.mastered_pct_ps ?? 0}%`"
-              title="Master 110 present perfect"
-              label="Mastered irregular verbs (used correctly 3x)"
-            />
-
-            <NumbersCard
-              class="ma-2 flex-grow-1"
-              :value="`${userStore.tierStats?.[1]?.discovered_pct_ps ?? 0}%`"
-              title="Master 110 past simple"
-              label="Discovered irregular verbs (written correctly 1x)"
-            />
-
-            <NumbersCard
-              class="ma-2 flex-grow-1"
-              :value="`${userStore.tierStats?.[1]?.mastered_pct_pp ?? 0}%`"
-              title="Master 110 present perfect"
-              label="Mastered irregular verbs (used correctly 3x)"
-            />
-
-            <NumbersCard
-              class="ma-2 flex-grow-1"
-              :value="`${userStore.tierStats?.[2]?.discovered_pct_ps ?? 0}%`"
-              title="All Irregs past simple"
-              label="Discovered irregular verbs (written correctly 1x)"
-            />
-
-            <NumbersCard
-              class="ma-2 flex-grow-1"
-              :value="`${userStore.tierStats?.[2]?.mastered_pct_pp ?? 0}%`"
-              title="All irregs present perfect"
-              label="Mastered irregular verbs (used correctly 3x)"
-            />
-          </v-sheet>
-
-
+        </v-row>
+          
           <v-divider />
 
           <v-card
@@ -230,6 +429,7 @@
             </div>
           </v-card>
         </div>
+      </div>
       </v-window-item>
     </v-window>
   </v-container>
@@ -249,6 +449,7 @@ import NumbersCard from "@/components/NumbersCard.vue";
 import { useRouter, useRoute } from 'vue-router';
 import VocabDataTab from "@/components/VocabDataTab.vue";
 import GoalsDataTab from "@/components/GoalsDataTab.vue";
+import { mean } from "d3";
 
 
 interface GameSession {
@@ -291,6 +492,11 @@ const tenseStats = ref<TenseStats | null>(null);
     const totalRoundsPlayed = computed(() =>
       sessions.value.reduce((sum, session) => sum + session.total_rounds, 0)
     );
+    const avgTimePerRound = computed(() => {
+      const total = sessions.value.reduce((sum, session) => sum + session.avg_time_per_prompt, 0);
+      return sessions.value.length > 0 ? (total / sessions.value.length).toFixed(1) : 0;
+    });
+
     const totalRightWrongChartData = computed(() => [
       { label: "Correct", value: totalPercentCorrect.value },
       { label: "Incorrect", value: totalPercentIncorrect.value },
@@ -341,6 +547,14 @@ const tenseStats = ref<TenseStats | null>(null);
       "#9C27B0",
       "#FF5722",
     ];
+    const sparklineGradients = [
+          ['#222'],
+          ['#42b3f4'],
+          ['green', 'yellow', 'red'],
+          ['purple', 'violet'],
+          ['#00c6ff', '#F0F', '#FF0'],
+          ['#f72047', '#ffd200', '#1feaea'],
+        ]
 
     const fetchConjGameSessionsDashboardData = async () => {
       loading.value = true;
@@ -359,6 +573,21 @@ const tenseStats = ref<TenseStats | null>(null);
 
       loading.value = false;
     };
+
+    const sessionAccuracyTrend = computed(() => {
+  return sessions.value
+    .map(session => {
+      const total = session.total_rounds ?? 0
+      return total
+        ? Number(((session.correct_count / total) * 100).toFixed(0))
+        : null
+    })
+    .filter((x): x is number => x !== null) // type guard to keep only numbers
+})
+
+// unwrap the computed into a plain array
+const sessionAccuracyTrendArray = computed(() => sessionAccuracyTrend.value)
+
 
     const tenseAccuracyData = computed(() => {
       const rounds = sessions.value.flatMap((session) => session.rounds || []);
@@ -401,6 +630,7 @@ const tenseStats = ref<TenseStats | null>(null);
         }
       }
 
+
       return Object.entries(typeGroups).map(
         ([type, stats], index: number) => ({
           label: type,
@@ -437,15 +667,18 @@ const tenseStats = ref<TenseStats | null>(null);
       userStore,
       TopNavBar,
       PieChart,
+      sessionAccuracyTrend: sessionAccuracyTrendArray,
       totalRightWrongChartData,
       totalRoundsPlayed,
+      avgTimePerRound,
       tenseAccuracyData,
       sentenceTypeAccuracyData,
       smAndDown,
       xs,
       verbUsage,
       tierStats,
-      tenseStats
+      tenseStats,
+      sparklineGradients
     };
   },
 });
