@@ -1,15 +1,28 @@
 // src/stores/auth.ts
 import { defineStore } from "pinia";
-import { ref, computed, nextTick } from "vue";
-import { apiLogin, apiRefresh, apiValidateToken, saveTokens, clearTokens, getAccessToken, getRefreshToken } from "@/services/auth";
-
+import { ref, computed, onMounted, nextTick } from "vue";
+import { 
+  apiLogin, apiRefresh, apiValidateToken, 
+  saveTokens, clearTokens, 
+  getAccessToken, getRefreshToken 
+} from "@/services/auth";
 
 export const useAuthStore = defineStore("auth", () => {
   const access = ref<string | null>(null);
-    if (typeof window !== 'undefined') {
+  const refresh = ref<string | null>(null);
+  const isRestored = ref(false); // new: hydration flag
+
+  // Session restoration (hydration)
+  function restoreSession() {
     access.value = getAccessToken();
-    }
-  const refresh = ref<string | null>(getRefreshToken());
+    refresh.value = getRefreshToken();
+    isRestored.value = true;
+  }
+
+  // Immediate restore on store creation / component mount
+  if (typeof window !== 'undefined') {
+    restoreSession();
+  }
 
   const isLoggedIn = computed(() => !!access.value);
 
@@ -18,9 +31,9 @@ export const useAuthStore = defineStore("auth", () => {
     access.value = res.data.access;
     refresh.value = res.data.refresh;
     saveTokens(res.data.access, res.data.refresh);
-    return res.data.access; // return the token
+    isRestored.value = true; // Set hydrated after login
+    return res.data.access;
   }
-
 
   async function refreshAccessToken() {
     if (!refresh.value) throw new Error("No refresh token");
@@ -32,53 +45,44 @@ export const useAuthStore = defineStore("auth", () => {
   function logout() {
     access.value = null;
     refresh.value = null;
+    isRestored.value = false;
     clearTokens();
   }
 
   async function validateSession(): Promise<boolean> {
-  await nextTick(); // ensure reactive state is settled
+    await nextTick();
 
-  // No access token? Try to hydrate from localStorage
-  if (!access.value) {
-    access.value = getAccessToken();
-    refresh.value = getRefreshToken();
-  }
+    // Hydrate from localStorage if not hydrated
+    if (!isRestored.value) restoreSession();
 
-  // If still no token, user is not logged in
-  if (!access.value) return false;
+    if (!access.value) return false;
 
-  // Check if access token is expired
-  if (isAccessTokenExpired()) {
-    try {
-      await refreshAccessToken(); // attempt silent recovery
-      await apiValidateToken();   // confirm new token
-      return true;
-    } catch {
-      // Optional: show modal before logout
-      logout();
-      return false;
+    if (isAccessTokenExpired()) {
+      try {
+        await refreshAccessToken();
+        await apiValidateToken();
+        return true;
+      } catch {
+        logout();
+        return false;
+      }
     }
-  }
-
-  // Token exists and is not expired — validate it
-  try {
-    await apiValidateToken();
-    return true;
-  } catch {
-    // Token might be invalid despite not being expired
     try {
-      await refreshAccessToken();
       await apiValidateToken();
       return true;
     } catch {
-      logout();
-      return false;
+      try {
+        await refreshAccessToken();
+        await apiValidateToken();
+        return true;
+      } catch {
+        logout();
+        return false;
+      }
     }
   }
-}
 
-
-function isAccessTokenExpired(): boolean {
+  function isAccessTokenExpired(): boolean {
     const expiry = parseInt(localStorage.getItem("access_expiry") || "0");
     return Date.now() > expiry;
   }
@@ -86,11 +90,13 @@ function isAccessTokenExpired(): boolean {
   return {
     access,
     refresh,
+    isRestored,    
     isLoggedIn,
     login,
     logout,
     refreshAccessToken,
     validateSession,
-    isAccessTokenExpired
+    isAccessTokenExpired,
+    restoreSession, // EXPORTED for early call if needed
   };
 });

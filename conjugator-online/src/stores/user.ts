@@ -8,14 +8,16 @@ interface User {
   id: number;
   username: string;
   is_staff: boolean;
+  email?: string;
+  is_superuser?: boolean;
 }
 
 interface Student {
   id: number;
   web_id: string;
   initials: string;
-  user: User;
   total_correct_prompts: number;
+  user: User | null;
 }
 
 interface VerbUsage {
@@ -53,21 +55,23 @@ interface TenseStats {
   mastered_verbs_pp: string[];
 }
 
+interface Feedback {
+  feedback_id: string;
+  student?: { id: number; name?: string };
+  course?: { name?: string };
+  date?: string;
+  content?: string;
+}
+
 interface VocabItem {
   vocab_id: string;
+  student: Student | number | null;
+  student_web_id: string | null;
   correct: string;
   incorrect: string | null;
   times: number;
   comment: string;
   feedback: Feedback;
-}
-
-interface Feedback {
-  feedback_id: string;
-  student?: { name?: string };
-  course?: { name?: string };
-  date?: string;
-  content?: string;
 }
 
 // --- Store ---
@@ -93,6 +97,19 @@ export const useUserStore = defineStore("user", () => {
 
   function setAccessToken(token: string) {
     accessToken.value = token;
+  }
+
+  async function fetchStudentData() {
+    if (!accessToken.value) return;
+
+    try {
+      const response = await api.get<Student>("/me/student/");
+      setStudent(response.data);
+      console.log("Fetched student:", response.data);
+    } catch (err: any) {
+      console.error("Failed to fetch student data:", err);
+      clearStudent();
+    }
   }
 
   // 📊 Verb usage state
@@ -147,8 +164,9 @@ export const useUserStore = defineStore("user", () => {
     vocabError.value = null;
 
     try {
-      const response = await api.get<VocabItem[]>("/vocab/");
+      const response = await api.get<VocabItem[]>(`/vocab/?student=${studentId.value}`);
       vocab.value = response.data;
+      console.log("Fetched vocab:", vocab.value);
     } catch (err: any) {
       console.error("Failed to fetch vocab:", err);
       vocabError.value = "Failed to fetch vocab";
@@ -157,17 +175,31 @@ export const useUserStore = defineStore("user", () => {
     }
   }
 
+
   const processedVocab = computed(() => {
-    const map = new Map<string, { correct: string; incorrects: string[]; times: number; comment: string }>();
+    const map = new Map<string, {
+      correct: string;
+      incorrects: string[];
+      times: number;
+      comment: string;
+      studentId?: number | null;
+    }>();
 
     for (const entry of vocab.value) {
       const key = entry.correct;
+
+      const studentId =
+        typeof entry.student === "number"
+          ? entry.student
+          : (entry.student as Student)?.id ?? entry.feedback?.student?.id ?? null;
+
       if (!map.has(key)) {
         map.set(key, {
           correct: entry.correct,
           incorrects: entry.incorrect ? [entry.incorrect] : [],
           times: entry.times,
           comment: entry.comment || '',
+          studentId,
         });
       } else {
         const existing = map.get(key)!;
@@ -202,7 +234,7 @@ export const useUserStore = defineStore("user", () => {
   return {
     // Auth
     student, accessToken, isAuthenticated, isStaff, studentId, totalCorrect,
-    setStudent, clearStudent, setAccessToken,
+    setStudent, clearStudent, setAccessToken, fetchStudentData,
 
     // Verb usage
     verbUsage, tierStats, tenseStats, loadingVerbUsage, verbUsageError,

@@ -86,10 +86,13 @@ export default defineComponent({
         formError.value = null;
         try {
             await api.post('/vocab/', {
+            feedback: null,
+            student_web_id: userStore.student?.web_id ?? null,
             correct: newVocab.value.correct,
             incorrect: newVocab.value.incorrect,
             comment: newVocab.value.comment,
-            });
+            times: 1
+            });;
             newVocab.value = { correct: '', incorrect: '', comment: '' };
             userStore.fetchVocabDashboardData();
         } catch (err: any) {

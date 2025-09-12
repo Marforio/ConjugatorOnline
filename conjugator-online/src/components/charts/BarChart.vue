@@ -44,7 +44,7 @@ export default defineComponent({
 
     const responsiveWidth = computed(() => {
       if (smAndUp.value) return Math.max(props.width, 500);
-      return 300; // smaller width for phones
+      return 250; // smaller width for phones
     });
 
     const labelFontSize = computed(() => (xs.value ? '9px' : '11px'));

@@ -26,7 +26,7 @@
     </v-tabs>
 
     <!-- Tab Content -->
-    <v-window v-model="activeTab" class="mt-5" touchless>
+    <v-window v-model="activeTab" class="mt-5" :touch="false">
       <v-window-item value="grammar-feedback">
         <div v-if="loading" class="text-center my-5">
           <v-progress-circular indeterminate color="primary" />
@@ -61,7 +61,7 @@
           <div v-else>
             <v-row dense>
             <!-- Conjugation accuracy -->
-            <v-col cols="12" lg="6">
+            <v-col cols="12" lg="6" sm="12">
               <v-card class="chart-card pa-4" elevation="2">
                 <v-card-title class="text-h5 font-weight-bold">Conjugation accuracy</v-card-title>
                 <v-card-text class="d-flex flex-column align-center flex-grow-1">
@@ -71,6 +71,9 @@
                   </div>
                   <div class="text-subtitle-2">
                     {{ totalRoundsPlayed }} total rounds
+                  </div>
+                  <div v-if="totalTypos > 0" class="text-caption text-muted">
+                    ({{ totalTypos }} typo<span v-if="totalTypos > 1">s</span> not counted)
                   </div>
                 </v-card-text>
               </v-card>
@@ -376,7 +379,7 @@
             class="pa-4 mb-6"
             elevation="2"
             :style="{
-              minWidth: xs ? '300px' : '95%',
+              minWidth: xs ? '250px' : '95%',
               maxWidth: xs ? '500px' : '95%',
               marginLeft: xs ? '5px' : '16px',
               marginRight: xs ? '5px' : '16px',
@@ -391,7 +394,7 @@
                 <v-expansion-panel>
                   <v-expansion-panel-title>
                     <span class="font-weight-medium">
-                      Game {{ session.session_id }} — {{ session.correct_count }} Correct, {{ session.wrong_count }} Incorrect
+                      Game {{ session.session_id }} — <span v-if="session.correct_count > 0">{{ session.correct_count }} Correct</span><span v-if="session.wrong_count > 0">, {{ session.wrong_count }} Incorrect </span> 
                     </span>
                     — {{ new Date(session.started_at).toLocaleString() }} — {{ session.tenses.join(', ').slice(0, 50) }}
                   </v-expansion-panel-title>
@@ -425,11 +428,36 @@
                             <td>{{ round.user_answer }}</td>
                                                         <td>{{ round.acceptable_answers?.join(' / ') }}</td>
                             <td>
-                              <v-icon :color="round.is_correct ? 'green' : 'red'">
-                                {{ round.is_correct ? 'mdi-check-circle' : 'mdi-close-circle' }}
+                              <v-icon
+                                :color="round.typo ? 'grey' : round.is_correct ? 'green' : 'red'"
+                              >
+                                {{
+                                  round.typo
+                                    ? 'mdi-cancel' // or 'mdi-minus-circle-outline'
+                                    : round.is_correct
+                                    ? 'mdi-check-circle'
+                                    : 'mdi-close-circle'
+                                }}
                               </v-icon>
                             </td>
                             <td>{{ round.typo }}</td>
+                            <td>{{ round.elapsed_time?.toFixed(2) ?? '—' }}</td>
+                            <td v-if="!round.typo && !round.typo_requested && !round.is_correct">
+                              <v-btn
+                                size="small"
+                                color="primary"
+                                :disabled="typoRequests.has(round.id)"
+                                @click="requestTypo(round.id)"
+                              >
+                                This was a typo
+                              </v-btn>
+                            </td>
+                            <td v-else-if="round.typo_requested && !round.typo">
+                              <span class="text-caption text-warning">Pending approval</span>
+                            </td>
+                            <td v-else-if="round.typo">
+                              <span class="text-caption text-success">Typo approved</span>
+                            </td>
                             <td>{{ round.elapsed_time?.toFixed(2) ?? '—' }}</td>
                           </tr>
                         </tbody>
@@ -447,6 +475,9 @@
       </div>
       </v-window-item>
     </v-window>
+    <v-snackbar v-model="snackbar.show" :color="snackbar.color" timeout="3000">
+      {{ snackbar.text }}
+    </v-snackbar>
   </v-container>
 </template>
 
@@ -464,7 +495,8 @@ import NumbersCard from "@/components/NumbersCard.vue";
 import { useRouter, useRoute } from 'vue-router';
 import VocabDataTab from "@/components/VocabDataTab.vue";
 import GoalsDataTab from "@/components/GoalsDataTab.vue";
-import { mean } from "d3";
+
+
 
 
 interface GameSession {
@@ -500,13 +532,23 @@ export default defineComponent({
         mastered_verbs_pp: string[];
       }
 
-const tenseStats = ref<TenseStats | null>(null);
+    const tenseStats = ref<TenseStats | null>(null);
+
+    const typoRequests = ref<Set<number>>(new Set());
+    const snackbar = ref({
+      show: false,
+      text: '',
+      color: 'success'
+    });
+
+    const showSnackbar = (text: string, color = 'success') => {
+      snackbar.value.text = text;
+      snackbar.value.color = color;
+      snackbar.value.show = true;
+    };
 
     const userStore = useUserStore();
 
-    const totalRoundsPlayed = computed(() =>
-      sessions.value.reduce((sum, session) => sum + session.total_rounds, 0)
-    );
     const avgTimePerRound = computed(() => {
       const total = sessions.value.reduce((sum, session) => sum + session.avg_time_per_prompt, 0);
       return sessions.value.length > 0 ? (total / sessions.value.length).toFixed(1) : 0;
@@ -516,32 +558,44 @@ const tenseStats = ref<TenseStats | null>(null);
       { label: "Correct", value: totalPercentCorrect.value },
       { label: "Incorrect", value: totalPercentIncorrect.value },
     ]);
-
-    const totalPercentCorrect = computed(() =>
-      Number(
-        (
-          (sessions.value.reduce(
-            (sum, session) => sum + session.correct_count,
-            0
-          ) /
-            totalRoundsPlayed.value) *
-          100
-        ).toFixed(0)
-      )
+    const totalRoundsPlayed = computed(() =>
+      sessions.value.reduce((sum, session) => {
+        const validRounds = session.rounds.filter((round: any) => !round.typo);
+        return sum + validRounds.length;
+      }, 0)
     );
 
-    const totalPercentIncorrect = computed(() =>
-      Number(
-        (
-          (sessions.value.reduce(
-            (sum, session) => sum + session.wrong_count,
-            0
-          ) /
-            totalRoundsPlayed.value) *
-          100
-        ).toFixed(0)
-      )
+    const totalTypos = computed(() =>
+      sessions.value.reduce((sum, session) => {
+        return (
+          sum + session.rounds.filter((round: any) => round.typo).length
+        );
+      }, 0)
     );
+
+    const totalPercentCorrect = computed(() => {
+      const totalCorrect = sessions.value.reduce((sum, session) => {
+        return (
+          sum +
+          session.rounds.filter((round: any) => round.is_correct && !round.typo).length
+        );
+      }, 0);
+
+      return Number(((totalCorrect / totalRoundsPlayed.value) * 100).toFixed(0));
+    });
+
+
+    const totalPercentIncorrect = computed(() => {
+      const totalIncorrect = sessions.value.reduce((sum, session) => {
+        return (
+          sum +
+          session.rounds.filter((round: any) => !round.is_correct && !round.typo).length
+        );
+      }, 0);
+
+      return Number(((totalIncorrect / totalRoundsPlayed.value) * 100).toFixed(0));
+    });
+
 
 
     const activeTab = ref("grammar-feedback");
@@ -601,7 +655,25 @@ const tenseStats = ref<TenseStats | null>(null);
         .filter((x): x is number => x !== null) // type guard to keep only numbers
     })
 
-// unwrap the computed into a plain array
+  const requestTypo = async (promptId: number) => {
+    if (typoRequests.value.has(promptId)) return;
+
+    typoRequests.value.add(promptId);
+
+    try {
+      await api.patch(`/conj-game-rounds/${promptId}/request-typo/`, {
+        typo_requested: true
+      });
+      showSnackbar('Typo request submitted!');
+      fetchConjGameSessionsDashboardData();
+    } catch (err) {
+      console.error("Typo request failed:", err);
+      showSnackbar('Failed to send typo request.', 'error');
+    }
+  };
+
+
+    // unwrap the computed into a plain array
 const sessionAccuracyTrendArray = computed(() => sessionAccuracyTrend.value)
 
 
@@ -687,6 +759,7 @@ const sessionAccuracyTrendArray = computed(() => sessionAccuracyTrend.value)
       sessionAccuracyTrend: sessionAccuracyTrendArray,
       totalRightWrongChartData,
       totalRoundsPlayed,
+      totalTypos,
       avgTimePerRound,
       tenseAccuracyData,
       sentenceTypeAccuracyData,
@@ -695,7 +768,10 @@ const sessionAccuracyTrendArray = computed(() => sessionAccuracyTrend.value)
       verbUsage,
       tierStats,
       tenseStats,
-      sparklineGradients
+      typoRequests,
+      snackbar,
+      requestTypo,
+      sparklineGradients,
     };
   },
 });
