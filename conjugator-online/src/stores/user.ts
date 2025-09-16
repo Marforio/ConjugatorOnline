@@ -20,6 +20,17 @@ interface Student {
   user: User | null;
 }
 
+interface Course {
+  slug: string;
+}
+
+interface StudentCourse {
+  id: number;
+  student: Student;
+  course: Course;
+}
+
+
 interface VerbUsage {
   verb: string;
   tier: string;
@@ -76,14 +87,23 @@ interface VocabItem {
 
 // --- Store ---
 export const useUserStore = defineStore("user", () => {
-  // 🔐 Auth state
+  // Auth state
+  const user = ref<User | null>(null);
   const student = ref<Student | null>(null);
+
   const accessToken = ref<string | null>(getAccessToken());
 
   const isAuthenticated = computed(() => !!accessToken.value);
-  const isStaff = computed(() => student.value?.user?.is_staff ?? false);
+  const isStaff = computed(() => user.value?.is_staff ?? false);
+  const isSuperuser = computed(() => user.value?.is_superuser ?? false);
   const studentId = computed(() => student.value?.id ?? null);
   const totalCorrect = computed(() => student.value?.total_correct_prompts ?? 0);
+
+  // Enrollments state
+  const enrollments = ref<StudentCourse[]>([]);
+  const loadingEnrollments = ref(false);
+  const enrollmentError = ref<string | null>(null);
+
 
   function setStudent(data: Student) {
     student.value = data;
@@ -99,18 +119,50 @@ export const useUserStore = defineStore("user", () => {
     accessToken.value = token;
   }
 
+  async function fetchUserData() {
+    if (!accessToken.value) return;
+
+    try {
+      const res = await api.get<User>("/users/me/");
+      user.value = res.data;
+    } catch (err) {
+      console.error("Failed to fetch user data:", err);
+    }
+  }
+
   async function fetchStudentData() {
     if (!accessToken.value) return;
 
     try {
       const response = await api.get<Student>("/me/student/");
-      setStudent(response.data);
-      console.log("Fetched student:", response.data);
-    } catch (err: any) {
+      student.value = response.data;
+    } catch (err) {
       console.error("Failed to fetch student data:", err);
-      clearStudent();
     }
   }
+
+  async function fetchEnrollments() {
+    if (!accessToken.value) return;
+
+    loadingEnrollments.value = true;
+    enrollmentError.value = null;
+
+    try {
+      const response = await api.get<StudentCourse[]>("/enrollment/");
+      enrollments.value = response.data;
+      console.log("Fetched enrollments:", response.data);
+    } catch (err: any) {
+      console.error("Failed to fetch enrollments:", err);
+      enrollmentError.value = "Failed to fetch enrollments";
+    } finally {
+      loadingEnrollments.value = false;
+    }
+  }
+  const enrolledCourses = computed(() =>
+    enrollments.value.map(e => e.course.slug)
+  );
+
+
 
   // 📊 Verb usage state
   const verbUsage = ref<VerbUsage[]>([]);
@@ -233,8 +285,11 @@ export const useUserStore = defineStore("user", () => {
   // 🧠 Return state + actions
   return {
     // Auth
-    student, accessToken, isAuthenticated, isStaff, studentId, totalCorrect,
-    setStudent, clearStudent, setAccessToken, fetchStudentData,
+    student, accessToken, isAuthenticated, isStaff, isSuperuser, studentId, totalCorrect,
+    setStudent, clearStudent, setAccessToken, fetchStudentData, fetchUserData,
+
+    // Enrollments
+    enrollments, loadingEnrollments, enrollmentError, enrolledCourses, fetchEnrollments,
 
     // Verb usage
     verbUsage, tierStats, tenseStats, loadingVerbUsage, verbUsageError,

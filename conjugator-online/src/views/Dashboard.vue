@@ -35,7 +35,9 @@
           <v-alert type="error">{{ errorsError }}</v-alert>
         </div>
         <div v-else>
-          <ErrorsDataTab />
+          <AdminErrorDataTab v-if="userStore.isStaff" :key="'admin'"/>
+          <ErrorsDataTab v-else :key="'student'" />
+
         </div>
       </v-window-item>
 
@@ -491,6 +493,7 @@ import TopNavBar from "@/components/TopNavBar.vue";
 import PieChart from "@/components/charts/PieChart.vue";
 import BarChart from "@/components/charts/BarChart.vue";
 import ErrorsDataTab from "@/components/ErrorsDataTab.vue";
+import AdminErrorDataTab from "@/components/AdminErrorDataTab.vue";
 import NumbersCard from "@/components/NumbersCard.vue";
 import { useRouter, useRoute } from 'vue-router';
 import VocabDataTab from "@/components/VocabDataTab.vue";
@@ -515,7 +518,7 @@ interface GameSession {
 
 export default defineComponent({
   name: "Dashboard",
-  components: { TopNavBar, NumbersCard, PieChart, BarChart, ErrorsDataTab, VocabDataTab, GoalsDataTab },
+  components: { TopNavBar, NumbersCard, PieChart, BarChart, ErrorsDataTab, AdminErrorDataTab, VocabDataTab, GoalsDataTab },
   setup() {
     const router = useRouter();
     const route = useRoute();
@@ -731,10 +734,11 @@ const sessionAccuracyTrendArray = computed(() => sessionAccuracyTrend.value)
     });
 
     onMounted(async () => {
+      await userStore.fetchUserData();
       await fetchConjGameSessionsDashboardData();
       userStore.fetchVerbUsageDashboardData();
       setInitialTabFromRoute();
-      console.log("SessionAccTrend: ", sessionAccuracyTrend )
+      console.log("is staff? ", userStore.isStaff)
     });
 
     function setInitialTabFromRoute() {

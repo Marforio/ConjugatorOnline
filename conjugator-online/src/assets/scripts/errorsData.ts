@@ -112,6 +112,13 @@ export const errorsData: Record<string, ErrorEntry> = {
         "recommendation": "remember that demonstratives are different for single or multiple objects, and if they are near or far, but they never end in '-s'",
         "examples": "this house here, that house there, these houses here, those houses there"
     },
+    "0179":{
+        "short_slug": "quant-some-negative",
+        "description": "incorrect use of the quantifier 'some' to make a negation",
+        "reference": "<a href='https://book.language-labs.ch/ch1#e0179' target='_blank'>error 0179</a>)",
+        "recommendation": "remember that 'some' is not used in negative sentences",
+        "examples": "Don't say 'I didn't have some money'. Say 'I didn't have any money' or 'I had no money'"
+    },
     "0180":{
         "short_slug": "quant-any-by-itself",
         "description": "incorrect use of the quantifier 'any' to make a negation",
@@ -167,6 +174,20 @@ export const errorsData: Record<string, ErrorEntry> = {
         "reference": "<a href='https://book.language-labs.ch/ch1#e0187' target='_blank'>error 0187</a>",
         "recommendation": "remember that, in English, we do not use the article 'the' in front of the determiner 'both'. You can do this with 'two', but not with 'both'",
         "examples": "'Both options are good' or 'the two options are good, but not 'The both options are good'."
+    },
+    "0188":{
+        "short_slug": "quant-implicit-noun-much-little",
+        "description": "incorrect choice of quantifier for an implicit noun",
+        "reference": "<a href='https://book.language-labs.ch/ch1#e0188' target='_blank'>error 0188</a>)",
+        "recommendation": "remember that implicit nouns are usually quantified with 'much' or 'little'.",
+        "examples": "'There is little we can do.; 'I don't have much to say.'"
+    },
+    "0189":{
+        "short_slug": "quant-unspecified-noun-of",
+        "description": "incorrect use of the preposition 'of' with an unspecified noun",
+        "reference": "<a href='https://book.language-labs.ch/ch1#e0189' target='_blank'>error 0189</a>)",
+        "recommendation": "remember that we use the preposition 'of' to quantify previously mentioned or specified nouns.",
+        "examples": "'Both kids' vs 'Both of the kids'; 'Many cars' vs 'Many of those cars'; 'A few players' vs 'A few of them'"
     },
     
     "0210":{
@@ -484,6 +505,13 @@ export const errorsData: Record<string, ErrorEntry> = {
         "recommendation": "remember that we use present continuous for single ongoing actions",
         "examples": "say 'today, the climate is changing', not 'today, the climate changes'"
     },
+    "0426":{
+        "short_slug": "pres-cont-state-verbs",
+        "description": "incorrect conjugation of a state verb in a continuous tense",
+        "reference": "<a href='https://book.language-labs.ch/ch4#e0426' target='_blank'>error 0426</a>)",
+        "recommendation": "remember that state verbs such as 'need', 'want', 'own', 'believe', 'know', etc. are not normally used in continuous tenses",
+        "examples": "avoid saying 'She was ownning two houses' or 'I am believing in aliens'"
+    },
     "0430":{
         "short_slug": "pres-simple-overuse-pperf",
         "description": "overuse of the present simple in present perfect situations",
@@ -539,6 +567,13 @@ export const errorsData: Record<string, ErrorEntry> = {
         "reference": "<a href='https://book.language-labs.ch/ch4#e0449' target='_blank'>error 0449</a>",
         "recommendation": "remember that the past perfect tense allows you to indicate a past event that happened before another past event",
         "examples": "'I did not have lunch because I had eaten so much for breakfast.'"
+    },
+    "0450":{
+        "short_slug": "future-definite-vs-indefinite",
+        "description": "incorrect choice of future tense",
+        "reference": "<a href='https://book.language-labs.ch/ch4#e0450' target='_blank'>error 0450</a>)",
+        "recommendation": "remember that we use future simple for unplanned or indefinite future actions, and present continuous for planned or definite future actions",
+        "examples": "'My team is playing tomorrow' vs 'My team will win'"
     },
     "0451":{
         "short_slug": "future-continuous",
@@ -682,6 +717,13 @@ export const errorsData: Record<string, ErrorEntry> = {
         "recommendation": "remember that 'by' is the preposition used in passive constructions",
         "examples": "it was decided by the president"
     },
+    "0805":{
+        "short_slug": "passive-preposition",
+        "description": "incorrect use of the expression 'to be born'",
+        "reference": "<a href='https://book.language-labs.ch/ch8#e0805' target='_blank'>error 0805</a>)",
+        "recommendation": "remember that we use the past simple passive form 'was born' to indicate the year of birth",
+        "examples": "don't say 'I am born in 1990', say 'I was born in 1990'"
+    },
     "0910":{
         "short_slug": "pronoun-subj-obj",
         "description": "incorrect subject or object pronoun",
@@ -744,6 +786,13 @@ export const errorsData: Record<string, ErrorEntry> = {
         "reference": "<a href='https://book.language-labs.ch/ch9#e0951' target='_blank'>error 0951</a>",
         "recommendation": "remember that a few verbs in French or German that are reflexive are not reflexive in English",
         "examples": "say 'I remember the day we met', not 'I remember me the day we met'"
+    },
+    "0955":{
+        "short_slug": "existential-there",
+        "description": "incorrect construction of an existential 'there' sentence",
+        "reference": "<a href='https://book.language-labs.ch/ch9#e0955' target='_blank'>error 0955</a>)",
+        "recommendation": "remember that existential constructions cannot be translated word-for-word from French or German, and that the verb agrees with the true subject (the noun that follows it)",
+        "examples": "say 'There are two stations', not 'There is two stations' or 'There has two stations' or 'It gives two stations'"
     },
     "0960":{
         "short_slug": "relative-who-which",
@@ -808,10 +857,45 @@ export const errorsData: Record<string, ErrorEntry> = {
         "recommendation": "remember that some verbs are followed by infinitive complements, and others by gerund (-ing) complements",
         "examples": "I promise to call; I stopped calling; I must remember to call; I regret calling"
     },
-    "1110":{
+    "1111":{
+        "short_slug": "verb-comp-gerund-verb",
+        "description": "incorrectly using an infinitive instead of a gerund after certain verbs",
+        "reference": "<a href='https://book.language-labs.ch/ch11#e1111' target='_blank'>error 1111</a>)",
+        "recommendation": "remember that we use gerunds (-ing) after certain verbs like 'enjoy', 'mind', 'suggest', 'recommend', 'avoid', etc.",
+        "examples": "'I enjoy swimming'; 'I suggest going to the museum', etc."
+    },
+    "1112":{
+        "short_slug": "verb-comp-preposition",
+        "description": "incorrectly using infinitive after a preposition",
+        "reference": "<a href='https://book.language-labs.ch/ch11#e1112 target='_blank'>error 1112</a>)",
+        "recommendation": "remember that we gerund (-ing) after a preposition",
+        "examples": "'I got fired for being late'; 'I am interested in learning languages', etc."
+    },
+    "1113":{
+        "short_slug": "verb-comp-subject",
+        "description": "incorrectly using infinitive when the verb complement is the subject of the main verb",
+        "reference": "<a href='https://book.language-labs.ch/ch11#e1113 target='_blank'>error 1113</a>)",
+        "recommendation": "remember that we use gerund when the verb is the subject of a sentence",
+        "examples": "Showering after 10pm is not allowed; Smoking is prohibited"
+    },
+    "1115":{
+        "short_slug": "verb-comp-infinitive-verb",
+        "description": "incorrectly using gerund with verbs that require an infinitive",
+        "reference": "<a href='https://book.language-labs.ch/ch11#e1115' target='_blank'>error 1115</a>)",
+        "recommendation": "remember verbs such as 'decide', 'plan', 'hope', 'want', 'learn', 'offer', 'promise', etc. are followed by an infinitive",
+        "examples": "'I decided to go'; 'I plan to travel'; 'I hope to see you soon'"
+    },
+    "1116":{
+        "short_slug": "verb-comp-adjectives",
+        "description": "incorrectly using gerund after an adjective",
+        "reference": "<a href='https://book.language-labs.ch/ch11#e1116' target='_blank'>error 1116</a>)",
+        "recommendation": "remember that we infinitive verbs after adjectives",
+        "examples": "'I am happy to help'; 'She is eager to learn'"
+    },
+    "1117":{
         "short_slug": "verb-comp-let-make",
         "description": "incorrectly adding 'to' between let or make and their complement",
-        "reference": "<a href='https://book.language-labs.ch/ch11#e1110' target='_blank'>error 1110</a>",
+        "reference": "<a href='https://book.language-labs.ch/ch11#e1117' target='_blank'>error 1117</a>)",
         "recommendation": "remember that we use infinitive WIHOUT 'to' after the verbs 'make' and 'let'",
         "examples": "'My mom made me clean up my room'; 'My parents never let me go out after 11 pm"
     },
