@@ -63,8 +63,6 @@
         </v-expansion-panel-text>
       </v-expansion-panel>
     </v-expansion-panels>
-
-
   </div>
 </template>
 
@@ -75,14 +73,14 @@ import ErrorHorizontalBarChart from "./charts/ErrorHorizontalBarChart.vue";
 import InitialsText from "./InitialsText.vue";
 import api from "@/axios";
 import { useDisplay } from "vuetify";
-import { errorsData } from '@/assets/scripts/errorsData';
+import { errorsData } from "@/assets/scripts/errorsData";
 
 interface ErrorItem {
   error_id: string;
   error_code: string;
   evidence: string | null;
   times: number;
-  feedback: Feedback;
+  feedback: Feedback | string;
 }
 interface Feedback {
   feedback_id: string;
@@ -101,7 +99,7 @@ export default defineComponent({
     const loading = ref(true);
     const errorsError = ref<string | null>(null);
     const { xs } = useDisplay();
-    const errorData = errorsData
+    const errorData = errorsData;
 
     const fetchErrorDashboardData = async () => {
       loading.value = true;
@@ -120,46 +118,126 @@ export default defineComponent({
       loading.value = false;
     };
 
-    const processedErrors = computed(() =>
-      errors.value.map(({ error_code, times, evidence, feedback }) => ({
-        error_code,
-        times,
-        evidence,
-        feedback: feedback?.feedback_id ?? "Unknown Feedback"
-      }))
-    );
+const processedErrors = computed(() =>
+  errors.value.map(({ error_code, times, evidence, feedback }) => {
+    // defaults
+    let feedbackId = "Unknown";
+    let feedbackDate: string | null = null;
+    let feedbackLabel = "";
 
-    // Group errors by feedback
-    // Group errors by feedback with processed date and type
-const feedbackGroups = computed(() => {
+    // Helper to parse date substring like "_20250620_" and return YYYY-MM-DD
+    const extractDateFromString = (s: string): string | null => {
+      const match = s.match(/_(\d{8})_/);
+      if (!match) return null;
+      const y = match[1].slice(0, 4);
+      const m = match[1].slice(4, 6);
+      const d = match[1].slice(6, 8);
+      return `${y}-${m}-${d}`;
+    };
+
+    if (typeof feedback === "string") {
+      // feedback already a string (student view) — may already contain the date
+      feedbackId = feedback || "Unknown";
+      feedbackDate = extractDateFromString(feedback);
+    } else if (feedback && typeof feedback === "object") {
+      // full object (admin view)
+      feedbackId = feedback.feedback_id ?? "Unknown";
+      if (feedback.date) {
+        // sometimes date is encoded in feedback.date string (same pattern)
+        feedbackDate = extractDateFromString(feedback.date) ?? null;
+        // if not found inside feedback.date, attempt to parse feedback_id too
+        if (!feedbackDate) {
+          feedbackDate = extractDateFromString(feedback.feedback_id ?? "") ?? null;
+        }
+      } else {
+        // fallback: maybe the feedback_id itself embeds the date
+        feedbackDate = extractDateFromString(feedback.feedback_id ?? "") ?? null;
+      }
+    }
+
+    // Make a friendly label (Presentation / Exercises + date if available)
+    if (feedbackId.startsWith("P")) {
+      feedbackLabel = "Errors in Feedback on Presentation" + (feedbackDate ? `, created ${feedbackDate}` : "");
+    } else if (feedbackId.startsWith("E")) {
+      feedbackLabel = "Errors in Feedback on Exercises" + (feedbackDate ? `, created ${feedbackDate}` : "");
+    } else {
+      feedbackLabel = feedbackId;
+    }
+
+    // Use the original feedbackId as the grouping key for charts (it already contains the raw id + date piece)
+    return {
+      error_code,
+      times,
+      evidence,
+      feedbackId,                 // grouping key for the chart (unique per feedback+date)
+      feedbackObj: typeof feedback === "object" ? feedback : null, // original object if present
+      feedbackDate,               // parsed date or null
+      feedbackLabel               // friendly label for UI
+    };
+  })
+);
+
+
+    // Group errors by feedback (with friendly names + date for panel headers)
+    const feedbackGroups = computed(() => {
   const map = new Map<
     string,
     { feedback_id: string; date?: string; errors: ErrorItem[] }
   >();
 
+  // helper: parse "_YYYYMMDD_" into "YYYY-MM-DD"
+  const extractDateFromString = (s?: string): string | undefined => {
+    if (!s) return undefined;
+    const match = s.match(/_(\d{8})_/);
+    if (!match) return undefined;
+    const y = match[1].slice(0, 4);
+    const m = match[1].slice(4, 6);
+    const d = match[1].slice(6, 8);
+    return `${y}-${m}-${d}`;
+  };
+
   for (const e of errors.value) {
-    let rawId = e.feedback?.feedback_id || "Unknown";
-    let processedId = rawId;
+    // rawId works for both string and object cases
+    const rawId =
+      typeof e.feedback === "string"
+        ? e.feedback
+        : e.feedback?.feedback_id || "Unknown";
 
-    // Extract date from the string (_YYYYMMDD_) ignoring the last 4 digits
-    let rawDate = e.feedback?.date || "";
+    // 1) try to get date from feedback.date (object case)
     let formattedDate: string | undefined = undefined;
-
-    if (rawDate) {
-      const match = rawDate.match(/_(\d{8})_/);
-      if (match) {
-        const y = match[1].slice(0, 4);
-        const m = match[1].slice(4, 6);
-        const d = match[1].slice(6, 8);
-        formattedDate = `${y}-${m}-${d}`;
-      }
+    if (typeof e.feedback === "object" && e.feedback?.date) {
+      formattedDate = extractDateFromString(e.feedback.date);
     }
-    // Replace P/E prefixes with friendly words
-    if (rawId.startsWith("P")) processedId = "Errors in Feedback on Presentation, created " + formattedDate;
-    else if (rawId.startsWith("E")) processedId = "Errors in Feedback on Exercises, created " + formattedDate;
+
+    // 2) if not found, try to parse the rawId string (covers "P__20250620_..." strings)
+    if (!formattedDate) {
+      formattedDate = extractDateFromString(rawId);
+    }
+
+    // friendly prefix
+    let processedId = rawId;
+    if (rawId.startsWith("P")) {
+      processedId = "Errors in Feedback on Presentation";
+    } else if (rawId.startsWith("E")) {
+      processedId = "Errors in Feedback on Exercises";
+    } else {
+      // leave the rawId or some other label for non-standard ids
+      processedId = rawId;
+    }
+
+    // Append date and rawId to keep group labels informative AND unique" 
+    if (formattedDate) {
+      processedId = `${processedId}, created ${formattedDate}`;
+    } else {
+      processedId = `${processedId} (${rawId})`;
+    }
 
     if (!map.has(processedId)) {
-      map.set(processedId, { feedback_id: processedId, date: formattedDate, errors: [e] });
+      map.set(processedId, {
+        feedback_id: processedId,
+        date: formattedDate,
+        errors: [e],
+      });
     } else {
       map.get(processedId)!.errors.push(e);
     }
@@ -173,7 +251,7 @@ const feedbackGroups = computed(() => {
       minWidth: xs.value ? "200px" : "300px",
       maxWidth: xs.value ? "500px" : "95%",
       marginLeft: xs.value ? "5px" : "15px",
-      marginRight: xs.value ? "5px" : "15px"
+      marginRight: xs.value ? "5px" : "15px",
     }));
 
     onMounted(() => {
@@ -188,8 +266,8 @@ const feedbackGroups = computed(() => {
       xs,
       feedbackGroups,
       cardStyle,
-      errorData
+      errorData,
     };
-  }
+  },
 });
 </script>

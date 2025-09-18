@@ -156,8 +156,10 @@ export default {
             .attr('transform', `translate(${margin.left},${margin.top})`);
 
         const feedbackKeys = Array.from(
-            new Set(this.errorData.map(d => d.feedback).filter(Boolean))
+          new Set(this.errorData.map(d => d.feedbackId).filter(Boolean))
         );
+
+        
 
         // Map feedback_id → feedback object for tooltips
         const feedbackMap = new Map();
@@ -168,7 +170,7 @@ export default {
         });
 
         // Build stackData with evidence included
-        const nested = d3.group(this.errorData, d => d.error_code, d => d.feedback);
+        const nested = d3.group(this.errorData, d => d.error_code, d => d.feedbackId);
         const stackData = [];
         
         nested.forEach((feedbackGroup, error_code) => {

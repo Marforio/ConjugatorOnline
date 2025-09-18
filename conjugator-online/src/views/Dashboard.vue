@@ -738,7 +738,6 @@ const sessionAccuracyTrendArray = computed(() => sessionAccuracyTrend.value)
       await fetchConjGameSessionsDashboardData();
       userStore.fetchVerbUsageDashboardData();
       setInitialTabFromRoute();
-      console.log("is staff? ", userStore.isStaff)
     });
 
     function setInitialTabFromRoute() {

@@ -115,60 +115,79 @@ export default {
         .append("g")
         .attr("transform", `translate(${margin.left},${margin.top})`);
 
+      // 🔑 Normalize feedback_id consistently
+      const normalizeFeedbackId = d =>
+        typeof d.feedback === "string"
+          ? d.feedback
+          : d.feedback?.feedback_id || "Unknown";
+
       const feedbackKeys = Array.from(
-        new Set(this.errorData.map(d => d.feedback).filter(Boolean))
+        new Set(this.errorData.map(normalizeFeedbackId))
       );
 
-      const nested = d3.group(this.errorData, d => d.error_code, d => d.feedback);
-      const stackData = [];
+      // 🔑 Build stackData rows with all feedbackKeys
+      const grouped = d3.group(
+        this.errorData,
+        d => d.error_code
+      );
 
-      nested.forEach((feedbackGroup, error_code) => {
-        const exampleError = this.errorData.find(e => e.error_code === error_code);
-        const entry = {
+      const stackData = [];
+      for (const [error_code, items] of grouped.entries()) {
+        const exampleError = items[0];
+        const row = {
           error_code,
           evidence: exampleError?.evidence ?? "",
-          description: exampleError?.description ?? "",
-          recommendation: exampleError?.recommendation ?? "",
-          examples: exampleError?.examples ?? "",
-          reference: exampleError?.reference ?? ""
+          description: errorsData[error_code]?.description ?? "",
+          recommendation: errorsData[error_code]?.recommendation ?? "",
+          examples: errorsData[error_code]?.examples ?? "",
+          reference: errorsData[error_code]?.reference ?? ""
         };
 
-        feedbackGroup.forEach((items, feedbackId) => {
-          entry[feedbackId] = d3.sum(items, d => d.times);
-        });
+        // initialize all feedback keys with 0
+        for (const key of feedbackKeys) {
+          row[key] = 0;
+        }
 
-        stackData.push(entry);
-      });
+        // fill counts
+        for (const item of items) {
+          const fid = normalizeFeedbackId(item);
+          row[fid] += item.times;
+        }
 
+        stackData.push(row);
+      }
+
+      // sort by total errors
       stackData.sort((a, b) => {
-        const totalA = feedbackKeys.reduce((sum, key) => sum + (a[key] || 0), 0);
-        const totalB = feedbackKeys.reduce((sum, key) => sum + (b[key] || 0), 0);
+        const totalA = feedbackKeys.reduce((sum, k) => sum + (a[k] || 0), 0);
+        const totalB = feedbackKeys.reduce((sum, k) => sum + (b[k] || 0), 0);
         return totalB - totalA;
       });
 
-      const maxTotal =
-        d3.max(stackData, d => d3.sum(feedbackKeys, key => d[key] || 0)) || 0;
+      const maxTotal = d3.max(stackData, d =>
+        d3.sum(feedbackKeys, k => d[k] || 0)
+      ) || 0;
 
-      const y = d3
-        .scaleBand()
+      const y = d3.scaleBand()
         .domain(stackData.map(d => d.error_code))
         .range([0, height])
         .padding(0.2);
 
-      const x = d3.scaleLinear().domain([0, maxTotal]).nice().range([0, width]);
+      const x = d3.scaleLinear()
+        .domain([0, maxTotal])
+        .nice()
+        .range([0, width]);
 
-      const color = d3
-        .scaleOrdinal()
+      const color = d3.scaleOrdinal()
         .domain(feedbackKeys)
         .range(d3.schemeTableau10);
 
-      const stackedSeries = d3
-        .stack()
+      // 🔑 Correct stacking
+      const stackedSeries = d3.stack()
         .keys(feedbackKeys)
-        .value((d, key) => d[key] || 0)(stackData);
+        .value((d, key) => d[key])(stackData);
 
-      chart
-        .selectAll("g.layer")
+      chart.selectAll("g.layer")
         .data(stackedSeries)
         .enter()
         .append("g")
@@ -187,8 +206,7 @@ export default {
 
       chart.append("g").call(d3.axisLeft(y));
 
-      chart
-        .selectAll(".bar-total")
+      chart.selectAll(".bar-total")
         .data(stackData)
         .enter()
         .append("text")
@@ -199,6 +217,7 @@ export default {
         .attr("font-size", "12px")
         .text(d => d3.sum(feedbackKeys, k => d[k] || 0));
     },
+
     showPopover(errorItem) {
       const error_code = errorItem.error_code;
       const evidenceText = errorItem.evidence || "No evidence available";
