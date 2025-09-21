@@ -34,7 +34,10 @@ class Game {
   }
 
   submitAnswer(answer) {
-    const cleanedAnswer = answer.toLowerCase().replace(/['.]/g, '');
+    const cleanedAnswer = answer.toLowerCase()
+                                .replace(/[?.!'"]/g, '')  // strip punctuation first
+                                .replace(/\s+/g, ' ')     // collapse multiple spaces
+                                .trim(); 
     this.currentPrompt.setUserAnswer(cleanedAnswer);
 
     const isCorrect = this.currentPrompt.getCorrect();
