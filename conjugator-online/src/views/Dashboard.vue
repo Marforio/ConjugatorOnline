@@ -72,7 +72,7 @@
                     {{ sessions.length }} game{{ sessions.length !== 1 ? 's' : '' }} played
                   </div>
                   <div class="text-subtitle-2">
-                    {{ totalRoundsPlayed }} total rounds
+                    {{ totalRoundsPlayed }} total rounds: {{ totalCorrect }} correct, {{ totalIncorrect }} incorrect
                   </div>
                   <div v-if="totalTypos > 0" class="text-caption text-muted">
                     ({{ totalTypos }} typo<span v-if="totalTypos > 1">s</span> not counted)
@@ -396,7 +396,7 @@
                 <v-expansion-panel>
                   <v-expansion-panel-title>
                     <span class="font-weight-medium">
-                      Game {{ session.session_id }} — <span v-if="session.correct_count > 0">{{ session.correct_count }} Correct</span><span v-if="session.wrong_count > 0">, {{ session.wrong_count }} Incorrect </span> 
+                      {{ session.correct_count }} correct out of {{ session.total_rounds }} 
                     </span>
                     — {{ new Date(session.started_at).toLocaleString() }} — {{ session.tenses.join(', ').slice(0, 50) }}
                   </v-expansion-panel-title>
@@ -444,26 +444,35 @@
                             </td>
                             <td>{{ round.typo }}</td>
                             <td>{{ round.elapsed_time?.toFixed(2) ?? '—' }}</td>
-                            <td v-if="!round.typo && !round.typo_requested && !round.is_correct">
-                              <v-btn
-                                size="small"
-                                color="primary"
-                                :disabled="typoRequests.has(round.id)"
-                                @click="requestTypo(round.id)"
-                              >
-                                This was a typo
-                              </v-btn>
+                            <td>
+                              <!-- 1. Approved -->
+                              <template v-if="round.typo === true">
+                                <span class="badge bg-success">Typo approved</span>
+                              </template>
+
+                              <!-- 2. Denied (show whenever typo_accepted is explicitly false) -->
+                              <template v-else-if="round.typo_accepted === false">
+                                <span class="badge bg-warning">Typo denied</span>
+                              </template>
+
+                              <!-- 3. Pending -->
+                              <template v-else-if="round.typo_requested === true">
+                                <span class="badge bg-warning text-dark">Pending approval</span>
+                              </template>
+
+                              <!-- 4. Request button (only when not correct and no other state) -->
+                              <template v-else-if="!round.is_correct">
+                                <v-btn
+                                  size="small"
+                                  color="primary"
+                                  :disabled="typoRequests.has(round.id)"
+                                  @click="requestTypo(round)"
+                                >
+                                  This was a typo
+                                </v-btn>
+                              </template>
                             </td>
-                            <td v-else-if="round.typo_requested && !round.typo">
-                              <span class="text-caption text-warning">Pending approval</span>
-                            </td>
-                            <td v-else-if="round.typo_requested && round.typo_accepted === false">
-                              <span class="text-caption text-success">Typo denied</span>
-                            </td>
-                            <td v-else-if="round.typo">
-                              <span class="text-caption text-success">Typo approved</span>
-                            </td>
-                            <td>{{ round.elapsed_time?.toFixed(2) ?? '—' }}</td>
+
                           </tr>
                         </tbody>
                       </v-table>
@@ -502,8 +511,22 @@ import { useRouter, useRoute } from 'vue-router';
 import VocabDataTab from "@/components/VocabDataTab.vue";
 import GoalsDataTab from "@/components/GoalsDataTab.vue";
 
-
-
+// ---------------- Types ----------------
+interface Round {
+  id: number;
+  is_correct: boolean;
+  typo: boolean | null;
+  typo_requested: boolean;
+  typo_accepted: boolean | null;
+  tense?: string;
+  sentence_type?: string;
+  prompt_number?: number;
+  person?: string;
+  verb?: string;
+  acceptable_answers?: string[];
+  elapsed_time?: number;
+  user_answer?: string;
+}
 
 interface GameSession {
   session_id: number;
@@ -516,9 +539,10 @@ interface GameSession {
   correct_count: number;
   wrong_count: number;
   avg_time_per_prompt: number;
-  rounds: any[];
+  rounds: Round[];
 }
 
+// ---------------- Component ----------------
 export default defineComponent({
   name: "Dashboard",
   components: { TopNavBar, NumbersCard, PieChart, BarChart, ErrorsDataTab, AdminErrorDataTab, VocabDataTab, GoalsDataTab },
@@ -531,13 +555,13 @@ export default defineComponent({
     const conjGameError = ref<string | null>(null);
     const verbUsage = ref<any[]>([]);
     const tierStats = ref<any[]>([]);
-    interface TenseStats {
-        discovered_verbs_ps: string[];
-        discovered_verbs_pp: string[];
-        mastered_verbs_ps: string[];
-        mastered_verbs_pp: string[];
-      }
 
+    interface TenseStats {
+      discovered_verbs_ps: string[];
+      discovered_verbs_pp: string[];
+      mastered_verbs_ps: string[];
+      mastered_verbs_pp: string[];
+    }
     const tenseStats = ref<TenseStats | null>(null);
 
     const typoRequests = ref<Set<number>>(new Set());
@@ -555,6 +579,7 @@ export default defineComponent({
 
     const userStore = useUserStore();
 
+    // ---------------- Stats ----------------
     const avgTimePerRound = computed(() => {
       const total = sessions.value.reduce((sum, session) => sum + session.avg_time_per_prompt, 0);
       return sessions.value.length > 0 ? (total / sessions.value.length).toFixed(1) : 0;
@@ -564,44 +589,47 @@ export default defineComponent({
       { label: "Correct", value: totalPercentCorrect.value },
       { label: "Incorrect", value: totalPercentIncorrect.value },
     ]);
+
     const totalRoundsPlayed = computed(() =>
       sessions.value.reduce((sum, session) => {
-        const validRounds = session.rounds.filter((round: any) => !round.typo);
+        const validRounds = session.rounds.filter((round: Round) => !round.typo);
         return sum + validRounds.length;
       }, 0)
     );
 
     const totalTypos = computed(() =>
       sessions.value.reduce((sum, session) => {
-        return (
-          sum + session.rounds.filter((round: any) => round.typo).length
-        );
+        return sum + session.rounds.filter((round: Round) => round.typo).length;
       }, 0)
     );
 
+    const totalCorrect = computed(() =>
+      sessions.value.reduce(
+        (sum, session) =>
+          sum + session.rounds.filter((round: Round) => round.is_correct && !round.typo).length,
+        0
+      )
+    );
+
+    const totalIncorrect = computed(() =>
+      sessions.value.reduce(
+        (sum, session) =>
+          sum + session.rounds.filter((round: Round) => !round.is_correct && !round.typo).length,
+        0
+      )
+    );
+
     const totalPercentCorrect = computed(() => {
-      const totalCorrect = sessions.value.reduce((sum, session) => {
-        return (
-          sum +
-          session.rounds.filter((round: any) => round.is_correct && !round.typo).length
-        );
-      }, 0);
-
-      return Number(((totalCorrect / totalRoundsPlayed.value) * 100).toFixed(0));
+      return totalRoundsPlayed.value > 0
+        ? Number(((totalCorrect.value / totalRoundsPlayed.value) * 100).toFixed(0))
+        : 0;
     });
-
 
     const totalPercentIncorrect = computed(() => {
-      const totalIncorrect = sessions.value.reduce((sum, session) => {
-        return (
-          sum +
-          session.rounds.filter((round: any) => !round.is_correct && !round.typo).length
-        );
-      }, 0);
-
-      return Number(((totalIncorrect / totalRoundsPlayed.value) * 100).toFixed(0));
+      return totalRoundsPlayed.value > 0
+        ? Number(((totalIncorrect.value / totalRoundsPlayed.value) * 100).toFixed(0))
+        : 0;
     });
-
 
 
     const activeTab = ref("grammar-feedback");
@@ -614,128 +642,130 @@ export default defineComponent({
 
     const { xs, smAndDown } = useDisplay();
     const isMobile = computed(() => smAndDown.value);
+
     const BarchartColorPalette = [
-      "#4CAF50",
-      "#2196F3",
-      "#FFC107",
-      "#E91E63",
-      "#9C27B0",
-      "#FF5722",
+      "#4CAF50", "#2196F3", "#FFC107", "#E91E63", "#9C27B0", "#FF5722",
     ];
     const sparklineGradients = [
-          ['#222'],
-          ['#42b3f4'],
-          ['green', 'yellow', 'red'],
-          ['purple', 'violet'],
-          ['#00c6ff', '#F0F', '#FF0'],
-          ['#f72047', '#ffd200', '#1feaea'],
-        ]
+      ['#222'], ['#42b3f4'], ['green', 'yellow', 'red'],
+      ['purple', 'violet'], ['#00c6ff', '#F0F', '#FF0'],
+      ['#f72047', '#ffd200', '#1feaea'],
+    ];
 
-    const fetchConjGameSessionsDashboardData = async () => {
+    // ---------------- API Calls ----------------
+    const fetchConjGameSessionsDashboardData = async (): Promise<void> => {
       loading.value = true;
       conjGameError.value = null;
-
       try {
         const sessionsRes = await api.get<GameSession[]>("/conj-game-sessions/");
         sessions.value = sessionsRes.data;
-
       } catch (err: any) {
         console.error("Conj game sessions fetch failed:", err);
         conjGameError.value = conjGameError.value
           ? `${conjGameError.value}; Failed to fetch sessions`
           : "Failed to fetch sessions";
       }
-
       loading.value = false;
     };
 
     const sessionAccuracyTrend = computed(() => {
       return sessions.value
+        .slice() // shallow copy so we don’t mutate original
         .reverse()
         .map(session => {
-          const total = session.total_rounds ?? 0
+          const total = session.total_rounds ?? 0;
           return total
             ? Number(((session.correct_count / total) * 100).toFixed(0))
-            : null
+            : null;
         })
-        .filter((x): x is number => x !== null) // type guard to keep only numbers
-    })
+        .filter((x): x is number => x !== null);
+    });
 
-  const requestTypo = async (promptId: number) => {
-    if (typoRequests.value.has(promptId)) return;
+    // ---------------- Typo Actions ----------------
+    const requestTypo = async (round: Round): Promise<void> => {
+      if (typoRequests.value.has(round.id)) return;
+      typoRequests.value.add(round.id);
+      try {
+        await api.patch(`/conj-game-rounds/${round.id}/request-typo/`, {
+          typo_requested: true,
+        });
+        round.typo_requested = true;
+        round.typo_accepted = null;
+        showSnackbar("Typo request submitted!");
+      } catch (err) {
+        console.error("Typo request failed:", err);
+        typoRequests.value.delete(round.id);
+        showSnackbar("Failed to send typo request.", "error");
+      }
+    };
 
-    typoRequests.value.add(promptId);
+    const acceptTypo = async (round: Round): Promise<void> => {
+      try {
+        await api.patch(`/conj-game-rounds/${round.id}/accept-typo/`);
+        round.typo = true;
+        round.is_correct = true;
+        round.typo_requested = false;
+        round.typo_accepted = true;
+        showSnackbar("Typo approved!");
+      } catch (err) {
+        console.error("Typo approval failed:", err);
+        showSnackbar("Failed to approve typo.", "error");
+      }
+    };
 
-    try {
-      await api.patch(`/conj-game-rounds/${promptId}/request-typo/`, {
-        typo_requested: true
-      });
-      showSnackbar('Typo request submitted!');
-      fetchConjGameSessionsDashboardData();
-    } catch (err) {
-      console.error("Typo request failed:", err);
-      showSnackbar('Failed to send typo request.', 'error');
-    }
-  };
+    const denyTypo = async (round: Round): Promise<void> => {
+      try {
+        await api.patch(`/conj-game-rounds/${round.id}/deny-typo/`);
+        round.typo = false;
+        round.typo_requested = false;
+        round.typo_accepted = false;
+        showSnackbar("Typo denied!");
+      } catch (err) {
+        console.error("Typo denial failed:", err);
+        showSnackbar("Failed to deny typo.", "error");
+      }
+    };
 
-
-    // unwrap the computed into a plain array
-const sessionAccuracyTrendArray = computed(() => sessionAccuracyTrend.value)
-
+    // ---------------- Derived Stats ----------------
+    const sessionAccuracyTrendArray = computed(() => sessionAccuracyTrend.value);
 
     const tenseAccuracyData = computed(() => {
-      const rounds = sessions.value.flatMap((session) => session.rounds || []);
+      const rounds = sessions.value.flatMap(session => session.rounds || []);
       const tenseGroups: Record<string, { correct: number; total: number }> = {};
-
       for (const round of rounds) {
-        const tense = round.tense;
-        if (!tenseGroups[tense]) {
-          tenseGroups[tense] = { correct: 0, total: 0 };
-        }
+        const tense = round.tense || "unknown";
+        if (!tenseGroups[tense]) tenseGroups[tense] = { correct: 0, total: 0 };
         tenseGroups[tense].total += 1;
-        if (round.is_correct) {
-          tenseGroups[tense].correct += 1;
-        }
+        if (round.is_correct) tenseGroups[tense].correct += 1;
       }
-
-      return Object.entries(tenseGroups).map(
-        ([tense, stats], index: number) => ({
-          label: tense,
-          value: parseFloat(((stats.correct / stats.total) * 100).toFixed(0)),
-          correct: stats.correct,
-          total: stats.total,
-          color: BarchartColorPalette[index % BarchartColorPalette.length],
-        })
-      );
+      return Object.entries(tenseGroups).map(([tense, stats], i) => ({
+        label: tense,
+        value: parseFloat(((stats.correct / stats.total) * 100).toFixed(0)),
+        correct: stats.correct,
+        total: stats.total,
+        color: BarchartColorPalette[i % BarchartColorPalette.length],
+      }));
     });
 
     const sentenceTypeAccuracyData = computed(() => {
-      const rounds = sessions.value.flatMap((session) => session.rounds || []);
+      const rounds = sessions.value.flatMap(session => session.rounds || []);
       const typeGroups: Record<string, { correct: number; total: number }> = {};
-
       for (const round of rounds) {
-        const type = round.sentence_type;
-        if (!typeGroups[type]) {
-          typeGroups[type] = { correct: 0, total: 0 };
-        }
+        const type = round.sentence_type || "unknown";
+        if (!typeGroups[type]) typeGroups[type] = { correct: 0, total: 0 };
         typeGroups[type].total += 1;
-        if (round.is_correct) {
-          typeGroups[type].correct += 1;
-        }
+        if (round.is_correct) typeGroups[type].correct += 1;
       }
-
-
-      return Object.entries(typeGroups).map(
-        ([type, stats], index: number) => ({
-          label: type,
-          value: parseFloat(((stats.correct / stats.total) * 100).toFixed(0)),
-          correct: stats.correct,
-          total: stats.total,
-          color: BarchartColorPalette[index % BarchartColorPalette.length],
-        })
-      );
+      return Object.entries(typeGroups).map(([type, stats], i) => ({
+        label: type,
+        value: parseFloat(((stats.correct / stats.total) * 100).toFixed(0)),
+        correct: stats.correct,
+        total: stats.total,
+        color: BarchartColorPalette[i % BarchartColorPalette.length],
+      }));
     });
 
+    // ---------------- Lifecycle ----------------
     onMounted(async () => {
       await userStore.fetchUserData();
       await fetchConjGameSessionsDashboardData();
@@ -743,14 +773,13 @@ const sessionAccuracyTrendArray = computed(() => sessionAccuracyTrend.value)
       setInitialTabFromRoute();
     });
 
-    function setInitialTabFromRoute() {
+    function setInitialTabFromRoute(): void {
       const tabFromRoute = route.query.tab;
       const isValidTab = typeof tabFromRoute === "string" && tabItems.some(t => t.value === tabFromRoute);
-
-      activeTab.value = isValidTab ? tabFromRoute : tabItems[0].value; // fallback to first tab
+      activeTab.value = isValidTab ? tabFromRoute : tabItems[0].value;
     }
 
-
+    // ---------------- Expose ----------------
     return {
       sessions,
       loading,
@@ -763,6 +792,8 @@ const sessionAccuracyTrendArray = computed(() => sessionAccuracyTrend.value)
       TopNavBar,
       PieChart,
       sessionAccuracyTrend: sessionAccuracyTrendArray,
+      totalCorrect,
+      totalIncorrect,
       totalRightWrongChartData,
       totalRoundsPlayed,
       totalTypos,
@@ -777,11 +808,14 @@ const sessionAccuracyTrendArray = computed(() => sessionAccuracyTrend.value)
       typoRequests,
       snackbar,
       requestTypo,
+      acceptTypo,
+      denyTypo,
       sparklineGradients,
     };
   },
 });
 </script>
+
 
 <style scoped>
 .chart-card {

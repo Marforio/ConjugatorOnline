@@ -24,7 +24,7 @@ const consonants = ['b', 'c', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'm', 'n', 'p', 
 const vowels = ['a', 'e', 'i', 'o', 'u'];
 const NON_DOUBLING_CONSONANTS = ['w', 'x', 'y'];
 const NON_DOUBLING = ['administer', 'allow', 'alter', 'anger', 'answer', 'bother', 'broaden', 'cater', 'color', 'consider', 'counter', 'cover', 'deliver', 
-    'differ', 'discover', 'encounter', 'enter', 'favor', 'foster', 'gather', 'honor', 'lower', 'lengthen', 'master', 'market', 'minister', 
+    'differ', 'discover', 'encounter', 'enter', 'favor', 'focus', 'foster', 'gather', 'honor', 'interpret', 'lower', 'lengthen', 'master', 'market', 'minister', 'misinterpret',
     'monitor', 'murder', 'offer', 'open', 'order', 'pocket', 'ponder', 'reconsider', 'recover', 'register', 'remember', 'render',  
     'rocket', 'shorten', 'skyrocket', 'strengthen', 'suffer', 'surrender', 'target', 'tighten', 'transfer', 'wager', 'wander', 'widen', 'wonder'];
 

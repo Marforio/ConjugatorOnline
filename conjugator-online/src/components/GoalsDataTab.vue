@@ -45,9 +45,12 @@
       <!-- Roadmap Card -->
       <v-col cols="12" lg="6">
         <v-card elevation="2" class="pa-4">
-          <v-card-title class="text-h5 mb-6">
+          <v-card-title class="text-h5 mb-1">
             <v-icon class="me-3">mdi-road-variant</v-icon>Roadmap to advanced level
           </v-card-title>
+          <v-card-subtitle class="mb-5">
+            Milestones reached in SPEAKING exercises without reading from notes
+          </v-card-subtitle>
           <v-card-text>
             <v-expansion-panels multiple>
               <v-expansion-panel
@@ -93,6 +96,7 @@
 <script lang="ts" setup>
 import { ref, onMounted, computed } from 'vue'
 import api from "@/axios"
+import { useUserStore } from "@/stores/user";
 
 interface Achievement {
   id: number
@@ -116,6 +120,7 @@ interface GroupedRoadmap {
   [category: string]: { key: string; item: RoadmapItem }[]
 }
 
+const userStore = useUserStore();
 const achievements = ref<Achievement[]>([])
 const automaticAchievements = ref<Achievement[]>([])
 const manualAchievements = ref<Achievement[]>([])
@@ -167,6 +172,29 @@ const fetchAchievements = async () => {
     loading.value = false
   }
 }
+const coursePrograms: Record<string, string> = {
+  'A': "Architecture",
+  'M': "Mechanical engineering",
+  'I': "Computer science",
+  'E': "Electrical engineering",
+  '1': "Business English Year",
+  '2': "Business English Year"
+}
+
+const courseProgram = computed(() => {
+  // Ensure enrolledCourses is treated as a string
+  const enrolledArray = userStore.enrolledCourses || []
+  const enrolled = Array.isArray(enrolledArray) ? enrolledArray.join('') : String(enrolledArray)
+  const firstChar = enrolled.charAt(0)
+  const firstTwoChars = enrolled.slice(0, 2)
+
+  if (firstTwoChars === 'EM') {
+    return 'Electrical or Mechanical'
+  }
+
+  return coursePrograms[firstChar] || null
+})
+
 
 const fetchRoadmap = async () => {
   try {
