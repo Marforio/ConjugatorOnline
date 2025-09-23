@@ -1,0 +1,282 @@
+{
+  "compound_nouns": {
+    "pretty_title": "Compound nouns",
+    "description": "Use compound nouns correctly (instead of unnecessary prepositions or possessives)",
+    "category": "Nouns"
+  },
+  "countable_nouns": {
+    "pretty_title": "Countable nouns",
+    "description": "Use countable nouns correctly (avoiding describing them as units or plurals)",
+    "category": "Nouns"
+  },
+  "uncountable_nouns": {
+    "pretty_title": "Uncountable nouns",
+    "description": "Use uncountable nouns correctly",
+    "category": "Nouns"
+  },
+  "quantify_countable": {
+    "pretty_title": "Quantifying countable nouns",
+    "description": "Quantify countable nouns correctly with several, many and few",
+    "category": "Nouns"
+  },
+  "quantify_uncountable": {
+    "pretty_title": "Quantifying uncountable nouns",
+    "description": "Quantify uncountable nouns correctly with much and little",
+    "category": "Nouns"
+  },
+  "numbers": {
+    "pretty_title": "Numbers",
+    "description": "Use numbers correctly, including large numbers",
+    "category": "Adjectives and adverbs"
+  },
+  "well_vs_good": {
+    "pretty_title": "Well vs Good",
+    "description": "Use well vs good correctly",
+    "category": "Adjectives and adverbs"
+  },
+  "good_vs_right": {
+    "pretty_title": "Good vs Right",
+    "description": "Use good vs right correctly",
+    "category": "Adjectives and adverbs"
+  },
+  "since_vs_for": {
+    "pretty_title": "Since vs For",
+    "description": "Use since and for appropriately for unfinished periods with the present perfect tense",
+    "category": "Adjectives and adverbs"
+  },
+    "still_anymore": {
+    "pretty_title": "Still and anymore",
+    "description": "Use still and anymore correctly",
+    "category": "Adjectives and adverbs"
+  },
+  "comparative_superlative": {
+    "pretty_title": "Comparative and Superlative",
+    "description": "Use the comparative and superlative form correctly",
+    "category": "Adjectives and adverbs"
+  },
+  "the_more_the_more": {
+    "pretty_title": "The more, the more",
+    "description": "Use 'the more..., the more...' correctly",
+    "category": "Adjectives and adverbs"
+  },
+  "so_vs_such": {
+    "pretty_title": "So vs Such",
+    "description": "Use so and such for intensification",
+    "category": "Adjectives and adverbs"
+  },
+  "third_person_s": {
+    "pretty_title": "-s endings in 3rd person",
+    "description": "Be consistently accurate with -s endings in 3rd person (he, she it) conjugations in the present simple",
+    "category": "Verb conjugation"
+  },
+  "past_simple_negative": {
+    "pretty_title": "Past simple negatives",
+    "description": "Be consistently accurate with past simple negative sentences",
+    "category": "Verb conjugation"
+  },
+  "past_simple_questions": {
+    "pretty_title": "Past simple questions",
+    "description": "Be consistently accurate with past simple questions",
+    "category": "Verb conjugation"
+  },
+  "question_forms": {
+    "pretty_title": "Question forms",
+    "description": "Be consistently accurate with question forms",
+    "category": "Verb conjugation"
+  },
+  "irregular_verbs_20": {
+    "pretty_title": "20+ irregular verbs",
+    "description": "Use 20+ irregular verbs",
+    "category": "Verb conjugation"
+  },
+  "irregular_verbs_30": {
+    "pretty_title": "30+ irregular verbs",
+    "description": "Use 30+ irregular verbs",
+    "category": "Verb conjugation"
+  },
+  "irregular_verbs_50": {
+    "pretty_title": "50+ irregular verbs",
+    "description": "Use 50+ irregular verbs",
+    "category": "Verb conjugation"
+  },
+  "present_perfect": {
+    "pretty_title": "Present perfect for unfinished time",
+    "description": "Use the present perfect tense to talk about unfinished time (rather than simplifying with present simple or other tenses)",
+    "category": "Verb tenses"
+  },
+  "narrative_tenses": {
+    "pretty_title": "Narrative tenses",
+    "description": "Tell a complete anecdote using the narrative tenses + present perfect",
+    "category": "Verb tenses"
+  },
+  "past_modals_criticism": {
+    "pretty_title": "Past modals for criticism",
+    "description": "Use past modals for criticism (should and could)",
+    "category": "Advanced modal verbs"
+  },
+  "ability_obligation": {
+    "pretty_title": "Ability and obligation",
+    "description": "Talk about ability and obligation in the past and future",
+    "category": "Advanced modal verbs"
+  },
+    "deduction": {
+    "pretty_title": "Deduction and guessing with might and must",
+    "description": "Make deductions and guesses using the past form of might and must",
+    "category": "Advanced modal verbs"
+  },
+  "past_future_would": {
+    "pretty_title": "Past's future with would",
+    "description": "Describe the past's future using would",
+    "category": "Advanced modal verbs"
+  },
+  "third_conditional": {
+    "pretty_title": "3rd conditional",
+    "description": "Describe imagined alternative scenarios in the past (3rd conditional)",
+    "category": "Advanced modal verbs"
+  },
+  "linking_structures": {
+    "pretty_title": "Structured linking",
+    "description": "Create structured sequences of arguments using a variety of linking words",
+    "category": "Linking words"
+  },
+  "linking_expansion": {
+    "pretty_title": "Linking for expansion",
+    "description": "Expand, exemplify and develop arguments using variety of linking words",
+    "category": "Linking words"
+  },
+  "linking_contrast": {
+    "pretty_title": "Contrast linking",
+    "description": "Make elegant thematic transitions using contrast or counter-expectation linking words",
+    "category": "Linking words"
+  },
+  "linking_conclusions": {
+    "pretty_title": "Linking for conclusions",
+    "description": "Draw conclusions using linking words",
+    "category": "Linking words"
+  },
+  "linking_balance": {
+    "pretty_title": "Balanced linking",
+    "description": "Balance positive and negative points using contrast or counter-expectation linking words",
+    "category": "Linking words"
+  },
+  "recommendation_reporting": {
+    "pretty_title": "Recommendation and reporting verbs",
+    "description": "Use verbs for recommendation and reporting in a natural way",
+    "category": "Sentence structure"
+  },
+  "prepositions_end": {
+    "pretty_title": "Prepositions at end",
+    "description": "Place prepositions at the end of questions and relative clauses",
+    "category": "Sentence structure"
+  },
+  "indirect_questions": {
+    "pretty_title": "Indirect questions",
+    "description": "Use indirect questions correctly",
+    "category": "Sentence structure"
+  },
+  "cleft_sentences": {
+    "pretty_title": "Cleft sentences",
+    "description": "Use cleft sentences as a strategy for clear communication",
+    "category": "Sentence structure"
+  },
+  "correlatives": {
+    "pretty_title": "Correlatives",
+    "description": "Use correlatives to make impactful sentences",
+    "category": "Sentence structure"
+  },
+  "inversion": {
+    "pretty_title": "Inversion",
+    "description": "Use inversion to make impactful sentences",
+    "category": "Sentence structure"
+  },
+  "possessive_pronouns": {
+    "pretty_title": "Possessive pronouns",
+    "description": "Be consistently accurate with possessive adjectives and pronouns",
+    "category": "Pronouns and possessive -s"
+  },
+  "reflexive_pronouns": {
+    "pretty_title": "Reflexive pronouns",
+    "description": "Use reflexive pronouns",
+    "category": "Pronouns and possessive -s"
+  },
+  "relative_pronouns": {
+    "pretty_title": "Relative pronouns",
+    "description": "Be consistently accurate in the use of relative pronouns",
+    "category": "Pronouns and possessive -s"
+  },
+  "whose_usage": {
+    "pretty_title": "Whose",
+    "description": "Ability to use 'whose'",
+    "category": "Pronouns and possessive -s"
+  },
+  "simple_passive": {
+    "pretty_title": "Simple passive",
+    "description": "Consistent accuracy using the present simple and past simple passive",
+    "category": "Passive"
+  },
+  "complex_passive": {
+    "pretty_title": "Complex passive",
+    "description": "Consistent accuracy using the passive forms of present continuous, present perfect and other tenses or modalities",
+    "category": "Passive"
+  },
+  "verb_complements": {
+    "pretty_title": "Verb complements",
+    "description": "Consistent accuracy in the use of verb complements (with 10+ verbs)",
+    "category": "Verb complements"
+  },
+  "negative_complements": {
+    "pretty_title": "Negative complements",
+    "description": "Correct use of negative complements",
+    "category": "Verb complements"
+  },
+  "want_structure": {
+    "pretty_title": "Want structure",
+    "description": "Use a natural sentence structure with the verb 'want'",
+    "category": "Verb complements"
+  },
+  "look_forward_used_to": {
+    "pretty_title": "Look forward to / be used to",
+    "description": "Uses the expressions look forward to and be/get used to correctly",
+    "category": "Verb complements"
+  },
+  "possessive_s": {
+    "pretty_title": "Possessive -s",
+    "description": "Use possessive -s when appropriate to avoid overuse of 'of'",
+    "category": "Pronouns and possessive -s"
+  },
+  "echo_questions": {
+    "pretty_title": "Echo questions",
+    "description": "Use echo questions to show interest or skepticism",
+    "category": "Discourse markers"
+  },
+  "so_neither_agreement": {
+    "pretty_title": "Agreement with so/neither",
+    "description": "Agree with so and neither",
+    "category": "Discourse markers"
+  },
+  "tag_questions": {
+    "pretty_title": "Tag questions",
+    "description": "Use tag questions to signal a willingness to interact",
+    "category": "Discourse markers"
+  },
+  "pronounce_s": {
+    "pretty_title": "Pronounce -s endings",
+    "description": "Pronounce -s endings with consistency",
+    "category": "Pronunciation"
+  },
+  "pronounce_es": {
+    "pretty_title": "Pronounce -es endings",
+    "description": "Pronounce -es endings with consistency",
+    "category": "Pronunciation"
+  },
+  "pronounce_ed": {
+    "pretty_title": "Pronounce -ed endings",
+    "description": "Pronounce -ed endings with consistent accuracy",
+    "category": "Pronunciation"
+  },
+  "pronounce_ght": {
+    "pretty_title": "Pronounce -ght endings",
+    "description": "Pronounce -ght endings with consistent accuracy",
+    "category": "Pronunciation"
+  }
+}

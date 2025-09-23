@@ -4,7 +4,7 @@
       <!-- Vocab Table -->
       <v-col cols="12" md="8">
         <v-card elevation="2" class="pa-4">
-          <v-card-title class="text-h5 mb-5">My vocabulary notebook</v-card-title>
+          <v-card-title class="text-h5 mb-5"><v-icon class="me-3">mdi-notebook</v-icon>My vocabulary notebook</v-card-title>
           <v-card-text>
             <v-data-table
                 :items="userStore.processedVocab"
@@ -28,7 +28,7 @@
       <!-- Add Vocab Form -->
       <v-col cols="12" md="4">
         <v-card elevation="2" class="pa-4">
-          <v-card-title class="text-h5">Add New Vocab</v-card-title>
+          <v-card-title class="text-h5"><v-icon class="me-3 mb-2">mdi-notebook-plus</v-icon>Add New Vocab</v-card-title>
           <v-card-text>
             <v-form @submit.prevent="submitNewVocab">
               <v-text-field

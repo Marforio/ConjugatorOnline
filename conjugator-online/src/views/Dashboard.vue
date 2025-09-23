@@ -457,6 +457,9 @@
                             <td v-else-if="round.typo_requested && !round.typo">
                               <span class="text-caption text-warning">Pending approval</span>
                             </td>
+                            <td v-else-if="round.typo_requested && round.typo_accepted === false">
+                              <span class="text-caption text-success">Typo denied</span>
+                            </td>
                             <td v-else-if="round.typo">
                               <span class="text-caption text-success">Typo approved</span>
                             </td>
@@ -605,7 +608,7 @@ export default defineComponent({
     const tabItems = [
       { value: "grammar-feedback", label: "Errors Feedback" },
       { value: "vocabulary", label: "Vocabulary" },
-      { value: "goals", label: "Goals" },
+      { value: "goals", label: "Achievements" },
       { value: "conjugation-game", label: "Conjugator" },
     ];
 
