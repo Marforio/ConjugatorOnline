@@ -34,10 +34,12 @@ class Game {
   }
 
   submitAnswer(answer) {
-    const cleanedAnswer = answer.toLowerCase()
-                                .replace(/[?.!'"]/g, '')  // strip punctuation first
-                                .replace(/\s+/g, ' ')     // collapse multiple spaces
-                                .trim(); 
+    const cleanedAnswer = answer
+        .normalize("NFKC") // Normalize Unicode characters
+        .toLowerCase()
+        .replace(/[?.!"'’‘`´]/g, '') // Remove all apostrophe variants and punctuation
+        .replace(/\s+/g, ' ')        // Collapse multiple spaces
+        .trim();
     this.currentPrompt.setUserAnswer(cleanedAnswer);
 
     const isCorrect = this.currentPrompt.getCorrect();
