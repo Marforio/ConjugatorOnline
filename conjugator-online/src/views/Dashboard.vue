@@ -96,24 +96,10 @@
                     auto-draw-easing="ease"
                     padding="20"
                     smooth
-                    :labels="
-                      sessionAccuracyTrend.length > 8
-                        ? sessionAccuracyTrend.map((val, i, arr) => {
-                            const lastIndex = arr.length - 1
-                            // Always show first, last, and 3 evenly spaced in between
-                            const showIndices = [
-                              0,
-                              Math.floor(arr.length * 0.25),
-                              Math.floor(arr.length * 0.5),
-                              Math.floor(arr.length * 0.75),
-                              lastIndex,
-                            ]
-                            return showIndices.includes(i) ? `${val}%` : ''
-                          })
-                        : sessionAccuracyTrend.map(val => `${val}%`)
-                    "
+                    :labels="generateSparklineLabels(sessionAccuracyTrend)"
                     :show-labels="true"
                   />
+
 
                   <div class="text-caption text-muted mt-2">
                     Accuracy per game played
@@ -163,7 +149,73 @@
               </v-card>
             </v-col>
 
-          
+            <!-- Error explainer -->
+            <v-col cols="12" lg="6">
+              <v-card
+                class="pa-4 d-flex flex-column justify-space-between"
+                elevation="2"
+                style="background-color: #fff9db; min-height: 400px;"
+              >
+                <v-card-title class="text-h4 font-weight-bold">
+                  <v-icon class="me-3 mb-2">mdi-lightbulb-on-10</v-icon>
+                  Error explainer
+                </v-card-title>
+
+                <v-card-text v-if="currentError" class="flex-grow-1 d-flex flex-column justify-center">
+                  <div class="m-2 text-center">Can you explain why your answer was incorrect?</div>
+                  <div class="my-6 text-decoration-line-through text-center font-weight-light font-italic" style="font-size: 3rem;">
+                    {{ currentError.user_answer }}
+                  </div>
+                  <div class="text-center">
+                    <span class="text-overline mx-3">{{ currentError.verb }}</span>
+                    <span class="text-overline mx-3">{{ currentError.person }}</span>
+                    <span class="text-overline mx-3">{{ currentError.tense }}</span>
+                    <span class="text-overline mx-3">{{ currentError.sentence_type }}</span>
+                  </div>
+                </v-card-text>
+
+                <v-card-actions class="d-flex justify-end">
+                  <v-btn
+                    color="brown-lighten-2"
+                    size="large"
+                    @click="nextError"
+                    :disabled="!incorrectAnswersData.length"
+                  >
+                    Next error
+                    <v-icon size="32" class="ms-2">mdi-arrow-right-thin-circle-outline</v-icon>
+                  </v-btn>
+                </v-card-actions>
+              </v-card>
+            </v-col>
+
+            <!-- Conjugation health index -->
+            <v-col cols="12" lg="6">
+              <v-card
+                class="pa-4 d-flex flex-column justify-space-between bg-light-blue-lighten-5"
+                elevation="2"
+                style="min-height: 400px;"
+              >
+                <v-card-title class="text-h4 font-weight-bold">
+                  <v-icon class="me-3 mb-2">mdi-heart-pulse</v-icon>
+                  Conjugation health index
+                </v-card-title>
+
+                <!-- Center NumbersCard -->
+                <div class="d-flex justify-center flex-grow-1 align-center">
+                  <NumbersCard
+                    class="ma-2"
+                    :value="(userStore.totalCorrect ?? 0).toString()"
+                    title=""
+                    label="Conjugation health index"
+                  />
+                </div>
+
+                <v-card-text class="text-caption text-center">
+                  The index factors in the difficulty of the tenses and verb sets used
+                  along with the accuracy and total number of correct answers.
+                </v-card-text>
+              </v-card>
+            </v-col>
           </v-row>
 
           <v-divider />
@@ -380,9 +432,10 @@
           <v-card
             class="pa-4 mb-6"
             elevation="2"
+            style="max-height: 1000px; overflow-y: scroll;"
             :style="{
               minWidth: xs ? '250px' : '95%',
-              maxWidth: xs ? '500px' : '95%',
+              maxWidth: xs ? '500px' : '99%',
               marginLeft: xs ? '5px' : '16px',
               marginRight: xs ? '5px' : '16px',
               marginTop: '20px',
@@ -555,6 +608,7 @@ export default defineComponent({
     const conjGameError = ref<string | null>(null);
     const verbUsage = ref<any[]>([]);
     const tierStats = ref<any[]>([]);
+    const currentError = ref<any | null>(null);
 
     interface TenseStats {
       discovered_verbs_ps: string[];
@@ -578,6 +632,40 @@ export default defineComponent({
     };
 
     const userStore = useUserStore();
+
+    function generateSparklineLabels(arr: number[]): string[] {
+      if (arr.length <= 8) {
+        return arr.map(val => `${val}%`);
+      }
+
+      const lastIndex = arr.length - 1;
+      const showIndices = [
+        0,
+        Math.floor(arr.length * 0.25),
+        Math.floor(arr.length * 0.5),
+        Math.floor(arr.length * 0.75),
+        lastIndex,
+      ];
+
+      return arr.map((val, i) =>
+        showIndices.includes(i) ? `${val}%` : "\u00A0" // non-breaking space
+      );
+    }
+
+    function pickRandomError() {
+      if (!incorrectAnswersData.value.length) {
+        currentError.value = null;
+        return;
+      }
+      const idx = Math.floor(Math.random() * incorrectAnswersData.value.length);
+      currentError.value = incorrectAnswersData.value[idx];
+    }
+
+    function nextError() {
+      pickRandomError();
+    }
+
+
 
     // ---------------- Stats ----------------
     const avgTimePerRound = computed(() => {
@@ -629,6 +717,23 @@ export default defineComponent({
       return totalRoundsPlayed.value > 0
         ? Number(((totalIncorrect.value / totalRoundsPlayed.value) * 100).toFixed(0))
         : 0;
+    });
+
+        const incorrectAnswersData = computed(() => {
+      const rounds = sessions.value.flatMap(session => session.rounds || []);
+
+      return rounds
+        .filter(round => !round.is_correct) // only keep incorrect ones
+        .map(round => ({
+          user_answer: round.user_answer || "",
+          verb: round.verb || "unknown",
+          tense: round.tense || "unknown",
+          person: round.person || "unknown",
+          sentence_type: round.sentence_type || "unknown",
+          acceptable_answers: round.acceptable_answers || [],
+          prompt_number: round.prompt_number,
+          session_id: round.id,
+        }));
     });
 
 
@@ -765,12 +870,14 @@ export default defineComponent({
       }));
     });
 
+
     // ---------------- Lifecycle ----------------
     onMounted(async () => {
       await userStore.fetchUserData();
       await fetchConjGameSessionsDashboardData();
       userStore.fetchVerbUsageDashboardData();
       setInitialTabFromRoute();
+      pickRandomError();
     });
 
     function setInitialTabFromRoute(): void {
@@ -800,6 +907,7 @@ export default defineComponent({
       avgTimePerRound,
       tenseAccuracyData,
       sentenceTypeAccuracyData,
+      incorrectAnswersData,
       smAndDown,
       xs,
       verbUsage,
@@ -811,6 +919,10 @@ export default defineComponent({
       acceptTypo,
       denyTypo,
       sparklineGradients,
+      generateSparklineLabels,
+      currentError,
+      nextError,
+      pickRandomError,
     };
   },
 });
