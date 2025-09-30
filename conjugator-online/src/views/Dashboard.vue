@@ -119,6 +119,18 @@
                     title="Avg speed"
                     label="Seconds per answer (round)"
                   />
+                  <v-tooltip text="How close you are to an ideal student with 1500 correct answers, 100% accuracy and 12s avg speed with medium difficulty conjugations" location="bottom">
+                    <template v-slot:activator="{ props }">
+                      <NumbersCard
+                        class="ma-2 flex-grow-1 bg-light-blue-lighten-5"
+                        :value="`${healthQuotient ?? 0}%`"
+                        title="Health index"
+                        :label="`Level: ${healthTier ?? ''}`"
+                        v-bind="props"
+                      />
+                    </template>
+                  </v-tooltip>
+                  
                 </div>
               </v-card>
                 
@@ -148,35 +160,50 @@
                 </v-card-text>
               </v-card>
             </v-col>
+            <v-divider class="my-6"/>
+
+            <!-- spacer card-->
+            <v-col v-if="$vuetify.display.xlAndUp" xl="1"></v-col>
 
             <!-- Error explainer -->
-            <v-col cols="12" lg="6">
+            <v-col cols="12" lg="6" xl="4">
               <v-card
                 class="pa-4 d-flex flex-column justify-space-between"
                 elevation="2"
-                style="background-color: #fff9db; min-height: 400px;"
+                style="background-color: #fff9db; min-height: 430px;"
               >
                 <v-card-title class="text-h4 font-weight-bold">
                   <v-icon class="me-3 mb-2">mdi-lightbulb-on-10</v-icon>
                   Error explainer
                 </v-card-title>
+                <v-card-subtitle class="text-center">
+                  You have {{ totalIncorrect }} incorrect answers
+                </v-card-subtitle>
 
                 <v-card-text v-if="currentError" class="flex-grow-1 d-flex flex-column justify-center">
-                  <div class="m-2 text-center">Can you explain why your answer was incorrect?</div>
-                  <div class="my-6 text-decoration-line-through text-center font-weight-light font-italic" style="font-size: 3rem;">
-                    {{ currentError.user_answer }}
-                  </div>
-                  <div class="text-center">
-                    <span class="text-overline mx-3">{{ currentError.verb }}</span>
-                    <span class="text-overline mx-3">{{ currentError.person }}</span>
-                    <span class="text-overline mx-3">{{ currentError.tense }}</span>
-                    <span class="text-overline mx-3">{{ currentError.sentence_type }}</span>
-                  </div>
+                  <transition name="slide" mode="out-in">
+                    <div :key="currentError?.user_answer">
+                      <div class="m-2 text-center">Can you explain why this answer was incorrect?</div>
+                      <div class="my-6 text-center font-weight-light" style="font-size: 3rem;">
+                        "{{ currentError.user_answer }}"
+                      </div>
+                      <div class="text-center">
+                        <span class="text-overline mx-3">{{ currentError.verb }}</span>
+                        <span class="text-overline mx-3">{{ currentError.person }}</span>
+                        <span class="text-overline mx-3">{{ currentError.tense }}</span>
+                        <span class="text-overline mx-3">{{ currentError.sentence_type }}</span>
+                      </div>
+                    </div>
+                  </transition>
                 </v-card-text>
+                <v-card-text v-else class="text-center text-caption text-muted mt-6">
+                  No conjugation errors yet.
+                </v-card-text>
+
 
                 <v-card-actions class="d-flex justify-end">
                   <v-btn
-                    color="brown-lighten-2"
+                    color="brown-lighten-1"
                     size="large"
                     @click="nextError"
                     :disabled="!incorrectAnswersData.length"
@@ -187,38 +214,58 @@
                 </v-card-actions>
               </v-card>
             </v-col>
-
-            <!-- Conjugation health index -->
-            <v-col cols="12" lg="6">
+            
+            <!-- spacer card -->
+            <v-col v-if="$vuetify.display.xlAndUp" xl="2"></v-col>
+            
+            
+            <!-- Use your mastered verbs -->
+            <v-col cols="12" lg="6" xl="4">
               <v-card
-                class="pa-4 d-flex flex-column justify-space-between bg-light-blue-lighten-5"
+                class="pa-4 d-flex flex-column justify-space-between bg-teal-lighten-4"
                 elevation="2"
-                style="min-height: 400px;"
+                style="min-height: 430px;"
               >
                 <v-card-title class="text-h4 font-weight-bold">
-                  <v-icon class="me-3 mb-2">mdi-heart-pulse</v-icon>
-                  Conjugation health index
+                  <v-icon class="me-3 mb-2">mdi-bullhorn</v-icon>
+                  Use your mastered irregs
                 </v-card-title>
+                <v-card-subtitle class="text-center text-wrap">
+                  You have mastered {{ userStore.tenseStats.mastered_verbs_ps.length }} irregular verbs in past simple form and {{ userStore.tenseStats.mastered_verbs_pp.length }} in present perfect form
+                </v-card-subtitle>
 
-                <!-- Center NumbersCard -->
-                <div class="d-flex justify-center flex-grow-1 align-center">
-                  <NumbersCard
-                    class="ma-2"
-                    :value="(userStore.totalCorrect ?? 0).toString()"
-                    title=""
-                    label="Conjugation health index"
-                  />
-                </div>
-
-                <v-card-text class="text-caption text-center">
-                  The index factors in the difficulty of the tenses and verb sets used
-                  along with the accuracy and total number of correct answers.
+                <v-card-text v-if="currentMasteredVerb" class="flex-grow-1 d-flex flex-column justify-center">
+                  <transition name="slide" mode="out-in">
+                    <div :key="currentMasteredVerb?.verb">
+                      <div class="m-2 text-center">Can you use this verb + tense in a sentence about your life?</div>
+                      <div class="my-6 text-center" style="font-size: 3.5rem;">
+                        {{ currentMasteredVerb?.verb }}
+                      </div>
+                      <div class="text-center">
+                        Tense: <span class="text-overline mx-3">{{ currentMasteredVerb?.tense }}</span>
+                      </div>
+                    </div>
+                  </transition>
                 </v-card-text>
+                <v-card-text v-else class="text-center text-caption text-muted mt-6">
+                  No mastered verbs yet.
+                </v-card-text>
+                <v-card-actions v-if="currentMasteredVerb" class="d-flex justify-end">
+                  <v-btn
+                    color="brown-lighten-1"
+                    size="large"
+                    @click="nextMasteredVerb"
+                    :disabled="!incorrectAnswersData.length"
+                  >
+                    Next verb
+                    <v-icon size="32" class="ms-2">mdi-arrow-right-thin-circle-outline</v-icon>
+                  </v-btn>
+                </v-card-actions>
               </v-card>
             </v-col>
           </v-row>
 
-          <v-divider />
+          <v-divider class="my-6"/>
 
           <h3 class="text-h4 mt-6 mb-4 mx-5 font-weight-bold w-100">Irregular verbs</h3>
           <v-row dense>
@@ -264,7 +311,7 @@
                 <v-progress-linear
                   :model-value="userStore.tierStats?.[1]?.discovered_pct_ps ?? 0"
                   height="22"
-                  color="green darken-2"
+                  color="green-lighten-2"
                   striped
                   rounded
                   class="mb-1"
@@ -609,6 +656,49 @@ export default defineComponent({
     const verbUsage = ref<any[]>([]);
     const tierStats = ref<any[]>([]);
     const currentError = ref<any | null>(null);
+    const currentMasteredVerb = ref<any | null>(null);
+
+    const TENSE_WEIGHTS: Record<string, number> = {
+      "Recommendation": 1,
+      "Future simple": 1,
+      "Present simple": 2,
+      "present continuous": 2,
+      "Past simple": 3,
+      "Present perfect": 4,
+    };
+
+    const SENTENCE_TYPE_WEIGHTS: Record<string, number> = {
+      "Positive": 1,
+      "Negative": 2,
+      "Questions": 3,
+    };
+    const MAX_CORRECT = 1500;
+    const MEDIAN_DIFFICULTY = 2.5;
+    const MAX_RAW_SCORE = MAX_CORRECT * MEDIAN_DIFFICULTY;
+
+    const VERB_SET_WEIGHTS: Record<string, number> = {
+      "Regular verbs only": 1,
+      "Common verbs (Reg + Irreg)": 2,
+      "Basic 75 Irregs": 2,
+      "Master 110 Irregs": 3,
+      "Shakespeare 130 Irregs": 4,
+      "GOAT 50 Hard Irregs Only": 5,
+    };
+    const HEALTH_TIERS: Record<string, [number, number]> = {
+      "Getting started": [0,9],
+      "Warming up": [10,19],
+      "Jeune espoir": [20,29],
+      "Haut potentiel": [30,39],
+      "Professional": [40,49],
+      "Super League": [50,59],
+      "National Team": [60,69],
+      "Champions League": [70,79],
+      "World Cup": [80,89],
+      "Ballon d'Or": [90,98],
+      "Conjugation Messi": [99,100]
+    }
+
+
 
     interface TenseStats {
       discovered_verbs_ps: string[];
@@ -665,9 +755,71 @@ export default defineComponent({
       pickRandomError();
     }
 
+    function nextMasteredVerb() {
+      const verbsPs = userStore.tenseStats?.mastered_verbs_ps ?? [];
+      const verbsPp = userStore.tenseStats?.mastered_verbs_pp ?? [];
+
+      // Attach tense labels to each verb
+      const labeledPs = verbsPs.map(verb => ({ verb, tense: "Past Simple" }));
+      const labeledPp = verbsPp.map(verb => ({ verb, tense: "Present Perfect" }));
+
+      const allLabeledVerbs = [...labeledPs, ...labeledPp];
+
+      if (!allLabeledVerbs.length) {
+        currentMasteredVerb.value = null;
+        return;
+      }
+
+      const randomIndex = Math.floor(Math.random() * allLabeledVerbs.length);
+      currentMasteredVerb.value = allLabeledVerbs[randomIndex];
+    }
 
 
     // ---------------- Stats ----------------
+    const allRoundsWithVerbSet = computed(() => {
+      return sessions.value.flatMap(session => {
+        const verbSet = session.verb_set || "Regular verbs only";
+        return session.rounds.map(round => ({
+          ...round,
+          verb_set: verbSet,
+        }));
+      });
+    });
+
+    const totalWeightedDifficulty = computed(() => {
+      return allRoundsWithVerbSet.value.reduce((sum, round) => {
+        if (!round.is_correct || round.typo) return sum;
+
+        const tenseWeight = round.tense ? TENSE_WEIGHTS[round.tense] || 1 : 1;
+        const typeWeight = round.sentence_type ? SENTENCE_TYPE_WEIGHTS[round.sentence_type] || 1 : 1;
+        const verbSetWeight = round.verb_set ? VERB_SET_WEIGHTS[round.verb_set] || 1 : 1;
+
+        return sum + Math.cbrt(tenseWeight * typeWeight * verbSetWeight);
+
+      }, 0);
+    });
+
+    const healthQuotient = computed(() => {
+      const rawScore = totalWeightedDifficulty.value;
+      const normalized = rawScore / MAX_RAW_SCORE;
+      const speedFactor = speedModifier(Number(avgTimePerRound.value));
+      return Math.round(normalized * (totalCorrect.value / totalRoundsPlayed.value) * speedFactor  * 100);
+    });
+
+    const healthTier = computed(() => {
+      const score = healthQuotient.value;
+
+      for (const [tier, [min, max]] of Object.entries(HEALTH_TIERS)) {
+        if (score >= min && score <= max) {
+          return tier;
+        }
+      }
+
+      return "Unknown"; // fallback if score is outside defined ranges
+    });
+
+
+    
     const avgTimePerRound = computed(() => {
       const total = sessions.value.reduce((sum, session) => sum + session.avg_time_per_prompt, 0);
       return sessions.value.length > 0 ? (total / sessions.value.length).toFixed(1) : 0;
@@ -677,6 +829,20 @@ export default defineComponent({
       { label: "Correct", value: totalPercentCorrect.value },
       { label: "Incorrect", value: totalPercentIncorrect.value },
     ]);
+
+    function speedModifier(avgTime: number): number {
+      const ideal = 12;
+
+      if (avgTime <= ideal) {
+        // Reward faster responses, capped at 10%
+        return 1 + (ideal - avgTime) * 0.01; // max boost: 1.1
+      } else {
+        // Penalize slower responses, capped at -10%
+        return Math.max(0.90, 1 - (avgTime - ideal) * 0.01);
+      }
+    }
+
+
 
     const totalRoundsPlayed = computed(() =>
       sessions.value.reduce((sum, session) => {
@@ -878,6 +1044,7 @@ export default defineComponent({
       userStore.fetchVerbUsageDashboardData();
       setInitialTabFromRoute();
       pickRandomError();
+      nextMasteredVerb();
     });
 
     function setInitialTabFromRoute(): void {
@@ -899,6 +1066,8 @@ export default defineComponent({
       TopNavBar,
       PieChart,
       sessionAccuracyTrend: sessionAccuracyTrendArray,
+      allRoundsWithVerbSet,
+      totalWeightedDifficulty,
       totalCorrect,
       totalIncorrect,
       totalRightWrongChartData,
@@ -908,6 +1077,8 @@ export default defineComponent({
       tenseAccuracyData,
       sentenceTypeAccuracyData,
       incorrectAnswersData,
+      healthQuotient,
+      healthTier,
       smAndDown,
       xs,
       verbUsage,
@@ -923,6 +1094,8 @@ export default defineComponent({
       currentError,
       nextError,
       pickRandomError,
+      currentMasteredVerb,
+      nextMasteredVerb
     };
   },
 });
@@ -941,5 +1114,17 @@ export default defineComponent({
   flex-direction: column;
   justify-content: center;
 }
+.slide-enter-active, .slide-leave-active {
+  transition: all 0.4s ease;
+}
+.slide-enter-from {
+  transform: translateX(100%);
+  opacity: 0;
+}
+.slide-leave-to {
+  transform: translateX(-100%);
+  opacity: 0;
+}
+
 </style>
 
