@@ -123,7 +123,7 @@
                     <template v-slot:activator="{ props }">
                       <NumbersCard
                         class="ma-2 flex-grow-1 bg-light-blue-lighten-5"
-                        :value="`${healthQuotient ?? 0}%`"
+                        :value="`${userStore.healthScore ?? 0}%`"
                         title="Health index"
                         :label="`Level: ${healthTier ?? ''}`"
                         v-bind="props"
@@ -658,32 +658,6 @@ export default defineComponent({
     const currentError = ref<any | null>(null);
     const currentMasteredVerb = ref<any | null>(null);
 
-    const TENSE_WEIGHTS: Record<string, number> = {
-      "Recommendation": 1,
-      "Future simple": 1,
-      "Present simple": 2,
-      "present continuous": 2,
-      "Past simple": 3,
-      "Present perfect": 4,
-    };
-
-    const SENTENCE_TYPE_WEIGHTS: Record<string, number> = {
-      "Positive": 1,
-      "Negative": 2,
-      "Questions": 3,
-    };
-    const MAX_CORRECT = 1500;
-    const MEDIAN_DIFFICULTY = 2.5;
-    const MAX_RAW_SCORE = MAX_CORRECT * MEDIAN_DIFFICULTY;
-
-    const VERB_SET_WEIGHTS: Record<string, number> = {
-      "Regular verbs only": 1,
-      "Common verbs (Reg + Irreg)": 2,
-      "Basic 75 Irregs": 2,
-      "Master 110 Irregs": 3,
-      "Shakespeare 130 Irregs": 4,
-      "GOAT 50 Hard Irregs Only": 5,
-    };
     const HEALTH_TIERS: Record<string, [number, number]> = {
       "Getting started": [0,9],
       "Warming up": [10,19],
@@ -776,38 +750,8 @@ export default defineComponent({
 
 
     // ---------------- Stats ----------------
-    const allRoundsWithVerbSet = computed(() => {
-      return sessions.value.flatMap(session => {
-        const verbSet = session.verb_set || "Regular verbs only";
-        return session.rounds.map(round => ({
-          ...round,
-          verb_set: verbSet,
-        }));
-      });
-    });
-
-    const totalWeightedDifficulty = computed(() => {
-      return allRoundsWithVerbSet.value.reduce((sum, round) => {
-        if (!round.is_correct || round.typo) return sum;
-
-        const tenseWeight = round.tense ? TENSE_WEIGHTS[round.tense] || 1 : 1;
-        const typeWeight = round.sentence_type ? SENTENCE_TYPE_WEIGHTS[round.sentence_type] || 1 : 1;
-        const verbSetWeight = round.verb_set ? VERB_SET_WEIGHTS[round.verb_set] || 1 : 1;
-
-        return sum + Math.cbrt(tenseWeight * typeWeight * verbSetWeight);
-
-      }, 0);
-    });
-
-    const healthQuotient = computed(() => {
-      const rawScore = totalWeightedDifficulty.value;
-      const normalized = rawScore / MAX_RAW_SCORE;
-      const speedFactor = speedModifier(Number(avgTimePerRound.value));
-      return Math.round(normalized * (totalCorrect.value / totalRoundsPlayed.value) * speedFactor  * 100);
-    });
-
     const healthTier = computed(() => {
-      const score = healthQuotient.value;
+      const score = userStore.healthScore ?? 0;;
 
       for (const [tier, [min, max]] of Object.entries(HEALTH_TIERS)) {
         if (score >= min && score <= max) {
@@ -817,8 +761,6 @@ export default defineComponent({
 
       return "Unknown"; // fallback if score is outside defined ranges
     });
-
-
     
     const avgTimePerRound = computed(() => {
       const total = sessions.value.reduce((sum, session) => sum + session.avg_time_per_prompt, 0);
@@ -829,19 +771,6 @@ export default defineComponent({
       { label: "Correct", value: totalPercentCorrect.value },
       { label: "Incorrect", value: totalPercentIncorrect.value },
     ]);
-
-    function speedModifier(avgTime: number): number {
-      const ideal = 12;
-
-      if (avgTime <= ideal) {
-        // Reward faster responses, capped at 10%
-        return 1 + (ideal - avgTime) * 0.01; // max boost: 1.1
-      } else {
-        // Penalize slower responses, capped at -10%
-        return Math.max(0.90, 1 - (avgTime - ideal) * 0.01);
-      }
-    }
-
 
 
     const totalRoundsPlayed = computed(() =>
@@ -1066,8 +995,6 @@ export default defineComponent({
       TopNavBar,
       PieChart,
       sessionAccuracyTrend: sessionAccuracyTrendArray,
-      allRoundsWithVerbSet,
-      totalWeightedDifficulty,
       totalCorrect,
       totalIncorrect,
       totalRightWrongChartData,
@@ -1077,7 +1004,6 @@ export default defineComponent({
       tenseAccuracyData,
       sentenceTypeAccuracyData,
       incorrectAnswersData,
-      healthQuotient,
       healthTier,
       smAndDown,
       xs,

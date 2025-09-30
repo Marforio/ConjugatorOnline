@@ -54,7 +54,7 @@ class ConjugationSet {
     static IRREGULAR_VERBS_110 = 'data/irregMaster110.json';
     static IRREGULAR_VERBS_GOAT_50 = 'data/irregGOAT50.json';
 
-    constructor(type, tenses, sentences, length) {
+    constructor(type, tenses, sentences, length, smartVerbPool = null) {
         this.type = type;
         this.length = length;
         this.tenses = tenses;
@@ -62,6 +62,7 @@ class ConjugationSet {
         this.PromptDict = {};
         this.PromptList = [];
         this.CurrentPromptNumber = 1;
+        this.smartVerbPool = smartVerbPool;
     }
 
     async loadPrompts() {
@@ -87,29 +88,54 @@ class ConjugationSet {
 
             let verbSource;
 
-            // Determine verb source based on type
-            if (this.type === 'Common verbs (Reg + Irreg)') {
-                verbSource = this.commonVerbs;
-            } else if (this.type === 'Regular verbs only') {
-                verbSource = this.regularVerbs;
-            }  else if (this.type === "Basic 75 Irregs") {
-                verbSource = Object.keys(this.irregularVerbs75)
-            } else if (this.type === "Master 110 Irregs") {
-                verbSource = Object.keys(this.irregularVerbs110)
-            } else if (this.type === 'Shakespeare 130 Irregs') {
-                verbSource = Object.keys(this.irregularVerbs);
-            } else if (this.type === "GOAT 50 Hard Irregs Only") {
-                verbSource = Object.keys(this.irregularVerbsGOAT50)
-            }
-            else {
-                console.error('Invalid type:', this.type);
-                verbSource = [];
+            if (this.smartVerbPool && Array.isArray(this.smartVerbPool)) {
+                if (this.type === "Basic 75 Irregs") {
+                    verbSource = this.smartVerbPool['Basic 75'] || [];
+                } else if (this.type === "Master 110 Irregs") {
+                    verbSource = this.smartVerbPool['Master 110'] || [];
+                } else if (this.type === "Shakespeare 130 Irregs") {
+                    verbSource = this.smartVerbPool['All Irregular'] || [];
+                } else if (this.type === "GOAT 50 Hard Irregs Only") {
+                    // combine GOAT 50 + All Irregular
+                    const goat50 = Object.keys(this.irregularVerbsGOAT50) || [];
+                    const allIrregs = this.smartVerbPool['All Irregular'] || [];
+                    verbSource = Array.from(new Set([...goat50, ...allIrregs]));
+                } else {
+                    // For Common / Regular, ignore smart pool
+                    verbSource = null;
+                }
             }
 
+            // fallback to existing type-based logic if verbSource is null or empty
             if (!verbSource || verbSource.length === 0) {
-                console.error('Verb source is empty. Check your data files and type.');
-                return;
+                if (this.type === 'Common verbs (Reg + Irreg)') verbSource = this.commonVerbs;
+                else if (this.type === 'Regular verbs only') verbSource = this.regularVerbs;
+                else if (this.type === "Basic 75 Irregs") verbSource = Object.keys(this.irregularVerbs75);
+                else if (this.type === "Master 110 Irregs") verbSource = Object.keys(this.irregularVerbs110);
+                else if (this.type === 'Shakespeare 130 Irregs') verbSource = Object.keys(this.irregularVerbs);
+                else if (this.type === "GOAT 50 Hard Irregs Only") verbSource = Object.keys(this.irregularVerbsGOAT50);
+                else verbSource = [];
             }
+
+            // make sure verbSource is at least as long as desired number of rounds/prompts
+            if (verbSource.length < this.length) {
+                console.warn(
+                    `Smart verb pool too small (${verbSource.length}) for requested prompts (${this.length}), topping up with normal verb set.`
+                );
+
+                let fallbackVerbs = [];
+                if (this.type === "Basic 75 Irregs") fallbackVerbs = Object.keys(this.irregularVerbs75);
+                else if (this.type === "Master 110 Irregs") fallbackVerbs = Object.keys(this.irregularVerbs110);
+                else if (this.type === "Shakespeare 130 Irregs") fallbackVerbs = Object.keys(this.irregularVerbs);
+                else if (this.type === "GOAT 50 Hard Irregs Only") fallbackVerbs = Object.keys(this.irregularVerbsGOAT50);
+
+                // Avoid duplicates
+                const additionalVerbs = fallbackVerbs.filter(v => !verbSource.includes(v));
+
+                verbSource = [...verbSource, ...additionalVerbs];
+            }
+
+
 
             // Generate prompts
             for (let i = 1; i <= this.length; i++) {

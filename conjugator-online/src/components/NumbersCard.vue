@@ -1,9 +1,9 @@
 <template>
   <v-card class="pa-4 m-3 flex-grow-1" elevation="2">
     <v-card-text class="text-center" style="text-wrap: wrap;">
-      <v-card-title>{{ title }}</v-card-title>
-      <div class="text-h4 font-weight-bold">{{ value }}</div>
-      <div class="text-subtitle-1 text-grey-darken-1">{{ label }}</div>
+      <v-card-title class="text-subtitle-2 text-wrap">{{ title }}</v-card-title>
+      <div class="text-h4 m-3 font-weight-bold">{{ value }}</div>
+      <div class="text-caption text-medium-emphasis">{{ label }}</div>
     </v-card-text>
   </v-card>
 </template>

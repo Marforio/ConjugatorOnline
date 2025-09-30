@@ -17,6 +17,7 @@ interface Student {
   web_id: string;
   initials: string;
   total_correct_prompts: number;
+  health_score: number;
   user: User | null;
 }
 
@@ -85,6 +86,10 @@ interface VocabItem {
   feedback: Feedback;
 }
 
+interface SmartVerbPool {
+  [tierName: string]: string[];
+}
+
 // --- Store ---
 export const useUserStore = defineStore("user", () => {
   // Auth state
@@ -98,8 +103,9 @@ export const useUserStore = defineStore("user", () => {
   const isSuperuser = computed(() => user.value?.is_superuser ?? false);
   const studentId = computed(() => student.value?.id ?? null);
   const totalCorrect = computed(() => student.value?.total_correct_prompts ?? 0);
+  const healthScore = computed(() => student.value?.health_score ?? 0)
 
-  // Enrollments state
+  // Enrollments state 
   const enrollments = ref<StudentCourse[]>([]);
   const loadingEnrollments = ref(false);
   const enrollmentError = ref<string | null>(null);
@@ -206,6 +212,26 @@ export const useUserStore = defineStore("user", () => {
     }
   }
 
+  // smart verb pool for the COnjugator
+  function getSmartVerbPoolPerTier(tierStatsList: TierStats[]): SmartVerbPool {
+    const pool: SmartVerbPool = {};
+
+    for (const tier of tierStatsList) {
+      const mergedSet = new Set<string>([
+        ...tier.undiscovered_verbs_ps,
+        ...tier.unmastered_verbs_ps,
+        ...tier.undiscovered_verbs_pp,
+        ...tier.unmastered_verbs_pp,
+      ]);
+
+      pool[tier.tier_name] = Array.from(mergedSet);
+    }
+
+    return pool;
+  }
+  const smartVerbPools = getSmartVerbPoolPerTier(tierStats.value);
+
+
   // 📚 Vocab state
   const vocab = ref<VocabItem[]>([]);
   const loadingVocab = ref(true);
@@ -285,14 +311,14 @@ export const useUserStore = defineStore("user", () => {
   // 🧠 Return state + actions
   return {
     // Auth
-    student, accessToken, isAuthenticated, isStaff, isSuperuser, studentId, totalCorrect,
+    student, accessToken, isAuthenticated, isStaff, isSuperuser, studentId, totalCorrect, healthScore,
     setStudent, clearStudent, setAccessToken, fetchStudentData, fetchUserData,
 
     // Enrollments
     enrollments, loadingEnrollments, enrollmentError, enrolledCourses, fetchEnrollments,
 
     // Verb usage
-    verbUsage, tierStats, tenseStats, loadingVerbUsage, verbUsageError,
+    verbUsage, tierStats, tenseStats, loadingVerbUsage, verbUsageError, smartVerbPools,
     fetchVerbUsageDashboardData,
 
     // Vocab
