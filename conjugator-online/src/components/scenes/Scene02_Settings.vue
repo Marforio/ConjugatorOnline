@@ -18,7 +18,7 @@
                       class="quick-play-btn"
                       @click="startGame(btn.settings)"
                     >
-                      {{ btn.label }}
+                      <span class="text-wrap">{{ btn.label }}</span>
                     </v-btn>
                   </v-col>
                 </v-row>

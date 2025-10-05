@@ -63,6 +63,13 @@ class ConjugationSet {
         this.PromptList = [];
         this.CurrentPromptNumber = 1;
         this.smartVerbPool = smartVerbPool;
+        this.verbSetIsSmart = false;
+
+        console.log("ConjugationSet constructor:", {
+            type, length, tenses, sentences,
+            smartVerbPoolPassed: smartVerbPool,
+            keys: smartVerbPool ? Object.keys(smartVerbPool) : "(none)"
+        });
     }
 
     async loadPrompts() {
@@ -88,53 +95,78 @@ class ConjugationSet {
 
             let verbSource;
 
-            if (this.smartVerbPool && Array.isArray(this.smartVerbPool)) {
+            // helper: safely extract a plain array from the provided smartVerbPool (handles proxies/reactive arrays)
+            const getPoolArray = (key) => {
+                try {
+                    //console.log(this.smartVerbPool, this.smartVerbPool[key]);
+                    const candidate = this.smartVerbPool && this.smartVerbPool[key];
+                    if (!candidate) return [];
+                    // Array.from will materialize Proxy arrays and also copy plain arrays
+                    return Array.from(candidate);
+                } catch (e) {
+                    // defensive: if reading the pool throws for some odd reason, return empty
+                    console.warn('getPoolArray error reading smart pool key', key, e);
+                    return [];
+                }
+            };
+
+            // materialize the pool object (if present) for safer checks/logging
+            let materializedPool = null;
+            try {
+                if (this.smartVerbPool && typeof this.smartVerbPool === 'object') {
+                    // shallow copy of top-level keys -> plain arrays via getPoolArray
+                    materializedPool = {};
+                    for (const k of Object.keys(this.smartVerbPool)) {
+                        materializedPool[k] = getPoolArray(k);
+                    }
+                }
+            } catch (e) {
+                materializedPool = null;
+            }
+
+            // Decide verbSource from materialized pool (if available), otherwise fallback later.
+            if (materializedPool) {
+                //console.log("materialized pool=", materializedPool)
                 if (this.type === "Basic 75 Irregs") {
-                    verbSource = this.smartVerbPool['Basic 75'] || [];
+                    verbSource = materializedPool['Basic 75'] || [];
+                    this.verbSetIsSmart = verbSource.length > 0;
                 } else if (this.type === "Master 110 Irregs") {
-                    verbSource = this.smartVerbPool['Master 110'] || [];
+                    verbSource = materializedPool['Master 110'] || [];
+                    this.verbSetIsSmart = verbSource.length > 0;
                 } else if (this.type === "Shakespeare 130 Irregs") {
-                    verbSource = this.smartVerbPool['All Irregular'] || [];
+                    verbSource = materializedPool['All Irregular'] || [];
+                    this.verbSetIsSmart = verbSource.length > 0;
                 } else if (this.type === "GOAT 50 Hard Irregs Only") {
-                    // combine GOAT 50 + All Irregular
-                    const goat50 = Object.keys(this.irregularVerbsGOAT50) || [];
-                    const allIrregs = this.smartVerbPool['All Irregular'] || [];
-                    verbSource = Array.from(new Set([...goat50, ...allIrregs]));
-                } else {
-                    // For Common / Regular, ignore smart pool
-                    verbSource = null;
+                    const goat50 = Object.keys(this.irregularVerbsGOAT50 || {});
+                    const allIrregs = materializedPool['All Irregular'] || [];
+                    verbSource = Array.from(new Set([...(goat50 || []), ...(allIrregs || [])]));
+                    this.verbSetIsSmart = verbSource.length > 0;
                 }
             }
 
-            // fallback to existing type-based logic if verbSource is null or empty
-            if (!verbSource || verbSource.length === 0) {
-                if (this.type === 'Common verbs (Reg + Irreg)') verbSource = this.commonVerbs;
-                else if (this.type === 'Regular verbs only') verbSource = this.regularVerbs;
-                else if (this.type === "Basic 75 Irregs") verbSource = Object.keys(this.irregularVerbs75);
-                else if (this.type === "Master 110 Irregs") verbSource = Object.keys(this.irregularVerbs110);
-                else if (this.type === 'Shakespeare 130 Irregs') verbSource = Object.keys(this.irregularVerbs);
-                else if (this.type === "GOAT 50 Hard Irregs Only") verbSource = Object.keys(this.irregularVerbsGOAT50);
-                else verbSource = [];
+            // fallback to existing type-based logic if verbSource is missing or empty
+            const hasVerbSource = Array.isArray(verbSource) && verbSource.length > 0;
+            if (!hasVerbSource) {
+                //console.log("no smart verb source; hasVerbSource = false")
+                // we only flip off the smart flag when we're actually choosing the fallback set
+                this.verbSetIsSmart = false;
+
+                if (this.type === 'Common verbs (Reg + Irreg)') {
+                    verbSource = this.commonVerbs;
+                } else if (this.type === 'Regular verbs only') {
+                    verbSource = this.regularVerbs;
+                } else if (this.type === "Basic 75 Irregs") {
+                    verbSource = Object.keys(this.irregularVerbs75);
+                } else if (this.type === "Master 110 Irregs") {
+                    verbSource = Object.keys(this.irregularVerbs110);
+                } else if (this.type === 'Shakespeare 130 Irregs') {
+                    verbSource = Object.keys(this.irregularVerbs);
+                } else if (this.type === "GOAT 50 Hard Irregs Only") {
+                    verbSource = Object.keys(this.irregularVerbsGOAT50);
+                } else {
+                    verbSource = [];
+                }
             }
-
-            // make sure verbSource is at least as long as desired number of rounds/prompts
-            if (verbSource.length < this.length) {
-                console.warn(
-                    `Smart verb pool too small (${verbSource.length}) for requested prompts (${this.length}), topping up with normal verb set.`
-                );
-
-                let fallbackVerbs = [];
-                if (this.type === "Basic 75 Irregs") fallbackVerbs = Object.keys(this.irregularVerbs75);
-                else if (this.type === "Master 110 Irregs") fallbackVerbs = Object.keys(this.irregularVerbs110);
-                else if (this.type === "Shakespeare 130 Irregs") fallbackVerbs = Object.keys(this.irregularVerbs);
-                else if (this.type === "GOAT 50 Hard Irregs Only") fallbackVerbs = Object.keys(this.irregularVerbsGOAT50);
-
-                // Avoid duplicates
-                const additionalVerbs = fallbackVerbs.filter(v => !verbSource.includes(v));
-
-                verbSource = [...verbSource, ...additionalVerbs];
-            }
-
 
 
             // Generate prompts
@@ -167,6 +199,7 @@ class ConjugationSet {
                 const prompt = new ConjugationPrompt(i, verb, person, tense, sentence, answers);
                 this.PromptList.push(prompt);
             }
+
 
         } catch (error) {
             console.error('Error loading prompts:', error);

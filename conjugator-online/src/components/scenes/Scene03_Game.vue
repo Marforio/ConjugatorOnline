@@ -27,7 +27,7 @@
           <v-list-item-title style="text-wrap: wrap;"><span class="font-weight-medium">Verb set:</span> {{ gameSettings.verbSet }}</v-list-item-title>
         </v-list-item>
         <v-list-item>
-            <span class="font-weight-medium">Rounds: </span>{{ remainingCount }} 
+            <span class="font-weight-medium">Rounds: </span>{{ remainingCount }} <v-chip v-if="isSmartList" size="x-small" color="primary" class="ms-5">smart list</v-chip>
         </v-list-item>
         <v-divider></v-divider>
         <v-list-item>
@@ -80,7 +80,7 @@
             <li>Include both subject and verb</li>
             <li>Contractions are allowed</li>
             <li>Don't press BACK during the game</li>
-            <li>Details are shown at the end and in your dashboard</li>
+            <li>Game details are shown at the end and in your dashboard</li>
           </ul>
         </ol>
 
@@ -137,7 +137,13 @@
               </v-col>
               <v-col v-if="$vuetify.display.smAndUp" cols="12" md="4">
                 <div class="text-subtitle-2 text-grey-darken-1">{{ displayedTenseHeader }}</div>
-                <div class="text-body-1 text-center">{{ randomTenseDisplay }}</div>
+                <v-tooltip :text="currentPrompt.tense" location="right" :disabled="!showKeyword">
+                  <template v-slot:activator="{ props }">
+                    <div v-bind="props" class="text-body-1 text-center">
+                      {{ randomTenseDisplay }}
+                    </div>
+                  </template>
+                </v-tooltip>
               </v-col>
               <v-col v-else cols="12" md="4">
                 <div class="d-flex flex-column align-center">
@@ -269,6 +275,7 @@ import api from '@/axios';
 import { getAccessToken } from '@/services/auth';
 import Game from '@/assets/scripts/Game';
 import InitialsText from '../InitialsText.vue';
+import { useUserStore } from "@/stores/user";
 
 export default {
   components: { InitialsText },
@@ -279,15 +286,19 @@ export default {
         verbSet: '',
         sentenceTypes: [],
         tenses: [],
-        numPrompts: 0
+        numPrompts: 0,
+        smartVerbPool: null,
+        isSmart: false
       })
     }
   },
   data() {
     return {
+      userStore: null,
       userName: 'Player',
       game: null,
       gameStarted: false,
+      localGameSettings: null,   // ✅ local clone instead of mutating props
       currentPrompt: {
         person: '',
         verb: '',
@@ -315,38 +326,93 @@ export default {
       },
       showKeyword: true,
       randomTenseDisplay: '',
-      keywords: {},
-
+      keywords: {}
     };
   },
+
   async mounted() {
-    this.game = new Game(this.gameSettings);
-    await this.tenseKeyWords();  // wait for keywords to load
-    this.game.start();
-    this.updatePrompt();   
+    this.userStore = useUserStore();
+
+    // Ensure the tierStats + pool are populated
+    if (!this.userStore.tierStats || 
+        (Array.isArray(this.userStore.tierStats) && this.userStore.tierStats.length === 0)) {
+      await this.userStore.fetchVerbUsageDashboardData();
+    }
+
+    // Get computed verb pool (already plain, but may still hold refs)
+    const poolComputed = this.userStore.smartVerbPoolPlain ?? this.userStore.smartVerbPools;
+    const poolObj = poolComputed?.value !== undefined ? poolComputed.value : poolComputed;
+
+    // Deep clone utility
+    const deepClone = (obj) => {
+      if (typeof structuredClone === 'function') {
+        return structuredClone(obj);
+      }
+      return JSON.parse(JSON.stringify(obj));
+    };
+
+    const plainPool = poolObj ? deepClone(poolObj) : null;
+
+    // ✅ create localGameSettings clone (safe to mutate)
+    this.localGameSettings = { ...this.gameSettings, smartVerbPool: plainPool };
+    // console.log("this.localGameSettings", this.localGameSettings)
+
+    // create and start the game with local settings
+    this.game = new Game(this.localGameSettings);
+
+    // console.log("Scene03 settings about to be passed into Game:", this.localGameSettings);
+
+    await this.tenseKeyWords();  
+    await this.game.start();
+    this.updatePrompt();
   },
+
   beforeDestroy() {
     clearInterval(this.timerInterval);
     clearInterval(this.intervalId);
     clearInterval(this.roundIntervalId);
   },
+
   computed: {
     progressValue() {
-      return ((this.promptCounter) / this.gameSettings.numPrompts) * 100;
+      return ((this.promptCounter) / this.localGameSettings.numPrompts) * 100;
     },
     isAuthenticated() { 
       return !!getAccessToken();
     },
     displayedTenseHeader() {
-      if (!this.showKeyword) return "Tense";
-      return "Time reference"
+      return this.showKeyword ? "Time reference" : "Tense";
+    },
+    isSmartList() {
+      const settings = this.localGameSettings;
+      if (!settings || !settings.smartVerbPool) return false;
+
+      const poolRaw = settings.smartVerbPool;
+      const pool = (poolRaw && poolRaw.value !== undefined) ? poolRaw.value : poolRaw;
+
+      if (!pool || typeof pool !== 'object') return false;
+
+      const smartCapableSets = [
+        "Basic 75 Irregs",
+        "Master 110 Irregs",
+        "Shakespeare 130 Irregs",
+        "GOAT 50 Hard Irregs Only"
+      ];
+
+      if (!smartCapableSets.includes(this.gameSettings.verbSet)) {
+        return false;
+      }
+
+      return Object.values(pool).some(v => Array.isArray(v) && v.length > 0);
     }
 
   },
+
   methods: {
     goBack() {
       this.$emit('changeScene', 'Scene02_Settings');
     },
+    
     async tenseKeyWords() {
       try {
         const res = await fetch('/data/tenseKeywords.json');
@@ -355,6 +421,7 @@ export default {
         console.error('Error loading tense keywords:', e);
       }
     },
+
     updateRandomTense() {
       if (!this.showKeyword) {
         this.randomTenseDisplay = this.currentPrompt.tense;
@@ -366,15 +433,9 @@ export default {
 
       if (Array.isArray(options) && options.length > 0) {
         let randomIndex;
-
-        // Ensure new random index is different from the previous one
         do {
           randomIndex = Math.floor(Math.random() * options.length);
-        } while (
-          options.length > 1 && 
-          options[randomIndex] === this.randomTenseDisplay
-        );
-
+        } while (options.length > 1 && options[randomIndex] === this.randomTenseDisplay);
         this.randomTenseDisplay = options[randomIndex];
       } else {
         this.randomTenseDisplay = this.currentPrompt.tense;
@@ -388,70 +449,54 @@ export default {
 
       const avgTime = ((new Date().getTime() - this.startTime) / 1000 / this.results.length).toFixed(1);
 
-    const rounds = this.results.map((r, index) => ({
-      prompt_number: index + 1,
-      person: r.prompt.person,
-      verb: r.prompt.verb,
-      tense: r.prompt.tense,
-      sentence_type: r.prompt.sentenceType,
-      user_answer: r.userAnswer,
-      is_correct: r.correct,
-      acceptable_answers: Array.isArray(r.correctAnswers) ? r.correctAnswers : [],
-      elapsed_time: parseFloat(r.elapsedTime),
-    }));
+      const rounds = this.results.map((r, index) => ({
+        prompt_number: index + 1,
+        person: r.prompt.person,
+        verb: r.prompt.verb,
+        tense: r.prompt.tense,
+        sentence_type: r.prompt.sentenceType,
+        user_answer: r.userAnswer,
+        is_correct: r.correct,
+        acceptable_answers: Array.isArray(r.correctAnswers) ? r.correctAnswers : [],
+        elapsed_time: parseFloat(r.elapsedTime),
+      }));
 
-    const payload = {
-      verb_set: this.gameSettings.verbSet,
-      sentence_types: this.gameSettings.sentenceTypes,
-      tenses: this.gameSettings.tenses,
-      total_rounds: this.gameSettings.numPrompts,
-      correct_count: this.rightCount,
-      wrong_count: this.wrongCount,
-      started_at: new Date(this.startTime).toISOString(),
-      finished_at: new Date().toISOString(),
-      total_time: Math.floor((new Date().getTime() - this.startTime) / 1000),
-      avg_time_per_prompt: parseFloat(avgTime),
-      rounds: rounds   // no session or session_id here
-    };
-
+      const payload = {
+        verb_set: this.localGameSettings.verbSet,
+        sentence_types: this.localGameSettings.sentenceTypes,
+        tenses: this.localGameSettings.tenses,
+        total_rounds: this.localGameSettings.numPrompts,
+        correct_count: this.rightCount,
+        wrong_count: this.wrongCount,
+        started_at: new Date(this.startTime).toISOString(),
+        finished_at: new Date().toISOString(),
+        total_time: Math.floor((new Date().getTime() - this.startTime) / 1000),
+        avg_time_per_prompt: parseFloat(avgTime),
+        rounds: rounds
+      };
 
       try {
         console.log("Submitting game payload:", JSON.stringify(payload, null, 2));
-        
-        if (typeof payload.sentence_types === "string") {
-            payload.sentence_types = JSON.parse(selections.sentenceTypes);
-          }
-        if (typeof payload.tenses === "string") {
-            payload.tenses = JSON.parse(selections.tenses);
-          }
-
         const response = await api.post('/conj-game-sessions/', payload, {
-            headers: {
-              'Content-Type': 'application/json',
-            },
-          });
-          console.log("Game session saved:", response.data);
+          headers: { 'Content-Type': 'application/json' }
+        });
+        console.log("Game session saved:", response.data);
+      } catch (error) {
+        console.error("Status:", error.response?.status);
+        console.error("Response data:", error.response?.data);
+      }
 
-
-        } catch (error) {
-        console.error("Status:", error.response.status);
-        console.error("Response data:", error.response.data);
-        }
-
-      // Delay to ensure dialog is visible long enough
       setTimeout(() => {
         this.showBlockingDialog = false;
-
-        this.$emit('gameOver', payload );
-
+        this.$emit('gameOver', payload);
         this.endTimer();
       }, 1000);
     },
 
-
     quitGame() {
       this.$emit('changeScene', 'Scene01_Landing');
     },
+
     startGame() {
       this.gameStarted = true;
       this.startTime = new Date().getTime();
@@ -459,26 +504,27 @@ export default {
       this.timerInterval = setInterval(this.updateTimers, 1000);
       this.updatePrompt();
     },
+
     updatePrompt() {
       const prompt = this.game.getCurrentPrompt();
       this.currentPrompt.person = prompt.getPerson();
       this.currentPrompt.verb = prompt.getVerb();
       this.currentPrompt.tense = prompt.getTense();
       this.currentPrompt.sentenceType = prompt.getSentenceType();
-
-      // Ensure a fresh random tense keyword is selected
       this.updateRandomTense();
-
       this.startRoundTimer();
     },
+
     updateTimers() {
       const now = new Date().getTime();
       const elapsed = Math.floor((now - this.startTime) / 1000);
       this.overallTimer = this.formatTime(elapsed);
     },
+
     endTimer() {
       clearInterval(this.intervalId);
     },
+
     startRoundTimer() {
       this.roundStartTime = new Date().getTime();
       clearInterval(this.roundIntervalId);
@@ -488,14 +534,17 @@ export default {
         this.roundTimer = this.formatTime(elapsed);
       }, 1000);
     },
+
     formatTime(totalSeconds) {
       const minutes = Math.floor(totalSeconds / 60);
       const seconds = totalSeconds % 60;
       return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
     },
+
     endRoundTimer() {
       clearInterval(this.roundIntervalId);
     },
+
     submitAnswer() {
       const now = new Date().getTime();
       const elapsedMs = now - this.roundStartTime;
@@ -506,26 +555,24 @@ export default {
 
       const isCorrect = this.game.submitAnswer(this.userAnswer);
 
-      // Trigger snackbar
       this.snackbar.message = isCorrect
         ? `Yes! "${this.userAnswer}" is correct!`
         : `Sorry, "${this.userAnswer}" is wrong!`;
       this.snackbar.color = isCorrect ? 'success' : 'warning';
-      // Reset and re-trigger the snackbar cleanly
       this.snackbar.show = false;
       this.$nextTick(() => {
-        this.snackbar.show = true;});
-
+        this.snackbar.show = true;
+      });
 
       if (isCorrect) {
         this.rightCount = this.game.getRightCount();
       } else {
         this.wrongCount = this.game.getWrongCount();
       }
+
       this.promptCounter++;
       this.remainingCount--;
       this.userAnswer = '';
-
       this.endRoundTimer();
 
       if (this.remainingCount === 1) {
@@ -538,10 +585,11 @@ export default {
         this.updatePrompt();
         this.startRoundTimer();
       }
-    },
+    }
   }
 };
 </script>
+
 
 
 <style scoped>

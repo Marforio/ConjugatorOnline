@@ -216,6 +216,9 @@ export const useUserStore = defineStore("user", () => {
   function getSmartVerbPoolPerTier(tierStatsList: TierStats[]): SmartVerbPool {
     const pool: SmartVerbPool = {};
 
+    //console.log("Tier stats list before building pool:", JSON.stringify(tierStatsList, null, 2));
+
+
     for (const tier of tierStatsList) {
       const mergedSet = new Set<string>([
         ...tier.undiscovered_verbs_ps,
@@ -226,10 +229,23 @@ export const useUserStore = defineStore("user", () => {
 
       pool[tier.tier_name] = Array.from(mergedSet);
     }
-
+    //console.log("Smart verb pool in user store", pool)
     return pool;
   }
-  const smartVerbPools = getSmartVerbPoolPerTier(tierStats.value);
+  const smartVerbPools = computed(() => getSmartVerbPoolPerTier(tierStats.value));
+  // plain clone for easy use in Options API / components (avoid Proxy surprises)
+  const smartVerbPoolPlain = computed(() => {
+    const pool = smartVerbPools.value || {};
+    // return a plain cloned object (so components get plain arrays, not reactive proxies)
+    try {
+      return JSON.parse(JSON.stringify(pool));
+    } catch (e) {
+      // fallback: shallow copy
+      console.log("Plain smart verb pool in user store, saved as smartVerbPools", JSON.parse(JSON.stringify(pool)))
+      return Object.fromEntries(Object.entries(pool));
+    }
+  });
+
 
 
   // 📚 Vocab state
@@ -318,7 +334,7 @@ export const useUserStore = defineStore("user", () => {
     enrollments, loadingEnrollments, enrollmentError, enrolledCourses, fetchEnrollments,
 
     // Verb usage
-    verbUsage, tierStats, tenseStats, loadingVerbUsage, verbUsageError, smartVerbPools,
+    verbUsage, tierStats, tenseStats, loadingVerbUsage, verbUsageError, smartVerbPools, smartVerbPoolPlain,
     fetchVerbUsageDashboardData,
 
     // Vocab

@@ -119,15 +119,27 @@
                     title="Avg speed"
                     label="Seconds per answer (round)"
                   />
-                  <v-tooltip text="How close you are to an ideal student with 1500 correct answers, 100% accuracy and 12s avg speed with medium difficulty conjugations" location="bottom">
+                  <v-tooltip text="How close you are to an ideal student (1500 correct answers, 100% accuracy, 12s avg speed, medium difficulty" location="bottom">
                     <template v-slot:activator="{ props }">
-                      <NumbersCard
+                      <v-card
                         class="ma-2 flex-grow-1 bg-light-blue-lighten-5"
-                        :value="`${userStore.healthScore ?? 0}%`"
-                        title="Health index"
-                        :label="`Level: ${healthTier ?? ''}`"
+                        elevation="2"
                         v-bind="props"
-                      />
+                        style="min-width: 180px;"
+                      >
+                        <v-card-text class="text-center">
+                          <v-card-title class="text-subtitle-2 text-wrap mb-2">Power index</v-card-title>
+                            <Gauge
+                                  :key="gaugeKey"
+                                  :value="userStore.healthScore ?? 0"
+                                  :size="$vuetify.display.lgAndUp ? 120 : 200"
+                                />
+                            <v-card-subtitle class="text-caption text-wrap">
+                              Level: {{ healthTier ?? '' }}
+                            </v-card-subtitle>
+                        </v-card-text>
+                      </v-card>
+                      
                     </template>
                   </v-tooltip>
                   
@@ -169,7 +181,7 @@
             <v-col cols="12" lg="6" xl="4">
               <v-card
                 class="pa-4 d-flex flex-column justify-space-between"
-                elevation="2"
+                elevation="3"
                 style="background-color: #fff9db; min-height: 430px;"
               >
                 <v-card-title class="text-h4 font-weight-bold">
@@ -223,7 +235,7 @@
             <v-col cols="12" lg="6" xl="4">
               <v-card
                 class="pa-4 d-flex flex-column justify-space-between bg-teal-lighten-4"
-                elevation="2"
+                elevation="3"
                 style="min-height: 430px;"
               >
                 <v-card-title class="text-h4 font-weight-bold">
@@ -597,7 +609,7 @@
 
 
 <script lang="ts">
-import { defineComponent, ref, onMounted, computed } from "vue";
+import { defineComponent, ref, onMounted, computed, watch } from "vue";
 import api from "@/axios";
 import { useUserStore } from "@/stores/user";
 import { useDisplay } from "vuetify";
@@ -610,6 +622,7 @@ import NumbersCard from "@/components/NumbersCard.vue";
 import { useRouter, useRoute } from 'vue-router';
 import VocabDataTab from "@/components/VocabDataTab.vue";
 import GoalsDataTab from "@/components/GoalsDataTab.vue";
+import Gauge from "@/components/Gauge.vue"
 
 // ---------------- Types ----------------
 interface Round {
@@ -645,7 +658,7 @@ interface GameSession {
 // ---------------- Component ----------------
 export default defineComponent({
   name: "Dashboard",
-  components: { TopNavBar, NumbersCard, PieChart, BarChart, ErrorsDataTab, AdminErrorDataTab, VocabDataTab, GoalsDataTab },
+  components: { TopNavBar, NumbersCard, PieChart, BarChart, ErrorsDataTab, AdminErrorDataTab, VocabDataTab, GoalsDataTab, Gauge },
   setup() {
     const router = useRouter();
     const route = useRoute();
@@ -667,10 +680,16 @@ export default defineComponent({
       "Super League": [50,59],
       "National Team": [60,69],
       "Champions League": [70,79],
-      "World Cup": [80,89],
+      "Hall of Fame": [80,89],
       "Ballon d'Or": [90,98],
       "Conjugation Messi": [99,100]
     }
+
+    const gaugeKey = ref(0);
+    const { lgAndUp } = useDisplay();
+    watch(() => lgAndUp.value, () => {
+      gaugeKey.value++;
+    });
 
 
 
@@ -1021,7 +1040,8 @@ export default defineComponent({
       nextError,
       pickRandomError,
       currentMasteredVerb,
-      nextMasteredVerb
+      nextMasteredVerb,
+      gaugeKey 
     };
   },
 });

@@ -11,7 +11,8 @@ class Game {
       settings.verbSet,
       settings.tenses,
       settings.sentenceTypes,
-      settings.numPrompts
+      settings.numPrompts,
+      settings.smartVerbPool
     );
     this.currentPrompt = null;
     this.rightCount = 0;
@@ -22,6 +23,10 @@ class Game {
 
   async start() {
     await this.conjugationSet.loadPrompts(); // Ensure data is loaded
+    //console.log("Game start conjugationSet.settings.smartVerbPool", this.conjugationSet.smartVerbPool)
+    //console.log("Game start conjugationSet.settings.verbSetIsSmart", this.conjugationSet.verbSetIsSmart)
+
+
     this.currentPrompt = this.conjugationSet.getPrompt();
 }
 
