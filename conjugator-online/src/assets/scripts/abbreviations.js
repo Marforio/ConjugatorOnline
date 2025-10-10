@@ -195,43 +195,17 @@ function abbreviator(tense, person, sentenceType, text) {
                 alternatives.push(alternative2);
             }
         } else if (sentenceType === 'Negative') {
-            if (person === 'i') {
-                const alternative = text.replace('i am', "i'm", "im");
-                alternatives.push(alternative);
-            } else if (person === 'you') {
-                for (const alt of NEGATIVE_ABBREVIATIONS['you are not']) {
-                    const alternative = text.replace('you are not', alt);
-                    alternatives.push(alternative);
-                }
-            } else if (person === 'he') {
-                for (const alt of NEGATIVE_ABBREVIATIONS['he is not']) {
-                    const alternative = text.replace('he is not', alt);
-                    alternatives.push(alternative);
-                }
-            } else if (person === 'she') {
-                for (const alt of NEGATIVE_ABBREVIATIONS['she is not']) {
-                    const alternative = text.replace('she is not', alt);
-                    alternatives.push(alternative);
-                }
-            } else if (person === 'it') {
-                for (const alt of NEGATIVE_ABBREVIATIONS['it is not']) {
-                    const alternative = text.replace('it is not', alt);
-                    alternatives.push(alternative);
-                }
-            } else if (person === 'we') {
-                for (const alt of NEGATIVE_ABBREVIATIONS['we are not']) {
-                    const alternative = text.replace('we are not', alt);
-                    alternatives.push(alternative);
-                }
-            } else if (person === 'they') {
-                for (const alt of NEGATIVE_ABBREVIATIONS['they are not']) {
-                    const alternative = text.replace('they are not', alt);
+            // ✅ Use the NEGATIVE_ABBREVIATIONS map for *all* pronouns
+            const key = `${person} ${person === 'i' ? 'am not' : person === 'he' || person === 'she' || person === 'it' ? 'is not' : 'are not'}`;
+            if (NEGATIVE_ABBREVIATIONS[key]) {
+                for (const alt of NEGATIVE_ABBREVIATIONS[key]) {
+                    const alternative = text.replace(key, alt);
                     alternatives.push(alternative);
                 }
             }
         }
         return alternatives;
-    }
+}
 
     // Present perfect
     if (tense === 'Present perfect') {

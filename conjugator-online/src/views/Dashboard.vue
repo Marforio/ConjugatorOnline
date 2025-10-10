@@ -109,7 +109,7 @@
                 <div style="display: flex;">
                   <NumbersCard
                     class="ma-2 flex-grow-1"
-                    :value="(userStore.totalCorrect ?? 0).toString()"
+                    :value="totalCorrect ?? 0"
                     title="Total correct"
                     label="Conjugations (rounds) in the Conjugator game"
                   />
