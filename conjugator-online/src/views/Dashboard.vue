@@ -376,7 +376,25 @@
                   </template>
                 </v-progress-linear>
                 <div class="text-caption text-muted">Mastered (written correctly 3x)</div>
-              </div>
+                
+                <div class="mt-8">  
+                <v-subheader class="mt-8 mb-4 font-weight-medium">My verbs — Past Simple</v-subheader>
+
+                  <v-select
+                    v-model="selectedPsOption"
+                    :items="pastSimpleOptionsWithCounts"
+                    item-title="displayLabel"
+                    item-value="key"
+                    label="Select Past Simple category"
+                    density="compact"
+                    class="mt-4"
+                  />
+
+                  <div class="text-caption mt-2">
+                    {{ displayedPsVerbs.join(', ') || psFallbackMessage }}
+                  </div>
+                </div>
+              </div> 
 
             </v-sheet>
           </v-col>
@@ -480,6 +498,24 @@
                 </v-progress-linear>
                 <div class="text-caption text-muted">Mastered (written correctly 3x)</div>
               </div>
+              
+              <div class="mt-3">
+                <v-subheader class="mt-8 mb-4 font-weight-medium">My verbs — Present Perfect</v-subheader>
+
+                <v-select
+                  v-model="selectedPpOption"
+                  :items="presentPerfectOptionsWithCounts"
+                  item-title="displayLabel"
+                  item-value="key"
+                  label="Select Present Perfect category"
+                  density="compact"
+                  class="mt-4"
+                />
+
+                <div class="text-caption mt-2">
+                  {{ displayedPpVerbs.join(', ') || ppFallbackMessage }}
+                </div>
+              </div>
 
             </v-sheet>
           </v-col>
@@ -487,6 +523,7 @@
         </v-row>
           
           <v-divider />
+
 
           <v-card
             class="pa-4 mb-6"
@@ -715,6 +752,110 @@ export default defineComponent({
     };
 
     const userStore = useUserStore();
+      
+    // ---------- Dropdown option lists ----------
+    const pastSimpleOptions = [
+      { key: 'Discovered_verbs_ps', label: 'Discovered verbs' },
+      { key: 'Mastered_verbs_ps', label: 'Mastered verbs' },
+      { key: 'Basic 75_undiscovered_verbs_ps', label: 'Basic 75 – Undiscovered' },
+      { key: 'Basic 75_unmastered_verbs_ps', label: 'Basic 75 – Unmastered' },
+      { key: 'Master 110_undiscovered_verbs_ps', label: 'Master 110 – Undiscovered' },
+      { key: 'Master 110_unmastered_verbs_ps', label: 'Master 110 – Unmastered' },
+      { key: 'All Irregular_undiscovered_verbs_ps', label: 'All Irregular – Undiscovered' },
+      { key: 'All Irregular_unmastered_verbs_ps', label: 'All Irregular – Unmastered' },
+    ]
+
+    const presentPerfectOptions = [
+      { key: 'Discovered_verbs_pp', label: 'Discovered verbs' },
+      { key: 'Mastered_verbs_pp', label: 'Mastered verbs' },
+      { key: 'Basic 75_undiscovered_verbs_pp', label: 'Basic 75 – Undiscovered' },
+      { key: 'Basic 75_unmastered_verbs_pp', label: 'Basic 75 – Unmastered' },
+      { key: 'Master 110_undiscovered_verbs_pp', label: 'Master 110 – Undiscovered' },
+      { key: 'Master 110_unmastered_verbs_pp', label: 'Master 110 – Unmastered' },
+      { key: 'All Irregular_undiscovered_verbs_pp', label: 'All Irregular – Undiscovered' },
+      { key: 'All Irregular_unmastered_verbs_pp', label: 'All Irregular – Unmastered' },
+    ]
+
+    // default selections
+    const selectedPsOption = ref(pastSimpleOptions[0].key)
+    const selectedPpOption = ref(presentPerfectOptions[0].key)
+
+    // ---------- Types ----------
+    type VerbField =
+      | 'undiscovered_verbs_ps'
+      | 'unmastered_verbs_ps'
+      | 'discovered_verbs_ps'
+      | 'mastered_verbs_ps'
+      | 'undiscovered_verbs_pp'
+      | 'unmastered_verbs_pp'
+      | 'discovered_verbs_pp'
+      | 'mastered_verbs_pp'
+
+    interface TenseStats {
+      discovered_verbs_ps: string[]
+      discovered_verbs_pp: string[]
+      mastered_verbs_ps: string[]
+      mastered_verbs_pp: string[]
+    }
+
+    // ---------- Helpers ----------
+    function parseKey(key: string): { tierName: string | null; field: VerbField | null } {
+      if (key.startsWith('Discovered_') || key.startsWith('Mastered_')) {
+        const field = key.charAt(0).toLowerCase() + key.slice(1) as VerbField
+        return { tierName: null, field }
+      }
+      const idx = key.indexOf('_')
+      if (idx === -1) return { tierName: null, field: null }
+      const tierName = key.slice(0, idx)
+      const field = key.slice(idx + 1) as VerbField
+      return { tierName, field }
+    }
+
+    function getVerbsForKey(key: string): string[] {
+      const { tierName, field } = parseKey(key)
+      if (!field) return []
+
+      // global discovered/mastered lists
+      if (!tierName && (field.startsWith('discovered') || field.startsWith('mastered'))) {
+        const tenseStats = userStore.tenseStats as TenseStats | undefined
+        return tenseStats && Array.isArray((tenseStats as any)[field])
+          ? [...(tenseStats as any)[field]]
+          : []
+      }
+
+      // per-tier undiscovered/unmastered
+      const tier = (userStore.tierStats || []).find((t: any) => t.tier_name === tierName)
+      const maybe = tier ? (tier as any)[field] : []
+      return Array.isArray(maybe) ? [...maybe] : []
+    }
+
+    // ---------- Computed lists ----------
+    const displayedPsVerbs = computed(() => getVerbsForKey(selectedPsOption.value))
+    const displayedPpVerbs = computed(() => getVerbsForKey(selectedPpOption.value))
+
+    // ---------- Counts and formatted labels ----------
+    function withCounts(options: { key: string; label: string }[]) {
+      return options.map(opt => {
+        const verbs = getVerbsForKey(opt.key)
+        const count = verbs.length
+        const suffix = count ? ` (${count})` : ' (0)'
+        return { ...opt, displayLabel: opt.label + suffix }
+      })
+    }
+
+    // dynamic labels that always reflect latest counts
+    const pastSimpleOptionsWithCounts = computed(() => withCounts(pastSimpleOptions))
+    const presentPerfectOptionsWithCounts = computed(() => withCounts(presentPerfectOptions))
+
+    // ---------- Fallback messages ----------
+    function getFallbackMessage(key: string): string {
+      const verbs = getVerbsForKey(key)
+      if (verbs.length > 0) return ''
+      return 'None! Great job!'
+    }
+
+    const psFallbackMessage = computed(() => getFallbackMessage(selectedPsOption.value))
+    const ppFallbackMessage = computed(() => getFallbackMessage(selectedPpOption.value))
 
     function generateSparklineLabels(arr: number[]): string[] {
       if (arr.length <= 8) {
@@ -1041,7 +1182,15 @@ export default defineComponent({
       pickRandomError,
       currentMasteredVerb,
       nextMasteredVerb,
-      gaugeKey 
+      gaugeKey,
+      selectedPsOption,
+      selectedPpOption,
+      pastSimpleOptionsWithCounts,
+      presentPerfectOptionsWithCounts,
+      displayedPsVerbs,
+      displayedPpVerbs,
+      psFallbackMessage,
+      ppFallbackMessage,
     };
   },
 });

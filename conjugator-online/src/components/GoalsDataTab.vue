@@ -23,7 +23,7 @@
                     {{ achievement.name }}
                     <v-icon class="m-2" :icon="achievementIcons[achievement.criteria_key] || 'mdi-trophy'" />
                   </v-list-item-title>
-                  <v-list-item-subtitle>
+                  <v-list-item-subtitle class="text-wrap">
                     {{ achievement.description }}
                   </v-list-item-subtitle>
                   <v-list-item-subtitle>
