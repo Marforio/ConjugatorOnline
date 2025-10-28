@@ -484,6 +484,20 @@ export const errorsData: Record<string, ErrorEntry> = {
         "recommendation": "remember that 'will' is the auxiliary verb for the future tense; do not confuse it with 'want to'",
         "examples": "'I will go' (j'irai) is not the same as 'I want to go' (je veux y aller)"
     },
+            "0416":{
+        "short_slug": "will-in-2nd-conditional",
+        "description": "using will instead of would in the result clause of a 2nd conditional sentence",
+        "reference": "<a href='https://book.language-labs.ch/ch4#e0416'>error 0416</a>",
+        "recommendation": "remember that 'would', not 'will', is used in the result clause of a 2nd conditional sentence",
+        "examples": "'If I was rich, I would travel the world' is correct; 'If I am rich, I will travel the world' is incorrect"
+    },
+        "0417":{
+        "short_slug": "past-in-2nd-conditional",
+        "description": "using past simple in the restult clause of a 2nd conditional sentence",
+        "reference": "<a href='https://book.language-labs.ch/ch4#e0417'>error 0417</a>",
+        "recommendation": "remember that the past simple is used only in the condition clause of a 2nd conditional sentence",
+        "examples": "'If I was rich, I would travel the world' is correct; 'If I was rich, I traveled the world' is incorrect"
+    },
     "0420":{
         "short_slug": "irregular-verb-form",
         "description": "incorrect irregular form of the past simple or past participle",
@@ -525,6 +539,13 @@ export const errorsData: Record<string, ErrorEntry> = {
         "reference": "<a href='https://book.language-labs.ch/ch4#e0432' target='_blank'>error 0432</a>",
         "recommendation": "remember that English has a specific verb tense for unfinished or indefinite past time, and it's not the past simple",
         "examples": "try to say 'I have done this already', instead of 'I did it already'; and 'I've been there many times', not 'I was there many times'"
+    },
+        "0433":{
+        "short_slug": "pperf-continuous",
+        "description": "incorrect choice between present perfect simple and present perfect continuous",
+        "reference": "<a href='https://book.language-labs.ch/ch4#e0433' target='_blank'>error 0432</a>",
+        "recommendation": "remember that the present perfect continuous is used to emphasize the duration of an ongoing action, while the present perfect simple is used to emphasize the completion or result of an action",
+        "examples": "'I have been working here for five years' (emphasizing duration) vs 'I have worked here for five years' (emphasizing completion)"
     },
     "0440":{
         "short_slug": "pres-simple-overuse-past",

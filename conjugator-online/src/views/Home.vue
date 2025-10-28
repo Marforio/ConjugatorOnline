@@ -11,7 +11,7 @@
     </div>
 
     <!-- Main Title Centered -->
-    <v-row justify="center" class="mt-6 mb-4">
+    <v-row justify="center" class="mt-6 mb-2">
       <v-col cols="12" class="text-center">
         <h1 :class="[smAndDown ? 'text-h2' : 'text-h1', 'font-weight-bold']">
           Language Labs
@@ -30,11 +30,11 @@
     <v-btn
       large
       class="d-flex flex-column align-center pa-3 pa-sm-6"
-      color="secondary"
+      color="primary"
       href="https://book.language-labs.ch"
     >
       <v-icon large>mdi-book-open-variant</v-icon>
-      <span class="subtitle-1 font-weight-medium px-2">Grammar Book</span>
+      <span class="subtitle-1 font-weight-medium px-3">Grammar Book</span>
     </v-btn>
   </v-col>
 
@@ -47,11 +47,11 @@
     <v-btn
       large
       class="d-flex flex-column align-center pa-3 pa-sm-6"
-      color="primary"
+      color="warning"
       :to="{ name: 'conjugator' }"
     >
       <v-icon large>mdi-controller</v-icon>
-      <span class="subtitle-1 font-weight-medium px-2">Conjugator</span>
+      <span class="subtitle-1 font-weight-medium px-3">Conjugator</span>
     </v-btn>
   </v-col>
 
@@ -68,7 +68,24 @@
       :to="{ name: 'dashboard' }"
     >
       <v-icon large>mdi-chart-bar</v-icon>
-      <span class="subtitle-1 font-weight-medium px-2">Dashboard</span>
+      <span class="subtitle-1 font-weight-medium px-3">Dashboard</span>
+    </v-btn>
+  </v-col>
+
+    <v-col
+    cols="12"
+    sm="6"
+    md="4"
+    class="d-flex justify-center mb-0 mb-sm-4"
+  >
+    <v-btn
+      large
+      class="d-flex flex-column align-center pa-3 pa-sm-6"
+      color="secondary"
+      :to="{ name: 'games' }"
+    >
+      <v-icon large>mdi-gamepad-circle</v-icon>
+      <span class="subtitle-1 font-weight-medium px-3">Other games</span>
     </v-btn>
   </v-col>
 </v-row>

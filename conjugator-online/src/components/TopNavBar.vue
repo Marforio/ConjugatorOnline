@@ -52,7 +52,7 @@
 
       <!-- Desktop Icons -->
       <div class="d-none d-sm-flex">
-        <v-tooltip text="Go to Homepage" location="bottom">
+        <v-tooltip text="Home" location="bottom">
           <template v-slot:activator="{ props }">
             <v-btn icon v-bind="props" :to="{ name: 'home' }">
               <v-icon>mdi-home</v-icon>
@@ -60,7 +60,7 @@
           </template>
         </v-tooltip>
 
-        <v-tooltip text="Go to Grammar Book" location="bottom">
+        <v-tooltip text="Grammar Book" location="bottom">
           <template v-slot:activator="{ props }">
             <v-btn icon v-bind="props" href="https://book.language-labs.ch" target='_blank'>
               <v-icon>mdi-book-open-variant</v-icon>
@@ -70,13 +70,13 @@
 
         <v-tooltip text="Go to Exercises" location="bottom">
           <template v-slot:activator="{ props }">
-            <v-btn icon v-bind="props" :to="{ name: 'exercises' }" :disabled="true">
+            <v-btn icon v-bind="props" :to="{ name: 'exercises' }" :disabled="true">   <!-- :disabled="true"  --> 
               <v-icon>mdi-tools</v-icon>
             </v-btn>
           </template>
         </v-tooltip>
 
-        <v-tooltip text="Open Conjugator Game" location="bottom">
+        <v-tooltip text="Conjugator Game" location="bottom">
           <template v-slot:activator="{ props }">
             <v-btn icon v-bind="props" :to="{ name: 'conjugator' }">
               <v-icon>mdi-controller</v-icon>
@@ -84,15 +84,15 @@
           </template>
         </v-tooltip>
 
-        <v-tooltip text="More Grammar Games" location="bottom">
+        <v-tooltip text="Other Games" location="bottom">
           <template v-slot:activator="{ props }">
-            <v-btn icon v-bind="props" :to="{ name: 'games' }" :disabled="true">
-              <v-icon>mdi-gamepad-round-outline</v-icon>
+            <v-btn icon v-bind="props" :to="{ name: 'games' }" >  <!-- :disabled="true"  --> 
+              <v-icon>mdi-gamepad-circle</v-icon>
             </v-btn>
           </template>
         </v-tooltip>
 
-        <v-tooltip text="Go to Dashboard" location="bottom">
+        <v-tooltip text="My dashboard" location="bottom">
           <template v-slot:activator="{ props }">
             <v-btn icon v-bind="props" :to="{ name: 'dashboard' }">
               <v-icon>mdi-chart-bar</v-icon>

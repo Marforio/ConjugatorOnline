@@ -5,9 +5,6 @@ import Login from '@/views/Login.vue'
 import Home from '@/views/Home.vue'
 import Conjugator from '@/views/Conjugator.vue'
 import Admin from '@/views/Admin.vue'
-import Dashboard from '@/views/Dashboard.vue'
-import Exercises from '@/views/Exercises.vue'
-import Games from '@/views/Games.vue'
 import { path } from 'd3'
 
 const routes = [
@@ -17,7 +14,12 @@ const routes = [
   { path: '/conjugator', name: 'conjugator', component: Conjugator, meta: { requiresAuth: true }},
   { path: '/dashboard', name: 'dashboard', component: () => import('@/views/Dashboard.vue'), meta: { requiresAuth: true } },
   { path: '/exercises', name: 'exercises', component: () => import('@/views/Exercises.vue'), meta: { requiresAuth: true } },
-  { path: '/games', name: 'games', component: () => import('@/views/Games.vue'), meta: { requiresAuth: true } },
+  { path: '/games', name: 'games', component: () => import('@/views/Games.vue')},
+  { path: '/games/pronoun-practice', name: 'pronounpractice', component: () => import('@/views/PronounPractice.vue'), meta: { requiresAuth: true }},
+  { path: '/games/quantifier', name: 'quantifier', component: () => import('@/views/Quantifer.vue'), meta: { requiresAuth: true }},
+  { path: '/games/verb-combinator', name: 'verbcombinator', component: () => import('@/views/VerbCombinator.vue'), meta: { requiresAuth: true }},
+  { path: '/games/passive-maker', name: 'passivemaker', component: () => import('@/views/PassiveMaker.vue'), meta: { requiresAuth: true }},
+  { path: '/games/translator', name: 'translator', component: () => import('@/views/Translator.vue'), meta: { requiresAuth: true }},
   { path: '/exercises/:errorCode', name: 'exercise-detail', component: () => import('@/views/ExerciseDetail.vue'), meta: { requiresAuth: true } }
 ]
 

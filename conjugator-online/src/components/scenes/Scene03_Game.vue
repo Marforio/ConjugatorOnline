@@ -8,15 +8,15 @@
       class="pa-4 d-flex flex-column align-center ml-3 align-self-center"
     >
       <v-img
-        src="/images/conjugator.png"
+        src="/images/conjugator2.png"
         alt="Logo"
         class="m-4 rounded-lg"
         max-width="220"
-        aspect-ratio="1"
+        aspect-ratio="4/3"
         cover
       />
 
-      <h2 class="text-h6 font-weight-bold">Your Settings</h2>
+      <h2 class="text-h6 text-center font-weight-bold">Game Settings</h2>
 
       <v-list density="compact" lines="one">
         <v-list-item>

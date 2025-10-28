@@ -1,11 +1,16 @@
 <template>
-  <v-btn
-    color="error"
-    @click="logout"
-    style="align-self: center; margin-right: 15px;"
-  >
-    Log out
-  </v-btn>
+  <v-tooltip text="Log out" location="bottom">
+    <template v-slot:activator="{ props }">
+      <v-btn
+        v-bind="props"  
+        color="red-lighten-3"
+        @click="logout"
+        style="align-self: center; margin-right: 15px;"
+      >
+        <v-icon large>mdi-logout</v-icon>
+      </v-btn>
+    </template>
+  </v-tooltip>
 </template>
 
 <script setup lang="ts">

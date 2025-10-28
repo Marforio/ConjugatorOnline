@@ -1,5 +1,5 @@
 <template>
-  <v-container fluid class="fill-height d-flex flex-column mt-5">
+  <v-container fluid class="fill-height d-flex flex-column" style="margin-top: 50px;">
     <v-row align="center" justify="center" class="flex-grow-1 text-center">
       <v-col cols="12">
         <!-- Clickable Image -->
@@ -10,26 +10,21 @@
           tabindex="0"
         >
           <v-img
-            src="/images/conjugator.png"
+            src="/images/conjugator2.png"
             alt="Logo"
-            class="m-2 rounded-image"
+            class="m-2 mb-5 rounded-image"
             width="100%"
             contain
           />
         </div>
 
         <!-- Beating subtitle -->
-        <h2 class="beating-text mt-3 mb-5">
+        <h2 class="beating-text mt-6 mb-5">
           Put your conjugation to the test!
         </h2>
       </v-col>
-    </v-row>
-    <v-row align="center" justify="center" class="flex-grow-1 text-center mt-5">
-      <v-btn elevation class="text-h5 m-3" size="x-large" color="success" @click="goToScene('Scene02_Settings')">
-        Play!
-      </v-btn>
-    </v-row>  
-    <v-row>
+    </v-row> 
+    <v-row style="margin-top: 50px;">
       <v-btn icon elevation class="m-3" large :to="{ name: 'home' }">
         <v-icon>mdi-arrow-left-circle</v-icon>
       </v-btn>

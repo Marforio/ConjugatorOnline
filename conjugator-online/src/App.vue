@@ -22,7 +22,7 @@ const auth = useAuthStore()
 // Hide nav bar on home page
 const showNav = computed(() => {
   const name = route.name || ''
-  return name !== 'home' && name !== 'conjugator' && name !== 'login'
+  return name !== 'home' && name !== 'conjugator' && name !== 'login' && name !== 'games'
 })
 
 if (auth.isLoggedIn && !auth.isAccessTokenExpired()) {
