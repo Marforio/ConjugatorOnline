@@ -86,9 +86,10 @@
               <!-- Number of Questions -->
               <v-card class="mb-2" color="grey-lighten-3" flat>
                 <v-card-text class="py-2 px-3">
-                  <span class="text-subtitle-2 mb-2">Number of questions</span>
+                  <span class="text-subtitle-2 mb-2">Number of questions  (min 3, max 50)</span>
                   <span><v-text-field
                     v-model.number="numPrompts"
+                    @change="validateNumPrompts"
                     type="number"
                     min="3"
                     max="50"
@@ -224,6 +225,7 @@
               <v-col cols="6">
                 <v-text-field
                   v-model.number="numPrompts"
+                  @change="validateNumPrompts"
                   type="number"
                   min="3"
                   max="50"
@@ -312,8 +314,12 @@ export default {
       this.$emit('startGame', selections);
       this.goToScene('Scene03_Game');
     },
-  },
-};
+    validateNumPrompts() {
+      if (this.numPrompts < 3) this.numPrompts = 3
+      if (this.numPrompts > 50) this.numPrompts = 50
+    },
+  }
+}
 </script>
 
 <style scoped>

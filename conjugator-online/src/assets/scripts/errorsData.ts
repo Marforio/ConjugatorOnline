@@ -675,6 +675,20 @@ export const errorsData: Record<string, ErrorEntry> = {
         "recommendation": "remember that prepositions are usually placed at the end of questions and relative clauses",
         "examples": "say 'Who did you write this letter for?', not 'for who did you write this letter'?"
     },
+    "0713":{
+        "short_slug": "content-clause-inverted",
+        "description": "incorrect use of inversion (question structure) in a content clause",
+        "reference": "<a href='https://book.language-labs.ch/ch7#e0713'>error 0713</a>",
+        "recommendation": "remember that content clauses do not require an inverted (question) structure, even when introduced by interrogative adverbs",
+        "examples": "Say 'I don't know how high the building is', not '...how high is the building'"
+    },
+    "0714":{
+        "short_slug": "relative-comma",
+        "description": "incorrect use of commas with a defining relative clause",
+        "reference": "<a href='https://book.language-labs.ch/ch7#e0714'>error 0714</a>",
+        "recommendation": "remember that only non-defining relative clauses are separated from the main sentence with commas",
+        "examples": "The neigbhor, who by the way I've invited to my house many times, pretended not so see me at the restaurant!"
+    },
     "0717":{
         "short_slug": "verbs-of-recommendation-reporting",
         "description": "incorrect construction with verbs of recommendation or reporting ('present', 'explain', 'suggest', or 'recommend')",

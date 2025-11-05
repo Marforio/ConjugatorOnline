@@ -637,6 +637,9 @@
         </div>
       </div>
       </v-window-item>
+      <v-window-item value="other-games">
+        <OtherGamesDash />
+      </v-window-item>
     </v-window>
     <v-snackbar v-model="snackbar.show" :color="snackbar.color" timeout="3000">
       {{ snackbar.text }}
@@ -654,6 +657,7 @@ import TopNavBar from "@/components/TopNavBar.vue";
 import PieChart from "@/components/charts/PieChart.vue";
 import BarChart from "@/components/charts/BarChart.vue";
 import ErrorsDataTab from "@/components/ErrorsDataTab.vue";
+import OtherGamesDash from "@/components/OtherGamesDash.vue";
 import AdminErrorDataTab from "@/components/AdminErrorDataTab.vue";
 import NumbersCard from "@/components/NumbersCard.vue";
 import { useRouter, useRoute } from 'vue-router';
@@ -695,7 +699,7 @@ interface GameSession {
 // ---------------- Component ----------------
 export default defineComponent({
   name: "Dashboard",
-  components: { TopNavBar, NumbersCard, PieChart, BarChart, ErrorsDataTab, AdminErrorDataTab, VocabDataTab, GoalsDataTab, Gauge },
+  components: { TopNavBar, NumbersCard, PieChart, BarChart, ErrorsDataTab, AdminErrorDataTab, VocabDataTab, GoalsDataTab, OtherGamesDash, Gauge },
   setup() {
     const router = useRouter();
     const route = useRoute();
@@ -998,6 +1002,7 @@ export default defineComponent({
       { value: "vocabulary", label: "Vocabulary" },
       { value: "goals", label: "Achievements" },
       { value: "conjugation-game", label: "Conjugator" },
+      { value: "other-games", label: "Other Games"}
     ];
 
     const { xs, smAndDown } = useDisplay();

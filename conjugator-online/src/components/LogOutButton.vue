@@ -3,7 +3,7 @@
     <template v-slot:activator="{ props }">
       <v-btn
         v-bind="props"  
-        color="red-lighten-3"
+        color="grey-darken-2"
         @click="logout"
         style="align-self: center; margin-right: 15px;"
       >

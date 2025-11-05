@@ -2,7 +2,7 @@
   <v-container fluid class="mt-5 pa-4 d-flex flex-column justify-center align-center">
     <v-row align="stretch" justify="center" class="game-grid" dense>
 
-      <!-- Pronoun Practice (portrait) -->
+      <!-- Pronoun Practice -->
       <v-col cols="12" sm="6" md="4" class="d-flex justify-center">
         <RouterLink :to="{ name: 'pronounpractice' }" class="image-tile">
           <div class="tile-frame">

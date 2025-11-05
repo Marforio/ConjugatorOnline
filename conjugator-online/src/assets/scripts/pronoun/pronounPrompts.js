@@ -19,19 +19,20 @@ class PronounPrompt {
      * @param {string} [config.label] - A label describing the question type (e.g., "object", "reflexive").
      * @param {number} [config.numberInSet] - The index of this prompt in the game set.
      */
-    constructor({ questionText, correctAnswer, pronoun, image = null, label = '', numberInSet = null }) {
+    constructor({ questionText, correctAnswer, pronoun, subject, image = null, label = '', numberInSet = null }) {
         this.number = numberInSet;
         this.questionText = questionText;
         this.pronoun = pronoun;
         this.image = image;
         this.label = label;
+        this.subject = subject
 
         // Normalize correct answers to array for flexible checking
         this.correctAnswers = Array.isArray(correctAnswer) ? correctAnswer : [correctAnswer];
 
         this.userAnswer = "";
         this.correct = false;
-        this.elapsedTime = 0; // optional, can be set externally for analytics
+        this.elapsedTime = 0; 
     }
 
     /** Returns the question text displayed to the user */

@@ -3,7 +3,7 @@
     <!-- Top controls: centered on xs, right-aligned on sm+ -->
     <div class="top-controls mb-8">
       <div v-if="userStore.isAuthenticated">
-        <LogOutButton />
+        <LogOutButton v-if="!smAndDown"></LogOutButton>
       </div>
       <div v-else>
         <v-btn :to="{ name: 'login' }" color="primary" variant="tonal">Log in</v-btn>
