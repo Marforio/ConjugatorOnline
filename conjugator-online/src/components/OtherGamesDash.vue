@@ -203,7 +203,7 @@
       right
     >
       {{ snackbar.message }}
-      <template #action>
+      <template #actions>
         <v-btn text @click="snackbar.visible = false">Close</v-btn>
       </template>
     </v-snackbar>
