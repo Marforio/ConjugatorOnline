@@ -25,8 +25,8 @@
       </v-col>
     </v-row> 
     <v-row style="margin-top: 50px;">
-      <v-btn icon elevation class="m-3" large :to="{ name: 'home' }">
-        <v-icon>mdi-arrow-left-circle</v-icon>
+      <v-btn icon elevation class="m-3" size="x-large" :to="{ name: 'home' }">
+        <v-icon size="x-large">mdi-arrow-left-circle</v-icon>
       </v-btn>
     </v-row>
     

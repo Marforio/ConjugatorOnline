@@ -45,13 +45,13 @@
       <v-divider></v-divider>
 
       <div class="mt-auto d-flex justify-space-between align-center w-100 px-3">
-        <v-btn icon elevation="0" size="large" class="ms-3" @click="goBack">
-          <v-icon>mdi-arrow-left-circle</v-icon>
+        <v-btn icon elevation="0" size="x-large" class="ms-3" @click="goBack">
+          <v-icon size="x-large">mdi-arrow-left-circle</v-icon>
         </v-btn>
         <v-tooltip text="Summary of tense keywords" location="top">
           <template v-slot:activator="{ props }">
-            <v-btn icon elevation="0" size="large" class="me-3" v-bind="props" href="https://book.language-labs.ch/ch4#tense-keyword-summary" target='_blank'>
-              <v-icon>mdi-lifebuoy</v-icon>
+            <v-btn icon elevation="0" size="x-large" class="me-3" v-bind="props" href="https://book.language-labs.ch/ch4#tense-keyword-summary" target='_blank'>
+              <v-icon size="x-large">mdi-lifebuoy</v-icon>
             </v-btn>
           </template>
         </v-tooltip>
@@ -89,8 +89,8 @@
           <span class="ms-4 me-4">→ → →</span>
           <v-tooltip text="Summary of tense keywords" location="top">
           <template v-slot:activator="{ props }">
-            <v-btn icon v-bind="props" href="https://book.language-labs.ch/ch4#tense-keyword-summary" target='_blank'>
-              <v-icon>mdi-lifebuoy</v-icon>
+            <v-btn size="x-large" icon v-bind="props" href="https://book.language-labs.ch/ch4#tense-keyword-summary" target='_blank'>
+              <v-icon size="x-large">mdi-lifebuoy</v-icon>
             </v-btn>
           </template>
         </v-tooltip>
@@ -101,8 +101,8 @@
         </div>
 
         <div v-if="$vuetify.display.xs" class="d-flex justify-center mt-6">
-          <v-btn icon elevation large @click="goBack">
-            <v-icon>mdi-arrow-left-circle</v-icon>
+          <v-btn size="x-large" icon elevation large @click="goBack">
+            <v-icon size="x-large">mdi-arrow-left-circle</v-icon>
           </v-btn>
         </div>
       </div>

@@ -25,8 +25,11 @@
         <v-list-item :to="{ name: 'conjugator' }">
           <v-list-item-title>Conjugator Game</v-list-item-title>
         </v-list-item>
-        <v-list-item :to="{ name: 'games' }" :disable="true">
+        <v-list-item :to="{ name: 'games' }">
           <v-list-item-title>Other Games</v-list-item-title>
+        </v-list-item>
+        <v-list-item :to="{ name: 'tools' }">
+          <v-list-item-title>Tools</v-list-item-title>
         </v-list-item>
         <v-divider />
         <v-list-item>
@@ -71,7 +74,7 @@
         <v-tooltip text="Go to Exercises" location="bottom">
           <template v-slot:activator="{ props }">
             <v-btn icon v-bind="props" :to="{ name: 'exercises' }" :disabled="true">   <!-- :disabled="true"  --> 
-              <v-icon>mdi-tools</v-icon>
+              <v-icon>mdi-weight-lifter</v-icon>
             </v-btn>
           </template>
         </v-tooltip>
@@ -88,6 +91,14 @@
           <template v-slot:activator="{ props }">
             <v-btn icon v-bind="props" :to="{ name: 'games' }" >  <!-- :disabled="true"  --> 
               <v-icon>mdi-gamepad-circle</v-icon>
+            </v-btn>
+          </template>
+        </v-tooltip>
+
+        <v-tooltip text="Classroom tools" location="bottom">
+          <template v-slot:activator="{ props }">
+            <v-btn icon v-bind="props" :to="{ name: 'tools' }" >  <!-- :disabled="true"  --> 
+              <v-icon>mdi-tools</v-icon>
             </v-btn>
           </template>
         </v-tooltip>

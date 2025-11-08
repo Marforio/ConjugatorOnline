@@ -45,8 +45,8 @@
       <div class="mt-auto d-flex justify-space-between align-center w-100 px-3">
         
         <RouterLink :to="{ name: 'games' }">
-            <v-btn icon elevation="0" size="large" class="ms-3" @click="goBack">
-          <v-icon color="grey-darken-3">mdi-arrow-left-circle</v-icon></v-btn>
+            <v-btn icon elevation="0" size="x-large" class="ms-3" @click="goBack">
+          <v-icon color="grey-darken-3" size="x-large">mdi-arrow-left-circle</v-icon></v-btn>
         </RouterLink>
         
         

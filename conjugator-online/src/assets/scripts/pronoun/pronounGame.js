@@ -123,6 +123,14 @@ class PronounGame {
         : 0,
     };
   }
+
+  stop() {
+    this.active = false;
+    if (this.timer) clearInterval(this.timer);
+    if (this.roundTimer) clearTimeout(this.roundTimer);
+    console.log("PronounGame stopped.");
+}
+
 }
 
 export default PronounGame;

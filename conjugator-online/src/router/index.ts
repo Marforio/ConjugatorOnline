@@ -20,7 +20,9 @@ const routes = [
   { path: '/games/verb-combinator', name: 'verbcombinator', component: () => import('@/views/VerbCombinator.vue'), meta: { requiresAuth: true }},
   { path: '/games/passive-maker', name: 'passivemaker', component: () => import('@/views/PassiveMaker.vue'), meta: { requiresAuth: true }},
   { path: '/games/translator', name: 'translator', component: () => import('@/views/Translator.vue'), meta: { requiresAuth: true }},
-  { path: '/exercises/:errorCode', name: 'exercise-detail', component: () => import('@/views/ExerciseDetail.vue'), meta: { requiresAuth: true } }
+  { path: '/exercises/:errorCode', name: 'exercise-detail', component: () => import('@/views/ExerciseDetail.vue'), meta: { requiresAuth: true } },
+  { path: '/tools', name: 'tools', component: () => import('@/views/Tools.vue') },
+  { path: '/tools/meeting-machine', name: 'meeting-machine', component: () => import('@/views/MeetingMachine.vue')}
 ]
 
 

@@ -88,6 +88,23 @@
       <span class="subtitle-1 font-weight-medium px-3">Other games</span>
     </v-btn>
   </v-col>
+
+  <v-col
+    cols="12"
+    sm="6"
+    md="4"
+    class="d-flex justify-center mb-0 mb-sm-4"
+  >
+    <v-btn
+      large
+      class="d-flex flex-column align-center pa-3 pa-sm-6"
+      color="yellow-darken-2"
+      :to="{ name: 'tools' }"
+    >
+      <v-icon large>mdi-tools</v-icon>
+      <span class="subtitle-1 font-weight-medium px-3">Tools</span>
+    </v-btn>
+  </v-col>
 </v-row>
 
   </v-container>

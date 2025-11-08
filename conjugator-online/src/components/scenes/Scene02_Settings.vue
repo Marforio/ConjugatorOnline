@@ -138,8 +138,8 @@
 
           </v-row>
           <div class="d-flex justify-center mt-6">
-        <v-btn icon elevation="0" size="large" @click="goToScene('Scene01_Landing')">
-          <v-icon>mdi-arrow-left-circle</v-icon>
+        <v-btn icon elevation="0" size="x-large" @click="goToScene('Scene01_Landing')">
+          <v-icon size="x-large">mdi-arrow-left-circle</v-icon>
         </v-btn>
       </div>
     </v-container>
