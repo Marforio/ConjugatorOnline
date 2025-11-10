@@ -27,7 +27,7 @@
         <v-divider></v-divider>
 
         <v-list-item style="align-content: center;"><v-icon start icon="mdi-counter" class="me-2" />  {{ remainingCount }} rounds</v-list-item>
-        <v-list-item><v-icon start icon="mdi-timer-outline" class="me-2" /> 8 sec / round</v-list-item>
+        <v-list-item><v-icon start icon="mdi-timer-outline" class="me-2" /> 10 sec / round</v-list-item>
 
         <v-divider></v-divider>
         <v-list-item>
@@ -75,7 +75,7 @@
             <v-icon start icon="mdi-pencil" class="me-2" /> Type the correct pronoun in the blank.
           </li>
           <li class="mb-2">
-            <v-icon start icon="mdi-timer-outline" class="me-2" /> Time pressure: you have <b>8 seconds</b> to write the pronoun.
+            <v-icon start icon="mdi-timer-outline" class="me-2" /> Time pressure: you have <b>10 seconds</b> to write the pronoun.
           </li>
         </ul>
 
@@ -131,7 +131,7 @@
             <!-- Countdown Timer -->
           <div class="text-center mt-1">
             <v-progress-circular
-              :model-value="(timeLeft / 8) * 100"
+              :model-value="(timeLeft / 10) * 100"
               :color="timerColor"
               size="70"
               width="8"
@@ -237,7 +237,7 @@ const showBlockingDialog = ref(false);
 const progressValue = computed(() => (promptCounter.value / gameSettings.numPrompts) * 100);
 const isAuthenticated = ref(false);
 
-const timeLeft = ref(8);
+const timeLeft = ref(10);
 const timerColor = ref('primary');
 let timerInterval = null;
 
@@ -407,7 +407,7 @@ function goBack() {
 
 function startTimer() {
   clearInterval(timerInterval);
-  timeLeft.value = 8;
+  timeLeft.value = 10;
   timerColor.value = 'primary';
 
   timerInterval = setInterval(() => {
@@ -434,7 +434,7 @@ function stopTimer() {
 function handleTimeout() {
   // Mark round as out_of_time and treat as wrong answer
   stopTimer();
-  const elapsedTime = 8.0
+  const elapsedTime = 10.0
   game.value.submitAnswer('', elapsedTime, true); // you can add this third param in your PronounGame
 
   snackbar.message = '⏰ Time is up!';

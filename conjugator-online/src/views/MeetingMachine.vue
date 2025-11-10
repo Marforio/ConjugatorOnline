@@ -50,9 +50,17 @@
     <!-- Main area -->
     <v-container fluid class="d-flex flex-column justify-center align-center pa-6">
         <div v-if="simulationOver" class="text-center">
-            <h1 class="text-h4 font-weight-bold mb-6">Simulation Over</h1>
+            <h1 class="text-h4 font-weight-bold mt-4 mb-6">Simulation Over</h1>
+            <div class="phases-list d-flex flex-column justify-center" style="margin-bottom: 75px;">
+              <v-list>
+                <v-list-item class="">1. {{ phases[1].item }}</v-list-item>
+                <v-list-item class="">2. {{ phases[2].item }}</v-list-item>
+                <v-list-item class="">3. {{ phases[3].item }}</v-list-item>
+              </v-list>
+            </div>
+  
             <div class="d-flex flex-column align-center gap-4">
-                <v-btn color="success" large @click="startSimulation">Do another simulation</v-btn>
+                <v-btn color="success" large @click="doAnotherSimulation">Do another simulation</v-btn>
                 <RouterLink :to="{ name: 'tools' }">
                 <v-btn color="primary" large>Back to Tools</v-btn>
                 </RouterLink>
@@ -61,50 +69,74 @@
                 </RouterLink>
             </div>
         </div>
-        <div v-else-if="!simulationRunning" class="text-center" style="max-width: 900px">
-        <v-list class="mb-4">
+        <div v-else-if="!simulationRunning" class="text-center" style="max-width: 1100px">
+          <div ref="pdfContent" id="pdfContent">
+          <v-list class="mb-1">
           <div style="margin-bottom: 50px;">
             <v-alert
                 border="start"
                 elevation="1"
-                class="mb-6"
+                class="mb-4"
                 style="background-color: #e3f2fd; color: #0d47a1;"
                 density="compact"
                 icon=""
                 >
-                <v-list-item class="text-body-1 pa-0">
-                    <span class="font-weight-bold" style="font-size: 1.2rem;">Situation:</span> The meeting chair is the founder of <a href="https://www.sun-ways.ch/en" target="_blank">Sun Ways</a>, a start-up that makes solar panels for railways (panels installed between the train tracks). The two meeting participants are his/her two most important and trusted employees. The company has 17 employees in total. The company is not profitable yet and is burning through the capital it raised from investors. It needs to grow and become less dependent on support from the CFF/SBB.
+                <v-list-item class="text-body-2 pa-0">
+                    <span class="font-weight-bold" style="font-size: 1rem;">Situation:</span> The meeting chair is the founder of <a href="https://www.sun-ways.ch/en" target="_blank">Sun Ways</a>, a start-up that makes solar panels for railways (panels installed between the train tracks). The two meeting participants are his/her two most important and trusted employees. The company has 11 employees in total that design, test and install the panels, which are produced in Poland. The company is not profitable yet and is burning through the capital it raised from investors. It needs to grow and become less dependent on support from the CFF/SBB.
                 </v-list-item>
             </v-alert>
           </div>
-        <v-list-item class="text-h5 text-center font-weight-medium mt-6">This meeting's agenda</v-list-item>  
+        <v-list-item
+          class="mt-4"
+          style="background-color: #fff9c4; border-radius: 6px; padding: 12px;"
+        >
+          <div class="d-flex align-center w-100" style="position: relative;">
+            <!-- Centered text -->
+            <div class="text-h5 font-weight-medium text-center" style="flex: 1;">
+              This meeting's agenda
+            </div>
+
+            <!-- Right-aligned button -->
+            <div style="position: absolute; right: 0;">
+              <v-btn
+                color="primary"
+                prepend-icon="mdi-file-pdf-box"
+                @click="downloadPdf"
+              >
+                Download PDF
+              </v-btn>
+            </div>
+          </div>
+        </v-list-item>
+
+
         <v-list-item class="mt-3 mb-6">
-            <v-table>
+            <v-table class="bordered-table" striped="odd">
                     <tbody>
                     <tr>
                         <td class="font-weight-medium">Starting the meeting</td>
-                        <td>30 s</td>
-                        <td class="font-italic">Rules and priorities</td>
+                        <td>30s</td>
+                        <td>Rules and priorities</td>
                     </tr>
                     <tr>
                         <td class="font-weight-medium">Item 1</td>
-                        <td>90 s</td>
-                        <td class="font-italic">{{ phases[1].item }}</td>
+                        <td>90s</td>
+                        <td>{{ phases[1].item }}</td>
                     </tr>
                     <tr>
                         <td class="font-weight-medium">Item 2</td>
-                        <td>90 s</td>
-                        <td class="font-italic">{{ phases[2].item }}</td>
+                        <td>90s</td>
+                        <td>{{ phases[2].item }}</td>
                     </tr>
                     <tr>
                         <td class="font-weight-medium">Item 3</td>
-                        <td>90 s</td>
-                        <td class="font-italic">{{ phases[3].item }}</td>
+                        <td>90s</td>
+                        <td>{{ phases[3].item }}</td>
                     </tr>
                     <tr>
                         <td class="font-weight-medium">Wrapping up</td>
-                        <td>30 s</td>
-                        <td class="font-italic">Summary, decisions and next steps</td>
+                        <td>30s</td>
+                        <td>Summary, decisions and next steps</td>
                     </tr>
                     </tbody>
             </v-table>
@@ -114,8 +146,48 @@
         <div class=" w-100 d-flex flex-column align-end">
             <p class="text-caption">{{ simulationCode }}</p>
         </div>
+        </div>
+
         <v-btn color="success" large @click="startSimulation">START SIMULATION</v-btn>
-        <div class="mt-4 d-flex justify-center">
+
+        <div class="d-flex justify-start">
+            <v-btn
+              variant="plain"
+              color="grey"
+              size="small"
+              prepend-icon="mdi-lightbulb-outline"
+              @click="dialog = true"
+            >
+              View all possible topics
+            </v-btn>
+
+            <v-dialog
+              v-model="dialog"
+              max-width="700"
+              transition="dialog-bottom-transition"
+              persistent
+            >
+              <v-card>
+                <v-card-title class="text-h6 font-weight-bold d-flex justify-space-between align-center">
+                  Meeting simulation: all possible topics
+                  <v-btn icon variant="text" @click="dialog = false">
+                    <v-icon>mdi-close</v-icon>
+                  </v-btn>
+                </v-card-title>
+
+                <v-divider></v-divider>
+
+                <v-card-text>
+                  <MeetingItems :prompts="PROMPTS" />
+                </v-card-text>
+
+                <v-card-actions class="justify-end">
+                  <v-btn color="primary" variant="plain" @click="dialog = false">Close</v-btn>
+                </v-card-actions>
+              </v-card>
+            </v-dialog>
+          </div>
+        <div class="d-flex justify-center">
             <RouterLink :to="{ name: 'tools' }">
             <v-btn icon elevation="0" size="large">
                 <v-icon color="grey-darken-3" size="x-large">mdi-arrow-left-circle</v-icon>
@@ -127,12 +199,10 @@
 
       <div v-else class="d-flex flex-column align-center w-100">
         <!-- Top-right digital timer and phase timer -->
-        <div class=" w-100 d-flex flex-column align-start">
-            <p class="text-caption">{{ simulationCode }}</p>
-        </div>
         <div class="timer-row w-100 d-flex flex-column align-end mb-6 pe-8">
           <div class="digital-timer">{{ formattedTime }}</div>
           <div class="phase-timer">This part: <strong>{{ formattedPhaseTime }}</strong></div>
+          <p class="text-caption mt-6">{{ simulationCode }}</p>
         </div>
 
         <!-- Big circular gauge -->
@@ -190,22 +260,52 @@
 
 <script setup>
 import { ref, reactive, computed, onUnmounted } from 'vue';
+import MeetingItems from '@/components/MeetingItems.vue';
+import html2pdf from 'html2pdf.js';
 
 const PROMPTS = {
-  'Tier 1': [  // Budget, monetary or investment decision
-    'Where should we do the end of year retreat?',
-    'How should we spend our marketing budget?',
-    'Who stole the cookie from the cookie jar?',
+  'Tier 1': [  // Planning an event, organization or negotiation
+    'Our main partner, the CFF, wants to demonstrate the value of our solar panels to people using the train. What is the best way to do this? Find 2 concrete ideas.',
+    "We are finally ready for product launch. Where -- which canton or region of Switzerland -- should we prioritize for our first installations? Decide.",
+    "We should all have company cars. What car brand and model should we choose? Decide.",
+    'When should we do our team-building event? What should we do this year? Find a concrete solution.',
+    'Should we allow remote work or insist on employees coming in to the office every day? Decide.',
+    'The three of us want to be on vacation over Christmas and New Year, but we cannot close the company. How should we organize this? Find a concrete solution.',
+    'There are no food options near our office. What should we do to ensure that the team can find a good lunch every day in an efficient way? Find a concrete solution.',
+    "We have a big trade fair coming up in 3 months. What do we need to have ready for that important event? Agree on 3 priorities.",
+    "Do we really need to pay for Microsoft 365 licenses, or can we use open source alternatives? Decide.",
+    "Holding cash reserves is costing us money due to inflation and vey low interest rates. Should we invest our cash reserves? If so, what is a good investment?",
+    'Should we start having apprentices in our company? Does it make sense financially?',
+    "Should we hire a part-time HR manager to help us with recruiting and employee relations? Decide.",
+    
   ],
-  'Tier 2': [  // Strategy, marketing or business decision
-    'We lost money. How should we communicate this?',
-    'Our system has been hacked, how shall we handle it?',
-    'How can we regain client trust after a major failure?',
+  'Tier 2': [  // Financial decision (budget, monetary, investment)
+    "We can cut costs by meeting with customers over Zoom instead of traveling to meet them in person. SHould we do this? Decide",
+    'Should we raise more capital by selling another 20% of the company to a venture capital firm?',
+    'Everyone in the team deserves a bonus, but we are losing money. How can we reward the team?',
+    'Our budget for next year is 10 million CHF. How much should we allocate to research and development?',
+    'Our budget for next year is 10 million CHF. How much should we allocate to marketing and promotion?',
+    'Which KPIs should we highlight in our annual report? Choose three.',
+    'Should we explore a new product: solar panels on highways? Decide.',
+    "Our lead engineer says he will quit if we don't give him a 25% raise. How should we handle this situation?",
+    "Without overspending, which AI tools should we buy to make our design, admininistration and marketing more efficient?",
+    "Our main investor wants us to cut costs by 15% next year. Where should we make the cuts? Find 2 concrete suggestions.",
+    "We have a smaller competitor that is performing quite well. Should we try to acquire them? Decide.",
+    "Should we go public with an IPO in the next 12 months? Decide.",
   ],
-  'Tier 3': [   // 
-    'Who is the best hockey player ever?',
-    'Which Swiss hockey team is the best ever?',
-    'Who is the greatest football player of all time?',
+  'Tier 3': [   // Marketing, promotion, communication or strategy 
+    "What's the best way to make the public understand what our product does? We need 2 concrete ideas.",
+    "How can we attract attention from large railway operators outside Switzerland? We need 2 concrete ideas.",
+    "What should be our main message when talking to journalists? We need 3 keywords.",
+    "To expand beyond Switzerland, which country we should focus on? We need 2 good candidate countries.",
+    "To have a big media impact, let's sponsor a sports team. Which one?",
+    "We need a big event to really make our name known to the public. What should we do?",
+    "Which marketing channels should we use to promote our product? We need two good suggestions.",
+    "Our product is made in Poland. Should we move production to China?",
+    'We lost money again last year. How should we communicate this? We need 2 concrete ideas.',
+    "Should we hire a marketing agency? Or can we do it ourselves with ChatGPT?",
+    "To grow our brand, should we merge with a more traditional solar panel company for rooftops? Or should we stay independent?",
+    "Should we go public with an IPO in the next 12 months? Decide.",
   ],
 };
 
@@ -218,6 +318,9 @@ const simulationOver = ref(false);
 const paused = ref(false);
 const timeLeft = ref(TOTAL);
 let tickInterval = null;
+
+const dialog = ref(false);
+const pdfContent = ref(null);
 
 // choose items for the three discussion items (visible from start)
 function pick(arr) { return arr[Math.floor(Math.random()*arr.length)]; }
@@ -357,7 +460,6 @@ const gaugeSize = Math.min(Math.max(window.innerHeight * 0.72, 360), window.inne
 
 // controls
 function startSimulation() {
-  simulationOver.value = false;
   timeLeft.value = TOTAL;
   simulationRunning.value = true;
   paused.value = false;
@@ -375,6 +477,19 @@ function startSimulation() {
   }, 1000);
 }
 
+function doAnotherSimulation() {
+  simulationOver.value = false;
+  simulationRunning.value = false;
+  paused.value = false;
+  clearInterval(tickInterval);
+  timeLeft.value = TOTAL;
+
+  phases[1].item = pick(PROMPTS['Tier 1']);
+  phases[2].item = pick(PROMPTS['Tier 2']);
+  phases[3].item = pick(PROMPTS['Tier 3']);
+}
+
+
 function pauseSimulation() { paused.value = true; }
 function resumeSimulation() { paused.value = false; }
 
@@ -387,6 +502,25 @@ function stopSimulation() {
   
 }
 
+function downloadPdf() {
+  const element = pdfContent.value;
+  const opt = {
+    margin: [0.5, 0.5],
+    filename: `meeting-simulation-${simulationCode.value}.pdf`,
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: {
+      scale: 4, // higher = sharper text
+      useCORS: true,
+    },
+    jsPDF: {
+      unit: 'in',
+      format: 'a4',
+      orientation: 'portrait',
+    },
+  };
+  html2pdf().set(opt).from(element).save();
+}
+
 // cleanup
 onUnmounted(() => clearInterval(tickInterval));
 </script>
@@ -395,6 +529,13 @@ onUnmounted(() => clearInterval(tickInterval));
 /* layout */
 .sidebar-header { padding-bottom: 4px; }
 .phases-list { width: 100%; padding-top: 8px; padding-bottom: 8px; }
+
+.bordered-table {
+  border: 2px solid #ccc; /* or #1976d2 for primary accent */
+  border-radius: 8px;     /* optional rounded corners */
+  overflow: hidden;       /* ensures rounded corners look clean */
+}
+
 
 /* phase rows */
 .phase-row {
@@ -433,7 +574,7 @@ onUnmounted(() => clearInterval(tickInterval));
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-top: -70px; /* nudge circle slightly higher in the viewport */
+  margin-top: -120px; /* nudge circle slightly higher in the viewport */
 }
 .gauge-center {
   position: absolute;
@@ -476,6 +617,14 @@ onUnmounted(() => clearInterval(tickInterval));
 .text-center h1 {
   color: #1a237e;
   letter-spacing: 0.5px;
+}
+
+.v-card {
+  border-radius: 16px;
+}
+.v-card-title {
+  background-color: #f5f5f5;
+  color: #1a237e;
 }
 
 
