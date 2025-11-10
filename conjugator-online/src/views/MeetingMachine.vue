@@ -266,7 +266,7 @@ import html2pdf from 'html2pdf.js';
 const PROMPTS = {
   'Tier 1': [  // Planning an event, organization or negotiation
     'Our main partner, the CFF, wants to demonstrate the value of our solar panels to people using the train. What is the best way to do this? Find 2 concrete ideas.',
-    "We are finally ready for product launch. Where -- which canton or region of Switzerland -- should we prioritize for our first installations? Decide.",
+    "We are finally ready for product launch. Which canton or region of Switzerland should we prioritize for our first installations? Decide.",
     "We should all have company cars. What car brand and model should we choose? Decide.",
     'When should we do our team-building event? What should we do this year? Find a concrete solution.',
     'Should we allow remote work or insist on employees coming in to the office every day? Decide.',
@@ -280,7 +280,7 @@ const PROMPTS = {
     
   ],
   'Tier 2': [  // Financial decision (budget, monetary, investment)
-    "We can cut costs by meeting with customers over Zoom instead of traveling to meet them in person. SHould we do this? Decide",
+    "We can cut costs by meeting with customers over Zoom instead of traveling to meet them in person. Should we do this? Decide",
     'Should we raise more capital by selling another 20% of the company to a venture capital firm?',
     'Everyone in the team deserves a bonus, but we are losing money. How can we reward the team?',
     'Our budget for next year is 10 million CHF. How much should we allocate to research and development?',
@@ -509,7 +509,7 @@ function downloadPdf() {
     filename: `meeting-simulation-${simulationCode.value}.pdf`,
     image: { type: 'jpeg', quality: 0.98 },
     html2canvas: {
-      scale: 4, // higher = sharper text
+      scale: 5, // higher = sharper text
       useCORS: true,
     },
     jsPDF: {
