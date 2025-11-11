@@ -72,16 +72,17 @@ export default {
     }
   },
   data() {
+    const display = useDisplay();
     return {
       svgWidth: 1000,
       svgHeight: 400,
       selectedEvidence: null,
-      popover: { x: 300, y: 30 }
+      popover: { x: 0, y: 0 },
+      display
     };
   },
   mounted() {
-    const { smAndDown } = useDisplay();
-    if (smAndDown.value) this.svgWidth = 1000;
+    if (this.display.smAndDown) this.svgWidth = 1000;
     this.calculateSvgHeight();
     this.drawChart();
     this.updatePopoverPosition();
@@ -125,10 +126,14 @@ export default {
 
     updatePopoverPosition() {
       if (!this.$refs.container) return;
-      const contRect = this.$refs.container.getBoundingClientRect();
+      const cont = this.$refs.container;
+      const contRect = cont.getBoundingClientRect();
       const popoverWidth = 200;
-      const padding = 24;
-      this.popover.x = Math.max(0, contRect.width - popoverWidth - padding);
+      const padding = 20;
+      const adjustment = this.display.xlAndUp ? 600 : 100;
+
+      // Adjust for scrollLeft!
+      this.popover.x = cont.scrollLeft + Math.max(0, contRect.width - popoverWidth - padding - adjustment);
       this.popover.y = Math.max(0, padding);
     },
 
@@ -292,6 +297,7 @@ export default {
       const error_code = errorItem.error_code;
       const evidenceText = errorItem.evidence || 'No evidence available';
       const details = errorsData[error_code];
+
       this.selectedEvidence = details
         ? {
             error: `Error ${error_code}`,
@@ -309,10 +315,13 @@ export default {
             examples: '',
             reference: ''
           };
-      const contRect = this.$refs.container.getBoundingClientRect();
+
+      const cont = this.$refs.container;
+      const contRect = cont.getBoundingClientRect();
       const padding = 24;
-      this.popover.x = Math.max(0, contRect.width - 300 - padding - 150);
-      this.popover.y = Math.max(0, padding);
+
+      // Recalculate correct popover position based on current viewport
+      this.$nextTick(() => this.updatePopoverPosition());
     }
   }
 };

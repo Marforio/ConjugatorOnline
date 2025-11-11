@@ -37,7 +37,7 @@
 
     <!-- Info card (always below) -->
     <div id="infoCard" v-if="selectedEvidence">
-      <v-list density="compact">
+      <v-list density="compact" elevation="3" class="mt-4">
         <v-list-subheader>
           <span class="text-uppercase">{{ selectedEvidence.error }}</span>
         </v-list-subheader>
@@ -117,9 +117,10 @@ export default {
 
       // 🔑 Normalize feedback_id consistently
       const normalizeFeedbackId = d =>
-        typeof d.feedback === "string"
-          ? d.feedback
-          : d.feedback?.feedback_id || "Unknown";
+        d.feedbackId?.toString?.() ||
+        d.feedback?.feedback_id?.toString?.() ||
+        "Unknown";
+
 
       const feedbackKeys = Array.from(
         new Set(this.errorData.map(normalizeFeedbackId))
@@ -252,8 +253,8 @@ export default {
 <style scoped>
 .chart-wrapper {
   position: relative;
-  margin-top: 5%;
-  padding: 8%;
+  margin-top: 1%;
+  padding: 3%;
 }
 
 .chart-container {
@@ -261,7 +262,7 @@ export default {
   overflow-x: auto;
   overflow-y: hidden;
   max-width: 100%;
-  padding-top: 120px; /* space for the pinned card */
+  padding-top: 100px; /* space for the pinned card */
 }
 
 .chart-svg {

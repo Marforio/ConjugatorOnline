@@ -54,7 +54,7 @@
       <v-spacer></v-spacer>
 
       <!-- Desktop Icons -->
-      <div class="d-none d-sm-flex">
+      <div class="d-none d-sm-flex px-6 m-4">
         <v-tooltip text="Home" location="bottom">
           <template v-slot:activator="{ props }">
             <v-btn icon v-bind="props" :to="{ name: 'home' }">
@@ -111,18 +111,21 @@
           </template>
         </v-tooltip>
 
-        
-        <span style="align-self: center; margin-left: 50px; margin-right: 50px;">Hello <InitialsText /></span>
-        
-
-        <LogOutButton />
+        <span v-if="userStore.isAuthenticated" style="align-self: center; margin-left: 50px; margin-right: 50px;">Hello <InitialsText /></span>
       </div>
+        
+      <div v-if="userStore.isAuthenticated"><LogOutButton /></div>
+      <div v-else>
+        <v-btn :to="{ name: 'login' }" color="primary" variant="tonal" class="px-4 m-4">Log in</v-btn>
+      </div>
+      
     </v-app-bar>
 </template>
 
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
 import { useUserStore } from "@/stores/user";
+import { useDisplay } from "vuetify";
 import InitialsText from './InitialsText.vue';
 import LogOutButton from './LogOutButton.vue';
 
@@ -134,6 +137,7 @@ export default defineComponent({
   },
   setup() {
     const userStore = useUserStore();
+    const { smAndDown } = useDisplay();
     const drawer = ref(false);
     const disabledExercises = ref(true); 
     const disabledGame = ref(false);
