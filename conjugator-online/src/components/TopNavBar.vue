@@ -71,7 +71,7 @@
           </template>
         </v-tooltip>
 
-        <v-tooltip text="Go to Exercises" location="bottom">
+        <v-tooltip text="Grammar exercises" location="bottom">
           <template v-slot:activator="{ props }">
             <v-btn icon v-bind="props" :to="{ name: 'exercises' }" :disabled="true">   <!-- :disabled="true"  --> 
               <v-icon>mdi-weight-lifter</v-icon>

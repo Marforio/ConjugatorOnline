@@ -103,7 +103,7 @@
                 prepend-icon="mdi-file-pdf-box"
                 @click="downloadPdf"
               >
-                Download PDF
+                <span v-if="!$vuetify.display.xs">Download PDF</span>
               </v-btn>
             </div>
           </div>
@@ -150,7 +150,9 @@
 
         <v-btn color="success" large @click="startSimulation">START SIMULATION</v-btn>
 
-        <div class="d-flex justify-start">
+          <!-- Dialog Buttons Row -->
+          <div class="d-flex justify-space-between align-center mt-4 w-100">
+            <!-- Left button: view all topics -->
             <v-btn
               variant="plain"
               color="grey"
@@ -160,7 +162,6 @@
             >
               View all possible topics
             </v-btn>
-
             <v-dialog
               v-model="dialog"
               max-width="700"
@@ -186,7 +187,67 @@
                 </v-card-actions>
               </v-card>
             </v-dialog>
+
+            <!-- Right button: choose by code -->
+            <v-btn
+              variant="plain"
+              color="grey"
+              size="small"
+              prepend-icon="mdi-barcode"
+              @click="simulCodeDialog = true"
+            >
+              Choose an agenda by code
+            </v-btn>
+            <v-dialog
+              v-model="simulCodeDialog"
+              max-width="500"
+              transition="dialog-bottom-transition"
+              persistent
+            >
+              <v-card>
+                <v-card-title class="text-h6 font-weight-bold d-flex justify-space-between align-center">
+                  Enter a simulation code
+                  <v-btn icon variant="text" @click="simulCodeDialog = false">
+                    <v-icon>mdi-close</v-icon>
+                  </v-btn>
+                </v-card-title>
+
+                <v-divider></v-divider>
+
+                <v-card-text>
+                  <v-form v-model="simulCodeFormValid" @submit.prevent="applySimulationCode">
+                    <v-text-field
+                      v-model="simulCodeInput"
+                      label="Simulation Code (X_Y_Z)"
+                      placeholder="e.g., 3_7_10"
+                      variant="outlined"
+                      clearable
+                      :rules="[validateSimulCode]"
+                      maxlength="8"
+                      required
+                      class="mt-3"
+                    ></v-text-field>
+
+                    <v-alert
+                      v-if="simulCodeError"
+                      type="error"
+                      dense
+                      border="start"
+                      class="mt-2"
+                    >
+                      {{ simulCodeError }}
+                    </v-alert>
+                  </v-form>
+                </v-card-text>
+
+                <v-card-actions class="justify-end">
+                  <v-btn variant="plain" color="grey" @click="simulCodeDialog = false">Cancel</v-btn>
+                  <v-btn color="primary" @click="applySimulationCode">Apply</v-btn>
+                </v-card-actions>
+              </v-card>
+            </v-dialog>
           </div>
+
         <div class="d-flex justify-center">
             <RouterLink :to="{ name: 'tools' }">
             <v-btn icon elevation="0" size="large">
@@ -200,9 +261,9 @@
       <div v-else class="d-flex flex-column align-center w-100">
         <!-- Top-right digital timer and phase timer -->
         <div class="timer-row w-100 d-flex flex-column align-end mb-6 pe-8">
-          <div class="digital-timer">{{ formattedTime }}</div>
-          <div class="phase-timer">This part: <strong>{{ formattedPhaseTime }}</strong></div>
-          <p class="text-caption mt-6">{{ simulationCode }}</p>
+          <div class="digital-timer" v-if="!$vuetify.display.xs">{{ formattedTime }}</div>
+          <div class="phase-timer" v-if="!$vuetify.display.xs">This part: <strong>{{ formattedPhaseTime }}</strong></div>
+          <p class="text-caption mt-6" v-if="!$vuetify.display.xs">{{ simulationCode }}</p>
         </div>
 
         <!-- Big circular gauge -->
@@ -294,7 +355,7 @@ const PROMPTS = {
     "Should we go public with an IPO in the next 12 months? Decide.",
   ],
   'Tier 3': [   // Marketing, promotion, communication or strategy 
-    "What's the best way to make the public understand what our product does? We need 2 concrete ideas.",
+    "What's the best way to make political leaders understand what our product does? We need 2 concrete ideas.",
     "How can we attract attention from large railway operators outside Switzerland? We need 2 concrete ideas.",
     "What should be our main message when talking to journalists? We need 3 keywords.",
     "To expand beyond Switzerland, which country we should focus on? We need 2 good candidate countries.",
@@ -305,7 +366,7 @@ const PROMPTS = {
     'We lost money again last year. How should we communicate this? We need 2 concrete ideas.',
     "Should we hire a marketing agency? Or can we do it ourselves with ChatGPT?",
     "To grow our brand, should we merge with a more traditional solar panel company for rooftops? Or should we stay independent?",
-    "Should we go public with an IPO in the next 12 months? Decide.",
+    "Should our company go public with an IPO in the next 12 months? Decide.",
   ],
 };
 
@@ -320,7 +381,45 @@ const timeLeft = ref(TOTAL);
 let tickInterval = null;
 
 const dialog = ref(false);
+
+const simulCodeDialog = ref(false);
+const simulCodeInput = ref("");
+const simulCodeFormValid = ref(false);
+const simulCodeError = ref("");
+
 const pdfContent = ref(null);
+
+// simulation code dialog
+const validateSimulCode = (value) => {
+  if (!value) return "Please enter a code.";
+  const regex = /^(1[0-1]|0?[0-9])_(1[0-1]|0?[0-9])_(1[0-1]|0?[0-9])$/;
+  return regex.test(value) || "Code must be in format X_Y_Z (0–11).";
+};
+function applySimulationCode() {
+  simulCodeError.value = "";
+
+  const regex = /^(1[0-1]|0?[0-9])_(1[0-1]|0?[0-9])_(1[0-1]|0?[0-9])$/;
+  if (!regex.test(simulCodeInput.value)) {
+    simulCodeError.value = "Invalid code format. Use X_Y_Z (0–11).";
+    return;
+  }
+
+  // ✅ parse and apply code
+  const [x, y, z] = simulCodeInput.value.split("_").map(Number);
+
+  // temporarily just console.log — later you’ll connect this logic
+  console.log("Applying code:", x, y, z);
+
+  // Example preview: replace meeting items by those indices
+  try {
+    phases[1].item = PROMPTS["Tier 1"][x];
+    phases[2].item = PROMPTS["Tier 2"][y];
+    phases[3].item = PROMPTS["Tier 3"][z];
+    simulCodeDialog.value = false;
+  } catch (e) {
+    simulCodeError.value = "Code out of range or invalid.";
+  }
+}
 
 // choose items for the three discussion items (visible from start)
 function pick(arr) { return arr[Math.floor(Math.random()*arr.length)]; }
