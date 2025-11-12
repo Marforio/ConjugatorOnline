@@ -10,7 +10,7 @@
         >
         <div class="sidebar-header text-center mt-6 mb-6">
             <h2 class="text-h5 font-weight-bold">Meeting Machine</h2>
-            <div class="text-body-1">5:30 meeting simulations</div>
+            <div class="text-body-1">6:00 meeting simulations</div>
         </div>
 
         <v-spacer />
@@ -135,13 +135,13 @@
                     </tr>
                     <tr>
                         <td class="font-weight-medium">Wrapping up</td>
-                        <td>30s</td>
+                        <td>60s</td>
                         <td>Summary, decisions and next steps</td>
                     </tr>
                     </tbody>
             </v-table>
           </v-list-item>
-          <v-list-item class="text-body-1 font-weight-bold">5 minutes 30 seconds total</v-list-item>
+          <v-list-item class="text-body-1 font-weight-bold">6 minutes total</v-list-item>
         </v-list>
         <div class=" w-100 d-flex flex-column align-end">
             <p class="text-caption">{{ simulationCode }}</p>
@@ -371,7 +371,7 @@ const PROMPTS = {
 };
 
 // total time in seconds
-const TOTAL = 330; // 5:30
+const TOTAL = 360; // 6:00
 
 // reactive state
 const simulationRunning = ref(false);
@@ -425,11 +425,11 @@ function applySimulationCode() {
 function pick(arr) { return arr[Math.floor(Math.random()*arr.length)]; }
 
 const phases = reactive([
-  { name: 'Starting the meeting', start: TOTAL, end: 300, color: '#4caf50', item: 'Welcome & rules' },
-  { name: 'Item 1', start: 300, end: 210, color: '#0288d1', item: pick(PROMPTS['Tier 1']) },
-  { name: 'Item 2', start: 210, end: 120, color: '#ffb300', item: pick(PROMPTS['Tier 2']) },
-  { name: 'Item 3', start: 120, end: 30, color: '#e53935', item: pick(PROMPTS['Tier 3']) },
-  { name: 'Wrapping Up', start: 30, end: 0, color: '#8e24aa', item: 'Decisions & next steps' },
+  { name: 'Starting the meeting', start: TOTAL, end: 330, color: '#4caf50', item: 'Welcome & rules' },
+  { name: 'Item 1', start: 330, end: 240, color: '#0288d1', item: pick(PROMPTS['Tier 1']) },
+  { name: 'Item 2', start: 240, end: 150, color: '#ffb300', item: pick(PROMPTS['Tier 2']) },
+  { name: 'Item 3', start: 150, end: 60, color: '#e53935', item: pick(PROMPTS['Tier 3']) },
+  { name: 'Wrapping Up', start: 60, end: 0, color: '#8e24aa', item: 'Decisions & next steps' },
 ]);
 
 // derived

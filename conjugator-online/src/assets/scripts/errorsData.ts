@@ -296,11 +296,11 @@ export const errorsData: Record<string, ErrorEntry> = {
         "examples": "the higher they rise, the harder they fall; the more you study, the better you will do on the exam"
     },
     "0270":{
-        "short_slug": "equality-with-as",
+        "short_slug": "equality-expression",
         "description": "incorrect expression of equality",
         "reference": "<a href='https://book.language-labs.ch/ch2#e0270' target='_blank'>error 0270</a>",
-        "recommendation": "remember that we express equality with an adjective using the expression AS+ADJECTIVE+AS",
-        "examples": "You chances of winning are as goos as mine; I am as tall as my brother"
+        "recommendation": "remember that we express equality with an adjective using the expression AS+ADJECTIVE+AS or THE SAME AS",
+        "examples": "You chances of winning are as goos as mine; I am as tall as my brother; your car is the same as mine"
     },
     "0280":{
         "short_slug": "adjective-as-adverb",
@@ -678,16 +678,30 @@ export const errorsData: Record<string, ErrorEntry> = {
     "0713":{
         "short_slug": "content-clause-inverted",
         "description": "incorrect use of inversion (question structure) in a content clause",
-        "reference": "<a href='https://book.language-labs.ch/ch7#e0713'>error 0713</a>",
+        "reference": "<a href='https://book.language-labs.ch/ch7#e0713' target='_blank'>error 0713</a>",
         "recommendation": "remember that content clauses do not require an inverted (question) structure, even when introduced by interrogative adverbs",
         "examples": "Say 'I don't know how high the building is', not '...how high is the building'"
     },
     "0714":{
         "short_slug": "relative-comma",
         "description": "incorrect use of commas with a defining relative clause",
-        "reference": "<a href='https://book.language-labs.ch/ch7#e0714'>error 0714</a>",
+        "reference": "<a href='https://book.language-labs.ch/ch7#e0714' target='_blank'>error 0714</a>",
         "recommendation": "remember that only non-defining relative clauses are separated from the main sentence with commas",
         "examples": "The neigbhor, who by the way I've invited to my house many times, pretended not so see me at the restaurant!"
+    },
+    "0715":{
+        "short_slug": "transitive-vs-intransitive",
+        "description": "incorrect use of a transitive verb as intransitive, or vice versa",
+        "reference": "<a href='https://book.language-labs.ch/ch7#e0715' target='_blank'>error 0715</a>",
+        "recommendation": "remember that some verbs can never be used with an object (intransitive) or always need an object (transitive)",
+        "examples": "'I raised my hand' vs 'The sun rose at 6:30'; 'He speaks loudly' vs 'He said something important'"
+    },
+    "0716":{
+        "short_slug": "monotransitive-vs-ditransitive",
+        "description": "incorrect use of a ditranstive verb as monotransitive, or vice versa",
+        "reference": "<a href='https://book.language-labs.ch/ch7#e0715' target='_blank'>error 0716</a>",
+        "recommendation": "remember that some verbs can never be used with an indirect object (monotransitive) or, conversely, some need an indirect object (ditransitive)",
+        "examples": "'I told her to leave' vs 'I said, 'leave!''; I reminded him of the meeting' vs 'He remembered the meeting'"
     },
     "0717":{
         "short_slug": "verbs-of-recommendation-reporting",
@@ -857,6 +871,13 @@ export const errorsData: Record<string, ErrorEntry> = {
         "recommendation": "remember that we use the preposition 'to' with verbs for movement",
         "examples": "say 'I went to France', not 'I went in France'"
     },
+    "1015":{
+        "short_slug": "prep-change-in-value",
+        "description": "incorrect preposition to describe a change in value",
+        "reference": "<a href='https://book.language-labs.ch/ch10#e1015' target='_blank'>error 1015</a>",
+        "recommendation": "remember that we use the preposition 'to' for the target value, and 'by' for the amount of change (not 'from' or 'of')",
+        "examples": "say 'the price increased by 500 dollars', not 'it increased from 500 dollars'"
+    },
     "1020":{
         "short_slug": "prep-time",
         "description": "incorrect time preposition",
@@ -870,6 +891,13 @@ export const errorsData: Record<string, ErrorEntry> = {
         "reference": "<a href='https://book.language-labs.ch/ch10#e1030' target='_blank'>error 1030</a>",
         "recommendation": "remember that we never use the preposition 'for' with infinitive to express purpose",
         "examples": "say 'We took the train to go to Poland', not 'We took the train for go to Poland"
+    },
+    "1035":{
+        "short_slug": "prep-scale-area",
+        "description": "incorrect preposition to describe a scale or area",
+        "reference": "<a href='https://book.language-labs.ch/ch10#e1035' target='_blank'>error 1035</a>",
+        "recommendation": "remember that we use the preposition 'to' for scales and 'by' for areas",
+        "examples": "say 'I made a ten to one (10:1) model of a ten by twenty (10x20) swimming pool.'"
     },
     "1040":{
         "short_slug": "prep-clause-fut",
