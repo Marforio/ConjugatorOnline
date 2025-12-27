@@ -8,11 +8,10 @@
       class="pa-4 d-flex flex-column align-center ml-3 align-self-center"
     >
       <v-img
-        src="/images/conjugator2.png"
+        src="/images/banners/Conjugator3.png"
         alt="Logo"
-        class="m-4 rounded-lg"
-        max-width="220"
-        aspect-ratio="4/3"
+        class="rounded-lg w-100 mb-5 mt-4"
+        min-width="250"
         cover
       />
 

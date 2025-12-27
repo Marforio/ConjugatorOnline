@@ -30,7 +30,7 @@ export const errorsData: Record<string, ErrorEntry> = {
     },
     "0125":{
         "short_slug": "singular-s",
-        "description": "incorrect use of a plural noun",
+        "description": "incorrect use of a singular noun ending in -s",
         "reference": "<a href='https://book.language-labs.ch/ch1#e0125' target='_blank'>error 0125</a>",
         "recommendation": "remember that the singular form of a few nouns ends in -s",
         "examples": "one series, a means of transportation, economics is important, etc."
@@ -906,6 +906,20 @@ export const errorsData: Record<string, ErrorEntry> = {
         "recommendation": "remember that we avoid using future tense in a time clause",
         "examples": "say 'I'll call you as soon as I return', not 'as soon as I will return'"
     },
+    "1041":{
+        "short_slug": "prep-static-position",
+        "description": "incorrect use of prepositions to describe a static position.",
+        "reference": "<a href='https://book.language-labs.ch/ch10#e1041' target='_blank'>error 1041</a>",
+        "recommendation": "remember that we avoid movement prepositions when describing a static position",
+        "examples": "say 'The village is under the mountain, not 'The village is down the mountain'"
+    },
+    "1042":{
+        "short_slug": "prep-part-vs-position",
+        "description": "incorrectly describing part of a whole using preposition of position, or vice-versa",
+        "reference": "<a href='https://book.language-labs.ch/ch10#e1042' target='_blank'>error 1042</a>",
+        "recommendation": "remember that we do not describe part of a whole with prepositions of position",
+        "examples": "don't say 'the above of the mountain or 'the upper of the mountain', say 'the top of the mountain'"
+    },
     "1050":{
         "short_slug": "prep-collocation",
         "description": "incorrect verb or adjective + preposition collocation",
@@ -1115,6 +1129,20 @@ export const errorsData: Record<string, ErrorEntry> = {
         "reference": "<a href='https://book.language-labs.ch/ch14#letter-pronunciation' target='_blank'>Pronunciation of single letters</a>",
         "recommendation": "review the correct way to pronounce single letters in English; this is important in mathematics, for example",
         "examples": "'x' is pronounced 'eks', 'y' is pronounced 'why', 'h' is pronounced 'aitch', etc."
+    },
+    "1430":{
+        "short_slug": "pronun-hardest",
+        "description": "incorrect pronunciation of one of the hardest English words",
+        "reference": "<a href='https://book.language-labs.ch/ch14#top-ten-hard-pronunciation' target='_blank'>Top ten hardest words to pronounce</a>",
+        "recommendation": "practice the pronunciation of hard words, paying special attention to the stressed syllable",
+        "examples": "be careful with 'parentheses', 'hierarchy', 'clothes', 'mirror', 'analyisis, etc."
+    },
+    "1440":{
+        "short_slug": "pronun-strangest",
+        "description": "incorrect pronunciation of one of the strangest English words (to pronounce)",
+        "reference": "<a href='https://book.language-labs.ch/ch14#top-ten-hard-pronunciation' target='_blank'>Top ten strangest words to pronounce</a>",
+        "recommendation": "practice the pronunciation of strangely pronounced words",
+        "examples": "be careful with 'gauge', 'vineyard', 'engine', 'comfortable', 'women', etc."
     },
     "1501":{
         "short_slug": "false-friend-actually",

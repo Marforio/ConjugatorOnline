@@ -32,6 +32,13 @@
           <v-list-item-title>Tools</v-list-item-title>
         </v-list-item>
         <v-divider />
+        <v-list-item
+          v-if="userStore.isAuthenticated && userStore.isStaff"
+          :to="{ name: 'teacher-tools' }"
+        >
+          <v-list-item-title>Teacher Tools</v-list-item-title>
+        </v-list-item>
+        <v-divider />
         <v-list-item>
           <LogOutButton />
         </v-list-item>
@@ -107,6 +114,18 @@
           <template v-slot:activator="{ props }">
             <v-btn icon v-bind="props" :to="{ name: 'dashboard' }">
               <v-icon>mdi-chart-bar</v-icon>
+            </v-btn>
+          </template>
+        </v-tooltip>
+
+        <v-tooltip
+          v-if="userStore.isAuthenticated && userStore.isStaff"
+          text="Teacher Tools"
+          location="bottom"
+        >
+          <template v-slot:activator="{ props }">
+            <v-btn icon v-bind="props" :to="{ name: 'teacher-tools' }">
+              <v-icon>mdi-school</v-icon>
             </v-btn>
           </template>
         </v-tooltip>

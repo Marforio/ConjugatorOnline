@@ -2,18 +2,18 @@
   <v-container fluid class="mt-5 pa-4 d-flex flex-column justify-center align-center">
     <v-row align="stretch" justify="center" class="game-grid" dense>
 
-      <!-- Pronoun Practice -->
-      <v-col cols="12" sm="6" md="4" class="d-flex justify-center" style="min-height: 350px;">
-        <v-btn
-            size="x-large"
-            class="d-flex flex-column align-center pa-3 pa-sm-6"
-            style="margin-top: 100px;"
-            color="yellow-darken-3"
-            :to="{ name: 'meeting-machine' }"
-            >
-            <v-icon large>mdi-lightbulb-group</v-icon>
-            <span class="subtitle-1 font-weight-medium px-3">Meeting machine</span>
-            </v-btn>
+      <!-- Meeting Machine -->
+      <v-col cols="12" sm="6" md="4" class="d-flex justify-center">
+        <RouterLink :to="{ name: 'meeting-machine' }" class="image-tile">
+          <div class="tile-frame">
+            <v-img
+              src="/images/banners/MeetingMachine.png"
+              alt="Meeting Machine"
+              cover
+              class="tile-image"
+            />
+          </div>
+        </RouterLink>
       </v-col>
 
 

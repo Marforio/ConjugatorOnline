@@ -319,9 +319,11 @@ const sessionAccuracyTrend = computed(() => {
 const GAME_NAMES = [
   "Pronoun Practice",
   "Quantifier Quest",
-  "Verb Combinator",
-  "Translator",
-  "Passive Maker",
+  "Verb Mixer",
+  "Tricky Translator",
+  "Passive Party",
+  "Word Families",
+  "Regret Machine"
 ];
 
 // ----- Fetch and Group -----

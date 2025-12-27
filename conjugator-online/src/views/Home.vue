@@ -1,5 +1,5 @@
 <template>
-  <v-container fluid class="fill-height d-flex flex-column pa-4">
+  <v-container fluid class="d-flex flex-column pa-4">
     <!-- Top controls: centered on xs, right-aligned on sm+ -->
     <div class="top-controls mb-8">
       <div v-if="userStore.isAuthenticated">
@@ -11,18 +11,33 @@
     </div>
 
     <!-- Main Title Centered -->
-    <v-row justify="center" class="mt-6 mb-2">
+    <v-row justify="center" class="mb-2">
       <v-col cols="12" class="text-center">
-        <h1 :class="[smAndDown ? 'text-h2' : 'text-h1', 'font-weight-bold']">
-          Language Labs
-        </h1>
+
+       <!-- XS -->
+        <v-img
+          v-if="xs"
+          src="/images/banners/LanguageLabs1.png"
+          alt="Language Labs"
+          height="280"
+          class="mx-auto mb-5"
+        />
+
+        <!-- MD+ -->
+        <v-img
+          v-else
+          src="/images/banners/LanguageLabs.png"
+          alt="Language Labs"
+          height="360"
+          class="mx-auto mb-6"
+        />
       </v-col>
     </v-row>
 
     <!-- Tiles with Icon Buttons for Navigation -->
 <v-row justify="center" align="center" dense>
   <v-col
-    cols="12"
+    cols="8"
     sm="6"
     md="4"
     class="d-flex justify-center mb-0 mb-sm-4"
@@ -105,6 +120,25 @@
       <span class="subtitle-1 font-weight-medium px-3">Tools</span>
     </v-btn>
   </v-col>
+  <!-- TEACHER TOOLS (admin-only) -->
+  <v-col
+    v-if="userStore.isAuthenticated && userStore.isStaff"
+    cols="12"
+    sm="6"
+    md="4"
+    class="d-flex justify-center mb-0 mb-sm-4"
+  >
+    <v-btn
+      large
+      class="d-flex flex-column align-center pa-3 pa-sm-6"
+      color="deep-purple-accent-4"
+      :to="{ name: 'teacher-tools' }"
+    >
+      <v-icon large>mdi-school</v-icon>
+      <span class="subtitle-1 font-weight-medium px-3">Teacher Tools</span>
+    </v-btn>
+  </v-col>
+
 </v-row>
 
   </v-container>
@@ -116,7 +150,9 @@ import LogOutButton from "@/components/LogOutButton.vue";
 import { useDisplay } from "vuetify";
 
 const userStore = useUserStore();
-const { smAndDown } = useDisplay();
+const { xs, sm, md, lg, xl, smAndDown } = useDisplay()
+
+
 </script>
 
 <style scoped>

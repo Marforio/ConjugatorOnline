@@ -1,8 +1,13 @@
 <template>
-Nuffin yet
+    <v-container>
+        <PassiveSceneManager />
+    </v-container>
 </template>
 
-<scripts>
+<script setup>
+import 'bootstrap/dist/css/bootstrap.min.css';
+import 'bootstrap/dist/js/bootstrap.min.js';
+import PassiveSceneManager from '@/components/PassiveSceneManager.vue';
+import TopNavBar from '@/components/TopNavBar.vue';
 
-
-</scripts>
+</script>

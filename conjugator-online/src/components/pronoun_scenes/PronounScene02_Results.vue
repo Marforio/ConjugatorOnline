@@ -160,9 +160,12 @@
 
     <!-- Action Buttons -->
     <v-row class="d-flex justify-center align-center mt-4 gap-4">
-      <v-btn @click="goToScene('PronounScene01_Game')">PLAY AGAIN</v-btn>
+      <v-btn @click="$emit('changeScene', 'PronounScene01_Game')">
+        PLAY AGAIN
+      </v-btn>
+
       <router-link :to="{ path: '/dashboard', query: { tab: 'other-games' } }">
-        <v-btn>GO TO Dashboard</v-btn>
+        <v-btn>Go to Dashboard</v-btn>
       </router-link>
       <HomeButton />
     </v-row>
@@ -216,11 +219,6 @@ const chartData = computed(() => [
   { label: "Correct", value: props.results.correct_count || 0 },
   { label: "Wrong", value: props.results.wrong_count || 0 },
 ]);
-
-// Navigation
-function goToScene(sceneName) {
-  emit("changeScene", sceneName);
-}
 
 // D3 pie chart rendering
 function renderPieChart() {

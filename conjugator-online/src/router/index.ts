@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHistory, RouteLocationNormalized } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { nextTick, watch } from 'vue'
 import Login from '@/views/Login.vue'
@@ -16,13 +16,18 @@ const routes = [
   { path: '/exercises', name: 'exercises', component: () => import('@/views/Exercises.vue'), meta: { requiresAuth: true } },
   { path: '/games', name: 'games', component: () => import('@/views/Games.vue')},
   { path: '/games/pronoun-practice', name: 'pronounpractice', component: () => import('@/views/PronounPractice.vue'), meta: { requiresAuth: true }},
-  { path: '/games/quantifier', name: 'quantifier', component: () => import('@/views/Quantifer.vue'), meta: { requiresAuth: true }},
-  { path: '/games/verb-combinator', name: 'verbcombinator', component: () => import('@/views/VerbCombinator.vue'), meta: { requiresAuth: true }},
-  { path: '/games/passive-maker', name: 'passivemaker', component: () => import('@/views/PassiveMaker.vue'), meta: { requiresAuth: true }},
-  { path: '/games/translator', name: 'translator', component: () => import('@/views/Translator.vue'), meta: { requiresAuth: true }},
-  { path: '/exercises/:errorCode', name: 'exercise-detail', component: () => import('@/views/ExerciseDetail.vue'), meta: { requiresAuth: true } },
+  { path: '/games/quantifier-quest', name: 'quantifierquest', component: () => import('@/views/Quantifer.vue'), meta: { requiresAuth: true }},
+  { path: '/games/verb-mixer', name: 'verbmixer', component: () => import('@/views/VerbCombinator.vue'), meta: { requiresAuth: true }},
+  { path: '/games/passive-party', name: 'passiveparty', component: () => import('@/views/PassiveMaker.vue'), meta: { requiresAuth: true }},
+  { path: '/games/tricky-translator', name: 'trickytranslator', component: () => import('@/views/Translator.vue'), meta: { requiresAuth: true }},
+  { path: '/exercises/:errorCode', name: 'exercise-detail', component: () => import('@/views/ExerciseDetail.vue'), props: true , meta: { requiresAuth: true } },
   { path: '/tools', name: 'tools', component: () => import('@/views/Tools.vue') },
-  { path: '/tools/meeting-machine', name: 'meeting-machine', component: () => import('@/views/MeetingMachine.vue')}
+  { path: '/tools/meeting-machine', name: 'meeting-machine', component: () => import('@/views/MeetingMachine.vue')},
+  { path : '/teacher-tools', name: 'teacher-tools', component: () => import('@/views/TeacherTools.vue'),  meta: { requiresAuth: true, requiresAdmin: true } },
+  { path: '/teacher-tools/classroom-challenges', name: 'classroom-challenges', component: () => import('@/views/ClassroomChallenges.vue'), meta: { requiresAuth: true, requiresAdmin: true }, props: (route: RouteLocationNormalized) => ({
+      game: route.query.game as string,
+      student: route.query.student as string,
+    }), }
 ]
 
 

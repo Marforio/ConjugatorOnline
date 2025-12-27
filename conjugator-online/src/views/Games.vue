@@ -7,7 +7,7 @@
         <RouterLink :to="{ name: 'pronounpractice' }" class="image-tile">
           <div class="tile-frame">
             <v-img
-              src="/images/pronoun-practice.png"
+              src="/images/banners/PronounPractice.png"
               alt="Pronoun Practice"
               cover
               class="tile-image"
@@ -18,10 +18,10 @@
 
       <!-- Quantifier Quest -->
       <v-col cols="12" sm="6" md="4" class="d-flex justify-center">
-        <RouterLink :to="{ name: 'quantifier' }" class="image-tile">
+        <RouterLink :to="{ name: 'quantifierquest' }" class="image-tile">
           <div class="tile-frame">
             <v-img
-              src="/images/quantifier.png"
+              src="/images/banners/QuantifierQuest.png"
               alt="Quantifier Quest"
               cover
               class="tile-image"
@@ -33,12 +33,11 @@
       <!-- Passive Maker -->
       <v-col cols="12" sm="6" md="4" class="d-flex justify-center">
         <RouterLink
-          :to="isEnabled ? { name: 'translator' } : undefined"
+          :to="{ name: 'passiveparty' }"
           class="image-tile"
-          :style="{ pointerEvents: isEnabled ? 'auto' : 'none', opacity: isEnabled ? 1 : 0.5 }"
         >
           <div class="tile-frame">
-            <v-img src="/images/passive-maker.png" alt="Passive Maker" cover class="tile-image" />
+            <v-img src="/images/banners/PassiveParty.png" alt="Passive Maker" cover class="tile-image" />
           </div>
         </RouterLink>
       </v-col>
@@ -47,12 +46,12 @@
       <!-- Verb Combinator -->
       <v-col cols="12" sm="6" md="4" class="d-flex justify-center">
         <RouterLink
-          :to="isEnabled ? { name: 'translator' } : undefined"
+          :to="isEnabled ? { name: 'verbmixer' } : undefined"
           class="image-tile"
           :style="{ pointerEvents: isEnabled ? 'auto' : 'none', opacity: isEnabled ? 1 : 0.5 }"
         >
           <div class="tile-frame">
-            <v-img src="/images/verb-combinator.png" alt="Verb Combinator" cover class="tile-image" />
+            <v-img src="/images/banners/VerbMixer.png" alt="Verb Mixer" cover class="tile-image" />
           </div>
         </RouterLink>
       </v-col>
@@ -60,12 +59,12 @@
       <!-- Translator -->
       <v-col cols="12" sm="6" md="4" class="d-flex justify-center">
         <RouterLink
-          :to="isEnabled ? { name: 'translator' } : undefined"
+          :to="isEnabled ? { name: 'trickytranslator' } : undefined"
           class="image-tile"
           :style="{ pointerEvents: isEnabled ? 'auto' : 'none', opacity: isEnabled ? 1 : 0.5 }"
         >
           <div class="tile-frame">
-            <v-img src="/images/translator.png" alt="Translator" cover class="tile-image" />
+            <v-img src="/images/banners/TrickyTranslator.png" alt="Translator" cover class="tile-image" />
           </div>
         </RouterLink>
       </v-col>

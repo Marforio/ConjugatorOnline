@@ -59,6 +59,9 @@
     <v-container fluid class="pa-2 d-flex justify-center align-center">
       <div v-if="!gameStarted">
         <!-- Instructions -->
+        <div class="d-flex justify-center">
+            <v-img src="/images/banners/PronounPractice.png" max-width="400" ></v-img>
+          </div>
         <h1 class="text-h3 mb-6">Instructions</h1>
         <ul class="no-bullets pa-0">
           <li class="mb-2">
