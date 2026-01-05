@@ -82,7 +82,18 @@
           class="text-center text-uppercase text-high-emphasis"
           v-if="selectedCategory == 'Essential irregulars present perfect' || selectedCategory == 'Advanced irregulars present perfect'"
         >
-          <span class="border-lg border-info">{{ prompt?.category }}</span>
+          <span>
+            <v-chip
+              color="primary"
+              size="x-large"
+              class="text-black"
+              variant="flat"
+            >
+              {{ prompt?.category }}
+            </v-chip>
+          </span>
+
+
         </v-card-title>
 
         <v-card-text class="text-wrap mt-5" style="font-size: 2.5rem;">
@@ -137,9 +148,15 @@
         </ul>
       </div>
 
-      <v-btn color="primary" size="x-large" @click="resetGame">
-        PLAY AGAIN
+      <v-btn color="primary" size="x-large" @click="resetGame" class="me-5">
+        PLAY AGAIN (SAME PLAYER)
       </v-btn>
+      <RouterLink :to="{ name: 'tools' }">
+        <v-btn color="info" size="x-large">
+        PLAY WITH OTHER PLAYER
+      </v-btn>
+      </RouterLink>
+      
     </div>
   </v-container>
 
@@ -286,16 +303,16 @@ const gameData: Record<string, { description: string; instructions: string; prom
       "lose": [ "What did you lose yesterday?", "What did you lose on your last trip?" ], 
       "drive": [ "Where did you drive last weekend?", "When did you drive to school?" ], 
       "meet": [ "Who did you meet yesterday?", "Who did you meet on your last holiday?" ], 
-      "build": [ "What did you build in art class?", "What did you build with blocks last week?" ], 
+      "build": [ "What did you build?", "What did you build with blocks?" ], 
       "draw": [ "What did you draw in your notebook?", "What did you draw in art class?" ], 
       "feel": [ "What did you feel when you won?", "What did you feel yesterday morning?" ], 
-      "cost": [ "What did it cost to buy lunch?", "What did the book cost last week?" ], 
+      "cost": [ "What did it cost to buy lunch?", "What did the laptop cost?" ], 
       "wear": [ "What did you wear yesterday?", "What did you wear to the party?" ], 
-      "win": [ "What did you win in the game?", "What did you win last year?" ], 
-      "fall": [ "Where did you fall yesterday?", "When did you fall in the playground?" ], 
+      "win": [ "What did you win?", "When did you win a game?" ], 
+      "fall": [ "Where did you fall?", "When did you fall on the ski slope?" ], 
       "leave": [ "When did you leave school yesterday?", "When did you leave home last weekend?" ], 
       "begin": [ "What did you begin last month?", "What did you begin in class yesterday?" ], 
-      "teach": [ "What did your teacher teach yesterday?", "What did your teacher teach last week?" ], 
+      "teach": [ "What did your teacher teach yesterday?", "What did you teach the children?" ], 
       "steal": [ "What did the thief steal?", "What did someone steal from the shop?" ], 
       "throw": [ "What did you throw in the game?", "What did you throw away yesterday?" ], 
       "spend": [ "What did you spend money on last week?", "What did you spend time doing yesterday?" ], 
@@ -304,23 +321,23 @@ const gameData: Record<string, { description: string; instructions: string; prom
       "rise": [ "When did the sun rise today?", "When did you rise from bed yesterday?" ], 
       "show": [ "What did you show your friend?", "What did you show in class yesterday?" ], 
       "mean": [ "What did you mean by that?", "What did the word mean in the story?" ], 
-      "deal": [ "What did you deal with yesterday?", "What did you deal cards for last week?" ], 
+      "deal": [ "What problem did you deal with yesterday?", "When did you deal cards?" ], 
       "wake": [ "When did you wake up today?", "When did you wake up last weekend?" ], 
       "drink": [ "What did you drink for breakfast?", "What did you drink at the party?" ], 
       "choose": [ "What did you choose for lunch?", "What did you choose in the shop?" ], 
-      "become": [ "What did you become in the game?", "What did you become after practice?" ], 
-      "freeze": [ "What did you freeze in the freezer?", "What did you freeze last winter?" ], 
+      "become": [ "When did you become the best?", "What did you become independent?" ], 
+      "freeze": [ "What did you freeze in the freezer?", "When did your toes freeze?" ], 
       "set": [ "What did you set on the table?", "What did you set up yesterday?" ], 
-      "hit": [ "What did you hit with the ball?", "What did you hit by accident yesterday?" ], 
-      "sleep": [ "Where did you sleep last night?", "When did you sleep on holiday?" ], 
+      "hit": [ "What did you hit with the racket?", "What did you hit by accident?" ], 
+      "sleep": [ "How many hours did you sleep last night?", "When did you sleep outdoors?" ], 
       "put": [ "What did you put in your bag?", "What did you put on the desk yesterday?" ], 
-      "lead": [ "Who did you lead in the game?", "What did you lead at school yesterday?" ], 
+      "lead": [ "When did you lead the race?", "When did you lead a time?" ], 
       "get": [ "What did you get for your birthday?", "What did you get at the shop yesterday?" ], 
       "sit": [ "Where did you sit in class?", "Where did you sit last weekend?" ], 
       "grow": [ "What did you grow in the garden?", "What did you grow last summer?" ], 
       "hold": [ "What did you hold in your hand?", "What did you hold during the game?" ], 
       "tell": [ "What did you tell your friend?", "What did you tell your teacher yesterday?" ], 
-      "let": [ "What did you let your friend do?", "What did you let happen yesterday?" ], 
+      "let": [ "What did you let your friend do?", "What did you let your pet do?" ], 
       "fly": [ "Where did you fly last summer?", "When did you fly to another city?" ],
       "give": [ "What did you give to your friend?", "What did you give for Christmas?" ],
     }
@@ -331,7 +348,7 @@ const gameData: Record<string, { description: string; instructions: string; prom
     prompts: {
         "bear": [
           "What did you bear last year?",
-          "What did you bear during the hard time?"
+          "What did you bear during a hard time?"
         ],
         "beat": [
           "What did you beat in the game?",
@@ -466,20 +483,20 @@ const gameData: Record<string, { description: string; instructions: string; prom
           "Where did you stand in line?"
         ],
         "stink": [
-          "What did stink last week?",
-          "What did stink in the kitchen?"
+          "What [stink] in your fridge?",
+          "What [stink] in the kitchen?"
         ],
         "strike": [
           "What did you strike yesterday?",
           "What did you strike in the game?"
         ],
         "sweep": [
-          "What did you sweep yesterday?",
+          "Which room you sweep yesterday?",
           "What did you sweep in the house?"
         ],
         "tear": [
           "What did you tear yesterday?",
-          "What did you tear in class?"
+          "Did you tear a ligament?"
         ],
         "upset": [
           "What did upset you last week?",
@@ -565,14 +582,14 @@ const gameData: Record<string, { description: string; instructions: string; prom
       "understand": ["understood", "I have _____ the lesson clearly."],
       "think": ["thought", "He has _____ about the problem carefully."],
       "catch": ["caught", "She has _____ the ball easily."],
-      "read": ["read", "I have _____ that book twice."], // note: same spelling, pronounced differently
+      "read": ["read", "I have _____ that book twice."], 
       "find": ["found", "They have _____ the missing keys."],
       "lose": ["lost", "He has _____ his wallet again."],
       "drive": ["driven", "She has _____ to work every day this week."],
       "meet": ["met", "I have _____ many new friends."],
       "build": ["built", "They have _____ a new house."],
       "draw": ["drawn", "She has _____ a beautiful picture."],
-      "feel": ["felt", "I have _____ very happy today."],
+      "feel": ["felt", "I have _____ very happy since the divorce."],
       "cost": ["cost", "The trip has _____ a lot of money."],
       "wear": ["worn", "She has _____ that dress before."],
       "win": ["won", "He has _____ the game twice."],
@@ -626,9 +643,9 @@ const gameData: Record<string, { description: string; instructions: string; prom
       "cling": ["clung", "The child has _____ to his mother all day."], 
       "creep": ["crept", "The cat has _____ silently into the room."], 
       "feed": ["fed", "She has _____ the baby twice today."], 
-      "foretell": ["foretold", "The prophecy has _____ the future correctly."], 
+      "foretell": ["foretold", "The prophet has _____ the future correctly."], 
       "grind": ["ground", "He has _____ the coffee beans fresh."], 
-      "hang": ["hanged", "The criminal was _____ for his crimes."], 
+      "hang": ["hung", "That jacket has _____ in my closet since I was 20."], 
       "hurt": ["hurt", "She has _____ her ankle again."], 
       "lay": ["laid", "He has _____ the books on the desk."], 
       "lend": ["lent", "I have _____ my pen to a friend."], 
