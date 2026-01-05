@@ -123,6 +123,8 @@
     <div v-else class="text-center">
       <h2 class="text-h4 mb-4">Results</h2>
 
+      <p class="text-h5 m-3">Score = {{ score }}%</p>
+      <p class="text-success mb-2">✔ Correct: {{ rightCount }}</p>
       <p class="text-error mb-2">✖ Incorrect: {{ wrongCount }}</p>
       <p class="mb-4">❓ Unsure: {{ unclearCount }}</p>
 
@@ -183,6 +185,7 @@ const gameComplete = ref(false)
 
 const rightCount = ref(0)
 const wrongCount = ref(0)
+const score = computed(() => rightCount.value !== 0 ? (rightCount.value / totalRounds * 100).toFixed(1) : 0)
 const hasAnyAnswer = ref(false)
 const unclearCount = ref(0)
 const wrongPrompts = ref<string[]>([])
