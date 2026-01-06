@@ -59,7 +59,7 @@
     </div>
 
     <!-- ACTIVE GAME -->
-    <div v-else-if="gameStarted" class="text-center py-6">
+    <div v-else-if="gameStarted" class="text-center py-10">
       <!-- Timer -->
       <div v-if="useTimer" class="my-6 d-flex justify-end">
         <v-progress-circular
@@ -141,7 +141,7 @@
 
       <div v-if="flaggedPrompts.length" class="mb-6">
         <h3 class="text-h6 mb-2">Needs Review</h3>
-        <ul>
+        <ul class="">
           <li v-for="(p, i) in flaggedPrompts" :key="i">
             {{ p.question }}
           </li>
@@ -196,7 +196,7 @@ const BANNERS = {
 
 const selectedCategory = ref<string>("")    // for Prove it!
 
-const prompt = ref<{ question: string; correctAnswers: string[]; category: string } | null>(null)
+const prompt = ref<{ question: string; verb: string; correctAnswers: string[]; category: string } | null>(null)
 const gameStarted = ref(false)
 const gameComplete = ref(false)
 
@@ -208,6 +208,7 @@ const unclearCount = ref(0)
 const wrongPrompts = ref<string[]>([])
 const promptQueue = ref<{
   question: string
+  verb: string
   correctAnswers: string[]
   category: string
 }[]>([])
@@ -215,6 +216,7 @@ const promptQueue = ref<{
 
 const shownPrompts = ref<{
   question: string
+  verb: string
   correctAnswers: string[]
   category: string
   is_correct: boolean | null
@@ -351,12 +353,12 @@ const gameData: Record<string, { description: string; instructions: string; prom
           "What did you bear during a hard time?"
         ],
         "beat": [
-          "What did you beat in the game?",
-          "What did you beat last weekend?"
+          "Which team did Gottéron beat in the game?",
+          "Who did you beat in the competition?"
         ],
         "bend": [
           "What did you bend yesterday?",
-          "What did you bend in class?"
+          "Which part did you bend?"
         ],
         "bet": [
           "What did you bet on last week?",
@@ -367,31 +369,31 @@ const gameData: Record<string, { description: string; instructions: string; prom
           "What did you bid online yesterday?"
         ],
         "bite": [
-          "What did you bite at lunch?",
-          "What did you bite by accident?"
+          "What did the baby bite into?",
+          "Who did the dog bite?"
         ],
         "bleed": [
-          "When did you bleed last year?",
+          "When did your heart bleed (metaphorically)?",
           "What did you bleed from yesterday?"
         ],
         "blow": [
-          "What did you blow out last night?",
-          "What did you blow in the wind?"
+          "Which direction did the wind blow last night?",
+          "When did you blow out a candle?"
         ],
         "broadcast": [
           "What did you broadcast on TV?",
           "What did you broadcast last week?"
         ],
         "cast": [
-          "What did you cast in the play?",
-          "What did you cast into the water?"
+          "What metal you cast?",
+          "Which actor did they cast for the role?"
         ],
         "cling": [
-          "What did you cling to yesterday?",
+          "Why did the baby cling to his mother?",
           "What did you cling to in fear?"
         ],
         "creep": [
-          "Where did you creep last night?",
+          "When did the soldiers creep on the ground?",
           "When did you creep quietly?"
         ],
         "feed": [
@@ -399,16 +401,16 @@ const gameData: Record<string, { description: string; instructions: string; prom
           "What did you feed at the farm?"
         ],
         "foretell": [
-          "What did you foretell in class?",
+          "What did you foretell about the weather?",
           "What did you foretell last year?"
         ],
         "grind": [
           "What did you grind in the kitchen?",
-          "What did you grind at school?"
+          "What did you grind in the workshop?"
         ],
         "hang": [
           "What did you hang on the wall?",
-          "What did you hang outside yesterday?"
+          "What did you hang up in your closet?"
         ],
         "hurt": [
           "What did you hurt last week?",
@@ -416,14 +418,14 @@ const gameData: Record<string, { description: string; instructions: string; prom
         ],
         "lay": [
           "What did you lay on the table?",
-          "What did you lay in the garden?"
+          "What did you lay on the ground?"
         ],
         "lend": [
           "What did you lend your friend?",
           "What did you lend last month?"
         ],
         "offset": [
-          "What did you offset yesterday?",
+          "When did you offset your carbon footprint?",
           "What did you offset in the budget?"
         ],
         "ride": [
@@ -443,36 +445,36 @@ const gameData: Record<string, { description: string; instructions: string; prom
           "What did you shake in your hand?"
         ],
         "shed": [
-          "What did you shed last week?",
-          "What did you shed in the garden?"
+          "Did your dog shed its hair?",
+          "When did you shed your skin?"
         ],
         "shoot": [
           "What did you shoot in the game?",
-          "What did you shoot last summer?"
+          "When did you shoot?"
         ],
         "shrink": [
-          "What did you shrink in the wash?",
-          "What did you shrink last week?"
+          "What did you shrink in the washing machine?",
+          "When did your savings shrink?"
         ],
         "shut": [
-          "What did you shut yesterday?",
-          "What did you shut at school?"
+          "When did you shut the door?",
+          "What did you shut down the computer?"
         ],
         "sink": [
-          "What did you sink in the water?",
-          "What did you sink last summer?"
+          "What year did the Titanic sink?",
+          "When did stock prices sink?"
         ],
         "slay": [
           "What did the hero slay in the story?",
           "What did you slay in the game?"
         ],
         "slide": [
-          "Where did you slide yesterday?",
-          "What did you slide in the playground?"
+          "When did you slide?",
+          "When did your car tires slide?"
         ],
         "spit": [
           "What did you spit out yesterday?",
-          "What did you spit in the sink?"
+          "Why did the camel spit?"
         ],
         "spin": [
           "What did you spin in class?",
@@ -499,8 +501,8 @@ const gameData: Record<string, { description: string; instructions: string; prom
           "Did you tear a ligament?"
         ],
         "upset": [
-          "What did upset you last week?",
-          "What did upset your friend yesterday?"
+          "Why did the news upset you?",
+          "When did you upset your friend?"
         ],
         "weave": [
           "What did you weave in art class?",
@@ -515,8 +517,8 @@ const gameData: Record<string, { description: string; instructions: string; prom
           "What did you wind around the pole?"
         ],
         "withdraw": [
-          "What did you withdraw from the bank?",
-          "What did you withdraw last week?"
+          "How much did you withdraw from the bank account?",
+          "When did you withdraw from the competition?"
         ],
         "withstand": [
           "What did you withstand last year?",
@@ -532,15 +534,15 @@ const gameData: Record<string, { description: string; instructions: string; prom
         ],
         "spread": [
           "What did you spread on the bread?",
-          "What did you spread yesterday?"
+          "Which rumor did you spread?"
         ],
         "lie": [
-          "Where did you lie yesterday?",
-          "Where did you lie down last week?"
+          "When did you lie down for a nap?",
+          "Where did you lie down for your nap?"
         ],
         "bind": [
-          "What did you bind yesterday?",
-          "What did you bind in class?"
+          "What two materials did you bind together?",
+          "When did you bind the materials?"
         ],
         "strive": [
           "What did you strive for last year?",
@@ -719,6 +721,7 @@ function buildPromptQueue() {
     ) {
       queue.push({
         question: values[1],
+        verb: key,
         correctAnswers: [values[0]],
         category: key,
       })
@@ -733,6 +736,7 @@ function buildPromptQueue() {
       const q = values[Math.floor(Math.random() * values.length)]
       queue.push({
         question: q,
+        verb: key,
         correctAnswers: [key],
         category: key,
       })
@@ -743,6 +747,7 @@ function buildPromptQueue() {
     values.forEach(v => {
       queue.push({
         question: v,
+        verb: key,
         correctAnswers: [v],
         category: key,
       })
@@ -807,9 +812,24 @@ function evaluate(type: "right" | "wrong" | "unclear") {
 
   if (!prompt.value) return
 
+  const shouldAppendCategory =
+    props.game === "Prove it!" &&
+    selectedCategory.value.includes("present perfect")
+
+  const finalQuestion = shouldAppendCategory
+    ? `${prompt.value.question} (${prompt.value.category})`
+    : prompt.value.question
+
   shownPrompts.value.push({
-    ...prompt.value,
-    is_correct: type === "right" ? true : type === "wrong" ? false : null,
+    question: finalQuestion,
+    verb: prompt.value.verb,
+    correctAnswers: prompt.value.correctAnswers,
+    category: prompt.value.category,
+    is_correct: type === "right"
+      ? true
+      : type === "wrong"
+      ? false
+      : null,
   })
 
   if (type === "right") rightCount.value++
@@ -818,13 +838,17 @@ function evaluate(type: "right" | "wrong" | "unclear") {
 
   snackbar.message = type.toUpperCase()
   snackbar.color =
-    type === "right" ? "success" :
-    type === "wrong" ? "error" :
-    "grey-darken-2"
+    type === "right"
+      ? "success"
+      : type === "wrong"
+      ? "error"
+      : "grey-darken-2"
 
   snackbar.show = true
   loadNextPrompt()
 }
+
+
 const flaggedPrompts = computed(() =>
   shownPrompts.value.filter(p => p.is_correct !== true)
 )
@@ -890,7 +914,7 @@ const rounds = shownPrompts.value.map((r, index) => ({
   question: r.question,
   pronoun: null,
   image: null,
-  label: null,
+  label: r.verb,
   correct_answer: r.correctAnswers,
   prompt_number: index + 1,
   user_answer: null,

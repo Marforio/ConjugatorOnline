@@ -12,20 +12,45 @@
     </div>
 
     <v-row v-else>
-      <v-col cols="12" md="4">
-        <div class="d-flex justify-end">
-          <v-select
-          v-model="selectedGame"
-          :items="availableGames"
-          label="Select Game"
-          outlined
-          dense
-          ></v-select>
+      <v-col cols="12">
+        <div class="d-flex align-center px-6">
+
+          <!-- LEFT: select -->
+          <div class="flex-shrink-0">
+            <v-select
+              v-model="selectedGame"
+              :items="availableGames"
+              label="Select Game"
+              variant="outlined"
+              density="compact"
+              style="max-width: 400px; min-width: 200px"
+            />
+          </div>
+
+          <!-- CENTER: title -->
+          <div class="flex-grow-1 text-center">
+            <h4 class="text-h4 font-weight-bold mb-0">
+              {{ selectedGame }}
+            </h4>
+          </div>
+
+          <!-- RIGHT: image (desktop only) -->
+          <div class="flex-shrink-0 d-none d-md-flex">
+            <v-img
+              :src="selectedGame ? gamePictures[selectedGame] : gamePictures['Pronoun Practice']"
+              alt="Game name"
+              max-width="400"
+              min-width="200"
+              contain
+            />
+          </div>
+
         </div>
       </v-col>
 
+
       <v-col cols="12" v-if="selectedGame && groupedGames[selectedGame]">
-        <h5 class="text-h5 font-weight-bold">{{ selectedGame }}</h5>
+        
 
         <v-row dense>
           <!-- Accuracy Pie -->
@@ -91,11 +116,14 @@
               </v-card-subtitle>
               <v-card-text v-if="currentError(selectedGame)">
                 <div class="text-center">
-                  <p>Can you explain why this answer was incorrect?</p>
-                  <div class="mb-4 d-flex justify-center align-center">
+                  <p v-if="selectedGame != 'Prove it!' && selectedGame != 'Pronunciation Challenge'">Can you explain why this answer was incorrect?</p>
+                  <p v-if="selectedGame === 'Prove it!'">Can you answer this question with the correct form of the irregular verb?</p>
+                  <p v-if="selectedGame === 'Pronunciation Challenge'">Can you pronounce this word correctly?</p>
+                  <v-divider gradient v-if="selectedGame === 'Pronunciation Challenge' || selectedGame === 'Prove it!'" style="margin-top: 20px; margin-bottom: 50px;"></v-divider>
+                  <div v-if="selectedGame === 'Pronoun Practice' || selectedGame === 'Quantifier Quest'" class="mb-4 d-flex justify-center align-center">
                         <v-img
-                            :src="`/images/pronoun_pics_resized/${currentError(selectedGame)?.image}`"
-                            alt="Pronoun Image"
+                            :src="(selectedGame === 'Quantifier Quest' ? quantifierImagePath : pronounImagePath) + currentError(selectedGame)?.image"
+                            alt="Prompt Image"
                             class="mt-3 mb-3 rounded-lg border-md"
                             max-width="150"
                             aspect-ratio="1"
@@ -105,7 +133,7 @@
                   <div class="my-6 text-center font-weight-light" style="font-size: 2rem;">
                     "{{ currentError(selectedGame)?.question }}"
                   </div>
-                  <div class="text-center text-overline">
+                  <div v-if="selectedGame != 'Prove it!' && selectedGame != 'Pronunciation Challenge'" class="text-center text-overline">
                     <em v-if="currentError(selectedGame)?.out_of_time || currentError(selectedGame)?.user_answer === ''">No answer submitted</em>
                         <span v-else>Your answer: {{ currentError(selectedGame)?.user_answer }}</span>
                     
@@ -135,6 +163,7 @@
           <div class="text-h6 mb-2">Game Details</div>
           <v-expansion-panels>
             <v-expansion-panel
+              v-if="selectedGame != 'Prove it!' && selectedGame != 'Pronunciation Challenge'"
               v-for="session in groupedGames[selectedGame].sessions"
               :key="session.session_id"
             >
@@ -150,6 +179,7 @@
                     <tr>
                       <th>#</th>
                       <th>Question</th>
+                      <th v-if="selectedGame === 'Quantifier Quest' || selectedGame === 'Pronoun Practice'">Image</th>
                       <th>Your Answer</th>
                       <th>Correct?</th>
                       <th>Typo?</th>
@@ -159,7 +189,8 @@
                   <tbody>
                     <tr v-for="round in session.rounds" :key="round.id">
                       <td>{{ round.prompt_number }}</td>
-                      <td>{{ round.question_text }}</td>
+                      <td>{{ round.question }}</td>
+                      <td v-if="selectedGame === 'Quantifier Quest' || selectedGame === 'Pronoun Practice'"><img :src="(selectedGame === 'Quantifier Quest' ? quantifierImagePath : pronounImagePath) + round.image" alt="Question Image" style="max-height: 40px;" /></td>
                       <td>{{ round.user_answer }}</td>
                       <td>
                         <v-icon :color="round.is_correct ? 'green' : 'red'">
@@ -183,6 +214,42 @@
                         <template v-else-if="round.typo_accepted">
                           <span class="badge bg-success">Approved</span>
                         </template>
+                      </td>
+                    </tr>
+                  </tbody>
+                </v-table>
+              </v-expansion-panel-text>
+            </v-expansion-panel>
+            <v-expansion-panel
+              v-if="selectedGame === 'Prove it!' || selectedGame === 'Pronunciation Challenge'"
+              v-for="session in groupedGames[selectedGame].sessions" 
+              :key="session.session_id"
+            >
+              <v-expansion-panel-title>
+                <span class="font-weight-medium">
+                  {{ session.correct_count }} correct out of {{ session.total_rounds }}
+                </span>
+                — {{ new Date(session.started_at).toLocaleString() }}
+              </v-expansion-panel-title>
+              <v-expansion-panel-text>
+                <v-table>
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th v-if="selectedGame === 'Prove it!'">Verb</th>
+                      <th>Question</th>
+                      <th>Correct?</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="round in session.rounds" :key="round.id">
+                      <td>{{ round.prompt_number }}</td>
+                      <td v-if="selectedGame === 'Prove it!'">{{ round.label }}</td>
+                      <td>{{ round.question }}</td>
+                      <td>
+                        <v-icon :color="round.is_correct ? 'green' : 'red'">
+                          {{ round.is_correct ? 'mdi-check-circle' : 'mdi-close-circle' }}
+                        </v-icon>
                       </td>
                     </tr>
                   </tbody>
@@ -222,6 +289,7 @@ interface OtherGameRound {
   id: number;
   user_answer: string;
   question: string;
+  label: string;
   image: string;
   prompt_number: number;
   is_correct: boolean | null;
@@ -260,6 +328,8 @@ interface Snackbar {
 }
 
 // ----- State -----
+const pronounImagePath = "/images/pronoun_pics_resized/";
+const quantifierImagePath = "/images/quantifier_pics_resized/";
 const loading = ref(true);
 const error = ref<string | null>(null);
 const groupedGames = ref<Record<string, GroupedGameData>>({});
@@ -323,8 +393,21 @@ const GAME_NAMES = [
   "Tricky Translator",
   "Passive Party",
   "Word Families",
-  "Regret Machine"
+  "Regret Machine",
+  "Prove it!",
+  "Pronunciation Challenge"
 ];
+const gamePictures: Record<string, string> = {
+  "Pronoun Practice": "/images/banners/PronounPractice.png",
+  "Quantifier Quest": "/images/banners/QuantifierQuest.png",
+  "Verb Mixer": "/images/banners/VerbMixer.png",
+  "Tricky Translator": "/images/banners/TrickyTranslator.png",
+  "Passive Party": "/images/banners/PassiveParty.png",
+  "Word Families": "/images/banners/WordFamilies.png",
+  "Regret Machine": "/images/banners/RegretMachine.png",
+  "Prove it!": "/images/banners/ProveIt.png",
+  "Pronunciation Challenge": "/images/banners/PronunciationChallenge.png"
+};
 
 // ----- Fetch and Group -----
 onMounted(async () => {
