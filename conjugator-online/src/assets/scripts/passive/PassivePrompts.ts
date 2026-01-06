@@ -175,7 +175,7 @@ export const passivePrompts = {
         level :  "essential"
     },
     26 : {
-        active : "The pilotis driving the car.",
+        active : "The pilot is driving the car.",
         passive : "The car ____________ by the pilot.",
         tense : "present continuous",
         answer : "is being driven",
@@ -1095,7 +1095,7 @@ export const passivePrompts = {
         active : "The jury eliminated 3 contestants.",
         passive : "3 contestants ____________ by the jury.",
         tense : "past simple",
-        answer : "were elininated",
+        answer : "were eliminated",
         level :  "essential"
     },
     158 : {

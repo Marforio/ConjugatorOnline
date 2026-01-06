@@ -998,7 +998,7 @@ export default defineComponent({
 
     const activeTab = ref("grammar-feedback");
     const tabItems = [
-      { value: "grammar-feedback", label: "Errors Feedback" },
+      { value: "grammar-feedback", label: "Error Feedback" },
       { value: "vocabulary", label: "Vocabulary" },
       { value: "goals", label: "Achievements" },
       { value: "conjugation-game", label: "Conjugator" },

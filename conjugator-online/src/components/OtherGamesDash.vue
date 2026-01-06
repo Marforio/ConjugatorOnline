@@ -52,7 +52,7 @@
       <v-col cols="12" v-if="selectedGame && groupedGames[selectedGame]">
         
 
-        <v-row dense>
+        <v-row dense class="my-4">
           <!-- Accuracy Pie -->
           <v-col cols="12" md="6">
             <v-card class="chart-card pa-4" elevation="2">
@@ -98,16 +98,73 @@
             </v-card>
           </v-col>
         </v-row>
+        
+        <!-- Achievements Card -->
+         <v-row dense>
+          <v-col v-if="automaticAchievements.length > 0" cols="12" lg="6">
+            <v-card elevation="2" class="chart-card pa-4 mb-6">
+              <v-card-title class="text-h5">
+                <v-icon class="me-4">mdi-trophy</v-icon>
+                Achievements in {{ selectedGame }}
+                <v-icon class="ms-3">mdi-balloon</v-icon>
+              </v-card-title>
+
+              <v-card-text class="achievement-card-body">
+                <v-progress-linear v-if="loading" indeterminate color="primary" class="mb-4" />
+
+                <v-alert v-else-if="error" type="error" class="mb-4">
+                  {{ error }}
+                </v-alert>
+
+                <!-- scroll container -->
+                <div class="achievement-scroll">
+                  <v-list v-if="automaticAchievements.length">
+                    <v-list-item
+                      v-for="(achievement, index) in automaticAchievements"
+                      :key="achievement.id"
+                      class="mb-4 golden-list-item"
+                    >
+                      <v-list-item-content>
+                        <v-list-item-title class="font-weight-bold">
+                          {{ achievement.name }}
+                          <v-icon class="m-2" icon="mdi-star" />
+                        </v-list-item-title>
+
+                        <v-list-item-subtitle class="text-wrap mb-2">
+                          {{ achievement.description }}
+                        </v-list-item-subtitle>
+
+                        <v-list-item-subtitle>
+                          <strong>Achieved on:</strong> {{ formatDate(achievement.achieved_on) }}
+                        </v-list-item-subtitle>
+                      </v-list-item-content>
+
+                      <v-divider
+                        v-if="index < automaticAchievements.length - 1"
+                        class="my-4"
+                      />
+                    </v-list-item>
+                  </v-list>
+
+                  <div
+                    v-else
+                    class="text-center mt-8 text-medium-emphasis"
+                  >
+                    No achievements yet
+                  </div>
+                </div>
+              </v-card-text>
+            </v-card>
+          </v-col>
 
         <!-- Error Explainer -->
-          <v-row>
           <v-col cols="12" lg="6" xl="4">
             <v-card
-              class="pa-4 d-flex flex-column justify-space-between"
+              class="chart-card pa-3 d-flex flex-column justify-space-between"
               elevation="3"
-              style="background-color: #fff9db; min-height: 430px;"
+              style="background-color: #eef5ee"
             >
-              <v-card-title class="text-h5 font-weight-bold">
+              <v-card-title class="text-h5">
                 <v-icon class="me-3 mb-2">mdi-lightbulb-on-10</v-icon>
                 Error Explainer
               </v-card-title>
@@ -120,12 +177,12 @@
                   <p v-if="selectedGame === 'Prove it!'">Can you answer this question with the correct form of the irregular verb?</p>
                   <p v-if="selectedGame === 'Pronunciation Challenge'">Can you pronounce this word correctly?</p>
                   <v-divider gradient v-if="selectedGame === 'Pronunciation Challenge' || selectedGame === 'Prove it!'" style="margin-top: 20px; margin-bottom: 50px;"></v-divider>
-                  <div v-if="selectedGame === 'Pronoun Practice' || selectedGame === 'Quantifier Quest'" class="mb-4 d-flex justify-center align-center">
+                  <div v-if="selectedGame === 'Pronoun Practice' || selectedGame === 'Quantifier Quest'" class="mb-2 d-flex justify-center align-center">
                         <v-img
                             :src="(selectedGame === 'Quantifier Quest' ? quantifierImagePath : pronounImagePath) + currentError(selectedGame)?.image"
                             alt="Prompt Image"
-                            class="mt-3 mb-3 rounded-lg border-md"
-                            max-width="150"
+                            class="mt-1 mb-1 rounded-lg border-md"
+                            max-width="125"
                             aspect-ratio="1"
                             cover
                         />
@@ -280,7 +337,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from "vue";
+import { ref, onMounted, computed, watch } from "vue";
 import api from "@/axios";
 import PieChart from "@/components/charts/PieChart.vue";
 
@@ -327,9 +384,20 @@ interface Snackbar {
   visible: boolean;
 }
 
+interface Achievement {
+  id: number
+  student: number
+  student_username: string
+  name: string
+  description: string
+  evidence: string
+  criteria_key: string
+  achieved_on: string
+  manually_created: boolean
+}
 // ----- State -----
 const pronounImagePath = "/images/pronoun_pics_resized/";
-const quantifierImagePath = "/images/quantifier_pics_resized/";
+const quantifierImagePath = "/images/quant_pics_resized/";
 const loading = ref(true);
 const error = ref<string | null>(null);
 const groupedGames = ref<Record<string, GroupedGameData>>({});
@@ -338,6 +406,10 @@ const snackbar = ref<Snackbar>({
   color: "success",
   visible: false,
 });
+const allAchievements = ref<Achievement[]>([]);
+const automaticAchievements = ref<Achievement[]>([])
+const manualAchievements = ref<Achievement[]>([])
+const achievedKeys = ref<Set<string>>(new Set())
 
 const selectedGame = ref<string | null>(null);
 // Filtered games with at least one session
@@ -412,6 +484,8 @@ const gamePictures: Record<string, string> = {
 // ----- Fetch and Group -----
 onMounted(async () => {
   try {
+    await fetchAchievements();
+    
     const res = await api.get<OtherGameSession[]>("/other-games-sessions/");
     const sessions = res.data;
     console.log(sessions)
@@ -451,7 +525,6 @@ onMounted(async () => {
     }
 
     groupedGames.value = grouped;
-    console.log(groupedGames)
 
     // select the first available game
     selectedGame.value = availableGames.value[0] ?? null;
@@ -464,6 +537,42 @@ onMounted(async () => {
   }
 });
 
+// Fetch all achievements
+const fetchAchievements = async () => {
+  loading.value = true;
+  error.value = null;
+  try {
+    const res = await api.get<Achievement[]>('/achievements/');
+    allAchievements.value = res.data;
+
+    // Split manual vs automatic
+    manualAchievements.value = res.data.filter(a => a.manually_created);
+  } catch (err) {
+    console.error('Failed to fetch achievements:', err);
+    error.value = 'Failed to load achievements.';
+  } finally {
+    loading.value = false;
+  }
+};
+
+// Watch for game selection changes
+watch(selectedGame, (game) => {
+  automaticAchievements.value = filterAchievementsForGame(game ?? "");
+});
+
+const formatDate = (dateStr: string): string => {
+  const date = new Date(dateStr)
+  return date.toLocaleDateString()
+}
+
+// ----- Filter achievements by selected game -----
+const filterAchievementsForGame = (game: string) => {
+  if (!game) return [];
+  return allAchievements.value
+    .filter(a => !a.manually_created)               // automatic only
+    .filter(a => a.name.startsWith(game) || a.criteria_key.startsWith(game)) // beginsWith
+    .sort((a, b) => new Date(b.achieved_on).getTime() - new Date(a.achieved_on).getTime());
+};
 // ----- Pie Chart Data -----
 const getPieChartData = (gameData: GroupedGameData) => [
   { label: "Correct", value: gameData.totalCorrect },
@@ -507,7 +616,7 @@ const nextError = (gameName: string): void => {
 
 <style scoped>
 .chart-card {
-  min-height: 400px;
+  height: 420px;
   display: flex;
   flex-direction: column;
 }
@@ -517,4 +626,28 @@ const nextError = (gameName: string): void => {
   flex-direction: column;
   justify-content: center;
 }
+
+.golden-list-item {
+  background: linear-gradient(
+    135deg,
+    #fff7d6,
+    #f3e3a3
+  );
+  border: 1px solid rgba(184, 134, 11, 0.45); /* muted gold */
+  border-radius: 16px;
+  padding: 18px 20px;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+/* Titles pop slightly */
+.golden-list-item .v-list-item-title {
+  color: #5c4500;
+}
+
+/* Subtitles stay soft */
+.golden-list-item .v-list-item-subtitle {
+  color: #6b5a1f;
+}
+
+
 </style>

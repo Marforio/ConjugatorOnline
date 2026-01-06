@@ -5,7 +5,7 @@
       <v-col cols="12" lg="6">
         <v-card elevation="2" class="pa-4 mb-6">
           <v-card-title class="text-h5">
-            <v-icon class="me-3">mdi-trophy</v-icon>Achievements in the Conjugator
+            <v-icon class="me-3">mdi-trophy</v-icon>Achievements in language games
           </v-card-title>
           <v-card-text>
             <v-progress-linear v-if="loading" indeterminate color="primary" class="mb-4" />

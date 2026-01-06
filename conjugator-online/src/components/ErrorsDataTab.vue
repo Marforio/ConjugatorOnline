@@ -1,5 +1,22 @@
 <template>
-  <div>
+  <div v-if="loading === false && errors.length === 0">
+    <v-card>
+      <v-img src="/images/patience.jpg" style="max-height: 280px; margin-top: 70px; margin-bottom: 20px;"></v-img>
+      <v-card-text>
+        <div class="d-flex flex-column align-center">
+          <p class="text-h6">Please wait for the teacher to upload some feedback data.</p>
+          <p class="text-subtitle-1 mt-2">While you wait, why not play the conjugation game? <v-icon class="mx-3">mdi-arrow-right</v-icon> <v-tooltip text="Conjugator Game" location="bottom">
+          <template v-slot:activator="{ props }">
+            <v-btn icon v-bind="props" :to="{ name: 'conjugator' }">
+              <v-icon>mdi-controller</v-icon>
+            </v-btn>
+          </template>
+        </v-tooltip></p>
+        </div>
+      </v-card-text>
+    </v-card>
+  </div>
+  <div v-else>
     <!-- Chart Card -->
     <div v-if="xs">
       <v-card class="pa-4 mb-6" elevation="2" :style="cardStyle">
