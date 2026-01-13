@@ -78,7 +78,7 @@
               <v-card-title class="text-h6">Accuracy Trend</v-card-title>
               <v-card-text>
                 <v-sparkline
-                  :model-value="groupedGames[selectedGame].accuracyTrend"
+                  :model-value="[...groupedGames[selectedGame].accuracyTrend].reverse()"
                   :gradient="sparklineGradients[4]"
                   color="blue"
                   line-width="3"
@@ -88,7 +88,7 @@
                   auto-draw-duration="1200"
                   auto-draw-easing="ease"
                   padding="20"
-                  :labels="generateSparklineLabels(sessionAccuracyTrend)"
+                  :labels="generateSparklineLabels([...groupedGames[selectedGame].accuracyTrend].reverse())"
                   :show-labels="true"
                 />
                 <div class="text-caption text-muted text-center mt-2">

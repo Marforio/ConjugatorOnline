@@ -36,7 +36,7 @@ export default {
     },
     handleGameOver(payload) {
       this.results = payload;
-      this.changeScene('QuantScene03_Results');
+      this.changeScene('QuantScene02_Results');
       }
   },
 };

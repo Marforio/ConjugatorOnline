@@ -151,7 +151,7 @@
       <v-btn color="primary" size="x-large" @click="resetGame" class="me-5">
         PLAY AGAIN (SAME PLAYER)
       </v-btn>
-      <RouterLink :to="{ name: 'tools' }">
+      <RouterLink :to="{ name: 'teacher-tools' }">
         <v-btn color="info" size="x-large">
         PLAY WITH OTHER PLAYER
       </v-btn>
@@ -463,10 +463,6 @@ const gameData: Record<string, { description: string; instructions: string; prom
         "sink": [
           "What year did the Titanic sink?",
           "When did stock prices sink?"
-        ],
-        "slay": [
-          "What did the hero slay in the story?",
-          "What did you slay in the game?"
         ],
         "slide": [
           "When did you slide?",
