@@ -1,7 +1,7 @@
 <!-- src/components/passive/passive_scenes/PassiveScene00_Start.vue -->
 <template>
   <v-container class="pa-6">
-    <v-card class="mx-auto my-auto px-3 py-1" max-width="720" elevation="3">
+    <v-card class="mx-auto my-auto px-3 py-1" max-width="720" c>
       <v-card-title class="mb-4">
         <div>
           <div class="d-flex justify-center">
@@ -34,7 +34,7 @@
             ></v-select>
 
             <v-card-title class="font-weight-medium mt-4">Rounds</v-card-title>
-            <div class="ms-4">Fixed to <strong>30 rounds</strong></div>
+            <div class="ms-4">Fixed to <strong>24 rounds</strong></div>
           </v-col>
         </v-row>
 
@@ -42,7 +42,14 @@
 
       <v-card-actions>
         <v-spacer />
-        <v-btn style="justify-self: center;" color="primary" @click="start" :disabled="!valid">Start Game</v-btn>
+        <div class="d-flex justify-space-between align-center w-100">
+            <RouterLink :to="{ name: 'games' }">
+            <v-btn icon elevation="0" size="x-large" class="ms-3" @click="goBack">
+          <v-icon color="grey-darken-3" size="x-large">mdi-arrow-left-circle</v-icon></v-btn>
+        </RouterLink>
+           <v-btn style="justify-self: center;" color="primary" @click="start" :disabled="!valid">Start Game</v-btn>
+        </div>
+        
       </v-card-actions>
     </v-card>
   </v-container>
@@ -61,7 +68,7 @@ const tenseOptions = [
 const selections = ref({
   level: 'essential',
   tenseGroup: 'both',
-  numRounds: 30,
+  numRounds: 24,
 });
 
 const valid = computed(() => !!selections.value.level && !!selections.value.tenseGroup);

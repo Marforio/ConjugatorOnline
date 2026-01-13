@@ -182,12 +182,12 @@
                             :src="(selectedGame === 'Quantifier Quest' ? quantifierImagePath : pronounImagePath) + currentError(selectedGame)?.image"
                             alt="Prompt Image"
                             class="mt-1 mb-1 rounded-lg border-md"
-                            max-width="125"
+                            max-width="110"
                             aspect-ratio="1"
                             cover
                         />
                   </div>
-                  <div class="my-6 text-center font-weight-light" style="font-size: 2rem;">
+                  <div class="my-2 text-center font-weight-light" style="font-size: 1.2rem;">
                     "{{ currentError(selectedGame)?.question }}"
                   </div>
                   <div v-if="selectedGame != 'Prove it!' && selectedGame != 'Pronunciation Challenge'" class="text-center text-overline">
@@ -505,14 +505,17 @@ onMounted(async () => {
     }
 
  // group sessions
-    for (const s of sessions) {
-      if (!GAME_NAMES.includes(s.game_name)) continue;
-      const group = grouped[s.game_name];
-      group.sessions.push(s);
-      group.totalRounds += s.total_rounds ?? 0;
-      group.totalCorrect += s.correct_count ?? 0;
-      group.totalIncorrect += (s.total_rounds ?? 0) - (s.correct_count ?? 0);
-    }
+  for (const s of sessions) {
+    const baseName = normalizeGameName(s.game_name)
+    if (!GAME_NAMES.includes(baseName)) continue
+
+    const group = grouped[baseName]
+    group.sessions.push(s)
+    group.totalRounds += s.total_rounds ?? 0
+    group.totalCorrect += s.correct_count ?? 0
+    group.totalIncorrect += (s.total_rounds ?? 0) - (s.correct_count ?? 0)
+  }
+
 
     // compute trends and incorrect rounds
     for (const [name, data] of Object.entries(grouped)) {
@@ -598,6 +601,18 @@ const requestTypo = async (round: OtherGameRound) => {
 };
 
 // ----- Error Explainer -----
+function normalizeGameName(name: string): string {
+  if (!name) return name
+
+  if (name.startsWith("Quantifier Quest")) return "Quantifier Quest"
+  if (name.startsWith("Pronoun Practice")) return "Pronoun Practice"
+  if (name.startsWith("Prove it!")) return "Prove it!"
+  if (name.startsWith("Pronunciation Challenge")) return "Pronunciation Challenge"
+
+  return name
+}
+
+
 const currentError = (gameName: string): OtherGameRound | null => {
   const game = groupedGames.value[gameName];
   if (!game || !game.incorrectRounds.length) return null;

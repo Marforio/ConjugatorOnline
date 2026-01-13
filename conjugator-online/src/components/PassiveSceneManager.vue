@@ -55,8 +55,8 @@ function handleStartGame(selections) {
     },
   });
 
-  // sample 30 prompts (may repeat if pool smaller)
-  promptsForGame.value = samplePrompts(pool, selections.numRounds || 30);
+  // sample 24 prompts (may repeat if pool smaller)
+  promptsForGame.value = samplePrompts(pool, selections.numRounds || 24);
 
   // go to game
   changeScene('PassiveScene01_Game');

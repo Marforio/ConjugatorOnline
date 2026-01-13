@@ -17,8 +17,13 @@ const QUESTION_MAP = {
 };
 
 class QuantifierSet {
-  constructor(numPrompts = 30) {
+  /**
+   * @param {number} numPrompts
+   * @param {{ variant?: "countable" | "uncountable" | "all" }} options
+   */
+  constructor(numPrompts = 30, options = {}) {
     this.numPrompts = numPrompts;
+    this.variant = options.variant || 'all'; // "countable" | "uncountable" | "all"
     this.prompts = [];
     this.remaining = [];
   }
@@ -28,24 +33,31 @@ class QuantifierSet {
     const uncountablePool = [];
 
     Object.values(quantifierData).forEach(item => {
-      if (item.countable) {
-        countablePool.push(item);
-      } else {
-        uncountablePool.push(item);
-      }
+      if (item.countable) countablePool.push(item);
+      else uncountablePool.push(item);
     });
 
-    const half = Math.floor(this.numPrompts / 2);
+    let selected = [];
 
-    const selected = [
-      ...this._sample(countablePool, half),
-      ...this._sample(uncountablePool, half)
-    ];
+    // --- NEW: choose pool based on variant ---
+    if (this.variant === 'countable') {
+      selected = this._sampleWithRepeat(countablePool, this.numPrompts);
+    } else if (this.variant === 'uncountable') {
+      selected = this._sampleWithRepeat(uncountablePool, this.numPrompts);
+    } else {
+      // "all" (mixed): roughly half countable, half uncountable.
+      // If one pool is smaller, we repeat from that pool as needed.
+      const half = Math.floor(this.numPrompts / 2);
+      const rest = this.numPrompts - half;
+
+      selected = [
+        ...this._sampleWithRepeat(countablePool, half),
+        ...this._sampleWithRepeat(uncountablePool, rest),
+      ];
+    }
 
     this.prompts = this._shuffle(
-      selected.map((item, index) =>
-        this._createPrompt(item, index + 1)
-      )
+      selected.map((item, index) => this._createPrompt(item, index + 1))
     );
 
     this.remaining = [...this.prompts];
@@ -92,6 +104,22 @@ class QuantifierSet {
 
   _sample(array, n) {
     return this._shuffle([...array]).slice(0, n);
+  }
+
+  // NEW: sample n items, repeating if the pool is smaller than n
+  _sampleWithRepeat(array, n) {
+    if (!Array.isArray(array) || array.length === 0 || n <= 0) return [];
+
+    const shuffled = this._shuffle([...array]);
+    const out = [];
+    let idx = 0;
+
+    while (out.length < n) {
+      out.push(shuffled[idx % shuffled.length]);
+      idx++;
+    }
+
+    return out;
   }
 
   _shuffle(array) {

@@ -1,17 +1,19 @@
-/* quantifierGame.js
-   API intentionally matches PronounGame from your original project.
-*/
-
+// quantifierGame.js
 import { QuantifierSet } from './quantifierSets';
 
 class QuantifierGame {
   /**
-   * settings: { numPrompts: number }
+   * settings: { numPrompts: number, variant: "countable"|"uncountable"|"all" }
    */
   constructor(settings = {}) {
     this.settings = settings;
     this.numPrompts = settings.numPrompts || 30;
-    this.quantifierSet = new QuantifierSet(this.numPrompts);
+
+    // NEW: which prompt pool to use
+    this.variant = settings.variant || 'all';
+
+    // pass variant to set so it can filter
+    this.quantifierSet = new QuantifierSet(this.numPrompts, { variant: this.variant });
 
     this.currentPrompt = null;
     this.rightCount = 0;
@@ -25,7 +27,6 @@ class QuantifierGame {
 
   async start() {
     await this.quantifierSet.loadPrompts();
-    // load the first prompt into currentPrompt but DO NOT advance again
     this.currentPrompt = this.quantifierSet.getPrompt();
     this.active = true;
   }
@@ -133,7 +134,7 @@ class QuantifierGame {
   getResults() {
     return this.results.map(r => ({
       ...r,
-      elapsedTime: r.elapsedTime ?? this.elapsedTimes[r.number] ?? 0
+      elapsedTime: r.elapsedTime ?? this.elapsedTimes[r.number] ?? 0,
     }));
   }
 
@@ -154,7 +155,8 @@ class QuantifierGame {
       total: this.results.length,
       correct: this.rightCount,
       incorrect: this.wrongCount,
-      accuracy: this.results.length ? Math.round((this.rightCount / this.results.length) * 100) : 0
+      accuracy: this.results.length ? Math.round((this.rightCount / this.results.length) * 100) : 0,
+      variant: this.variant,
     };
   }
 

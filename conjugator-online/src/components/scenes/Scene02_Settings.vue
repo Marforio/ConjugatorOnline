@@ -1,5 +1,5 @@
 <template>
-  <v-sheet height="100vh" class="pa-6" color="grey-lighten-4">
+  <v-sheet height="100vh" class="py-2 px-6" color="grey-lighten-4">
     <!-- Large screens: side-by-side layout -->
     <v-container v-if="$vuetify.display.smAndUp">
       <div class="text-h3 mb-4">Game settings</div>
@@ -7,8 +7,8 @@
             <!-- Quick Play Section -->
             <v-col cols="12" lg="6">
               <v-card class="pa-6" color="white" elevation="2">
-                <h2 class="text-h5 mb-3">Quick Play</h2>
-                <p class="text-body-1 mb-6">Choose a predefined game package</p>
+                <h2 class="text-h5 mb-2">Quick Play</h2>
+                <p class="text-body-1 mb-2">Choose a predefined game package</p>
 
                 <v-row dense>
                   <v-col cols="12" sm="6" v-for="(btn, index) in quickPlayButtons" :key="btn.label">
@@ -29,20 +29,26 @@
             <v-col cols="12" lg="6">
             <v-card class="pa-3" color="white" elevation="1">
               <h2 class="text-h5 mb-2">Custom Play</h2>
-              <p class="text-body-1 mb-6">Define your own settings</p>
+              <p class="text-body-1 mb-4">Define your own settings</p>
 
               <!-- Verb Set -->
               <v-card class="mb-2" color="grey-lighten-3" flat>
                 <v-card-text class="py-2 px-3">
                   <h5 class="text-subtitle-2 mb-2">Verb set</h5>
-                  <v-radio-group v-model="selectedVerbSet" row density="compact">
-                    <v-radio
-                      v-for="set in options.verb_sets"
-                      :key="set"
-                      :label="set"
-                      :value="set"
-                      density="compact"
-                    />
+                  <v-radio-group v-model="selectedVerbSet" density="compact">
+                    <v-row dense>
+                      <v-col
+                        v-for="set in options.verb_sets"
+                        :key="set"
+                        cols="6"
+                      >
+                        <v-radio
+                          :label="set"
+                          :value="set"
+                          density="compact"
+                        />
+                      </v-col>
+                    </v-row>
                   </v-radio-group>
                 </v-card-text>
               </v-card>
@@ -112,7 +118,7 @@
                     <div v-bind="props">
                       <v-btn
                         color="success"
-                        class="mt-2 mx-auto"
+                        class="mt-3 mb-3 mx-auto"
                         style="max-width: 300px; pointer-events: none; opacity: 0.6;"
                       >
                         Confirm custom settings

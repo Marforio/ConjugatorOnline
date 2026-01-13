@@ -2,7 +2,7 @@
   <v-container v-if="results" fluid class="pa-4">
     <!-- Heading -->
     <v-row v-if="$vuetify.display.lgAndUp" class="m-2" justify="center">
-      <h1 class="text-h2">Quantifier Practice Results</h1>
+      <h1 class="text-h2">Quantifier Quest Results</h1>
     </v-row>
 
     <v-row align="start" justify="center" class="settings-scene">

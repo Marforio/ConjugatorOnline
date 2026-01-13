@@ -36,6 +36,11 @@
           <v-icon start icon="mdi-timer-outline" class="me-2" />
           30 sec / round
         </v-list-item>
+        <v-list-item>
+        <v-icon start icon="mdi-format-list-bulleted" class="me-2" />
+        {{ variantLabel }}
+      </v-list-item>
+
 
         <v-divider />
 
@@ -43,8 +48,10 @@
           <v-list-item-title>
             <p class="font-weight-medium">Reminder:</p>
             <ul>
-              <li class="text-wrap">Countable nouns → many / few</li>
-              <li class="text-wrap">Uncountable nouns → much / little</li>
+              <li class="text-wrap text-caption">Countable nouns → many / a few</li>
+              <li class="text-wrap text-caption">Uncountable nouns → much / a little</li>
+              <li class="text-wrap text-caption">Use 'a lot of' for big quantities of uncountable nouns in declarative sentences.</li>
+              <li class="text-wrap text-caption">Not allowed: <span class="font-italic">some, any, several, plenty</span></li>
             </ul>
           </v-list-item-title>
         </v-list-item>
@@ -316,6 +323,13 @@ import api from '@/axios';
 
 const router = useRouter();
 const emit = defineEmits(['gameOver']);
+const props = defineProps({
+  gameSettings: {
+    type: Object,
+    default: () => ({})
+  }
+})
+
 
 const PROMPT_MAP = {
   "a large quantity of": [["I want", "I see", "I have", "I bought"],["big quantity", ""]], // target = ["many", "a lot of"]
@@ -331,7 +345,12 @@ const PROMPT_MAP = {
 };
 
 
-const gameSettings = reactive({ numPrompts: 20 }); // Number of prompts must be an even number
+const gameSettings = reactive({
+  // Start scene will send { variant, numRounds }
+  numPrompts: props.gameSettings?.numRounds ?? props.gameSettings?.numPrompts ?? 30,
+  variant: props.gameSettings?.variant ?? 'all', // "countable" | "uncountable" | "all"
+})
+
 
 const game = ref(null);
 const gameStarted = ref(false);
@@ -368,6 +387,14 @@ const submitButtonText = computed(() =>
   timeLeft.value <= 0 ? 'Next' : 'Submit'
 );
 
+const variantLabel = computed(() => {
+  return gameSettings.variant === 'countable'
+    ? 'Countables Only'
+    : gameSettings.variant === 'uncountable'
+      ? 'Uncountables Only'
+      : 'All Nouns'
+})
+
 
 const progressValue = computed(
   () => (promptCounter.value / gameSettings.numPrompts) * 100
@@ -376,7 +403,11 @@ const progressValue = computed(
 const showBlockingDialog = ref(false);
 
 async function startGame() {
-  game.value = new QuantifierGame(gameSettings);
+  game.value = new QuantifierGame({
+    numPrompts: gameSettings.numPrompts,
+    variant: gameSettings.variant,
+  });
+
   showBlockingDialog.value = true;
   await game.value.start();
 
@@ -539,7 +570,7 @@ async function endGame() {
   }));
 
   const payload = {
-    game_name: 'Quantifier Quest',
+    game_name: `Quantifier Quest ${variantLabel.value}`,
     total_rounds: gameSettings.numPrompts,
     correct_count: rightCount.value,
     wrong_count: wrongCount.value,

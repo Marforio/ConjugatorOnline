@@ -27,6 +27,13 @@
           </v-list-item>
 
           <v-list-item>
+            <template #prepend><v-icon icon="mdi-timer-outline" /></template>
+            <v-list-item-title>
+              {{ ROUND_SECONDS }} seconds per prompt
+            </v-list-item-title>
+          </v-list-item>
+
+          <v-list-item>
             <template #prepend><v-icon icon="mdi-pencil" /></template>
             <v-list-item-title>
               Type only the passive verb phrase
@@ -55,7 +62,7 @@
         <div class="game-top">
           <div class="d-flex justify-space-between mb-2">
             <div>Round {{ currentRound + 1 }} / {{ numRounds }}</div>
-            <div class="text-caption">⏱ {{ elapsedTime }} s</div>
+            <div class="text-subtitle-2 timer-pill" :class="timerClass">⏱ {{ timeLeft }} s</div>
           </div>
         </div>
 
@@ -76,7 +83,10 @@
 
           <v-card class="pa-3 my-4" elevation="3" style="margin-bottom: 20px;">
             <v-card-title>Active</v-card-title> 
-            <v-card-text class="text-wrap">{{ currentPrompt.active }}</v-card-text>
+            <v-card-text
+              class="text-wrap"
+              v-html="highlightedActive"
+            />
 
             <v-card-title>Passive</v-card-title>
             <v-card-text class="text-wrap">{{ currentPrompt.passive }}</v-card-text>
@@ -122,23 +132,16 @@
     <!-- WRONG ANSWER DIALOG -->
     <v-dialog v-model="showWrongDialog" persistent max-width="420">
       <v-card @keydown.enter.prevent="acknowledgeWrong" color="yellow-lighten-2 pa-3">
-        <v-card-title class="text-h6">Wrong <v-icon icon="mdi-emoticon-sad-outline"/></v-card-title>
-
+        <v-card-title class="text-h6 mt-4">
+          {{ lastOutOfTime ? "Time ran out" : "Wrong" }}
+          <v-icon :icon="lastOutOfTime ? 'mdi-timer-off-outline' : 'mdi-emoticon-sad-outline'" />
+        </v-card-title>
         <v-card-text>
-          <div class="mb-2">
-            Your answer:
-            <strong>{{ lastUserAnswer || '—' }}</strong>
-          </div>
-          <div class="mb-2">
-            Tense:
-            <strong>{{ lastTense }}</strong>
-          </div>
-          <div>
-            Correct answer:
-            <strong>{{ lastCorrectAnswer }}</strong>
-          </div>
+            <p v-html="highlightedActive" class="font-italic"></p>
+            <p>Tense: <strong>{{ lastTense }}</strong></p>
+            <p>Your answer: <strong>{{ lastUserAnswer || '—' }}</strong></p>
+            <p>Correct answer: <strong>{{ lastCorrectAnswer }}</strong></p>
         </v-card-text>
-
         <v-card-actions class="justify-end">
           <v-btn ref="wrongOkButton" color="secondary" @click="acknowledgeWrong">
             OK
@@ -155,6 +158,11 @@ import { ref, computed, onMounted, onBeforeUnmount, nextTick, watch } from 'vue'
 import { checkAnswer } from '@/assets/scripts/passive/PassivePromptEngine'
 import api from '@/axios'
 
+const ROUND_SECONDS = 25
+const WARN_SECONDS = 10
+const DANGER_SECONDS = 4
+const timeLeft = ref(ROUND_SECONDS)
+let timer = null
 
 const props = defineProps({ prompts: Array })
 const emit = defineEmits(['gameOver'])
@@ -181,19 +189,74 @@ const gameStarted = ref(false)
 
 const resultsStore = ref([]);
 
+function highlightSubstring(text, highlight) {
+  if (!text || !highlight) return text
 
-/* TIMER (elapsed only) */
-const elapsedTime = ref(0)
-let timer = null
+  return text.replace(
+    highlight,
+    `<span class="font-weight-bold">${highlight}</span>`
+  )
+}
 
+
+const highlightedActive = computed(() => {
+  const prompt = currentPrompt.value
+  return highlightSubstring(prompt.active, prompt.highlight)
+})
+
+
+/* TIMER and handling TIMEOUT  */
 function startTimer() {
   stopTimer()
-  elapsedTime.value = 0
-  timer = setInterval(() => elapsedTime.value++, 1000)
+  timeLeft.value = ROUND_SECONDS
+
+  timer = setInterval(() => {
+    if (showWrongDialog.value || inputLocked.value) return
+
+    timeLeft.value--
+
+    if (timeLeft.value <= 0) {
+      timeLeft.value = 0
+      handleTimeOut()
+    }
+  }, 1000)
+
 }
+
 function stopTimer() {
-  clearInterval(timer)
+  if (timer) clearInterval(timer)
+  timer = null
 }
+
+function handleTimeOut() {
+  if (inputLocked.value) return
+  inputLocked.value = true
+
+  stopTimer()
+
+  const user = userAnswer.value.trim()
+
+  // set dialog data
+  lastUserAnswer.value = user || '—'
+  lastCorrectAnswer.value = currentPrompt.value.answer
+  lastTense.value = currentPrompt.value.tense
+  lastOutOfTime.value = true
+
+  // record as wrong with timeout flag
+  recordRound(user, false, true)
+
+  // show dialog (student must click OK)
+  showWrongDialog.value = true
+}
+
+
+const timerClass = computed(() => {
+  if (!gameStarted.value) return ''
+  if (timeLeft.value <= DANGER_SECONDS) return 'timer-danger'
+  if (timeLeft.value <= WARN_SECONDS) return 'timer-warn'
+  return 'timer-ok'
+})
+const lastOutOfTime = ref(false)
 
 
 /* FEEDBACK */
@@ -215,6 +278,7 @@ function begin() {
 }
 
 
+
 const progressValue = computed(() =>
   (currentRound.value / numRounds) * 100
 )
@@ -228,40 +292,42 @@ function submit() {
   const user = userAnswer.value.trim()
   const correct = checkAnswer(currentPrompt.value, user)
 
-  recordRound(user, correct)
+  recordRound(user, correct, false)
 
   if (correct) {
     showFloatingFeedback.value = true
     setTimeout(() => (showFloatingFeedback.value = false), 900)
-
-    next() // auto-advance
+    next()
   } else {
     lastUserAnswer.value = user
     lastCorrectAnswer.value = currentPrompt.value.answer
     lastTense.value = currentPrompt.value.tense
     showWrongDialog.value = true
+    lastOutOfTime.value = false
+    showWrongDialog.value = true
+
   }
 }
+
 
 function next() {
   userAnswer.value = ''
 
   if (currentRound.value === numRounds - 1) {
-  // last round finished — send payload
-  finishGame();
-  return;
+    finishGame()
+    return
   }
-
 
   currentRound.value++
   startTimer()
-
   unlockInputWithDelay()
 }
 
 
-function recordRound(user, correct) {
-  const roundNumber = resultsStore.value.length + 1;
+
+function recordRound(user, correct, outOfTime = false) {
+  const roundNumber = resultsStore.value.length + 1
+  const secondsUsed = ROUND_SECONDS - timeLeft.value
 
   resultsStore.value.push({
     question: currentPrompt.value.active,
@@ -269,16 +335,17 @@ function recordRound(user, correct) {
     prompt_number: roundNumber,
     user_answer: user,
     is_correct: correct,
-    out_of_time: false,
-    elapsed_time: elapsedTime.value,
+    out_of_time: outOfTime,
+    elapsed_time: secondsUsed, // how long they took
     typo: false,
     typo_requested: false,
     typo_accepted: null,
-  });
+  })
 
-  correct ? rightCount.value++ : wrongCount.value++;
-  remaining.value--;
+  correct ? rightCount.value++ : wrongCount.value++
+  remaining.value--
 }
+
 
 function acknowledgeWrong() {
     showWrongDialog.value = false
@@ -336,6 +403,8 @@ async function finishGame() {
 
 
 onMounted(() => {
+    console.log('prompt:', currentPrompt.value)
+  console.log('highlightedActive:', highlightedActive.value)
   window.addEventListener('keydown', e => {
     if (e.key !== 'Enter') return
 
@@ -378,6 +447,26 @@ onBeforeUnmount(stopTimer)
   background: #4caf50;
   color: white;
   z-index: 2000;
+}
+.timer-pill {
+  padding: 2px 8px;
+  border-radius: 999px;
+  transition: background-color 150ms ease, color 150ms ease;
+}
+
+/* default: subtle / transparent */
+.timer-ok {
+  background: transparent;
+}
+
+/* getting low */
+.timer-warn {
+  background: rgba(255, 193, 7, 0.25); /* soft amber */
+}
+
+/* critical */
+.timer-danger {
+  background: rgba(244, 67, 54, 0.22); /* soft red */
 }
 
 </style>

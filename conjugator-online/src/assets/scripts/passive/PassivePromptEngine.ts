@@ -11,6 +11,7 @@ export interface PassiveExercise {
   tense: string;
   answer: string;
   level: "essential" | "advanced";
+  highlight: string;
 }
 
 export interface NormalizedPrompts {
@@ -55,16 +56,30 @@ export const GROUP_2 = [
 
 export function normalizePrompts(rawPrompts: any): NormalizedPrompts {
   // rawPrompts may be object keyed by id OR an array
-  const arr: PassiveExercise[] = Array.isArray(rawPrompts)
-    ? rawPrompts
-    : Object.entries(rawPrompts).map(([id, p]: any) => ({
-        id,
-        active: p.active ?? "",
-        passive: p.passive ?? "",
-        tense: (p.tense ?? "").toLowerCase(),
-        answer: p.answer ?? "",
-        level: (p.level ?? "essential").toLowerCase(),
-      }));
+  const arr: PassiveExercise[] = (Array.isArray(rawPrompts)
+  ? rawPrompts.map((p: any, i: number) => ({
+      id: p.id ?? i,
+      active: p.active ?? "",
+      passive: p.passive ?? "",
+      tense: (p.tense ?? "").toLowerCase(),
+      answer: p.answer ?? "",
+      level: ((p.level ?? "essential").toLowerCase() === "advanced"
+        ? "advanced"
+        : "essential") as "essential" | "advanced",
+      highlight: p.highlight ?? "",
+    }))
+  : Object.entries(rawPrompts).map(([id, p]: any) => ({
+      id,
+      active: p.active ?? "",
+      passive: p.passive ?? "",
+      tense: (p.tense ?? "").toLowerCase(),
+      answer: p.answer ?? "",
+      level: ((p.level ?? "essential").toLowerCase() === "advanced"
+        ? "advanced"
+        : "essential") as "essential" | "advanced",
+      highlight: p.highlight ?? "",
+    })));
+
 
   const byLevel = {
     essential: [] as PassiveExercise[],
@@ -148,7 +163,7 @@ export function buildPool(
 
 export function samplePrompts(
   pool: PassiveExercise[],
-  n: number = 30
+  n: number = 24
 ): PassiveExercise[] {
   if (!Array.isArray(pool) || pool.length === 0) return [];
 

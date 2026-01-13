@@ -3,84 +3,96 @@ export const wordFamilyPrompts = {
     verb: ["activate", "Press the button to _____ the device."],
     noun: ["activity", "This is an interesting _____."],
     adjective: ["active", "Vince Carter is still an _____ player."],
-    adverb: ["actively", "I am _____ looking for a job."]
+    adverb: ["actively", "I am _____ looking for a job."],
+    category: "general"
   },
 
   "hei-": {
     verb: ["heighten", "The news will _____ public awareness."],
     noun: ["height", "The _____ of the building is impressive."],
     adjective: ["high", "That is a very _____ mountain."],
-    adverb: ["highly", "She is _____ respected in her field."]
+    adverb: ["highly", "She is _____ respected in her field."],
+    category: "dimensions and properties"
   },
 
   "deep-": {
     verb: ["deepen", "The rain will _____ the river."],
     noun: ["depth", "The submarine can reach great _____."],
     adjective: ["deep", "The water is very _____ here."],
-    adverb: ["deeply", "He was _____ moved by the speech."]
+    adverb: ["deeply", "He was _____ moved by the speech."],
+    category: "dimensions and properties"
   },
 
   "len-": {
     verb: ["lengthen", "They need to _____ the deadline."],
     noun: ["length", "The _____ of the rope is 5 meters."],
     adjective: ["long", "It was a very _____ journey."],
-    adverb: ["long", "She waited _____ for the bus."]
+    adverb: ["long", "She waited _____ for the bus."],
+    category: "dimensions and properties"
   },
 
   "wid-": {
     verb: ["widen", "They plan to _____ the road next year."],
     noun: ["width", "Measure the _____ of the table."],
     adjective: ["wide", "The river is very _____ here."],
-    adverb: ["widely", "The book is _____ known among scholars."]
+    adverb: ["widely", "The book is _____ known among scholars."],
+    category: "dimensions and properties"
   },
 
   "intim-": {
     verb: ["intimate", "He tried to _____ his concerns quietly."],
     noun: ["intimacy", "Trust is built through _____."],
     adjective: ["intimate", "They have an _____ relationship."],
-    adverb: ["intimately", "The two topics are _____ connected."]
+    adverb: ["intimately", "The two topics are _____ connected."],
+    category: "general"
   },
 
   "priv-": {
     verb: ["privatize", "The government plans to _____ the industry."],
     noun: ["privacy", "Online _____ is a growing concern."],
     adjective: ["private", "This is a _____ conversation."],
-    adverb: ["privately", "She spoke to me _____ after the meeting."]
+    adverb: ["privately", "She spoke to me _____ after the meeting."],
+    category: "general"
   },
 
   "calcul-": {
     verb: ["calculate", "Please _____ the total cost."],
     noun: ["calculation", "That was a clever _____."],
     adjective: ["calculated", "It was a very _____ chess move."],
-    adverb: null
+    adverb: null,
+    category: "math and science"
   },
 
   "analy-": {
     verb: ["analyze", "We need to _____ the data carefully."],
     noun: ["analysis", "The report includes a detailed _____."],
     adjective: ["analytical", "She has an _____ mind."],
-    adverb: ["analytically", "The problem was approached _____."]
+    adverb: ["analytically", "The problem was approached _____."],
+    category: "general"
   },
 
   "deriv-": {
     verb: ["derive", "We can _____ meaning from context."],
     noun: ["derivation", "This word has a Latin _____."],
     adjective: ["derivative", "The movie felt _____ of earlier works."],
-    adverb: null
+    adverb: null,
+    category: "math and science"
   },
 
   "appl-": {
     verb: ["apply", "You must _____ for the job."],
     noun: ["application", "Fill out the _____ form."],
     adjective: ["applicable", "This rule is _____ to all cases."],
-    adverb: null
+    adverb: null,
+    category: "general"
   },
 
   "configur-": {
     verb: ["configure", "Please _____ the settings."],
     noun: ["configuration", "The system _____ is complex."],
     adjective: ["configurable", "The software is highly _____."],
-    adverb: null
+    adverb: null,
+    category: "tech"
   },
 
   "synth-": {
@@ -94,47 +106,54 @@ export const wordFamilyPrompts = {
     verb: ["summarize", "Please _____ the article."],
     noun: ["summary", "The teacher asked for a short _____."],
     adjective: ["summarized", "This is a _____ version of the report."],
-    adverb: null
+    adverb: null,
+    category: "general"
   },
   "short-": {
     verb: ["shorten", "We need to _____ the meeting."],
     noun: ["shortness", "The _____ of breath was concerning."],
     adjective: ["short", "He gave a _____ answer."],
-    adverb: null
+    adverb: null,
+    category: "dimensions and properties"
   },
   "narrow-": {
     verb: ["narrow", "They will _____ the focus of the study."],
     noun: ["narrowness", "The _____ of the path made it difficult."],
     adjective: ["narrow", "The alley is very _____."],
-    adverb: ["narrowly", "He escaped the accident _____."]
+    adverb: ["narrowly", "He escaped the accident _____."],
+    category: "dimensions and properties"
   },
 
   "refer-": {
     verb: ["refer", "You should _____ to the manual."],
     noun: ["reference", "She made a _____ to the book."],
     adjective: ["referential", "This is a _____ citation."],
-    adverb: null
+    adverb: null,
+    category: "general"
   },
 
   "po-": {
     verb: ["impoverish", "The war will _____ the nation."],
     noun: ["poverty", "Many people live in _____."],
     adjective: ["poor", "They are _____ students."],
-    adverb: ["poorly", "He performed _____ on the test."]
+    adverb: ["poorly", "He performed _____ on the test."],
+    category: "general"
   },
 
   "excel-": {
     verb: ["excel", "She will _____ in her career."],
     noun: ["excellence", "The award recognizes _____."],
     adjective: ["excellent", "That was an _____ performance."],
-    adverb: ["excellently", "He played _____ in the match."]
+    adverb: ["excellently", "He played _____ in the match."],
+    category: "general"
   },
 
   "cohere-": {
     verb: ["cohere", "The ideas _____ well together."],
     noun: ["coherence", "The essay lacks _____."],
     adjective: ["coherent", "Her argument was _____."],
-    adverb: ["coherently", "He spoke _____ about the topic."]
+    adverb: ["coherently", "He spoke _____ about the topic."],
+    category: "general"
   },
 
   "deduc-": {
@@ -176,21 +195,24 @@ export const wordFamilyPrompts = {
     verb: null,
     noun: ["awareness", "Public _____ is growing."],
     adjective: ["aware", "She is _____ of the risks."],
-    adverb: null
+    adverb: null,
+    category: "general"
   },
 
   "conscious-": {
     verb: null,
     noun: ["consciousness", "He regained _____ after fainting."],
     adjective: ["conscious", "She is _____ of her surroundings."],
-    adverb: ["consciously", "He acted _____ to avoid mistakes."]
+    adverb: ["consciously", "He acted _____ to avoid mistakes."],
+    category: "general"
   },
 
   "incentiv-": {
     verb: ["incentivize", "The company will _____ employees to improve performance."],
     noun: ["incentive", "The bonus is an _____ to work harder."],
     adjective: ["incentivized", "The workers are _____ by rewards."],
-    adverb: null
+    adverb: null,
+    category: "general"
   },
 
   "sequen-": {
@@ -211,34 +233,39 @@ export const wordFamilyPrompts = {
     verb: ["standardize", "We need to _____ the procedures."],
     noun: ["standard", "This is the industry _____."],
     adjective: ["standard", "He followed the _____ procedure."],
-    adverb: ["standardly", "The test was _____ administered."]
+    adverb: ["standardly", "The test was _____ administered."],
+    category: "tech"
   },
 
   "default-": {
     verb: ["default", "The program will _____ to basic settings."],
     noun: ["default", "The system booted in _____ mode."],
     adjective: ["default", "This is the _____ option."],
-    adverb: null
+    adverb: null,
+    category: "tech"
   },
 
   "defect-": {
     verb: null,
     noun: ["defect", "The car has a serious _____."],
     adjective: ["defective", "The product is _____."],
-    adverb: ["defectively", "The machine was built _____."]
+    adverb: ["defectively", "The machine was built _____."],
+    category: "dimensions and properties"
   },
   "erro-": {
     verb: null,
     noun: ["error", "The program crashed due to an _____."],
     adjective: ["erroneous", "That was an _____ assumption."],
-    adverb: ["erroneously", "He was _____ blamed."]
+    adverb: ["erroneously", "He was _____ blamed."],
+    category: "tech"
   },
 
   "mistake-": {
     verb: ["mistake", "Don't _____ kindness for weakness."],
     noun: ["mistake", "It was a big _____."],
     adjective: ["mistaken", "She was _____ about the facts."],
-    adverb: ["mistakenly", "He was _____ identified."]
+    adverb: ["mistakenly", "He was _____ identified."],
+    category: "tech"
   },
 
   "accura-": {
@@ -252,33 +279,38 @@ export const wordFamilyPrompts = {
     verb: null,
     noun: ["precision", "The machine works with great _____."],
     adjective: ["precise", "He gave a _____ answer."],
-    adverb: ["precisely", "That is _____ what I meant."]
+    adverb: ["precisely", "That is _____ what I meant."],
+    category: "tech"
   },
   "stupid-": {
     verb: null,
     noun: ["stupidity", "His _____ shocked everyone."],
     adjective: ["stupid", "That was a _____ idea."],
-    adverb: ["stupidly", "He acted _____ in class."]
+    adverb: ["stupidly", "He acted _____ in class."],
+    category: "general"
   },
 
   "innocen-": {
     verb: null,
     noun: ["innocence", "He proved his _____ in court."],
     adjective: ["innocent", "The child is _____."],
-    adverb: ["innocently", "She smiled _____."]
+    adverb: ["innocently", "She smiled _____."],
+    category: "general"
   },
 
   "clever-": {
     verb: null,
     noun: ["cleverness", "His _____ helped solve the puzzle."],
     adjective: ["clever", "That was a _____ trick."],
-    adverb: ["cleverly", "She solved the problem _____."]
+    adverb: ["cleverly", "She solved the problem _____."],
+    category: "general"
   },
   "specif-": {
     verb: ["specify", "Please _____ your requirements."],
     noun: ["specification", "The _____ are detailed."],
     adjective: ["specific", "We need a _____ answer."],
-    adverb: ["specifically", "He asked _____ for your help."]
+    adverb: ["specifically", "He asked _____ for your help."],
+    category: "general"
   },
   "function-": {
     verb: ["function", "The machine will _____ properly."],
@@ -290,83 +322,96 @@ export const wordFamilyPrompts = {
     verb: null,
     noun: ["law", "The country is governed by _____."],
     adjective: ["lawful", "That was a _____ action."],
-    adverb: ["lawfully", "He acted _____ in court."]
+    adverb: ["lawfully", "He acted _____ in court."],
+    category: "general"
   },
   "leg-": {
     verb: ["legalize", "They want to _____ the new policy."],
     noun: ["legality", "The _____ of the contract was questioned."],
     adjective: ["legal", "They sought _____ advice."],
-    adverb: ["legally", "The business is _____ registered."]
+    adverb: ["legally", "The business is _____ registered."],
+    category: "general"
   },
   "just-": {
     verb: ["justify", "Can you _____ your actions?"],
     noun: ["justice", "The court seeks _____."],
     adjective: ["just", "That was a _____ decision."],
-    adverb: ["justly", "He was _____ rewarded."]
+    adverb: ["justly", "He was _____ rewarded."],
+    category: "general"
   },
 
   "fair-": {
     verb: null,
     noun: ["fairness", "The _____ of the trial was ensured."],
     adjective: ["fair", "They had a _____ chance."],
-    adverb: ["fairly", "She was treated _____."]
+    adverb: ["fairly", "She was treated _____."],
+    category: "general"
   },
 "wrong-": {
     verb: null,
     noun: ["wrongness", "The _____ of the act was clear."],
     adjective: ["wrong", "That is a _____ answer."],
-    adverb: ["wrongly", "He was _____ accused."]
+    adverb: ["wrongly", "He was _____ accused."],
+    category: "general"
   },
   "right-": {
     verb: ["right", "We must _____ our mistakes."],
     noun: ["rightness", "The _____ of the decision was debated."],
     adjective: ["right", "That is the _____ choice."],
-    adverb: ["rightly", "She was _____ praised for her work."]
+    adverb: ["rightly", "She was _____ praised for her work."],
+    category: "general"
   },
   "complet-": {
     verb: ["complete", "Please _____ the assignment."],
     noun: ["completion", "The _____ of the project took months."],
     adjective: ["complete", "This is a _____ set."],
-    adverb: ["completely", "She was _____ surprised."]
+    adverb: ["completely", "She was _____ surprised."],
+    category: "general"
   },
 
   "incomplet-": {
     verb: null,
     noun: ["incompleteness", "The report's _____ was obvious."],
     adjective: ["incomplete", "The puzzle is _____."],
-    adverb: ["incompletely", "He answered the question _____."]
+    adverb: ["incompletely", "He answered the question _____."],
+    category: "general"
   },
   "lack-": {
     verb: [ "lack", "They _____ the necessary skills."],
     noun: ["lack", "There is a _____ of resources."],
     adjective: ["lacking", "The plan is _____ in detail."],
-    adverb: null
+    adverb: null,
+    category: "general"
   },
 
   "h-": {
     verb: ["heat", "Please _____ the soup."],
     noun: ["heat", "The _____ was unbearable."],
     adjective: ["hot", "It’s a _____ day."],
-    adverb: ["hotly", "The issue was _____ debated."]
+    adverb: ["hotly", "The issue was _____ debated."],
+    category: "dimensions and properties"
   },
 
   "cold-": {
     verb: null,
     noun: ["coldness", "His _____ shocked everyone."],
     adjective: ["cold", "The water is _____."],
-    adverb: ["coldly", "She stared _____ at him."]
+    adverb: ["coldly", "She stared _____ at him."],
+    category: "dimensions and properties"
   },
   "warm-": {
     verb: ["warm", "Please _____ the food."],
     noun: ["warmth", "The _____ of the fire was comforting."],
     adjective: ["warm", "It's a _____ day."],
-    adverb: ["warmly", "They were _____ welcomed."]
+    adverb: ["warmly", "They were _____ welcomed."],
+    category: "dimensions and properties"
   },
   "cool-": {
     verb: ["cool", "Let the cake _____ before serving."],
     noun: ["coolness", "The _____ of the evening was refreshing."],
     adjective: ["cool", "The breeze is very _____."],
-    adverb: ["coolly", "He handled the situation _____."]
+    adverb: ["coolly", "He handled the situation _____."],
+    category: "dimensions and properties"
   },
 
   "pressur-": {
@@ -379,86 +424,100 @@ export const wordFamilyPrompts = {
     verb: ["moisten", "Please _____ the soil."],
     noun: ["moisture", "The _____ in the air was high."],
     adjective: ["moist", "The cake is still _____."],
-    adverb: null
+    adverb: null,
+    category: "dimensions and properties"
   },
   "prod-": {
     verb: ["produce", "They _____ high-quality goods."],
     noun: ["product", "The _____ is on sale."],
     adjective: ["productive", "She had a _____ day at work."],
-    adverb: ["productively", "He worked _____ all afternoon."]
+    adverb: ["productively", "He worked _____ all afternoon."],
+    category: "general"
   },
   "dry-": {
     verb: ["dry", "Please _____ the dishes."],
     noun: ["dryness", "The _____ of the desert is extreme."],
     adjective: ["dry", "The clothes are _____ now."],
-    adverb: ["dryly", "He spoke _____ about the situation."]
+    adverb: ["dryly", "He spoke _____ about the situation."],
+    category: "dimensions and properties"
   },
   "fabricate-": {
     verb: ["fabricate", "They will _____ the parts in the factory."],
     noun: ["fabrication", "The _____ of the machine took weeks."],
     adjective: ["fabricated", "The _____ components are ready."],
-    adverb: null
+    adverb: null,
+    category: "general"
   },
   "reduce-": {
     verb: ["reduce", "We need to _____ waste."],
     noun: ["reduction", "The _____ in costs was significant."],
     adjective: ["reduced", "They offered a _____ price."],
-    adverb: null
+    adverb: null,
+    category: "general"
   },
   "fresh-": {
     verb: ["freshen", "Please _____ the room with some air."],
     noun: ["freshness", "The _____ of the bread is appealing."],
     adjective: ["fresh", "The vegetables are very _____."],
-    adverb: ["freshly", "The coffee was _____ brewed."]
+    adverb: ["freshly", "The coffee was _____ brewed."],
+    category: "general"
   },
   "lov-": {
     verb: ["love", "They _____ spending time together."],
     noun: ["love", "Their _____ for each other is strong."],
     adjective: ["loving", "She gave him a _____ smile."],
-    adverb: ["lovingly", "He spoke _____ about his family."]
+    adverb: ["lovingly", "He spoke _____ about his family."],
+    category: "general"
   },
 
   "humid-": {
     verb: [ "humidify", "Please _____ the room."],
     noun: ["humidity", "The _____ made it hard to breathe."],
     adjective: ["humid", "It was a _____ afternoon."],
-    adverb: ["humidly", "The air hung _____ around us."]
+    adverb: ["humidly", "The air hung _____ around us."],
+    category: "dimensions and properties"
   },
   "domin-": {
     verb: ["dominate", "They _____ the market."],
     noun: ["dominance", "The team's _____ is clear."],
     adjective: ["dominant", "He is the _____ player on the team."],
-    adverb: ["dominantly", "She spoke _____ during the meeting."]
+    adverb: ["dominantly", "She spoke _____ during the meeting."],
+    category: "general"
   },
   "energ-": {
     verb: ["energize", "The coach will _____ the team."],
     noun: ["energy", "The _____ in the room was palpable."],
     adjective: ["energetic", "She is very _____ during workouts."],
-    adverb: ["energetically", "He worked _____ all day."]
+    adverb: ["energetically", "He worked _____ all day."],
+    category: "general"
     },
 "distribut-": {
     verb: ["distribute", "They will _____ the flyers tomorrow."],
     noun: ["distribution", "The _____ of resources is fair."],
     adjective: ["distributed", "The _____ materials are ready."],
-    adverb: null
+    adverb: null,
+    category: "general"
     },
 "confus-": {
     verb: ["confuse", "Don't _____ the instructions."],     
     noun: ["confusion", "There was _____ about the schedule."],
     adjective: ["confused", "She felt _____ about the decision."],
-    adverb: ["confusedly", "He spoke _____ during the meeting."]
+    adverb: ["confusedly", "He spoke _____ during the meeting."],
+    category: "general"
     },  
 "simpl-": {
     verb: ["simplify", "We need to _____ the process."],
     noun: ["simplicity", "The _____ of the design is appealing."],
     adjective: ["simple", "It's a _____ solution."],
-    adverb: ["simply", "She explained it _____."]
+    adverb: ["simply", "She explained it _____."],
+    category: "general"
     },
 "wild-": {
     verb: ["wildify", "They will _____ the area for conservation."],
     noun: ["wildness", "The _____ of the jungle is fascinating."],
     adjective: ["wild", "The animals are very _____."],
-    adverb: ["wildly", "He ran _____ through the field."]
+    adverb: ["wildly", "He ran _____ through the field."],
+    category: "general"
     },
 
   "lubric-": {
@@ -472,47 +531,54 @@ export const wordFamilyPrompts = {
     verb: ["sharpen", "You need to _____ your skills."],
     noun: ["sharpness", "The knife's _____ is dangerous."],
     adjective: ["sharp", "That's a _____ blade."],
-    adverb: ["sharply", "He turned _____ to the left."]
+    adverb: ["sharply", "He turned _____ to the left."],
+    category: "dimensions and properties"
   },
 
   "round-": {
     verb: ["round", "We will _____ the number up."],
     noun: ["roundness", "The ball's _____ is perfect."],
     adjective: ["round", "It's a _____ table."],
-    adverb: ["roundly", "The plan was _____ criticized."]
+    adverb: ["roundly", "The plan was _____ criticized."],
+    category: "dimensions and properties"
   },
 
   "square-": {
     verb: ["square", "They tried to _____ the accounts."],
     noun: ["square", "Draw a perfect _____."],
     adjective: ["square", "He lives in a _____ house."],
-    adverb: ["squarely", "It landed _____ in the middle."]
+    adverb: ["squarely", "It landed _____ in the middle."],
+    category: "dimensions and properties"
   },
   "triang-": {
     verb: ["triangulate", "We need to _____ the location."],
     noun: ["triangle", "The shape is a _____."],
     adjective: ["triangular", "The roof has a _____ design."],
-    adverb: null
+    adverb: null,
+    category: "dimensions and properties"
   },
 
   "cub-": {
     verb: ["cube", "Then _____ the product of the numbers."],
     noun: ["cube", "The ice _____ melted."],
     adjective: ["cubic", "Take the volume in _____ meters."],
-    adverb: null
+    adverb: null,
+    category: "dimensions and properties"
   },
 
   "tru-": {
     verb: null,
     noun: ["truth", "He always tells the _____."],
     adjective: ["true", "That is a _____ story."],
-    adverb: ["truly", "She is _____ talented."]
+    adverb: ["truly", "She is _____ talented."],
+    category: "general"
   },
   "exponent-": {
     verb: null,
     noun: ["exponent", "In 2^3, 3 is the _____."],
     adjective: ["exponential", "The growth was _____."],
-    adverb: ["exponentially", "The data increased _____."]
+    adverb: ["exponentially", "The data increased _____."],
+    category: "math and science"
   },
   "expl-": {
     verb: ["explode", "The bomb will _____ on impact."],
@@ -524,13 +590,15 @@ export const wordFamilyPrompts = {
     verb: null,
     noun: ["line", "The _____ is straight."],
     adjective: ["linear", "It's a _____ equation."],
-    adverb: ["linearly", "The variables are related _____."]
+    adverb: ["linearly", "The variables are related _____."],
+    category: "math and science"
   },
   "integr-": {
     verb: ["integrate", "We need to _____ the functions."],
     noun: ["integrity", "The _____ of the president is beyond doubt."],
     adjective: ["integral", "This is an _____ part of the system."],
-    adverb: null
+    adverb: null,
+    category: "math and science"
   },
 
   "fals-": {
@@ -692,21 +760,24 @@ export const wordFamilyPrompts = {
     verb: ["randomize", "They will _____ the samples."],
     noun: ["randomness", "The _____ of the draw was fair."],
     adjective: ["random", "It was a _____ choice."],
-    adverb: ["randomly", "The names were picked _____."]
+    adverb: ["randomly", "The names were picked _____."],
+    category: "math and science"
   },
 
   "invest-": {
     verb: ["invest", "She will _____ in real estate."],
     noun: ["investment", "His _____ paid off."],
     adjective: ["invested", "He is deeply _____ in the project."],
-    adverb: null
+    adverb: null,
+    category: "finance"
   },
 
   "experiment-": {
     verb: ["experiment", "Scientists _____ with new materials."],
     noun: ["experiment", "The _____ failed."],
     adjective: ["experimental", "This is an _____ design."],
-    adverb: ["experimentally", "The drug was tested _____."]
+    adverb: ["experimentally", "The drug was tested _____."],
+    category: "math and science"
   },
 
   "know-": {
@@ -734,14 +805,16 @@ export const wordFamilyPrompts = {
     verb: ["flatten", "Please _____ the boxes."],
     noun: ["flatness", "The _____ of the land was striking."],
     adjective: ["flat", "The tire is _____."],
-    adverb: ["flatly", "He _____ denied the accusation."]
+    adverb: ["flatly", "He _____ denied the accusation."],
+    category: "dimensions and properties"
   },
 
   "steep-": {
     verb: null,
     noun: ["steepness", "The _____ of the hill is dangerous."],
     adjective: ["steep", "It's a _____ climb."],
-    adverb: ["steeply", "The path rose _____ upward."]
+    adverb: ["steeply", "The path rose _____ upward."],
+    category: "dimensions and properties"
   },
 
   "even-": {
@@ -774,19 +847,22 @@ export const wordFamilyPrompts = {
     verb: ["automate", "They will _____ the assembly line."],
     noun: ["automation", "The _____ improved efficiency."],
     adjective: ["automated", "The system is _____."],
-    adverb: ["automatically", "The system updates _____."]
+    adverb: ["automatically", "The system updates _____."],
+    category: "tech"
   },
   "critic-": {
     verb: ["criticize", "Don't _____ others unfairly."],
     noun: ["criticism", "The _____ was constructive."],
     adjective: ["critical", "She gave a _____ review."],
-    adverb: ["critically", "He spoke _____ about the issue."]
+    adverb: ["critically", "He spoke _____ about the issue."],
+    category: "general"
   },
   "optim-": {
     verb: ["optimize", "We need to _____ our workflow."],
     noun: ["optimization", "The _____ improved performance."],
     adjective: ["optimal", "This is the _____ solution."],
-    adverb: ["optimally", "The system runs _____ now."]
+    adverb: ["optimally", "The system runs _____ now."],
+    category: "tech"
   },
   "approxim-": {
     verb: ["approximate", "We can _____ the value."],
@@ -798,13 +874,15 @@ export const wordFamilyPrompts = {
     verb: ["enter", "Please _____ the building."],
     noun: ["entrance", "The _____ is on the left."],
     adjective: ["entering", "The _____ guests waited in the reception hall."],
-    adverb: null
+    adverb: null,
+    category: "structure"
   },
   "furni-": {
     verb: ["furnish", "They will _____ the new apartment."],
     noun: ["furniture", "The _____ is modern and stylish."],
     adjective: ["furnished", "The room is fully _____."],
-    adverb: null
+    adverb: null,
+    category: "structure"
   },
   "behav-": {
     verb: ["behave", "Please _____ appropriately."],
@@ -816,13 +894,57 @@ export const wordFamilyPrompts = {
     verb: ["orient", "We need to _____ the map correctly."],
     noun: ["orientation", "The _____ session is tomorrow."],
     adjective: ["oriented", "The program is _____ towards beginners."],
-    adverb: null
+    adverb: null,
+    category: "structure"
   },
   "program-":{
     verb: ["program", "They will _____ the new software."],
     noun: ["program", "The _____ is scheduled for noon."],
     adjective: ["programmed", "The robot is _____ to perform tasks."],
-    adverb: ["programmatically", "The tasks are completed _____."]
+    adverb: ["programmatically", "The tasks are completed _____."],
+    category: "tech"
+  },
+  "multipl-": {
+    verb: ["multiply", "Please _____ the numbers."],
+    noun: ["multiplication", "The _____ table is essential."],
+    adjective: ["multiple", "She has _____ talents."],
+    adverb: null,
+    category: "math and science"
+  },
+  "add-": {
+    verb: ["add", "Please _____ these figures."],
+    noun: ["addition", "The _____ of new features is planned."],
+    adjective: ["additional", "We need _____ resources."],
+    adverb: ["additionally", "She is _____ qualified."],
+    category: "math and science",
+  },
+  "subtract-": {
+    verb: ["subtract", "You need to _____ these numbers."],
+    noun: ["subtraction", "The _____ was done correctly."],
+    adjective: ["subtractive", "They used a _____ method."],
+    adverb: null,
+    category: "math and science"
+  },
+  "divid-": {
+    verb: ["divide", "Please _____ the cake into pieces."],
+    noun: ["division", "The _____ of labor improved efficiency."],
+    adjective: ["divisional", "The company has several _____ units."],
+    adverb: null,
+    category: "math and science"
+  },
+  "extract-": {
+    verb: ["extract", "We need to _____ the data."],
+    noun: ["extraction", "The _____ of resources is ongoing."],
+    adjective: ["extractive", "They used an _____ process."],
+    adverb: null,
+    category: "math and science"
+  },
+  "extrapol-": {
+    verb: ["extrapolate", "We can _____ the results."],
+    noun: ["extrapolation", "The _____ was based on existing data."],
+    adjective: ["extrapolative", "They used an _____ approach."],
+    adverb: null,
+    category: "math and science"
   }
-
 }
+// categories: math and science, dimensions and properties and properties, business, tech, structure, general

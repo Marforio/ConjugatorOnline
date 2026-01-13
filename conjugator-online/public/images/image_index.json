@@ -112,10 +112,10 @@
         "eyes": false
     },
     "17": {
-        "filename": "An_old_and_rusted_screw.jpg",
+        "filename": "code.jpg",
         "pronoun": "it",
         "family": false,
-        "subject": "the screw",
+        "subject": "the code",
         "eyes": false
     },
     "18": {
@@ -1005,13 +1005,6 @@
         "pronoun": "they",
         "family": false,
         "subject": "these mascots",
-        "eyes": true
-    },
-    "146": {
-        "filename": "Crouch-Gritty.webp",
-        "pronoun": "it",
-        "family": false,
-        "subject": "Gritty",
         "eyes": true
     },
     "147": {
