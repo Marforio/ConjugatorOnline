@@ -1,3 +1,4 @@
+<!-- src/components/grammar/grammar_scenes/GrammarScene02_Results.vue -->
 <template>
   <v-container class="pa-4" v-if="results">
     <v-card class="mx-auto" max-width="900">
@@ -47,12 +48,14 @@
         <v-divider class="my-4" />
 
         <div class="d-flex justify-center align-center mt-4 gap-5">
-          <v-btn @click="goToScene('PassiveScene01_Game')">
+          <v-btn @click="goToScene('GrammarScene01_Game')">
             ▶️ Play Again
           </v-btn>
-          <router-link :to="{ path: '/dashboard', query: { tab: 'other-games', game: 'Passive Party' } }">
+
+          <router-link :to="{ path: '/dashboard', query: { tab: 'other-games', game: 'Verb Mixer' } }">
             <v-btn>Go to Dashboard</v-btn>
           </router-link>
+
           <HomeButton />
         </div>
 
@@ -77,11 +80,10 @@ const props = defineProps({
   },
 })
 
-defineEmits(['startGame', 'goHome', 'goDashboard'])
+const emit = defineEmits(['changeScene'])
 
-// Navigation
 function goToScene(sceneName) {
-  emit("changeScene", sceneName);
+  emit('changeScene', sceneName)
 }
 
 const percent = computed(() => {

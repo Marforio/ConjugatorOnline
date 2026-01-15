@@ -10,7 +10,7 @@
       <strong>Correct! <v-icon icon="mdi-emoticon-happy-outline"/></strong>
     </div>
 
-    <v-card class="p-4" width="420" min-height="600" elevation="3">
+    <v-card class="pt-4 px-4 pb-1" width="420" min-height="600" elevation="3">
 
       <!-- START SCREEN -->
       <div v-if="!gameStarted" class="p-3">
@@ -57,7 +57,6 @@
 
       <!-- GAME -->
       <div v-else class="game-layout">
-
         <!-- TOP -->
         <div class="game-top">
           <div class="d-flex justify-space-between mb-2">
@@ -93,18 +92,18 @@
             
           </v-card>
 
-          <div class="answer-spacing">
+          <div class="answer-spacing d-flex justify-center mb-8">
             <v-text-field
               v-model="userAnswer"
               label="Type the passive verb form"
-              density="compact"
               hide-details
+              max-width="80%"
               @keyup.enter="submit"
             />
           </div>
 
 
-          <div class="d-flex justify-center mt-4">
+          <div class="d-flex justify-center mt-4 mb-4">
             <v-btn color="primary" @click="submit" :disabled="inputLocked">
               Submit
             </v-btn>
@@ -124,6 +123,15 @@
             <div>✅ {{ rightCount }}</div>
             <div>❌ {{ wrongCount }}</div>
             <div>Remaining: {{ remaining }}</div>
+          </div>
+          <div class="mt-5 d-flex justify-center align-center w-100">
+            <RouterLink :to="{ name: 'games' }">
+              <v-btn icon elevation="0" size="large">
+                <v-icon color="grey-darken-3" size="large">
+                  mdi-arrow-left-circle
+                </v-icon>
+              </v-btn>
+            </RouterLink>
           </div>
         </div>
       </div>

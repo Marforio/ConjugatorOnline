@@ -164,7 +164,7 @@
         PLAY AGAIN
       </v-btn>
 
-      <router-link :to="{ path: '/dashboard', query: { tab: 'other-games' } }">
+      <router-link :to="{ path: '/dashboard', query: { tab: 'other-games', game: 'Pronoun Practice' } }">
         <v-btn>Go to Dashboard</v-btn>
       </router-link>
       <HomeButton />

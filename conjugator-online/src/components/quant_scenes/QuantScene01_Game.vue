@@ -201,9 +201,9 @@
         <!-- Active Game -->
         <v-card
           class="mb-6 d-flex justify-center"
-          height="560px"
+          height="530px"
           :style="{ width: $vuetify.display.mdAndUp ? '500px' : '320px' }"
-          :class="$vuetify.display.smAndUp ? 'pa-4' : 'pa-2'"
+          :class="$vuetify.display.smAndUp ? 'pa-3' : 'pa-2'"
           elevation="2"
           color="grey-lighten-4"
         >
@@ -249,14 +249,13 @@
               label="Type the quantifier + noun"
               placeholder="e.g. many cars / so much gold"
               variant="outlined"
-              density="compact"
               max-width="300px"
             />
             <span class="font-italic ml-1"> ."</span>
             </div>
 
             <!-- Timer + Submit button on same row -->
-            <div class="d-flex justify-center align-center mt-6">
+            <div class="d-flex justify-center align-center">
               <v-progress-circular
                 :model-value="(timeLeft / 30) * 100"
                 :color="timerColor"
@@ -268,7 +267,7 @@
               </v-progress-circular>
 
               <v-btn
-                class="ml-6"
+                class="ml-10"
                 color="primary"
                 large
                 @click="submitAnswer"

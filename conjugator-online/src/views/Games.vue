@@ -46,9 +46,8 @@
       <!-- Verb Combinator -->
       <v-col cols="12" sm="6" md="4" class="d-flex justify-center">
         <RouterLink
-          :to="isEnabled ? { name: 'verbmixer' } : undefined"
+          :to="{ name: 'verbmixer' }"
           class="image-tile"
-          :style="{ pointerEvents: isEnabled ? 'auto' : 'none', opacity: isEnabled ? 1 : 0.5 }"
         >
           <div class="tile-frame">
             <v-img src="/images/banners/VerbMixer.png" alt="Verb Mixer" cover class="tile-image" />

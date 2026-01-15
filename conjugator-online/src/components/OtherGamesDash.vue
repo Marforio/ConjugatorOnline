@@ -28,14 +28,14 @@
           </div>
 
           <!-- CENTER: title -->
-          <div class="flex-grow-1 text-center">
+          <div v-if="$vuetify.display.smAndUp" class="flex-grow-1 text-center">
             <h4 class="text-h4 font-weight-bold mb-0">
               {{ selectedGame }}
             </h4>
           </div>
 
           <!-- RIGHT: image (desktop only) -->
-          <div class="flex-shrink-0 d-none d-md-flex">
+          <div v-if="$vuetify.display.smAndUp" class="flex-shrink-0 d-none d-md-flex">
             <v-img
               :src="selectedGame ? gamePictures[selectedGame] : gamePictures['Pronoun Practice']"
               alt="Game name"
@@ -338,6 +338,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed, watch } from "vue";
+import { useRoute } from 'vue-router';
 import api from "@/axios";
 import PieChart from "@/components/charts/PieChart.vue";
 
@@ -396,6 +397,7 @@ interface Achievement {
   manually_created: boolean
 }
 // ----- State -----
+const route = useRoute()
 const pronounImagePath = "/images/pronoun_pics_resized/";
 const quantifierImagePath = "/images/quant_pics_resized/";
 const loading = ref(true);
@@ -529,8 +531,15 @@ onMounted(async () => {
 
     groupedGames.value = grouped;
 
-    // select the first available game
-    selectedGame.value = availableGames.value[0] ?? null;
+    // select the displayed game for the select widget
+    const queryGame =
+      typeof route.query.game === 'string' ? route.query.game : null
+
+    if (queryGame && availableGames.value.includes(queryGame)) {
+      selectedGame.value = queryGame
+    } else {
+      selectedGame.value = availableGames.value[0] ?? null
+    }
 
   } catch (err) {
     console.error(err);
