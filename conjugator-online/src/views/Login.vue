@@ -95,7 +95,7 @@ async function handleLogin() {
 
     userStore.setAccessToken(token);
 
-    const redirectPath = (route.query.redirect as string) || "/dashboard";
+    const redirectPath = (route.query.redirect as string) || "/";
     router.replace(redirectPath);
   } catch (err: any) {
     error.value =

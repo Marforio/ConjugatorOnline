@@ -8,6 +8,5 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.min.js';
 import PassiveSceneManager from '@/components/PassiveSceneManager.vue';
-import TopNavBar from '@/components/TopNavBar.vue';
 
 </script>

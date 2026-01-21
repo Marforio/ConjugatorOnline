@@ -24,18 +24,15 @@
 </template>
 
 
-<script>
-import { defineComponent, computed } from "vue";
+<script setup>
+import { computed } from "vue";
 import TopNavBar from '@/components/TopNavBar.vue';
 import { errorsData } from "@/assets/scripts/errorsData";
 
-export default defineComponent({
+defineOptions({
   name: "Exercises",
-  components: { TopNavBar },
-
-  setup() {
-    const errorList = computed(() => errorsData);
-    return { errorList };
-  }
+  components: { TopNavBar }
 });
+
+const errorList = computed(() => errorsData);
 </script>

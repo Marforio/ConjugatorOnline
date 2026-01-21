@@ -461,15 +461,18 @@ const sessionAccuracyTrend = computed(() => {
 
 // ----- Constants -----
 const GAME_NAMES = [
-  "Pronoun Practice",
-  "Quantifier Quest",
-  "Verb Mixer",
-  "Tricky Translator",
+  "Parallel Universe",  
   "Passive Party",
-  "Word Families",
-  "Regret Machine",
+  "Pronoun Practice",
+  "Pronunciation Challenge",
   "Prove it!",
-  "Pronunciation Challenge"
+  "Quantifier Quest",
+  "Regret Machine",
+  "Reported Speech",
+  "Tricky Translator",
+  "Verb Mixer",
+  "Year 2040",
+  "Word Families",
 ];
 const gamePictures: Record<string, string> = {
   "Pronoun Practice": "/images/banners/PronounPractice.png",
@@ -480,7 +483,10 @@ const gamePictures: Record<string, string> = {
   "Word Families": "/images/banners/WordFamilies.png",
   "Regret Machine": "/images/banners/RegretMachine.png",
   "Prove it!": "/images/banners/ProveIt.png",
-  "Pronunciation Challenge": "/images/banners/PronunciationChallenge.png"
+  "Pronunciation Challenge": "/images/banners/PronunciationChallenge.png",
+  "Reported Speech": "/images/banners/ReportedSpeech.png",
+  "Parallel Universe": "/images/banners/ParallelUniverse.png",
+  "Year 2040": "/images/banners/Year2040.png"
 };
 
 // ----- Fetch and Group -----

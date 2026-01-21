@@ -43,7 +43,7 @@
       </v-col>
 
 
-      <!-- Verb Combinator -->
+      <!-- Verb Mixer -->
       <v-col cols="12" sm="6" md="4" class="d-flex justify-center">
         <RouterLink
           :to="{ name: 'verbmixer' }"
@@ -55,7 +55,67 @@
         </RouterLink>
       </v-col>
 
-      <!-- Translator -->
+      <!-- Word Families -->
+      <v-col cols="12" sm="6" md="4" class="d-flex justify-center">
+        <RouterLink
+          :to="{ name: 'wordfamilies' }"
+          class="image-tile"
+        >
+          <div class="tile-frame">
+            <v-img src="/images/banners/WordFamilies.png" alt="Word Families" cover class="tile-image" />
+          </div>
+        </RouterLink>
+      </v-col>
+
+      <!-- Regret machine -->
+      <v-col cols="12" sm="6" md="4" class="d-flex justify-center">
+        <RouterLink
+          :to="{ name: 'regretmachine' }"
+          class="image-tile"
+        >
+          <div class="tile-frame">
+            <v-img src="/images/banners/RegretMachine.png" alt="Regret Machine" cover class="tile-image" />
+          </div>
+        </RouterLink>
+      </v-col>
+
+      <!-- Year 2040 -->
+      <v-col cols="12" sm="6" md="4" class="d-flex justify-center">
+        <RouterLink
+          :to="{ name: 'year2040' }"
+          class="image-tile"
+        >
+          <div class="tile-frame">
+            <v-img src="/images/banners/Year2040.png" alt="Year 2040" cover class="tile-image" />
+          </div>
+        </RouterLink>
+      </v-col>
+
+      <!-- Parallel Universe -->
+      <v-col cols="12" sm="6" md="4" class="d-flex justify-center">
+        <RouterLink
+          :to="{ name: 'paralleluniverse' }"
+          class="image-tile"
+        >
+          <div class="tile-frame">
+            <v-img src="/images/banners/ParallelUniverse.png" alt="Parallel Universe" cover class="tile-image" />
+          </div>
+        </RouterLink>
+      </v-col>
+
+      <!-- Reported Speech -->
+      <v-col cols="12" sm="6" md="4" class="d-flex justify-center">
+        <RouterLink
+          :to="{ name: 'reportedspeech' }"
+          class="image-tile"
+        >
+          <div class="tile-frame">
+            <v-img src="/images/banners/ReportedSpeech.png" alt="Reported Speech" cover class="tile-image" />
+          </div>
+        </RouterLink>
+      </v-col>
+      
+      <!-- Tricky Translator -->
       <v-col cols="12" sm="6" md="4" class="d-flex justify-center">
         <RouterLink
           :to="isEnabled ? { name: 'trickytranslator' } : undefined"
@@ -63,7 +123,7 @@
           :style="{ pointerEvents: isEnabled ? 'auto' : 'none', opacity: isEnabled ? 1 : 0.5 }"
         >
           <div class="tile-frame">
-            <v-img src="/images/banners/TrickyTranslator.png" alt="Translator" cover class="tile-image" />
+            <v-img src="/images/banners/TrickyTranslator.png" alt="Tricky Translator" cover class="tile-image" />
           </div>
         </RouterLink>
       </v-col>

@@ -40,7 +40,7 @@
           </v-list-item>
         </v-list>
 
-        <div class="d-flex justify-center mt-10">
+        <div class="d-flex justify-center mt-10 mb-4">
           <v-btn color="success" @click="begin" :disabled="!hasAnyPrompts">
             Start
           </v-btn>
@@ -48,6 +48,15 @@
 
         <div v-if="!hasAnyPrompts" class="text-caption text-center mt-4">
           No prompts were loaded. Please go back and try again.
+        </div>
+        <div class="d-flex justify-center">
+            <RouterLink :to="{ name: 'games' }">
+              <v-btn icon elevation="0" size="large">
+                <v-icon color="grey-darken-3" size="large">
+                  mdi-arrow-left-circle
+                </v-icon>
+              </v-btn>
+            </RouterLink>
         </div>
       </div>
 

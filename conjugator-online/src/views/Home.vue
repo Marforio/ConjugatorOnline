@@ -35,7 +35,7 @@
     </v-row>
 
     <!-- Tiles with Icon Buttons for Navigation -->
-<v-row justify="center" align="center" dense>
+<v-row justify="center" align="center" dense class="mx-10">
   <v-col
     cols="8"
     sm="6"
@@ -70,7 +70,7 @@
     </v-btn>
   </v-col>
 
-  <v-col
+    <v-col
     cols="12"
     sm="6"
     md="4"
@@ -79,11 +79,11 @@
     <v-btn
       large
       class="d-flex flex-column align-center pa-3 pa-sm-6"
-      color="success"
-      :to="{ name: 'dashboard' }"
+      color="red-lighten-1"
+      :to="{ name: 'vocabworkout' }"
     >
-      <v-icon large>mdi-chart-bar</v-icon>
-      <span class="subtitle-1 font-weight-medium px-3">Dashboard</span>
+      <v-icon large>mdi-alpha-v-box-outline</v-icon>
+      <span class="subtitle-1 font-weight-medium px-3">Vocab Workout</span>
     </v-btn>
   </v-col>
 
@@ -101,6 +101,23 @@
     >
       <v-icon large>mdi-gamepad-circle</v-icon>
       <span class="subtitle-1 font-weight-medium px-3">Other games</span>
+    </v-btn>
+  </v-col>
+
+  <v-col
+    cols="12"
+    sm="6"
+    md="4"
+    class="d-flex justify-center mb-0 mb-sm-4"
+  >
+    <v-btn
+      large
+      class="d-flex flex-column align-center pa-3 pa-sm-6"
+      color="success"
+      :to="{ name: 'dashboard' }"
+    >
+      <v-icon large>mdi-chart-bar</v-icon>
+      <span class="subtitle-1 font-weight-medium px-3">Dashboard</span>
     </v-btn>
   </v-col>
 

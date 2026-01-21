@@ -100,7 +100,7 @@ export const exerciseData = {
         },
         9: {
             type : 'checkbox',
-            question: "Which of the following sentences is correct?",
+            question: "Tick the box for any sentence that is correct.",
             answers: [
                 ["The plural form of 'datum' is 'data'.", true, "Yes. The plural form 'data' is correct."],
                 ["The singular form 'datum' is almost never used.", true, "Actually, it's true. We usually use 'data'."],
@@ -142,8 +142,8 @@ export const exerciseData = {
             type : "radio",
             question: "A few English words have a plural form identical to the singular form.",
             answers: [
-                ["True" , false, "Right! These include 'sheep', 'deer', 'fish', 'series', and 'means'."],
-                ["False" , true, "It's true. The words 'sheep', 'deer', 'fish', 'series', 'means' are both singular and plural." ]
+                ["True" , true, "Right! These include 'sheep', 'deer', 'fish', 'series', and 'means'."],
+                ["False" , false, "It's actually true. The words 'sheep', 'deer', 'fish', 'series', 'means' are both singular and plural." ]
             ]
         },
     },

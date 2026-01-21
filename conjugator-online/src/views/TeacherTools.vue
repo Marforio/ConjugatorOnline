@@ -48,6 +48,22 @@
       </div>
     </div>
   </v-col>
+
+  <!-- Numbers workout -->
+  <v-col cols="12" sm="6" md="4" class="d-flex justify-center">
+    <div
+      class="image-tile"
+      @click="openDialog('Numbers Workout')"
+    >
+      <div class="tile-frame">
+        <v-img
+          src="/images/banners/NumbersWorkout.png"
+          class="tile-image"
+          cover
+        />
+      </div>
+    </div>
+  </v-col>
 </v-row>
 
 
