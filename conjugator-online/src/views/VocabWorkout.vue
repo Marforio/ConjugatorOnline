@@ -1,8 +1,11 @@
+
 <template>
-Nuffin yet
+    <VocabWorkoutSceneManager />
 </template>
 
-<scripts>
+<script setup lang="ts">
+import 'bootstrap/dist/css/bootstrap.min.css';
+import 'bootstrap/dist/js/bootstrap.min.js';
+import VocabWorkoutSceneManager from '@/components/VocabWorkoutSceneManager.vue';
 
-
-</scripts>
+</script>

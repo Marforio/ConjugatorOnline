@@ -14,6 +14,7 @@ export interface RawRegretEntry {
   category: RegretLevel; // "essential" now; later also "advanced"
   modal: "should" | "could";
   answers: string[]; // accepted user inputs
+  negative: boolean;
 }
 
 export type RawDataset = Record<string | number, RawRegretEntry>;
@@ -27,6 +28,7 @@ export interface RegretExercise {
   category: RegretLevel;
   modal: "should" | "could";
   answers: string[];
+  negative: boolean;
 }
 
 export interface NormalizedPrompts {
@@ -59,6 +61,7 @@ export function normalizePrompts(raw: RawDataset): NormalizedPrompts {
       category,
       modal: p?.modal === "could" ? "could" : "should",
       answers: Array.isArray(p?.answers) ? p.answers.map(String) : [],
+      negative: Boolean(p?.negative)
     });
   });
 

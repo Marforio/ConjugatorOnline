@@ -1,42 +1,35 @@
-<!-- src/components/word_families/word_families_scenes/WordFamiliesScene00_Start.vue -->
+<!-- RegretMachineScene00_Start.vue (fix) -->
 <template>
   <v-container class="pa-6">
     <v-card class="mx-auto my-auto px-3 py-1" max-width="720">
       <v-card-title class="mb-4">
         <div>
           <div class="d-flex justify-center">
-            <v-img src="/images/banners/WordFamilies.png" max-width="420" />
+            <v-img src="/images/banners/RegretMachine.png" max-width="420" />
           </div>
           <h2 class="text-h4 ms-2 text-wrap">Settings</h2>
-          <div class="text-h6 ms-2 font-weight-light">Choose mode and category</div>
+          <div class="text-h6 ms-2 font-weight-light">Choose verb set</div>
         </div>
       </v-card-title>
 
       <v-card-text>
         <v-row>
           <v-col cols="12" md="6">
-            <v-card-title class="font-weight-medium">Mode</v-card-title>
-            <v-radio-group v-model="selections.mode" class="ms-2">
-              <v-radio label="Writing (type answers)" value="writing" />
-              <v-radio label="Matching (drag or tap chips)" value="matching" />
-            </v-radio-group>
+            <v-card-title class="font-weight-medium mt-4">Verb set</v-card-title>
 
-            <v-card-title class="font-weight-medium mt-4">Category</v-card-title>
             <v-select
-              v-model="selections.category"
-              :items="categoryOptions"
-              label="Choose category"
+              v-model="selections.level"
+              :items="levelOptions"
+              item-title="title"
+              item-value="value"
+              label="Choose set"
               density="compact"
             />
           </v-col>
 
           <v-col cols="12" md="6">
             <v-card-title class="font-weight-medium">Rounds</v-card-title>
-            <div class="ms-4">Fixed to <strong>20 rounds</strong></div>
-
-            <v-card-text class="text-caption mt-3">
-              Matching mode is for discovery and does not count as an achievement.
-            </v-card-text>
+            <div class="ms-4">Fixed to <strong>24 rounds</strong></div>
           </v-col>
         </v-row>
       </v-card-text>
@@ -50,31 +43,32 @@
             </v-btn>
           </RouterLink>
 
-          <v-btn color="primary" @click="start" :disabled="!valid">Start</v-btn>
+          <v-btn color="primary" @click="start">Start</v-btn>
         </div>
       </v-card-actions>
     </v-card>
   </v-container>
 </template>
 
-<script setup>
-import { ref, computed } from "vue";
-const emit = defineEmits(["startGame"]);
+<script setup lang="ts">
+import { ref } from "vue";
 
-const props = defineProps({
-  categoryOptions: { type: Array, default: () => ["all"] },
-});
+const emit = defineEmits<{
+  (e: "startGame", payload: { level: "essential" | "advanced" | "both"; numRounds: number }): void;
+}>();
+
+const levelOptions = [
+  { title: "Essential verbs", value: "essential" },
+  { title: "Advanced verbs", value: "advanced" },
+  { title: "All", value: "both" },
+] as const;
 
 const selections = ref({
-  mode: "matching",      // ✅ writing | matching
-  category: "all",
-  numRounds: 20,
+  level: "essential" as "essential" | "advanced" | "both",
+  numRounds: 24,
 });
 
-const valid = computed(() => !!selections.value.mode && !!selections.value.category);
-
 function start() {
-  if (!valid.value) return;
   emit("startGame", { ...selections.value });
 }
 </script>

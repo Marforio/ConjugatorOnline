@@ -2,7 +2,7 @@
 
 import type { NormalizedPrompts, RegretExercise, RegretLevel } from "./RegretMachinepromptEngine";
 
-export const ROUND_COUNT = 20;
+export const ROUND_COUNT = 24;
 
 export interface BuildPoolSettings {
   level: "essential" | "advanced" | "both";

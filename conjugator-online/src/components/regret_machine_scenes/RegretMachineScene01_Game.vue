@@ -36,7 +36,7 @@
           <v-list-item>
             <template #prepend><v-icon icon="mdi-eye-outline" /></template>
             <v-list-item-title class="text-wrap">
-              Watch out! Answers may be positive or negative (e.g. <strong>could have helped</strong> vs. <strong>shouldn't have helped</strong>) depending on the situation.
+              Watch out! Answers may be positive or negative.
             </v-list-item-title>
             </v-list-item>
         </v-list>
@@ -84,9 +84,16 @@
                     <v-chip color="primary" variant="flat">
                       <span class="text-uppercase" style="font-size: 1rem;">{{ currentPrompt.modal }}</span>
                     </v-chip>
-
                     <v-chip color="secondary" variant="flat">
                       <span class="text-uppercase" style="font-size: 1rem;">{{ currentPrompt.verb }}</span>
+                    </v-chip>
+                    <v-chip
+                            v-if="currentPrompt.negative"
+                            color="error"
+                            variant="flat"
+                            class="text-uppercase ms-5"
+                            >
+                            Negative
                     </v-chip>
                   </div>
                   <v-card-title class="text-wrap font-italic text-center text-h6 mt-2" style="font-size: 1.3rem;">
@@ -121,9 +128,19 @@
               color="primary"
             />
             <div class="d-flex justify-space-between">
-              <div>✅ {{ rightCount }}</div>
-              <div>❌ {{ wrongCount }}</div>
-              <div>Remaining: {{ remaining }}</div>
+              <RouterLink :to="{ name: 'games' }">
+                <v-btn icon elevation="0" class="ms-3">
+                  <v-icon color="grey-darken-3">
+                    mdi-arrow-left-circle
+                  </v-icon>
+                </v-btn>
+              </RouterLink>
+              <div class="d-flex justify-space-between align-center">
+                <div class="me-4">✅ {{ rightCount }}</div>
+                <div class="me-4">❌ {{ wrongCount }}</div>
+                <div class="me-4">Remaining: {{ remaining }}</div>
+              </div>
+              
             </div>
           </div>
         </template>

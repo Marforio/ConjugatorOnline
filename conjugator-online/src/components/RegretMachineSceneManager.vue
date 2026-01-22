@@ -49,8 +49,10 @@ function handleStartGame(selections) {
 
   const normalized = normalizePrompts(regretmachineData);
 
-  const pool = buildPool(normalized, { level: selections.level });
-  promptsForGame.value = samplePrompts(pool, selections.numRounds || 20);
+  
+
+const pool = buildPool(normalized, { level: selections.level });
+promptsForGame.value = samplePrompts(pool, selections.numRounds || 24);
 
   changeScene("RegretMachineScene01_Game");
 }

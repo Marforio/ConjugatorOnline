@@ -48,7 +48,7 @@
         <div class="d-flex justify-center align-center mt-4 gap-5">
           <v-btn @click="goToScene('RegretMachineScene01_Game')">▶️ Play Again</v-btn>
 
-          <router-link :to="{ path: '/dashboard', query: { tab: 'other-games', game: 'RegretMachine' } }">
+          <router-link :to="{ path: '/dashboard', query: { tab: 'other-games', game: 'Regret Machine' } }">
             <v-btn>Go to Dashboard</v-btn>
           </router-link>
 
