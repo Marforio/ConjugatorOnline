@@ -95,33 +95,85 @@
               <!-- CARDS -->
               <template v-if="mode === 'cards'">
                 <div class="d-flex justify-center">
-                  <v-card class="flip-card pa-4" elevation="2" width="620">
-                    <div class="d-flex align-center ga-4">
-                      <v-avatar v-if="currentItem.image" size="86" rounded="lg">
-                        <v-img :src="currentItem.image" cover />
-                      </v-avatar>
+                  <div class="card-stage">
+                    <!-- LEFT NAV -->
+                    <v-btn
+                      class="nav-btn nav-left"
+                      color="primary"
+                      variant="flat"
+                      icon
+                      size="x-large"
+                      :disabled="currentIndex === 0"
+                      @click.stop="goPrevCard"
+                      aria-label="Previous card"
+                    >
+                      <v-icon size="40">mdi-chevron-left</v-icon>
+                    </v-btn>
 
-                      <div class="flex-1">
-                        <div class="text-h6 mb-2">
-                          {{ flipped ? backPreview : frontPreview }}
-                        </div>
-                        <div class="text-caption text-medium-emphasis">
-                          {{ flipped ? "Back" : "Front" }}
+                    <!-- RIGHT NAV -->
+                    <v-btn
+                      class="nav-btn nav-right"
+                      color="primary"
+                      variant="flat"
+                      icon
+                      size="x-large"
+                      :disabled="currentIndex >= roundCount - 1"
+                      @click.stop="goNextCard"
+                      aria-label="Next card"
+                    >
+                      <v-icon size="40">mdi-chevron-right</v-icon>
+                    </v-btn>
+
+                    <!-- SLIDE transition between items -->
+                    <Transition :name="slideName" mode="out-in">
+                      <div :key="currentItem?.id || currentIndex">
+                        <!-- FLIP card -->
+                        <div class="flip-wrap" @click="toggleSide">
+                          <div class="flip-inner" :class="{ 'is-back': shownSide === 'back' }">
+                            <!-- FRONT -->
+                            <v-card class="flip-face flip-front pa-4" elevation="2" width="540">
+                              <div class="d-flex align-center ga-4">
+                                <v-avatar v-if="currentItem.image" size="86" rounded="lg">
+                                  <v-img :src="currentItem.image" cover />
+                                </v-avatar>
+
+                                <div class="flex-1">
+                                  <div class="text-h6 mb-2">{{ frontPreview }}</div>
+                                  <div class="text-caption text-medium-emphasis">
+                                    Front • click / ↑↓ to flip • ←→ to navigate
+                                  </div>
+                                </div>
+                              </div>
+                            </v-card>
+
+                            <!-- BACK -->
+                            <v-card class="flip-face flip-back pa-4" elevation="2" width="540">
+                              <div class="d-flex align-center ga-4">
+                                <v-avatar v-if="currentItem.image" size="86" rounded="lg">
+                                  <v-img :src="currentItem.image" cover />
+                                </v-avatar>
+
+                                <div class="flex-1">
+                                  <div class="text-h6 mb-2">{{ backPreview }}</div>
+                                  <div class="text-caption text-medium-emphasis">
+                                    Back • click / ↑↓ to flip • ←→ to navigate
+                                  </div>
+
+                                  <div class="text-caption text-medium-emphasis mt-1">
+                                    Default side: <strong class="text-capitalize">{{ defaultSide }}</strong>
+                                  </div>
+                                </div>
+                              </div>
+                            </v-card>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </v-card>
-                </div>
-
-                <div class="d-flex justify-center ga-3 mt-4">
-                  <v-btn variant="outlined" @click="toggleFlip">
-                    {{ flipped ? "Show front" : "Flip" }}
-                  </v-btn>
-                  <v-btn color="primary" @click="nextCard">
-                    Next
-                  </v-btn>
+                    </Transition>
+                  </div>
                 </div>
               </template>
+
+
 
               <!-- WRITING -->
               <template v-else-if="mode === 'write'">
@@ -225,7 +277,7 @@
 </template>
 
 <script setup>
-import { ref, computed, nextTick, watch } from "vue";
+import { ref, computed, nextTick, watch, onMounted, onBeforeUnmount } from "vue";
 
 import {
   getFrontText,
@@ -297,6 +349,22 @@ const backLabel = computed(() => {
   return String(b);
 });
 
+const effectiveCardBackField = computed(() => {
+  // only for cards + irregular verbs
+  if (mode.value !== "cards") return backField.value;
+  if (!isIrregularList.value) return backField.value;
+
+  // force fused back if they chose either PS or PP (or later "past_forms")
+  if (
+    backField.value === "past_simple" ||
+    backField.value === "present_perfect" ||
+    backField.value === "past_forms"
+  ) {
+    return "past_forms";
+  }
+  return backField.value;
+});
+
 /* ---------------- progress ---------------- */
 const progressValue = computed(() => {
   if (!roundCount.value) return 0;
@@ -304,7 +372,37 @@ const progressValue = computed(() => {
 });
 
 /* ---------------- cards mode ---------------- */
-const flipped = ref(false);
+
+// identify irregular list (use whichever you actually pass)
+const isIrregularList = computed(() => {
+  // robust: supports either domain string OR listKey
+  const domain = props.gameSettings?.domain;
+  const listKey = props.gameSettings?.listKey;
+  return domain === "Irregular verbs" || listKey === "irregular_verbs";
+});
+
+const isBackVerbForm = computed(() => {
+  return backField.value === "past_simple" || backField.value === "present_perfect";
+});
+
+// default side rules:
+// - non-irregular lists: BACK
+// - irregular lists: FRONT only if back is PS/PP, else BACK
+const defaultSide = computed(() => {
+  if (!isIrregularList.value) return "back";
+  return isBackVerbForm.value ? "front" : "back";
+});
+
+// instead of "flipped", track which side is currently shown
+const shownSide = ref("front"); // "front" | "back"
+
+function resetToDefaultSide() {
+  shownSide.value = defaultSide.value;
+}
+
+function toggleSide() {
+  shownSide.value = shownSide.value === "front" ? "back" : "front";
+}
 
 const frontPreview = computed(() => {
   if (!currentItem.value) return "—";
@@ -313,22 +411,46 @@ const frontPreview = computed(() => {
 
 const backPreview = computed(() => {
   if (!currentItem.value) return "—";
-  const accepted = getAcceptedAnswers(currentItem.value, backField.value);
+
+  // fused view for irregular verbs (cards mode)
+  if (effectiveCardBackField.value === "past_forms") {
+    const ps = getAcceptedAnswers(currentItem.value, "past_simple");
+    const pp = getAcceptedAnswers(currentItem.value, "present_perfect");
+
+    const psText = ps.length ? ps.join(" / ") : "—";
+    const ppText = pp.length ? pp.join(" / ") : "—";
+
+    return `Past simple: ${psText}   •   Past participle: ${ppText}`;
+  }
+
+  const accepted = getAcceptedAnswers(currentItem.value, effectiveCardBackField.value);
   return accepted.join(" / ") || "—";
 });
 
-function toggleFlip() {
-  flipped.value = !flipped.value;
+
+// navigation
+const slideName = ref("slide-left");
+
+function goNextCard() {
+  slideName.value = "slide-left";
+  recordRound({ user_answer: `(cards) viewed ${shownSide.value}`, is_correct: null });
+
+  if (currentIndex.value >= roundCount.value - 1) {
+    finishGame();
+    return;
+  }
+  currentIndex.value++;
 }
 
-function nextCard() {
-  // Cards mode is "study" not "correct/wrong" for now
-  recordRound({
-    user_answer: flipped.value ? "(flipped)" : "(not flipped)",
-    is_correct: null,
-  });
-  goNext();
+function goPrevCard() {
+  slideName.value = "slide-right";
+  recordRound({ user_answer: `(cards) viewed ${shownSide.value}`, is_correct: null });
+
+  if (currentIndex.value <= 0) return;
+  currentIndex.value--;
 }
+
+
 
 /* ---------------- writing mode ---------------- */
 const userAnswer = ref("");
@@ -346,7 +468,10 @@ async function focusAnswer() {
 // focus when index changes in writing mode
 watch(currentIndex, async () => {
   if (!gameStarted.value) return;
-  flipped.value = false;
+
+  // ALWAYS reset cards to default side when changing item
+  resetToDefaultSide();
+
   userAnswer.value = "";
 
   if (mode.value === "write") {
@@ -357,6 +482,7 @@ watch(currentIndex, async () => {
     refreshMcOptions();
   }
 });
+
 
 /* ---------------- multiple choice ---------------- */
 const mcOptions = ref([]);
@@ -402,12 +528,15 @@ function begin() {
   resultsStore.value = [];
   gameStarted.value = true;
 
-  flipped.value = false;
   userAnswer.value = "";
+
+  // start cards on default side
+  resetToDefaultSide();
 
   if (mode.value === "write") focusAnswer();
   if (mode.value === "multiple_choice") refreshMcOptions();
 }
+
 
 function submitWrite() {
   const it = currentItem.value;
@@ -511,9 +640,47 @@ function finishGame() {
 
   emit("gameOver", payload);
 }
+
+onMounted(() => {
+  const handler = (e) => {
+    if (!gameStarted.value) return;
+
+    // don't hijack keys when typing in an input/textarea
+    const tag = document.activeElement?.tagName?.toLowerCase();
+    const isTyping = tag === "input" || tag === "textarea";
+    if (isTyping && mode.value !== "cards") return;
+
+    // don't handle during dialogs
+    if (showWrongDialog.value) return;
+
+    // cards mode keyboard
+    if (mode.value === "cards") {
+      if (e.key === "ArrowUp" || e.key === "ArrowDown") {
+        e.preventDefault();
+        toggleSide();
+        return;
+      }
+      if (e.key === "ArrowRight") {
+        e.preventDefault();
+        goNextCard();
+        return;
+      }
+      if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        goPrevCard();
+        return;
+      }
+    }
+  };
+
+  window.addEventListener("keydown", handler);
+  onBeforeUnmount(() => window.removeEventListener("keydown", handler));
+});
+
 </script>
 
 <style scoped>
+
 .game-layout { display: flex; flex-direction: column; height: 100%; }
 .game-middle { flex: 1; }
 
@@ -530,4 +697,91 @@ function finishGame() {
   color: white;
   z-index: 2000;
 }
+.card-stage {
+  position: relative;
+  width: 540px;           /*  match the card */
+  margin: 0 auto;         /*  center within its parent */
+}
+
+
+/* Always-visible nav buttons */
+.nav-btn {
+  position: absolute !important;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 5;
+
+  width: 60px;
+  height: 140px;            /* tall “paddle” */
+  border-radius: 18px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.18);
+  opacity: 1;
+}
+
+.nav-left { left: -36px; }
+.nav-right { right: -36px; }
+
+/* keep them visible even disabled */
+.nav-btn.v-btn--disabled {
+  opacity: 0.35 !important;
+}
+
+/* ---------- FLIP animation (VERTICAL) ---------- */
+.flip-wrap {
+  perspective: 1200px;
+  cursor: pointer;
+}
+
+.flip-inner {
+  position: relative;
+  width: 540px;
+  min-height: 160px;
+  transform-style: preserve-3d;
+  transition: transform 420ms cubic-bezier(.2,.9,.2,1);
+}
+
+.flip-inner.is-back {
+  transform: rotateX(180deg);
+}
+
+.flip-face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  border-radius: 16px;
+}
+
+/* back face rotates vertically */
+.flip-back {
+  transform: rotateX(180deg);
+}
+
+
+/* ---------- SLIDE between cards ---------- */
+.slide-left-enter-active,
+.slide-left-leave-active,
+.slide-right-enter-active,
+.slide-right-leave-active {
+  transition: transform 220ms ease, opacity 220ms ease;
+}
+
+.slide-left-enter-from {
+  transform: translateX(30px);
+  opacity: 0;
+}
+.slide-left-leave-to {
+  transform: translateX(-30px);
+  opacity: 0;
+}
+
+.slide-right-enter-from {
+  transform: translateX(-30px);
+  opacity: 0;
+}
+.slide-right-leave-to {
+  transform: translateX(30px);
+  opacity: 0;
+}
+
+
 </style>

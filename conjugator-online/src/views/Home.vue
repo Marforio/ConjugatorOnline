@@ -1,5 +1,5 @@
 <template>
-  <v-container fluid class="d-flex flex-column pa-4">
+  <v-container fluid class="d-flex flex-column pa-1">
     <!-- Top controls: centered on xs, right-aligned on sm+ -->
     <div class="top-controls mb-8">
       <div v-if="userStore.isAuthenticated">
@@ -11,7 +11,7 @@
     </div>
 
     <!-- Main Title Centered -->
-    <v-row justify="center" class="mb-2">
+    <v-row justify="center">
       <v-col cols="12" class="text-center">
 
        <!-- XS -->
@@ -49,7 +49,7 @@
       href="https://book.language-labs.ch"
     >
       <v-icon large>mdi-book-open-variant</v-icon>
-      <span class="subtitle-1 font-weight-medium px-3">Grammar Book</span>
+      <span v-if="!$vuetify.display.xs" class="subtitle-1 font-weight-medium px-3">Grammar Book</span>
     </v-btn>
   </v-col>
 
@@ -66,7 +66,7 @@
       :to="{ name: 'conjugator' }"
     >
       <v-icon large>mdi-controller</v-icon>
-      <span class="subtitle-1 font-weight-medium px-3">Conjugator</span>
+      <span v-if="!$vuetify.display.xs" class="subtitle-1 font-weight-medium px-3">Conjugator</span>
     </v-btn>
   </v-col>
 
@@ -83,7 +83,7 @@
       :to="{ name: 'vocabworkout' }"
     >
       <v-icon large>mdi-alpha-v-box-outline</v-icon>
-      <span class="subtitle-1 font-weight-medium px-3">Vocab Workout</span>
+      <span v-if="!$vuetify.display.xs" class="subtitle-1 font-weight-medium px-3">Vocab Workout</span>
     </v-btn>
   </v-col>
 
@@ -100,7 +100,7 @@
       :to="{ name: 'games' }"
     >
       <v-icon large>mdi-gamepad-circle</v-icon>
-      <span class="subtitle-1 font-weight-medium px-3">Other games</span>
+      <span v-if="!$vuetify.display.xs" class="subtitle-1 font-weight-medium px-3">Other games</span>
     </v-btn>
   </v-col>
 
@@ -117,7 +117,7 @@
       :to="{ name: 'dashboard' }"
     >
       <v-icon large>mdi-chart-bar</v-icon>
-      <span class="subtitle-1 font-weight-medium px-3">Dashboard</span>
+      <span v-if="!$vuetify.display.xs" class="subtitle-1 font-weight-medium px-3">Dashboard</span>
     </v-btn>
   </v-col>
 
@@ -134,7 +134,7 @@
       :to="{ name: 'tools' }"
     >
       <v-icon large>mdi-tools</v-icon>
-      <span class="subtitle-1 font-weight-medium px-3">Tools</span>
+      <span v-if="!$vuetify.display.xs" class="subtitle-1 font-weight-medium px-3">Tools</span>
     </v-btn>
   </v-col>
   <!-- TEACHER TOOLS (admin-only) -->
@@ -152,7 +152,7 @@
       :to="{ name: 'teacher-tools' }"
     >
       <v-icon large>mdi-school</v-icon>
-      <span class="subtitle-1 font-weight-medium px-3">Teacher Tools</span>
+      <span v-if="!$vuetify.display.xs" class="subtitle-1 font-weight-medium px-3">Teacher Tools</span>
     </v-btn>
   </v-col>
 

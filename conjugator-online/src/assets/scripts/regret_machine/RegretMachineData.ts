@@ -441,7 +441,7 @@ export const regretmachineData = {
     highlight: "hit",
     sentence: "I _____ save.",
     category: "essential",
-    modal: "could",
+    modal: "should",
     answers: ["should have hit", "should've hit", "shouldve hit", "shoulda hit"],
     negative: false
   },
@@ -1113,10 +1113,10 @@ export const regretmachineData = {
   },
 
   "96": {
-    prompt: "I fell in love. Bad news for my studies.",
+    prompt: "I fell in love and stopped concentrating on my studies.",
     verb: "fall",
     highlight: "fell",
-    sentence: "I _____ in love. Bad news for my studies.",
+    sentence: "I _____ in love.",
     category: "essential",
     modal: "should",
     answers: [
@@ -2622,31 +2622,31 @@ export const regretmachineData = {
     prompt: "I fed the wrong information into the system.",
     verb: "feed",
     highlight: "fed",
-    sentence: "I _____ it incorrect data.",
+    sentence: "I _____ it the right data.",
     category: "advanced",
     modal: "should",
     answers: [
-      "shouldn't have fed",
-      "should not have fed",
-      "shouldnt have fed",
-      "shouldn't ve fed",
-      "shouldnt ve fed"
+      "should have fed",
+      "should've fed",
+      "shouldve fed",
+      "shouldn ve fed",
+      "shoulda fed"
     ],
-    negative: true
+    negative: false
   },
 
   "189": {
-    prompt: "I foretold disaster without evidence.",
+    prompt: "Scientists weren't able to foretell the negative effects.",
     verb: "foretell",
-    highlight: "foretold",
-    sentence: "I _____ such an outcome.",
+    highlight: "foretell",
+    sentence: "They _____ such an outcome.",
     category: "advanced",
-    modal: "could",
+    modal: "should",
     answers: [
-      "could have foretold",
-      "could've foretold",
-      "couldve foretold",
-      "coulda foretold"
+      "should have foretold",
+      "should've foretold",
+      "shouldve foretold",
+      "shoulda foretold"
     ],
     negative: false
   },
@@ -2837,20 +2837,20 @@ export const regretmachineData = {
   },
 
   "201": {
-    prompt: "I slew the final boss without mercy.",
+    prompt: "I didn't slay the opponent and he was able to regain power.",
     verb: "slay",
-    highlight: "slew",
-    sentence: "I _____ the the final boss.",
+    highlight: "didn't slay",
+    sentence: "I _____ the opponent when I had the chance.",
     category: "advanced",
     modal: "should",
     answers: [
-      "shouldn't have slain",
-      "should not have slain",
-      "shouldnt have slain",
-      "shouldn't ve slain",
-      "shouldnt ve slain"
+      "should have slain",
+      "should ve slain",
+      "should've slain",
+      "shouldve slain",
+      "shoulda slain"
     ],
-    negative: true
+    negative: false
   },
 
   "202": {
@@ -3060,11 +3060,11 @@ export const regretmachineData = {
     category: "advanced",
     modal: "should",
     answers: [
-      "shouldn't have lain",
-      "should not have lain",
-      "shouldnt have lain",
-      "shouldn't ve lain",
-      "shouldnt ve lain"
+      "shouldn't have lied",
+      "should not have lied",
+      "shouldnt have lied",
+      "shouldn't ve lied",
+      "shouldnt ve lied"
     ],
     negative: true
   },
@@ -3117,7 +3117,7 @@ export const regretmachineData = {
       "shouldn't ve sought",
       "shouldnt ve sought"
     ],
-    negative: false
+    negative: true
   },
 
   "218": {

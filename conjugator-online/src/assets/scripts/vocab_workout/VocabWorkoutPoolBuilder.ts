@@ -10,12 +10,12 @@ export function shuffle<T>(list: T[]): T[] {
 }
 
 export interface BuildPoolSettings {
-  level?: "all" | "essential" | "advanced";
+  level?: "essential" | "advanced" | null;
 }
 
 export function buildPool(items: VocabItem[], settings?: BuildPoolSettings): VocabItem[] {
-  const level = settings?.level ?? "all";
-  if (level === "all") return items;
+  const level = settings?.level ?? null;
+  if (level === null) return items;
   return items.filter(it => String(it.level) === level);
 }
 

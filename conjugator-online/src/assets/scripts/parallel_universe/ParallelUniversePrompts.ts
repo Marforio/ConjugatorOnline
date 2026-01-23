@@ -106,15 +106,15 @@ export const parallelUniversePrompts = {
         conditional_type: "third",
         sentence: "If you _____ breakfast this morning, you wouldn't be hungry now.",
         condition: true,
-        answers: ["had eaten"],
+        answers: ["had eaten", "d eaten", "'d eaten"],
         negative: false
     },
 
     13: {
-        verb: "study",
+        verb: "pass",
         irreg_level: "regular",
         conditional_type: "first",
-        sentence: "You _____ the test if you focus today.",
+        sentence: "You _____ your exams of you study.",
         condition: false,
         answers: ["will pass", "'ll pass", "ll pass"],
         negative: false
@@ -134,7 +134,7 @@ export const parallelUniversePrompts = {
         conditional_type: "third",
         sentence: "If you _____ last night, you'd have finished the assignment.",
         condition: true,
-        answers: ["had studied"],
+        answers: ["had studied", "d studied", "'d studied"],
         negative: false
     },
 

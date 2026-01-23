@@ -1571,7 +1571,7 @@ export const CitiesAndBuildings = {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-export const AtmosphereAndQualities = {
+export const LightSpaces = {
   "view of the lake": {
     definition: "a visual perspective overlooking a lake",
     French: "vue sur le lac",
@@ -2106,7 +2106,7 @@ export const AtmosphereAndQualities = {
 /////////////////////////////////////////////////////////////////////////////////
 
 
-export const Career = {
+export const ArchCareer = {
   "internship": {
     definition: "a temporary work placement for gaining professional experience",
     French: "stage professionnel",

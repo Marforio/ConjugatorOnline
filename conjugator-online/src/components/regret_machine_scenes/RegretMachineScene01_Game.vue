@@ -48,6 +48,14 @@
         <div v-if="!hasAnyPrompts" class="text-caption text-center mt-4">
           No prompts loaded. Go back and try again.
         </div>
+
+        <div class="d-flex justify-center align-center w-100 mt-8">
+          <RouterLink :to="{ name: 'games' }">
+            <v-btn icon elevation="0" size="large" class="ms-3">
+              <v-icon color="grey-darken-3" size="large">mdi-arrow-left-circle</v-icon>
+            </v-btn>
+          </RouterLink>
+        </div>
       </div>
 
       <!-- GAME -->
