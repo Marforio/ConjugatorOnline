@@ -28,7 +28,7 @@
             <v-card-title class="font-weight-medium">Tenses</v-card-title>
             <v-select
               v-model="selections.tenseGroup"
-              :items="tenseOptions"
+              :items="tenseOptions"A
               label="Choose tense group"
               density="compact"
             ></v-select>

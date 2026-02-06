@@ -257,6 +257,7 @@
 
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount } from "vue";
+import api from "@/axios";
 import { exerciseData } from "@/assets/scripts/exerciseData";
 import { errorsData } from "@/assets/scripts/errorsData";
 
@@ -268,9 +269,17 @@ onBeforeUnmount(() => {
   window.removeEventListener("keydown", onEnterKey);
 });
 
+const emit = defineEmits(["exerciseOver"]);
+
 const props = defineProps({
   errorCode: { type: String, required: true }
 });
+
+const roundsStore = ref([]);   // each round: { round_number, question_type, question_text, expected, user_answer, is_correct, elapsed_time }
+const startTime = ref(null);
+const numRounds = ref(0);
+const rightCount = ref(0);
+const wrongCount = ref(0);
 
 const errorEntry = errorsData[props.errorCode];
 
@@ -326,21 +335,24 @@ function shuffleArray(array) {
    START
 ------------------------------------------------------------------ */
 const startExercises = () => {
-  const entries = Object.entries(exercises.value).map(([id, item]) => ({
-    id,
-    item
-  }));
-
+  const entries = Object.entries(exercises.value).map(([id, item]) => ({ id, item }));
   shuffledExercises.value = shuffleArray(entries);
 
   userAnswers.value = {};
   result.value = {};
   currentIndex.value = 0;
 
-  initializeCurrentAnswer();
+  numRounds.value = shuffledExercises.value.length;
+  rightCount.value = 0;
+  wrongCount.value = 0;
+  roundsStore.value = [];
 
+  startTime.value = new Date();
+
+  initializeCurrentAnswer();
   phase.value = "during";
 };
+
 
 
 /* ------------------------------------------------------------------
@@ -353,7 +365,9 @@ const isLastQuestion = computed(() =>
 );
 
 const progressPercent = computed(() =>
-  ((currentIndex.value) / shuffledExercises.value.length) * 100
+  shuffledExercises.value.length
+    ? ((currentIndex.value + 1) / shuffledExercises.value.length) * 100
+    : 0
 );
 
 
@@ -412,7 +426,7 @@ const handleButtonClick = () => {
 
 
 const submitSingleAnswer = () => {
-  const item = currentQuestion.value.item;
+  const { id, item } = currentQuestion.value;
   const idx = currentIndex.value;
   const ans = currentAnswer.value;
 
@@ -420,22 +434,33 @@ const submitSingleAnswer = () => {
 
   if (item.type === "text_mono") {
     correct = ans.trim().toLowerCase() === item.answer.toLowerCase();
-  }
-  else if (item.type === "text_multi") {
+  } else if (item.type === "text_multi") {
     correct = item.answers.map(a => a.toLowerCase())
       .includes(ans.trim().toLowerCase());
-  }
-  else if (item.type === "checkbox") {
+  } else if (item.type === "checkbox") {
     const correctList = item.answers.filter(a => a[1]).map(a => a[0]);
     const user = Array.isArray(ans) ? ans.slice().sort() : [];
     correct = JSON.stringify(user) === JSON.stringify(correctList.sort());
-  }
-  else if (item.type === "radio") {
+  } else if (item.type === "radio") {
     correct = isRadioCorrect(item, ans);
   }
 
   result.value[idx] = correct;
   userAnswers.value[idx] = ans;
+
+  if (correct) rightCount.value += 1;
+  else wrongCount.value += 1;
+
+  roundsStore.value.push({
+    round_number: idx + 1,
+    question_type: item.type,
+    question_text: item.question,
+    expected: item.type === "text_mono" ? item.answer : item.answers,
+    user_answer: ans,
+    is_correct: correct,
+    out_of_time: false,
+    elapsed_time: null, // or track per-question time if you want
+  });
 
   snackbar.value = {
     show: true,
@@ -444,17 +469,52 @@ const submitSingleAnswer = () => {
   };
 };
 
-  const goToNextQuestion = () => {
-  // last question?
+const goToNextQuestion = () => {
   if (isLastQuestion.value) {
     phase.value = "post";
+    finishExercise();
     return;
   }
 
   currentIndex.value++;
   initializeCurrentAnswer();
-  answered.value = false; // reset for next question
+  answered.value = false;
 };
+
+
+async function finishExercise() {
+  const finishedAt = new Date();
+  const totalSeconds = startTime.value
+    ? Math.floor((finishedAt - startTime.value) / 1000)
+    : 0;
+
+  const avgTime = numRounds.value > 0
+    ? totalSeconds / numRounds.value
+    : 0;
+
+  const payload = {
+    error_code: props.errorCode,   // e.g. "0120"
+    total_rounds: numRounds.value,
+    correct_count: rightCount.value,
+    wrong_count: wrongCount.value,
+    started_at: startTime.value ? startTime.value.toISOString() : new Date().toISOString(),
+    finished_at: finishedAt.toISOString(),
+    total_time: totalSeconds,
+    avg_time_per_round: parseFloat(avgTime.toFixed(2)),
+    rounds: roundsStore.value,
+  };
+
+  try {
+    await api.post("/exercise-sessions/", payload, {
+      headers: { "Content-Type": "application/json" },
+    });
+  } catch (error) {
+    console.error("Status:", error.response?.status);
+    console.error("Response data:", error.response?.data);
+  }
+
+  emit("exerciseOver", payload);
+}
 
 
 /* ------------------------------------------------------------------

@@ -27,6 +27,7 @@ const routes = [
   { path: '/games/reported-speech', name: 'reportedspeech', component: () => import('@/views/ReportedSpeech.vue'), meta: { requiresAuth: true }},
   { path: '/games/year2040', name: 'year2040', component: () => import('@/views/Year2040.vue'), meta: { requiresAuth: true }},
   { path: '/games/parallel-universe', name: 'paralleluniverse', component: () => import('@/views/ParallelUniverse.vue'), meta: { requiresAuth: true }},
+  { path: '/games/uses-of-auxiliaries', name: 'auxiliaryuses', component: () => import('@/views/UsesOfAuxiliaries.vue'), meta: { requiresAuth: true }},
   { path: '/tools', name: 'tools', component: () => import('@/views/Tools.vue') },
   { path: '/tools/meeting-machine', name: 'meeting-machine', component: () => import('@/views/MeetingMachine.vue')},
   { path : '/teacher-tools', name: 'teacher-tools', component: () => import('@/views/TeacherTools.vue'),  meta: { requiresAuth: true, requiresAdmin: true } },

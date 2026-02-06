@@ -39,18 +39,18 @@
             <span class="font-weight-medium">Tense(s): </span>{{ gameSettings?.tenses?.join(', ') || '' }}
           </v-list-item-title>
         </v-list-item>
-        <v-switch :model-value="true" :label="showKeyword ? 'See time reference' : 'See tense name'" v-model="showKeyword" label="Time reference" class="ms-6" />
+        <v-switch :label="showKeyword ? 'See time reference' : 'See tense name'" v-model="showKeyword" class="ms-6" />
       </v-list>
       <v-divider></v-divider>
 
       <div class="mt-auto d-flex justify-space-between align-center w-100 px-3">
-        <v-btn icon elevation="0" size="x-large" class="ms-3" @click="goBack">
-          <v-icon size="x-large">mdi-arrow-left-circle</v-icon>
+        <v-btn icon elevation="1" class="ms-3" @click="goBack">
+          <v-icon size="large">mdi-arrow-left-circle</v-icon>
         </v-btn>
         <v-tooltip text="Summary of tense keywords" location="top">
           <template v-slot:activator="{ props }">
-            <v-btn icon elevation="0" size="x-large" class="me-3" v-bind="props" href="https://book.language-labs.ch/ch4#tense-keyword-summary" target='_blank'>
-              <v-icon size="x-large">mdi-lifebuoy</v-icon>
+            <v-btn icon elevation="1" class="me-3" v-bind="props" href="https://book.language-labs.ch/ch4#tense-keyword-summary" target='_blank'>
+              <v-icon size="large">mdi-lifebuoy</v-icon>
             </v-btn>
           </template>
         </v-tooltip>
@@ -100,7 +100,7 @@
         </div>
 
         <div v-if="$vuetify.display.xs" class="d-flex justify-center mt-6">
-          <v-btn size="x-large" icon elevation large @click="goBack">
+          <v-btn size="x-large" icon elevation="1" large @click="goBack">
             <v-icon size="x-large">mdi-arrow-left-circle</v-icon>
           </v-btn>
         </div>
@@ -240,7 +240,7 @@
 
         </v-footer>
         <div v-if="$vuetify.display.xs" class="d-flex justify-center mt-6">
-          <v-btn icon elevation large @click="goBack">
+          <v-btn icon elevation="1" large @click="goBack">
             <v-icon>mdi-arrow-left-circle</v-icon>
           </v-btn>
         </div>
@@ -269,324 +269,406 @@
 
 
 
-<script>
-import api from '@/axios';
-import { getAccessToken } from '@/services/auth';
-import Game from '@/assets/scripts/Game';
-import InitialsText from '../InitialsText.vue';
+<script setup lang="ts">
+import { ref, reactive, computed, onMounted, onBeforeUnmount, nextTick, shallowRef, markRaw } from "vue";
+import api from "@/axios";
+import { getAccessToken } from "@/services/auth";
+import Game from "@/assets/scripts/Game";
+import InitialsText from "../InitialsText.vue";
 import { useUserStore } from "@/stores/user";
 
-export default {
-  components: { InitialsText },
-  props: {
-    gameSettings: {
-      type: Object,
-      default: () => ({
-        verbSet: '',
-        sentenceTypes: [],
-        tenses: [],
-        numPrompts: 0,
-        smartVerbPool: null,
-        isSmart: false
-      })
-    }
-  },
-  data() {
-    return {
-      userStore: null,
-      userName: 'Player',
-      game: null,
-      gameStarted: false,
-      localGameSettings: null,   // ✅ local clone instead of mutating props
-      currentPrompt: {
-        person: '',
-        verb: '',
-        tense: '',
-        sentenceType: ''
-      },
-      userAnswer: '',
-      overallTimer: 0,
-      roundTimer: 0,
-      rightCount: 0,
-      wrongCount: 0,
-      remainingCount: this.gameSettings.numPrompts,
-      promptCounter: 0,
-      submitButtontext: 'SUBMIT',
-      results: {},
-      startTime: null,
-      intervalId: null,
-      roundStartTime: null,
-      roundIntervalId: null,
-      showBlockingDialog: false,
-      snackbar: {
-        show: false,
-        message: '',
-        color: 'success'
-      },
-      showKeyword: true,
-      randomTenseDisplay: '',
-      keywords: {}
-    };
-  },
-
-  async mounted() {
-    this.userStore = useUserStore();
-
-    // Ensure the tierStats + pool are populated
-    if (!this.userStore.tierStats || 
-        (Array.isArray(this.userStore.tierStats) && this.userStore.tierStats.length === 0)) {
-      await this.userStore.fetchVerbUsageDashboardData();
-    }
-
-    // Get computed verb pool (already plain, but may still hold refs)
-    const poolComputed = this.userStore.smartVerbPoolPlain ?? this.userStore.smartVerbPools;
-    const poolObj = poolComputed?.value !== undefined ? poolComputed.value : poolComputed;
-
-    // Deep clone utility
-    const deepClone = (obj) => {
-      if (typeof structuredClone === 'function') {
-        return structuredClone(obj);
-      }
-      return JSON.parse(JSON.stringify(obj));
-    };
-
-    const plainPool = poolObj ? deepClone(poolObj) : null;
-
-    // ✅ create localGameSettings clone (safe to mutate)
-    this.localGameSettings = { ...this.gameSettings, smartVerbPool: plainPool };
-    // console.log("this.localGameSettings", this.localGameSettings)
-
-    // create and start the game with local settings
-    this.game = new Game(this.localGameSettings);
-
-    // console.log("Scene03 settings about to be passed into Game:", this.localGameSettings);
-
-    await this.tenseKeyWords();  
-    await this.game.start();
-    this.updatePrompt();
-  },
-
-  beforeDestroy() {
-    clearInterval(this.timerInterval);
-    clearInterval(this.intervalId);
-    clearInterval(this.roundIntervalId);
-  },
-
-  computed: {
-    progressValue() {
-      return ((this.promptCounter) / this.localGameSettings.numPrompts) * 100;
-    },
-    isAuthenticated() { 
-      return !!getAccessToken();
-    },
-    displayedTenseHeader() {
-      return this.showKeyword ? "Time reference" : "Tense";
-    },
-    isSmartList() {
-      const settings = this.localGameSettings;
-      if (!settings || !settings.smartVerbPool) return false;
-
-      const poolRaw = settings.smartVerbPool;
-      const pool = (poolRaw && poolRaw.value !== undefined) ? poolRaw.value : poolRaw;
-
-      if (!pool || typeof pool !== 'object') return false;
-
-      const smartCapableSets = [
-        "Basic 75 Irregs",
-        "Master 110 Irregs",
-        "Shakespeare 130 Irregs",
-        "GOAT 50 Hard Irregs Only"
-      ];
-
-      if (!smartCapableSets.includes(this.gameSettings.verbSet)) {
-        return false;
-      }
-
-      return Object.values(pool).some(v => Array.isArray(v) && v.length > 0);
-    }
-
-  },
-
-  methods: {
-    goBack() {
-      this.$emit('changeScene', 'Scene02_Settings');
-    },
-    
-    async tenseKeyWords() {
-      try {
-        const res = await fetch('/data/tenseKeywords.json');
-        this.keywords = await res.json();
-      } catch (e) {
-        console.error('Error loading tense keywords:', e);
-      }
-    },
-
-    updateRandomTense() {
-      if (!this.showKeyword) {
-        this.randomTenseDisplay = this.currentPrompt.tense;
-        return;
-      }
-
-      const tenseKey = this.currentPrompt.tense.toLowerCase().replace(/\s/g, '_');
-      const options = this.keywords[tenseKey];
-
-      if (Array.isArray(options) && options.length > 0) {
-        let randomIndex;
-        do {
-          randomIndex = Math.floor(Math.random() * options.length);
-        } while (options.length > 1 && options[randomIndex] === this.randomTenseDisplay);
-        this.randomTenseDisplay = options[randomIndex];
-      } else {
-        this.randomTenseDisplay = this.currentPrompt.tense;
-      }
-    },
-
-    async endGame() {
-      this.showBlockingDialog = true;
-      this.results = this.game.getResults();
-      console.log("Game results in this.results (spread):", [...this.results]);
-
-      const avgTime = ((new Date().getTime() - this.startTime) / 1000 / this.results.length).toFixed(1);
-
-      const rounds = this.results.map((r, index) => ({
-        prompt_number: index + 1,
-        person: r.prompt.person,
-        verb: r.prompt.verb,
-        tense: r.prompt.tense,
-        sentence_type: r.prompt.sentenceType,
-        user_answer: r.userAnswer,
-        is_correct: r.correct,
-        acceptable_answers: Array.isArray(r.correctAnswers) ? r.correctAnswers : [],
-        elapsed_time: parseFloat(r.elapsedTime),
-      }));
-
-      const payload = {
-        verb_set: this.localGameSettings.verbSet,
-        sentence_types: this.localGameSettings.sentenceTypes,
-        tenses: this.localGameSettings.tenses,
-        total_rounds: this.localGameSettings.numPrompts,
-        correct_count: this.rightCount,
-        wrong_count: this.wrongCount,
-        started_at: new Date(this.startTime).toISOString(),
-        finished_at: new Date().toISOString(),
-        total_time: Math.floor((new Date().getTime() - this.startTime) / 1000),
-        avg_time_per_prompt: parseFloat(avgTime),
-        rounds: rounds
-      };
-
-      try {
-        console.log("Submitting game payload:", JSON.stringify(payload, null, 2));
-        const response = await api.post('/conj-game-sessions/', payload, {
-          headers: { 'Content-Type': 'application/json' }
-        });
-        console.log("Game session saved:", response.data);
-      } catch (error) {
-        console.error("Status:", error.response?.status);
-        console.error("Response data:", error.response?.data);
-      }
-
-      setTimeout(() => {
-        this.showBlockingDialog = false;
-        this.$emit('gameOver', payload);
-        this.endTimer();
-      }, 1000);
-    },
-
-    quitGame() {
-      this.$emit('changeScene', 'Scene01_Landing');
-    },
-
-    startGame() {
-      this.gameStarted = true;
-      this.startTime = new Date().getTime();
-      this.roundStartTime = new Date().getTime();
-      this.timerInterval = setInterval(this.updateTimers, 1000);
-      this.updatePrompt();
-    },
-
-    updatePrompt() {
-      const prompt = this.game.getCurrentPrompt();
-      this.currentPrompt.person = prompt.getPerson();
-      this.currentPrompt.verb = prompt.getVerb();
-      this.currentPrompt.tense = prompt.getTense();
-      this.currentPrompt.sentenceType = prompt.getSentenceType();
-      this.updateRandomTense();
-      this.startRoundTimer();
-    },
-
-    updateTimers() {
-      const now = new Date().getTime();
-      const elapsed = Math.floor((now - this.startTime) / 1000);
-      this.overallTimer = this.formatTime(elapsed);
-    },
-
-    endTimer() {
-      clearInterval(this.intervalId);
-    },
-
-    startRoundTimer() {
-      this.roundStartTime = new Date().getTime();
-      clearInterval(this.roundIntervalId);
-      this.roundIntervalId = setInterval(() => {
-        const now = new Date().getTime();
-        const elapsed = Math.floor((now - this.roundStartTime) / 1000);
-        this.roundTimer = this.formatTime(elapsed);
-      }, 1000);
-    },
-
-    formatTime(totalSeconds) {
-      const minutes = Math.floor(totalSeconds / 60);
-      const seconds = totalSeconds % 60;
-      return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-    },
-
-    endRoundTimer() {
-      clearInterval(this.roundIntervalId);
-    },
-
-    submitAnswer() {
-      const now = new Date().getTime();
-      const elapsedMs = now - this.roundStartTime;
-      const elapsedSecondsDecimal = (elapsedMs / 1000).toFixed(1);
-
-      const realPrompt = this.game.getCurrentPrompt();
-      realPrompt.elapsedTime = elapsedSecondsDecimal;
-
-      const isCorrect = this.game.submitAnswer(this.userAnswer);
-
-      this.snackbar.message = isCorrect
-        ? `Yes! "${this.userAnswer}" is correct!`
-        : `Sorry, "${this.userAnswer}" is wrong!`;
-      this.snackbar.color = isCorrect ? 'success' : 'warning';
-      this.snackbar.show = false;
-      this.$nextTick(() => {
-        this.snackbar.show = true;
-      });
-
-      if (isCorrect) {
-        this.rightCount = this.game.getRightCount();
-      } else {
-        this.wrongCount = this.game.getWrongCount();
-      }
-
-      this.promptCounter++;
-      this.remainingCount--;
-      this.userAnswer = '';
-      this.endRoundTimer();
-
-      if (this.remainingCount === 1) {
-        this.submitButtontext = 'FINISH';
-      }
-      if (this.remainingCount === 0) {
-        this.endGame();
-      } else {
-        this.game.nextPrompt();
-        this.updatePrompt();
-        this.startRoundTimer();
-      }
-    }
-  }
+// ---------------- props / emits ----------------
+type GameSettings = {
+  verbSet: string;
+  sentenceTypes: string[];
+  tenses: string[];
+  numPrompts: number;
+  smartVerbPool: any; // SmartVerbPoolByTense | null (kept as any to match existing code)
+  isSmart: boolean;
 };
+
+const props = defineProps<{
+  gameSettings: GameSettings;
+}>();
+
+const emit = defineEmits<{
+  (e: "changeScene", scene: string): void;
+  (e: "gameOver", payload: any): void;
+}>();
+
+// ---------------- store ----------------
+const userStore = useUserStore();
+
+// ---------------- state ----------------
+const userName = ref("Player");
+const game = shallowRef<any>(null);
+
+const gameStarted = ref(false);
+
+// ✅ local clone instead of mutating props
+const localGameSettings = ref<GameSettings | null>(null);
+
+const currentPrompt = reactive({
+  person: "",
+  verb: "",
+  tense: "",
+  sentenceType: "",
+});
+
+const userAnswer = ref("");
+
+const overallTimer = ref("00:00");
+const roundTimer = ref("00:00");
+
+const rightCount = ref(0);
+const wrongCount = ref(0);
+
+const remainingCount = ref<number>(props.gameSettings?.numPrompts ?? 0);
+const promptCounter = ref(0);
+
+const submitButtontext = ref("SUBMIT");
+
+// results are an array in your Game class; keep flexible
+const results = ref<any[]>([]);
+
+const startTime = ref<number | null>(null);
+const roundStartTime = ref<number | null>(null);
+
+let timerInterval: ReturnType<typeof window.setInterval> | null = null;
+let roundIntervalId: ReturnType<typeof window.setInterval> | null = null;
+
+const showBlockingDialog = ref(false);
+
+const snackbar = reactive({
+  show: false,
+  message: "",
+  color: "success",
+});
+
+const showKeyword = ref(true);
+const randomTenseDisplay = ref("");
+
+const keywords = ref<Record<string, string[]>>({});
+
+// ---------------- helpers ----------------
+function deepClone<T>(obj: T): T {
+  // structuredClone is fastest + safest when available
+  if (typeof structuredClone === "function") return structuredClone(obj);
+  return JSON.parse(JSON.stringify(obj));
+}
+
+function mapUiVerbSetToApiVerbSet(ui: string): string {
+  // must match backend expectation: "Basic 75" | "Master 110" | "All Irregular"
+  if (ui === "Basic 75 Irregs") return "Basic 75";
+  if (ui === "Master 110 Irregs") return "Master 110";
+  if (ui === "Shakespeare 130 Irregs") return "All Irregular";
+  if (ui === "GOAT 50 Hard Irregs Only") return "All Irregular";
+  return "All Irregular";
+}
+
+function isIrregularSmartCapable(ui: string) {
+  return (
+    ui === "Basic 75 Irregs" ||
+    ui === "Master 110 Irregs" ||
+    ui === "Shakespeare 130 Irregs" ||
+    ui === "GOAT 50 Hard Irregs Only"
+  );
+}
+
+function formatTime(totalSeconds: number) {
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+}
+
+// ---------------- computed ----------------
+const progressValue = computed(() => {
+  const total = localGameSettings.value?.numPrompts ?? props.gameSettings.numPrompts ?? 0;
+  if (!total) return 0;
+  return (promptCounter.value / total) * 100;
+});
+
+const isAuthenticated = computed(() => !!getAccessToken());
+
+const displayedTenseHeader = computed(() => (showKeyword.value ? "Time reference" : "Tense"));
+
+const isSmartList = computed(() => {
+  const settings = localGameSettings.value;
+  if (!settings) return false;
+
+  if (!isIrregularSmartCapable(settings.verbSet)) return false;
+
+  const pool = settings.smartVerbPool;
+  if (!pool || typeof pool !== "object") return false;
+
+  const ps = Array.isArray(pool["Past simple"]) ? pool["Past simple"] : [];
+  const pp = Array.isArray(pool["Present perfect"]) ? pool["Present perfect"] : [];
+  return ps.length > 0 || pp.length > 0;
+});
+
+// ---------------- API / loading ----------------
+async function loadTenseKeywords() {
+  try {
+    const res = await fetch("/data/tenseKeywords.json");
+    keywords.value = await res.json();
+  } catch (e) {
+    console.error("Error loading tense keywords:", e);
+    keywords.value = {};
+  }
+}
+
+function updateRandomTense() {
+  if (!showKeyword.value) {
+    randomTenseDisplay.value = currentPrompt.tense;
+    return;
+  }
+
+  const tenseKey = currentPrompt.tense.toLowerCase().replace(/\s/g, "_");
+  const options = keywords.value[tenseKey];
+
+  if (Array.isArray(options) && options.length > 0) {
+    let randomIndex: number;
+    do {
+      randomIndex = Math.floor(Math.random() * options.length);
+    } while (options.length > 1 && options[randomIndex] === randomTenseDisplay.value);
+
+    randomTenseDisplay.value = options[randomIndex];
+  } else {
+    randomTenseDisplay.value = currentPrompt.tense;
+  }
+}
+
+function updatePrompt() {
+  const prompt = game.value?.getCurrentPrompt?.();
+  if (!prompt) return;
+
+  currentPrompt.person = prompt.getPerson();
+  currentPrompt.verb = prompt.getVerb();
+  currentPrompt.tense = prompt.getTense();
+  currentPrompt.sentenceType = prompt.getSentenceType();
+
+  updateRandomTense();
+
+  // ✅ Only run the per-round timer while actually playing
+  if (gameStarted.value) startRoundTimer();
+}
+
+// ---------------- timers ----------------
+function updateTimers() {
+  if (!startTime.value) return;
+  const now = Date.now();
+  const elapsed = Math.floor((now - startTime.value) / 1000);
+  overallTimer.value = formatTime(elapsed);
+}
+
+function startOverallTimer() {
+  stopOverallTimer();
+  timerInterval = window.setInterval(updateTimers, 1000);
+}
+
+function stopOverallTimer() {
+  if (timerInterval) {
+    window.clearInterval(timerInterval);
+    timerInterval = null;
+  }
+}
+
+function startRoundTimer() {
+  roundStartTime.value = Date.now();
+  if (roundIntervalId) window.clearInterval(roundIntervalId);
+
+  roundIntervalId = window.setInterval(() => {
+    if (!roundStartTime.value) return;
+    const now = Date.now();
+    const elapsed = Math.floor((now - roundStartTime.value) / 1000);
+    roundTimer.value = formatTime(elapsed);
+  }, 1000);
+}
+
+function endRoundTimer() {
+  if (roundIntervalId) {
+    window.clearInterval(roundIntervalId);
+    roundIntervalId = null;
+  }
+}
+
+// ---------------- lifecycle ----------------
+onMounted(async () => {
+  await loadTenseKeywords();
+
+  // ✅ Build local settings (safe to mutate)
+  const baseSettings = deepClone(props.gameSettings);
+
+  // ✅ New smart pool source (per-tense)
+  // Only fetch for irregular verb sets; otherwise leave null (fallback will work in ConjugationSet)
+  if (isIrregularSmartCapable(baseSettings.verbSet)) {
+    const apiVerbSet = mapUiVerbSetToApiVerbSet(baseSettings.verbSet);
+
+    // ask server for a pool sized to this game
+    const pool = await userStore.fetchSmartConjVerbPool({
+      verbSet: apiVerbSet,
+      batchSize: baseSettings.numPrompts,
+    });
+
+    baseSettings.smartVerbPool = pool ? deepClone(pool) : null;
+    baseSettings.isSmart = !!(pool && (pool["Past simple"]?.length || pool["Present perfect"]?.length));
+  } else {
+    baseSettings.smartVerbPool = null;
+    baseSettings.isSmart = false;
+  }
+
+  localGameSettings.value = baseSettings;
+
+  // ✅ Create game instance
+  game.value = markRaw(new Game(localGameSettings.value));
+
+
+  // ✅ Preload prompts so the pre-game screen can immediately show the first prompt when user clicks Start,
+  // without a flash / delay. This does NOT start timers or advance the gameStarted state.
+  await game.value.start();
+
+  // Pre-fill currentPrompt for display (safe even before start)
+  updatePrompt();
+});
+
+onBeforeUnmount(() => {
+  stopOverallTimer();
+  endRoundTimer();
+});
+
+// ---------------- UI actions ----------------
+function goBack() {
+  emit("changeScene", "Scene02_Settings");
+}
+
+function quitGame() {
+  emit("changeScene", "Scene01_Landing");
+}
+
+function startGame() {
+  if (!game.value) return;
+
+  gameStarted.value = true;
+
+  startTime.value = Date.now();
+  roundStartTime.value = Date.now();
+
+  overallTimer.value = "00:00";
+  roundTimer.value = "00:00";
+
+  promptCounter.value = 0;
+  remainingCount.value = localGameSettings.value?.numPrompts ?? props.gameSettings.numPrompts ?? 0;
+
+  rightCount.value = 0;
+  wrongCount.value = 0;
+
+  submitButtontext.value = remainingCount.value === 1 ? "FINISH" : "SUBMIT";
+
+  startOverallTimer();
+  startRoundTimer();
+  updatePrompt();
+}
+
+async function endGame() {
+  showBlockingDialog.value = true;
+
+  results.value = game.value?.getResults?.() ?? [];
+
+  const totalRounds = results.value.length || (localGameSettings.value?.numPrompts ?? 0) || 1;
+
+  const avgTime =
+    startTime.value != null
+      ? ((Date.now() - startTime.value) / 1000 / totalRounds).toFixed(1)
+      : "0.0";
+
+  const rounds = results.value.map((r: any, index: number) => ({
+    prompt_number: index + 1,
+    person: r.prompt.person,
+    verb: r.prompt.verb,
+    tense: r.prompt.tense,
+    sentence_type: r.prompt.sentenceType,
+    user_answer: r.userAnswer,
+    is_correct: !!r.correct,
+    acceptable_answers: Array.isArray(r.correctAnswers) ? r.correctAnswers : [],
+    elapsed_time: parseFloat(r.elapsedTime ?? 0),
+  }));
+
+  const payload = {
+    verb_set: localGameSettings.value?.verbSet ?? props.gameSettings.verbSet,
+    sentence_types: localGameSettings.value?.sentenceTypes ?? props.gameSettings.sentenceTypes,
+    tenses: localGameSettings.value?.tenses ?? props.gameSettings.tenses,
+    total_rounds: localGameSettings.value?.numPrompts ?? props.gameSettings.numPrompts,
+    correct_count: rightCount.value,
+    wrong_count: wrongCount.value,
+    started_at: startTime.value ? new Date(startTime.value).toISOString() : new Date().toISOString(),
+    finished_at: new Date().toISOString(),
+    total_time: startTime.value ? Math.floor((Date.now() - startTime.value) / 1000) : 0,
+    avg_time_per_prompt: parseFloat(avgTime),
+    rounds,
+  };
+
+  try {
+    await api.post("/conj-game-sessions/", payload, {
+      headers: { "Content-Type": "application/json" },
+    });
+  } catch (error: any) {
+    console.error("Conj game submit failed.");
+    console.error("Status:", error?.response?.status);
+    console.error("Response data:", error?.response?.data);
+  }
+
+  // UI wrap-up
+  setTimeout(() => {
+    showBlockingDialog.value = false;
+    emit("gameOver", payload);
+    stopOverallTimer();
+    endRoundTimer();
+  }, 600);
+}
+
+async function submitAnswer() {
+  if (!gameStarted.value || !game.value) return;
+
+  const now = Date.now();
+  const elapsedMs = roundStartTime.value ? now - roundStartTime.value : 0;
+  const elapsedSecondsDecimal = (elapsedMs / 1000).toFixed(1);
+
+  // attach elapsed time to current prompt object (your existing design)
+  const realPrompt = game.value.getCurrentPrompt?.();
+  if (realPrompt) realPrompt.elapsedTime = elapsedSecondsDecimal;
+
+  const isCorrect = game.value.submitAnswer(userAnswer.value);
+
+  snackbar.message = isCorrect
+    ? `Yes! "${userAnswer.value}" is correct!`
+    : `Sorry, "${userAnswer.value}" is wrong!`;
+  snackbar.color = isCorrect ? "success" : "warning";
+  snackbar.show = false;
+  await nextTick();
+  snackbar.show = true;
+
+  // sync counts from Game
+  rightCount.value = game.value.getRightCount?.() ?? rightCount.value;
+  wrongCount.value = game.value.getWrongCount?.() ?? wrongCount.value;
+
+  promptCounter.value += 1;
+  remainingCount.value = Math.max(0, remainingCount.value - 1);
+
+  userAnswer.value = "";
+  endRoundTimer();
+
+  if (remainingCount.value === 1) submitButtontext.value = "FINISH";
+
+  if (remainingCount.value === 0) {
+    await endGame();
+    return;
+  }
+
+  // advance
+  game.value.nextPrompt();
+  updatePrompt();
+  startRoundTimer();
+}
 </script>
 
 

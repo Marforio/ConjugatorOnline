@@ -27,7 +27,7 @@ export const houseElements = {
   },
 
   "backyard": {
-    definition: "the area behind a house, often a garden or yard",
+    definition: "the garden area behind a house (not 'garden')",
     French: "jardin, arrière-cour",
     German: "Garten (hinter dem Haus)",
     Italian: "giardino sul retro",
@@ -49,7 +49,7 @@ export const houseElements = {
     French: "faux plafond",
     German: "abgehängte Decke",
     Italian: "controsoffitto",
-    image: "/images/vocab/dropped-ceiling.jpg",
+    image: "/images/vocab/dropped_ceiling.jpg",
     multiple_choice: ["false ceiling", "recessed ceiling", "suspended ceiling"]
   },
 
@@ -74,14 +74,14 @@ export const houseElements = {
   "parquet flooring": {
     definition: "wooden flooring arranged in decorative patterns",
     French: "parquet",
-    German: "Parkett",
+    German: "Parkettboden",
     Italian: "parquet",
-    image: "/images/vocab/parquet-flooring.jpg",
+    image: "/images/vocab/parquet_flooring.jpg",
     multiple_choice: ["wood tiles", "patterned flooring", "timber floor"]
   },
 
   "gable": {
-    definition: "the triangular upper part of a wall at the end of a roof",
+    definition: "the triangular part of a wall under a pitched roof",
     French: "pignon",
     German: "Giebel",
     Italian: "timpano",
@@ -103,7 +103,7 @@ export const houseElements = {
     French: "salon, salle de séjour",
     German: "Wohnzimmer",
     Italian: "soggiorno",
-    image: "/images/vocab/living-room.jpg",
+    image: "/images/vocab/living_room.jpg",
     multiple_choice: ["lounge", "family room", "sitting room"]
   },
 
@@ -112,7 +112,7 @@ export const houseElements = {
     French: "suite parentale",
     German: "Hauptschlafzimmer",
     Italian: "camera matrimoniale",
-    image: "/images/vocab/master-bedroom.jpg",
+    image: "/images/vocab/master_bedroom.jpg",
     multiple_choice: ["main bedroom", "primary suite", "parent suite"]
   },
 
@@ -135,7 +135,7 @@ export const houseElements = {
   },
 
   "basement": {
-    definition: "a floor below ground level",
+    definition: "a floor below ground level in a modern construction",
     French: "sous-sol",
     German: "Untergeschoss",
     Italian: "seminterrato",
@@ -143,12 +143,12 @@ export const houseElements = {
     multiple_choice: ["lower level", "cellar floor", "underground room"]
   },
 
-  "French windows": {
-    definition: "tall glass doors that open like windows",
+  "French doors": {
+    definition: "tall glass doors that open like windows, often to the garden or balcony",
     French: "porte-fenêtre",
     German: "Fenstertüren",
     Italian: "porte-finestre",
-    image: "/images/vocab/french-windows.jpg",
+    image: "/images/vocab/french_doors.jpg",
     multiple_choice: ["glass doors", "balcony doors", "patio windows"]
   },
 
@@ -161,7 +161,7 @@ export const houseElements = {
     multiple_choice: ["shed", "annex", "side building"]
   },
 
-  façade: {
+  "facade": {
     definition: "the front or face of a building",
     French: "façade",
     German: "Vorderseite",
@@ -171,7 +171,7 @@ export const houseElements = {
   },
 
   "cellar": {
-    definition: "a room below ground used for storage",
+    definition: "an underground room in a traditional house, used for storage (often wine and food)",
     French: "cave",
     German: "Keller",
     Italian: "cantina",
@@ -193,7 +193,7 @@ export const houseElements = {
     French: "fenêtre en avancée",
     German: "Erkerfenster",
     Italian: "finestra a bow",
-    image: "/images/vocab/bow-window.jpg",
+    image: "/images/vocab/bow_window.jpg",
     multiple_choice: ["bay window", "curved window", "projecting window"]
   },
 
@@ -202,7 +202,7 @@ export const houseElements = {
     French: "mur borgne",
     German: "Blendfassade",
     Italian: "muro cieco",
-    image: "/images/vocab/blind-wall.jpg",
+    image: "/images/vocab/blind_wall.jpg",
     multiple_choice: ["blank wall", "solid wall", "closed façade"]
   },
 
@@ -211,16 +211,16 @@ export const houseElements = {
     French: "lucarne",
     German: "Gaubenfenster",
     Italian: "abbaino",
-    image: "/images/vocab/dormer-window.jpg",
+    image: "/images/vocab/dormer_window.jpg",
     multiple_choice: ["roof window", "gable window", "attic window"]
   },
 
   "flat roof": {
     definition: "a roof with little or no slope",
-    French: "toiture-terrasse",
+    French: "toit plat",
     German: "Flachdach",
     Italian: "tetto piano",
-    image: "/images/vocab/flat-roof.jpg",
+    image: "/images/vocab/flat_roof.jpg",
     multiple_choice: ["level roof", "terrace roof", "horizontal roof"]
   },
 
@@ -229,7 +229,7 @@ export const houseElements = {
     French: "puits de lumière",
     German: "Lichtschacht",
     Italian: "pozzo di luce",
-    image: "/images/vocab/light-shaft.jpg",
+    image: "/images/vocab/light_shaft.jpg",
     multiple_choice: ["skylight", "light well", "roof opening"]
   },
 
@@ -238,7 +238,7 @@ export const houseElements = {
     French: "toît mansardé",
     German: "Mansarddach",
     Italian: "tetto mansardato",
-    image: "/images/vocab/mansard-roof.jpg",
+    image: "/images/vocab/mansard_roof.jpg",
     multiple_choice: ["double-slope roof", "steep roof", "attic roof"]
   },
 
@@ -252,16 +252,16 @@ export const houseElements = {
   },
 
   "entrance hall": {
-    definition: "the main entry area of a house",
+    definition: "the main entry reception area of a house",
     French: "hall d'entrée",
     German: "Eingangshalle, Diele",
     Italian: "ingresso",
-    image: "/images/vocab/entrance-hall.jpg",
+    image: "/images/vocab/entrance_hall.jpg",
     multiple_choice: ["foyer", "entryway", "lobby"]
   },
 
   "sunroom": {
-    definition: "a room with large windows designed to let in sunlight",
+    definition: "a room with large windows designed to let in sunlight (synonym = winter garden)",
     French: "solarium, jardin d'hiver",
     German: "Wintergarten",
     Italian: "veranda solare",
@@ -270,7 +270,7 @@ export const houseElements = {
   },
 
   "porch": {
-    definition: "a covered shelter at the entrance of a house",
+    definition: "a covered shelter at the entrance of a house (synonym = veranda)",
     French: "porche, véranda",
     German: "Veranda",
     Italian: "portico",
@@ -292,17 +292,15 @@ export const houseElements = {
     French: "salle à manger",
     German: "Esszimmer",
     Italian: "sala da pranzo",
-    
-    image: "/images/vocab/dining-room.jpg",
+    image: "/images/vocab/dining_room.jpg",
     multiple_choice: ["eating room", "meal room", "family dining area"]
   },
 
   "study": {
-    definition: "a room used for reading, writing, or work",
+    definition: "a room in a house used for reading, writing, or work (synonym = office space)",
     French: "bureau",
     German: "Arbeitszimmer",
     Italian: "studio",
-    
     image: "/images/vocab/study.jpg",
     multiple_choice: ["office", "work room", "reading room"]
   },
@@ -312,7 +310,6 @@ export const houseElements = {
     French: "portail",
     German: "Tor",
     Italian: "cancello",
-    
     image: "/images/vocab/gate.jpg",
     multiple_choice: ["entry gate", "yard gate", "front barrier"]
   },
@@ -322,8 +319,7 @@ export const houseElements = {
     French: "double hauteur",
     German: "Doppelte Deckenhöhe",
     Italian: "doppia altezza",
-    
-    image: "/images/vocab/double-height.jpg",
+    image: "/images/vocab/double_height.jpg",
     multiple_choice: ["tall ceiling", "open height", "vertical expansion"]
   },
 
@@ -333,7 +329,7 @@ export const houseElements = {
     German: "Erdgeschoss",
     Italian: "piano terra",
     
-    image: "/images/vocab/ground-floor.jpg",
+    image: "/images/vocab/ground_floor.jpg",
     multiple_choice: ["main level", "street level", "first level"]
   },
 
@@ -342,27 +338,24 @@ export const houseElements = {
     French: "vue",
     German: "Aussicht",
     Italian: "vista",
-    
     image: "/images/vocab/view.jpg",
     multiple_choice: ["scenery", "outlook", "panorama"]
   },
 
   "courtyard": {
-    definition: "an open space enclosed by walls or buildings",
+    definition: "an outdoor space in the interior of a large house or building",
     French: "cour intérieure",
     German: "Innenhof",
     Italian: "cortile",
-    
     image: "/images/vocab/courtyard.jpg",
     multiple_choice: ["inner yard", "patio", "central court"]
   },
 
   "furniture": {
-    definition: "movable items used to equip a room",
+    definition: "all the movable items used to equip a room",
     French: "mobilier, meubles",
     German: "Möbel",
     Italian: "mobili",
-    
     image: "/images/vocab/furniture.jpg",
     multiple_choice: ["house items", "room furnishings", "interior pieces"]
   },
@@ -372,8 +365,7 @@ export const houseElements = {
     French: "disposition des salles",
     German: "Raumgestaltung",
     Italian: "disposizione delle stanze",
-    
-    image: "/images/vocab/room-layout.jpg",
+    image: "/images/vocab/room_layout.jpg",
     multiple_choice: ["floor plan", "room arrangement", "interior layout"]
   },
 
@@ -382,7 +374,6 @@ export const houseElements = {
     French: "à demi-niveaux",
     German: "auf zwei Ebenen",
     Italian: "a livelli sfalsati",
-    
     image: "/images/vocab/split-level.jpg",
     multiple_choice: ["multi-level", "tiered layout", "offset floors"]
   },
@@ -392,8 +383,7 @@ export const houseElements = {
     French: "plan ouvert",
     German: "Grossraum-",
     Italian: "open space",
-    
-    image: "/images/vocab/open-plan.jpg",
+    image: "/images/vocab/open_plan.jpg",
     multiple_choice: ["open layout", "wall-free plan", "large space design"]
   },
 
@@ -402,17 +392,16 @@ export const houseElements = {
     French: "fondement",
     German: "Fundament",
     Italian: "fondazione",
-    
     image: "/images/vocab/foundation.jpg",
     multiple_choice: ["base structure", "ground support", "building footing"]
   },
 
-  "technical room": {
-    definition: "a room housing mechanical or utility equipment",
-    French: "salle technique",
-    German: "Technikraum",
-    Italian: "locale tecnico",
-    image: "/images/vocab/technical-room.jpg",
+  "laundry room": {
+    definition: "a room for the washing machine, tumbledryer, or other utility equipment",
+    French: "buanderie",
+    German: "Waschküche",
+    Italian: "lavanderia",
+    image: "/images/vocab/laundry_room.jpg",
     multiple_choice: ["utility room", "boiler room", "service room"]
   },
 
@@ -430,11 +419,11 @@ export const houseElements = {
     French: "baie vitrée",
     German: "Panoramafenster",
     Italian: "finestra panoramica",
-    image: "/images/vocab/picture-window.jpg",
+    image: "/images/vocab/picture_window.jpg",
     multiple_choice: ["large window", "panorama glass", "fixed glass wall"]
   },
 
-  "skylight window": {
+  "skylight": {
     definition: "a window installed in a roof",
     French: "fenêtre de toit",
     German: "Dachfenster",
@@ -444,11 +433,10 @@ export const houseElements = {
   },
 
     landing: {
-    definition: "the flat area at the top or bottom of a staircase",
+    definition: "a large flat area in a staircase (when it changes direction)",
     French: "palier",
     German: "Treppenabsatz",
     Italian: "pianerottolo",
-    
     image: "/images/vocab/landing.jpg",
     multiple_choice: ["stair platform", "stair stop", "upper step area"]
   },
@@ -458,8 +446,7 @@ export const houseElements = {
     French: "dressing",
     German: "Ankleidezimmer",
     Italian: "cabina armadio",
-    
-    image: "/images/vocab/walk-in-closet.jpg",
+    image: "/images/vocab/walk_in_closet.jpg",
     multiple_choice: ["dressing room", "wardrobe room", "clothes room"]
   },
 
@@ -468,7 +455,7 @@ export const houseElements = {
     French: "portes coulissantes",
     German: "Schiebetüren",
     Italian: "porte scorrevoli",
-    image: "/images/vocab/sliding-doors.jpg",
+    image: "/images/vocab/sliding_doors.jpg",
     multiple_choice: ["gliding doors", "track doors", "horizontal doors"]
   },
 
@@ -492,19 +479,19 @@ export const houseElements = {
 
   "bookcase": {
     definition: "a piece of furniture with shelves for books",
-    French: "bibliothèque",
+    French: "bibliothèque (meuble)",
     German: "Bücherregal",
-    Italian: "libreria",
+    Italian: "libreria (mobile)",
     image: "/images/vocab/bookcase.jpg",
     multiple_choice: ["shelf unit", "book shelf", "wall shelving"]
   },
 
   "storage space": {
-    definition: "an area used for keeping items",
+    definition: "a place used for keeping items",
     French: "espace de rangement",
     German: "Lagerraum",
     Italian: "spazio di stoccaggio",
-    image: "/images/vocab/storage-space.jpg",
+    image: "/images/vocab/storage_space.jpg",
     multiple_choice: ["storage area", "utility space", "supply room"]
   },
 
@@ -531,16 +518,16 @@ export const houseElements = {
     French: "îlot de cuisine",
     German: "Kochinsel",
     Italian: "isola da cucina",
-    image: "/images/vocab/kitchen-island.jpg",
+    image: "/images/vocab/kitchen_island.jpg",
     multiple_choice: ["central counter", "kitchen block", "prep island"]
   },
 
-  "the detailing": {
+  "detailing": {
     definition: "the finishing touches and fine decorative elements",
-    French: "les finitions",
+    French: "finitions",
     German: "Feinschliff",
-    Italian: "le finiture",
-    image: "/images/vocab/the-detailing.jpg",
+    Italian: "finiture",
+    image: "/images/vocab/detailing.jpg",
     multiple_choice: ["finishing work", "fine details", "final touches"]
   },
 
@@ -549,7 +536,7 @@ export const houseElements = {
     French: "toit incliné",
     German: "Schrägdach",
     Italian: "tetto spiovente",
-    image: "/images/vocab/pitched-roof.jpg",
+    image: "/images/vocab/pitched_roof.jpg",
     multiple_choice: ["patch roof", "angled roof", "point roof"]
   }
 };
@@ -558,7 +545,7 @@ export const houseElements = {
 
 export const LocationAndMaterials = {
   "sunrise": {
-    definition: "the moment when the sun appears above the horizon",
+    definition: "the moment at daybreak when the sun appears above the horizon",
     French: "lever de soleil",
     German: "Sonnenaufgang",
     Italian: "alba",
@@ -608,7 +595,7 @@ export const LocationAndMaterials = {
     German: "Erdrutschen",
     Italian: "frana",
     image: "/images/vocab/landslide.jpg",
-    multiple_choice: ["earth slip", "ground fall", "slope collapse"]
+    multiple_choice: ["earth slip", "ground fall", "earth rush"]
   },
 
   "slope": {
@@ -617,7 +604,7 @@ export const LocationAndMaterials = {
     German: "Hang",
     Italian: "pendio",
     image: "/images/vocab/slope.jpg",
-    multiple_choice: ["incline", "gradient", "hillside"]
+    multiple_choice: ["steep", "sloop", "stipe"]
   },
 
   "farmland": {
@@ -626,7 +613,7 @@ export const LocationAndMaterials = {
     German: "Ackerland",
     Italian: "terreno agricolo",
     image: "/images/vocab/farmland.jpg",
-    multiple_choice: ["crop land", "agricultural land", "fields"]
+    multiple_choice: ["barnland", "growing land", "planting land"]
   },
 
   "field": {
@@ -635,16 +622,16 @@ export const LocationAndMaterials = {
     German: "Feld",
     Italian: "campo",
     image: "/images/vocab/field.jpg",
-    multiple_choice: ["meadow", "open land", "pasture"]
+    multiple_choice: ["court", "feld", "part"]
   },
 
   "neighborhood": {
-    definition: "a residential area within a town or city",
+    definition: "a residential area with a sense of community",
     French: "quartier",
     German: "Viertel, Nachbarschaft",
     Italian: "quartiere",
     image: "/images/vocab/neighborhood.jpg",
-    multiple_choice: ["district", "local area", "residential zone"]
+    multiple_choice: ["neighbority", "localization", "distriture"]
   },
 
   "suburb": {
@@ -653,12 +640,12 @@ export const LocationAndMaterials = {
     German: "Vorort",
     Italian: "sobborghi",
     image: "/images/vocab/suburb.jpg",
-    multiple_choice: ["outer district", "city edge", "residential belt"]
+    multiple_choice: ["outer district", "city edge", "residential margin"]
   },
 
   "pavement": {
     definition: "a hard surface for walking or driving",
-    French: "revêtement",
+    French: "revêtement routier, chaussée",
     German: "Pflaster",
     Italian: "pavimentazione",
     image: "/images/vocab/pavement.jpg",
@@ -675,12 +662,12 @@ export const LocationAndMaterials = {
   },
 
   "hill": {
-    definition: "a naturally raised area of land",
+    definition: "a naturally raised area that is lower and less steep than a mountain",
     French: "colline",
     German: "Hügel",
     Italian: "collina",
     image: "/images/vocab/hill.jpg",
-    multiple_choice: ["rise", "small mountain", "upland"]
+    multiple_choice: ["rise", "mini-mount", "big bump"]
   },
 
   "cliff": {
@@ -689,7 +676,7 @@ export const LocationAndMaterials = {
     German: "Klippe",
     Italian: "scogliera",
     image: "/images/vocab/cliff.jpg",
-    multiple_choice: ["rock wall", "steep face", "sea bluff"]
+    multiple_choice: ["clip", "steep face", "foreland"]
   },
 
   "wind gusts": {
@@ -697,8 +684,8 @@ export const LocationAndMaterials = {
     French: "rafales de vent",
     German: "Windstösse",
     Italian: "raffiche di vento",
-    image: "/images/vocab/wind-gusts.jpg",
-    multiple_choice: ["strong bursts", "wind blasts", "air surges"]
+    image: "/images/vocab/wind_gusts.jpg",
+    multiple_choice: ["hurricane", "wind blasts", "wind bursts"]
   },
 
   "noise": {
@@ -707,52 +694,52 @@ export const LocationAndMaterials = {
     German: "Lärm",
     Italian: "rumore",
     image: "/images/vocab/noise.jpg",
-    multiple_choice: ["sound disturbance", "loudness", "background noise"]
+    multiple_choice: ["chainsaw", "loudliness", "heavy metal"]
   },
 
   "city center": {
     definition: "the central part of a city",
-    French: "centre-ville",
+    French: "centre ville",
     German: "Stadtkern",
     Italian: "centro città",
-    image: "/images/vocab/city-center.jpg",
-    multiple_choice: ["downtown", "urban core", "central district"]
+    image: "/images/vocab/city_center.jpg",
+    multiple_choice: ["city corn", "city hub", "central distriction"]
   },
 
   "north-facing": {
-    definition: "oriented toward the north",
+    definition: "oriented toward the north (adjective)",
     French: "orienté nord",
     German: "nach Norden gerichtet",
     Italian: "esposto a nord",
-    image: "/images/vocab/north-facing.jpg",
-    multiple_choice: ["north oriented", "northward", "north exposure"]
+    image: "/images/vocab/north_facing.jpg",
+    multiple_choice: ["northly oriented", "north-looking", "northly exposed"]
   },
 
   "south-facing": {
-    definition: "oriented toward the south",
+    definition: "oriented toward the south (adjective)",
     French: "orienté sud",
     German: "nach Süden ausgerichtet",
     Italian: "esposto a sud",
-    image: "/images/vocab/south-facing.jpg",
-    multiple_choice: ["south oriented", "southward", "south exposure"]
+    image: "/images/vocab/south_facing.jpg",
+    multiple_choice: ["southly oriented", "south-looking", "southly exposed"]
   },
 
   "landscape": {
-    definition: "the visible features of an area of land",
+    definition: "a beautiful, wide-open perspective of the land",
     French: "paysage",
     German: "Landschaft",
     Italian: "paesaggio",
     image: "/images/vocab/landscape.jpg",
-    multiple_choice: ["scenery", "terrain", "natural view"]
+    multiple_choice: ["landscope", "paysage", "countryside"]
   },
 
   "valley": {
-    definition: "a low area between hills or mountains",
+    definition: "a long low area between hills or mountains",
     French: "vallée",
     German: "Tal",
     Italian: "valle",
     image: "/images/vocab/valley.jpg",
-    multiple_choice: ["lowland", "basin", "river valley"]
+    multiple_choice: ["vallon", "vallage", "beluga"]
   },
 
   "stream": {
@@ -761,25 +748,25 @@ export const LocationAndMaterials = {
     German: "Bach",
     Italian: "ruscello",
     image: "/images/vocab/stream.jpg",
-    multiple_choice: ["brook", "small river", "water channel"]
+    multiple_choice: ["riverling", "baby river", "strom"]
   },
 
   "pond": {
-    definition: "a small body of still water",
+    definition: "a small body of still water, often in a park or garden",
     French: "étang",
     German: "Teich",
     Italian: "stagno",
     image: "/images/vocab/pond.jpg",
-    multiple_choice: ["small lake", "water basin", "garden pond"]
+    multiple_choice: ["lakelet", "pound", "stang"]
   },
 
   "path": {
-    definition: "a track made for walking",
+    definition: "a track made for walking (not 'road' or 'way')",
     French: "chemin",
     German: "Pfad",
     Italian: "sentiero",
     image: "/images/vocab/path.jpg",
-    multiple_choice: ["trail", "walkway", "footpath"]
+    multiple_choice: ["pad", "fad", "fath"]
   },
 
   "underground": {
@@ -796,12 +783,12 @@ export const LocationAndMaterials = {
     French: "en surface",
     German: "oberirdisch",
     Italian: "sopra il suolo",
-    image: "/images/vocab/above-ground.jpg",
+    image: "/images/vocab/above_ground.jpg",
     multiple_choice: ["surface level", "ground level", "upper level"]
   },
 
   "greenery": {
-    definition: "plants, leaves, and vegetation",
+    definition: "all plants, leaves, and vegetation",
     French: "verdure",
     German: "Begrünung",
     Italian: "vegetazione",
@@ -828,7 +815,7 @@ export const LocationAndMaterials = {
   },
 
   "ridge": {
-    definition: "a long, narrow elevated landform",
+    definition: "a long, narrow elevated landform, often linking mountain peaks",
     French: "crête",
     German: "Grat",
     Italian: "cresta",
@@ -838,23 +825,23 @@ export const LocationAndMaterials = {
 
   "groundwater": {
     definition: "water held underground in soil or rock",
-    French: "nappe phréatique",
+    French: "eau souterraine, nappe phréatique",
     German: "Grundwasser",
-    Italian: "falda acquifera",
+    Italian: "acqua sotterranea, falda acquifera",
     image: "/images/vocab/groundwater.jpg",
     multiple_choice: ["aquifer", "water table", "subsurface water"]
   },
 
   "spring": {
     definition: "a natural source of flowing water",
-    French: "source",
+    French: "source (d'eau)",
     German: "Quelle",
     Italian: "sorgente",
     image: "/images/vocab/spring.jpg",
     multiple_choice: ["water source", "natural outlet", "fresh spring"]
   },
 
-  "flooding": {
+  "flood": {
     definition: "overflow of water onto normally dry land",
     French: "inondation",
     German: "Überflutung",
@@ -864,7 +851,7 @@ export const LocationAndMaterials = {
   },
 
   "crack": {
-    definition: "a narrow opening or fracture",
+    definition: "a narrow fracture of a surface",
     French: "fissure",
     German: "Riss",
     Italian: "crepa",
@@ -873,8 +860,8 @@ export const LocationAndMaterials = {
   },
 
   "sandstone": {
-    definition: "a sedimentary rock made of sand-sized minerals",
-    French: "grès",
+    definition: "a sedimentary rock made of sand-sized minerals, used for construction but eroding easily",
+    French: "grès, molasse",
     German: "Sandstein",
     Italian: "arenaria",
     image: "/images/vocab/sandstone.jpg",
@@ -895,16 +882,16 @@ export const LocationAndMaterials = {
     French: "acier inoxydable",
     German: "Edelstahl",
     Italian: "acciaio inox",
-    image: "/images/vocab/stainless-steel.jpg",
+    image: "/images/vocab/stainless_steel.jpg",
     multiple_choice: ["inox metal", "steel alloy", "rust-free steel"]
   },
 
   "cast iron": {
-    definition: "a hard, brittle iron-carbon alloy",
+    definition: "a hard iron-carbon alloy",
     French: "fonte",
     German: "Gusseisen",
     Italian: "ghisa",
-    image: "/images/vocab/cast-iron.jpg",
+    image: "/images/vocab/cast_iron.jpg",
     multiple_choice: ["iron alloy", "heavy metal", "forged iron"]
   },
 
@@ -1265,7 +1252,7 @@ export const CitiesAndBuildings = {
   "country road": {
     definition: "a small road in a rural area",
     French: "route de campagne",
-    German: "Landstraße",
+    German: "Landstrasse",
     Italian: "strada di campagna",
     image: "/images/vocab/country-road.jpg",
     multiple_choice: ["rural road", "farm road", "back road"]
@@ -1292,7 +1279,7 @@ export const CitiesAndBuildings = {
   "bypass road": {
     definition: "a road built to avoid a town or congestion",
     French: "route de contournement",
-    German: "Umgehungsstraße",
+    German: "Umgehungsstrasse",
     Italian: "strada di circonvallazione",
     image: "/images/vocab/bypass-road.jpg",
     multiple_choice: ["ring road", "outer road", "perimeter road"]
@@ -1319,7 +1306,7 @@ export const CitiesAndBuildings = {
   "pedestrian area": {
     definition: "a zone reserved for people, not vehicles",
     French: "zone piétonne",
-    German: "Fußgängerzone",
+    German: "Fussgängerzone",
     Italian: "zona pedonale",
     image: "/images/vocab/pedestrian-area.jpg",
     multiple_choice: ["walking zone", "car-free area", "public walkway"]

@@ -3411,7 +3411,7 @@ export const BusinessReports = {
 
   "incident rate": {
     definition: "a metric measuring workplace injuries",
-    French: "taux d’incidents",
+    French: "taux d'incidents",
     German: "Unfallrate",
     Italian: "tasso di incidenti",
     image: "/images/vocab/incident_rate.jpg",

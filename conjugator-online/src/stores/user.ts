@@ -18,8 +18,10 @@ interface Student {
   initials: string;
   total_correct_prompts: number;
   health_score: number;
+  domain: string | null;    
   user: User | null;
 }
+
 
 interface Course {
   slug: string;
@@ -86,9 +88,13 @@ interface VocabItem {
   feedback: Feedback;
 }
 
-interface SmartVerbPool {
-  [tierName: string]: string[];
-}
+export type SmartVerbPoolByTense = {
+  verb_set: string;
+  batch_size: number | null;
+  "Past simple"?: string[];
+  "Present perfect"?: string[];
+};
+
 
 // --- Store ---
 export const useUserStore = defineStore("user", () => {
@@ -168,6 +174,27 @@ export const useUserStore = defineStore("user", () => {
     enrollments.value.map(e => e.course.slug)
   );
 
+const studentDomain = computed(() => student.value?.domain ?? null);
+
+// optional: pretty label for UI
+const studentDomainLabel = computed(() => {
+  const d = studentDomain.value;
+  if (!d) return "—";
+  const map: Record<string, string> = {
+    architecture: "Architecture",
+    business_1: "Business 1 - Corporations",
+    business_2: "Business 2 - Marketing",
+    business_3: "Business 3 - Finance",
+    business_4: "Business 4 - Ethics",
+    chemistry: "Chemistry",
+    civil: "Civil",
+    computer_science: "Computer Science",
+    electrical: "Electrical",
+    mechanical: "Mechanical",
+    general: "General",
+  };
+  return map[d] ?? d;
+});
 
 
   // 📊 Verb usage state
@@ -183,7 +210,7 @@ export const useUserStore = defineStore("user", () => {
   const loadingVerbUsage = ref(false);
   const verbUsageError = ref<string | null>(null);
 
-  async function fetchVerbUsageDashboardData() {
+async function fetchVerbUsageDashboardData() {
     if (!studentId.value && !isStaff.value) {
       verbUsageError.value = "Student ID required.";
       return;
@@ -212,39 +239,46 @@ export const useUserStore = defineStore("user", () => {
     }
   }
 
-  // smart verb pool for the COnjugator
-  function getSmartVerbPoolPerTier(tierStatsList: TierStats[]): SmartVerbPool {
-    const pool: SmartVerbPool = {};
+// smart verb pool for the COnjugator
+async function fetchSmartConjVerbPool(params: { verbSet: string; batchSize: number }) {
+  if (!accessToken.value) return null;
 
-    //console.log("Tier stats list before building pool:", JSON.stringify(tierStatsList, null, 2));
+  const sid = studentId.value;
 
+  // Most likely correct for non-staff: /<student_id>/verb-usage/
+  // Staff might use /verb-usage/
+  const candidates = [
+    sid ? `/${sid}/verb-usage/` : null,
+    "/verb-usage/",
+    "/student-verb-usage/", // keep only if you actually wired this route in urls.py
+  ].filter(Boolean) as string[];
 
-    for (const tier of tierStatsList) {
-      const mergedSet = new Set<string>([
-        ...tier.undiscovered_verbs_ps,
-        ...tier.unmastered_verbs_ps,
-        ...tier.undiscovered_verbs_pp,
-        ...tier.unmastered_verbs_pp,
-      ]);
-
-      pool[tier.tier_name] = Array.from(mergedSet);
-    }
-    //console.log("Smart verb pool in user store", pool)
-    return pool;
-  }
-  const smartVerbPools = computed(() => getSmartVerbPoolPerTier(tierStats.value));
-  // plain clone for easy use in Options API / components (avoid Proxy surprises)
-  const smartVerbPoolPlain = computed(() => {
-    const pool = smartVerbPools.value || {};
-    // return a plain cloned object (so components get plain arrays, not reactive proxies)
+  for (const url of candidates) {
     try {
-      return JSON.parse(JSON.stringify(pool));
-    } catch (e) {
-      // fallback: shallow copy
-      console.log("Plain smart verb pool in user store, saved as smartVerbPools", JSON.parse(JSON.stringify(pool)))
-      return Object.fromEntries(Object.entries(pool));
+      const res = await api.get<{ smart_pool?: any }>(url, {
+        params: {
+          verb_set: params.verbSet,
+          batch_size: params.batchSize,
+        },
+      });
+
+      if (res.data?.smart_pool) return res.data.smart_pool;
+      // If the endpoint exists but doesn't include smart_pool, treat as "no pool"
+      return null;
+    } catch (err: any) {
+      const status = err?.response?.status;
+      // If this URL doesn't exist, try the next candidate
+      if (status === 404) continue;
+
+      console.error("fetchSmartConjVerbPool failed:", err);
+      return null;
     }
-  });
+  }
+
+  // none of the endpoints existed
+  return null;
+}
+
 
 
 
@@ -330,12 +364,18 @@ export const useUserStore = defineStore("user", () => {
     student, accessToken, isAuthenticated, isStaff, isSuperuser, studentId, totalCorrect, healthScore,
     setStudent, clearStudent, setAccessToken, fetchStudentData, fetchUserData,
 
+    // Student domain
+    studentDomain, studentDomainLabel,
+
     // Enrollments
     enrollments, loadingEnrollments, enrollmentError, enrolledCourses, fetchEnrollments,
 
     // Verb usage
-    verbUsage, tierStats, tenseStats, loadingVerbUsage, verbUsageError, smartVerbPools, smartVerbPoolPlain,
-    fetchVerbUsageDashboardData,
+    verbUsage, tierStats, tenseStats, loadingVerbUsage, verbUsageError, 
+    fetchVerbUsageDashboardData, 
+    
+    // Conjugator smart pool
+    fetchSmartConjVerbPool,
 
     // Vocab
     vocab, loadingVocab, vocabError, fetchVocabDashboardData,

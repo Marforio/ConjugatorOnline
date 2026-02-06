@@ -91,20 +91,29 @@
 
               <!-- Number of Questions -->
               <v-card class="mb-2" color="grey-lighten-3" flat>
-                <v-card-text class="py-2 px-3">
-                  <span class="text-subtitle-2 mb-2">Number of questions  (min 3, max 50)</span>
-                  <span><v-text-field
-                    v-model.number="numPrompts"
-                    @change="validateNumPrompts"
-                    type="number"
-                    min="3"
-                    max="50"
-                    density="compact"
-                    hide-details
-                    class="mx-auto"
-                    style="max-width: 100px"
-                  /></span>
+                <div class="d-flex justify-center">
+                  <v-card-text class="py-2 px-3">
+                  <span class="text-subtitle-2 mb-2">Number of questions</span>
+                  <v-slider
+                      v-model.number="numPrompts"
+                      @change="validateNumPrompts"
+                      :min="5"
+                      :max="50"
+                      step="5"
+                      label="Questions"
+                      density="compact"
+                      hide-details
+                      class="mt-2"
+                      style="max-width: 400px"
+                    >
+                      <template #append>
+                        <span class="text-caption">{{ numPrompts }}</span>
+                      </template>
+                    </v-slider>
+
                 </v-card-text>
+                </div>
+                
               </v-card>
 
               <!-- Start Button -->
@@ -233,7 +242,7 @@
                   v-model.number="numPrompts"
                   @change="validateNumPrompts"
                   type="number"
-                  min="3"
+                  min="5"
                   max="50"
                   label="Questions"
                   density="compact"
@@ -271,7 +280,7 @@ export default {
       selectedVerbSet: '',
       selectedSentenceTypes: [],
       selectedTenses: [],
-      numPrompts: 10,
+      numPrompts: 20,
       colors: ["blue lighten-2", "green darken-2", "purple lighten-2", "red lighten-3", "orange lighten-2", "brown lighten-2", "pink lighten-2", "grey darken-2"],
       optionsLoaded: false,
     };

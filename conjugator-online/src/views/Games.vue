@@ -114,6 +114,18 @@
           </div>
         </RouterLink>
       </v-col>
+
+      <!-- Uses of Auxiliaries -->
+      <v-col cols="12" sm="6" md="4" class="d-flex justify-center">
+        <RouterLink
+          :to="{ name: 'auxiliaryuses' }"
+          class="image-tile"
+        >
+          <div class="tile-frame">
+            <v-img src="/images/banners/UsesOfAuxiliaries.png" alt="Uses of Auxiliaries" cover class="tile-image" />
+          </div>
+        </RouterLink>
+      </v-col>
       
       <!-- Tricky Translator -->
       <v-col cols="12" sm="6" md="4" class="d-flex justify-center">

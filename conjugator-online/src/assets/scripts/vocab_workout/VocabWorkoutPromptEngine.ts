@@ -10,7 +10,7 @@ export type StudyField =
   | "Italian";
 
 export type FrontField = "term" | "definition" | "French" | "German" | "Italian";
-export type BackField = "term" | "past_simple" | "present_perfect" | "definition" | "French" | "German" | "Italian";
+export type BackField = "term" | "past_simple" | "present_perfect" | "definition" | "past_forms" | "French" | "German" | "Italian";
 
 export type GameMode = "cards" | "write" | "multiple_choice" | "quiz" | "match";
 
@@ -66,8 +66,13 @@ function arrify(v: any): string[] {
   return [String(v).trim()].filter(Boolean);
 }
 
-export function normalizeVocabDataset(raw: RawVocabDataset): NormalizedVocab {
+// VocabWorkoutPromptEngine.ts
+export function normalizeVocabDataset(
+  raw: RawVocabDataset,
+  opts: { listKey: string }
+): NormalizedVocab {
   const items: VocabItem[] = [];
+  const listKey = opts.listKey.trim();
 
   Object.entries(raw || {}).forEach(([term, obj]) => {
     const level = (obj?.level ?? "general") as VocabLevel;
@@ -87,13 +92,8 @@ export function normalizeVocabDataset(raw: RawVocabDataset): NormalizedVocab {
       if (arr.length) fields[k] = arr;
     });
 
-    // always include term as a “field”
     fields.term = [term];
 
-    // MC normalization:
-    // - generic multiple_choice
-    // - field-specific variants (ps/pp)
-    // - and any future multiple_choice_<something>
     const mc: Record<string, string[]> = {};
     const generic = arrify(obj?.multiple_choice);
     if (generic.length) mc.generic = generic;
@@ -104,16 +104,15 @@ export function normalizeVocabDataset(raw: RawVocabDataset): NormalizedVocab {
     const pp = arrify(obj?.multiple_choice_pp);
     if (pp.length) mc.present_perfect = pp;
 
-    // future: multiple_choice_<fieldName>
     Object.keys(obj || {}).forEach((k) => {
       if (!k.startsWith("multiple_choice_")) return;
-      const fieldName = k.replace("multiple_choice_", ""); // e.g. "French"
+      const fieldName = k.replace("multiple_choice_", "");
       const arr = arrify(obj[k]);
       if (arr.length) mc[fieldName] = arr;
     });
 
     items.push({
-      id: term,
+      id: `${listKey}::${term}`,   // ✅ stable & list-scoped
       term,
       level,
       image: obj?.image,
@@ -125,11 +124,15 @@ export function normalizeVocabDataset(raw: RawVocabDataset): NormalizedVocab {
   const byLevel: Record<string, VocabItem[]> = {};
   items.forEach((it) => {
     const k = String(it.level ?? "general");
-    if (!byLevel[k]) byLevel[k] = [];
-    byLevel[k].push(it);
+    (byLevel[k] ||= []).push(it);
   });
 
   return { items, byLevel };
+}
+
+
+export function normalizeVocabDatasetWithListKey(listKey: string, raw: RawVocabDataset) {
+  return normalizeVocabDataset(raw, { listKey });
 }
 
 /* -------------------------

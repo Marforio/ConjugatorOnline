@@ -1,64 +1,86 @@
 <template>
-  <v-container
-    fluid
-    class="d-flex align-center justify-center"
-    style="min-height: 100vh;"
-  >
-    <v-card class="pa-8" max-width="560" elevation="4">
-      <v-card-title class="text-h5 text-center mb-4">
-        Welcome Back
-      </v-card-title>
+<v-container
+  fluid
+  class="d-flex align-center justify-center"
+  style="min-height: 100vh;"
+>
+  <v-card class="pa-8" max-width="560" elevation="4" style="position: relative;">
+    <!-- Overlay: Loading -->
+    <v-overlay
+      :model-value="loading"
+      class="d-flex flex-column align-center justify-center text-center"
+      opacity="0.85"
+    >
+      <v-progress-circular indeterminate size="48" color="primary" />
+      <div class="mt-4 text-body-1">Loading your data… please wait</div>
+    </v-overlay>
 
-      <v-card-text>
-        <v-form @submit.prevent="handleLogin">
-          <v-row dense>
-            <!-- Username -->
-            <v-col cols="12" class="mb-3">
-              <v-text-field
-                v-model="username"
-                label="Username"
-                placeholder="Enter username"
-                density="comfortable"
-                required
-              />
-            </v-col>
+    <!-- Overlay: Success -->
+    <v-overlay
+      :model-value="loginSuccess"
+      class="d-flex flex-column align-center justify-center text-center"
+      opacity="0.85"
+    >
+      <v-icon
+        color="green"
+        size="80"
+        class="success-check"
+      >
+        mdi-check-circle
+      </v-icon>
+      <div class="mt-4 text-h6">Login successful!</div>
+    </v-overlay>
 
-            <!-- Password -->
-            <v-col cols="12" class="mb-3">
-              <v-text-field
-                v-model="password"
-                label="Password"
-                placeholder="Enter password"
-                type="password"
-                density="comfortable"
-                required
-              />
-            </v-col>
+    <v-card-title class="text-h5 text-center mb-4">
+      Welcome Back
+    </v-card-title>
 
-            <!-- Error Alert -->
-            <v-col cols="12" v-if="error">
-              <v-alert v-if="showError" type="error" dense class="mb-3" dismissible>
-                {{ error }}
-              </v-alert>
-            </v-col>
+    <v-card-text>
+      <v-form @submit.prevent="handleLogin">
+        <v-row dense>
+          <v-col cols="12" class="mb-3">
+            <v-text-field
+              v-model="username"
+              label="Username"
+              placeholder="Enter username"
+              density="comfortable"
+              required
+            />
+          </v-col>
 
-            <!-- Submit -->
-            <v-col cols="12">
-              <v-btn
-                type="submit"
-                color="primary"
-                block
-                size="large"
-                :loading="loading"
-              >
-                Log in
-              </v-btn>
-            </v-col>
-          </v-row>
-        </v-form>
-      </v-card-text>
-    </v-card>
-  </v-container>
+          <v-col cols="12" class="mb-3">
+            <v-text-field
+              v-model="password"
+              label="Password"
+              placeholder="Enter password"
+              type="password"
+              density="comfortable"
+              required
+            />
+          </v-col>
+
+          <v-col cols="12" v-if="error">
+            <v-alert v-if="showError" type="error" dense class="mb-3" dismissible>
+              {{ error }}
+            </v-alert>
+          </v-col>
+
+          <v-col cols="12">
+            <v-btn
+              type="submit"
+              color="primary"
+              block
+              size="large"
+            >
+              Log in
+            </v-btn>
+          </v-col>
+        </v-row>
+      </v-form>
+    </v-card-text>
+  </v-card>
+</v-container>
+
 </template>
 
 <script setup lang="ts">
@@ -81,22 +103,27 @@ const showError = ref(false)
 const route = useRoute();
 const router = useRouter();
 
+const loginSuccess = ref(false);
+
 async function handleLogin() {
   error.value = "";
   loading.value = true;
 
   try {
     const token = await auth.login(username.value, password.value);
-
-    // Manually attach token to Axios headers before validation
     api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-
-    await apiValidateToken(); // now it will succeed
-
+    await apiValidateToken();
     userStore.setAccessToken(token);
 
-    const redirectPath = (route.query.redirect as string) || "/";
-    router.replace(redirectPath);
+    // Show success animation
+    loginSuccess.value = true;
+
+    // Wait briefly before redirect
+    setTimeout(() => {
+      const redirectPath = (route.query.redirect as string) || "/";
+      router.replace(redirectPath);
+    }, 1200);
+
   } catch (err: any) {
     error.value =
       err.response?.status === 401
@@ -112,6 +139,7 @@ async function handleLogin() {
   }
 }
 
+
 </script>
 
 <style scoped>
@@ -126,4 +154,15 @@ async function handleLogin() {
 .v-btn {
   font-weight: 600;
 }
+
+.success-check {
+  animation: pop 0.4s ease-out forwards;
+}
+
+@keyframes pop {
+  0% { transform: scale(0.4); opacity: 0; }
+  70% { transform: scale(1.15); opacity: 1; }
+  100% { transform: scale(1); }
+}
+
 </style>

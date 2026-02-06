@@ -470,6 +470,7 @@ const GAME_NAMES = [
   "Regret Machine",
   "Reported Speech",
   "Tricky Translator",
+  "Uses of Auxiliaries",
   "Verb Mixer",
   "Year 2040",
   "Word Families",
@@ -477,7 +478,7 @@ const GAME_NAMES = [
 const gamePictures: Record<string, string> = {
   "Pronoun Practice": "/images/banners/PronounPractice.png",
   "Quantifier Quest": "/images/banners/QuantifierQuest.png",
-  "Verb Mixer": "/images/banners/VerbMixer.png",
+  "Uses of Auxiliaries": "/images/banners/UsesOfAuxiliaries.png",
   "Tricky Translator": "/images/banners/TrickyTranslator.png",
   "Passive Party": "/images/banners/PassiveParty.png",
   "Word Families": "/images/banners/WordFamilies.png",

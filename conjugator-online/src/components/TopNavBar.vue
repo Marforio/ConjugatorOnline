@@ -19,6 +19,9 @@
         <v-list-item :to="{ name: 'dashboard' }">
           <v-list-item-title>My Dashboard</v-list-item-title>
         </v-list-item>
+        <v-list-item :to="{ name: 'vocabworkout' }">
+          <v-list-item-title>Vocab Workout</v-list-item-title>
+        </v-list-item>
         <v-list-item :to="{ name: 'exercises' }" :disable="true">
           <v-list-item-title>Exercises</v-list-item-title>
         </v-list-item>
@@ -98,6 +101,14 @@
           <template v-slot:activator="{ props }">
             <v-btn icon v-bind="props" :to="{ name: 'games' }" >  <!-- :disabled="true"  --> 
               <v-icon>mdi-gamepad-circle</v-icon>
+            </v-btn>
+          </template>
+        </v-tooltip>
+
+        <v-tooltip text="Vocab Workout" location="bottom">
+          <template v-slot:activator="{ props }">
+            <v-btn icon v-bind="props" :to="{ name: 'vocabworkout' }" >  <!-- :disabled="true"  --> 
+              <v-icon>mdi-cards-outline</v-icon>
             </v-btn>
           </template>
         </v-tooltip>

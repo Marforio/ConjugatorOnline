@@ -13,7 +13,7 @@ export const irregularVerbs = {
   },
 
   have: {
-    definition: "to possess or hold",
+    definition: "to possess or hold something",
     past_simple: ["had"],
     present_perfect: ["had"],
     French: "avoir",
@@ -29,9 +29,9 @@ export const irregularVerbs = {
     definition: "to create or produce something",
     past_simple: ["made"],
     present_perfect: ["made"],
-    French: "faire",
+    French: "faire (créer, produire)",
     German: "machen",
-    Italian: "fare",
+    Italian: "fare (creazione, produzione)",
     level: "essential",
     image: "/images/vocab/make.jpg",
     multiple_choice_ps: [],
@@ -42,9 +42,9 @@ export const irregularVerbs = {
     definition: "to perform an action or activity",
     past_simple: ["did"],
     present_perfect: ["done"],
-    French: "faire",
-    German: "machen",
-    Italian: "fare",
+    French: "faire (une activité)",
+    German: "tun",
+    Italian: "fare (una attività)",
     level: "essential",
     image: "/images/vocab/do.jpg",
     multiple_choice_ps: [],
@@ -52,7 +52,7 @@ export const irregularVerbs = {
   },
 
   go: {
-    definition: "to move or travel from one place to another",
+    definition: "to move from one place to another",
     past_simple: ["went"],
     present_perfect: ["gone"],
     French: "aller",
@@ -117,7 +117,7 @@ export const irregularVerbs = {
   },
 
   send: {
-    definition: "to cause something to go to another place",
+    definition: "to make something go to another place",
     past_simple: ["sent"],
     present_perfect: ["sent"],
     French: "envoyer",
@@ -130,7 +130,7 @@ export const irregularVerbs = {
   },
 
   know: {
-    definition: "to be aware of or familiar with",
+    definition: "to be aware of something or familiar with something",
     past_simple: ["knew"],
     present_perfect: ["known"],
     French: "savoir, connaître",
@@ -143,7 +143,7 @@ export const irregularVerbs = {
   },
 
   understand: {
-    definition: "to grasp the meaning of something",
+    definition: "to comprehend the meaning of something",
     past_simple: ["understood"],
     present_perfect: ["understood"],
     French: "comprendre",
@@ -208,7 +208,7 @@ export const irregularVerbs = {
   },
 
   find: {
-    definition: "to discover something",
+    definition: "to locate or discover something",
     past_simple: ["found"],
     present_perfect: ["found"],
     French: "trouver",
@@ -221,7 +221,7 @@ export const irregularVerbs = {
   },
 
   lose: {
-    definition: "to misplace or fail to keep something",
+    definition: "to misplace something or fail to keep something",
     past_simple: ["lost"],
     present_perfect: ["lost"],
     French: "perdre",
@@ -338,7 +338,7 @@ export const irregularVerbs = {
   },
 
   cost: {
-    definition: "to require payment",
+    definition: "to have a certain price",
     past_simple: ["cost"],
     present_perfect: ["cost"],
     French: "coûter",
@@ -377,7 +377,7 @@ export const irregularVerbs = {
   },
 
   break: {
-    definition: "to separate into pieces",
+    definition: "to separate into pieces, usually with violence",
     past_simple: ["broke"],
     present_perfect: ["broken"],
     French: "casser",
@@ -390,7 +390,7 @@ export const irregularVerbs = {
   },
 
   come: {
-    definition: "to move toward or arrive at a place",
+    definition: "to arrive at a place",
     past_simple: ["came"],
     present_perfect: ["come"],
     French: "venir",
@@ -406,11 +406,11 @@ export const irregularVerbs = {
     definition: "to have clothing on your body",
     past_simple: ["wore"],
     present_perfect: ["worn"],
-    French: "porter",
-    German: "tragen",
+    French: "porter (des habits)",
+    German: "tragen (Kleider)",
     Italian: "indossare",
     level: "essential",
-    image: "/images/vocab/wear.jpg",
+    image: "/images/vocab/wear_v.jpg",
     multiple_choice_ps: [],
     multiple_choice_pp: []
   },
@@ -419,7 +419,7 @@ export const irregularVerbs = {
     definition: "to achieve victory",
     past_simple: ["won"],
     present_perfect: ["won"],
-    French: "gagner",
+    French: "gagner (victoire)",
     German: "gewinnen",
     Italian: "vincere",
     level: "essential",
@@ -429,7 +429,7 @@ export const irregularVerbs = {
   },
 
   take: {
-    definition: "to remove or accept something",
+    definition: "to seize something or accept something",
     past_simple: ["took"],
     present_perfect: ["taken"],
     French: "prendre",
@@ -445,7 +445,7 @@ export const irregularVerbs = {
     definition: "to depart or go away",
     past_simple: ["left"],
     present_perfect: ["left"],
-    French: "partir",
+    French: "partir, quitter",
     German: "verlassen",
     Italian: "lasciare",
     level: "essential",
@@ -507,7 +507,7 @@ export const irregularVerbs = {
   },
 
   catch: {
-    definition: "to capture or seize",
+    definition: "to receive or capture something, such as a ball or frisbee",
     past_simple: ["caught"],
     present_perfect: ["caught"],
     French: "attraper",
@@ -520,7 +520,7 @@ export const irregularVerbs = {
   },
 
   throw: {
-    definition: "to propel something through the air",
+    definition: "to propel something through the air, such as a ball or frisbee",
     past_simple: ["threw"],
     present_perfect: ["thrown"],
     French: "lancer",
@@ -598,7 +598,7 @@ export const irregularVerbs = {
   },
 
   rise: {
-    definition: "to move upward",
+    definition: "to move upward, like the morning sun",
     past_simple: ["rose"],
     present_perfect: ["risen"],
     French: "se lever",
@@ -715,7 +715,7 @@ export const irregularVerbs = {
   },
 
   set: {
-    definition: "to place or put something in position",
+    definition: "to place or put something in position (not 'put')",
     past_simple: ["set"],
     present_perfect: ["set"],
     French: "mettre",
@@ -806,7 +806,7 @@ export const irregularVerbs = {
   },
 
   put: {
-    definition: "to place something somewhere",
+    definition: "to place something somewhere (not 'set')",
     past_simple: ["put"],
     present_perfect: ["put"],
     French: "mettre",
@@ -819,7 +819,7 @@ export const irregularVerbs = {
   },
 
   dig: {
-    definition: "to break up and move earth",
+    definition: "to make a hole in the earth",
     past_simple: ["dug"],
     present_perfect: ["dug"],
     French: "creuser",
@@ -871,7 +871,7 @@ export const irregularVerbs = {
   },
 
   sit: {
-    definition: "to rest on the buttocks",
+    definition: "to rest on a chair or bench",
     past_simple: ["sat"],
     present_perfect: ["sat"],
     French: "s'asseoir",
@@ -910,7 +910,7 @@ export const irregularVerbs = {
   },
 
   tell: {
-    definition: "to communicate information",
+    definition: "to communicate information (not 'speak' or 'say')",
     past_simple: ["told"],
     present_perfect: ["told"],
     French: "raconter",
@@ -923,7 +923,7 @@ export const irregularVerbs = {
   },
 
   say: {
-    definition: "to speak words",
+    definition: "to speak words (not 'tell' or 'speak')",
     past_simple: ["said"],
     present_perfect: ["said"],
     French: "dire",

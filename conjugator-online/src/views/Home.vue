@@ -82,7 +82,7 @@
       color="red-lighten-1"
       :to="{ name: 'vocabworkout' }"
     >
-      <v-icon large>mdi-alpha-v-box-outline</v-icon>
+      <v-icon large>mdi-cards-outline</v-icon>
       <span v-if="!$vuetify.display.xs" class="subtitle-1 font-weight-medium px-3">Vocab Workout</span>
     </v-btn>
   </v-col>
