@@ -13,8 +13,31 @@
     <!-- Main Title Centered -->
     <v-row justify="center">
       <v-col cols="12" class="text-center">
+       <div
+          v-if="xs"
+          class="language-title"
+          style="font-size: 3.5rem; margin-top: 5%; margin-bottom: 20%; margin-left: 4%; margin-right: 4%; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;"
+        >
+          Language Labs
+        </div>
 
-       <!-- XS -->
+        <div
+          v-else-if="lg || xl"
+          class="language-title"
+          style="font-size: 9rem; margin-top: 2%; margin-bottom: 10%; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;"
+        >
+          Language Labs
+        </div>
+
+        <div
+          v-else
+          class="language-title"
+          style="font-size: 8rem; margin-top: 2%; margin-bottom: 10%; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;"
+        >
+          Language Labs
+        </div>
+
+        <!-- 
         <v-img
           v-if="xs"
           src="/images/banners/LanguageLabs1.png"
@@ -23,19 +46,19 @@
           class="mx-auto mb-5"
         />
 
-        <!-- MD+ -->
+        MD+
         <v-img
           v-else
           src="/images/banners/LanguageLabs.png"
           alt="Language Labs"
           height="360"
           class="mx-auto mb-6"
-        />
+        /> -->
       </v-col>
     </v-row>
 
     <!-- Tiles with Icon Buttons for Navigation -->
-<v-row justify="center" align="center" dense class="mx-10">
+<v-row justify="center" align="center" dense style="margin-left: 17%; margin-right: 17%;">
   <v-col
     cols="8"
     sm="6"
@@ -83,7 +106,7 @@
       :to="{ name: 'vocabworkout' }"
     >
       <v-icon large>mdi-cards-outline</v-icon>
-      <span v-if="!$vuetify.display.xs" class="subtitle-1 font-weight-medium px-3">Vocab Workout</span>
+      <span v-if="!$vuetify.display.xs" class="subtitle-1 font-weight-medium px-3">Vocab</span>
     </v-btn>
   </v-col>
 
@@ -205,4 +228,6 @@ const { xs, sm, md, lg, xl, smAndDown } = useDisplay()
 .top-controls > *:last-child {
   margin-right: 0;
 }
+
+
 </style>

@@ -1,6 +1,16 @@
 <!-- src/components/reported_speech/reported_speech_scenes/ReportedSpeechScene01_Game.vue -->
 <template>
   <v-container fluid class="pa-4 d-flex justify-center">
+    <v-overlay
+      v-model="finishing"
+      class="align-center justify-center"
+      persistent
+    >
+      <div class="text-center">
+        <v-progress-circular indeterminate size="48" />
+        <div class="mt-3 text-subtitle-2">Saving your results…</div>
+      </div>
+    </v-overlay>
 
     <!-- Floating feedback (correct only, non-blocking) -->
     <div v-if="showFloatingFeedback" class="floating-feedback success">
@@ -241,6 +251,8 @@ const props = defineProps({
 });
 
 const emit = defineEmits(["gameOver"]);
+
+const finishing = ref(false);
 
 const timeLeft = ref(ROUND_SECONDS);
 let timer = null;
@@ -510,6 +522,7 @@ function recordRound(user, correct, outOfTime = false) {
 
 async function finishGame() {
   stopTimer();
+  finishing.value = true; 
 
   const finishedAt = new Date();
   const totalSeconds = Math.floor((finishedAt.getTime() - startTime.value.getTime()) / 1000);

@@ -126,7 +126,19 @@
           </div>
         </RouterLink>
       </v-col>
-      
+
+  <!-- Comparison -->
+      <v-col cols="12" sm="6" md="4" class="d-flex justify-center">
+        <RouterLink
+          :to="{ name: 'comparison' }"
+          class="image-tile"
+        >
+          <div class="tile-frame">
+            <v-img src="/images/banners/Comparison.png" alt="Comparison" cover class="tile-image" />
+          </div>
+        </RouterLink>
+      </v-col>     
+
       <!-- Tricky Translator -->
       <v-col cols="12" sm="6" md="4" class="d-flex justify-center">
         <RouterLink

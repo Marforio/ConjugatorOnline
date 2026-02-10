@@ -461,6 +461,7 @@ const sessionAccuracyTrend = computed(() => {
 
 // ----- Constants -----
 const GAME_NAMES = [
+  "Comparison",
   "Parallel Universe",  
   "Passive Party",
   "Pronoun Practice",
@@ -470,15 +471,16 @@ const GAME_NAMES = [
   "Regret Machine",
   "Reported Speech",
   "Tricky Translator",
-  "Uses of Auxiliaries",
+  "Uses Of Auxiliaries",
   "Verb Mixer",
   "Year 2040",
   "Word Families",
 ];
 const gamePictures: Record<string, string> = {
+  "Comparison": "/images/banners/Comparison.png",
   "Pronoun Practice": "/images/banners/PronounPractice.png",
   "Quantifier Quest": "/images/banners/QuantifierQuest.png",
-  "Uses of Auxiliaries": "/images/banners/UsesOfAuxiliaries.png",
+  "Uses Of Auxiliaries": "/images/banners/UsesOfAuxiliaries.png",
   "Tricky Translator": "/images/banners/TrickyTranslator.png",
   "Passive Party": "/images/banners/PassiveParty.png",
   "Word Families": "/images/banners/WordFamilies.png",
@@ -619,7 +621,9 @@ const requestTypo = async (round: OtherGameRound) => {
 // ----- Error Explainer -----
 function normalizeGameName(name: string): string {
   if (!name) return name
-
+  if (name.startsWith("Comparison")) return "Comparison"
+  if (name.startsWith("Parallel Universe")) return "Parallel Universe"
+  if (name.startsWith("Uses Of Auxiliaries")) return "Uses Of Auxiliaries"
   if (name.startsWith("Quantifier Quest")) return "Quantifier Quest"
   if (name.startsWith("Pronoun Practice")) return "Pronoun Practice"
   if (name.startsWith("Prove it!")) return "Prove it!"

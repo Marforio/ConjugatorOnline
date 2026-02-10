@@ -1,4 +1,4 @@
-<!-- src/components/UsesOfAuxiliariesSceneManager.vue -->
+<!-- src/components/comparison/ComparisonSceneManager.vue -->
 <template>
   <component
     :is="currentSceneComponent"
@@ -17,25 +17,25 @@
 import { ref, computed } from "vue";
 import { markRaw } from "vue";
 
-import AuxiliariesScene00_Start from "./auxiliaries_scenes/AuxiliariesScene00_Start.vue";
-import AuxiliariesScene01_Game from "./auxiliaries_scenes/AuxiliariesScene01_Game.vue";
-import AuxiliariesScene02_Results from "./auxiliaries_scenes/AuxiliariesScene02_Results.vue";
+import ComparisonScene00_Start from "./comparison_scenes/ComparisonScene00_Start.vue";
+import ComparisonScene01_Game from "./comparison_scenes/ComparisonScene01_Game.vue";
+import ComparisonScene02_Results from "./comparison_scenes/ComparisonScene02_Results.vue";
 
 import {
   normalizePrompts,
   buildPool,
   samplePrompts,
-} from "@/assets/scripts/uses_of_auxiliaries/AuxiliariesPromptEngine";
+} from "@/assets/scripts/comparison/ComparisonPromptEngine";
 
-import { auxiliariesPrompts } from "@/assets/scripts/uses_of_auxiliaries/AuxiliariesPrompts";
+import { comparisonPrompts } from "@/assets/scripts/comparison/ComparisonPrompts";
 
 const scenes = {
-  AuxiliariesScene00_Start,
-  AuxiliariesScene01_Game,
-  AuxiliariesScene02_Results,
+  ComparisonScene00_Start,
+  ComparisonScene01_Game,
+  ComparisonScene02_Results,
 };
 
-const currentScene = ref("AuxiliariesScene00_Start");
+const currentScene = ref("ComparisonScene00_Start");
 const gameSettings = ref(null);
 const results = ref(null);
 const totalTime = ref("");
@@ -51,21 +51,21 @@ function changeScene(sceneName) {
 function handleStartGame(selections) {
   gameSettings.value = markRaw(selections);
 
-  const normalized = normalizePrompts(auxiliariesPrompts);
+  const normalized = normalizePrompts(comparisonPrompts);
 
   const pool = buildPool(normalized, {
-    modes: selections.modes, // <-- only setting now
+    partOfSpeech: selections.partOfSpeech, // "adjectives" | "adverbs" | "mix"
   });
 
   promptsForGame.value = samplePrompts(pool, selections.numRounds || 30);
 
-  changeScene("AuxiliariesScene01_Game");
+  changeScene("ComparisonScene01_Game");
 }
 
 function handleGameOver(payload) {
   results.value = payload;
   totalTime.value = payload?.totalTime ?? totalTime.value;
   avgTime.value = payload?.avgTime ?? avgTime.value;
-  changeScene("AuxiliariesScene02_Results");
+  changeScene("ComparisonScene02_Results");
 }
 </script>

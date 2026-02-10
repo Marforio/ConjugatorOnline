@@ -1,6 +1,16 @@
 <!-- src/components/passive/passive_scenes/PassiveScene01_Game.vue -->
 <template>
   <v-container fluid class="pa-4 d-flex justify-center">
+    <v-overlay
+      v-model="finishing"
+      class="align-center justify-center"
+      persistent
+    >
+      <div class="text-center">
+        <v-progress-circular indeterminate size="48" />
+        <div class="mt-3 text-subtitle-2">Saving your results…</div>
+      </div>
+    </v-overlay>
 
     <!-- Floating feedback (correct only, non-blocking) -->
     <div
@@ -177,6 +187,8 @@ const emit = defineEmits(['gameOver'])
 
 const inputLocked = ref(false)
 const INPUT_COOLDOWN_MS = 600
+
+const finishing = ref(false);
 
 const numRounds = props.prompts.length
 const currentRound = ref(0)
@@ -370,6 +382,7 @@ function unlockInputWithDelay(delay = INPUT_COOLDOWN_MS) {
 
 async function finishGame() {
   stopTimer();
+  finishing.value = true; 
 
   const finishedAt = new Date();
   const totalSeconds =

@@ -11,21 +11,20 @@
             ></v-img>
           </div>
           <h2 class="text-h4 ms-2 text-wrap">Settings</h2>
-          <div class="text-h6 ms-2 font-weight-light">
-            Choose the mode(s) you want to practice
-          </div>
+          <v-card-subtitle class="">Practice other uses of auxiliary verbs
+          </v-card-subtitle>
         </div>
       </v-card-title>
 
       <v-card-text>
         <v-row>
-          <v-col cols="12">
+          <v-col cols="8">
             <v-card-title class="font-weight-medium">Modes</v-card-title>
 
-            <div class="ms-2">
+            <div class="ms-5">
               <v-checkbox
                 v-model="selections.modes.echo"
-                label="Echo (short questions like: do you? are you?)"
+                label="Echo questions to show interest (do you? are you?)"
                 density="compact"
                 hide-details
               />
@@ -37,21 +36,23 @@
               />
               <v-checkbox
                 v-model="selections.modes.tag"
-                label="Tag questions (..., isn't it?)"
+                label="Tag questions for confirmation (..., isn't it?)"
                 density="compact"
                 hide-details
               />
             </div>
-
-            <div class="text-caption mt-2 ms-2">
-              Tip: you can mix modes. The game will randomly sample from the enabled
-              modes.
+            <div class="text-caption mt-2 ms-5">
+              Reminder: to get the achievement for this game, you need to play with all three modes.
             </div>
-
+          </v-col>
+          <v-col cols="4">
             <v-card-title class="font-weight-medium mt-4">Rounds</v-card-title>
             <div class="ms-4">
               Fixed to <strong>30 rounds</strong>
             </div>
+            <v-card-title class="mt-6">Review</v-card-title>
+            <div class="ms-4">
+              Have you studied the <a href="https://book.language-labs.ch/ch13" target="_blank">special uses of auxiliaries</a>?</div>
           </v-col>
         </v-row>
       </v-card-text>
@@ -102,7 +103,7 @@ function start() {
   // We'll send only selections.modes for this simplified UI.
   emit("startGame", {
     modes: { ...selections.value.modes },
-    numRounds: 24,
+    numRounds: 30,
   });
 }
 </script>

@@ -110,7 +110,7 @@ export function buildPool(
 
 export function samplePrompts(
   pool: AuxiliariesExercise[],
-  n: number = 24
+  n: number = 30
 ): AuxiliariesExercise[] {
   if (!Array.isArray(pool) || pool.length === 0) return [];
 
