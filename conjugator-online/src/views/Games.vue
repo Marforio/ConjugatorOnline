@@ -139,6 +139,18 @@
         </RouterLink>
       </v-col>     
 
+        <!-- Idea Linker -->
+      <v-col cols="12" sm="6" md="4" class="d-flex justify-center">
+        <RouterLink
+          :to="{ name: 'idealinker' }"
+          class="image-tile"
+        >
+          <div class="tile-frame">
+            <v-img src="/images/banners/IdeaLinker.png" alt="Idea Linker" cover class="tile-image" />
+          </div>
+        </RouterLink>
+      </v-col>   
+
       <!-- Tricky Translator -->
       <v-col cols="12" sm="6" md="4" class="d-flex justify-center">
         <RouterLink

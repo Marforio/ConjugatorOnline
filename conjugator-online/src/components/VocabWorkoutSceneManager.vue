@@ -292,4 +292,7 @@ async function handleGameOver(payload: any) {
   changeScene("VocabWorkoutScene02_Results");
 }
 
+defineExpose({ handleStartGame, changeScene });
+
+
 </script>

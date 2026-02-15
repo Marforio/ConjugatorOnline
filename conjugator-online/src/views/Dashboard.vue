@@ -62,14 +62,14 @@
           </div>
           <div v-else>
             <v-row dense>
-            <!-- Conjugation accuracy -->
-            <v-col cols="12" lg="6" sm="12">
-              <v-card class="chart-card pa-4" elevation="2">
-                <v-card-title class="text-h5 font-weight-bold">Conjugation accuracy</v-card-title>
+            <!-- Conjugation accuracy overall -->
+            <v-col cols="12" lg="5">
+              <v-card class="chart-card pa-4 py-6" elevation="2">
+                <v-card-title class="text-h5 font-weight-bold mb-3">Conjugator data overall</v-card-title>
                 <v-card-text class="d-flex flex-column align-center flex-grow-1">
                   <PieChart :data="totalRightWrongChartData" />
-                  <div class="text-subtitle-1 mt-4">
-                    {{ sessions.length }} game{{ sessions.length !== 1 ? 's' : '' }} played
+                  <div class="text-subtitle-1 mt-6 mb-2">
+                    {{ sessions.length }} game{{ sessions.length !== 1 ? 's' : '' }} played in total
                   </div>
                   <div class="text-subtitle-2">
                     {{ totalRoundsPlayed }} total rounds: {{ totalCorrect }} correct, {{ totalIncorrect }} incorrect
@@ -77,11 +77,13 @@
                   <div v-if="totalTypos > 0" class="text-caption text-muted">
                     ({{ totalTypos }} typo<span v-if="totalTypos > 1">s</span> not counted)
                   </div>
+                  <div class="text-subtitle-2 mt-2">Average speed: {{ avgTimePerRound }} seconds per answer
+                  </div>
                 </v-card-text>
               </v-card>
             </v-col>
             <!-- Some Numbers -->
-            <v-col cols="12" lg="6">
+            <v-col cols="12" lg="7">
               <v-card class="chart-card pa-2" v-if="sessionAccuracyTrend.length > 1" elevation="2">
                     <v-card  elevation="1" class="pa-4 mb-2">
                   <div class="text-h6 mb-2">Game Accuracy Trend</div>
@@ -109,26 +111,20 @@
                 <div style="display: flex;">
                   <NumbersCard
                     class="ma-2 flex-grow-1"
-                    :value="totalCorrect ?? 0"
-                    title="Total correct"
-                    label="Conjugations (rounds) in the Conjugator game"
-                  />
-                  <NumbersCard
-                    class="ma-2 flex-grow-1"
-                    :value="avgTimePerRound"
-                    title="Avg speed"
-                    label="Seconds per answer (round)"
+                    :value="userStore.totalCorrect ?? 0"
+                    title="Spring 2026 Total correct"
+                    label="Correct answers since the start of the semester"
                   />
                   <v-tooltip text="How close you are to an ideal student (1500 correct answers, 100% accuracy, 12s avg speed, medium difficulty" location="bottom">
                     <template v-slot:activator="{ props }">
                       <v-card
-                        class="ma-2 flex-grow-1 bg-light-blue-lighten-5"
+                        class="ma-2 bg-light-blue-lighten-5"
                         elevation="2"
                         v-bind="props"
                         style="min-width: 180px;"
                       >
                         <v-card-text class="text-center">
-                          <v-card-title class="text-subtitle-2 text-wrap mb-2">Power index</v-card-title>
+                          <v-card-title class="text-subtitle-2 text-wrap m-2">Spring 2026 Power index</v-card-title>
                             <Gauge
                                   :key="gaugeKey"
                                   :value="userStore.healthScore ?? 0"
@@ -139,16 +135,34 @@
                             </v-card-subtitle>
                         </v-card-text>
                       </v-card>
-                      
                     </template>
                   </v-tooltip>
+                  <v-card v-if="userStore.previousDate" class="ma-2 pa-4" elevation="2">
+                    <v-card-title  class="text-subtitle-2 text-wrap m-2">Historical data</v-card-title>
+                    <v-card-text>
+                      <p class="m-2" style="font-size: 0.9rem;">Last semester</p>
+                      <div class="d-flex flex-column ga-5 ms-3 mt-3">
+                        <div class="d-flex align-center ga-2">
+                          <v-icon size="18">mdi-bullseye-arrow</v-icon>
+                          <span class="text-body-2">Total correct: {{ userStore.previousTotalCorrectPrompts }}</span>
+                        </div>
+
+                        <div class="d-flex align-center ga-2">
+                          <v-icon size="18">mdi-arm-flex</v-icon>
+                          <span class="text-body-2">Health: {{ userStore.previousHealthScore }}%</span>
+                        </div>
+                      </div>
+                    </v-card-text>
+                  </v-card>
+                  <v-card v-else class="ma-2 pa-4">
+                    <v-card-title class="text-subtitle-2 text-wrap mb-2">Historical data</v-card-title>
+                    <v-card-text>
+                      <p class="mb-2" style="font-size: 0.9rem;">No historical data available</p>
+                    </v-card-text>
+                  </v-card>
                   
                 </div>
               </v-card>
-                
-      
-    
-
             </v-col>
 
             <!-- Tense accuracy -->
@@ -732,8 +746,6 @@ export default defineComponent({
       gaugeKey.value++;
     });
 
-
-
     interface TenseStats {
       discovered_verbs_ps: string[];
       discovered_verbs_pp: string[];
@@ -998,11 +1010,12 @@ export default defineComponent({
 
     const activeTab = ref("grammar-feedback");
     const tabItems = [
-      { value: "grammar-feedback", label: "Error Feedback" },
-      { value: "vocabulary", label: "Vocabulary" },
-      { value: "goals", label: "Achievements" },
+      { value: "grammar-feedback", label: "Errors" },   // Error feedback
+      { value: "vocabulary", label: "Vocab" },
       { value: "conjugation-game", label: "Conjugator" },
-      { value: "other-games", label: "Other Games"}
+      { value: "other-games", label: "Other Games"},
+      { value: "goals", label: "Trophies" }  // Trophy room
+
     ];
 
     const { xs, smAndDown } = useDisplay();

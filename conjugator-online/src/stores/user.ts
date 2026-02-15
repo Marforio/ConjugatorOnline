@@ -12,6 +12,12 @@ interface User {
   is_superuser?: boolean;
 }
 
+interface ScoreSnapshot {
+  total_correct_prompts: number;
+  health_score: number;
+}
+
+
 interface Student {
   id: number;
   web_id: string;
@@ -20,6 +26,7 @@ interface Student {
   health_score: number;
   domain: string | null;    
   user: User | null;
+  score_history: Record<string, ScoreSnapshot>;
 }
 
 
@@ -110,6 +117,51 @@ export const useUserStore = defineStore("user", () => {
   const studentId = computed(() => student.value?.id ?? null);
   const totalCorrect = computed(() => student.value?.total_correct_prompts ?? 0);
   const healthScore = computed(() => student.value?.health_score ?? 0)
+
+  //  previous semester scores
+  const previousHealthScore = computed(() => {
+    if (!student.value?.score_history) return null;
+    
+    const entries = Object.entries(student.value.score_history);
+    if (entries.length === 0) return null;
+    
+    // Sort by date descending (most recent first)
+    const sorted = entries.sort(([dateA], [dateB]) => dateB.localeCompare(dateA));
+    return sorted[0][1].health_score;
+  });
+
+  const previousTotalCorrectPrompts = computed(() => {
+    if (!student.value?.score_history) return null;
+    
+    const entries = Object.entries(student.value.score_history);
+    if (entries.length === 0) return null;
+    
+    const sorted = entries.sort(([dateA], [dateB]) => dateB.localeCompare(dateA));
+    return sorted[0][1].total_correct_prompts;
+  });
+
+  const previousDate = computed(() => {
+    if (!student.value?.score_history) return null;
+    
+    const entries = Object.entries(student.value.score_history);
+    if (entries.length === 0) return null;
+    
+    const sorted = entries.sort(([dateA], [dateB]) => dateB.localeCompare(dateA));
+    return sorted[0][0]; // Returns date string in YYYY-MM-DD format
+  });
+
+  //  All historical scores sorted by date
+  const scoreHistory = computed(() => {
+    if (!student.value?.score_history) return [];
+    
+    return Object.entries(student.value.score_history)
+      .map(([date, scores]) => ({
+        date,
+        ...scores,
+      }))
+      .sort((a, b) => b.date.localeCompare(a.date)); // Most recent first
+  });
+
 
   // Enrollments state 
   const enrollments = ref<StudentCourse[]>([]);
@@ -366,6 +418,9 @@ async function fetchSmartConjVerbPool(params: { verbSet: string; batchSize: numb
 
     // Student domain
     studentDomain, studentDomainLabel,
+
+    // Previous semester scores
+    previousHealthScore, previousTotalCorrectPrompts, previousDate, scoreHistory,
 
     // Enrollments
     enrollments, loadingEnrollments, enrollmentError, enrolledCourses, fetchEnrollments,

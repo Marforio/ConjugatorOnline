@@ -1,17 +1,17 @@
 <template>
   <v-container>
 
-    <div v-if="loading" class="text-center my-5">
-      <v-progress-circular indeterminate color="primary" />
-    </div>
+<div v-if="isLoading" class="text-center my-5">
+  <v-progress-circular indeterminate color="primary" />
+</div>
 
-    <v-alert v-else-if="error" type="error">{{ error }}</v-alert>
+<v-alert v-else-if="error" type="error">{{ error }}</v-alert>
 
-    <div v-else-if="availableGames.length === 0" class="text-center my-5">
-      <v-alert type="info">No data available.</v-alert>
-    </div>
+<div v-else-if="availableGames.length === 0" class="text-center my-5">
+  <v-alert type="info">No data available.</v-alert>
+</div>
 
-    <v-row v-else>
+<v-row v-else>
       <v-col cols="12">
         <div class="d-flex align-center px-6">
 
@@ -99,18 +99,17 @@
           </v-col>
         </v-row>
         
-        <!-- Achievements Card -->
+        <!-- Trophy / Achievements Card -->
          <v-row dense>
           <v-col v-if="automaticAchievements.length > 0" cols="12" lg="6">
-            <v-card elevation="2" class="chart-card pa-4 mb-6">
+            <v-card elevation="2" class="chart-card trophy-card pa-4 mb-6">
               <v-card-title class="text-h5">
                 <v-icon class="me-4">mdi-trophy</v-icon>
                 Achievements in {{ selectedGame }}
-                <v-icon class="ms-3">mdi-balloon</v-icon>
               </v-card-title>
 
               <v-card-text class="achievement-card-body">
-                <v-progress-linear v-if="loading" indeterminate color="primary" class="mb-4" />
+                <v-progress-linear v-if="loadingAchievements" indeterminate color="primary" class="mb-4" />
 
                 <v-alert v-else-if="error" type="error" class="mb-4">
                   {{ error }}
@@ -400,7 +399,12 @@ interface Achievement {
 const route = useRoute()
 const pronounImagePath = "/images/pronoun_pics_resized/";
 const quantifierImagePath = "/images/quant_pics_resized/";
-const loading = ref(true);
+
+const loadingSessions = ref(true);
+const loadingAchievements = ref(true);
+
+const isLoading = computed(() => loadingSessions.value || loadingAchievements.value);
+
 const error = ref<string | null>(null);
 const groupedGames = ref<Record<string, GroupedGameData>>({});
 const snackbar = ref<Snackbar>({
@@ -494,16 +498,20 @@ const gamePictures: Record<string, string> = {
 
 // ----- Fetch and Group -----
 onMounted(async () => {
+  error.value = null;
+
   try {
-    await fetchAchievements();
-    
-    const res = await api.get<OtherGameSession[]>("/other-games-sessions/");
+    // Run both in parallel (faster) and track each independently
+    loadingAchievements.value = true;
+    loadingSessions.value = true;
+
+    const achievementsPromise = fetchAchievements(); // this will manage loadingAchievements
+    const sessionsPromise = api.get<OtherGameSession[]>("/other-games-sessions/");
+
+    const [, res] = await Promise.all([achievementsPromise, sessionsPromise]);
     const sessions = res.data;
-    console.log(sessions)
 
     const grouped: Record<string, GroupedGameData> = {};
-
-    // Initialize all 5 groups (even if empty)
     for (const name of GAME_NAMES) {
       grouped[name] = {
         sessions: [],
@@ -515,23 +523,20 @@ onMounted(async () => {
       };
     }
 
- // group sessions
-  for (const s of sessions) {
-    const baseName = normalizeGameName(s.game_name)
-    if (!GAME_NAMES.includes(baseName)) continue
+    for (const s of sessions) {
+      const baseName = normalizeGameName(s.game_name);
+      if (!GAME_NAMES.includes(baseName)) continue;
 
-    const group = grouped[baseName]
-    group.sessions.push(s)
-    group.totalRounds += s.total_rounds ?? 0
-    group.totalCorrect += s.correct_count ?? 0
-    group.totalIncorrect += (s.total_rounds ?? 0) - (s.correct_count ?? 0)
-  }
+      const group = grouped[baseName];
+      group.sessions.push(s);
+      group.totalRounds += s.total_rounds ?? 0;
+      group.totalCorrect += s.correct_count ?? 0;
+      group.totalIncorrect += (s.total_rounds ?? 0) - (s.correct_count ?? 0);
+    }
 
-
-    // compute trends and incorrect rounds
-    for (const [name, data] of Object.entries(grouped)) {
-      data.accuracyTrend = data.sessions.map(
-        s => Number(((s.correct_count / s.total_rounds) * 100).toFixed(0))
+    for (const [, data] of Object.entries(grouped)) {
+      data.accuracyTrend = data.sessions.map(s =>
+        Number(((s.correct_count / s.total_rounds) * 100).toFixed(0))
       );
       data.incorrectRounds = data.sessions.flatMap(s =>
         (s.rounds || []).filter(r => !r.is_correct)
@@ -540,41 +545,41 @@ onMounted(async () => {
 
     groupedGames.value = grouped;
 
-    // select the displayed game for the select widget
-    const queryGame =
-      typeof route.query.game === 'string' ? route.query.game : null
-
+    const queryGame = typeof route.query.game === "string" ? route.query.game : null;
     if (queryGame && availableGames.value.includes(queryGame)) {
-      selectedGame.value = queryGame
+      selectedGame.value = queryGame;
     } else {
-      selectedGame.value = availableGames.value[0] ?? null
+      selectedGame.value = availableGames.value[0] ?? null;
     }
-
   } catch (err) {
     console.error(err);
     error.value = "Failed to load game sessions.";
   } finally {
-    loading.value = false;
+    loadingSessions.value = false;
   }
 });
 
+
 // Fetch all achievements
 const fetchAchievements = async () => {
-  loading.value = true;
+  loadingAchievements.value = true;
   error.value = null;
-  try {
-    const res = await api.get<Achievement[]>('/achievements/');
-    allAchievements.value = res.data;
 
-    // Split manual vs automatic
+  try {
+    const res = await api.get<Achievement[]>("/achievements/");
+    allAchievements.value = res.data;
     manualAchievements.value = res.data.filter(a => a.manually_created);
+
+    // keep automaticAchievements in sync even on first load
+    automaticAchievements.value = filterAchievementsForGame(selectedGame.value ?? "");
   } catch (err) {
-    console.error('Failed to fetch achievements:', err);
-    error.value = 'Failed to load achievements.';
+    console.error("Failed to fetch achievements:", err);
+    error.value = "Failed to load achievements.";
   } finally {
-    loading.value = false;
+    loadingAchievements.value = false;
   }
 };
+
 
 // Watch for game selection changes
 watch(selectedGame, (game) => {
@@ -682,6 +687,42 @@ const nextError = (gameName: string): void => {
 /* Subtitles stay soft */
 .golden-list-item .v-list-item-subtitle {
   color: #6b5a1f;
+}
+
+.trophy-card {
+  position: relative;
+  border: 1px solid rgba(212, 175, 55, 0.35);
+  background:
+    linear-gradient(180deg, #ffffff 0%, #fffaf0 100%);
+  box-shadow:
+    0 6px 18px rgba(180, 150, 60, 0.12);
+}
+
+.trophy-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+
+  background:
+    linear-gradient(
+      120deg,
+      transparent 20%,
+      rgba(255, 235, 160, 0.35) 40%,
+      rgba(255, 215, 120, 0.2) 50%,
+      transparent 70%
+    );
+
+  opacity: 0.5;
+}
+
+.trophy-card .v-card-title {
+  color: #b38b00;
+  font-weight: 600;
+}
+
+.trophy-card .v-icon {
+  color: #caa600;
 }
 
 

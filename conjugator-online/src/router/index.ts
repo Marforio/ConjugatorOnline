@@ -6,6 +6,7 @@ import Home from '@/views/Home.vue'
 import Conjugator from '@/views/Conjugator.vue'
 import VocabWorkout from '@/views/VocabWorkout.vue'
 import Admin from '@/views/Admin.vue'
+import { path } from 'd3'
 
 const routes = [
   { path: '/', name: 'home', component: Home },
@@ -19,6 +20,7 @@ const routes = [
   { path: '/games', name: 'games', component: () => import('@/views/Games.vue')},
   { path: '/games/pronoun-practice', name: 'pronounpractice', component: () => import('@/views/PronounPractice.vue'), meta: { requiresAuth: true }},
   { path: '/games/comparison', name: 'comparison', component: () => import('@/views/Comparison.vue'), meta: { requiresAuth: true }},
+  { path: '/games/idea-linker', name: 'idealinker', component: () => import('@/views/IdeaLinker.vue'), meta: { requiresAuth: true }},
   { path: '/games/quantifier-quest', name: 'quantifierquest', component: () => import('@/views/Quantifer.vue'), meta: { requiresAuth: true }},
   { path: '/games/verb-mixer', name: 'verbmixer', component: () => import('@/views/VerbMixer.vue'), meta: { requiresAuth: true }},
   { path: '/games/passive-party', name: 'passiveparty', component: () => import('@/views/PassiveMaker.vue'), meta: { requiresAuth: true }},
@@ -31,6 +33,7 @@ const routes = [
   { path: '/games/uses-of-auxiliaries', name: 'auxiliaryuses', component: () => import('@/views/UsesOfAuxiliaries.vue'), meta: { requiresAuth: true }},
   { path: '/tools', name: 'tools', component: () => import('@/views/Tools.vue') },
   { path: '/tools/meeting-machine', name: 'meeting-machine', component: () => import('@/views/MeetingMachine.vue')},
+  { path: '/tools/essay-creator', name: 'essay-creator', component: () => import('@/views/EssayCreator.vue')},
   { path : '/teacher-tools', name: 'teacher-tools', component: () => import('@/views/TeacherTools.vue'),  meta: { requiresAuth: true, requiresAdmin: true } },
   { path: '/teacher-tools/classroom-challenges', name: 'classroom-challenges', component: () => import('@/views/ClassroomChallenges.vue'), meta: { requiresAuth: true, requiresAdmin: true }, props: (route: RouteLocationNormalized) => ({
       game: route.query.game as string,

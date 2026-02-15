@@ -16,6 +16,20 @@
         </RouterLink>
       </v-col>
 
+      <!-- Essay Creator -->
+      <v-col cols="12" sm="6" md="4" class="d-flex justify-center">
+        <RouterLink :to="{ name: 'essay-creator' }" class="image-tile">
+          <div class="tile-frame">
+            <v-img
+              src="/images/banners/EssayCreator.png"
+              alt="Essay Creator"
+              cover
+              class="tile-image"
+            />
+          </div>
+        </RouterLink>
+      </v-col>
+
 
 
     </v-row>
