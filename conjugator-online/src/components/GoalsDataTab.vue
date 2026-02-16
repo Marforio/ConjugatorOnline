@@ -18,7 +18,7 @@
                 <template v-for="(achievement, index) in conjugatorAchievements" :key="achievement.id">
                   <v-list-item class="py-2">
                     <v-list-item-content>
-                      <v-list-item-title class="font-weight-bold">
+                      <v-list-item-title class="font-weight-bold text-wrap">
                         {{ achievement.name }}
                         <v-icon
                           class="ms-2"
@@ -64,12 +64,12 @@
                 <template v-for="(achievement, index) in vocabularyAchievements" :key="achievement.id">
                   <v-list-item class="py-2">
                     <v-list-item-content>
-                      <v-list-item-title class="font-weight-bold">
+                      <v-list-item-title class="font-weight-bold text-wrap">
                         {{ achievement.name }}
                         <v-icon class="ms-2" icon="mdi-bookmark-check" />
                       </v-list-item-title>
 
-                      <v-list-item-subtitle class="text-wrap">
+                      <v-list-item-subtitle class="text-wrap wrap-fix">
                         {{ achievement.description }}
                       </v-list-item-subtitle>
 
@@ -112,7 +112,7 @@
                         <v-icon class="ms-2" icon="mdi-star" />
                       </v-list-item-title>
 
-                      <v-list-item-subtitle class="text-wrap">
+                      <v-list-item-subtitle class="wrap-fix">
                         {{ achievement.description }}
                       </v-list-item-subtitle>
 
@@ -443,5 +443,7 @@ const courseProgram = computed(() => {
   flex: 1 1 auto;
   overflow: auto;
 }
+
+.wrap-fix { white-space: normal !important; }
 
 </style>

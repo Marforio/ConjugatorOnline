@@ -599,11 +599,27 @@ const filterAchievementsForGame = (game: string) => {
     .filter(a => a.name.startsWith(game) || a.criteria_key.startsWith(game)) // beginsWith
     .sort((a, b) => new Date(b.achieved_on).getTime() - new Date(a.achieved_on).getTime());
 };
+
 // ----- Pie Chart Data -----
-const getPieChartData = (gameData: GroupedGameData) => [
-  { label: "Correct", value: gameData.totalCorrect },
-  { label: "Incorrect", value: gameData.totalIncorrect },
-];
+const getPieChartData = (gameData: GroupedGameData) => {
+  const total = gameData.totalCorrect + gameData.totalIncorrect;
+  
+  // Avoid division by zero
+  if (total === 0) {
+    return [
+      { label: "Correct", value: 0 },
+      { label: "Incorrect", value: 0 },
+    ];
+  }
+  
+  const correctPercentage = Math.round((gameData.totalCorrect / total) * 100);
+  const incorrectPercentage = Math.round((gameData.totalIncorrect / total) * 100);
+  
+  return [
+    { label: "Correct", value: correctPercentage },
+    { label: "Incorrect", value: incorrectPercentage },
+  ];
+};
 
 // ----- Typo Request -----
 const requestTypo = async (round: OtherGameRound) => {

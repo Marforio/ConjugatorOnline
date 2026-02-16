@@ -535,7 +535,7 @@ export const auxiliariesPrompts = {
     prompt: "I should call my grandmother more often.",
     highlight: "should",
     tense: "advice",
-    answer: ["should I", "should I?"],
+    answer: ["should you", "should you?"],
     negative: false,
   },
   68: {
@@ -615,7 +615,7 @@ export const auxiliariesPrompts = {
     prompt: "We met in the park.",
     highlight: "hidden auxiliary",
     tense: "past simple",
-    answer: ["did you", "did you?"],
+    answer: ["did you", "did we"],
     negative: false,
   },
   78: {

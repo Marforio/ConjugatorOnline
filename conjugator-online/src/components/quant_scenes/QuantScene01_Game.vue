@@ -228,16 +228,25 @@
                   </v-card> 
                   </template>
                 </v-tooltip>
-                <v-tooltip :text="displayedQuantity === 'big quantity' ? 'many // much or a lot of' : '(a) few // (a) little'"  location="top">
+                <v-tooltip :text="displayedQuantity === 'big quantity' ? 'many // much (a lot of)' : 'a few // a little'"  location="top">
                   <template v-slot:activator="{ props }">
                   <v-card v-bind="props" class="mr-4">
                     <v-card-title>{{ displayedQuantity }}</v-card-title>
                   </v-card>
                   </template>
                 </v-tooltip>
-                <v-card>
-                    <v-card-title class="text-uppercase">{{  currentPrompt.subject }}</v-card-title>
-                  </v-card>
+                <v-tooltip :text="countabilityLabel" location="top">
+              <template #activator="{ props }">
+                <v-card v-bind="props">
+                  <v-card-title class="text-uppercase d-flex align-center">
+                    {{ currentPrompt.subject }}
+                    <v-icon class="ms-2" size="18" color="grey-darken-1">
+                      mdi-information-outline
+                    </v-icon>
+                  </v-card-title>
+                </v-card>
+              </template>
+            </v-tooltip>
               
             </div>
 
@@ -394,6 +403,19 @@ const variantLabel = computed(() => {
       : 'All Nouns'
 })
 
+const countabilityLabel = computed(() => {
+  const isCountable = !!game.value?.getCurrentPrompt?.()?.countable;
+  return isCountable ? "Countable noun" : "Uncountable noun";
+});
+
+const countabilityHint = computed(() => {
+  const p = game.value?.getCurrentPrompt?.();
+  if (!p) return "";
+  if (p.countable) {
+    return "Countable: use many / a few (and so/too many, so/too few).";
+  }
+  return "Uncountable: use much / a little (and so/too much, so/too little).";
+});
 
 const progressValue = computed(
   () => (promptCounter.value / gameSettings.numPrompts) * 100
@@ -444,6 +466,7 @@ function updatePrompt() {
   displayedSentence.value = sentence;
   displayedQuantity.value = quantity;
   displayedIntensifier.value = intensifier;
+
 
   const intensifierStr = intensifier ? `${intensifier} ` : '';
   const generatedQuestion = `'${sentence}' + [${intensifierStr}${quantity}] + '${p.subject}'`;
