@@ -2,11 +2,11 @@
   <v-container fluid class="d-flex flex-column pa-1">
     <!-- Top controls: centered on xs, right-aligned on sm+ -->
     <div class="top-controls mb-8">
-      <div v-if="userStore.isAuthenticated">
+      <div v-if="userStore.isAuthenticated" class="mt-4 me-4">
         <LogOutButton v-if="!smAndDown"></LogOutButton>
       </div>
       <div v-else>
-        <v-btn :to="{ name: 'login' }" color="primary" variant="tonal">Log in</v-btn>
+        <v-btn v-if="!xs" :to="{ name: 'login' }" color="primary" variant="tonal" class="mt-6 me-8">Log in</v-btn>
       </div>
     </div>
 

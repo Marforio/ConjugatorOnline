@@ -137,11 +137,6 @@
                           <strong>Achieved on:</strong> {{ formatDate(achievement.achieved_on) }}
                         </v-list-item-subtitle>
                       </v-list-item-content>
-
-                      <v-divider
-                        v-if="index < automaticAchievements.length - 1"
-                        class="my-4"
-                      />
                     </v-list-item>
                   </v-list>
 
@@ -466,6 +461,7 @@ const sessionAccuracyTrend = computed(() => {
 // ----- Constants -----
 const GAME_NAMES = [
   "Comparison",
+  "Idea Linker",
   "Parallel Universe",  
   "Passive Party",
   "Pronoun Practice",
@@ -482,6 +478,7 @@ const GAME_NAMES = [
 ];
 const gamePictures: Record<string, string> = {
   "Comparison": "/images/banners/Comparison.png",
+  "Idea Linker": "/images/banners/IdeaLinker.png",
   "Pronoun Practice": "/images/banners/PronounPractice.png",
   "Quantifier Quest": "/images/banners/QuantifierQuest.png",
   "Uses Of Auxiliaries": "/images/banners/UsesOfAuxiliaries.png",
@@ -596,7 +593,7 @@ const filterAchievementsForGame = (game: string) => {
   if (!game) return [];
   return allAchievements.value
     .filter(a => !a.manually_created)               // automatic only
-    .filter(a => a.name.startsWith(game) || a.criteria_key.startsWith(game)) // beginsWith
+    .filter(a => a.name.startsWith(game) || a.criteria_key.startsWith(game) || a.criteria_key.startsWith('hard_work_'+game.toLowerCase().slice(0, 3))) // beginsWith
     .sort((a, b) => new Date(b.achieved_on).getTime() - new Date(a.achieved_on).getTime());
 };
 
