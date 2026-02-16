@@ -437,9 +437,9 @@ export const auxiliariesPrompts = {
   55: {
     mode: "echo",
     prompt: "I have changed since you last saw me.",
-    highlight: "haven't",
+    highlight: "have",
     tense: "present perfect",
-    answer: ["haven you"],
+    answer: ["have you"],
     negative: false,
   },
   56: {
