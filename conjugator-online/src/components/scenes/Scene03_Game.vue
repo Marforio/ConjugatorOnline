@@ -270,7 +270,7 @@
 
 
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted, onBeforeUnmount, nextTick, shallowRef, markRaw } from "vue";
+import { ref, reactive, computed, onMounted, onBeforeUnmount, nextTick, shallowRef, markRaw, toRaw, isProxy } from "vue";
 import api from "@/axios";
 import { getAccessToken } from "@/services/auth";
 import Game from "@/assets/scripts/Game";
@@ -352,9 +352,9 @@ const keywords = ref<Record<string, string[]>>({});
 
 // ---------------- helpers ----------------
 function deepClone<T>(obj: T): T {
-  // structuredClone is fastest + safest when available
-  if (typeof structuredClone === "function") return structuredClone(obj);
-  return JSON.parse(JSON.stringify(obj));
+  const raw = isProxy(obj as any) ? (toRaw(obj as any) as any) : (obj as any);
+  // Also ensure nested arrays/objects are raw:
+  return JSON.parse(JSON.stringify(raw));
 }
 
 function mapUiVerbSetToApiVerbSet(ui: string): string {

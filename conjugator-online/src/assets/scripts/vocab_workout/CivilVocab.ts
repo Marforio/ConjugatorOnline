@@ -3159,7 +3159,7 @@ export const BusinessReports = {
 
   "board of directors": {
     definition: "a group of individuals who oversee and guide a company's strategic decisions",
-    French: "conseil d’administration",
+    French: "conseil d'administration",
     German: "Verwaltungsrat",
     Italian: "consiglio di amministrazione",
     image: "/images/vocab/board_of_directors.jpg",
@@ -3184,12 +3184,12 @@ export const BusinessReports = {
     multiple_choice: ["director", "board representative", "governance member"]
   },
 
-  "mid-level management": {
+  "middle management": {
     definition: "managers who implement strategy and oversee daily operations",
     French: "management intermédiaire",
     German: "mittleres Management",
     Italian: "management intermedio",
-    image: "/images/vocab/mid_level_management.jpg",
+    image: "/images/vocab/middle_management.jpg",
     multiple_choice: ["middle managers", "operational leaders", "department managers"]
   },
 
@@ -3229,15 +3229,6 @@ export const BusinessReports = {
     multiple_choice: ["main office", "central hub", "corporate base"]
   },
 
-  "earnings": {
-    definition: "a company's profits or net income over a period",
-    French: "bénéfices",
-    German: "Erträge",
-    Italian: "utili",
-    image: "/images/vocab/earnings.jpg",
-    multiple_choice: ["net income", "profit results", "financial gain"]
-  },
-
   "profits": {
     definition: "money earned after expenses and taxes are deducted",
     French: "profits, bénéfices",
@@ -3248,7 +3239,7 @@ export const BusinessReports = {
   },
 
   "dividends": {
-    definition: "payments made to shareholders from company profits",
+    definition: "payments made to shareholders (a portion of company profits)",
     French: "dividendes",
     German: "Dividenden",
     Italian: "dividendi",
@@ -3293,7 +3284,7 @@ export const BusinessReports = {
   },
 
   "sourcing": {
-    definition: "the process of identifying and acquiring materials or suppliers",
+    definition: "the process of identifying and acquiring materials from suppliers",
     French: "approvisionnement",
     German: "Beschaffung",
     Italian: "approvvigionamento",
@@ -3319,33 +3310,6 @@ export const BusinessReports = {
     multiple_choice: ["manufacturing plant", "production facility", "industrial building"]
   },
 
-  "equity": {
-    definition: "the value and structure of shares held by shareholders",
-    French: "capitaux propres",
-    German: "Eigenkapital",
-    Italian: "capitale proprio",
-    image: "/images/vocab/equity.jpg",
-    multiple_choice: ["share value", "ownership stake", "shareholder equity"]
-  },
-
-  "offshore": {
-    definition: "to move part of a company’s operations to another country",
-    French: "délocaliser",
-    German: "auslagern",
-    Italian: "delocalizzare",
-    image: "/images/vocab/offshore.jpg",
-    multiple_choice: ["relocate abroad", "international outsourcing", "foreign operations"]
-  },
-
-  "appoint": {
-    definition: "to choose someone for a position or role",
-    French: "nommer",
-    German: "ernennen",
-    Italian: "nominare",
-    image: "/images/vocab/appoint.jpg",
-    multiple_choice: ["assign", "nominate", "select"]
-  },
-
   "metric": {
     definition: "a data point used to measure performance or progress",
     French: "métrique, indicateur",
@@ -3353,15 +3317,6 @@ export const BusinessReports = {
     Italian: "metrica",
     image: "/images/vocab/metric.jpg",
     multiple_choice: ["measurement", "indicator", "performance value"]
-  },
-
-  "chain of command": {
-    definition: "the line of authority from top leadership to lower levels",
-    French: "chaîne de commandement",
-    German: "Befehlskette",
-    Italian: "catena di comando",
-    image: "/images/vocab/chain_of_command.jpg",
-    multiple_choice: ["hierarchy line", "authority structure", "command chain"]
   },
 
   "project pipeline": {
@@ -3373,13 +3328,31 @@ export const BusinessReports = {
     multiple_choice: ["future projects list", "upcoming work", "project queue"]
   },
 
+  "bidding": {
+    definition: "the process of submitting proposals to win contracts",
+    French: "soumission d'offres",
+    German: "Ausschreibungsverfahren",
+    Italian: "offerte",
+    image: "/images/vocab/bid.jpg",
+    multiple_choice: ["proposal submission", "contract bidding", "tendering process"]
+  },
+
   "revenue backlog": {
     definition: "the total value of contracted projects not yet completed",
-    French: "carnet de commandes",
-    German: "Auftragsbestand",
-    Italian: "portafoglio ordini",
+    French: "valeur du carnet de commandes",
+    German: "Wert des Auftragsbestands",
+    Italian: "valore del portafoglio ordini",
     image: "/images/vocab/revenue_backlog.jpg",
     multiple_choice: ["pending revenue", "contracted value", "backlog amount"]
+  },
+
+  "quotation": {
+    definition: "a formal statement of the estimated cost for a project",
+    French: "devis",
+    German: "Angebot",
+    Italian: "preventivo",
+    image: "/images/vocab/quotation.jpg",
+    multiple_choice: ["cost estimate", "project quote", "pricing proposal"]
   },
 
   "bid win rate": {
