@@ -36,7 +36,7 @@ export const ConstructionScience = {
   },
 
   "square meters": {
-    definition: "a unit of area measurement equal to a square one meter on each side",
+    definition: "a unit of area measurement equal to one meter on each side",
     French: "mètres carrés",
     German: "Quadratmeter",
     Italian: "metri quadrati",
@@ -125,11 +125,11 @@ export const ConstructionScience = {
     multiple_choice: ["pulling resistance", "tension capacity", "stretch strength"]
   },
 
-  "thermal expansion and contraction": {
+  "thermal expansion": {
     definition: "the change in size of a material due to temperature variations",
-    French: "dilatation et contraction thermique",
-    German: "thermische Ausdehnung und Schrumpfung",
-    Italian: "dilatazione e contrazione termica",
+    French: "dilatation thermique",
+    German: "thermische Ausdehnung",
+    Italian: "dilatazione termica",
     image: "/images/vocab/thermal_expansion.jpg",
     multiple_choice: ["temperature deformation", "heat expansion", "thermal movement"]
   },
@@ -157,7 +157,7 @@ export const ConstructionScience = {
     French: "liant",
     German: "Bindemittel",
     Italian: "legante",
-    image: "/images/vocab/binder.jpg",
+    image: "/images/vocab/cement_binder.jpg",
     multiple_choice: ["cementing agent", "adhesive material", "binding compound"]
   },
 
@@ -342,7 +342,7 @@ export const ConstructionScience = {
   },
 
   "put pressure on": {
-    definition: "to apply force or stress to something",
+    definition: "to apply force or stress to something (verb + noun + preposition)",
     French: "mettre de la pression sur",
     German: "Druck ausüben auf",
     Italian: "fare pressione su",
@@ -382,7 +382,7 @@ export const ConstructionScience = {
     French: "fluage",
     German: "Kriechdehnung",
     Italian: "scorrimento viscoso",
-    image: "/images/vocab/creep.jpg",
+    image: "/images/vocab/material_creep.jpg",
     multiple_choice: ["slow deformation", "long-term strain", "creeping movement"]
   },
 
@@ -427,7 +427,7 @@ export const ConstructionScience = {
     French: "jointure, articulation",
     German: "Fuge, Gelenk",
     Italian: "giunto",
-    image: "/images/vocab/joint.jpg",
+    image: "/images/vocab/structural_joint.jpg",
     multiple_choice: ["connection point", "structural link", "junction"]
   },
   "anchoring": {
@@ -1474,7 +1474,7 @@ export const constructionSite = {
 
 export const DimensionsAndProperties = {
   "weight": {
-    definition: "the measure of how heavy something is",
+    definition: "the measure of how heavy something is (noun)",
     French: "le poids",
     German: "Gewicht",
     Italian: "peso",
@@ -1483,7 +1483,7 @@ export const DimensionsAndProperties = {
   },
 
   "height": {
-    definition: "the measurement from base to top",
+    definition: "the measurement from base to top (noun)",
     French: "la hauteur",
     German: "Höhe",
     Italian: "altezza",
@@ -1492,7 +1492,7 @@ export const DimensionsAndProperties = {
   },
 
   "width": {
-    definition: "the measurement of something from side to side",
+    definition: "the measurement of something from side to side (noun)",
     French: "la largeur",
     German: "Breite",
     Italian: "larghezza",
@@ -1501,7 +1501,7 @@ export const DimensionsAndProperties = {
   },
 
   "length": {
-    definition: "the measurement of something from end to end",
+    definition: "the measurement of something from end to end (noun)",
     French: "la longueur",
     German: "Länge",
     Italian: "lunghezza",
@@ -1510,7 +1510,7 @@ export const DimensionsAndProperties = {
   },
 
   "depth": {
-    definition: "the distance from the top or surface to the bottom",
+    definition: "the distance from the top or surface to the bottom (noun)",
     French: "la profondeur",
     German: "Tiefe",
     Italian: "profondità",
@@ -1519,7 +1519,7 @@ export const DimensionsAndProperties = {
   },
 
   "high": {
-    definition: "having great height",
+    definition: "having great height (adjective)",
     French: "haut",
     German: "hoch",
     Italian: "alto",
@@ -1528,7 +1528,7 @@ export const DimensionsAndProperties = {
   },
 
   "wide": {
-    definition: "having a large width",
+    definition: "having a large width (adjective)",
     French: "large",
     German: "weit, breit",
     Italian: "largo",
@@ -1537,7 +1537,7 @@ export const DimensionsAndProperties = {
   },
 
   "long": {
-    definition: "extending a great distance from end to end",
+    definition: "extending a great distance from end to end (adjective)",
     French: "long",
     German: "lang",
     Italian: "lungo",
@@ -1546,7 +1546,7 @@ export const DimensionsAndProperties = {
   },
 
   "deep": {
-    definition: "extending far down from the surface",
+    definition: "extending far down from the surface (adjective)",
     French: "profond",
     German: "tief",
     Italian: "profondo",
@@ -1555,7 +1555,7 @@ export const DimensionsAndProperties = {
   },
 
   "short": {
-    definition: "having little length or height",
+    definition: "having little length or height (adjective)",
     French: "court",
     German: "kurz",
     Italian: "corto",
@@ -1564,7 +1564,7 @@ export const DimensionsAndProperties = {
   },
 
   "narrow": {
-    definition: "having a small width",
+    definition: "having a small width (adjective)",
     French: "étroit",
     German: "eng, schmal",
     Italian: "stretto",
@@ -1573,7 +1573,7 @@ export const DimensionsAndProperties = {
   },
 
   "low": {
-    definition: "not high; close to the ground",
+    definition: "not high; close to the ground (adjective)",
     French: "bas",
     German: "niedrig",
     Italian: "basso",
@@ -1582,7 +1582,7 @@ export const DimensionsAndProperties = {
   },
 
   "spacious": {
-    definition: "having plenty of room",
+    definition: "having plenty of room (adjective)",
     French: "spacieux",
     German: "geräumig",
     Italian: "spazioso",
@@ -1591,7 +1591,7 @@ export const DimensionsAndProperties = {
   },
 
   "heavy": {
-    definition: "having great weight",
+    definition: "having great weight (adjective)",
     French: "lourd",
     German: "schwer",
     Italian: "pesante",
@@ -1600,16 +1600,16 @@ export const DimensionsAndProperties = {
   },
 
   "light": {
-    definition: "not heavy",
+    definition: "not heavy (adjective)",
     French: "léger",
     German: "leicht",
     Italian: "leggero",
-    image: "/images/vocab/light.jpg",
+    image: "/images/vocab/light2.jpg",
     multiple_choice: ["not heavy", "featherweight", "lightweight"]
   },
 
   "dark": {
-    definition: "having little or no light",
+    definition: "having little or no light (adjective)",
     French: "sombre",
     German: "dunkel",
     Italian: "scuro",
@@ -1618,7 +1618,7 @@ export const DimensionsAndProperties = {
   },
 
   "weak": {
-    definition: "lacking strength",
+    definition: "lacking strength (adjective)",
     French: "faible",
     German: "schwach",
     Italian: "debole",
@@ -1627,7 +1627,7 @@ export const DimensionsAndProperties = {
   },
 
   "reliable": {
-    definition: "able to be trusted or depended on",
+    definition: "able to be trusted or depended on (adjective)",
     French: "fiable",
     German: "zuverlässig",
     Italian: "affidabile",
@@ -1636,7 +1636,7 @@ export const DimensionsAndProperties = {
   },
 
   "waterproof": {
-    definition: "resistant to water penetration",
+    definition: "resistant to water penetration (adjective)",
     French: "imperméable",
     German: "wasserdicht",
     Italian: "impermeabile",
@@ -1645,7 +1645,7 @@ export const DimensionsAndProperties = {
   },
 
   "long-lasting": {
-    definition: "able to endure for a long time",
+    definition: "able to endure for a long time (adjective)",
     French: "durable",
     German: "dauerhaft",
     Italian: "duraturo",
@@ -1654,7 +1654,7 @@ export const DimensionsAndProperties = {
   },
 
   "custom-made": {
-    definition: "made specifically to fit a particular need or request",
+    definition: "made specifically to fit a particular need or request (adjective)",
     French: "fait sur mesure",
     German: "massgeschneidert",
     Italian: "su misura",
@@ -1663,7 +1663,7 @@ export const DimensionsAndProperties = {
   },
 
   "rigid": {
-    definition: "not flexible; stiff",
+    definition: "not flexible; stiff (adjective)",
     French: "rigide",
     German: "starr, unbeweglich",
     Italian: "rigido",
@@ -1672,7 +1672,7 @@ export const DimensionsAndProperties = {
   },
 
   "cost-effective": {
-    definition: "providing good value for the cost",
+    definition: "providing good value for the cost (adjective)",
     French: "rentable",
     German: "rentabel, preiswert",
     Italian: "conveniente",
@@ -1681,7 +1681,7 @@ export const DimensionsAndProperties = {
   },
 
   "eco-friendly": {
-    definition: "not harmful to the environment",
+    definition: "not harmful to the environment (adjective)",
     French: "écologique",
     German: "umweltfreundlich",
     Italian: "ecologico",
@@ -1690,7 +1690,7 @@ export const DimensionsAndProperties = {
   },
 
   "sealed": {
-    definition: "closed tightly to prevent leakage",
+    definition: "closed tightly to prevent leakage (adjective)",
     French: "scellé, étanche",
     German: "abgedichtet, versiegelt",
     Italian: "sigillato",
@@ -1699,7 +1699,7 @@ export const DimensionsAndProperties = {
   },
 
   "bright": {
-    definition: "giving off or reflecting a lot of light",
+    definition: "giving off or reflecting a lot of light (adjective)",
     French: "clair, brillant",
     German: "hell, leuchtend",
     Italian: "luminoso",
@@ -1708,7 +1708,7 @@ export const DimensionsAndProperties = {
   },
 
   "cheap": {
-    definition: "low in cost",
+    definition: "low in cost (adjective)",
     French: "bon marché",
     German: "billig",
     Italian: "economico",
@@ -1717,7 +1717,7 @@ export const DimensionsAndProperties = {
   },
 
   "expensive": {
-    definition: "costing a lot of money",
+    definition: "costing a lot of money (adjective)",
     French: "cher",
     German: "teuer",
     Italian: "costoso",
@@ -1725,17 +1725,8 @@ export const DimensionsAndProperties = {
     multiple_choice: ["pricey", "high-cost", "luxury-priced"]
   },
 
-  "safe": {
-    definition: "free from danger or risk",
-    French: "sûr",
-    German: "sicher",
-    Italian: "sicuro",
-    image: "/images/vocab/safe.jpg",
-    multiple_choice: ["secure", "protected", "risk-free"]
-  },
-
   "straight": {
-    definition: "not curved or bent",
+    definition: "not curved or bent (adjective)",
     French: "droit, raide",
     German: "gerade",
     Italian: "dritto",
@@ -1744,7 +1735,7 @@ export const DimensionsAndProperties = {
   },
 
   "curved": {
-    definition: "having a rounded or bent shape",
+    definition: "having a rounded or bent shape (adjective)",
     French: "courbé",
     German: "gebogen",
     Italian: "curvo",
@@ -1753,7 +1744,7 @@ export const DimensionsAndProperties = {
   },
 
   "hazardous": {
-    definition: "dangerous or risky",
+    definition: "dangerous or risky (adjective)",
     French: "hasardeux, dangereux",
     German: "gefährlich",
     Italian: "pericoloso",
@@ -1762,7 +1753,7 @@ export const DimensionsAndProperties = {
   },
 
   "powerful": {
-    definition: "having great strength or force",
+    definition: "having great strength or force (adjective)",
     French: "puissant",
     German: "mächtig, stark",
     Italian: "potente",
@@ -1771,7 +1762,7 @@ export const DimensionsAndProperties = {
   },
 
   "speed": {
-    definition: "the rate at which something moves",
+    definition: "the rate at which something moves (noun)",
     French: "vitesse",
     German: "Geschwindigkeit",
     Italian: "velocità",
@@ -1780,7 +1771,7 @@ export const DimensionsAndProperties = {
   },
 
   "fast": {
-    definition: "moving quickly",
+    definition: "moving quickly (adjective)",
     French: "vite",
     German: "schnell",
     Italian: "veloce",
@@ -1789,7 +1780,7 @@ export const DimensionsAndProperties = {
   },
 
   "thick": {
-    definition: "having a large distance between opposite sides",
+    definition: "having a large distance between opposite sides (adjective)",
     French: "épais",
     German: "dick",
     Italian: "spesso",
@@ -1798,7 +1789,7 @@ export const DimensionsAndProperties = {
   },
 
   "rough": {
-    definition: "having an uneven or irregular surface",
+    definition: "having an uneven or irregular surface (adjective)",
     French: "rugueux, brut",
     German: "rau, grob",
     Italian: "ruvido",
@@ -1807,7 +1798,7 @@ export const DimensionsAndProperties = {
   },
 
   "steep": {
-    definition: "rising or falling sharply",
+    definition: "rising or falling sharply (adjective)",
     French: "escarpé, raide",
     German: "steil",
     Italian: "ripido",
@@ -1816,7 +1807,7 @@ export const DimensionsAndProperties = {
   },
 
   "thickness": {
-    definition: "the dimension between two opposite surfaces",
+    definition: "the dimension between two opposite surfaces (noun)",
     French: "épaisseur",
     German: "Dicke",
     Italian: "spessore",
@@ -1825,7 +1816,7 @@ export const DimensionsAndProperties = {
   },
 
   "thin": {
-    definition: "having little thickness",
+    definition: "having little thickness (adjective)",
     French: "fin, mince",
     German: "dünn",
     Italian: "sottile",
@@ -1834,7 +1825,7 @@ export const DimensionsAndProperties = {
   },
 
   "flat": {
-    definition: "having a level and even surface",
+    definition: "having a level and even surface (adjective)",
     French: "plat",
     German: "flach",
     Italian: "piatto",
@@ -1843,7 +1834,7 @@ export const DimensionsAndProperties = {
   },
 
   "tight": {
-    definition: "fitting closely or firmly",
+    definition: "fitting closely or firmly (adjective)",
     French: "serré",
     German: "fest, dicht",
     Italian: "stretto",
@@ -1852,7 +1843,7 @@ export const DimensionsAndProperties = {
   },
 
   "plumb": {
-    definition: "perfectly vertical",
+    definition: "perfectly vertical (adjective)",
     French: "vertical (aplomb)",
     German: "lotrecht",
     Italian: "perfettamente verticale",
@@ -1861,7 +1852,7 @@ export const DimensionsAndProperties = {
   },
 
   "sticky": {
-    definition: "tending to adhere to surfaces",
+    definition: "tending to adhere to surfaces (adjective)",
     French: "collant",
     German: "klebrig",
     Italian: "appiccicoso",
@@ -1870,7 +1861,7 @@ export const DimensionsAndProperties = {
   },
 
   "sloping": {
-    definition: "inclined or slanted",
+    definition: "inclined or slanted (adjective)",
     French: "en pente",
     German: "schräg, ansteigend",
     Italian: "in pendenza",
@@ -1879,16 +1870,16 @@ export const DimensionsAndProperties = {
   },
 
   "square": {
-    definition: "having four equal sides and four right angles",
+    definition: "having four equal sides and four right angles (adjective)",
     French: "carré",
     German: "viereckig",
     Italian: "quadrato",
-    image: "/images/vocab/square.jpg",
+    image: "/images/vocab/square_adj.jpg",
     multiple_choice: ["four-sided", "right-angled", "square-shaped"]
   },
 
   "round": {
-    definition: "shaped like a circle or sphere",
+    definition: "shaped like a circle or sphere (adjective)",
     French: "rond",
     German: "rund",
     Italian: "rotondo",
@@ -1897,7 +1888,7 @@ export const DimensionsAndProperties = {
   },
 
   "cubic": {
-    definition: "having the shape of a cube",
+    definition: "having the shape of a cube (adjective)",
     French: "cubique",
     German: "kubisch",
     Italian: "cubico",
@@ -1906,7 +1897,7 @@ export const DimensionsAndProperties = {
   },
 
   "size": {
-    definition: "the overall dimensions or magnitude of something",
+    definition: "the overall dimensions or magnitude of something (noun)",
     French: "la taille",
     German: "die Grösse",
     Italian: "dimensione",
@@ -1915,7 +1906,7 @@ export const DimensionsAndProperties = {
   },
 
   "well insulated": {
-    definition: "protected against heat, cold, or sound transfer",
+    definition: "protected against heat, cold, or sound transfer (adjective)",
     French: "bien isolé",
     German: "gut isoliert",
     Italian: "ben isolato",
@@ -3085,20 +3076,11 @@ export const BusinessReports = {
     multiple_choice: ["corporate governance summary", "leadership report", "policy overview"]
   },
 
-  "profit and loss statement": {
-    definition: "a financial statement showing revenues, expenses, and net income over a period",
-    French: "compte de résultat",
-    German: "Gewinn- und Verlustrechnung",
-    Italian: "conto economico",
-    image: "/images/vocab/profit_and_loss.jpg",
-    multiple_choice: ["income statement", "earnings report", "P&L statement"]
-  },
-
-  "cash-flow statement": {
-    definition: "a financial statement showing cash inflows and outflows over a period",
-    French: "tableau des flux de trésorerie",
-    German: "Kapitalflussrechnung",
-    Italian: "rendiconto finanziario",
+  "cash-flow": {
+    definition: "cash inflows and outflows over a period",
+    French: "flux de trésorerie",
+    German: "Kapitalfluss",
+    Italian: "flusso di cassa",
     image: "/images/vocab/cash_flow_statement.jpg",
     multiple_choice: ["cash movement report", "liquidity statement", "cash activity summary"]
   },
