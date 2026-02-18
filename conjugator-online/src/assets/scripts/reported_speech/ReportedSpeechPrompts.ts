@@ -17,7 +17,7 @@ export const reportedSpeechPrompts = {
     direct: "I am happy.",
     Highlight: "am",
     reported: "he ______ happy.",
-    answer: "was",
+    answer: ["was"],
     irreg_category: null,
   },
 
@@ -26,7 +26,7 @@ export const reportedSpeechPrompts = {
     direct: "We will win the game.",
     Highlight: "will win",
     reported: "they _____ the game.",
-    answer: "would win",
+    answer: ["would win", "d win"],
     irreg_category: null,
   },
 
@@ -35,7 +35,7 @@ export const reportedSpeechPrompts = {
     direct: "She has finished the report.",
     Highlight: "has finished",
     reported: "she _______ the report.",
-    answer: "had finished",
+    answer: ["had finished", "d finished"],
     irreg_category: null,
   },
 
@@ -44,7 +44,7 @@ export const reportedSpeechPrompts = {
     direct: "I can fix the economy.",
     Highlight: "can fix",
     reported: "he ______ the economy.",
-    answer: "could fix",
+    answer: ["could fix"],
     irreg_category: null,
   },
 
@@ -53,7 +53,7 @@ export const reportedSpeechPrompts = {
     direct: "I am training very hard.",
     Highlight: "am training",
     reported: "he ______ very hard.",
-    answer: "was training",
+    answer: ["was training"],
     irreg_category: null,
   },
 
@@ -62,7 +62,7 @@ export const reportedSpeechPrompts = {
     direct: "We have signed a new contract.",
     Highlight: "have signed",
     reported: "they ______ a new contract.",
-    answer: "had signed",
+    answer: ["had signed", "d signed"],
     irreg_category: null,
   },
 
@@ -71,7 +71,7 @@ export const reportedSpeechPrompts = {
     direct: "We are excited about the season.",
     Highlight: "are",
     reported: "they ______ excited about the season.",
-    answer: "were",
+    answer: ["were"],
     irreg_category: null,
   },
 
@@ -80,7 +80,7 @@ export const reportedSpeechPrompts = {
     direct: "Prices will rise next year.",
     Highlight: "will rise",
     reported: "prices _____ the following year.",
-    answer: "would rise",
+    answer: ["would rise", "d rise"],
     irreg_category: null,
   },
 
@@ -89,7 +89,7 @@ export const reportedSpeechPrompts = {
     direct: "I must finish this today.",
     Highlight: "must finish",
     reported: "she ______ finish it that day.",
-    answer: "had to",
+    answer: ["had to"],
     irreg_category: null,
   },
 
@@ -98,7 +98,7 @@ export const reportedSpeechPrompts = {
     direct: "I scored the winning basket.",
     Highlight: "scored",
     reported: "he ______ the winning basket.",
-    answer: "had scored",
+    answer: ["had scored", "d scored"],
     irreg_category: null,
   },
 
@@ -107,7 +107,7 @@ export const reportedSpeechPrompts = {
     direct: "I went to the gym early.",
     Highlight: "went",
     reported: "he ______ to the gym early.",
-    answer: "had gone",
+    answer: ["had gone", "d gone"],
     irreg_category: "essential",
   },
 
@@ -116,7 +116,7 @@ export const reportedSpeechPrompts = {
     direct: "I made a mistake.",
     Highlight: "made",
     reported: "he ______ a mistake.",
-    answer: "had made",
+    answer: ["had made", "d made"],
     irreg_category: "essential",
   },
 
@@ -125,7 +125,7 @@ export const reportedSpeechPrompts = {
     direct: "We are planning a major expansion.",
     Highlight: "are planning",
     reported: "they ______ a major expansion.",
-    answer: "were planning",
+    answer: ["were planning"],
     irreg_category: null,
   },
 
@@ -134,7 +134,7 @@ export const reportedSpeechPrompts = {
     direct: "The company will grow rapidly.",
     Highlight: "will grow",
     reported: "they _____ rapidly.",
-    answer: "would grow",
+    answer: ["would grow", "d grow"],
     irreg_category: "essential",
   },
 
@@ -143,7 +143,7 @@ export const reportedSpeechPrompts = {
     direct: "I have never played in the playoffs.",
     Highlight: "have never played",
     reported: "he ______ in the playoffs.",
-    answer: "had never played",
+    answer: ["had never played", "d never played", "hadnt played", "had not played"],
     irreg_category: null,
   },
 
@@ -152,7 +152,7 @@ export const reportedSpeechPrompts = {
     direct: "I am speaking to the team.",
     Highlight: "am speaking",
     reported: "she ______ to the team.",
-    answer: "was speaking",
+    answer: ["was speaking"],
     irreg_category: null,
   },
 
@@ -161,7 +161,7 @@ export const reportedSpeechPrompts = {
     direct: "We saw an amazing match.",
     Highlight: "saw",
     reported: "they ______ an amazing match.",
-    answer: "had seen",
+    answer: ["had seen", "d seen"],
     irreg_category: "essential",
   },
 
@@ -170,7 +170,7 @@ export const reportedSpeechPrompts = {
     direct: "I will take responsibility.",
     Highlight: "will take",
     reported: "he _____ responsibility.",
-    answer: "would take",
+    answer: ["would take", "d take"],
     irreg_category: "essential",
   },
 
@@ -179,7 +179,7 @@ export const reportedSpeechPrompts = {
     direct: "I have spoken to world leaders.",
     Highlight: "have spoken",
     reported: "he ______ to world leaders.",
-    answer: "had spoken",
+    answer: ["had spoken", "d spoken"],
     irreg_category: "essential",
   },
 
@@ -188,7 +188,7 @@ export const reportedSpeechPrompts = {
     direct: "We are cutting costs.",
     Highlight: "are cutting",
     reported: "they ______ costs.",
-    answer: "were cutting",
+    answer: ["were cutting"],
     irreg_category: null,
   },
 
@@ -197,7 +197,7 @@ export const reportedSpeechPrompts = {
     direct: "The market fell sharply.",
     Highlight: "fell",
     reported: "the market ______ sharply.",
-    answer: "had fallen",
+    answer: ["had fallen", "d fallen"],
     irreg_category: "essential",
   },
 
@@ -206,7 +206,7 @@ export const reportedSpeechPrompts = {
     direct: "I can handle the pressure.",
     Highlight: "can handle",
     reported: "he ______ the pressure.",
-    answer: "could handle",
+    answer: ["could handle"],
     irreg_category: null,
   },
 
@@ -215,7 +215,7 @@ export const reportedSpeechPrompts = {
     direct: "I wrote the report myself.",
     Highlight: "wrote",
     reported: "she ______ the report herself.",
-    answer: "had written",
+    answer: ["had written", "d written"],
     irreg_category: "essential",
   },
 
@@ -224,7 +224,7 @@ export const reportedSpeechPrompts = {
     direct: "We will never forget this game.",
     Highlight: "will never forget",
     reported: "they _____ that game.",
-    answer: "would never forget",
+    answer: ["would never forget", "d never forget", "wouldnt forget", "would not forget"],
     irreg_category: "essential",
   },
 
@@ -233,7 +233,7 @@ export const reportedSpeechPrompts = {
     direct: "We have built a strong team.",
     Highlight: "have built",
     reported: "they ______ a strong team.",
-    answer: "had built",
+    answer: ["had built", "d built"],
     irreg_category: "essential",
   },
 
@@ -242,7 +242,7 @@ export const reportedSpeechPrompts = {
     direct: "I was trying to help everyone.",
     Highlight: "was trying",
     reported: "he ______ to help everyone.",
-    answer: "had been trying",
+    answer: ["had been trying", "d been trying"],
     irreg_category: null,
   },
 
@@ -251,7 +251,7 @@ export const reportedSpeechPrompts = {
     direct: "I didn't sleep well last night.",
     Highlight: "didn't sleep",
     reported: "he ______ well the night before.",
-    answer: "hadn't slept",
+    answer: ["had not slept", "hadnt slept"],
     irreg_category: "essential",
   },
 
@@ -260,7 +260,7 @@ export const reportedSpeechPrompts = {
     direct: "Scientists have discovered a new method.",
     Highlight: "have discovered",
     reported: "they ______ a new method.",
-    answer: "had discovered",
+    answer: ["had discovered", "d discovered"],
     irreg_category: null,
   },
 
@@ -269,7 +269,7 @@ export const reportedSpeechPrompts = {
     direct: "I will improve every season.",
     Highlight: "will improve",
     reported: "he _____ every season.",
-    answer: "would improve",
+    answer: ["would improve", "d improve"],
     irreg_category: null,
   },
 
@@ -278,7 +278,7 @@ export const reportedSpeechPrompts = {
     direct: "I gave clear instructions.",
     Highlight: "gave",
     reported: "she ______ clear instructions.",
-    answer: "had given",
+    answer: ["had given", "d given"],
     irreg_category: "essential",
   },
 
@@ -287,7 +287,7 @@ export const reportedSpeechPrompts = {
     direct: "We have taken decisive action.",
     Highlight: "have taken",
     reported: "they ______ decisive action.",
-    answer: "had taken",
+    answer: ["had taken", "d taken"],
     irreg_category: "essential",
   },
 
@@ -296,7 +296,7 @@ export const reportedSpeechPrompts = {
     direct: "I will not raise taxes.",
     Highlight: "will not raise",
     reported: "he _____ taxes.",
-    answer: "would not raise",
+    answer: ["would not raise", "wouldnt raise"],
     irreg_category: null,
   },
 
@@ -305,7 +305,7 @@ export const reportedSpeechPrompts = {
     direct: "The situation has become worse.",
     Highlight: "has become",
     reported: "the situation ______ worse.",
-    answer: "had become",
+    answer: ["had become", "d become"],
     irreg_category: "essential",
   },
 
@@ -314,7 +314,7 @@ export const reportedSpeechPrompts = {
     direct: "We were hoping for a comeback.",
     Highlight: "were hoping",
     reported: "they ______ for a comeback.",
-    answer: "had been hoping",
+    answer: ["had been hoping", "d been hoping"],
     irreg_category: null,
   },
 
@@ -323,7 +323,7 @@ export const reportedSpeechPrompts = {
     direct: "I have won many championships.",
     Highlight: "have won",
     reported: "he ______ many championships.",
-    answer: "had won",
+    answer: ["had won", "d won"],
     irreg_category: "essential",
   },
   36: {
@@ -331,7 +331,7 @@ export const reportedSpeechPrompts = {
     direct: "We are ready.",
     Highlight: "are",
     reported: "they ______ ready.",
-    answer: "were",
+    answer: ["were"],
     irreg_category: null,
   },
 
@@ -340,7 +340,7 @@ export const reportedSpeechPrompts = {
     direct: "I will begin the meeting.",
     Highlight: "will begin",
     reported: "he _____ the meeting.",
-    answer: "would begin",
+    answer: ["would begin", "d begin"],
     irreg_category: null,
   },
 
@@ -349,7 +349,7 @@ export const reportedSpeechPrompts = {
     direct: "I am writing an email.",
     Highlight: "am writing",
     reported: "she ______ an email.",
-    answer: "was writing",
+    answer: ["was writing"],
     irreg_category: null,
   },
 
@@ -358,7 +358,7 @@ export const reportedSpeechPrompts = {
     direct: "We saw the replay.",
     Highlight: "saw",
     reported: "they ______ the replay.",
-    answer: "had seen",
+    answer: ["had seen", "d seen"],
     irreg_category: "essential",
   },
 
@@ -367,7 +367,7 @@ export const reportedSpeechPrompts = {
     direct: "The company has grown fast.",
     Highlight: "has grown",
     reported: "the company ______ fast.",
-    answer: "had grown",
+    answer: ["had grown", "d grown"],
     irreg_category: "essential",
   },
 
@@ -376,7 +376,7 @@ export const reportedSpeechPrompts = {
     direct: "I can't change the law today.",
     Highlight: "can't change",
     reported: "he ______ the law that day.",
-    answer: "couldn't change",
+    answer: ["could not change", "couldnt change"],
     irreg_category: null,
   },
 
@@ -385,7 +385,7 @@ export const reportedSpeechPrompts = {
     direct: "I have eaten already.",
     Highlight: "have eaten",
     reported: "he ______ already.",
-    answer: "had eaten",
+    answer: ["had eaten", "d eaten"],
     irreg_category: "essential",
   },
 
@@ -394,7 +394,7 @@ export const reportedSpeechPrompts = {
     direct: "I didn't go to practice.",
     Highlight: "didn't go",
     reported: "he ______ to practice.",
-    answer: "hadn't gone",
+    answer: ["had not gone", "hadnt gone"],
     irreg_category: "essential",
   },
 
@@ -403,7 +403,7 @@ export const reportedSpeechPrompts = {
     direct: "I will not forget this moment.",
     Highlight: "will not forget",
     reported: "he _____ that moment.",
-    answer: "would not forget",
+    answer: ["would not forget", "wouldnt forget"],
     irreg_category: "essential",
   },
 
@@ -412,7 +412,7 @@ export const reportedSpeechPrompts = {
     direct: "I must leave now.",
     Highlight: "must leave",
     reported: "she ______ .",
-    answer: "had to leave",
+    answer: ["had to leave"],
     irreg_category: null,
   },
 
@@ -421,7 +421,7 @@ export const reportedSpeechPrompts = {
     direct: "We have built a new system.",
     Highlight: "have built",
     reported: "they ______ a new system.",
-    answer: "had built",
+    answer: ["had built", "d built"],
     irreg_category: "essential",
   },
 
@@ -430,7 +430,7 @@ export const reportedSpeechPrompts = {
     direct: "The results were improving.",
     Highlight: "were improving",
     reported: "the results ______.",
-    answer: "had been improving",
+    answer: ["had been improving", "d been improving"],
     irreg_category: null,
   },
 
@@ -439,7 +439,7 @@ export const reportedSpeechPrompts = {
     direct: "We will come again tomorrow.",
     Highlight: "will come",
     reported: "they _____ again the next day.",
-    answer: "would come",
+    answer: ["would come", "d come"],
     irreg_category: "essential",
   },
 
@@ -448,7 +448,7 @@ export const reportedSpeechPrompts = {
     direct: "We have chosen a captain.",
     Highlight: "have chosen",
     reported: "they ______ a captain.",
-    answer: "had chosen",
+    answer: ["had chosen", "d chosen"],
     irreg_category: "essential",
   },
 
@@ -457,7 +457,7 @@ export const reportedSpeechPrompts = {
     direct: "I made a promise.",
     Highlight: "made",
     reported: "he ______ a promise.",
-    answer: "had made",
+    answer: ["had made", "d made"],
     irreg_category: "essential",
   },
 
@@ -466,7 +466,7 @@ export const reportedSpeechPrompts = {
     direct: "I was sleeping when you called.",
     Highlight: "was sleeping",
     reported: "he ______ when I called.",
-    answer: "had been sleeping",
+    answer: ["had been sleeping", "d been sleeping"],
     irreg_category: null,
   },
 
@@ -475,7 +475,7 @@ export const reportedSpeechPrompts = {
     direct: "I have written the message.",
     Highlight: "have written",
     reported: "he ______ the message.",
-    answer: "had written",
+    answer: ["had written", "d written"],
     irreg_category: "essential",
   },
 
@@ -484,7 +484,7 @@ export const reportedSpeechPrompts = {
     direct: "I drank too much coffee.",
     Highlight: "drank",
     reported: "he ______ too much coffee.",
-    answer: "had drunk",
+    answer: ["had drunk", "d drunk"],
     irreg_category: "essential",
   },
 
@@ -493,7 +493,7 @@ export const reportedSpeechPrompts = {
     direct: "we broke the economy.",
     Highlight: "broke",
     reported: "they _____ the economy.",
-    answer: "had broken",
+    answer: ["had broken", "d broken"],
     irreg_category: "essential"
   },
 
@@ -502,7 +502,7 @@ export const reportedSpeechPrompts = {
     direct: "The market fell overnight.",
     Highlight: "fell",
     reported: "the market ______ overnight.",
-    answer: "had fallen",
+    answer: ["had fallen", "d fallen"],
     irreg_category: "essential",
   },
 
@@ -511,7 +511,7 @@ export const reportedSpeechPrompts = {
     direct: "The team must review the penalty with VAR.",
     Highlight: "must review",
     reported: "the team ______ the penalty with VAR.",
-    answer: "had to review",
+    answer: ["had to review"],
     irreg_category: null,
   },
 
@@ -520,7 +520,7 @@ export const reportedSpeechPrompts = {
     direct: "We must give our best!",
     Highlight: "must give",
     reported: "they ______ their best.",
-    answer: "had to give",
+    answer: ["had to give"],
     irreg_category: null,
   },
 
@@ -529,7 +529,7 @@ export const reportedSpeechPrompts = {
     direct: "We bought five fighter jets.",
     Highlight: "bought",
     reported: "they ______ five fighter jets.",
-    answer: "had bought",
+    answer: ["had bought", "d bought"],
     irreg_category: "essential",
   },
 
@@ -538,7 +538,7 @@ export const reportedSpeechPrompts = {
     direct: "I have driven here before.",
     Highlight: "have driven",
     reported: "he ______ there before.",
-    answer: "had driven",
+    answer: ["had driven", "d driven"],
     irreg_category: "essential",
   },
 
@@ -547,7 +547,7 @@ export const reportedSpeechPrompts = {
     direct: "I took the wrong exit.",
     Highlight: "took",
     reported: "he ______ the wrong exit.",
-    answer: "had taken",
+    answer: ["had taken", "d taken"],
     irreg_category: "essential",
   },
 
@@ -556,7 +556,7 @@ export const reportedSpeechPrompts = {
     direct: "I can handle it alone.",
     Highlight: "can handle",
     reported: "he ______ it alone.",
-    answer: "could handle",
+    answer: ["could handle"],
     irreg_category: null,
   },
 
@@ -565,7 +565,7 @@ export const reportedSpeechPrompts = {
     direct: "I have sent the files.",
     Highlight: "have sent",
     reported: "she ______ the files.",
-    answer: "had sent",
+    answer: ["had sent", "d sent"],
     irreg_category: "essential",
   },
 
@@ -574,7 +574,7 @@ export const reportedSpeechPrompts = {
     direct: "We will not pay extra.",
     Highlight: "will not pay",
     reported: "they _____ extra.",
-    answer: "would not pay",
+    answer: ["would not pay", "wouldnt pay"],
     irreg_category: "essential",
   },
 
@@ -583,7 +583,7 @@ export const reportedSpeechPrompts = {
     direct: "They have found an error.",
     Highlight: "have found",
     reported: "they ______ an error.",
-    answer: "had found",
+    answer: ["had found", "d found"],
     irreg_category: "essential",
   },
 
@@ -592,7 +592,7 @@ export const reportedSpeechPrompts = {
     direct: "We were singing all night.",
     Highlight: "were singing",
     reported: "they ______ all night.",
-    answer: "had been singing",
+    answer: ["had been singing", "d been singing"],
     irreg_category: null,
   },
 
@@ -601,7 +601,7 @@ export const reportedSpeechPrompts = {
     direct: "We broke the rules.",
     Highlight: "broke",
     reported: "they ______ the rules.",
-    answer: "had broken",
+    answer: ["had broken", "d broken"],
     irreg_category: "essential",
   },
 
@@ -610,7 +610,7 @@ export const reportedSpeechPrompts = {
     direct: "I have spoken to the press.",
     Highlight: "have spoken",
     reported: "he ______ to the press.",
-    answer: "had spoken",
+    answer: ["had spoken", "d spoken"],
     irreg_category: "essential",
   },
 
@@ -619,7 +619,7 @@ export const reportedSpeechPrompts = {
     direct: "I will bring the documents.",
     Highlight: "will bring",
     reported: "he _____ the documents.",
-    answer: "would bring",
+    answer: ["would bring", "d bring"],
     irreg_category: "essential",
   },
 
@@ -628,7 +628,7 @@ export const reportedSpeechPrompts = {
     direct: "I didn't tell anyone.",
     Highlight: "didn't tell",
     reported: "he ______ anyone.",
-    answer: "hadn't told",
+    answer: ["had not told", "hadnt told"],
     irreg_category: "essential",
   },
 
@@ -637,7 +637,7 @@ export const reportedSpeechPrompts = {
     direct: "I was thinking about retirement.",
     Highlight: "was thinking",
     reported: "he ______ about retirement.",
-    answer: "had been thinking",
+    answer: ["had been thinking", "d been thinking"],
     irreg_category: null,
   },
 
@@ -646,7 +646,7 @@ export const reportedSpeechPrompts = {
     direct: "I have made changes.",
     Highlight: "have made",
     reported: "she ______ changes.",
-    answer: "had made",
+    answer: ["had made", "d made"],
     irreg_category: "essential",
   },
 
@@ -655,7 +655,7 @@ export const reportedSpeechPrompts = {
     direct: "We cut the budget last month.",
     Highlight: "cut",
     reported: "they ______ the budget the month before.",
-    answer: "had cut",
+    answer: ["had cut", "d cut"],
     irreg_category: "essential",
   },
 
@@ -664,7 +664,7 @@ export const reportedSpeechPrompts = {
     direct: "The CEO will leave soon.",
     Highlight: "will leave",
     reported: "the CEO _____ soon.",
-    answer: "would leave",
+    answer: ["would leave", "d leave"],
     irreg_category: "essential",
   },
 
@@ -673,7 +673,7 @@ export const reportedSpeechPrompts = {
     direct: "We met the players.",
     Highlight: "met",
     reported: "they ______ the players.",
-    answer: "had met",
+    answer: ["had met", "d met"],
     irreg_category: "essential",
   },
 
@@ -682,7 +682,7 @@ export const reportedSpeechPrompts = {
     direct: "We have won three matches.",
     Highlight: "have won",
     reported: "they ______ three matches.",
-    answer: "had won",
+    answer: ["had won", "d won"],
     irreg_category: "essential",
   },
 
@@ -691,7 +691,7 @@ export const reportedSpeechPrompts = {
     direct: "I wrote the law myself.",
     Highlight: "wrote",
     reported: "he ______ the law himself.",
-    answer: "had written",
+    answer: ["had written", "d written"],
     irreg_category: "essential",
   },
 
@@ -700,7 +700,7 @@ export const reportedSpeechPrompts = {
     direct: "I am not feeling well.",
     Highlight: "am not feeling",
     reported: "he ______ well.",
-    answer: "wasn't feeling",
+    answer: ["wasn't feeling", "wasnt feeling"],
     irreg_category: null,
   },
 
@@ -709,7 +709,7 @@ export const reportedSpeechPrompts = {
     direct: "I can't find my keys.",
     Highlight: "can't find",
     reported: "he ______ his keys.",
-    answer: "couldn't find",
+    answer: ["could not find", "couldnt find"],
     irreg_category: null,
   },
 
@@ -718,7 +718,7 @@ export const reportedSpeechPrompts = {
     direct: "I have caught a cold.",
     Highlight: "have caught",
     reported: "he ______ a cold.",
-    answer: "had caught",
+    answer: ["had caught", "d caught"],
     irreg_category: "essential",
   },
 
@@ -727,7 +727,7 @@ export const reportedSpeechPrompts = {
     direct: "I will show you the numbers.",
     Highlight: "will show",
     reported: "she _____ me the numbers.",
-    answer: "would show",
+    answer: ["would show", "d show"],
     irreg_category: "essential",
   },
 
@@ -736,7 +736,7 @@ export const reportedSpeechPrompts = {
     direct: "We have shut the office.",
     Highlight: "have shut",
     reported: "they ______ the office.",
-    answer: "had shut",
+    answer: ["had shut", "d shut"],
     irreg_category: "advanced",
   },
 
@@ -745,7 +745,7 @@ export const reportedSpeechPrompts = {
     direct: "The ship sank during the storm.",
     Highlight: "sank",
     reported: "the ship ______ during the storm.",
-    answer: "had sunk",
+    answer: ["had sunk", "d sunk"],
     irreg_category: "advanced",
   },
 
@@ -754,7 +754,7 @@ export const reportedSpeechPrompts = {
     direct: "We chose the wrong seats.",
     Highlight: "chose",
     reported: "they ______ the wrong seats.",
-    answer: "had chosen",
+    answer: ["had chosen", "d chosen"],
     irreg_category: "essential",
   },
 
@@ -763,7 +763,7 @@ export const reportedSpeechPrompts = {
     direct: "We have fought hard all season.",
     Highlight: "have fought",
     reported: "they ______ hard all season.",
-    answer: "had fought",
+    answer: ["had fought", "d fought"],
     irreg_category: "essential",
   },
 
@@ -772,7 +772,7 @@ export const reportedSpeechPrompts = {
     direct: "I have lied about it.",
     Highlight: "have lied",
     reported: "he ______ about it.",
-    answer: "had lied",
+    answer: ["had lied", "d lied"],
     irreg_category: "essential",
   },
 
@@ -781,7 +781,7 @@ export const reportedSpeechPrompts = {
     direct: "I withdrew my offer yesterday.",
     Highlight: "withdrew",
     reported: "he ______ his offer the day before.",
-    answer: "had withdrawn",
+    answer: ["had withdrawn", "d withdrawn"],
     irreg_category: "advanced",
   },
 
@@ -790,7 +790,7 @@ export const reportedSpeechPrompts = {
     direct: "I have worn this jersey before.",
     Highlight: "have worn",
     reported: "he ______ that jersey before.",
-    answer: "had worn",
+    answer: ["had worn", "d worn"],
     irreg_category: "essential",
   },
 
@@ -799,7 +799,7 @@ export const reportedSpeechPrompts = {
     direct: "I will not give up.",
     Highlight: "will not give up",
     reported: "he _____ up.",
-    answer: "would not give up",
+    answer: ["would not give up", "d not give up", "wouldnt give up", "would not give", "wouldnt give", "d not give"],
     irreg_category: "essential",
   },
 
@@ -808,7 +808,7 @@ export const reportedSpeechPrompts = {
     direct: "We hit the target",
     Highlight: "hit",
     reported: "they ______ the target.",
-    answer: "had hit",
+    answer: ["had hit", "d hit"],
     irreg_category: "essential",
   },
 
@@ -817,7 +817,7 @@ export const reportedSpeechPrompts = {
     direct: "We have broadcast the announcement.",
     Highlight: "have broadcast",
     reported: "they ______ the announcement.",
-    answer: "had broadcast",
+    answer: ["had broadcast", "d broadcast"],
     irreg_category: "advanced",
   },
 
@@ -826,7 +826,7 @@ export const reportedSpeechPrompts = {
     direct: "They will seek new investors.",
     Highlight: "will seek",
     reported: "they _____ new investors.",
-    answer: "would seek",
+    answer: ["would seek", "d seek"],
     irreg_category: "advanced",
   },
 
@@ -835,7 +835,7 @@ export const reportedSpeechPrompts = {
     direct: "We were shaking with excitement.",
     Highlight: "were shaking",
     reported: "they ______ with excitement.",
-    answer: "had been shaking",
+    answer: ["had been shaking", "d been shaking"],
     irreg_category: null,
   },
 
@@ -844,7 +844,7 @@ export const reportedSpeechPrompts = {
     direct: "We have beaten the champions.",
     Highlight: "have beaten",
     reported: "they ______ the champions.",
-    answer: "had beaten",
+    answer: ["had beaten", "d beaten"],
     irreg_category: "advanced",
   },
 
@@ -853,7 +853,7 @@ export const reportedSpeechPrompts = {
     direct: "I will strike a deal soon.",
     Highlight: "will strike",
     reported: "he _____ a deal soon.",
-    answer: "would strike",
+    answer: ["would strike", "d strike"],
     irreg_category: "advanced",
   },
 
@@ -862,7 +862,7 @@ export const reportedSpeechPrompts = {
     direct: "I have bitten my tongue.",
     Highlight: "have bitten",
     reported: "he ______ his tongue.",
-    answer: "had bitten",
+    answer: ["had bitten", "d bitten"],
     irreg_category: "advanced",
   },
 
@@ -871,7 +871,7 @@ export const reportedSpeechPrompts = {
     direct: "I tore the paper by accident.",
     Highlight: "tore",
     reported: "he ______ the paper by accident.",
-    answer: "had torn",
+    answer: ["had torn", "d torn"],
     irreg_category: "advanced",
   },
 
@@ -880,7 +880,7 @@ export const reportedSpeechPrompts = {
     direct: "I have fed the dog.",
     Highlight: "have fed",
     reported: "he ______ the dog.",
-    answer: "had fed",
+    answer: ["had fed", "d fed"],
     irreg_category: "advanced",
   },
 
@@ -889,7 +889,7 @@ export const reportedSpeechPrompts = {
     direct: "We have lent them the equipment.",
     Highlight: "have lent",
     reported: "she they ______ them the equipment.",
-    answer: "had lent",
+    answer: ["had lent", "d lent"],
     irreg_category: "advanced",
   },
 
@@ -898,15 +898,15 @@ export const reportedSpeechPrompts = {
     direct: "We have bound ourselves to the contract.",
     Highlight: "have bound",
     reported: "they ______ themselves to the contract.",
-    answer: "had bound",
+    answer: ["had bound", "d bound"],
     irreg_category: "advanced",
   },
     101: {
     speaker: "the politician",
     direct: "I will raise taxes, muahahaha.",
     Highlight: "will raise",
-    reported: "he ______ taxes. Muahahaha.",
-    answer: "would raise",
+    reported: "he ______ taxes.",
+    answer: ["would raise", "d raise"],
     irreg_category: null,
   },
 };

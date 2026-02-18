@@ -1,4 +1,7 @@
 // src/assets/scripts/reported_speech/ReportedSpeechPromptEngine.ts
+//
+// Update: allow prompt.answer to be either a string OR a list of strings.
+// Example: answer: ["would win", "d win"]
 
 /* ------------------------------------------------------------------
  * TYPES
@@ -11,7 +14,8 @@ export interface RawReportedSpeechPrompt {
   direct: string;
   Highlight: string;
   reported: string;
-  answer: string;
+  // ✅ changed: string OR list of strings
+  answer: string | string[];
   irreg_category: IrregCategory;
 }
 
@@ -23,7 +27,8 @@ export interface ReportedSpeechExercise {
   direct: string;
   highlight: string;
   reported: string;
-  answer: string;
+  // ✅ normalized to list always
+  answers: string[];
   irreg_category: IrregCategory;
 }
 
@@ -48,8 +53,15 @@ export function normalizeForCheck(s: any): string {
   return String(s ?? "")
     .toLowerCase()
     .trim()
-    .replace(/['’]/g, "")      // ✅ remove apostrophes (straight + curly)
-    .replace(/\s+/g, " ");     // collapse spaces
+    .replace(/['’]/g, "") // remove apostrophes (straight + curly)
+    .replace(/\s+/g, " "); // collapse spaces
+}
+
+function toAnswerList(answer: string | string[] | null | undefined): string[] {
+  if (Array.isArray(answer)) return answer.map((x) => String(x ?? "")).filter(Boolean);
+  if (answer == null) return [];
+  const s = String(answer).trim();
+  return s ? [s] : [];
 }
 
 /* ------------------------------------------------------------------
@@ -67,7 +79,7 @@ export function normalizePrompts(raw: RawReportedSpeechDataset): NormalizedPromp
       direct: p?.direct ?? "",
       highlight: p?.Highlight ?? "",
       reported: p?.reported ?? "",
-      answer: p?.answer ?? "",
+      answers: toAnswerList(p?.answer),
       irreg_category:
         p?.irreg_category === "essential" || p?.irreg_category === "advanced"
           ? p.irreg_category
@@ -95,13 +107,22 @@ export function normalizePrompts(raw: RawReportedSpeechDataset): NormalizedPromp
  * - Case-insensitive
  * - Apostrophes ignored (hadn't == hadnt)
  * - Whitespace normalized
+ * - ✅ Accepts ANY of prompt.answers
  * ------------------------------------------------------------------ */
 
 export function checkAnswer(prompt: ReportedSpeechExercise, userAnswer: string): boolean {
-  const correct = normalizeForCheck(prompt?.answer);
   const user = normalizeForCheck(userAnswer);
-  return user === correct;
+  const correctList = (prompt?.answers || []).map(normalizeForCheck).filter(Boolean);
+  return correctList.some((c) => c === user);
 }
+
+/**
+ * Optional helper for UI: show correct answers joined nicely.
+ */
+export function buildCorrectAnswerLabel(prompt: ReportedSpeechExercise): string {
+  return (prompt?.answers || []).filter(Boolean).join(" / ");
+}
+
 /* ------------------------------------------------------------------
  * HIGHLIGHT HELPERS (for v-html)
  * - Highlights the first occurrence of `highlight` inside `text`
@@ -118,10 +139,6 @@ function escapeHtml(s: string): string {
     .replace(/'/g, "&#039;");
 }
 
-/**
- * Highlight helper (safe for v-html)
- * NOTE: It escapes the whole text, then injects a bold span for the match.
- */
 export function highlightSubstringHtml(text: any, highlight: any): string {
   const rawText = String(text ?? "");
   const rawHighlight = String(highlight ?? "");
@@ -138,11 +155,9 @@ export function highlightSubstringHtml(text: any, highlight: any): string {
   const match = rawText.slice(idx, idx + rawHighlight.length);
   let after = rawText.slice(idx + rawHighlight.length);
 
-  // Trim only whitespace touching the match
   before = before.replace(/\s+$/, "");
   after = after.replace(/^\s+/, "");
 
-  // ✅ Use &nbsp; so spacing cannot collapse away
   return (
     escapeHtml(before) +
     "&nbsp;" +
@@ -151,5 +166,3 @@ export function highlightSubstringHtml(text: any, highlight: any): string {
     escapeHtml(after)
   );
 }
-
-

@@ -78,4 +78,3 @@ function start() {
   emit("startGame", { ...selections.value });
 }
 </script>
-ok, I

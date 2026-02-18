@@ -44,9 +44,9 @@
           </v-list-item>
 
           <v-list-item>
-            <template #prepend><v-icon icon="mdi-alert-circle-outline" /></template>
+            <template #prepend><v-icon icon="mdi-book-open-outline" /></template>
             <v-list-item-title class="text-wrap">
-              Avoid abbreviations (write 'had not' instead of <span class="text-decoration-line-through">hadn't</span>)
+              Review <a href="https://book.language-labs.ch/ch4#reported-speech" target="_blank">reported speech</a> before you play
             </v-list-item-title>
           </v-list-item>
         </v-list>
@@ -146,7 +146,7 @@
                   width="300px"
                   hide-details
                   :disabled="inputLocked"
-                  @keyup.enter="submit"
+                  @keyup.enter.prevent="handleEnter"
                 />
               </div>
 
@@ -192,7 +192,7 @@
 
     <!-- WRONG ANSWER DIALOG -->
     <v-dialog v-model="showWrongDialog" persistent max-width="460">
-      <v-card @keydown.enter.prevent="acknowledgeWrong" color="yellow-lighten-2 pa-3">
+      <v-card @keydown.enter.prevent.stop="handleEnter" color="yellow-lighten-2 pa-3">
         <v-card-title class="text-h6 mt-4">
           {{ lastOutOfTime ? "Time ran out" : "Wrong" }}
           <v-icon :icon="lastOutOfTime ? 'mdi-timer-off-outline' : 'mdi-emoticon-sad-outline'" />
@@ -238,7 +238,11 @@ import { ref, computed, onMounted, onBeforeUnmount, nextTick, watch } from "vue"
 import api from "@/axios";
 
 import { reportedSpeechSpeakers } from "@/assets/scripts/reported_speech/ReportedSpeechPrompts";
-import { checkAnswer, highlightSubstringHtml } from "@/assets/scripts/reported_speech/ReportedSpeechPromptEngine";
+import {
+  checkAnswer,
+  highlightSubstringHtml,
+  buildCorrectAnswerLabel,
+} from "@/assets/scripts/reported_speech/ReportedSpeechPromptEngine";
 
 const ROUND_SECONDS = 20;
 const WARN_SECONDS =10;
@@ -276,6 +280,52 @@ const remaining = ref(0);
 
 const gameStarted = ref(false);
 const resultsStore = ref([]);
+
+/* ------------------------------------------------------------------
+ * Keydown handler helper (Enter key)
+ * ------------------------------------------------------------------ */
+const ignoreEnterUntil = ref(0);
+const ENTER_GUARD_MS = 650;
+
+function guardEnterFor(ms = ENTER_GUARD_MS) {
+  ignoreEnterUntil.value = Date.now() + ms;
+}
+function isEnterGuarded() {
+  return Date.now() < ignoreEnterUntil.value;
+}
+
+/**
+ * Single unified Enter handler for:
+ * - main input (keyup.enter)
+ * - wrong dialog card (keydown.enter)
+ * - global window keydown/keyup
+ */
+function handleEnter(e) {
+  // swallow Enter during guard window
+  if (isEnterGuarded()) {
+    e?.preventDefault?.();
+    e?.stopPropagation?.();
+    return;
+  }
+
+  // if locked, do nothing
+  if (inputLocked.value) {
+    e?.preventDefault?.();
+    e?.stopPropagation?.();
+    return;
+  }
+
+  // dialog open => Enter acknowledges
+  if (showWrongDialog.value) {
+    acknowledgeWrong();
+    return;
+  }
+
+  // otherwise Enter submits
+  submit();
+}
+
+
 
 /* ------------------------------------------------------------------
  * Speaker image + highlighting
@@ -359,7 +409,7 @@ function handleTimeOut() {
 
   const user = userAnswer.value.trim();
 
-  setWrongDialogData(user || "—", true);
+  setWrongDialogData(user || "—", true);   
   recordRound(user, false, true);
   showWrongDialog.value = true;
 }
@@ -381,31 +431,36 @@ const wrongOkButton = ref(null);
 
 const lastUserAnswer = ref("");
 const lastCorrectAnswer = ref("");
+function setWrongDialogData(user, outOfTimeFlag) {
+  const p = currentPrompt.value;
+  if (!p) return;
+
+  lastUserAnswer.value = user || "—";
+  lastCorrectAnswer.value = buildCorrectAnswerLabel(p); // ✅ list -> label
+  lastReported.value = p.reported;
+  lastSpeaker.value = p.speaker;
+  lastSpeakerImg.value = (reportedSpeechSpeakers?.[p.speaker])
+    ? reportedSpeechSpeakers[p.speaker]
+    : "/images/speaker_pics_resized/team.jpg";
+  lastDirectHtml.value = highlightSubstringHtml(p.direct, p.highlight);
+  lastOutOfTime.value = !!outOfTimeFlag;
+}
 const lastReported = ref("");
 const lastSpeaker = ref("");
 const lastSpeakerImg = ref("");
 const lastDirectHtml = ref("");
 const lastOutOfTime = ref(false);
 
-watch(showWrongDialog, async (visible) => {
+watch(showWrongDialog, async (visible, wasVisible) => {
   if (visible) {
     await nextTick();
     wrongOkButton.value?.$el?.focus();
+  } else if (wasVisible) {
+    // ✅ keep ONLY the guard here
+    guardEnterFor();
   }
 });
 
-function setWrongDialogData(user, outOfTimeFlag) {
-  const p = currentPrompt.value;
-  if (!p) return;
-
-  lastUserAnswer.value = user || "—";
-  lastCorrectAnswer.value = p.answer;
-  lastReported.value = p.reported;
-  lastSpeaker.value = p.speaker;
-  lastSpeakerImg.value = (reportedSpeechSpeakers?.[p.speaker]) ? reportedSpeechSpeakers[p.speaker] : "/images/speaker_pics_resized/team.jpg";
-  lastDirectHtml.value = highlightSubstringHtml(p.direct, p.highlight);
-  lastOutOfTime.value = !!outOfTimeFlag;
-}
 
 /* ------------------------------------------------------------------
  * Game flow
@@ -438,6 +493,7 @@ function begin() {
 function submit() {
   if (!hasPrompt.value) return;
   if (inputLocked.value) return;
+  if (isEnterGuarded()) return; 
 
   inputLocked.value = true;
   stopTimer();
@@ -485,11 +541,15 @@ function unlockInputWithDelay(delay = INPUT_COOLDOWN_MS) {
   }, delay);
 }
 
-
 function acknowledgeWrong() {
+  guardEnterFor();     
   showWrongDialog.value = false;
-  next();
-  unlockInputWithDelay();
+
+  // proceed to next round after dialog begins closing
+  setTimeout(() => {
+    next();
+    unlockInputWithDelay();
+  }, 0);
 }
 
 /* ------------------------------------------------------------------
@@ -505,7 +565,7 @@ function recordRound(user, correct, outOfTime = false) {
 
   resultsStore.value.push({
     question: `${p.direct} || ${p.reported}`,
-    correct_answer: p.answer,
+    correct_answer: buildCorrectAnswerLabel(p), 
     prompt_number: roundNumber,
     user_answer: user,
     is_correct: correct,
@@ -559,17 +619,29 @@ async function finishGame() {
  * ------------------------------------------------------------------ */
 
 onMounted(() => {
-  const handler = (e) => {
+  const downHandler = (e) => {
     if (e.key !== "Enter") return;
     e.preventDefault();
-    if (inputLocked.value) return;
-
-    if (showWrongDialog.value) acknowledgeWrong();
-    else submit();
+    handleEnter(e);
   };
 
-  window.addEventListener("keydown", handler);
-  onBeforeUnmount(() => window.removeEventListener("keydown", handler));
+  const upHandler = (e) => {
+    if (e.key !== "Enter") return;
+    // swallow keyup too during guard window (prevents "keyup on input" leakage)
+    if (isEnterGuarded()) {
+      e.preventDefault();
+      e.stopPropagation?.();
+    }
+  };
+
+  // capture phase helps intercept before focused buttons/inputs
+  window.addEventListener("keydown", downHandler, true);
+  window.addEventListener("keyup", upHandler, true);
+
+  onBeforeUnmount(() => {
+    window.removeEventListener("keydown", downHandler, true);
+    window.removeEventListener("keyup", upHandler, true);
+  });
 });
 
 onBeforeUnmount(stopTimer);

@@ -552,6 +552,613 @@ export const meetings = {
 };
 
 
+export const meetingExpressions = {
+  "I agree": {
+    "definition": "Expressing agreement or support for a statement or proposal.",
+    "French": "Je suis d'accord",
+    "German": "Ich stimme zu",
+    "Italian": "Sono d'accordo",
+    "image": "/images/vocab/i_agree.jpg",
+    "multiple_choice": ["I support", "I concur", "I approve"],
+    "accepted": [],
+    "synonyms": []
+  },
+
+  "I disagree": {
+    "definition": "Expressing opposition or a different opinion from what has been stated.",
+    "French": "Je ne suis pas d'accord",
+    "German": "Ich bin anderer Meinung",
+    "Italian": "Non sono d'accordo",
+    "image": "/images/vocab/i_disagree.jpg",
+    "multiple_choice": ["I oppose", "I differ", "I don't agree"],
+    "accepted": [],
+    "synonyms": []
+  },
+
+  "That's beside the point": {
+    "definition": "Indicating that something is not relevant to the current discussion.",
+    "French": "Cela n'a rien à voir",
+    "German": "Das ist nicht relevant",
+    "Italian": "Questo non è pertinente",
+    "image": "/images/vocab/thats_beside_the_point.jpg",
+    "multiple_choice": ["That's irrelevant", "That's off-topic", "That's not the issue"],
+    "accepted": [],
+    "synonyms": []
+  },
+
+  "That's a fair point": {
+    "definition": "Acknowledging that someone has made a reasonable or valid observation.",
+    "French": "C'est un point valable",
+    "German": "Das ist ein berechtigter Punkt",
+    "Italian": "È un punto giusto",
+    "image": "/images/vocab/thats_a_fair_point.jpg",
+    "multiple_choice": ["That's valid", "That's reasonable", "Good point"],
+    "accepted": [],
+    "synonyms": []
+  },
+
+  "I couldn't agree more": {
+    "definition": "Expressing complete and enthusiastic agreement.",
+    "French": "Je ne pourrais pas être plus d'accord",
+    "German": "Ich könnte nicht mehr zustimmen",
+    "Italian": "Non potrei essere più d'accordo",
+    "image": "/images/vocab/i_couldnt_agree_more.jpg",
+    "multiple_choice": ["I totally agree", "Absolutely", "I completely agree"],
+    "accepted": [],
+    "synonyms": []
+  },
+
+  "That's a valid argument": {
+    "definition": "Recognizing that someone's reasoning or position is logical and well-founded.",
+    "French": "C'est un argument valable",
+    "German": "Das ist ein gültiges Argument",
+    "Italian": "È un argomento valido",
+    "image": "/images/vocab/thats_a_valid_argument.jpg",
+    "multiple_choice": ["That's sound reasoning", "That's logical", "That makes sense"],
+    "accepted": [],
+    "synonyms": []
+  },
+
+  "That's the wrong line of thinking": {
+    "definition": "Indicating that someone's approach or perspective is incorrect or misguided.",
+    "French": "Ce n'est pas la bonne façon de penser",
+    "German": "Das ist die falsche Denkweise",
+    "Italian": "È il modo sbagliato di pensare",
+    "image": "/images/vocab/thats_the_wrong_line_of_thinking.jpg",
+    "multiple_choice": ["That's the wrong approach", "That's misguided", "That's not right"],
+    "accepted": [],
+    "synonyms": []
+  },
+
+  "I'm skeptical": {
+    "definition": "Expressing doubt or uncertainty about something.",
+    "French": "Je suis sceptique",
+    "German": "Ich bin skeptisch",
+    "Italian": "Sono scettico",
+    "image": "/images/vocab/im_skeptical.jpg",
+    "multiple_choice": ["I'm doubtful", "I'm unsure", "I have doubts"],
+    "accepted": [],
+    "synonyms": []
+  },
+
+  "I'm not convinced": {
+    "definition": "Expressing that you have not been persuaded by an argument or proposal.",
+    "French": "Je ne suis pas convaincu(e)",
+    "German": "Ich bin nicht überzeugt",
+    "Italian": "Non sono convinto",
+    "image": "/images/vocab/im_not_convinced.jpg",
+    "multiple_choice": ["I'm unconvinced", "I'm not persuaded", "I doubt that"],
+    "accepted": [],
+    "synonyms": []
+  },
+
+  "I can't accept that": {
+    "definition": "Firmly rejecting a proposal or statement.",
+    "French": "Je ne peux pas accepter cela",
+    "German": "Das kann ich nicht akzeptieren",
+    "Italian": "Non posso accettarlo",
+    "image": "/images/vocab/i_cant_accept_that.jpg",
+    "multiple_choice": ["I reject that", "I can't agree to that", "That's unacceptable"],
+    "accepted": [],
+    "synonyms": []
+  },
+
+  "That's right, in my opinion": {
+    "definition": "Agreeing with something while making it clear it's your personal view.",
+    "French": "C'est juste, à mon avis",
+    "German": "Das ist richtig, meiner Meinung nach",
+    "Italian": "È giusto, secondo me",
+    "image": "/images/vocab/thats_right_in_my_opinion.jpg",
+    "multiple_choice": ["I think that's correct", "That's true, I believe", "From my view, that's right"],
+    "accepted": [],
+    "synonyms": []
+  },
+
+  "We can take a different angle": {
+    "definition": "Suggesting an alternative perspective or approach to the discussion.",
+    "French": "On peut aborder cela autrement",
+    "German": "Wir können einen anderen Blickwinkel wählen",
+    "Italian": "Possiamo prendere una prospettiva diversa",
+    "image": "/images/vocab/we_can_take_a_different_angle.jpg",
+    "multiple_choice": ["Let's try another approach", "We can look at this differently", "Let's consider alternatives"],
+    "accepted": [],
+    "synonyms": []
+  },
+
+  "From my perspective": {
+    "definition": "Introducing your personal viewpoint on a matter.",
+    "French": "De mon point de vue",
+    "German": "Aus meiner Sicht",
+    "Italian": "Dalla mia prospettiva",
+    "image": "/images/vocab/from_my_perspective.jpg",
+    "multiple_choice": ["In my view", "From where I stand", "As I see it"],
+    "accepted": [],
+    "synonyms": []
+  },
+
+  "To piggyback off of John's point": {
+    "definition": "Building upon or adding to what someone else has already said.",
+    "French": "Pour rebondir sur le point de John",
+    "German": "Um auf Johns Punkt aufzubauen",
+    "Italian": "Per aggiungere al punto di John",
+    "image": "/images/vocab/to_piggyback_off_of_johns_point.jpg",
+    "multiple_choice": ["To build on John's idea", "To add to what John said", "Following John's point"],
+    "accepted": [],
+    "synonyms": []
+  },
+
+  "To touch on what she said...": {
+    "definition": "Referring back to a previous comment to continue the discussion.",
+    "French": "Pour revenir sur ce qu'elle a dit...",
+    "German": "Um auf das zurückzukommen, was sie gesagt hat...",
+    "Italian": "Per tornare su quello che ha detto...",
+    "image": "/images/vocab/to_touch_on_what_she_said.jpg",
+    "multiple_choice": ["Regarding what she mentioned", "About her comment", "To reference her point"],
+    "accepted": [],
+    "synonyms": []
+  },
+
+  "I take your point": {
+    "definition": "Acknowledging that you understand and consider someone's argument.",
+    "French": "Je comprends votre point de vue",
+    "German": "Ich verstehe Ihren Standpunkt",
+    "Italian": "Capisco il tuo punto",
+    "image": "/images/vocab/i_take_your_point.jpg",
+    "multiple_choice": ["I understand your argument", "I see what you mean", "I get your point"],
+    "accepted": [],
+    "synonyms": []
+  },
+
+  "To your point...": {
+    "definition": "Addressing or responding to something someone has previously mentioned.",
+    "French": "Concernant votre remarque...",
+    "German": "Zu Ihrem Punkt...",
+    "Italian": "Riguardo al tuo punto...",
+    "image": "/images/vocab/to_your_point.jpg",
+    "multiple_choice": ["Regarding your comment", "About what you said", "On that note"],
+    "accepted": [],
+    "synonyms": []
+  },
+
+  "Going forward, ...": {
+    "definition": "Discussing plans or actions for the future.",
+    "French": "À l'avenir, ...",
+    "German": "In Zukunft, ...",
+    "Italian": "Andando avanti, ...",
+    "image": "/images/vocab/going_forward.jpg",
+    "multiple_choice": ["Moving forward", "In the future", "From now on"],
+    "accepted": [],
+    "synonyms": []
+  },
+
+  "That's a non-starter...": {
+    "definition": "Indicating that something is completely unacceptable or impossible from the beginning.",
+    "French": "C'est inacceptable dès le départ",
+    "German": "Das ist von Anfang an ausgeschlossen",
+    "Italian": "È inaccettabile fin dall'inizio",
+    "image": "/images/vocab/thats_a_non_starter.jpg",
+    "multiple_choice": ["That won't work", "That's impossible", "That's unacceptable"],
+    "accepted": [],
+    "synonyms": []
+  },
+
+  "It's win-win": {
+    "definition": "Describing a situation where all parties benefit.",
+    "French": "C'est gagnant-gagnant",
+    "German": "Das ist eine Win-Win-Situation",
+    "Italian": "È vantaggioso per tutti",
+    "image": "/images/vocab/its_win_win.jpg",
+    "multiple_choice": ["Everyone benefits", "It's mutually beneficial", "All parties gain"],
+    "accepted": [],
+    "synonyms": []
+  },
+
+  "That's the right approach": {
+    "definition": "Agreeing that a particular method or strategy is correct.",
+    "French": "C'est la bonne approche",
+    "German": "Das ist der richtige Ansatz",
+    "Italian": "È l'approccio giusto",
+    "image": "/images/vocab/thats_the_right_approach.jpg",
+    "multiple_choice": ["That's the correct method", "That's the way to go", "That works"],
+    "accepted": [],
+    "synonyms": []
+  },
+
+  "We need to make up our minds": {
+    "definition": "Emphasizing the need to reach a decision.",
+    "French": "Il faut se décider",
+    "German": "Wir müssen uns entscheiden",
+    "Italian": "Dobbiamo decidere",
+    "image": "/images/vocab/we_need_to_make_up_our_minds.jpg",
+    "multiple_choice": ["We need to decide", "Let's reach a decision", "We must choose"],
+    "accepted": [],
+    "synonyms": []
+  },
+
+  "I'm not sure": {
+    "definition": "Expressing uncertainty or lack of confidence about something.",
+    "French": "Je ne suis pas sûr(e)",
+    "German": "Ich bin mir nicht sicher",
+    "Italian": "Non sono sicuro",
+    "image": "/images/vocab/im_not_sure.jpg",
+    "multiple_choice": ["I'm uncertain", "I don't know", "I'm unsure"],
+    "accepted": [],
+    "synonyms": []
+  },
+
+  "I doubt that": {
+    "definition": "Expressing skepticism or disbelief about something.",
+    "French": "J'en doute",
+    "German": "Ich bezweifle das",
+    "Italian": "Ne dubito",
+    "image": "/images/vocab/i_doubt_that.jpg",
+    "multiple_choice": ["I'm skeptical", "I question that", "I don't believe that"],
+    "accepted": [],
+    "synonyms": []
+  },
+
+  "Reach an agreement": {
+    "definition": "Coming to a mutual understanding or consensus.",
+    "French": "Parvenir à un accord",
+    "German": "Eine Einigung erzielen",
+    "Italian": "Raggiungere un accordo",
+    "image": "/images/vocab/reach_an_agreement.jpg",
+    "multiple_choice": ["Come to terms", "Find consensus", "Agree on something"],
+    "accepted": [],
+    "synonyms": []
+  },
+
+  "Come to a conclusion": {
+    "definition": "Arriving at a final decision or judgment.",
+    "French": "Arriver à une conclusion",
+    "German": "Zu einem Schluss kommen",
+    "Italian": "Giungere a una conclusione",
+    "image": "/images/vocab/come_to_a_conclusion.jpg",
+    "multiple_choice": ["Reach a decision", "Make a final determination", "Conclude"],
+    "accepted": [],
+    "synonyms": []
+  },
+
+  "We need to wrap this up": {
+    "definition": "Indicating that the discussion needs to be concluded soon.",
+    "French": "Il faut conclure",
+    "German": "Wir müssen das abschließen",
+    "Italian": "Dobbiamo concludere",
+    "image": "/images/vocab/we_need_to_wrap_this_up.jpg",
+    "multiple_choice": ["Let's finish this", "We need to conclude", "Let's end this"],
+    "accepted": [],
+    "synonyms": []
+  },
+
+  "Can we move on?": {
+    "definition": "Requesting to proceed to the next topic or agenda item.",
+    "French": "Peut-on passer à la suite ?",
+    "German": "Können wir weitermachen?",
+    "Italian": "Possiamo andare avanti?",
+    "image": "/images/vocab/can_we_move_on.jpg",
+    "multiple_choice": ["Let's continue", "Can we proceed?", "Shall we move forward?"],
+    "accepted": [],
+    "synonyms": []
+  },
+
+  "Next up on the agenda": {
+    "definition": "Introducing the following item to be discussed.",
+    "French": "Prochain point à l'ordre du jour",
+    "German": "Als Nächstes auf der Tagesordnung",
+    "Italian": "Prossimo punto all'ordine del giorno",
+    "image": "/images/vocab/next_up_on_the_agenda.jpg",
+    "multiple_choice": ["The next item", "Coming up next", "The following topic"],
+    "accepted": [],
+    "synonyms": []
+  },
+
+  "That's a no-go": {
+    "definition": "Indicating that something is not acceptable or will not work.",
+    "French": "C'est hors de question",
+    "German": "Das geht gar nicht",
+    "Italian": "Non è possibile",
+    "image": "/images/vocab/thats_a_no_go.jpg",
+    "multiple_choice": ["That won't work", "That's unacceptable", "That's not happening"],
+    "accepted": [],
+    "synonyms": []
+  },
+
+  "How can we settle this?": {
+    "definition": "Asking for ways to resolve a disagreement or issue.",
+    "French": "Comment peut-on régler cela ?",
+    "German": "Wie können wir das klären?",
+    "Italian": "Come possiamo risolvere questo?",
+    "image": "/images/vocab/how_can_we_settle_this.jpg",
+    "multiple_choice": ["How do we resolve this?", "How can we fix this?", "What's the solution?"],
+    "accepted": [],
+    "synonyms": []
+  },
+
+  "It's a no-brainer": {
+    "definition": "Describing something that is very obvious or requires little thought.",
+    "French": "C'est évident",
+    "German": "Das ist offensichtlich",
+    "Italian": "È ovvio",
+    "image": "/images/vocab/its_a_no_brainer.jpg",
+    "multiple_choice": ["It's obvious", "That's easy", "It's clear"],
+    "accepted": [],
+    "synonyms": []
+  },
+
+  "Who is willing to...": {
+    "definition": "Asking for volunteers to take on a task or responsibility.",
+    "French": "Qui est prêt à...",
+    "German": "Wer ist bereit zu...",
+    "Italian": "Chi è disposto a...",
+    "image": "/images/vocab/who_is_willing_to.jpg",
+    "multiple_choice": ["Who can...", "Who will volunteer to...", "Who wants to..."],
+    "accepted": [],
+    "synonyms": []
+  },
+
+  "Does everyone agree?": {
+    "definition": "Checking for consensus among all participants.",
+    "French": "Est-ce que tout le monde est d'accord ?",
+    "German": "Sind alle einverstanden?",
+    "Italian": "Tutti sono d'accordo?",
+    "image": "/images/vocab/does_everyone_agree.jpg",
+    "multiple_choice": ["Is everyone on board?", "Do we all agree?", "Are we all in agreement?"],
+    "accepted": [],
+    "synonyms": []
+  },
+
+  "Is anyone opposed?": {
+    "definition": "Asking if anyone disagrees or objects to a proposal.",
+    "French": "Quelqu'un est-il contre ?",
+    "German": "Ist jemand dagegen?",
+    "Italian": "Qualcuno è contrario?",
+    "image": "/images/vocab/is_anyone_opposed.jpg",
+    "multiple_choice": ["Does anyone disagree?", "Any objections?", "Is there opposition?"],
+    "accepted": [],
+    "synonyms": []
+  },
+
+  "Shall we continue?": {
+    "definition": "Asking if the group should proceed with the discussion or activity.",
+    "French": "On continue ?",
+    "German": "Sollen wir fortfahren?",
+    "Italian": "Continuiamo?",
+    "image": "/images/vocab/shall_we_continue.jpg",
+    "multiple_choice": ["Should we go on?", "Let's proceed?", "Can we move forward?"],
+    "accepted": [],
+    "synonyms": []
+  },
+
+  "Let's circle back to that later": {
+    "definition": "Proposing to return to a topic at a later time.",
+    "French": "Revenons-y plus tard",
+    "German": "Lassen Sie uns später darauf zurückkommen",
+    "Italian": "Torniamoci sopra più tardi",
+    "image": "/images/vocab/lets_circle_back_to_that_later.jpg",
+    "multiple_choice": ["Let's revisit that", "We'll return to that", "Let's come back to this"],
+    "accepted": [],
+    "synonyms": []
+  },
+
+  "Let's stay on track": {
+    "definition": "Encouraging the group to remain focused on the main topic.",
+    "French": "Restons concentrés",
+    "German": "Lassen Sie uns beim Thema bleiben",
+    "Italian": "Rimaniamo in tema",
+    "image": "/images/vocab/lets_stay_on_track.jpg",
+    "multiple_choice": ["Let's focus", "Stay on topic", "Keep to the point"],
+    "accepted": [],
+    "synonyms": []
+  },
+
+  "Can we table this for now?": {
+    "definition": "Suggesting to postpone discussion of a topic temporarily.",
+    "French": "Peut-on mettre cela de côté pour l'instant ?",
+    "German": "Können wir das vorerst zurückstellen?",
+    "Italian": "Possiamo rimandare questo per ora?",
+    "image": "/images/vocab/can_we_table_this_for_now.jpg",
+    "multiple_choice": ["Can we postpone this?", "Let's set this aside", "Can we delay this?"],
+    "accepted": [],
+    "synonyms": []
+  },
+
+  "We're running out of time": {
+    "definition": "Indicating that there is limited time remaining.",
+    "French": "On manque de temps",
+    "German": "Uns läuft die Zeit davon",
+    "Italian": "Il tempo sta per scadere",
+    "image": "/images/vocab/were_running_out_of_time.jpg",
+    "multiple_choice": ["Time is short", "We're low on time", "Time is running out"],
+    "accepted": [],
+    "synonyms": []
+  },
+
+  "Let's keep this brief": {
+    "definition": "Requesting that the discussion be concise and to the point.",
+    "French": "Soyons concis",
+    "German": "Lassen Sie uns das kurz halten",
+    "Italian": "Siamo brevi",
+    "image": "/images/vocab/lets_keep_this_brief.jpg",
+    "multiple_choice": ["Let's be concise", "Keep it short", "Be brief"],
+    "accepted": [],
+    "synonyms": []
+  },
+
+  "Let's take a vote": {
+    "definition": "Proposing to make a decision by voting.",
+    "French": "Faisons un vote",
+    "German": "Lassen Sie uns abstimmen",
+    "Italian": "Facciamo una votazione",
+    "image": "/images/vocab/lets_take_a_vote.jpg",
+    "multiple_choice": ["Let's vote on it", "Shall we vote?", "Time to vote"],
+    "accepted": [],
+    "synonyms": []
+  },
+
+  "Let's revisit this next time": {
+    "definition": "Suggesting to discuss a topic again at a future meeting.",
+    "French": "Revenons-y la prochaine fois",
+    "German": "Lassen Sie uns das beim nächsten Mal besprechen",
+    "Italian": "Rivediamolo la prossima volta",
+    "image": "/images/vocab/lets_revisit_this_next_time.jpg",
+    "multiple_choice": ["We'll discuss this later", "Let's return to this", "Save it for next time"],
+    "accepted": [],
+    "synonyms": []
+  },
+
+  "Let's summarize the key points": {
+    "definition": "Proposing to recap the main ideas discussed.",
+    "French": "Résumons les points clés",
+    "German": "Fassen wir die wichtigsten Punkte zusammen",
+    "Italian": "Riassumiamo i punti chiave",
+    "image": "/images/vocab/lets_summarize_the_key_points.jpg",
+    "multiple_choice": ["Let's recap", "Sum up the main points", "Review the highlights"],
+    "accepted": [],
+    "synonyms": []
+  },
+
+  "Any final thoughts?": {
+    "definition": "Asking if anyone has last comments before concluding.",
+    "French": "Des remarques finales ?",
+    "German": "Gibt es abschließende Gedanken?",
+    "Italian": "Ultimi pensieri?",
+    "image": "/images/vocab/any_final_thoughts.jpg",
+    "multiple_choice": ["Last comments?", "Any closing remarks?", "Final input?"],
+    "accepted": [],
+    "synonyms": []
+  },
+
+  "Let's take a step back": {
+    "definition": "Suggesting to reconsider the situation from a broader perspective.",
+    "French": "Prenons du recul",
+    "German": "Lassen Sie uns einen Schritt zurückgehen",
+    "Italian": "Facciamo un passo indietro",
+    "image": "/images/vocab/lets_take_a_step_back.jpg",
+    "multiple_choice": ["Let's reassess", "Take a broader view", "Reconsider this"],
+    "accepted": [],
+    "synonyms": []
+  },
+
+  "Let's not get ahead of ourselves": {
+    "definition": "Cautioning against moving too quickly or making premature decisions.",
+    "French": "Ne nous emballons pas",
+    "German": "Lassen Sie uns nicht voreilig sein",
+    "Italian": "Non anticipiamo troppo",
+    "image": "/images/vocab/lets_not_get_ahead_of_ourselves.jpg",
+    "multiple_choice": ["Let's slow down", "Don't rush", "Take it step by step"],
+    "accepted": [],
+    "synonyms": []
+  },
+
+  "Let's keep an open mind": {
+    "definition": "Encouraging receptiveness to different ideas and perspectives.",
+    "French": "Gardons l'esprit ouvert",
+    "German": "Lassen Sie uns offen bleiben",
+    "Italian": "Manteniamo la mente aperta",
+    "image": "/images/vocab/lets_keep_an_open_mind.jpg",
+    "multiple_choice": ["Be open to ideas", "Stay receptive", "Consider all options"],
+    "accepted": [],
+    "synonyms": []
+  },
+
+  "Let's agree to disagree": {
+    "definition": "Accepting that consensus cannot be reached and moving forward despite differences.",
+    "French": "Acceptons nos désaccords",
+    "German": "Lassen Sie uns zustimmen, uneinig zu sein",
+    "Italian": "Accettiamo di non essere d'accordo",
+    "image": "/images/vocab/lets_agree_to_disagree.jpg",
+    "multiple_choice": ["We'll have different views", "Accept our differences", "Disagree respectfully"],
+    "accepted": [],
+    "synonyms": []
+  },
+
+  "Make sure everyone is on the same page": {
+    "definition": "Ensuring all participants have the same understanding.",
+    "French": "S'assurer que tout le monde est sur la même longueur d'onde",
+    "German": "Sicherstellen, dass alle auf dem gleichen Stand sind",
+    "Italian": "Assicurarsi che tutti siano allineati",
+    "image": "/images/vocab/make_sure_everyone_is_on_the_same_page.jpg",
+    "multiple_choice": ["Ensure alignment", "Check everyone understands", "Verify shared understanding"],
+    "accepted": [],
+    "synonyms": []
+  },
+
+  "Raise your hand": {
+    "definition": "Requesting participants to physically indicate their response or desire to speak.",
+    "French": "Lever la main",
+    "German": "Die Hand heben",
+    "Italian": "Alzare la mano",
+    "image": "/images/vocab/raise_your_hand.jpg",
+    "multiple_choice": ["Put your hand up", "Signal by hand", "Indicate by raising"],
+    "accepted": [],
+    "synonyms": []
+  },
+
+  "By show of hands": {
+    "definition": "Conducting a vote or survey where participants raise their hands.",
+    "French": "À main levée",
+    "German": "Durch Handzeichen",
+    "Italian": "Per alzata di mano",
+    "image": "/images/vocab/by_show_of_hands.jpg",
+    "multiple_choice": ["Hands up voting", "Hand vote", "Raise hands to vote"],
+    "accepted": [],
+    "synonyms": []
+  },
+
+  "The first item on the agenda": {
+    "definition": "Referring to the initial topic or task to be discussed.",
+    "French": "Le premier point à l'ordre du jour",
+    "German": "Der erste Punkt auf der Tagesordnung",
+    "Italian": "Il primo punto all'ordine del giorno",
+    "image": "/images/vocab/the_first_item_on_the_agenda.jpg",
+    "multiple_choice": ["First topic", "Opening item", "Initial point"],
+    "accepted": [],
+    "synonyms": []
+  },
+
+  "Some background": {
+    "definition": "Providing context or historical information about a topic.",
+    "French": "Quelques éléments de contexte",
+    "German": "Etwas Hintergrundinformation",
+    "Italian": "Un po' di contesto",
+    "image": "/images/vocab/some_background.jpg",
+    "multiple_choice": ["Context", "Background information", "History"],
+    "accepted": [],
+    "synonyms": []
+  },
+
+  "You should have pre-read": {
+    "definition": "Indicating that participants were expected to review materials before the meeting.",
+    "French": "Vous auriez dû lire les documents à l'avance",
+    "German": "Sie hätten die Unterlagen im Voraus lesen sollen",
+    "Italian": "Avreste dovuto leggere in anticipo",
+    "image": "/images/vocab/you_should_have_pre_read.jpg",
+    "multiple_choice": ["You were supposed to review", "Materials should be read beforehand", "Expected advance reading"],
+    "accepted": [],
+    "synonyms": []
+  }
+}
+
 export const productMarketing = {
   "core product": {
     "definition": "The fundamental benefit or solution that a product provides to customers.",
@@ -598,7 +1205,7 @@ export const productMarketing = {
   },
 
   "locally-sourced": {
-    "definition": "Products or ingredients that are obtained from local suppliers or producers.",
+    "definition": "Adjective applying to materials that are obtained from local suppliers or producers.",
     "French": "d'origine locale",
     "German": "lokal bezogen",
     "Italian": "di provenienza locale",
@@ -609,7 +1216,7 @@ export const productMarketing = {
   },
 
   "paying in installments": {
-    "definition": "A payment plan that allows customers to pay for a product over a period of time in smaller amounts.",
+    "definition": "A plan that allows customers to pay for a product over a period of time in smaller amounts.",
     "French": "paiement échelonné",
     "German": "Ratenzahlung",
     "Italian": "pagamento rateale",
@@ -642,7 +1249,7 @@ export const productMarketing = {
   },
 
   "position a product": {
-    "definition": "To create a unique and favorable impression of a product in the minds of target customers.",
+    "definition": "To place a product favorably in the minds of target customers.",
     "French": "positionner un produit",
     "German": "ein Produkt positionieren",
     "Italian": "posizionare un prodotto",
@@ -653,7 +1260,7 @@ export const productMarketing = {
   },
 
   "value positioning": {
-    "definition": "A strategy that emphasizes the product's price to create a perception of value among customers.",
+    "definition": "A strategy that emphasizes the product's low price to create a perception of value.",
     "French": "positionnement par la valeur",
     "German": "Wertpositionierung",
     "Italian": "posizionamento di valore",
@@ -719,7 +1326,7 @@ export const productMarketing = {
   },
 
   "saturation": {
-    "definition": "The stage of the product life cycle where sales and revenue level off due to market maturity.",
+    "definition": "The stage of the product life cycle where sales and revenue slow down due to market maturity.",
     "French": "saturation",
     "German": "Sättigung",
     "Italian": "saturazione",
@@ -730,7 +1337,7 @@ export const productMarketing = {
   },
 
   "decline": {
-    "definition": "The stage of the product life cycle where sales and revenue decrease due to decreased demand or competition.",
+    "definition": "The stage of the product life cycle where it sees decreased demand or increased competition.",
     "French": "déclin",
     "German": "Rückgang",
     "Italian": "declino",
@@ -741,7 +1348,7 @@ export const productMarketing = {
   },
 
   "withdrawal": {
-    "definition": "The process of removing a product from the market due to declining sales, increased competition, or other reasons.",
+    "definition": "Noun for the process of removing a product from the market due to declining sales, increased competition, or other reasons.",
     "French": "retrait",
     "German": "Rückzug",
     "Italian": "ritiro",
@@ -751,8 +1358,8 @@ export const productMarketing = {
     "synonyms": []
   },
 
-  "phase out a product": {
-    "definition": "To gradually discontinue a product by reducing production, marketing, and distribution efforts.",
+  "phase out": {
+    "definition": "A verb meaning to gradually discontinue a product.",
     "French": "retirer progressivement un produit",
     "German": "ein Produkt auslaufen lassen",
     "Italian": "eliminare gradualmente un prodotto",
@@ -762,19 +1369,9 @@ export const productMarketing = {
     "synonyms": []
   },
 
-  "innovator": {
-    "definition": "A customer who is eager to try new products and technologies, often taking risks to be among the first to adopt.",
-    "French": "innovateur",
-    "German": "Innovator",
-    "Italian": "innovatore",
-    "image": "/images/vocab/innovator.jpg",
-    "multiple_choice": ["early adopter", "pioneer", "trendsetter"],
-    "accepted": [],
-    "synonyms": []
-  },
 
   "early adopter": {
-    "definition": "A customer who adopts a new product or technology soon after its introduction, often influencing others to follow.",
+    "definition": "A customer who is eager to try new products soon after their introduction, often influencing others to follow.",
     "French": "adopteur précoce",
     "German": "Frühanwender",
     "Italian": "early adopter",
@@ -796,7 +1393,7 @@ export const productMarketing = {
   },
 
   "late majority": {
-    "definition": "A customer who adopts a new product or technology after the majority of the market, often due to increased awareness and social proof.",
+    "definition": "A customer who adopts a new product or technology after the majority of the market.",
     "French": "majorité tardive",
     "German": "späte Mehrheit",
     "Italian": "maggioranza tardiva",
@@ -807,7 +1404,7 @@ export const productMarketing = {
   },
 
   "laggard": {
-    "definition": "A customer who is slow to adopt new products or technologies, often due to skepticism or resistance to change.",
+    "definition": "A customer who is slow to adopt new products or technologies.",
     "French": "retardataire",
     "German": "Nachzügler",
     "Italian": "ritardatario",
@@ -818,7 +1415,7 @@ export const productMarketing = {
   },
 
   "rising star": {
-    "definition": "A product that is growing rapidly in sales and revenue, often due to innovative features or marketing efforts.",
+    "definition": "A product that is growing rapidly in sales and revenue.",
     "French": "étoile montante",
     "German": "aufsteigender Stern",
     "Italian": "stella nascente",
@@ -829,7 +1426,7 @@ export const productMarketing = {
   },
 
   "cash cow": {
-    "definition": "A mature product that generates consistent and significant revenue, often with minimal marketing and maintenance efforts.",
+    "definition": "A mature product that generates consistent and significant revenue.",
     "French": "vache à lait",
     "German": "Cashcow",
     "Italian": "mucca da mungere",
@@ -840,7 +1437,7 @@ export const productMarketing = {
   },
 
   "problem children": {
-    "definition": "Products that have low market share and low growth potential, often requiring significant investment to improve their position.",
+    "definition": "Products that have low market share and low growth potential.",
     "French": "produits dilemmes",
     "German": "Fragezeichen",
     "Italian": "prodotti problema",
@@ -850,16 +1447,6 @@ export const productMarketing = {
     "synonyms": []
   },
 
-  "dog": {
-    "definition": "A product that has low market share and low growth potential, often considered for discontinuation.",
-    "French": "poids mort",
-    "German": "arme Hunde",
-    "Italian": "prodotto cane",
-    "image": "/images/vocab/dog.jpg",
-    "multiple_choice": ["problem children", "failing product", "low performer"],
-    "accepted": [],
-    "synonyms": []
-  },
 
   "pricing strategy": {
     "definition": "A plan for setting prices that balances revenue goals with customer demand and competitor activity.",
@@ -879,7 +1466,7 @@ export const productMarketing = {
     "Italian": "ricarico",
     "image": "/images/vocab/mark_up.jpg",
     "multiple_choice": ["margin", "price increase", "profit add-on"],
-    "accepted": [],
+    "accepted": ["markup", "mark up"],
     "synonyms": []
   },
 
@@ -890,7 +1477,7 @@ export const productMarketing = {
     "Italian": "punto vendita",
     "image": "/images/vocab/sales_outlet.jpg",
     "multiple_choice": ["retail location", "store", "selling point"],
-    "accepted": [],
+    "accepted": ["sales outlets"],
     "synonyms": []
   },
 
@@ -945,23 +1532,23 @@ export const productMarketing = {
     "Italian": "rivenditori",
     "image": "/images/vocab/retailers.jpg",
     "multiple_choice": ["wholesalers", "stores", "merchants"],
-    "accepted": [],
+    "accepted": ["retailer"],
     "synonyms": []
   },
 
   "wholesaler": {
     "definition": "An intermediary that buys products from manufacturers and sells them to retailers or other intermediaries.",
     "French": "grossiste",
-    "German": "Großhändler",
+    "German": "Grosshändler",
     "Italian": "grossista",
     "image": "/images/vocab/wholesaler.jpg",
     "multiple_choice": ["distributor", "bulk seller", "retailers"],
-    "accepted": [],
+    "accepted": ["wholesalers"],
     "synonyms": []
   },
 
   "agent": {
-    "definition": "A type of distribution channel where an intermediary acts on behalf of the manufacturer or supplier to negotiate sales, but does not take ownership of the product.",
+    "definition": "an intermediary acting on behalf of the manufacturer or supplier to negotiate sales, but not taking ownership of the product.",
     "French": "agent",
     "German": "Vertreter",
     "Italian": "agente",
@@ -1022,7 +1609,7 @@ export const productMarketing = {
     "Italian": "gestione del ciclo di vita",
     "image": "/images/vocab/life_cycle_management.jpg",
     "multiple_choice": ["product management", "lifecycle planning", "stage management"],
-    "accepted": [],
+    "accepted": ["lifecycle management"],
     "synonyms": []
   },
 
@@ -1083,8 +1670,8 @@ export const productMarketing = {
 };
 
 export const promotionAndBusinessDevelopment = {
-  "generate leads": {
-    "definition": "The process of identifying and attracting potential customers for a product or service.",
+  "generating leads": {
+    "definition": "[2 words] The process of identifying and attracting potential customers for a product or service.",
     "French": "générer des prospects",
     "German": "Leads generieren",
     "Italian": "generare contatti",
@@ -1094,8 +1681,8 @@ export const promotionAndBusinessDevelopment = {
     "synonyms": []
   },
 
-  "convert leads into sales": {
-    "definition": "Turning prospective customers into actual buyers of a product or service.",
+  "converting leads into sales": {
+    "definition": "[4 words] Turning prospective customers into actual buyers of a product or service.",
     "French": "convertir les prospects en ventes",
     "German": "Leads in Verkäufe umwandeln",
     "Italian": "convertire i contatti in vendite",
@@ -1398,7 +1985,7 @@ export const promotionAndBusinessDevelopment = {
     "Italian": "passaparola",
     "image": "/images/vocab/word_of_mouth.jpg",
     "multiple_choice": ["organic promotion", "customer referrals", "peer recommendations"],
-    "accepted": [],
+    "accepted": ["word of mouth"],
     "synonyms": []
   },
 
@@ -1435,8 +2022,8 @@ export const promotionAndBusinessDevelopment = {
     "synonyms": []
   },
 
-  "prime-time TV": {
-    "definition": "The hours when TV viewership is at its highest, often targeted for advertising.",
+  "prime-time": {
+    "definition": "The hours when audiences are at their highest, often targeted for advertising.",
     "French": "heures de grande écoute",
     "German": "Hauptsendezeit",
     "Italian": "prima serata",
@@ -1794,6 +2381,503 @@ export const promotionAndBusinessDevelopment = {
     "Italian": "jingle",
     "image": "/images/vocab/jingle.jpg",
     "multiple_choice": ["advertising tune", "commercial song", "brand melody"],
+    "accepted": [],
+    "synonyms": []
+  }
+};
+
+export const startUps = {
+  "pitch": {
+    "definition": "A brief presentation to investors or stakeholders explaining a business idea and its potential.",
+    "French": "présentation",
+    "German": "Pitch",
+    "Italian": "presentazione",
+    "image": "/images/vocab/pitch.jpg",
+    "multiple_choice": ["proposal", "sales talk", "business presentation"],
+    "accepted": [],
+    "synonyms": []
+  },
+
+  "pitch deck": {
+    "definition": "A slide presentation used to provide an overview of a business plan to potential investors.",
+    "French": "support de présentation",
+    "German": "Pitch-Deck",
+    "Italian": "pitch deck",
+    "image": "/images/vocab/pitch_deck.jpg",
+    "multiple_choice": ["investor presentation", "slide deck", "business overview"],
+    "accepted": [],
+    "synonyms": []
+  },
+
+  "elevator pitch": {
+    "definition": "A brief, persuasive speech that you can deliver in the time span of an elevator ride (30-60 seconds).",
+    "French": "pitch éclair",
+    "German": "Elevator Pitch",
+    "Italian": "elevator pitch",
+    "image": "/images/vocab/elevator_pitch.jpg",
+    "multiple_choice": ["quick pitch", "short presentation", "summary speech"],
+    "accepted": [],
+    "synonyms": []
+  },
+
+  "founding": {
+    "definition": "The act of establishing or creating a new company or organization.",
+    "French": "fondation",
+    "German": "Gründung",
+    "Italian": "fondazione",
+    "image": "/images/vocab/founding.jpg",
+    "multiple_choice": ["establishment", "creation", "startup launch"],
+    "accepted": [],
+    "synonyms": []
+  },
+
+  "founder": {
+    "definition": "A person who establishes a company or organization.",
+    "French": "fondateur/fondatrice",
+    "German": "Gründer(in)",
+    "Italian": "fondatore/fondatrice",
+    "image": "/images/vocab/founder.jpg",
+    "multiple_choice": ["creator", "establisher", "originator"],
+    "accepted": [],
+    "synonyms": []
+  },
+
+  "co-founder": {
+    "definition": "One of multiple people who jointly establish a company.",
+    "French": "cofondateur/cofondatrice",
+    "German": "Mitgründer(in)",
+    "Italian": "cofondatore/cofondatrice",
+    "image": "/images/vocab/co_founder.jpg",
+    "multiple_choice": ["joint founder", "founding partner", "collaborative founder"],
+    "accepted": [],
+    "synonyms": []
+  },
+
+  "CEO": {
+    "definition": "Chief Executive Officer - the highest-ranking executive in a company responsible for major corporate decisions.",
+    "French": "PDG (président-directeur général)",
+    "German": "CEO (Geschäftsführer)",
+    "Italian": "CEO (amministratore delegato)",
+    "image": "/images/vocab/ceo.jpg",
+    "multiple_choice": ["managing director", "president", "executive director"],
+    "accepted": [],
+    "synonyms": []
+  },
+
+  "CTO": {
+    "definition": "Chief Technology Officer - the executive responsible for technological and technical decisions.",
+    "French": "directeur technique",
+    "German": "CTO (technischer Leiter)",
+    "Italian": "CTO (direttore tecnico)",
+    "image": "/images/vocab/cto.jpg",
+    "multiple_choice": ["tech lead", "technology director", "technical director"],
+    "accepted": [],
+    "synonyms": []
+  },
+
+  "CFO": {
+    "definition": "Chief Financial Officer - the executive responsible for managing the company's finances.",
+    "French": "directeur financier",
+    "German": "CFO (Finanzvorstand)",
+    "Italian": "CFO (direttore finanziario)",
+    "image": "/images/vocab/cfo.jpg",
+    "multiple_choice": ["finance director", "financial controller", "treasurer"],
+    "accepted": [],
+    "synonyms": []
+  },
+
+  "COO": {
+    "definition": "Chief Operating Officer - the executive responsible for daily operations of the company.",
+    "French": "directeur des opérations",
+    "German": "COO (Betriebsleiter)",
+    "Italian": "COO (direttore operativo)",
+    "image": "/images/vocab/coo.jpg",
+    "multiple_choice": ["operations director", "managing director", "operational manager"],
+    "accepted": [],
+    "synonyms": []
+  },
+
+  "angel investor": {
+    "definition": "A wealthy individual who provides capital for startups in exchange for equity or convertible debt.",
+    "French": "investisseur providentiel",
+    "German": "Business Angel",
+    "Italian": "angel investor",
+    "image": "/images/vocab/angel_investor.jpg",
+    "multiple_choice": ["private investor", "seed investor", "early-stage backer"],
+    "accepted": [],
+    "synonyms": []
+  },
+
+  "venture capital": {
+    "definition": "Financing provided by firms or funds to startups and small businesses with high growth potential.",
+    "French": "capital-risque",
+    "German": "Risikokapital",
+    "Italian": "capitale di rischio",
+    "image": "/images/vocab/venture_capital.jpg",
+    "multiple_choice": ["VC funding", "risk capital", "growth investment"],
+    "accepted": [],
+    "synonyms": []
+  },
+
+  "seed funding": {
+    "definition": "The initial capital used to start a business, often coming from founders, friends, family, or angel investors.",
+    "French": "financement d'amorçage",
+    "German": "Startkapital",
+    "Italian": "finanziamento seed",
+    "image": "/images/vocab/seed_funding.jpg",
+    "multiple_choice": ["initial funding", "startup capital", "early investment"],
+    "accepted": [],
+    "synonyms": []
+  },
+
+  "Series A": {
+    "definition": "The first significant round of venture capital financing after seed funding.",
+    "French": "série A",
+    "German": "Serie A",
+    "Italian": "Serie A",
+    "image": "/images/vocab/series_a.jpg",
+    "multiple_choice": ["first round", "Round A", "initial VC round"],
+    "accepted": [],
+    "synonyms": []
+  },
+
+  "valuation": {
+    "definition": "The estimated worth of a company, often determined during fundraising rounds.",
+    "French": "valorisation",
+    "German": "Bewertung",
+    "Italian": "valutazione",
+    "image": "/images/vocab/valuation.jpg",
+    "multiple_choice": ["company worth", "market value", "appraisal"],
+    "accepted": [],
+    "synonyms": []
+  },
+
+  "equity": {
+    "definition": "Ownership interest in a company, typically represented by shares of stock.",
+    "French": "capital",
+    "German": "Eigenkapital",
+    "Italian": "capitale azionario",
+    "image": "/images/vocab/equity.jpg",
+    "multiple_choice": ["shares", "ownership stake", "stock"],
+    "accepted": [],
+    "synonyms": []
+  },
+
+  "bootstrapping": {
+    "definition": "Starting and growing a business using personal finances or operating revenue without external funding.",
+    "French": "autofinancement",
+    "German": "Bootstrapping",
+    "Italian": "autofinanziamento",
+    "image": "/images/vocab/bootstrapping.jpg",
+    "multiple_choice": ["self-funding", "organic growth", "independent funding"],
+    "accepted": [],
+    "synonyms": []
+  },
+
+  "burn rate": {
+    "definition": "The rate at which a company spends its capital before generating positive cash flow.",
+    "French": "taux de combustion",
+    "German": "Kapitalverbrauchsrate",
+    "Italian": "tasso di consumo",
+    "image": "/images/vocab/burn_rate.jpg",
+    "multiple_choice": ["spending rate", "cash depletion rate", "expenditure velocity"],
+    "accepted": [],
+    "synonyms": []
+  },
+
+  "runway": {
+    "definition": "The amount of time a company can continue operating before running out of money.",
+    "French": "autonomie financière",
+    "German": "Laufzeit",
+    "Italian": "runway finanziario",
+    "image": "/images/vocab/runway.jpg",
+    "multiple_choice": ["cash runway", "time to zero", "survival period"],
+    "accepted": [],
+    "synonyms": []
+  },
+
+  "MVP": {
+    "definition": "Minimum Viable Product - a version of a product with just enough features to satisfy early customers and provide feedback.",
+    "French": "produit minimum viable",
+    "German": "Minimum Viable Product",
+    "Italian": "prodotto minimo funzionante",
+    "image": "/images/vocab/mvp.jpg",
+    "multiple_choice": ["prototype", "basic product", "initial version"],
+    "accepted": [],
+    "synonyms": []
+  },
+
+  "product-market fit": {
+    "definition": "The degree to which a product satisfies strong market demand.",
+    "French": "adéquation produit-marché",
+    "German": "Product-Market-Fit",
+    "Italian": "product-market fit",
+    "image": "/images/vocab/product_market_fit.jpg",
+    "multiple_choice": ["market validation", "product alignment", "demand match"],
+    "accepted": [],
+    "synonyms": []
+  },
+
+  "scalability": {
+    "definition": "The capacity of a business to grow and manage increased demand without compromising performance.",
+    "French": "évolutivité",
+    "German": "Skalierbarkeit",
+    "Italian": "scalabilità",
+    "image": "/images/vocab/scalability.jpg",
+    "multiple_choice": ["growth capacity", "expansion potential", "scaling ability"],
+    "accepted": [],
+    "synonyms": []
+  },
+
+  "pivot": {
+    "definition": "A significant change in business strategy or product direction based on market feedback.",
+    "French": "pivot",
+    "German": "Strategiewechsel",
+    "Italian": "pivot",
+    "image": "/images/vocab/pivot.jpg",
+    "multiple_choice": ["strategic shift", "direction change", "business transformation"],
+    "accepted": [],
+    "synonyms": []
+  },
+
+  "exit strategy": {
+    "definition": "A plan for how investors or founders will liquidate their stake in a company, typically through acquisition or IPO.",
+    "French": "stratégie de sortie",
+    "German": "Exit-Strategie",
+    "Italian": "strategia di uscita",
+    "image": "/images/vocab/exit_strategy.jpg",
+    "multiple_choice": ["liquidation plan", "cash-out strategy", "investment exit"],
+    "accepted": [],
+    "synonyms": []
+  },
+
+  "IPO": {
+    "definition": "Initial Public Offering - when a private company offers shares to the public for the first time.",
+    "French": "introduction en bourse",
+    "German": "Börsengang",
+    "Italian": "offerta pubblica iniziale",
+    "image": "/images/vocab/ipo.jpg",
+    "multiple_choice": ["going public", "stock market launch", "public offering"],
+    "accepted": [],
+    "synonyms": []
+  },
+
+  "acquisition": {
+    "definition": "When one company purchases another company or a significant portion of its assets.",
+    "French": "acquisition",
+    "German": "Übernahme",
+    "Italian": "acquisizione",
+    "image": "/images/vocab/acquisition.jpg",
+    "multiple_choice": ["buyout", "takeover", "purchase"],
+    "accepted": [],
+    "synonyms": []
+  },
+
+  "term sheet": {
+    "definition": "A non-binding agreement outlining the terms and conditions of an investment.",
+    "French": "lettre d'intention",
+    "German": "Term Sheet",
+    "Italian": "term sheet",
+    "image": "/images/vocab/term_sheet.jpg",
+    "multiple_choice": ["investment agreement", "deal terms", "preliminary contract"],
+    "accepted": [],
+    "synonyms": []
+  },
+
+  "due diligence": {
+    "definition": "The investigation and evaluation of a business or investment opportunity before finalizing a deal.",
+    "French": "vérification préalable",
+    "German": "Due Diligence",
+    "Italian": "due diligence",
+    "image": "/images/vocab/due_diligence.jpg",
+    "multiple_choice": ["business investigation", "thorough review", "investment audit"],
+    "accepted": [],
+    "synonyms": []
+  },
+
+  "cap table": {
+    "definition": "Capitalization table - a document showing the equity ownership structure of a company.",
+    "French": "table de capitalisation",
+    "German": "Kapitalisierungstabelle",
+    "Italian": "tabella di capitalizzazione",
+    "image": "/images/vocab/cap_table.jpg",
+    "multiple_choice": ["ownership table", "equity breakdown", "shareholder registry"],
+    "accepted": [],
+    "synonyms": []
+  },
+
+  "vesting": {
+    "definition": "The process by which an employee or founder earns ownership rights to stock or equity over time.",
+    "French": "acquisition progressive",
+    "German": "Vesting",
+    "Italian": "vesting",
+    "image": "/images/vocab/vesting.jpg",
+    "multiple_choice": ["equity earning", "gradual ownership", "stock maturation"],
+    "accepted": [],
+    "synonyms": []
+  },
+
+  "dilution": {
+    "definition": "The reduction in ownership percentage when new shares are issued.",
+    "French": "dilution",
+    "German": "Verwässerung",
+    "Italian": "diluizione",
+    "image": "/images/vocab/dilution.jpg",
+    "multiple_choice": ["ownership reduction", "share weakening", "equity decrease"],
+    "accepted": [],
+    "synonyms": []
+  },
+
+  "convertible note": {
+    "definition": "A type of short-term debt that converts into equity during a future financing round.",
+    "French": "obligation convertible",
+    "German": "Wandelanleihe",
+    "Italian": "nota convertibile",
+    "image": "/images/vocab/convertible_note.jpg",
+    "multiple_choice": ["convertible loan", "equity debt", "conversion bond"],
+    "accepted": [],
+    "synonyms": []
+  },
+
+  "traction": {
+    "definition": "Evidence that a startup is gaining momentum, typically measured by user growth, revenue, or engagement.",
+    "French": "traction",
+    "German": "Traktion",
+    "Italian": "trazione",
+    "image": "/images/vocab/traction.jpg",
+    "multiple_choice": ["momentum", "growth evidence", "market adoption"],
+    "accepted": [],
+    "synonyms": []
+  },
+
+  "unicorn": {
+    "definition": "A privately held startup company valued at over $1 billion.",
+    "French": "licorne",
+    "German": "Einhorn",
+    "Italian": "unicorno",
+    "image": "/images/vocab/unicorn.jpg",
+    "multiple_choice": ["billion-dollar startup", "mega-startup", "high-value company"],
+    "accepted": [],
+    "synonyms": []
+  },
+
+  "incubator": {
+    "definition": "An organization that helps early-stage startups develop by providing resources, mentorship, and sometimes funding.",
+    "French": "incubateur",
+    "German": "Inkubator",
+    "Italian": "incubatore",
+    "image": "/images/vocab/incubator.jpg",
+    "multiple_choice": ["startup program", "development center", "business accelerator"],
+    "accepted": [],
+    "synonyms": []
+  },
+
+  "accelerator": {
+    "definition": "A program that provides mentorship, education, and funding to help startups grow rapidly over a fixed period.",
+    "French": "accélérateur",
+    "German": "Accelerator",
+    "Italian": "acceleratore",
+    "image": "/images/vocab/accelerator.jpg",
+    "multiple_choice": ["growth program", "startup booster", "incubator"],
+    "accepted": [],
+    "synonyms": []
+  },
+
+  "disruptive innovation": {
+    "definition": "An innovation that creates a new market and value network, eventually displacing established competitors.",
+    "French": "innovation de rupture",
+    "German": "disruptive Innovation",
+    "Italian": "innovazione dirompente",
+    "image": "/images/vocab/disruptive_innovation.jpg",
+    "multiple_choice": ["market disruption", "game-changing innovation", "revolutionary technology"],
+    "accepted": [],
+    "synonyms": []
+  },
+
+  "churn rate": {
+    "definition": "The percentage of customers who stop using a product or service during a given time period.",
+    "French": "taux d'attrition",
+    "German": "Abwanderungsrate",
+    "Italian": "tasso di abbandono",
+    "image": "/images/vocab/churn_rate.jpg",
+    "multiple_choice": ["customer loss rate", "attrition rate", "turnover rate"],
+    "accepted": [],
+    "synonyms": []
+  },
+
+  "customer acquisition cost": {
+    "definition": "The total cost of acquiring a new customer, including marketing and sales expenses (CAC).",
+    "French": "coût d'acquisition client",
+    "German": "Kundenakquisitionskosten",
+    "Italian": "costo di acquisizione cliente",
+    "image": "/images/vocab/customer_acquisition_cost.jpg",
+    "multiple_choice": ["CAC", "acquisition expense", "customer cost"],
+    "accepted": [],
+    "synonyms": []
+  },
+
+  "lifetime value": {
+    "definition": "The predicted net profit attributed to the entire future relationship with a customer (LTV).",
+    "French": "valeur vie client",
+    "German": "Customer Lifetime Value",
+    "Italian": "valore del ciclo di vita del cliente",
+    "image": "/images/vocab/lifetime_value.jpg",
+    "multiple_choice": ["LTV", "customer value", "total customer worth"],
+    "accepted": [],
+    "synonyms": []
+  },
+
+  "go-to-market strategy": {
+    "definition": "A plan that outlines how a company will reach customers and achieve competitive advantage.",
+    "French": "stratégie de mise sur le marché",
+    "German": "Go-to-Market-Strategie",
+    "Italian": "strategia go-to-market",
+    "image": "/images/vocab/go_to_market_strategy.jpg",
+    "multiple_choice": ["market entry plan", "launch strategy", "commercialization plan"],
+    "accepted": [],
+    "synonyms": []
+  },
+
+  "proof of concept": {
+    "definition": "A demonstration to verify that certain concepts or theories have the potential for real-world application.",
+    "French": "preuve de concept",
+    "German": "Proof of Concept",
+    "Italian": "prova di fattibilità",
+    "image": "/images/vocab/proof_of_concept.jpg",
+    "multiple_choice": ["POC", "feasibility demonstration", "concept validation"],
+    "accepted": [],
+    "synonyms": []
+  },
+
+  "down round": {
+    "definition": "A financing round where a company's valuation is lower than in previous rounds.",
+    "French": "tour de financement à la baisse",
+    "German": "Down Round",
+    "Italian": "round al ribasso",
+    "image": "/images/vocab/down_round.jpg",
+    "multiple_choice": ["decreased valuation round", "lower funding round", "devaluation financing"],
+    "accepted": [],
+    "synonyms": []
+  },
+
+  "lean startup": {
+    "definition": "A methodology for developing businesses and products that aims to shorten development cycles through experimentation and validated learning.",
+    "French": "startup lean",
+    "German": "Lean Startup",
+    "Italian": "lean startup",
+    "image": "/images/vocab/lean_startup.jpg",
+    "multiple_choice": ["agile startup", "efficient startup method", "iterative business model"],
+    "accepted": [],
+    "synonyms": []
+  },
+
+  "hockey stick growth": {
+    "definition": "A growth pattern where progress is slow initially, followed by a dramatic and sustained increase.",
+    "French": "croissance en hockey",
+    "German": "Hockey-Stick-Wachstum",
+    "Italian": "crescita a forma di bastone da hockey",
+    "image": "/images/vocab/hockey_stick_growth.jpg",
+    "multiple_choice": ["exponential growth", "rapid acceleration", "J-curve growth"],
     "accepted": [],
     "synonyms": []
   }
