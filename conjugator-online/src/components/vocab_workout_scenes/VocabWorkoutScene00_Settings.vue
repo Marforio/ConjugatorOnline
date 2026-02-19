@@ -46,14 +46,30 @@
                 Start a new training session
               </div>
             </div>
+              
+              <!-- START + PDF BUTTONS -->
+              <div v-if="selectedListKey" class="d-flex justify-end ga-2 align-center">
+                <v-btn
+                  variant="tonal"
+                  color="primary"
+                  size="large"
+                  @click="downloadListPdf"
+                  :loading="pdfLoading"
+                >
+                  Export PDF
+                </v-btn>
 
-            <!-- START BUTTON -->
-            <div v-if="selectedListKey && selectedMode" class="d-flex justify-end">
-              <v-btn color="success" size="x-large" @click="start" :disabled="!valid">
-                Start
-              </v-btn>
+                <v-btn
+                  v-if="selectedMode"
+                  color="success"
+                  size="x-large"
+                  @click="start"
+                  :disabled="!valid"
+                >
+                  Start
+                </v-btn>
+              </div>
             </div>
-          </div>
 
           <v-divider class="my-4" />
 
@@ -235,6 +251,9 @@ import { useUserStore } from "@/stores/user";
 import VWMyProgressPanel from "@/components/vocab_workout_scenes/VWMyProgressPanel.vue";
 import HomeButton from "../HomeButton.vue";
 
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
+
 /** If you want “Completed 3×” as the mastery target */
 const COMPLETION_TARGET = 3;
 
@@ -254,6 +273,8 @@ const vw = useVocabWorkoutStore();
 const user = useUserStore();
 
 const activePanel = ref(0);
+
+const pdfLoading = ref(false);
 
 /* ----------------------------
    SETTINGS STATE
@@ -296,6 +317,154 @@ const selectedListMeta = computed(() => {
 });
 
 const listSupportsLevels = computed(() => !!selectedListMeta.value?.supportsLevels);
+
+function getSelectedListTermMap(): Record<string, any> {
+  const key = selectedListKey.value;
+  if (!key) return {};
+
+  const entry = (vocabLists as any)[key];
+  const termMap = entry?.data;
+
+  if (!termMap || typeof termMap !== "object" || Array.isArray(termMap)) return {};
+  return termMap as Record<string, any>;
+}
+
+
+async function downloadListPdf() {
+  if (!selectedListKey.value) return;
+
+  pdfLoading.value = true;
+  try {
+    const title = selectedListMeta.value?.title ?? selectedListKey.value;
+
+    const termMap = getSelectedListTermMap();
+    let rows = toPdfRowsFromTermMap(termMap)
+      .filter((r) => r.term.length > 0)
+      .sort((a, b) => a.term.localeCompare(b.term, undefined, { sensitivity: "base" }));
+
+    // Optional: filter by level for irregular verbs (or any list that provides a `level` per term)
+    if (listSupportsLevels.value && selectedLevel.value) {
+      rows = rows.filter((r) => {
+        const raw = termMap[r.term];
+        return String(raw?.level ?? "").toLowerCase() === String(selectedLevel.value).toLowerCase();
+      });
+    }
+    const doc = new jsPDF({ orientation: "landscape", unit: "pt", format: "a4" });
+
+    doc.setFontSize(14);
+    doc.text(`Vocab list: ${title}`, 40, 40);
+
+const marginLeft = 30;
+const marginRight = 30;
+
+const isIrregular = selectedListKey.value?.startsWith("irregular_verbs");
+
+const head = isIrregular
+  ? ["Term", "Past forms", "Definition", "French", "German", "Italian"]
+  : ["Term", "Definition", "French", "German", "Italian"];
+
+const body = rows.map((r) =>
+  isIrregular
+    ? [r.term, r.past_forms || "", r.definition, r.French, r.German, r.Italian]
+    : [r.term, r.definition, r.French, r.German, r.Italian]
+);
+
+// Choose “ideal” widths, then auto-scale to fit exactly
+const idealWidths = isIrregular
+  ? [95, 140, 240, 125, 125, 125]
+  : [110, 300, 140, 140, 140];
+
+
+  function fitColumnWidthsToPage(doc: jsPDF, widths: number[], marginLeft: number, marginRight: number) {
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const available = pageWidth - marginLeft - marginRight;
+
+  const sum = widths.reduce((a, b) => a + b, 0);
+  if (sum <= available) return widths;
+
+  const scale = available / sum;
+  return widths.map((w) => Math.floor(w * scale));
+}
+const fitted = fitColumnWidthsToPage(doc, idealWidths, marginLeft, marginRight);
+
+const columnStyles: any = {};
+for (let i = 0; i < fitted.length; i++) {
+  columnStyles[i] = { cellWidth: fitted[i] };
+}
+
+  autoTable(doc, {
+    startY: 60,
+    margin: { left: marginLeft, right: marginRight },
+
+    // ✅ this helps prevent unexpected stretching
+    tableWidth: "wrap",
+
+    head: [head],
+    body,
+
+    styles: {
+      fontSize: 9,
+      cellPadding: 4,
+      overflow: "linebreak", // keep your existing behavior
+      valign: "top",
+    },
+
+    headStyles: {
+      fillColor: [30, 30, 30],
+      textColor: 255,
+    },
+
+    columnStyles,
+  });
+
+      const safeName = String(title).replace(/[^a-z0-9]+/gi, "_").replace(/^_+|_+$/g, "");
+      const levelSuffix =
+        listSupportsLevels.value && selectedLevel.value ? `_${selectedLevel.value}` : "";
+      doc.save(`${safeName || "vocab_list"}${levelSuffix}.pdf`);
+    } catch (e) {
+      console.error("[VocabWorkoutSettings] PDF export failed:", e);
+    } finally {
+      pdfLoading.value = false;
+    }
+  }
+
+type PdfRow = {
+  term: string;
+  past_forms?: string;
+  definition: string;
+  French: string;
+  German: string;
+  Italian: string;
+};
+
+function asStringArray(x: any): string[] {
+  if (Array.isArray(x)) return x.map(String).map((s) => s.trim()).filter(Boolean);
+  if (typeof x === "string") return x.split(/[;,/]+/).map((s) => s.trim()).filter(Boolean);
+  return [];
+}
+
+function toPdfRowsFromTermMap(termMap: Record<string, any>): PdfRow[] {
+  return Object.entries(termMap ?? {}).map(([term, data]) => {
+    const ps = asStringArray((data as any)?.past_simple);
+    const pp = asStringArray((data as any)?.present_perfect);
+
+    const pastForms =
+      ps.length || pp.length
+        ? `${ps.join(" / ")}${ps.length && pp.length ? " • " : ""}${pp.join(" / ")}`
+        : "";
+
+    return {
+      term: String(term ?? "").trim(),
+      definition: String((data as any)?.definition ?? ""),
+      past_forms: pastForms,
+      French: String((data as any)?.French ?? ""),
+      German: String((data as any)?.German ?? ""),
+      Italian: String((data as any)?.Italian ?? ""),
+    };
+  });
+}
+
+
 
 /* ----------------------------
    Domain + expected lists
@@ -442,6 +611,7 @@ const sortedFrontItems = computed(() => {
     return a.title.localeCompare(b.title);
   });
 });
+
 
 // Auto-fix invalid pair whenever list or selections change.
 function forceValidPair() {
