@@ -1,6 +1,7 @@
 import { houseElements, LocationAndMaterials, CitiesAndBuildings, LightSpaces, ArchCareer, AdjectivesForReviews } from "./ArchitectureVocab";
 import { civilVerbs, constructionSite, ConstructionScience, EarthAndMaterials, CitiesInfrastructureBuildings, DimensionsAndProperties, BusinessReports } from "./CivilVocab"
 import { productMarketing, promotionAndBusinessDevelopment, meetingExpressions, meetings, businessEthics, sustainability } from "./BusinessVocab";
+import { programmingSymbols, mechanicalForces } from "./MechVocab";
 import { irregularVerbs } from "./IrregularVerbs";
 
 export const vocabLists = {
@@ -93,6 +94,18 @@ export const vocabLists = {
   },
   ////////////////////////////// MECHANICAL /////////////////////////////
 
+  mechanicalForces: {
+    title: "Mechanical Forces",
+    module: "Mechanical",
+    data: mechanicalForces,
+    supportsLevels: false,
+  },
+   programmingSymbols: {
+    title: "Programming Elements (Python)",
+    module: "Mechanical",
+    data: programmingSymbols,
+    supportsLevels: false,
+  },
 
    meetingExpressionsM: {
     title: "Meeting Expressions",

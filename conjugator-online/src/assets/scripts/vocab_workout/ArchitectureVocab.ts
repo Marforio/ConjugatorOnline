@@ -5,7 +5,7 @@ export const houseElements = {
     German: "Türschwelle",
     Italian: "soglia",
     image: "/images/vocab/doorstep.jpg",
-    multiple_choice: ["threshold", "entry step", "front slab"]
+    multiple_choice: ["threshold", "entry step", "front slab"],
   },
 
   "awning": {

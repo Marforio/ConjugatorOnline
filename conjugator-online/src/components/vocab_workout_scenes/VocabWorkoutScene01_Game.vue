@@ -113,7 +113,7 @@
 
             <!-- Right -->
             <div class="d-flex flex-column align-end">
-              <div v-if="!isPersistedMode">{{ listCoveragePct }} / {{ roundCount }}</div>
+              <div v-if="!isPersistedMode">{{ currentIndex + 1 }} / {{ roundCount }}</div>
               <div class="d-flex ga-2 mt-1">
                 <v-chip
                   v-if="isPersistedMode"
@@ -200,16 +200,16 @@
 
                                 <div class="flex-two-thirds d-flex align-center justify-start">
                                   <div
-                                    class="text-h6 ms-4 mb-2 font-weight-regular font-italic"
-                                    style="margin-right: 20%;"
-                                  >
-                                    {{ frontPreview }}
-                                  </div>
+                                      class="text-h5 ms-4 mb-2 font-weight-regular font-italic"
+                                      style="margin-right: 20%;"
+                                    >
+                                      {{ frontPreview }}
+                                    </div>
                                 </div>
                               </div>
 
                               <div v-else class="d-flex justify-center align-center text-center h-100">
-                                <div class="mx-3 text-h5 font-weight-regular font-italic">
+                                <div :class="frontCardClass">
                                   {{ frontPreview }}
                                 </div>
                               </div>
@@ -242,7 +242,7 @@
                               </div>
 
                               <div v-else class="d-flex justify-center align-center text-center h-100">
-                                <div class="text-h4 mb-2">
+                                <div class="text-h4 mb-2 mx-4">
                                   {{ backPreview }}
                                 </div>
                               </div>
@@ -357,7 +357,46 @@
               </div>
             </div>
 
+            <!-- Cards mode seek bar -->
+            <div v-if="mode === 'cards'" class="d-flex align-center ga-3 mt-3">
+              <!-- optional: jump back/forward by 5 -->
+              <v-btn variant="text" size="small" :disabled="currentIndex === 0" @click="jumpCards(-5)">
+                -5
+              </v-btn>
+
+              <v-slider
+                v-model="cardSeekIndex"
+                :min="0"
+                :max="Math.max(0, roundCount - 1)"
+                :step="5"
+                color="info"
+                track-color="grey-lighten-2"
+                thumb-color="info"
+                hide-details
+                show-ticks="always"
+
+                thumb-label="always"
+                @update:model-value="() => {}"  
+                @end="commitCardSeek"          
+              >
+                <template #thumb-label>
+                  {{ cardThumbLabel }}
+                </template>
+              </v-slider>
+
+              <v-btn
+                variant="text"
+                size="small"
+                :disabled="currentIndex >= roundCount - 1"
+                @click="jumpCards(5)"
+              >
+                +5
+              </v-btn>
+            </div>
+
+            <!-- Other modes: existing progress bar -->
             <v-progress-linear
+              v-else
               :model-value="isPersistedMode && serverCountsReady ? phaseProgressPct : listCoveragePct"
               height="10"
               class="mb-2"
@@ -439,7 +478,7 @@
 
 
 <script setup lang="ts">
-import { ref, computed, nextTick, watch, onMounted, onBeforeUnmount } from "vue";
+import { ref, computed, nextTick, watch, onMounted, onBeforeUnmount, watchEffect } from "vue";
 
 import type { VocabItem, BackField, FrontField } from "@/assets/scripts/vocab_workout/VocabWorkoutPromptEngine";
 import { getFrontText, getAcceptedAnswers } from "@/assets/scripts/vocab_workout/VocabWorkoutPromptEngine";
@@ -608,6 +647,10 @@ type LocalRoundRow = {
 /* =========================================================
    Pretty labels
 ========================================================= */
+const frontCardClass = computed(() =>
+  prettyListKey.value === "ProgrammingSymbols" ? 'text-h4 mx-4 mb-2 font-weight-regular' : 'text-h4 mx-4 mb-2 font-weight-regular font-italic'
+)
+
 const resumeIndexDisplay = computed(() => {
   const idx = Number(props.gameSettings?.resumeIndex ?? 0);
   if (!Number.isFinite(idx)) return "1";
@@ -661,6 +704,117 @@ const listCoveragePct = computed(() => {
   if (!roundCount.value) return 0;
   return Math.round((currentIndex.value / roundCount.value) * 100);
 });
+
+
+/* =========================================================
+   Slider
+========================================================= */
+const cardSeekIndex = ref<number>(0);
+
+// Keep slider in sync when user navigates with arrows/buttons
+watch(
+  [gameStarted, mode, currentIndex, roundCount],
+  () => {
+    if (!gameStarted.value) return;
+    if (mode.value !== "cards") return;
+
+    const total = roundCount.value ?? 0;
+    if (total <= 0) {
+      cardSeekIndex.value = 0;
+      return;
+    }
+
+    const idx = Math.min(total - 1, Math.max(0, currentIndex.value));
+
+    // index 0 => slider 0 ("1")
+    if (idx === 0) {
+      cardSeekIndex.value = 0;
+      return;
+    }
+
+    // index 1..4 => milestone 5, index 5..9 => milestone 10, etc.
+    const milestone = Math.ceil((idx + 1) / 5) * 5; // use card number (idx+1) for milestone
+    cardSeekIndex.value = Math.min(total, milestone);
+  },
+  { immediate: true }
+);
+
+const cardThumbLabel = computed(() => {
+  const total = roundCount.value ?? 0;
+  if (total <= 0) return "0";
+
+  const idx = Math.min(Math.max(0, Math.trunc(cardSeekIndex.value)), Math.max(0, total - 1));
+
+  // Special case: first position
+  if (idx === 0) return "1";
+
+  // Bucket indices into: 1..5 => 5, 6..10 => 10, 11..15 => 15, ...
+  const milestone = Math.ceil(idx / 5) * 5;
+
+  // Clamp to total (nice when total isn't a multiple of 5)
+  return String(Math.min(total, milestone));
+});
+
+// Called when user finishes interacting (mouse up / touch end)
+function commitCardSeek() {
+  if (!gameStarted.value) return;
+  if (mode.value !== "cards") return;
+
+  const total = roundCount.value ?? 0;
+  if (total <= 0) return;
+
+  const maxIdx = total - 1;
+
+  // Slider value is 0,5,10... but you want that to mean card 1,5,10...
+  const raw = Math.trunc(cardSeekIndex.value);
+
+  const target =
+    raw === 0
+      ? 0
+      : Math.min(maxIdx, Math.max(0, raw - 1)); // 5->4, 10->9, ...
+
+  if (target === currentIndex.value) return;
+
+  slideName.value = target > currentIndex.value ? "slide-left" : "slide-right";
+  currentIndex.value = target;
+}
+
+// Optional: if you want keyboard-accessible "jump 5" buttons
+function jumpCards(delta: number) {
+  if (!gameStarted.value) return;
+  if (mode.value !== "cards") return;
+
+  const max = Math.max(0, roundCount.value - 1);
+  const target = Math.min(max, Math.max(0, currentIndex.value + delta));
+
+  if (target === currentIndex.value) return;
+
+  slideName.value = target > currentIndex.value ? "slide-left" : "slide-right";
+  currentIndex.value = target;
+}
+const cardSliderTicks = computed<Record<number, string>>(() => {
+  const total = roundCount.value ?? 0;
+  const maxIdx = Math.max(0, total - 1);
+
+  const ticks: Record<number, string> = {};
+  if (total <= 0) return ticks;
+
+  // Always show "1" at the start (index 0)
+  ticks[0] = "1";
+
+  // Show 5,10,15,... as labels at indices 4,9,14,... (every 5th card)
+  // i is 1-based card number
+  for (let i = 5; i <= total; i += 5) {
+    const idx = i - 1;
+    if (idx >= 0 && idx <= maxIdx) ticks[idx] = String(i);
+  }
+
+  // Ensure last card number is shown if not already (nice for non-multiple-of-5 totals)
+  if (!ticks[maxIdx]) ticks[maxIdx] = String(total);
+
+  return ticks;
+});
+
 
 /* =========================================================
    Mastery-phase progress (server-driven)
