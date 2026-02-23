@@ -171,7 +171,7 @@
         "filename": "Angela_Merkel_28200829.jpg",
         "countable": true,
         "subject": "president",
-        "plural": "presindents",
+        "plural": "presidents",
         "plural_noun": false
     },
     "26": {
@@ -1277,14 +1277,7 @@
         "filename": "Rosa_'True_Inspiration'_-_Massachusetts.jpg",
         "countable": true,
         "subject": "rose",
-        "plural": "",
-        "plural_noun": false
-    },
-    "192": {
-        "filename": "Russet_potato_cultivar_with_sprouts.jpg",
-        "countable": true,
-        "subject": "potato",
-        "plural": "potatoes",
+        "plural": "roses",
         "plural_noun": false
     },
     "193": {
@@ -1303,7 +1296,7 @@
     },
     "195": {
         "filename": "ST_vs_CO_2012-03-10_-_42_-_Conversion_kick_by_Luke_McAlister.jpg",
-        "countable": true,
+        "countable": false,
         "subject": "strength",
         "plural": "",
         "plural_noun": false
