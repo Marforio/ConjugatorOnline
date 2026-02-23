@@ -34,7 +34,9 @@
         <v-divider class="my-4" />
 
         <div class="d-flex justify-center align-center mt-4 gap-5">
-          <v-btn @click="goToScene('ComparisonScene00_Start')">▶️ Play Again</v-btn>
+          <v-btn @click="$emit('playAgain')">
+            ▶️ Play Again
+          </v-btn>
 
           <router-link :to="{ path: '/dashboard', query: { tab: 'other-games', game: 'Comparison Challenge' } }">
             <v-btn>Go to Dashboard</v-btn>
@@ -59,11 +61,7 @@ const props = defineProps({
   results: { type: Object, default: null },
 });
 
-const emit = defineEmits(["changeScene"]);
-
-function goToScene(sceneName) {
-  emit("changeScene", sceneName);
-}
+defineEmits(["changeScene", "playAgain"]);
 
 const percent = computed(() => {
   if (!props.results) return 0;

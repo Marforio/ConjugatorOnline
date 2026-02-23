@@ -1023,7 +1023,7 @@ export const comparisonPrompts: Record<number, ComparisonPromptRaw> = {
   196: { word: "expensively", person_A: "steel", person_B: "gold", answer: { comparative: ["more expensively than"], superlative: ["the most expensively"] }, negative: false, part_of_speech: "adverb", prompt: "is priced" },
 
   197: { word: "fast", person_A: "Bill", person_B: "Jeff", answer: { comparative: ["faster than"], superlative: ["the fastest"], equality: ["as fast as"] }, negative: false, part_of_speech: "adverb", prompt: "decides" },
-  198: { word: "powerfully", person_A: "Lebron", person_B: "Mike", answer: { comparative: ["more powerfully than"], superlative: ["the most powerfully"] }, negative: false, part_of_speech: "adverb", prompt: "dunks" },
-  199: { word: "successfully", person_A: "Messi", person_B: "Cristiano", answer: { comparative: ["more successfully than"], superlative: ["the most successfully"] }, negative: false, part_of_speech: "adverb", prompt: "invests" },
-  200: { word: "politely", person_A: "Roger", person_B: "Rafa", answer: { comparative: ["more politely than"], superlative: ["the most politely"] }, negative: false, part_of_speech: "adverb", prompt: "shakes hands" },
+  198: { word: "powerfully", person_A: "Lebron", person_B: "Mike", answer: { comparative: ["more powerfully than"], superlative: ["the most powerfully"], equality: ["as powerfully as"] }, negative: false, part_of_speech: "adverb", prompt: "dunks" },
+  199: { word: "successfully", person_A: "Messi", person_B: "Cristiano", answer: { comparative: ["more successfully than"], superlative: ["the most successfully"], equality: ["as successfully as"] }, negative: false, part_of_speech: "adverb", prompt: "invests" },
+  200: { word: "politely", person_A: "Roger", person_B: "Rafa", answer: { comparative: ["more politely than"], superlative: ["the most politely"], equality: ["as politely as"] }, negative: false, part_of_speech: "adverb", prompt: "shakes hands" },
 };
