@@ -15,7 +15,7 @@
 
           <v-list-item>
             <template #prepend><v-icon icon="mdi-timer-sand" /></template>
-            <v-list-item-title class="text-wrap">15 seconds per round</v-list-item-title>
+            <v-list-item-title class="text-wrap">30 seconds per round</v-list-item-title>
           </v-list-item>
 
           <v-list-item>
@@ -68,7 +68,7 @@ import { ref } from "vue";
 const emit = defineEmits(["startGame"]);
 
 const selections = ref({
-  numRounds: 30,
+  numRounds: 24,
   showTranslations: false,
 });
 

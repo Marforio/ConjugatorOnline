@@ -2,7 +2,7 @@
 
 import type { IdeaLinkerDataset, IdeaLinkerEntry, IdeaLinkerTranslations } from "./IdeaLinkerPrompts";
 
-export const ROUND_SECONDS = 15;
+export const ROUND_SECONDS = 30;
 
 export type IdeaLinkerSettings = {
   numRounds: number;
@@ -11,13 +11,13 @@ export type IdeaLinkerSettings = {
 };
 
 export type IdeaLinkerRound = {
-  id: string; // `${entryId}:${promptIndex}`
+  id: string;
   entryId: string;
   promptIndex: number;
   promptText: string;
 
   category: string;
-  variant: string;
+  variant: string | null;
   behavior: string;
 
   possibleLinkers: string[];
@@ -26,7 +26,26 @@ export type IdeaLinkerRound = {
 
   minAnswers: number;
   maxAnswers: number;
+
+  imageKey: string;   // raw: variant or category
+  imagePath: string;  // "/images/linkers/<slug>.jpg"
 };
+
+function slugForImageKey(s: string): string {
+  return String(s || "")
+    .trim()
+    .toLowerCase()
+    .replace(/&/g, "and")
+    .replace(/['’]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+function linkerImagePath(category: string, variant: string | null): { key: string; path: string } {
+  const key = (variant && String(variant).trim()) ? String(variant) : String(category);
+  const slug = slugForImageKey(key);
+  return { key, path: `/images/linkers/${slug}.jpg` };
+}
 
 export function normalizeForCompare(s: string): string {
   // Auxiliaries-style: remove spaces + punctuation + apostrophes; case-insensitive.
@@ -66,6 +85,10 @@ export function flattenDataset(dataset: IdeaLinkerDataset): IdeaLinkerRound[] {
 
   for (const [entryId, entry] of Object.entries(dataset)) {
     const d = entryDefaults(entry);
+    const cat = String(entry.category);
+    const vari = entry.variant == null ? null : String(entry.variant);
+
+    const img = linkerImagePath(cat, vari);
 
     entry.prompts.forEach((promptText, idx) => {
       rounds.push({
@@ -74,8 +97,8 @@ export function flattenDataset(dataset: IdeaLinkerDataset): IdeaLinkerRound[] {
         promptIndex: idx,
         promptText: String(promptText),
 
-        category: String(entry.category),
-        variant: String(entry.variant),
+        category: cat,
+        variant: vari,
         behavior: String(entry.behavior),
 
         possibleLinkers: (entry.possibleLinkers || []).map(String),
@@ -84,6 +107,9 @@ export function flattenDataset(dataset: IdeaLinkerDataset): IdeaLinkerRound[] {
 
         minAnswers: d.minAnswers,
         maxAnswers: d.maxAnswers,
+
+        imageKey: img.key,
+        imagePath: img.path,
       });
     });
   }
@@ -92,12 +118,15 @@ export function flattenDataset(dataset: IdeaLinkerDataset): IdeaLinkerRound[] {
 }
 
 /**
- * Even-ish distribution sampler:
- * - group rounds by entryId
- * - allocate a quota to each entry
- * - shuffle within each entry and take quota
- * - if we still need more, fill from remaining
+ * Sample rounds evenly across entries, then shuffle within each entry.
+ * Protection A: cap how many rounds can be drawn from each entry
+ * so the game never selects more prompts from an entry than there are
+ * eligible (unused-possible) linkers for that entry.
+ *
+ * Also keeps the "even-ish distribution" idea, but will redistribute
+ * leftover rounds to entries that still have capacity.
  */
+
 export function sampleRoundsEvenly(allRounds: IdeaLinkerRound[], numRounds: number): IdeaLinkerRound[] {
   const n = clamp(Number(numRounds) || 0, 1, allRounds.length);
 
@@ -107,34 +136,77 @@ export function sampleRoundsEvenly(allRounds: IdeaLinkerRound[], numRounds: numb
     byEntry.get(r.entryId)!.push(r);
   }
 
-  // shuffle each bucket
+  // shuffle each bucket (random prompt selection within each entry)
   for (const [k, bucket] of byEntry.entries()) {
     byEntry.set(k, shuffle(bucket));
   }
 
-  const entryIds = Array.from(byEntry.keys());
-  const baseQuota = Math.floor(n / entryIds.length);
-  let remainder = n % entryIds.length;
+  // capacity per entry = number of eligible linkers in that entry
+  // (possibleLinkers minus excludedLinkers, unique by normalized form)
+  const capacityByEntry = new Map<string, number>();
+  for (const [entryId, bucket] of byEntry.entries()) {
+    const first = bucket[0];
+    if (!first) {
+      capacityByEntry.set(entryId, 0);
+      continue;
+    }
+
+    const excludedNorm = new Set((first.excludedLinkers || []).map(normalizeForCompare));
+    const eligibleNorm = new Set(
+      (first.possibleLinkers || [])
+        .filter(Boolean)
+        .map((l) => normalizeForCompare(l))
+        .filter((l) => l && !excludedNorm.has(l))
+    );
+
+    capacityByEntry.set(entryId, eligibleNorm.size);
+  }
+
+  // Only keep entries that can actually contribute at least 1 safe round
+  let entryIds = Array.from(byEntry.keys()).filter((id) => (capacityByEntry.get(id) || 0) > 0);
+  entryIds = shuffle(entryIds);
 
   const chosen: IdeaLinkerRound[] = [];
 
-  // first pass: base quota + distribute remainder
-  for (const entryId of entryIds) {
-    const bucket = byEntry.get(entryId)!;
-    const take = Math.min(bucket.length, baseQuota + (remainder > 0 ? 1 : 0));
-    if (remainder > 0) remainder--;
+  // We allocate in passes:
+  // - In each pass, give each entry 1 round, until we reach n
+  // - But never exceed per-entry capacity or bucket length
+  // This produces good mixing and respects caps.
+  const takenByEntry = new Map<string, number>();
+  for (const id of entryIds) takenByEntry.set(id, 0);
 
-    chosen.push(...bucket.splice(0, take));
+  while (chosen.length < n && entryIds.length > 0) {
+    let progressed = false;
+
+    for (const entryId of shuffle(entryIds)) {
+      if (chosen.length >= n) break;
+
+      const bucket = byEntry.get(entryId)!;
+      const cap = capacityByEntry.get(entryId) || 0;
+      const taken = takenByEntry.get(entryId) || 0;
+
+      // stop using this entry if at cap or no prompts left
+      if (taken >= cap || bucket.length === 0) continue;
+
+      chosen.push(bucket.shift()!);
+      takenByEntry.set(entryId, taken + 1);
+      progressed = true;
+    }
+
+    // Remove exhausted entries (at cap or empty)
+    entryIds = entryIds.filter((entryId) => {
+      const bucket = byEntry.get(entryId)!;
+      const cap = capacityByEntry.get(entryId) || 0;
+      const taken = takenByEntry.get(entryId) || 0;
+      return bucket.length > 0 && taken < cap;
+    });
+
+    if (!progressed) break; // safety
   }
 
-  // fill leftover slots (if some buckets were smaller than quota)
-  if (chosen.length < n) {
-    const leftovers: IdeaLinkerRound[] = [];
-    for (const bucket of byEntry.values()) leftovers.push(...bucket);
-    chosen.push(...shuffle(leftovers).slice(0, n - chosen.length));
-  }
-
-  return chosen.slice(0, n);
+  // If we couldn't reach n because of caps, return as many as we safely can.
+  // (You can also throw or warn here.)
+  return shuffle(chosen);
 }
 
 export type CheckAnswerResult =
@@ -194,3 +266,4 @@ export function translationsLabel(translations: IdeaLinkerTranslations | null): 
   }
   return parts.join(" • ");
 }
+

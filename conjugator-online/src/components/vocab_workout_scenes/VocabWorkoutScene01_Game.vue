@@ -373,8 +373,7 @@
                 track-color="grey-lighten-2"
                 thumb-color="info"
                 hide-details
-                show-ticks="always"
-
+                show-ticks
                 thumb-label="always"
                 @update:model-value="() => {}"  
                 @end="commitCardSeek"          
@@ -725,16 +724,19 @@ watch(
     }
 
     const idx = Math.min(total - 1, Math.max(0, currentIndex.value));
+    const cardNum = idx + 1; // 1-based
 
-    // index 0 => slider 0 ("1")
-    if (idx === 0) {
-      cardSeekIndex.value = 0;
-      return;
-    }
+    // Slider positions represent milestones: 0 ("1"), 5, 10, 15...
+    // We want: 1-4 => 0, 5-9 => 5, 10-14 => 10, ...
+    let milestone: number;
 
-    // index 1..4 => milestone 5, index 5..9 => milestone 10, etc.
-    const milestone = Math.ceil((idx + 1) / 5) * 5; // use card number (idx+1) for milestone
-    cardSeekIndex.value = Math.min(total, milestone);
+    if (cardNum < 5) milestone = 0;
+    else milestone = Math.floor(cardNum / 5) * 5; // 5-9=>5, 10-14=>10, ...
+
+    // Clamp in case list shorter than milestone
+    milestone = Math.min(milestone, total);
+
+    cardSeekIndex.value = milestone;
   },
   { immediate: true }
 );
@@ -743,16 +745,9 @@ const cardThumbLabel = computed(() => {
   const total = roundCount.value ?? 0;
   if (total <= 0) return "0";
 
-  const idx = Math.min(Math.max(0, Math.trunc(cardSeekIndex.value)), Math.max(0, total - 1));
-
-  // Special case: first position
-  if (idx === 0) return "1";
-
-  // Bucket indices into: 1..5 => 5, 6..10 => 10, 11..15 => 15, ...
-  const milestone = Math.ceil(idx / 5) * 5;
-
-  // Clamp to total (nice when total isn't a multiple of 5)
-  return String(Math.min(total, milestone));
+  // Always show the actual current card number (1-based)
+  const n = Math.min(total, Math.max(1, Math.trunc(currentIndex.value) + 1));
+  return String(n);
 });
 
 // Called when user finishes interacting (mouse up / touch end)

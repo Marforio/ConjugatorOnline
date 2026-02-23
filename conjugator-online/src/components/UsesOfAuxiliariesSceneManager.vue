@@ -5,6 +5,7 @@
     @changeScene="changeScene"
     @startGame="handleStartGame"
     @gameOver="handleGameOver"
+    @playAgain="handlePlayAgain"
     :gameSettings="gameSettings"
     :prompts="promptsForGame"
     :results="results"
@@ -60,6 +61,17 @@ function handleStartGame(selections) {
   promptsForGame.value = samplePrompts(pool, selections.numRounds || 30);
 
   changeScene("AuxiliariesScene01_Game");
+}
+
+function handlePlayAgain() {
+  // If for some reason settings are missing, fall back to start scene
+  if (!gameSettings.value) {
+    changeScene("AuxiliariesScene00_Start");
+    return;
+  }
+
+  // ✅ Re-run sampling with the same settings to get a fresh prompt set
+  handleStartGame(gameSettings.value);
 }
 
 function handleGameOver(payload) {

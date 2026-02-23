@@ -51,7 +51,7 @@
         <v-divider class="my-4" />
 
         <div class="d-flex justify-center align-center mt-4 gap-5">
-          <v-btn @click="goToScene('AuxiliariesScene01_Game')">
+          <v-btn @click="$emit('playAgain')">
             ▶️ Play Again
           </v-btn>
 
@@ -87,11 +87,7 @@ const props = defineProps({
   },
 });
 
-const emit = defineEmits(["changeScene"]);
-
-function goToScene(sceneName) {
-  emit("changeScene", sceneName);
-}
+defineEmits(["changeScene", "playAgain"]);
 
 const percent = computed(() => {
   if (!props.results) return 0;

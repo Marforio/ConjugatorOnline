@@ -135,7 +135,7 @@ export const vocabLists = {
     supportsLevels: false,
   },
 
-  ////////////////////////////// IT /////////////////////////////
+  ////////////////////////////// COMPUTER SCIENCE/////////////////////////////
 
    meetingExpressionsIT: {
     title: "Meeting Expressions",
@@ -149,6 +149,28 @@ export const vocabLists = {
     data: meetings,
     supportsLevels: false,
   },
+
+// STARTUPS
+
+// 
+
+ // PROGRAMMING ELEMENTS AND SYMBOLS
+
+ // HTML, CSS, AND UI ELEMENTS
+
+ // HARDWARE
+
+  // CRYPTOGRAPHY
+
+  // VMs, CONTAINTERS AND CLUSTERS
+
+  // FRONTEND FRAMEWORKS
+
+  // DATA SCIENCE, DATA PROCESSING
+
+  // DATABASES
+
+  // NETWORKING
 
   ////////////////////////////// CHEMISTRY /////////////////////////////
   ////////////////////////////// BUSINESS 1 /////////////////////////////

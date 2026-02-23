@@ -391,7 +391,7 @@ export const auxiliariesPrompts = {
     prompt: "We were watching lightning from the balcony.",
     highlight: "were",
     tense: "past continuous",
-    answer: ["were you", "were you?"],
+    answer: ["were you", "were we"],
     negative: false,
   },
   50: {

@@ -460,6 +460,7 @@ const sessionAccuracyTrend = computed(() => {
 
 // ----- Constants -----
 const GAME_NAMES = [
+  "Be Polite!",
   "Comparison",
   "Idea Linker",
   "Parallel Universe",  
@@ -477,6 +478,7 @@ const GAME_NAMES = [
   "Word Families",
 ];
 const gamePictures: Record<string, string> = {
+  "Be Polite!": "/images/banners/BePolite.png",
   "Comparison": "/images/banners/Comparison.png",
   "Idea Linker": "/images/banners/IdeaLinker.png",
   "Pronoun Practice": "/images/banners/PronounPractice.png",

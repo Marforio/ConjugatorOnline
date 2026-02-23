@@ -44,7 +44,8 @@
 
 
       <!-- Time pressure toggle -->
-      <v-switch
+      <div class="d-flex justify-center">
+              <v-switch
         v-model="useTimer"
         label="Enable time pressure (10s per card)"
         inset
@@ -52,6 +53,8 @@
         color="info"
 
       />
+      </div>
+
 
       <v-btn color="success" size="x-large" @click="startGame">
         START
@@ -179,7 +182,7 @@ import { ref, reactive, computed } from "vue"
 import api from "@/axios"
 
 const props = defineProps<{
-  game: "Spelling bee" | "Pronunciation Challenge" | "Prove it!"
+  game: "Spelling bee" | "Pronunciation Challenge" | "Prove it!" | "Be Polite!"
   student: string
 }>()
 
@@ -192,6 +195,7 @@ const BANNERS = {
   "Spelling bee": "/images/banners/SpellingBee-png",
   "Pronunciation Challenge": "/images/banners/PronunciationChallenge.png",
   "Prove it!": "/images/banners/ProveIt.png",
+  "Be Polite!": "/images/banners/BePolite.png",
 }
 
 const selectedCategory = ref<string>("")    // for Prove it!
@@ -264,6 +268,166 @@ const gameData: Record<string, { description: string; instructions: string; prom
       "hard": ["parentheses", "indices", "the mirror", "my clothes", "apostrophe", "emphasis", "analysis", "symthesis", "rural", "hierarchy", "iron", "phenomenon"],
       "strange": ["diesel engine", "Easter island", "a kitchen island", "Is Iceland an island?", "dollar", "gauge", "vineyard", "comfortable", "Wednesday", "February", "women", "debt", "aisle", "recipe", "cupboard", "4-stroke engine"],
       "pairs": ["desert (Sahara) vs dessert (cake)", "lead (to guide) vs lead (the metal)", "wind (air movement) vs wind (to turn)", "tear (rip) vs tear (from the eye)", "quiet (shhh!) vs quite ('quite good')", "suit (clothing) vs suite (set of rooms)", "choose vs chose", "live (to reside) vs live (not recorded)", "bass (fish) vs bass (low frequency sound)"],
+    }
+  },
+  "Be Polite!": {
+    description: "Prove your ability to be polite by repeating the auxiliary verb in the question.",
+    instructions: "A card will appear with a yes/no question. Answer the question politely by repeating the auxiliary verb.",
+    prompts: {
+      "present_simple": [
+        "Do you take out the trash on Tuesdays?",
+        "Do you usually check your email before class?",
+        "Do you work on your homework every day?",
+        "Do you drink coffee in the morning?",
+        "Do you often help your classmates?",
+        "Do you need a pen right now?",
+        "Do you know the answer to this question?",
+        "Do you speak English at home?",
+        "Do you like working in pairs?",
+        "Do you always bring your notebook to class?"
+      ],
+      "present_simple_negative": [
+        "Do you not like group work?",
+        "Don't you have your homework with you?",
+        "Do you not understand the instructions?",
+        "Don't you usually take the bus to school?",
+        "Do you not need any help today?"
+      ],
+      "present_continuous": [
+        "Are you working on your assignment right now?",
+        "Are you listening to me?",
+        "Are you studying for an exam this week?",
+        "Are you waiting for someone today?",
+        "Are you learning any new words this month?",
+        "Are you using your phone for the activity?",
+        "Are you writing the answer down?",
+        "Are you watching any English videos these days?"
+      ],
+      "present_continuous_negative": [
+        "Aren't you paying attention?",
+        "Are you not feeling well today?",
+        "Aren't you working on it at the moment?"
+      ],
+      "present_perfect": [
+        "Have you finished your homework yet?",
+        "Have you ever visited London?",
+        "Have you done your chores today?",
+        "Have you heard this song before?",
+        "Have you already sent the message?",
+        "Have you studied enough for tomorrow?",
+        "Have you eaten lunch today?",
+        "Have you seen this movie before?",
+        "Have you spoken to your teacher about it?"
+      ],
+      "present_perfect_negative": [
+        "Haven't you completed the task yet?",
+        "Have you not read the instructions?",
+        "Haven't you ever tried sushi?"
+      ],
+      "past_simple": [
+        "Did you take out the trash yesterday?",
+        "Did you call your parents last night?",
+        "Did you watch TV after dinner?",
+        "Did you go to bed late yesterday?",
+        "Did you do any exercise last week?",
+        "Did you remember to bring your books?",
+        "Did you meet any friends last weekend?",
+        "Did you have breakfast this morning?",
+        "Did you understand the last lesson?"
+      ],
+      "past_simple_negative": [
+        "Didn't you do your homework?",
+        "Did you not see my message?",
+        "Didn't you go to school yesterday?"
+      ],
+      "past_continuous": [
+        "Were you studying when I called you?",
+        "Were you sleeping at 10 p.m. last night?",
+        "Were you watching a movie when the power went out?",
+        "Were you working on your project yesterday evening?",
+        "Were you listening to music while you were cooking?",
+        "Were you talking to someone during the break?"
+      ],
+      "past_continuous_negative": [
+        "Weren't you paying attention when I explained it?",
+        "Were you not taking notes during the presentation?"
+      ],
+      "future_simple": [
+        "Will you be on time tomorrow?",
+        "Will you help me with this later?",
+        "Will you remember to bring your notebook next class?",
+        "Will you study tonight?",
+        "Will you do the dishes after dinner?",
+        "Will you join us for the next activity?"
+      ],
+      "future_simple_negative": [
+        "Won't you be able to come tomorrow?",
+        "Will you not attend the meeting?"
+      ],
+      "should": [
+        "Should you apologize to your classmate?",
+        "Should we start now?",
+        "Should you review the vocabulary again?",
+        "Should I speak more slowly?",
+        "Should you turn off your phone during class?",
+        "Should we take a short break?"
+      ],
+      "should_negative": [
+        "Shouldn't you be more careful?",
+        "Should we not wait for the others?"
+      ],
+      "could": [
+        "Could you repeat that, please?",
+        "Could you open the window?",
+        "Could you help me with this question?",
+        "Could you speak a little louder?",
+        "Could you send me the file today?",
+        "Could we change partners?"
+      ],
+      "could_negative": [
+        "Couldn't you come earlier next time?",
+        "Could you not make so much noise, please?"
+      ],
+      "can": [
+        "Can you confirm the meeting time?",
+        "Can you help me carry these books?",
+        "Can you answer this question in English?",
+        "Can you wait a moment, please?",
+        "Can you explain your idea?",
+        "Can we start the game now?",
+        "Can I borrow your pen?",
+        "Can you close the door, please?"
+      ],
+      "can_negative": [
+        "Can't you stay a little longer?",
+        "Can you not interrupt, please?"
+      ],
+      "would": [
+        "Would you like to try again?",
+        "Would you mind speaking more slowly?",
+        "Would you help me with my pronunciation?",
+        "Would you like some feedback now?",
+        "Would you prefer working alone or in pairs?",
+        "Would you like to answer first?"
+      ],
+      "would_negative": [
+        "Wouldn't you agree that this is important?",
+        "Would you not rather do it tomorrow?"
+      ],
+      "be_present": [
+        "Are you ready to begin?",
+        "Is your homework finished?",
+        "Are you okay?",
+        "Is it your turn?",
+        "Are we in the right room?"
+      ],
+      "be_past": [
+        "Were you late to class yesterday?",
+        "Was the homework difficult?",
+        "Were you tired after school?",
+        "Was it noisy in the classroom?",
+        "Were they happy with the result?"
+      ]
     }
   },
   "Essential irregulars past simple": {
@@ -688,8 +852,6 @@ const gameData: Record<string, { description: string; instructions: string; prom
 function startGame() {
   gameStarted.value = true
   gameComplete.value = false
-  buildPromptQueue()
-  loadNextPrompt()
 
   if (props.game === "Prove it!" && !selectedCategory.value) {
     snackbar.message = "Please select a category first"
@@ -697,6 +859,8 @@ function startGame() {
     snackbar.show = true
     return
   }
+  buildPromptQueue()
+  loadNextPrompt()
 }
 
 function buildPromptQueue() {

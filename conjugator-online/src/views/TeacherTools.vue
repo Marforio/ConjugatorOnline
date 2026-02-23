@@ -32,6 +32,22 @@
       </div>
     </div>
   </v-col>
+
+      <!-- Be Polite! -->
+  <v-col cols="12" sm="6" md="4" class="d-flex justify-center">
+    <div
+      class="image-tile"
+      @click="openDialog('Be Polite!')"
+    >
+      <div class="tile-frame">
+        <v-img
+          src="/images/banners/BePolite.png"
+          class="tile-image"
+          cover
+        />
+      </div>
+    </div>
+  </v-col>
   
   <!-- Spelling Bee -->
   <v-col cols="12" sm="6" md="4" class="d-flex justify-center">
