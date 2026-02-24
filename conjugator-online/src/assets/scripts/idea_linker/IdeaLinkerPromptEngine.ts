@@ -54,7 +54,7 @@ export function normalizeForCompare(s: string): string {
     .toLowerCase()
     .replace(/[’‘`´]/g, "'")
     .replace(/[?!.]+$/g, "")
-    .replace(/[\s.,!;:"()\-–—_/\\]+/g, "")
+    .replace(/[\s.,!;:¨"()\-–—_/\\]+/g, "")
     .replace(/'/g, "");
 }
 

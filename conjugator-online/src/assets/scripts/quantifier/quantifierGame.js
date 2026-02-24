@@ -61,7 +61,7 @@ class QuantifierGame {
     const cleaned = String(answer || '')
       .normalize('NFKC')
       .toLowerCase()
-      .replace(/[?.!"'’‘`´]/g, '')
+      .replace(/[?.!"¨'’‘`´]/g, '')
       .replace(/\s+/g, ' ')
       .trim();
 

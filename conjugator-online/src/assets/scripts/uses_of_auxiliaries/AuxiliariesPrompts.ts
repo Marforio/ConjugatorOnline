@@ -487,7 +487,7 @@ export const auxiliariesPrompts = {
     prompt: "We are going to start at sunrise.",
     highlight: "are",
     tense: "future (going to)",
-    answer: ["are you", "are you?"],
+    answer: ["are you", "are we"],
     negative: false,
   },
   62: {

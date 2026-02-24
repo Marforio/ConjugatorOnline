@@ -40,7 +40,7 @@ export function normalizeForCheck(s: any): string {
   return String(s ?? "")
     .toLowerCase()
     .trim()
-    .replace(/['’]/g, "")
+    .replace(/["$?!:;,¨'’]/g, "")
     .replace(/\s+/g, " ");
 }
 

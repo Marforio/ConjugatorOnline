@@ -472,7 +472,7 @@ export const passivePrompts = {
         highlight: "forgot"
     },
     60 : {
-        active : "We put the old computer to good use as a media server.",
+        active : "Yesterday we put the old computer to good use as a media server.",
         passive : "The old computer ____________ to good use as a media server.",
         tense : "past simple",
         answer : "was put",

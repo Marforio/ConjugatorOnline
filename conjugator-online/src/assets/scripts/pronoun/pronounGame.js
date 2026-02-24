@@ -49,7 +49,7 @@ class PronounGame {
   const cleanedAnswer = answer
     .normalize("NFKC")
     .toLowerCase()
-    .replace(/[?.!"'’‘`´]/g, '')
+    .replace(/[?.!"¨'’‘`´]/g, '')
     .replace(/\s+/g, ' ')
     .trim();
 

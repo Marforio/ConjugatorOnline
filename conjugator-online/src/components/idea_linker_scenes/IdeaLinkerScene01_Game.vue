@@ -12,11 +12,11 @@
       <strong>Correct! <v-icon icon="mdi-emoticon-happy-outline" /></strong>
     </div>
 
-    <v-card class="pt-4 px-4 pb-1" width="900" height="700" elevation="2">
+    <v-card class="pt-2 px-4" width="900" height="700" elevation="2">
       <div class="game-layout">
         <!-- TOP -->
         <div class="game-top">
-          <div class="d-flex justify-space-between mb-2">
+          <div class="d-flex justify-space-between">
             <div>Round {{ currentRound + 1 }} / {{ numRounds }}</div>
             <div class="text-subtitle-2 timer-pill" :class="timerClass">⏱ {{ timeLeft }} s</div>
           </div>
@@ -24,7 +24,7 @@
 
         <!-- MIDDLE -->
         <div class="game-middle mb-5">
-          <v-card class="pa-3 my-4" elevation="2" variant="flat">
+          <v-card class="pa-3 my-1" elevation="2" variant="flat">
             <div class="d-flex ga-4">
               <!-- Prompt + input -->
               <div class="flex-grow-1">
@@ -104,7 +104,7 @@
                     class="pa-2"
                     :class="{ 'group-complete': g.used >= g.needed }"
                   >
-                    <div class="d-flex justify-space-between align-center mb-2 used-group-header">
+                    <div class="d-flex justify-space-between align-center used-group-header">
                       <div class="text-caption font-weight-medium text-uppercase">
                         {{ g.key }}
                       </div>
