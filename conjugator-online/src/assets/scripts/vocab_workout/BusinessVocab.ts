@@ -3227,12 +3227,12 @@ export const sustainability = {
     "synonyms": []
   },
 
-  "corporate social responsibility": {
-    "definition": "Companies' commitment to ethical and sustainable business practices (CSR).",
+  "CSR": {
+    "definition": "Corporate Social Responsibility: companies' commitment to sustainable business practices.",
     "French": "responsabilité sociale des entreprises",
     "German": "Corporate Social Responsibility",
     "Italian": "responsabilità sociale d'impresa",
-    "image": "/images/vocab/corporate_social_responsibility.jpg",
+    "image": "/images/vocab/CSR.jpg",
     "multiple_choice": ["business ethics", "corporate citizenship", "social accountability"],
     "accepted": [],
     "synonyms": []
@@ -3287,7 +3287,7 @@ export const sustainability = {
     "French": "ESG (environnement, social, gouvernance)",
     "German": "ESG (Umwelt, Soziales, Unternehmensführung)",
     "Italian": "ESG (ambientale, sociale, governance)",
-    "image": "/images/vocab/esg.jpg",
+    "image": "/images/vocab/ESG.jpg",
     "multiple_choice": ["sustainability metrics", "CSR criteria", "impact assessment"],
     "accepted": [],
     "synonyms": []
@@ -3414,12 +3414,12 @@ export const sustainability = {
     "synonyms": []
   },
 
-  "extended producer responsibility": {
-    "definition": "Policies that hold manufacturers accountable for the lifecycle of their products (EPR).",
+  "EPR": {
+    "definition": "Extended Producer Responsibility: when manufacturers take more responsibility for the treatment or disposal of post-consumer products.",
     "French": "responsabilité élargie du producteur",
     "German": "erweiterte Herstellerverantwortung",
     "Italian": "responsabilità estesa del produttore",
-    "image": "/images/vocab/extended_producer_responsibility.jpg",
+    "image": "/images/vocab/E_P_R.jpg",
     "multiple_choice": ["product stewardship", "manufacturer accountability", "lifecycle responsibility"],
     "accepted": [],
     "synonyms": []
@@ -3458,12 +3458,12 @@ export const sustainability = {
     "synonyms": []
   },
 
-  "smart grids": {
-    "definition": "Energy networks that optimize electricity use and reduce waste.",
-    "French": "réseaux intelligents",
-    "German": "intelligente Stromnetze",
-    "Italian": "reti intelligenti",
-    "image": "/images/vocab/smart_grids.jpg",
+  "smart grid": {
+    "definition": "An energy network that optimizes electricity use and reduces waste.",
+    "French": "réseau intelligent",
+    "German": "intelligentes Stromnetz",
+    "Italian": "rete intelligente",
+    "image": "/images/vocab/smart_grid.jpg",
     "multiple_choice": ["intelligent networks", "optimized grids", "digital energy systems"],
     "accepted": [],
     "synonyms": []
