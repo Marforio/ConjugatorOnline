@@ -2885,7 +2885,7 @@ export const startUps = {
 
 export const businessEthics = {
   "ethical dilemma": {
-    "definition": "A situation in which a person or organization faces a conflict between competing ethical principles, requiring a difficult decision.",
+    "definition": "A logical conflict between competing ethical principles, requiring a difficult decision.",
     "French": "dilemme éthique",
     "German": "ethisches Dilemma",
     "Italian": "dilemma etico",
@@ -2896,7 +2896,7 @@ export const businessEthics = {
   },
 
   "integrity": {
-    "definition": "Adherence to moral and ethical principles, such as honesty, fairness, and consistency in business dealings.",
+    "definition": "The moral quality of someone who follows moral and ethical principles, to become a 'whole' person.",
     "French": "intégrité",
     "German": "Integrität",
     "Italian": "integrità",
@@ -2907,7 +2907,7 @@ export const businessEthics = {
   },
 
   "transparency": {
-    "definition": "The practice of being open and clear about business practices, decisions, and performance to build trust with stakeholders.",
+    "definition": "The practice of being open and clear about business practices.",
     "French": "transparence",
     "German": "Transparenz",
     "Italian": "trasparenza",
@@ -2918,7 +2918,7 @@ export const businessEthics = {
   },
 
   "fair trade": {
-    "definition": "A movement that promotes better trading conditions and fairer prices for producers in developing countries, ensuring ethical sourcing and social responsibility.",
+    "definition": "A movement that promotes better trading conditions and fairer prices for producers.",
     "French": "commerce équitable",
     "German": "fairer Handel",
     "Italian": "commercio equo e solidale",
@@ -2929,7 +2929,7 @@ export const businessEthics = {
   },
 
   "whistleblowing": {
-    "definition": "The act of reporting unethical or illegal behavior within an organization to relevant authorities or the public.",
+    "definition": "The (risky) act of reporting unethical or illegal behavior to the public.",
     "French": "dénonciation",
     "German": "Whistleblowing",
     "Italian": "whistleblowing",
@@ -2951,7 +2951,7 @@ export const businessEthics = {
   },
 
   "ethical leadership": {
-    "definition": "Leading by example through responsible, fair, and transparent actions, demonstrating commitment to ethical practices.",
+    "definition": "Leading by example in the area of ethics.",
     "French": "leadership éthique",
     "German": "ethische Führung",
     "Italian": "leadership etica",
@@ -2973,7 +2973,7 @@ export const businessEthics = {
   },
 
   "utilitarianism": {
-    "definition": "An ethical theory that suggests the best decision is the one that maximizes overall happiness or benefit for the most people.",
+    "definition": "The idea that the best decision is the one that maximizes overall happiness or benefit for the most people.",
     "French": "utilitarisme",
     "German": "Utilitarismus",
     "Italian": "utilitarismo",
@@ -2984,7 +2984,7 @@ export const businessEthics = {
   },
 
   "conflict of interest": {
-    "definition": "A situation where an individual's personal interests interfere with their ability to make impartial decisions for their organization.",
+    "definition": "When an individual's personal interests interfere with their ability to make impartial decisions for their organization.",
     "French": "conflit d'intérêts",
     "German": "Interessenkonflikt",
     "Italian": "conflitto di interessi",
@@ -2995,7 +2995,7 @@ export const businessEthics = {
   },
 
   "stakeholder theory": {
-    "definition": "A theory that holds that businesses have an ethical obligation to consider the interests of all stakeholders (employees, customers, suppliers, communities) in decision-making.",
+    "definition": "The idea that businesses have an ethical obligation to consider the interests of all stakeholders (employees, customers, suppliers, communities).",
     "French": "théorie des parties prenantes",
     "German": "Stakeholder-Theorie",
     "Italian": "teoria degli stakeholder",
@@ -3028,7 +3028,7 @@ export const businessEthics = {
   },
 
   "compliance": {
-    "definition": "The act of adhering to laws, regulations, and internal policies, ensuring ethical behavior in business operations.",
+    "definition": "The act of adhering to laws, regulations, and internal policies.",
     "French": "conformité",
     "German": "Compliance",
     "Italian": "conformità",
@@ -3039,7 +3039,7 @@ export const businessEthics = {
   },
 
   "anti-corruption": {
-    "definition": "Measures and practices designed to prevent corruption and bribery in business transactions and operations.",
+    "definition": "Measures and practices designed to prevent illegal or unethical behavior in business operations.",
     "French": "lutte contre la corruption",
     "German": "Korruptionsbekämpfung",
     "Italian": "anticorruzione",
@@ -3050,7 +3050,7 @@ export const businessEthics = {
   },
 
   "human rights": {
-    "definition": "The fundamental rights and freedoms that every individual is entitled to, including the right to fair treatment and dignity in the workplace.",
+    "definition": "The fundamental rights and freedoms of every individual.",
     "French": "droits de l'homme",
     "German": "Menschenrechte",
     "Italian": "diritti umani",
@@ -3061,7 +3061,7 @@ export const businessEthics = {
   },
 
   "diversity and inclusion": {
-    "definition": "Ethical principles that emphasize the importance of creating an inclusive and diverse work environment that values different perspectives and equal opportunities for all.",
+    "definition": "Ethical principles that emphasize the importance of creating a diverse and inclusive work environment.",
     "French": "diversité et inclusion",
     "German": "Vielfalt und Inklusion",
     "Italian": "diversità e inclusione",
@@ -3072,7 +3072,7 @@ export const businessEthics = {
   },
 
   "responsible marketing": {
-    "definition": "The practice of marketing products and services in an ethical manner, avoiding manipulation, misrepresentation, or exploitation of consumers.",
+    "definition": "The practice of marketing products and services in an ethical manner.",
     "French": "marketing responsable",
     "German": "verantwortungsvolles Marketing",
     "Italian": "marketing responsabile",
@@ -3083,7 +3083,7 @@ export const businessEthics = {
   },
 
   "employee well-being": {
-    "definition": "The ethical responsibility of businesses to ensure the health, safety, and mental well-being of their employees.",
+    "definition": "The responsibility of businesses to ensure the health, safety, and mental well-being of their employees.",
     "French": "bien-être des employés",
     "German": "Mitarbeiterwohlbefinden",
     "Italian": "benessere dei dipendenti",
@@ -3105,7 +3105,7 @@ export const businessEthics = {
   },
 
   "price gouging": {
-    "definition": "The unethical practice of increasing the prices of goods or services to exploit consumers during a crisis or shortage.",
+    "definition": "The unethical practice of increasing the prices of goods or services to exploit consumers.",
     "French": "prix abusifs",
     "German": "Preistreiberei",
     "Italian": "speculazione sui prezzi",
@@ -3116,7 +3116,7 @@ export const businessEthics = {
   },
 
   "exploitation": {
-    "definition": "The unethical use of workers, resources, or communities for financial gain, often with little regard for fairness or human dignity.",
+    "definition": "The abuse of workers, resources, or communities for financial gain.",
     "French": "exploitation",
     "German": "Ausbeutung",
     "Italian": "sfruttamento",

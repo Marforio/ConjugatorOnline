@@ -1088,7 +1088,7 @@ const rounds = shownPrompts.value.map((r, index) => ({
 
 
   const payload = {
-    game_name: props.game,
+    game_name: updatedGameName.value,
     student_web_id: props.student,
     total_rounds: totalRounds,
     correct_count: rightCount.value,
