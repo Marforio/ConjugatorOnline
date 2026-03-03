@@ -308,7 +308,7 @@ export const comparisonPrompts: Record<number, ComparisonPromptRaw> = {
     word: "comfortable",
     person_A: "Airbus",
     person_B: "Boeing",
-    answer: { comparative: ["more comfortable"], superlative: ["the most comfortable"], equality: ["as comfortable as"] },
+    answer: { comparative: ["more comfortable than"], superlative: ["the most comfortable"], equality: ["as comfortable as"] },
     negative: false,
     part_of_speech: "adjective",
     prompt: null,

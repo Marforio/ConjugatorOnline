@@ -330,10 +330,228 @@ export const exerciseData = {
             ]
         }
     },
-    
 
+    // Plurals inside compound nouns
+    "0140" : {
+        1: {
+            type : "radio",
+            question : "What is a compound noun?",
+            answers : [
+                ["A noun made up of two or more words that function as a single noun.", true, "Correct! A compound noun is made up of two or more words that function as a single noun."],
+                ["A noun that is always plural.", false, "Wrong. A compound noun can be singular or plural."],
+                ["A noun that cannot be modified by adjectives.", false, "Wrong. A compound noun can be modified by adjectives." ]
+            ]
+        },        
+        2: {
+            type : "radio",
+            question : "Which of these is an example of a compound noun?",
+            answers : [
+                ["Computer screen", true, "Correct! 'Computer screen' is a compound noun made up of 'computer' and 'screen'."],
+                ["The big dog", false, "Wrong. 'Dog' is a simple noun modified by an adjective and specified by the article."],
+                ["Consolidation", false, "Wrong. 'Consolidation' is just a long simple noun." ]
+            ]
+        },
+        3: {
+            type : "text_multi",
+            question : "Change the following phrase into a compound noun: 'A journey lasting three days'",
+            answers : ["a three-day journey", "a 3-day journey","a three day journey", "a 3 day journey", "three-day journey", "3-day journey"]
+        },
+        4: {
+            type: "text_multi",
+            question: "Change the following phrase into a compound noun: 'A boy who is 5 years old'",
+            answers: ["a five-year-old boy", "a 5-year-old boy", "a five year old boy", "a 5 year old boy", "five-year-old boy", "5-year-old boy", "five year old boy", "5 year old boy"]
+        },
+        5: {
+            type : "text_multi",
+            question : "Change the following phrase into a compound noun: 'An exam consisting of 20 questions'",
+            answers : ["a 20-question exam", "a twenty-question exam", "a 20 question exam", "a twenty question exam", "20-question exam", "twenty-question exam", "20 question exam", "twenty question exam"]
+        },
+        6: {
+            type : "checkbox",
+            question : "Which of these sentences are correct?",
+            answers : [
+                ["I wrote a 10-page report.", true, "Correct! '10-page report' is a correctly formed compound noun."],
+                ["I wrote a 10 pages report.", false, "Wrong. The plural form 'pages' is not correct in this compound noun."],
+                ["I wrote a Tenpagereport.", false, "Wrong. 'Tenpagereport' is not correctly formed. It should be 'Ten-page report'."],
+            ]
+        },
+        7: {
+            type : "checkbox",
+            question : "Which if these sentences about hyphens ( - ) in compound nouns are correct?",
+            answers : [
+                ["Hyphens are used to link words together, especially when numbers are involved.", true, "Correct! Hyphens are used to link words together, especially when numbers are involved."],
+                ["Hyphens in a compound noun are obligatory. It is a big mistake not to use them.", false, "Wrong. Hyphens are not always obligatory in compound nouns. They are used in specific cases, such as when numbers are involved."],
+                ["Hyphens are a visual aid to help clarify which words are grouped together.", true, "Correct! Hyphens help clarify which words are grouped together."]
+            ]
+        },
+        8: {
+            type : "radio",
+            question : "Why do we avoid plural forms inside compound nouns?",
+            answers : [
+                ["Because only the last noun behaves like a noun; the first noun(s) act as adjectives or modifiers, which cannot be pluralized.", true, "Right! In compound nouns, only the last noun behaves like a noun; the first noun(s) act as adjectives or modifiers."],
+                ["Because plural forms are more difficult to pronounce inside compound nouns.", false, "Wrong. Plural forms are not more difficult to pronounce inside compound nouns." ],
+                ["We don't avoid plural forms inside compound nouns.", false, "Wrong. You should avoid plural forms inside compound nouns." ]
+            ]
+        },
+        9: {
+            type :  "radio",
+            question : "Is this correct: 'I live in a 10-floors building' ?",
+            answers : [
+                ["Yes, it is correct.", false, "Wrong. The correct form is 'I live in a 10-floor building'."],
+                ["No, it is incorrect.", true, "Right! The correct form is 'I live in a 10-floor building'."]
+            ]
+        },
+        10: {
+            type : "radio",
+            question : "Is this correct: 'My neighbors are a 5-children family' ?",
+            answers : [
+                ["Yes, it is correct.", false, "Wrong. The correct form is 'My neighbors are a 5-child family'."],
+                ["No, it is incorrect.", true, "Right! The correct form is 'My neighbors are a 5-child family'."]
+            ]
+        }
+    },
 
+    // Not using compound nouns
+    "0141" : {
+        1: {
+            type : "radio",
+            question :  "Are compound nouns such as '4-wheel drive' considered natural and elegant in English?",
+            answers : [
+                ["Yes, compound nouns are natural and elegant in English.", true, "Correct! Compound nouns are a natural and elegant way to express ideas in English."],
+                ["No, compound nouns are complicated and should be avoided.", false, "Wrong. Compound nouns are a natural and elegant way to express ideas in English." ]
+            ]
+        },
+        2: {
+            type : "radio",
+            question : "Why are compound nouns such as 'a 50-win season' considered elegant?",
+            answers : [
+                ["Because they are short and economical.", true, "Correct! Compound nouns are elegant because they are concise and efficient."],
+                ["Because they are a bit old-fashioned and outdated.", false, "Wrong. Compound nouns are not old-fashioned or outdated."],
+                ["Because they are rarely used.", false, "Wrong. Compound nouns are used all the time." ]
+            ]
+        },
+        3: {
+            type : "radio",
+            question :  "Choose the most elegant option:",
+            answers : [
+                ["The team had a season with 50 wins.", false, "Wrong. The preposition 'with' makes the sentence less concise."],
+                ["The team had a 50-win season.", true, "Correct! 'A 50-win season' is a concise and elegant way to express this idea."],
+                ["The team had a 50 win's season.", false, "Wrong. There is no need for the possessive ** 's ** here." ]
+                ]
+        },
+        4: {
+            type : "radio",
+            question : "Choose the most elegant option:",
+            answers : [
+                ["The rover has a sensor for detecting obstacles.", false, "Wrong. The preposition 'for' makes the sentence less concise."],
+                ["The rover has an obstacles-detection sensor,", false, "Wrong. The plural form 'obstacles' is not correct inside a compound noun."],
+                ["The rover has an obstacle-detection sensor.", true, "Correct! 'An obstacle-detection sensor' is a concise and elegant way to express this idea." ]
+            ]
+        },
+        5: {
+            type : "radio",
+            question : "True or false: avoid using possessive 's if you can use compound word instead.",
+            answers : [
+                ["True", true, "Correct! It's usually better to say, for example, 'The University campus' instead of 'The University's campus'."],
+                ["False", false, "Wrong. It's usually better to say, for example, 'The University campus' instead of 'The University's campus'." ]
+            ]
+        },
+        6: {
+            type : "radio",
+            question : "Which statments about compound nouns are correct?",
+            answers : [
+                ["Compound nouns are a natural and elegant way to express ideas in English.", true, "Correct! Compound nouns are a natural and elegant way to express ideas in English."],
+                ["Compound nouns are often more concise and efficient than using prepositional phrases or possessive forms.", true, "Correct! Compound nouns are often more concise and efficient than using prepositional phrases or possessive forms."],
+                ["You must always use compound nouns instead of prepositions or possessives.", false, "Wrong. There are common sense situations in which using a preposition or possessive form is more appropriate." ]
+            ]
+        },
+        7: {
+            type : "radio",
+            question : "True or false: possessive 's is often used unnecessarily when a compound noun would be more concise and elegant.",
+            answers : [
+                ["True", true, "Correct! Possessive 's is often unnecessary (example: 'the airport's lounge' vs 'the airport lounge')."],
+                ["False", false, "Wrong. Possessive 's is often unnecessary if the notion of ownership is weakly expressed (example: 'the airport's lounge' vs 'the airport lounge')." ]
+            ]
+        },
+        8: {
+            type : "radio",
+            question : "In general, which of these sentences is more elegant?",
+            answers : [
+                ["The school's website is a bit outdated.", false, "Wrong. The possessive 's is less concise and elegant."],
+                ["The school website is a bit outdated.", true, "Correct! The compound noun 'school website' is more concise and elegant." ],
+                ["The website of the school is a bit outdated.", false, "Wrong. The prepositional phrase 'of the school' is less concise and elegant."]
+            ]        
+        },
+        9: {
+            type : "radio",
+            question : "In general, which of these sentences is more elegant?",
+            answers : [
+                ["The three-day weekend for all is a dangerous idea.", true, "Correct! The compound noun 'three-day weekend' is more concise and elegant."],
+                ["The three days' weekend for all is a dangerous idea.", false, "Wrong. The possessive 's is less elegant, even wrong in this case." ],
+                ["The weekend of three days for all is a dangerous idea.", false, "Wrong. The prepositional phrase 'of three days' is less concise and elegant." ]
+            ]
+        },
+        10: {
+            type : "radio",
+            question : "In general, which of these sentences is more elegant?",
+            answers : [
+                ["Geneva's airport needs to be renovated.", false, "Wrong. The possessive 's is less concise and elegant."],
+                ["Geneva airport needs to be renovated.", true, "Correct! The compound noun 'Geneva airport' is more concise and elegant." ],
+                ["The airport of Geneva needs to be renovated.", false, "Wrong. The prepositional phrase 'of Geneva' is less concise and elegant." ]
+            ]
+        }
+    },
 
-};
-
-
+    // Treating uncountable nouns as single units
+    "0151" : {
+        1: {
+            type : "checkbox",
+            question : "Which of these words are uncountable nouns?",
+            answers : [
+                ["Book", false, "Wrong. 'Book' is a countable noun."],
+                ["Information", true, "Correct! 'Information' is an uncountable noun."],
+                ["Advice", true,"Correct! 'Advice' is an uncountable noun." ],
+                ["Microphone", false, "Wrong. 'Microphone' is a countable noun." ],
+                ["Furniture", true, "Correct! 'Furniture' is an uncountable noun." ],
+                ["News", true, "Correct! 'News' is an uncountable noun (>> 'l'actualité')." ],
+                ["Water", true, "Correct! 'Water' is an uncountable noun." ],
+            ]
+        },
+        2: {
+            type : "radio",
+            question : "Uncountable nouns such as 'information' and 'advice' can be treated as a single unit ('an information' or 'an advice').",
+            answers : [
+                ["True", false, "Wrong. Uncountable nouns should not be treated as a single units."],
+                ["False", true, "Correct. Uncountable nouns should not be treated as a single units." ]
+            ]
+        },
+        3: {
+            type : "radio",
+            question : "Can we use 'each' and 'every' with uncountable nouns such as 'information' and 'advice'?",
+            answers : [
+                ["True", false, "Wrong. 'Each' and 'every' cannot be used with uncountable nouns such as 'information' and 'advice'."],
+                ["False", true, "Correct. 'Each' and 'every' cannot be used with uncountable nouns such as 'information' and 'advice'." ]
+            ]
+        },
+        4: {
+            type : "radio",
+            question : "Why are the articles 'a' and 'an' and the determiners 'each' and 'every' not used with uncountable nouns such as 'information' and 'advice'?",
+            answers : [
+                ["Because these articles and determiners imply that the noun is a single unit, which is incompatible with uncountable nouns.", true, "Correct! The articles 'a' and 'an' and the determiners 'each' and 'every' imply that the noun is a single unit, which is incompatible with uncountable nouns."],
+                ["Because these articles and determiners are only used with plural nouns.", false, "Wrong. The articles 'a' and 'an' and the determiners 'each' and 'every' are used with singular countable nouns." ],
+                ["Because these articles and determiners are only used with countable nouns.", false, "Wrong. The articles 'a' and 'an' and the determiners 'each' and 'every' are used with singular countable nouns." ]
+            ]
+        },
+        5: {
+            type : "checkbox",
+            question : "Which of these are correct?",
+            answers : [
+                ["Each furniture in this room is priceless.", false, "Wrong. 'Furniture' is an uncountable noun and cannot be treated as a single unit."],
+                ["I have important information to give.", true, "Correct! 'Information' is an uncountable noun and should not be treated as a single unit (no article is used)." ],
+                ["I have an important advice to give.", false, "Wrong. 'Advice' is an uncountable noun and cannot be treated as a single unit."],
+                ["I have an important announcement to make.", true, "Correct! 'Announcement' is a countable noun and can be treated as a single unit ('an announcement')."],
+                ["Every news today was depressing.", false, "Wrong. 'News' is an uncountable noun and cannot be treated as a single unit, which is what 'every' implies."],
+            ]
+},
+    }
+}
