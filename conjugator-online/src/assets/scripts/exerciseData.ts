@@ -368,7 +368,7 @@ export const exerciseData = {
         },
         6: {
             type : "checkbox",
-            question : "Which of these sentences are correct?",
+            question : "Which of these sentences is correct?",
             answers : [
                 ["I wrote a 10-page report.", true, "Correct! '10-page report' is a correctly formed compound noun."],
                 ["I wrote a 10 pages report.", false, "Wrong. The plural form 'pages' is not correct in this compound noun."],
@@ -377,11 +377,11 @@ export const exerciseData = {
         },
         7: {
             type : "checkbox",
-            question : "Which if these sentences about hyphens ( - ) in compound nouns are correct?",
+            question : "Which of these sentences is correct?",
             answers : [
-                ["Hyphens are used to link words together, especially when numbers are involved.", true, "Correct! Hyphens are used to link words together, especially when numbers are involved."],
-                ["Hyphens in a compound noun are obligatory. It is a big mistake not to use them.", false, "Wrong. Hyphens are not always obligatory in compound nouns. They are used in specific cases, such as when numbers are involved."],
-                ["Hyphens are a visual aid to help clarify which words are grouped together.", true, "Correct! Hyphens help clarify which words are grouped together."]
+                ["Hyphens ( - ) are used to link words together, especially when numbers are involved.", true, "Correct! Hyphens are used to link words together, especially when numbers are involved."],
+                ["Hyphens ( - )  in a compound noun are obligatory. It is a big mistake not to use them.", false, "Wrong. Hyphens are not always obligatory in compound nouns. They are used in specific cases, such as when numbers are involved."],
+                ["Hyphens ( - ) are a visual aid to help clarify which words are grouped together.", true, "Correct! Hyphens help clarify which words are grouped together."]
             ]
         },
         8: {

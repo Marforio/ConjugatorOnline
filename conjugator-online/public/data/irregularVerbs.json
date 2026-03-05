@@ -273,7 +273,7 @@
     },
     "offset":{
         "past_simple": "offset",
-        "present_perfect": "offset"
+        "past_participle": "offset"
     },
     "pay":{
         "past_simple": "paid",
@@ -398,6 +398,10 @@
     "spit":{
         "past_simple": "spat",
         "past_participle": "spat"
+    },
+    "spread":{
+        "past_simple": "spread",
+        "past_participle": "spread"
     },
     "spring":{
         "past_simple": "sprang",

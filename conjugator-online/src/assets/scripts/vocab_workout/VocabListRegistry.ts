@@ -49,6 +49,12 @@ export const vocabLists = {
     data: ArchCareer,
     supportsLevels: false,
   },
+    dimensions_properties_arch: {
+    title: "Dimensions and Properties",
+    module: "Architecture",
+    data: DimensionsAndProperties,
+    supportsLevels: false,
+  },
   ////////////////////////////// CIVIL ENGINEERING /////////////////////////////
   civil_verbs: {
     title: "Verbs for Civil Engineering",
