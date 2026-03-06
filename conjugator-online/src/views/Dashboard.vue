@@ -56,137 +56,143 @@
         <div v-else-if="conjGameError">
           <v-alert type="error">{{ conjGameError }}</v-alert>
         </div>
-        <div v-else class="d-flex flex-wrap align-start pa-2">
+        <v-container v-else fluid class="pa-2">
           <div v-if="!sessions.length">
             <h3 class="m-5 text-center">No data to display.</h3>
           </div>
           <div v-else>
             <v-row dense>
-            <!-- Conjugation accuracy overall -->
-            <v-col cols="12" lg="5">
-              <v-card class="chart-card pa-4 py-6" elevation="2">
-                <v-card-title class="text-h5 font-weight-bold mb-3">Conjugator data overall</v-card-title>
-                <v-card-text class="d-flex flex-column align-center flex-grow-1">
-                  <PieChart :data="totalRightWrongChartData" />
-                  <div class="text-subtitle-1 mt-6 mb-2">
-                    {{ sessions.length }} game{{ sessions.length !== 1 ? 's' : '' }} played in total
-                  </div>
-                  <div class="text-subtitle-2">
-                    {{ totalRoundsPlayed }} total rounds: {{ totalCorrect }} correct, {{ totalIncorrect }} incorrect
-                  </div>
-                  <div v-if="totalTypos > 0" class="text-caption text-muted">
-                    ({{ totalTypos }} typo<span v-if="totalTypos > 1">s</span> not counted)
-                  </div>
-                  <div class="text-subtitle-2 mt-2">Average speed: {{ avgTimePerRound }} seconds per answer
-                  </div>
-                </v-card-text>
-              </v-card>
-            </v-col>
-            <!-- Some Numbers -->
-            <v-col cols="12" lg="7">
-              <v-card class="chart-card pa-2" v-if="sessionAccuracyTrend.length > 1" elevation="2">
-                    <v-card  elevation="1" class="pa-4 mb-2">
-                  <div class="text-h6 mb-2">Game Accuracy Trend</div>
-                  <v-sparkline
-                    :model-value="sessionAccuracyTrend"
-                    :gradient="sparklineGradients[2]"
-                    color="blue"
-                    line-width="3"
-                    stroke-linecap="round"
-                    auto-draw
-                    auto-draw-duration="1200"
-                    auto-draw-easing="ease"
-                    padding="20"
-                    smooth
-                    :labels="generateSparklineLabels(sessionAccuracyTrend)"
-                    :show-labels="true"
-                  />
+              <v-col cols="12" lg="5">
+                <v-card class="chart-card pa-4 py-6" elevation="2">
+                  <v-card-title class="text-h5 font-weight-bold mb-3">Conjugator data overall</v-card-title>
+                  <v-card-text class="d-flex flex-column align-center flex-grow-1">
+                    <PieChart :data="totalRightWrongChartData" />
 
-
-                  <div class="text-caption text-muted mt-2">
-                    Accuracy per game played
-                  </div>
-                  
+                    <div class="text-subtitle-1 mt-6 mb-2">
+                      {{ sessions.length }} game{{ sessions.length !== 1 ? 's' : '' }} played in total
+                    </div>
+                    <div class="text-subtitle-2 text-center">
+                      {{ totalRoundsPlayed }} total rounds: {{ totalCorrect }} correct, {{ totalIncorrect }} incorrect
+                    </div>
+                    <div v-if="totalTypos > 0" class="text-caption text-muted">
+                      ({{ totalTypos }} typo<span v-if="totalTypos > 1">s</span> not counted)
+                    </div>
+                    <div class="text-subtitle-2 mt-2">
+                      Average speed: {{ avgTimePerRound }} seconds per answer
+                    </div>
+                  </v-card-text>
                 </v-card>
-                <div style="display: flex;">
-                  <NumbersCard
-                    class="ma-2 flex-grow-1"
-                    :value="userStore.totalCorrect ?? 0"
-                    title="Spring 2026 Total correct"
-                    label="Correct answers since the start of the semester"
-                  />
-                  <v-tooltip text="How close you are to an ideal student (1500 correct answers, 100% accuracy, 12s avg speed, medium difficulty" location="bottom">
-                    <template v-slot:activator="{ props }">
-                      <v-card
-                        class="ma-2 bg-light-blue-lighten-5"
-                        elevation="2"
-                        v-bind="props"
-                        style="min-width: 180px;"
-                      >
-                        <v-card-text class="text-center">
-                          <v-card-title class="text-subtitle-2 text-wrap m-2">Spring 2026 Power index</v-card-title>
-                            <Gauge
-                                  :key="gaugeKey"
-                                  :value="userStore.healthScore ?? 0"
-                                  :size="$vuetify.display.lgAndUp ? 120 : 200"
-                                />
-                            <v-card-subtitle class="text-caption text-wrap">
-                              Level: {{ healthTier ?? '' }}
-                            </v-card-subtitle>
-                        </v-card-text>
+              </v-col>
+
+              <v-col cols="12" lg="7">
+                <v-card class="chart-card pa-2" v-if="sessionAccuracyTrend.length > 1" elevation="2">
+                  <v-card elevation="1" class="pa-4 mb-2">
+                    <div class="text-h6 mb-2">Game Accuracy Trend</div>
+                    <v-sparkline
+                      :model-value="sessionAccuracyTrend"
+                      :gradient="sparklineGradients[2]"
+                      color="blue"
+                      line-width="3"
+                      stroke-linecap="round"
+                      auto-draw
+                      padding="20"
+                      smooth
+                      :labels="generateSparklineLabels(sessionAccuracyTrend)"
+                      :show-labels="true"
+                    />
+                    <div class="text-caption text-muted mt-2">Accuracy per game played</div>
+                  </v-card>
+
+                  <v-row dense justify="center" class="mt-2">
+                    <v-col cols="12" sm="4" class="d-flex">
+                      <v-card class="pa-4 flex-grow-1 text-center d-flex flex-column justify-center" elevation="2">
+                        <v-card-title class="text-subtitle-2 text-wrap justify-center pa-0">
+                          Spring 2026 Total correct
+                        </v-card-title>
+                        <div class="text-h5 my-3 font-weight-bold">{{ userStore.totalCorrect ?? 0 }}</div>
+                        <div class="text-caption text-medium-emphasis">
+                          Correct answers since the start of the semester
+                        </div>
                       </v-card>
-                    </template>
-                  </v-tooltip>
-                  <v-card v-if="userStore.previousDate" class="ma-2 pa-4" elevation="2">
-                    <v-card-title  class="text-subtitle-2 text-wrap m-2">Historical data</v-card-title>
-                    <v-card-text>
-                      <p class="m-2" style="font-size: 0.9rem;">Last semester</p>
-                      <div class="d-flex flex-column ga-5 ms-3 mt-3">
-                        <div class="d-flex align-center ga-2">
-                          <v-icon size="18">mdi-bullseye-arrow</v-icon>
-                          <span class="text-body-2">Total correct: {{ userStore.previousTotalCorrectPrompts }}</span>
+                    </v-col>
+
+                    <v-col cols="12" sm="4" class="d-flex">
+                      <v-tooltip text="How close you are to an ideal student..." location="bottom">
+                        <template v-slot:activator="{ props }">
+                          <v-card
+                            v-bind="props"
+                            class="pa-4 bg-light-blue-lighten-5 flex-grow-1 text-center d-flex flex-column justify-center"
+                            elevation="2"
+                          >
+                            <v-card-title class="text-subtitle-2 text-wrap justify-center pa-0">
+                              Spring 2026 Power index
+                            </v-card-title>
+                            <div class="d-flex justify-center my-1">
+                              <Gauge
+                                :key="gaugeKey"
+                                :value="userStore.healthScore ?? 0"
+                                :size="xs ? 130 : 100" 
+                              />
+                            </div>
+                            <div class="text-caption text-medium-emphasis">
+                              Level: {{ healthTier ?? '' }}
+                            </div>
+                          </v-card>
+                        </template>
+                      </v-tooltip>
+                    </v-col>
+
+                    <v-col cols="12" sm="4" class="d-flex">
+                      <v-card class="pa-4 flex-grow-1 text-center d-flex flex-column justify-center" elevation="2">
+                        <v-card-title class="text-subtitle-2 text-wrap justify-center pa-0">
+                          Historical data
+                        </v-card-title>
+                        <v-card-subtitle>Last semester</v-card-subtitle>
+                        
+                        <div class="flex-grow-1 d-flex flex-column justify-center mt-2">
+                          <template v-if="userStore.previousDate">
+                            <div class="text-h6 font-weight-bold mb-1">
+                              {{ userStore.previousTotalCorrectPrompts }}
+                            </div>
+                            <div class="text-caption text-medium-emphasis">
+                              Correct answers <br> 
+                              <v-chip size="x-small" color="primary" variant="flat" class="mt-4">
+                                {{ userStore.previousHealthScore }}% Health
+                              </v-chip>
+                            </div>
+                          </template>
+                          <div v-else class="text-caption text-medium-emphasis py-4">
+                            No historical data available
+                          </div>
                         </div>
+                      </v-card>
+                    </v-col>
+                  </v-row>
+                </v-card>
+              </v-col>
 
-                        <div class="d-flex align-center ga-2">
-                          <v-icon size="18">mdi-arm-flex</v-icon>
-                          <span class="text-body-2">Health: {{ userStore.previousHealthScore }}%</span>
-                        </div>
-                      </div>
-                    </v-card-text>
-                  </v-card>
-                  <v-card v-else class="ma-2 pa-4">
-                    <v-card-title class="text-subtitle-2 text-wrap mb-2">Historical data</v-card-title>
-                    <v-card-text>
-                      <p class="mb-2" style="font-size: 0.9rem;">No historical data available</p>
-                    </v-card-text>
-                  </v-card>
-                  
-                </div>
-              </v-card>
-            </v-col>
+              <v-col cols="12" lg="6">
+                <v-card class="chart-card pa-4" elevation="2">
+                  <v-card-title class="text-h5 font-weight-bold">Tense accuracy</v-card-title>
+                  <v-card-text class="d-flex flex-column align-center flex-grow-1">
+                    <BarChart :data="tenseAccuracyData" />
+                    <div class="text-subtitle-1 mt-4">Percentage of correct answers by tense</div>
+                  </v-card-text>
+                </v-card>
+              </v-col>
 
-            <!-- Tense accuracy -->
-            <v-col cols="12" lg="6">
-              <v-card class="chart-card pa-4" elevation="2">
-                <v-card-title class="text-h5 font-weight-bold">Tense accuracy</v-card-title>
-                <v-card-text class="d-flex flex-column align-center flex-grow-1">
-                  <BarChart :data="tenseAccuracyData" :width="400" :height="250" color="#4CAF50" />
-                  <div class="text-subtitle-1 mt-4">Percentage of correct answers by tense</div>
-                </v-card-text>
-              </v-card>
-            </v-col>
+              <v-col cols="12" lg="6">
+                <v-card class="chart-card pa-4" elevation="2">
+                  <v-card-title class="text-h5 font-weight-bold">Sentence type accuracy</v-card-title>
+                  <v-card-text class="d-flex flex-column align-center flex-grow-1">
+                    <BarChart :data="sentenceTypeAccuracyData" />
+                    <div class="text-subtitle-1 mt-4">Percentage of correct answers by sentence type</div>
+                  </v-card-text>
+                </v-card>
+              </v-col>
+            </v-row>
 
-            <!-- Sentence type accuracy -->
-            <v-col cols="12" lg="6">
-              <v-card class="chart-card pa-4" elevation="2">
-                <v-card-title class="text-h5 font-weight-bold">Sentence type accuracy</v-card-title>
-                <v-card-text class="d-flex flex-column align-center flex-grow-1">
-                  <BarChart :data="sentenceTypeAccuracyData" :width="400" :height="250" color="#2196F3" />
-                  <div class="text-subtitle-1 mt-4">Percentage of correct answers by sentence type</div>
-                </v-card-text>
-              </v-card>
-            </v-col>
-            <v-divider class="my-6"/>
+            <v-divider class="my-6" v-if="!xs"/>
 
             <!-- spacer card-->
             <v-col v-if="$vuetify.display.xlAndUp" xl="1"></v-col>
@@ -289,7 +295,7 @@
                 </v-card-actions>
               </v-card>
             </v-col>
-          </v-row>
+
 
           <v-divider class="my-6"/>
 
@@ -540,6 +546,7 @@
 
 
           <v-card
+            v-if="!xs"  
             class="pa-4 mb-6"
             elevation="2"
             style="max-height: 1000px; overflow-y: scroll;"
@@ -649,7 +656,7 @@
             </div>
           </v-card>
         </div>
-      </div>
+      </v-container>
       </v-window-item>
       <v-window-item value="other-games">
         <OtherGamesDash />
@@ -673,7 +680,6 @@ import BarChart from "@/components/charts/BarChart.vue";
 import ErrorsDataTab from "@/components/ErrorsDataTab.vue";
 import OtherGamesDash from "@/components/OtherGamesDash.vue";
 import AdminErrorDataTab from "@/components/AdminErrorDataTab.vue";
-import NumbersCard from "@/components/NumbersCard.vue";
 import { useRouter, useRoute } from 'vue-router';
 import VocabDataTab from "@/components/VocabDataTab.vue";
 import GoalsDataTab from "@/components/GoalsDataTab.vue";
@@ -713,7 +719,7 @@ interface GameSession {
 // ---------------- Component ----------------
 export default defineComponent({
   name: "Dashboard",
-  components: { TopNavBar, NumbersCard, PieChart, BarChart, ErrorsDataTab, AdminErrorDataTab, VocabDataTab, GoalsDataTab, OtherGamesDash, Gauge },
+  components: { TopNavBar, PieChart, BarChart, ErrorsDataTab, AdminErrorDataTab, VocabDataTab, GoalsDataTab, OtherGamesDash, Gauge },
   setup() {
     const router = useRouter();
     const route = useRoute();
@@ -1217,10 +1223,23 @@ export default defineComponent({
 
 <style scoped>
 .chart-card {
-  min-height: 500px;   /* keeps them equal height */
+  min-height: 400px;
   display: flex;
   flex-direction: column;
 }
+/* On mobile, let the cards be as short as they need to be */
+@media (max-width: 600px) {
+  .chart-card {
+    min-height: auto !important; 
+    margin-bottom: 16px;
+  }
+  /* Prevent large text from pushing the card width out */
+  .text-h4, .text-h5 {
+    font-size: 1.25rem !important;
+    line-height: 1.4rem;
+  }
+}
+
 .chart-card .v-card-text {
   flex-grow: 1;        /* stretch content evenly */
   display: flex;
@@ -1237,6 +1256,20 @@ export default defineComponent({
 .slide-leave-to {
   transform: translateX(-100%);
   opacity: 0;
+}
+
+/* Force cards to respect the viewport on mobile */
+@media (max-width: 600px) {
+  .v-container {
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+  }
+  
+  .chart-card {
+    min-width: 0 !important; /* Overrides any previous min-width */
+    width: 100% !important;
+    min-height: auto !important; /* Allow it to shrink vertically if needed */
+  }
 }
 
 </style>

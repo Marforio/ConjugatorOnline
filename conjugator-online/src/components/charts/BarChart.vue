@@ -1,129 +1,75 @@
 <template>
-  <div ref="chartContainer" class="bar-chart"></div>
+  <div class="chart-container">
+    <canvas ref="chartCanvas"></canvas>
+  </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, watch, ref, computed } from 'vue';
-import * as d3 from 'd3';
-import { useDisplay } from 'vuetify';
+import { defineComponent, onMounted, watch, ref, onBeforeUnmount } from 'vue';
+import { Chart, registerables } from 'chart.js';
 
-interface ChartData {
-  label: string;
-  value: number;
-  correct: number;
-  total: number;
-  color: string;
-}
+Chart.register(...registerables);
 
 export default defineComponent({
   name: 'BarChart',
   props: {
-    data: {
-      type: Array as () => ChartData[],
-      required: true
-    },
-    width: {
-      type: Number,
-      default: 400
-    },
-    height: {
-      type: Number,
-      default: 250
-    },
-    color: {
-      type: String,
-      default: '#2196F3'
-    }
+    data: { type: Array as () => any[], required: true },
+    height: { type: Number, default: 250 }
   },
   setup(props) {
-    const chartContainer = ref<HTMLElement | null>(null);
-    const marginBottom = 50;
-    const marginLeft = 18;
-
-    const { xs, smAndUp } = useDisplay();
-
-    const responsiveWidth = computed(() => {
-      if (smAndUp.value) return Math.max(props.width, 500);
-      return 250; // smaller width for phones
-    });
-
-    const labelFontSize = computed(() => (xs.value ? '9px' : '11px'));
-    const labelRotation = computed(() => (xs.value ? -15 : -30));
+    const chartCanvas = ref<HTMLCanvasElement | null>(null);
+    let chartInstance: Chart | null = null;
 
     const drawChart = () => {
-      if (!chartContainer.value) return;
+      if (!chartCanvas.value) return;
+      if (chartInstance) chartInstance.destroy();
 
-      const svg = d3.select(chartContainer.value)
-        .html('')
-        .append('svg')
-        .attr('width', responsiveWidth.value + marginLeft)
-        .attr('height', props.height + marginBottom);
-
-      const chartGroup = svg.append('g')
-        .attr('transform', `translate(${marginLeft}, 0)`);
-
-      const x = d3.scaleBand()
-        .domain(props.data.map((d: ChartData) => d.label))
-        .range([0, responsiveWidth.value])
-        .padding(0.1);
-
-      const yMax = d3.max(props.data, (d: ChartData) => d.value)!;
-      const y = d3.scaleLinear()
-        .domain([0, yMax * 1.1])
-        .range([props.height - 20, 0]);
-
-      chartGroup.selectAll('rect')
-        .data(props.data)
-        .enter()
-        .append('rect')
-        .attr('x', (d: ChartData) => x(d.label)!)
-        .attr('y', (d: ChartData) => y(d.value))
-        .attr('width', x.bandwidth())
-        .attr('height', (d: ChartData) => props.height - 20 - y(d.value))
-        .attr('fill', (d: ChartData) => d.color)
-        .append('title')
-        .text((d: ChartData) => `${d.correct}/${d.total} correct`);
-
-      chartGroup.selectAll('text.value-label')
-        .data(props.data)
-        .enter()
-        .append('text')
-        .attr('class', 'value-label')
-        .attr('x', (d: ChartData) => x(d.label)! + x.bandwidth() / 2)
-        .attr('y', (d: ChartData) => y(d.value) - 5)
-        .attr('text-anchor', 'middle')
-        .attr('font-size', '10px')
-        .text((d: ChartData) => `${d.value}%`);
-
-      chartGroup.selectAll('text.x-label')
-        .data(props.data)
-        .enter()
-        .append('text')
-        .attr('class', 'x-label')
-        .attr('x', (d: ChartData) => x(d.label)! + x.bandwidth() / 2)
-        .attr('y', props.height)
-        .attr('font-size', labelFontSize.value)
-        .attr('transform', (d: ChartData) =>
-          `rotate(${labelRotation.value}, ${x(d.label)! + x.bandwidth() / 2}, ${props.height})`
-        )
-        .attr('text-anchor', 'end')
-        .text((d: ChartData) => d.label);
+      chartInstance = new Chart(chartCanvas.value, {
+        type: 'bar',
+        data: {
+          labels: props.data.map(d => d.label),
+          datasets: [{
+            label: 'Accuracy %',
+            data: props.data.map(d => d.value),
+            backgroundColor: props.data.map(d => d.color),
+            borderRadius: 4,
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: { beginAtZero: true, max: 100, ticks: { callback: (v) => v + '%' } },
+            x: { ticks: { maxRotation: 45, minRotation: 0 } }
+          },
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: (ctx) => {
+                  const item = props.data[ctx.dataIndex];
+                  return `${item.correct}/${item.total} correct (${item.value}%)`;
+                }
+              }
+            }
+          }
+        }
+      });
     };
 
     onMounted(drawChart);
     watch(() => props.data, drawChart, { deep: true });
-    watch(responsiveWidth, drawChart); // redraw on screen size change
+    onBeforeUnmount(() => chartInstance?.destroy());
 
-    return { chartContainer};
+    return { chartCanvas };
   }
 });
 </script>
 
-
 <style scoped>
-.bar-chart {
-  margin-top: 1rem;
-  overflow-x: auto;
+.chart-container {
+  position: relative;
+  width: 100%;
+  height: 250px; /* The container now controls the height */
 }
-
 </style>

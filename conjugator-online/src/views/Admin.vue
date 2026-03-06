@@ -55,7 +55,6 @@ import TopNavBar from "@/components/TopNavBar.vue";
 import PieChart from "@/components/charts/PieChart.vue";
 import BarChart from "@/components/charts/BarChart.vue";
 import ErrorsDataTab from "@/components/ErrorsDataTab.vue";
-import NumbersCard from "@/components/NumbersCard.vue";
 import { useRouter, useRoute } from 'vue-router';
 import VocabDataTab from "@/components/VocabDataTab.vue";
 import GoalsDataTab from "@/components/GoalsDataTab.vue";
@@ -79,7 +78,7 @@ interface GameSession {
 
 export default defineComponent({
   name: "Dashboard",
-  components: { TopNavBar, NumbersCard, PieChart, BarChart, ErrorsDataTab, VocabDataTab, GoalsDataTab },
+  components: { TopNavBar, PieChart, BarChart, ErrorsDataTab, VocabDataTab, GoalsDataTab },
   setup() {
     const router = useRouter();
     const route = useRoute();

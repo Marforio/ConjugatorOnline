@@ -2307,7 +2307,7 @@ export const regretmachineData = {
     prompt: "I let the chance slip away.",
     verb: "let",
     highlight: "let",
-    sentence: "I _____ the chance.",
+    sentence: "I _____ the chance slip away.",
     category: "essential",
     modal: "should",
     answers: [

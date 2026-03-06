@@ -1,86 +1,60 @@
 <template>
-  <div ref="chartContainer" class="pie-chart"></div>
+  <div class="chart-container">
+    <canvas ref="chartCanvas"></canvas>
+  </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, watch, ref } from 'vue';
-import * as d3 from 'd3';
+import { defineComponent, onMounted, watch, ref, onBeforeUnmount } from 'vue';
+import { Chart, registerables } from 'chart.js';
 
-interface ChartData {
-  label: string;
-  value: number;
-}
+Chart.register(...registerables);
 
 export default defineComponent({
   name: 'PieChart',
   props: {
-    data: {
-      type: Array as () => ChartData[],
-      required: true
-    },
-    width: {
-      type: Number,
-      default: 250
-    },
-    height: {
-      type: Number,
-      default: 250
-    },
-    colors: {
-      type: Array as () => string[],
-      default: () => ['#4CAF50', '#F44336']
-    }
+    data: { type: Array as () => { label: string; value: number }[], required: true },
+    colors: { type: Array as () => string[], default: () => ['#4CAF50', '#F44336'] }
   },
   setup(props) {
-    const chartContainer = ref<HTMLElement | null>(null);
+    const chartCanvas = ref<HTMLCanvasElement | null>(null);
+    let chartInstance: Chart | null = null;
 
     const drawChart = () => {
-      if (!chartContainer.value) return;
+      if (!chartCanvas.value) return;
+      if (chartInstance) chartInstance.destroy();
 
-      const radius = Math.min(props.width, props.height) / 2;
-      const color = d3.scaleOrdinal<string>()
-        .domain(props.data.map((d: ChartData) => d.label))
-        .range(props.colors);
-
-      const svg = d3.select(chartContainer.value)
-        .html('')
-        .append('svg')
-        .attr('width', props.width)
-        .attr('height', props.height)
-        .append('g')
-        .attr('transform', `translate(${props.width / 2}, ${props.height / 2})`);
-
-      const pie = d3.pie<ChartData>().value((d: ChartData) => d.value);
-      const arc = d3.arc<d3.PieArcDatum<ChartData>>()
-        .innerRadius(0)
-        .outerRadius(radius);
-
-      svg.selectAll('path')
-        .data(pie(props.data))
-        .enter()
-        .append('path')
-        .attr('d', (d: d3.PieArcDatum<ChartData>) => arc(d)!)
-        .attr('fill', (d: d3.PieArcDatum<ChartData>) => color(d.data.label));
-
-      svg.selectAll('text')
-        .data(pie(props.data).filter(d => d.data.value > 0)) 
-        .enter()
-        .append('text')
-        .attr('transform', (d: d3.PieArcDatum<ChartData>) => `translate(${arc.centroid(d)})`)
-        .attr('text-anchor', 'middle')
-        .text((d: d3.PieArcDatum<ChartData>) => `${d.data.value}%`);
+      chartInstance = new Chart(chartCanvas.value, {
+        type: 'pie',
+        data: {
+          labels: props.data.map(d => d.label),
+          datasets: [{
+            data: props.data.map(d => d.value),
+            backgroundColor: props.colors,
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: true, // Keeps it a circle
+          plugins: { legend: { display: false } }
+        }
+      });
     };
 
     onMounted(drawChart);
     watch(() => props.data, drawChart, { deep: true });
+    onBeforeUnmount(() => chartInstance?.destroy());
 
-    return { chartContainer };
+    return { chartCanvas };
   }
 });
 </script>
 
 <style scoped>
-.pie-chart {
-  margin-top: 1rem;
+.chart-container {
+  position: relative;
+  width: 100%;
+  max-width: 250px; /* Limits size on desktop so it doesn't get huge */
+  margin: 0 auto;
 }
 </style>

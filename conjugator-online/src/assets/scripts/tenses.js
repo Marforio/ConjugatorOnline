@@ -24,7 +24,7 @@ const consonants = ['b', 'c', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'm', 'n', 'p', 
 const vowels = ['a', 'e', 'i', 'o', 'u'];
 const NON_DOUBLING_CONSONANTS = ['w', 'x', 'y'];
 const NON_DOUBLING = ['abandon','administer', 'allow', 'alter', 'anger', 'answer', 'benefit', 'bother', 'broaden', 'cater', 'color', 'combat', 'consider', 'counter', 'cover', 'deliver', 'develop',
-    'differ', 'discover', 'edit', 'encounter', 'enter', 'exhibit', 'favor', 'focus', 'foster', 'frigthen', 'gather', 'happen', 'hasten', 'honor', 'inherit', 'interpret', 'lengthen', 'limit', 'listen', 'lower', 'master', 'market', 'minister', 'misinterpret',
+    'differ', 'discover', 'edit', 'encounter', 'enter', 'exhibit', 'favor', 'focus', 'foster', 'frigthen', 'gather', 'happen', 'hasten', 'honor', 'inherit', 'inhibit', 'interpret', 'lengthen', 'limit', 'listen', 'lower', 'master', 'market', 'minister', 'misinterpret',
     'monitor', 'murder', 'offer', 'open', 'order', 'pocket', 'ponder', 'profit', 'reckon', 'reconsider', 'recover', 'register', 'remember', 'render',  
     'rocket', 'shorten', 'signal', 'skyrocket', 'soften','strengthen', 'suffer', 'summon', 'surrender', 'target', 'threaten', 'tighten', 'transfer', 'visit', 'wager', 'wander', 'weaken', 'widen', 'wonder'];
 
