@@ -15,13 +15,20 @@
 
           <v-list-item>
             <template #prepend><v-icon icon="mdi-timer-sand" /></template>
-            <v-list-item-title class="text-wrap">30 seconds per round</v-list-item-title>
+            <v-list-item-title class="text-wrap">45 seconds per round</v-list-item-title>
           </v-list-item>
 
           <v-list-item>
             <template #prepend><v-icon icon="mdi-lightbulb-on-outline" /></template>
             <v-list-item-title class="text-wrap">
               Write the missing linking word
+            </v-list-item-title>
+          </v-list-item>
+
+          <v-list-item>
+            <template #prepend><v-icon icon="mdi-repeat-off" /></template>
+            <v-list-item-title class="text-wrap">
+              Do not repeat a linking word in the game
             </v-list-item-title>
           </v-list-item>
 
@@ -33,20 +40,8 @@
           </v-list-item>
         </v-list>
 
-        <v-divider class="my-4" />
-        <div class="d-flex justify-center">
-        <v-switch
-          v-model="selections.showTranslations"
-          inset
-          class="mt-2"
-          label="Show translation hints"
-          color="primary"
-          density="compact"
-        />
-        </div>
 
-
-        <div class="d-flex justify-center mt-6">
+        <div class="d-flex justify-center" style="margin-top: 15%;">
           <v-btn color="success" @click="start">Start</v-btn>
         </div>
 
@@ -69,7 +64,6 @@ const emit = defineEmits(["startGame"]);
 
 const selections = ref({
   numRounds: 24,
-  showTranslations: false,
 });
 
 function start() {

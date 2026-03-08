@@ -2,7 +2,7 @@
 
 import type { IdeaLinkerDataset, IdeaLinkerEntry, IdeaLinkerTranslations } from "./IdeaLinkerPrompts";
 
-export const ROUND_SECONDS = 30;
+export const ROUND_SECONDS = 45;
 
 export type IdeaLinkerSettings = {
   numRounds: number;
@@ -10,11 +10,17 @@ export type IdeaLinkerSettings = {
   showTranslations: boolean;
 };
 
+// In IdeaLinkerPromptEngine.ts
+
 export type IdeaLinkerRound = {
   id: string;
   entryId: string;
   promptIndex: number;
   promptText: string;
+  
+  // NEW: Split ideas
+  idea1: string | null;
+  idea2: string | null;
 
   category: string;
   variant: string | null;
@@ -27,8 +33,8 @@ export type IdeaLinkerRound = {
   minAnswers: number;
   maxAnswers: number;
 
-  imageKey: string;   // raw: variant or category
-  imagePath: string;  // "/images/linkers/<slug>.jpg"
+  imageKey: string;
+  imagePath: string;
 };
 
 function slugForImageKey(s: string): string {
@@ -80,6 +86,8 @@ function entryDefaults(entry: IdeaLinkerEntry) {
   };
 }
 
+// In IdeaLinkerPromptEngine.ts
+
 export function flattenDataset(dataset: IdeaLinkerDataset): IdeaLinkerRound[] {
   const rounds: IdeaLinkerRound[] = [];
 
@@ -91,11 +99,17 @@ export function flattenDataset(dataset: IdeaLinkerDataset): IdeaLinkerRound[] {
     const img = linkerImagePath(cat, vari);
 
     entry.prompts.forEach((promptText, idx) => {
+      const split = splitPromptIntoIdeas(String(promptText));
+      
       rounds.push({
         id: `${entryId}:${idx}`,
         entryId,
         promptIndex: idx,
         promptText: String(promptText),
+        
+        // NEW: Add split ideas
+        idea1: split?.idea1 ?? null,
+        idea2: split?.idea2 ?? null,
 
         category: cat,
         variant: vari,
@@ -267,3 +281,150 @@ export function translationsLabel(translations: IdeaLinkerTranslations | null): 
   return parts.join(" • ");
 }
 
+export function formatExcludedLinkers(excludedLinkers: string[] | null): string {
+  if (!excludedLinkers || excludedLinkers.length === 0) {
+    return "None";
+  }
+  return excludedLinkers.map(l => `"${l}"`).join(", ");
+}
+
+export function getTranslationsByLanguage(translations: IdeaLinkerTranslations | null): {
+  french: string[];
+  german: string[];
+  italian: string[];
+} {
+  if (!translations) {
+    return { french: [], german: [], italian: [] };
+  }
+  
+  return {
+    french: translations.French || [],
+    german: translations.German || [],
+    italian: translations.Italian || []
+  };
+}
+
+export function formatTranslationsForLanguage(translations: string[]): string {
+  if (!translations || translations.length === 0) return "No translations available";
+  return translations.join(", ");
+}
+
+// In IdeaLinkerPromptEngine.ts
+
+/**
+ * Splits a prompt into Idea 1 and Idea 2 based on the blank marker (___).
+ * Handles three main patterns:
+ * 1. Blank at the start: "___ idea, main idea." → Uses comma as boundary
+ * 2. Blank in the middle: "idea. ___, idea." → Uses period before blank
+ * 3. Standard case: "idea ___ idea." → Uses blank as direct boundary
+ * 
+ * Returns an object with both ideas, or null if the split fails.
+ */
+export function splitPromptIntoIdeas(promptText: string): { idea1: string; idea2: string } | null {
+  const trimmed = promptText.trim();
+  const blankIndex = trimmed.indexOf('___');
+  
+  if (blankIndex === -1) {
+    console.warn('Prompt does not contain a blank marker:', promptText);
+    return null;
+  }
+  
+  // CASE 1: Blank at the very beginning
+  // Example: "___ many competitors, the company succeeded."
+  if (blankIndex === 0) {
+    // Find the first comma after the blank
+    const afterBlank = trimmed.substring(3); // Skip the "___"
+    const commaIndex = afterBlank.indexOf(',');
+    
+    if (commaIndex === -1) {
+      // No comma found, split at the blank
+      const parts = trimmed.split('___');
+      return {
+        idea1: parts[0].trim() || '(connecting word goes here)',
+        idea2: parts[1]?.trim() || ''
+      };
+    }
+    
+    // Split at the comma after the blank
+    const idea1Part = afterBlank.substring(0, commaIndex).trim();
+    const idea2Part = afterBlank.substring(commaIndex + 1).trim();
+    
+    return {
+      idea1: idea1Part,
+      idea2: idea2Part
+    };
+  }
+  
+  // CASE 2: Check if there's a period before the blank
+  // Example: "First idea. Second idea, ___, continues here."
+  const beforeBlank = trimmed.substring(0, blankIndex);
+  const lastPeriodIndex = beforeBlank.lastIndexOf('.');
+  
+  if (lastPeriodIndex !== -1) {
+    // There's a period before the blank - split there
+    const idea1 = beforeBlank.substring(0, lastPeriodIndex).trim();
+    
+    // For idea2, take everything after the period, removing the blank
+    const afterPeriod = beforeBlank.substring(lastPeriodIndex + 1).trim();
+    const afterBlank = trimmed.substring(blankIndex + 3).trim();
+    
+    // If there's a comma after the blank, include text up to and after it
+    const commaIndex = afterBlank.indexOf(',');
+    let idea2;
+    
+    if (commaIndex !== -1) {
+      // Reconstruct: "part before blank, part after blank"
+      idea2 = afterPeriod + ' ' + afterBlank.substring(commaIndex + 1).trim();
+    } else {
+      // No comma after blank, just concatenate
+      idea2 = (afterPeriod + ' ' + afterBlank).trim();
+    }
+    
+    return {
+      idea1: idea1,
+      idea2: idea2
+    };
+  }
+  
+  // CASE 3: Standard case - blank in the middle, no period before it
+  // Example: "The team trained hard ___ their performance was poor."
+  const parts = trimmed.split('___');
+  
+  if (parts.length !== 2) {
+    console.warn('Unexpected blank marker count in prompt:', promptText);
+    return null;
+  }
+  
+  // Check if there's a comma after the blank in idea2
+  const idea2Raw = parts[1].trim();
+  const commaIndex = idea2Raw.indexOf(',');
+  
+  if (commaIndex !== -1 && commaIndex < 3) {
+    // There's a comma right after the blank (likely part of the linker format)
+    // Remove it from idea2
+    return {
+      idea1: parts[0].trim(),
+      idea2: idea2Raw.substring(commaIndex + 1).trim()
+    };
+  }
+  
+  return {
+    idea1: parts[0].trim(),
+    idea2: idea2Raw
+  };
+}
+
+/**
+ * Test helper function to validate the split logic
+ */
+export function testPromptSplit(promptText: string): void {
+  console.log('Testing:', promptText);
+  const result = splitPromptIntoIdeas(promptText);
+  if (result) {
+    console.log('  Idea 1:', result.idea1);
+    console.log('  Idea 2:', result.idea2);
+  } else {
+    console.log('  FAILED to split');
+  }
+  console.log('---');
+}

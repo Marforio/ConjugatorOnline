@@ -35,8 +35,22 @@ export default defineComponent({
         },
         options: {
           responsive: true,
-          maintainAspectRatio: true, // Keeps it a circle
-          plugins: { legend: { display: false } }
+          maintainAspectRatio: true,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              // This adds space between the color box and the text
+              boxPadding: 8, 
+              callbacks: {
+                // "label" controls the text that appears next to the color box
+                label: function(context) {
+                  const label = context.label || '';
+                  const value = context.parsed || 0;
+                  return ` ${value}%`;
+                }
+              }
+            }
+          }
         }
       });
     };

@@ -1,4 +1,3 @@
-<!-- src/components/idea_linker/idea_linker_scenes/IdeaLinkerScene01_Game.vue -->
 <template>
   <v-container fluid class="pa-4 d-flex justify-center">
     <v-overlay v-model="finishing" class="align-center justify-center" persistent>
@@ -12,62 +11,156 @@
       <strong>Correct! <v-icon icon="mdi-emoticon-happy-outline" /></strong>
     </div>
 
-    <v-card class="pt-2 px-4" width="900" height="700" elevation="2">
+    <v-card class="pt-1 px-4" width="900" height="670" elevation="2">
       <div class="game-layout">
-        <!-- TOP -->
-        <div class="game-top">
-          <div class="d-flex justify-space-between">
-            <div>Round {{ currentRound + 1 }} / {{ numRounds }}</div>
-            <div class="text-subtitle-2 timer-pill" :class="timerClass">⏱ {{ timeLeft }} s</div>
-          </div>
-        </div>
-
         <!-- MIDDLE -->
-        <div class="game-middle mb-5">
-          <v-card class="pa-3 my-1" elevation="2" variant="flat">
+        <div class="game-middle">
+          <v-card class="pa-3" elevation="0" variant="flat">
             <div class="d-flex ga-4">
-              <!-- Prompt + input -->
+              <!-- Main content area -->
               <div class="flex-grow-1">
-                <div class="d-flex justify-center align-end" style="margin-bottom: 10%;">
-
-                  <!-- LEFT BOX -->
-                  <div class="d-flex flex-column align-center pa-3 rounded-lg" style="border: 1px solid #ccc;">
-                    <v-img
-                      :src="round.imagePath"
-                      :alt="round.imageKey"
-                      width="100"
-                      aspect-ratio="4/3"
-                      cover
-                      class="rounded-lg mb-2"
-                    />
-
-                    <v-chip
-                      color="primary"
-                      variant="flat"
-                      class="text-uppercase mt-1"
-                    >
-                      {{ round.variant || round.category }}
-                    </v-chip>
+                
+                <!-- Grid layout for 7 information elements -->
+                <div class="info-grid mb-4">
+                  
+                  <!-- ROW 1: The Two Ideas -->
+                  <div class="info-section span-2">
+                    <div class="section-label">Idea 1</div>
+                    <div class="section-content idea-content">
+                      {{ round.idea1 || 'Error loading idea 1' }}
+                    </div>
                   </div>
 
-                  <!-- RIGHT CHIP -->
-                  <v-chip
-                    :color="behaviorColor"
-                    variant="flat"
-                    class="text-capitalize ms-4 my-3"
-                  >
-                    {{ round.behavior }}
-                  </v-chip>
+                  <div class="info-section span-2">
+                    <div class="section-label">Idea 2</div>
+                    <div class="section-content idea-content">
+                      {{ round.idea2 || 'Error loading idea 2' }}
+                    </div>
+                  </div>
 
+                  <!-- ROW 2: Relationship and Behavior -->
+                  <div class="info-section">
+                    <div class="section-label">Relationship</div>
+                    <div class="section-content d-flex align-center justify-center">
+                      <v-img
+                        :src="round.imagePath"
+                        :alt="round.imageKey"
+                        max-height="70"
+                        aspect-ratio="4/3"
+                        cover
+                        class="rounded me-3"
+                      />
+                      <v-chip
+                        color="primary"
+                        variant="flat"
+                        size="small"
+                        class="text-uppercase"
+                        style="margin-top: 2%;"
+                      >
+                        {{ round.variant || round.category }}
+                      </v-chip>
+                    </div>
+                  </div>
+
+                  <div class="info-section">
+                    <div class="section-label">Behavior</div>
+                    <div class="section-content d-flex align-center justify-center">
+                      <v-chip
+                        :color="behaviorColor"
+                        variant="flat"
+                        class="text-capitalize"
+                        style="margin-top: 6%;"
+                      >
+                        {{ round.behavior }}
+                      </v-chip>
+                    </div>
+                  </div>
+
+                  <!-- ROW 3: Complete Sentence -->
+                  <div class="info-section span-2">
+                    <div class="section-label">Complete Sentence</div>
+                    <div class="section-content sentence-content">
+                      "{{ round.promptText }}"
+                    </div>
+                  </div>
+
+                  <!-- ROW 4: Translations and Not Allowed -->
+                  <div class="info-section">
+                    <div class="section-label">Translations</div>
+                    <div class="section-content centered-content">
+                      <div class="d-flex ga-1">
+                        <v-tooltip location="bottom">
+                          <template v-slot:activator="{ props: tooltipProps }">
+                            <v-chip
+                              v-bind="tooltipProps"
+                              size="small"
+                              color="blue-grey-lighten-4"
+                              class="translation-chip me-3"
+                            >
+                              FR
+                            </v-chip>
+                          </template>
+                          <div class="translation-tooltip">
+                            <div class="text-subtitle-2 mb-1">French</div>
+                            <div class="text-caption">{{ frenchHint }}</div>
+                          </div>
+                        </v-tooltip>
+
+                        <v-tooltip location="bottom">
+                          <template v-slot:activator="{ props: tooltipProps }">
+                            <v-chip
+                              v-bind="tooltipProps"
+                              size="small"
+                              color="blue-grey-lighten-4"
+                              class="translation-chip me-3"
+                            >
+                              DE
+                            </v-chip>
+                          </template>
+                          <div class="translation-tooltip">
+                            <div class="text-subtitle-2 mb-1">German</div>
+                            <div class="text-caption">{{ germanHint }}</div>
+                          </div>
+                        </v-tooltip>
+
+                        <v-tooltip location="bottom">
+                          <template v-slot:activator="{ props: tooltipProps }">
+                            <v-chip
+                              v-bind="tooltipProps"
+                              size="small"
+                              color="blue-grey-lighten-4"
+                              class="translation-chip"
+                            >
+                              IT
+                            </v-chip>
+                          </template>
+                          <div class="translation-tooltip">
+                            <div class="text-subtitle-2 mb-1">Italian</div>
+                            <div class="text-caption">{{ italianHint }}</div>
+                          </div>
+                        </v-tooltip>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="info-section">
+                    <div class="section-label">Not Allowed</div>
+                    <div class="section-content centered-content">
+                          <v-chip
+                            v-bind="tooltipProps"
+                            size="small"
+                            color="red-lighten-1"
+                            class="translation-chip"
+                          >
+                            <v-icon size="x-small" start>mdi-cancel</v-icon>
+                            {{ excludedHint }}
+                          </v-chip>
+                    </div>
+                  </div>
                 </div>
-                <div class="text-subtitle-1 text-center mb-3 mx-4">{{ round.promptText }}</div>
 
-
-
-                <div v-if="gameSettings?.showTranslations && round.translations" class="text-caption text-center mb-3">
-                  <strong>Hint:</strong> {{ translationsHint }}
-                </div>
-                <div class="d-flex justify-center my-5">
+                <!-- Input and Submit -->
+                <div class="d-flex justify-center mb-2" style="margin-top: 10%; margin-bottom: 8%;">
                   <v-text-field
                     ref="answerField"
                     v-model="userAnswer"
@@ -76,15 +169,13 @@
                     density="compact"
                     :disabled="inputLocked"
                     @keydown.enter.prevent="handleEnter"
-                    style="margin-top: 2rem;"
-                    max-width="200"
+                    max-width="250"
                   />
-                </div>
-
-              
-
-                <div class="d-flex justify-center mt-3">
-                  <v-btn color="primary" @click="submit" :disabled="inputLocked">Submit</v-btn>
+                  
+                  <v-btn class="ms-2" color="primary" @click="submit" :disabled="inputLocked">Submit</v-btn>
+                    
+                  <div class="text-subtitle-2 ms-6 timer-pill" :class="timerClass">⏱ {{ timeLeft }} s</div>
+                
                 </div>
               </div>
 
@@ -129,6 +220,8 @@
                       </v-chip>
                     </div>
                   </v-card>
+                
+
                 </div>
               </div>
             </div>
@@ -139,51 +232,91 @@
         <div class="game-bottom">
           <v-progress-linear :model-value="progressValue" height="10" class="mb-3" color="primary" />
 
-          <div class="d-flex justify-space-between">
-            <div>✅ {{ rightCount }}</div>
-            <div>❌ {{ wrongCount }}</div>
-            <div>Remaining: {{ remaining }}</div>
-          </div>
-
-          <div class="mt-5 d-flex justify-center align-center w-100">
+          <div class="d-flex justify-space-between align-center">
             <RouterLink :to="{ name: 'games' }">
-              <v-btn icon elevation="0" size="large">
-                <v-icon color="grey-darken-3" size="large">mdi-arrow-left-circle</v-icon>
+              <v-btn icon elevation="0" size="medium">
+                <v-icon color="grey-darken-3" size="medium">mdi-arrow-left-circle</v-icon>
               </v-btn>
             </RouterLink>
+            <div>Round {{ currentRound + 1 }} / {{ numRounds }}</div>
+            <div class="d-flex justify-center align-center">
+              <div class="me-3">✅ {{ rightCount }}</div>
+              <div>❌ {{ wrongCount }}</div>
+            </div>
           </div>
         </div>
       </div>
     </v-card>
 
     <!-- WRONG ANSWER DIALOG -->
-    <v-dialog v-model="showWrongDialog" persistent max-width="520">
-      <v-card @keydown.enter.prevent.stop="handleEnter" color="yellow-lighten-2 pa-3">
-        <v-card-title class="text-h6 mt-4">
-          {{ lastOutOfTime ? "Time ran out" : "Wrong" }}
-          <v-icon :icon="lastOutOfTime ? 'mdi-timer-off-outline' : 'mdi-emoticon-sad-outline'" />
+    <v-dialog v-model="showWrongDialog" persistent max-width="600">
+      <v-card color="yellow-lighten-4" class="pa-4">
+        <v-card-title class="text-h5 d-flex align-center justify-space-between pa-0 mb-4">
+          <span>
+            <v-icon 
+              :icon="lastOutOfTime ? 'mdi-timer-off-outline' : 'mdi-close-circle-outline'" 
+              size="large"
+              :color="lastOutOfTime ? 'orange-darken-2' : 'red-darken-1'"
+              class="me-2"
+            />
+            {{ lastOutOfTime ? "Time's Up!" : "Incorrect Answer" }}
+          </span>
         </v-card-title>
 
-        <v-card-text>
-          <p class="mb-2">
-            Prompt:
-            <strong>{{ round.promptText }}</strong>
-          </p>
-          <p class="mb-2">
-            Your answer:
-            <strong>{{ lastUserAnswer || "—" }}</strong>
-          </p>
-          <p class="mb-0">
-            Accepted (unused) answers:
-            <strong>{{ lastCorrectAnswers || "—" }}</strong>
-          </p>
-          <p v-if="wrongReasonLabel" class="mt-2 mb-0 text-caption">
-            Note: {{ wrongReasonLabel }}
-          </p>
+        <v-divider class="mb-4"></v-divider>
+
+        <v-card-text class="pa-0">
+          <div class="info-box mb-3">
+            <div class="info-box-label">Ideas to link</div>
+            <div class="info-box-content">
+              <div class="mb-2">
+                <strong>Idea 1:</strong> {{ round.idea1 }}
+              </div>
+              <div>
+                <strong>Idea 2:</strong> {{ round.idea2 }}
+              </div>
+            </div>
+          </div>
+
+          <div class="info-box mb-3">
+            <div class="info-box-label">Your answer</div>
+            <div class="info-box-content">
+              <v-chip color="red-lighten-3" variant="flat">
+                {{ lastUserAnswer || "—" }}
+              </v-chip>
+            </div>
+          </div>
+          <v-alert 
+            v-if="wrongReasonLabel" 
+            type="info" 
+            variant="tonal"
+            density="compact"
+            class="my-3"
+          >
+            {{ wrongReasonLabel }}
+          </v-alert>
+
+          <div class="info-box mb-3">
+            <div class="info-box-label">Accepted answers (unused)</div>
+            <div class="info-box-content">
+              {{ lastCorrectAnswers || "—" }}
+            </div>
+          </div>
+
+
         </v-card-text>
 
-        <v-card-actions class="justify-end">
-          <v-btn ref="wrongOkButton" color="secondary" @click="acknowledgeWrong">OK</v-btn>
+        <v-card-actions class="pa-0 mt-4">
+          <v-spacer></v-spacer>
+          <v-btn 
+            ref="wrongOkButton" 
+            color="primary" 
+            variant="elevated"
+            size="large"
+            @click="acknowledgeWrong"
+          >
+            Continue
+          </v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -199,7 +332,10 @@ import {
   buildCorrectAnswersLabel,
   checkIdeaLinkerAnswer,
   getEligibleLinkers,
-  translationsLabel,
+  getTranslationsByLanguage,
+  formatTranslationsForLanguage,
+  formatExcludedLinkers,
+  splitPromptIntoIdeas
 } from "@/assets/scripts/idea_linker/IdeaLinkerPromptEngine";
 
 const props = defineProps({
@@ -221,6 +357,15 @@ const behaviorColor = computed(() => {
   }
 })
 
+// Translation hints for each language
+const translations = computed(() => getTranslationsByLanguage(round.value.translations ?? null))
+
+const frenchHint = computed(() => formatTranslationsForLanguage(translations.value.french))
+const germanHint = computed(() => formatTranslationsForLanguage(translations.value.german))
+const italianHint = computed(() => formatTranslationsForLanguage(translations.value.italian))
+
+// Excluded linkers hint
+const excludedHint = computed(() => formatExcludedLinkers(round.value.excludedLinkers))
 
 const emit = defineEmits(["gameOver"]);
 
@@ -256,8 +401,6 @@ const lastUserAnswer = ref("");
 const lastCorrectAnswers = ref("");
 const lastOutOfTime = ref(false);
 const lastWrongReason = ref("");
-
-const translationsHint = computed(() => translationsLabel(round.value.translations ?? null));
 
 /* Enter guard */
 const ignoreEnterUntil = ref(0);
@@ -574,8 +717,66 @@ onBeforeUnmount(stopTimer);
   height: 100%;
 }
 .game-middle {
-  flex: 1;
-  margin-top: 2%;
+  flex: 0 1 auto;
+  margin-top: 1%;
+}
+
+/* Information Grid Layout */
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  max-width: 650px;
+  margin: 0 auto;
+}
+
+.info-section {
+  background: #f8f9fa;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  padding: 8px 12px;
+  min-height: 70px;
+}
+
+.info-section.span-2 {
+  grid-column: span 2;
+}
+
+.section-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #1976d2;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+  border-bottom: 2px solid #1976d2;
+  padding-bottom: 2px;
+}
+
+.section-content {
+  font-size: 0.95rem;
+  line-height: 1.4;
+  color: #333;
+}
+
+.idea-content {
+  font-weight: 400;
+  color: #1a1a1a;
+  font-size: 0.85rem;
+}
+
+.sentence-content {
+  font-style: italic;
+  color: #666;
+  font-size: 1rem;
+}
+
+.centered-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
 }
 
 /* Floating feedback */
@@ -593,29 +794,45 @@ onBeforeUnmount(stopTimer);
 
 /* Timer */
 .timer-pill {
-  padding: 2px 8px;
+  padding: 6px 12px; /* Increased top/bottom padding */
   border-radius: 999px;
   transition: background-color 150ms ease, color 150ms ease;
+  min-width: 70px;
+  text-align: center;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1; /* Ensures text sits exactly in the middle */
 }
-.timer-ok { background: transparent; }
-.timer-warn { background: rgba(255, 193, 7, 0.25); }
-.timer-danger { background: rgba(244, 67, 54, 0.22); }
+.timer-ok { background: #e8f5e9; color: #2e7d32; }
+.timer-warn { background: #fff3e0; color: #f57c00; }
+.timer-danger { background: #ffebee; color: #c62828; }
 
-/* B) fixed width column that never changes during the game */
+/* Translation chips */
+.translation-chip {
+  cursor: help;
+  font-weight: 600;
+}
+
+.translation-tooltip {
+  max-width: 300px;
+  padding: 8px;
+}
+
+/* Used linkers column */
 .used-linkers-col {
-  flex: 0 0 400px;       /* fixed column width in flex row */
-  width: 400px;
-  max-width: 400px;
+  flex: 0 0 300px;
+  width: 300px;
+  max-width: 300px;
 }
 
-/* A) scrollable area */
 .used-linkers-scroll {
-  max-height: 500px;     /* adjust to taste */
+  max-height: 600px;
   overflow-y: auto;
-  padding-right: 6px;    /* keep chips from hiding under scrollbar */
+  padding-right: 6px;
 }
 
-/* Optional: nicer scrollbar spacing on WebKit */
 .used-linkers-scroll::-webkit-scrollbar {
   width: 8px;
 }
@@ -624,13 +841,34 @@ onBeforeUnmount(stopTimer);
   border-radius: 8px;
 }
 
-/* C) completed group background */
 .group-complete {
-  background: #e8f5e9;          /* light green */
+  background: #e8f5e9;
   border-color: #66bb6a !important;
 }
 .group-complete .used-group-header {
   color: #1b5e20;
 }
 
+/* Wrong Answer Dialog Styles */
+.info-box {
+  background: white;
+  border-radius: 6px;
+  padding: 10px;
+  border: 1px solid #e0e0e0;
+}
+
+.info-box-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+}
+
+.info-box-content {
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: #333;
+}
 </style>
