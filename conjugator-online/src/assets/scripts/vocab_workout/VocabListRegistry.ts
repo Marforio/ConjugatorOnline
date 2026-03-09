@@ -2,6 +2,7 @@ import { houseElements, LocationAndMaterials, CitiesAndBuildings, LightSpaces, A
 import { civilVerbs, constructionSite, ConstructionScience, EarthAndMaterials, CitiesInfrastructureBuildings, DimensionsAndProperties, BusinessReports } from "./CivilVocab"
 import { productMarketing, promotionAndBusinessDevelopment, meetingExpressions, meetings, businessEthics, sustainability } from "./BusinessVocab";
 import { programmingSymbols, mechanicalForces } from "./MechVocab";
+import { CryptographyVocab, DataProcessingAndVisualization } from "./ITVocab";
 import { irregularVerbs } from "./IrregularVerbs";
 
 export const vocabLists = {
@@ -143,7 +144,21 @@ export const vocabLists = {
 
   ////////////////////////////// COMPUTER SCIENCE/////////////////////////////
 
-   meetingExpressionsIT: {
+  Cryptography: {
+    title: "Cryptography",
+    module: "Computer_science",
+    data: CryptographyVocab,
+    supportsLevels: false,
+  },
+
+  DataProcessingAndVisualization: {
+    title: "Data Processing and Visualization",
+    module: "Computer_science",
+    data: DataProcessingAndVisualization,
+    supportsLevels: false,
+  }, 
+  
+  meetingExpressionsIT: {
     title: "Meeting Expressions",
     module: "Computer_science",
     data: meetingExpressions,
