@@ -1,6 +1,6 @@
 import { houseElements, LocationAndMaterials, CitiesAndBuildings, LightSpaces, ArchCareer, AdjectivesForReviews } from "./ArchitectureVocab";
 import { civilVerbs, constructionSite, ConstructionScience, EarthAndMaterials, CitiesInfrastructureBuildings, DimensionsAndProperties, BusinessReports } from "./CivilVocab"
-import { productMarketing, promotionAndBusinessDevelopment, meetingExpressions, meetings, businessEthics, sustainability } from "./BusinessVocab";
+import { productMarketing, promotionAndBusinessDevelopment, startUps, meetingExpressions, meetings, businessEthics, sustainability, DataVisualization, RegularVerbsBusiness, FinanceAndTrading, Corporations } from "./BusinessVocab";
 import { programmingSymbols, mechanicalForces } from "./MechVocab";
 import { CryptographyVocab, DataProcessingAndVisualization } from "./ITVocab";
 import { irregularVerbs } from "./IrregularVerbs";
@@ -181,21 +181,45 @@ export const vocabLists = {
 
  // HARDWARE
 
-  // CRYPTOGRAPHY
 
   // VMs, CONTAINTERS AND CLUSTERS
 
   // FRONTEND FRAMEWORKS
 
-  // DATA SCIENCE, DATA PROCESSING
 
   // DATABASES
 
   // NETWORKING
 
   ////////////////////////////// CHEMISTRY /////////////////////////////
+
+
+
+
+
   ////////////////////////////// BUSINESS 1 /////////////////////////////
- meetingExpressions: {
+ RegularVerbsBusiness: {
+    title: "Regular Verbs for Business",
+    module: "Business_1",
+    data: RegularVerbsBusiness,
+    supportsLevels: false,
+ },
+ 
+ Corporations: {
+    title: "Corporations",
+    module: "Business_1",
+    data: Corporations,
+    supportsLevels: false,
+ },
+ 
+  DataVisualization: {
+    title: "Data Visualization",
+    module: "Business_1",
+    data: DataVisualization,
+    supportsLevels: false,  
+ },
+ 
+  meetingExpressions: {
     title: "Meeting Expressions",
     module: "Business_1",
     data: meetingExpressions,
@@ -222,8 +246,22 @@ export const vocabLists = {
     data: promotionAndBusinessDevelopment,
     supportsLevels: false,
   },
+  startups: {
+    title: "Startups",
+    module: "Business_2",
+    data: startUps,
+    supportsLevels: false,
+  },
 
   ////////////////////////////// BUSINESS 3 /////////////////////////////
+
+  finance_and_trading: {
+    title: "Finance and Trading",
+    module: "Business_3",
+    data: FinanceAndTrading,
+    supportsLevels: false,
+  },
+  
 
   ////////////////////////////// BUSINESS 4 /////////////////////////////
   business_ethics: {

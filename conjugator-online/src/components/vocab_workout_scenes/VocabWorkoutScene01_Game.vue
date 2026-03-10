@@ -647,7 +647,7 @@ type LocalRoundRow = {
    Pretty labels
 ========================================================= */
 const frontCardClass = computed(() =>
-  prettyListKey.value === "ProgrammingSymbols" ? 'text-h4 mx-4 mb-2 font-weight-regular' : 'text-h4 mx-4 mb-2 font-weight-regular font-italic'
+  prettyListKey.value === "ProgrammingSymbols" ? 'text-h4 mx-4 mb-2 font-weight-regular' : 'text-h5 mx-8 mb-2 font-weight-regular font-italic'
 )
 
 const resumeIndexDisplay = computed(() => {

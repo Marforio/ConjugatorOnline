@@ -1,4 +1,456 @@
 
+export const RegularVerbsBusiness = {
+  "manage": {
+    definition: "To be in charge of a company, department, or team of people.",
+    French: "gérer",
+    German: "managen, verwalten",
+    Italian: "gestire",
+    image: "/images/vocab/manage.jpg",
+    multiple_choice: ["direct", "oversee", "administer"]
+  },
+
+  "schedule": {
+    definition: "To arrange or plan for an event to happen at a particular time.",
+    French: "planifier",
+    German: "einplanen, terminieren",
+    Italian: "programmare",
+    image: "/images/vocab/schedule.jpg",
+    multiple_choice: ["set a time", "organize", "book"]
+  },
+
+  "arrange": {
+    definition: "To organize the details of something or put things in a particular order.",
+    French: "organiser",
+    German: "arrangieren",
+    Italian: "organizzare",
+    image: "/images/vocab/arrange.jpg",
+    multiple_choice: ["set up", "prepare", "order"]
+  },
+
+  "report": {
+    definition: "To give a description or summary of something that has happened or been investigated.",
+    French: "rapporter",
+    German: "berichten",
+    Italian: "riferire",
+    image: "/images/vocab/report.jpg",
+    multiple_choice: ["inform", "document", "present"]
+  },
+
+  "supervise": {
+    definition: "To watch a person or activity to make sure that everything is done correctly and safely.",
+    French: "superviser",
+    German: "beaufsichtigen",
+    Italian: "supervisionare",
+    image: "/images/vocab/supervise.jpg",
+    multiple_choice: ["oversee", "monitor", "watch"]
+  },
+
+  "monitor": {
+    definition: "To observe and check the progress or quality of something over a period of time.",
+    French: "surveiller, suivre",
+    German: "überwachen, kontrollieren",
+    Italian: "monitorare",
+    image: "/images/vocab/monitor.jpg",
+    multiple_choice: ["track", "check", "observe"]
+  },
+
+  "coordinate": {
+    definition: "To make many different things work effectively as a whole.",
+    French: "coordonner",
+    German: "koordinieren",
+    Italian: "coordinare",
+    image: "/images/vocab/coordinate.jpg",
+    multiple_choice: ["synchronize", "align", "match"]
+  },
+
+  "handle": {
+    definition: "To deal with, have responsibility for, or be in charge of a task or situation.",
+    French: "gérer",
+    German: "handhaben",
+    Italian: "gestire",
+    image: "/images/vocab/handle.jpg",
+    multiple_choice: ["cope with", "manage", "process"]
+  },
+
+  "negotiate": {
+    definition: "To have formal discussions with someone in order to reach an agreement.",
+    French: "négocier",
+    German: "verhandeln",
+    Italian: "negoziare",
+    image: "/images/vocab/negotiate.jpg",
+    multiple_choice: ["bargain", "discuss terms", "settle"]
+  },
+
+  "approve": {
+    definition: "To officially accept a plan, request, or proposal.",
+    French: "approuver",
+    German: "genehmigen",
+    Italian: "approvare",
+    image: "/images/vocab/approve.jpg",
+    multiple_choice: ["authorize", "validate", "accept"]
+  },
+
+  "request": {
+    definition: "To ask for something formally or politely.",
+    French: "demander",
+    German: "anfordern, beantragen",
+    Italian: "richiedere",
+    image: "/images/vocab/request.jpg",
+    multiple_choice: ["petition", "seek", "ask"]
+  },
+
+  "submit": {
+    definition: "To give or offer something for a decision or consideration by others.",
+    French: "soumettre",
+    German: "einreichen",
+    Italian: "presentare",
+    image: "/images/vocab/submit.jpg",
+    multiple_choice: ["hand in", "send", "propose"]
+  },
+
+  "process": {
+    definition: "To deal with a document or request officially using a particular set of actions.",
+    French: "traiter",
+    German: "bearbeiten",
+    Italian: "elaborare",
+    image: "/images/vocab/process.jpg",
+    multiple_choice: ["handle", "execute", "manage"]
+  },
+
+  "sort": {
+    definition: "To put a number of things into groups or a particular order.",
+    French: "trier",
+    German: "sortieren",
+    Italian: "ordinare",
+    image: "/images/vocab/sort.jpg",
+    multiple_choice: ["classify", "categorize", "arrange"]
+  },
+
+  "calculate": {
+    definition: "To determine a mathematical result or amount using numbers.",
+    French: "calculer",
+    German: "berechnen",
+    Italian: "calcolare",
+    image: "/images/vocab/calculate.jpg",
+    multiple_choice: ["compute", "estimate", "work out"]
+  },
+
+  "classify": {
+    definition: "To divide things into groups according to their type.",
+    French: "classer",
+    German: "klassifizieren",
+    Italian: "classificare",
+    image: "/images/vocab/classify.jpg",
+    multiple_choice: ["group", "label", "categorize"]
+  },
+
+  "summarize": {
+    definition: "To give a short statement of the main points of something.",
+    French: "résumer",
+    German: "zusammenfassen",
+    Italian: "riassumere",
+    image: "/images/vocab/summarize.jpg",
+    multiple_choice: ["outline", "recap", "condense"]
+  },
+
+  "analyze": {
+    definition: "To examine something in detail in order to understand it or explain it.",
+    French: "analyser",
+    German: "analysieren",
+    Italian: "analizzare",
+    image: "/images/vocab/analyze.jpg",
+    multiple_choice: ["examine", "evaluate", "investigate"]
+  },
+
+  "review": {
+    definition: "To think about or look at something again to decide if changes are needed.",
+    French: "réviser",
+    German: "überprüfen",
+    Italian: "revisionare",
+    image: "/images/vocab/review.jpg",
+    multiple_choice: ["assess", "inspect", "re-examine"]
+  },
+
+  "update": {
+    definition: "To make something more modern or include the most recent information.",
+    French: "mettre à jour",
+    German: "aktualisieren",
+    Italian: "aggiornare",
+    image: "/images/vocab/update.jpg",
+    multiple_choice: ["refresh", "revise", "amend"]
+  },
+
+  "finalize": {
+    definition: "To make a final decision or complete the last part of a plan.",
+    French: "finaliser",
+    German: "abschließen",
+    Italian: "finalizzare",
+    image: "/images/vocab/finalize.jpg",
+    multiple_choice: ["complete", "settle", "conclude"]
+  },
+
+  "reduce": {
+    definition: "To make something smaller in size, amount, degree, or importance.",
+    French: "réduire",
+    German: "reduzieren",
+    Italian: "ridurre",
+    image: "/images/vocab/reduce.jpg",
+    multiple_choice: ["decrease", "cut", "lessen"]
+  },
+
+  "lower": {
+    definition: "To reduce something in value, level, or amount.",
+    French: "baisser",
+    German: "senken, herunterlassen",
+    Italian: "abbassare",
+    image: "/images/vocab/lower.jpg",
+    multiple_choice: ["diminish", "drop", "minimize"]
+  },
+
+  "train": {
+    definition: "To teach someone the skills of a particular job or activity.",
+    French: "former",
+    German: "trainieren, schulen",
+    Italian: "addestrare",
+    image: "/images/vocab/train.jpg",
+    multiple_choice: ["educate", "instruct", "prepare"]
+  },
+
+  "coach": {
+    definition: "To give special classes or advice to help someone improve their skills.",
+    French: "entraîner",
+    German: "coachen",
+    Italian: "allenare",
+    image: "/images/vocab/coach.jpg",
+    multiple_choice: ["mentor", "guide", "tutor"]
+  },
+
+  "budget": {
+    definition: "To plan how much money will be spent on something.",
+    French: "budgétiser",
+    German: "budgetieren",
+    Italian: "mettere a bilancio",
+    image: "/images/vocab/budget.jpg",
+    multiple_choice: ["allocate funds", "finance", "plan"]
+  },
+
+  "forecast": {
+    definition: "To predict what is likely to happen in the future, based on current data.",
+    French: "prévoir",
+    German: "prognostizieren",
+    Italian: "prevedere",
+    image: "/images/vocab/forecast.jpg",
+    multiple_choice: ["predict", "anticipate", "project"]
+  },
+
+  "prioritize": {
+    definition: "To decide which tasks are the most important so you can do them first.",
+    French: "prioriser",
+    German: "priorisieren",
+    Italian: "dare la priorità",
+    image: "/images/vocab/prioritize.jpg",
+    multiple_choice: ["rank", "order", "arrange"]
+  },
+
+  "delegate": {
+    definition: "To give a particular job or duty to someone else to do for you.",
+    French: "déléguer",
+    German: "delegieren",
+    Italian: "delegare",
+    image: "/images/vocab/delegate.jpg",
+    multiple_choice: ["assign", "entrust", "pass on"]
+  },
+
+  "allocate": {
+    definition: "To give something officially to a person or system for a particular purpose.",
+    French: "allouer",
+    German: "zuordnen, zuteilen",
+    Italian: "allocare",
+    image: "/images/vocab/allocate.jpg",
+    multiple_choice: ["assign", "distribute", "grant"]
+  },
+
+  "justify": {
+    definition: "To give a good reason for an action or a decision.",
+    French: "justifier",
+    German: "rechtfertigen",
+    Italian: "giustificare",
+    image: "/images/vocab/justify.jpg",
+    multiple_choice: ["explain", "defend", "warrant"]
+  },
+
+  "clarify": {
+    definition: "To make something clearer or easier to understand.",
+    French: "clarifier",
+    German: "klären",
+    Italian: "chiarire",
+    image: "/images/vocab/clarify.jpg",
+    multiple_choice: ["explain", "simplify", "elucidate"]
+  },
+
+  "rectify": {
+    definition: "To correct something or make a situation right.",
+    French: "rectifier",
+    German: "berichtigen",
+    Italian: "rettificare",
+    image: "/images/vocab/rectify.jpg",
+    multiple_choice: ["correct", "fix", "remedy"]
+  },
+
+  "notice": {
+    definition: "To become aware of something or see something.",
+    French: "se rendre compte",
+    German: "etw. merken",
+    Italian: "notare",
+    image: "/images/vocab/notice.jpg",
+    multiple_choice: ["observe", "spot", "detect"]
+  },
+
+  "notify": {
+    definition: "To tell someone officially about something.",
+    French: "notifier",
+    German: "benachrichtigen",
+    Italian: "notificare",
+    image: "/images/vocab/notify.jpg",
+    multiple_choice: ["inform", "alert", "announce"]
+  },
+
+  "audit": {
+    definition: "To make an official examination of accounts or business systems.",
+    French: "auditer",
+    German: "auditieren",
+    Italian: "verificare",
+    image: "/images/vocab/audit.jpg",
+    multiple_choice: ["inspect", "examine", "verify"]
+  },
+
+  "consolidate": {
+    definition: "To combine several things into one to make them more effective or stronger.",
+    French: "consolider",
+    German: "konsolidieren",
+    Italian: "consolidare",
+    image: "/images/vocab/consolidate.jpg",
+    multiple_choice: ["merge", "unite", "combine"]
+  },
+
+  "specify": {
+    definition: "To explain something in an exact and detailed way.",
+    French: "spécifier",
+    German: "spezifizieren",
+    Italian: "specificare",
+    image: "/images/vocab/specify.jpg",
+    multiple_choice: ["detail", "stipulate", "identify"]
+  },
+
+  "highlight": {
+    definition: "To attract attention to or emphasize something important.",
+    French: "mettre en évidence",
+    German: "hervorheben",
+    Italian: "evidenziare",
+    image: "/images/vocab/highlight.jpg",
+    multiple_choice: ["emphasize", "stress", "showcase"]
+  },
+
+  "measure": {
+    definition: "To discover the size, amount, or degree of something by using an instrument or system.",
+    French: "mesurer",
+    German: "messen",
+    Italian: "misurare",
+    image: "/images/vocab/measure.jpg",
+    multiple_choice: ["quantify", "gauge", "calculate"]
+  },
+
+  "check": {
+    definition: "To examine something to see if it is correct, safe, or in good condition.",
+    French: "contrôler, vérifier",
+    German: "überprüfen, kontrollieren",
+    Italian: "controllare",
+    image: "/images/vocab/check.jpg",
+    multiple_choice: ["inspect", "verify", "examine"]
+  },
+
+  "hire": {
+    definition: "To employ someone or pay them to do a particular job.",
+    French: "embaucher",
+    German: "einstellen",
+    Italian: "assumere",
+    image: "/images/vocab/hire.jpg",
+    multiple_choice: ["employ", "recruit", "engage"]
+  },
+
+  "raise": {
+    definition: "To increase an amount, number, or level (e.g., to raise a salary).",
+    French: "augmenter, lever",
+    German: "erhöhen",
+    Italian: "aumentare",
+    image: "/images/vocab/raise.jpg",
+    multiple_choice: ["boost", "elevate", "increase"]
+  },
+
+  "trust": {
+    definition: "To believe that someone is good and honest and will not harm you.",
+    French: "faire confiance",
+    German: "vertrauen",
+    Italian: "fidarsi",
+    image: "/images/vocab/trust.jpg",
+    multiple_choice: ["rely on", "believe in", "confide"]
+  },
+
+  "bother": {
+    definition: "To make someone feel worried or upset, or to interrupt them.",
+    French: "importuner, déranger",
+    German: "stören",
+    Italian: "disturbare",
+    image: "/images/vocab/bother.jpg",
+    multiple_choice: ["annoy", "trouble", "interrupt"]
+  },
+
+  "release": {
+    definition: "To make a product, report, or information available to the public.",
+    French: "relâcher, lancer",
+    German: "loslassen",
+    Italian: "rilasciare",
+    image: "/images/vocab/release.jpg",
+    multiple_choice: ["launch", "publish", "issue"]
+  },
+
+  "rush": {
+    definition: "To go or do something very quickly because you are in a hurry.",
+    French: "se presser",
+    German: "eilen, rennen",
+    Italian: "affrettarsi",
+    image: "/images/vocab/rush.jpg",
+    multiple_choice: ["hurry", "dash", "speed"]
+  },
+
+  "lack": {
+    definition: "To not have or not have enough of something that is needed.",
+    French: "manquer de",
+    German: "fehlen",
+    Italian: "mancare",
+    image: "/images/vocab/lack.jpg",
+    multiple_choice: ["need", "want", "shortage"]
+  },
+
+  "fail": {
+    definition: "To not succeed in what you are trying to achieve.",
+    French: "échouer",
+    German: "versagen",
+    Italian: "fallire",
+    image: "/images/vocab/fail.jpg",
+    multiple_choice: ["break down", "collapse", "miss"]
+  },
+
+  "fire": {
+    definition: "To remove someone from their job, especially because they have done something wrong.",
+    French: "licencier",
+    German: "jmdm kündigen",
+    Italian: "licenziare",
+    image: "/images/vocab/fire.jpg",
+    multiple_choice: ["dismiss", "sack", "terminate"]
+  }
+};
+
 export const meetings = {
   "agenda": {
     "definition": "A list of items to be discussed or acted upon during a meeting.",
@@ -1158,6 +1610,787 @@ export const meetingExpressions = {
     "synonyms": []
   }
 }
+
+export const DataVisualization = {
+
+  "average": {
+    definition: "A number expressing the central or typical value in a set of data; in common usage, it refers to the 'mean'.",
+    French: "moyenne",
+    German: "Durchschnitt",
+    Italian: "media",
+    image: "/images/vocab/average.jpg",
+    multiple_choice: ["central value", "typical result", "mean"]
+  },
+
+  "median": {
+    definition: "The middle value in a list of numbers ordered from lowest to highest.",
+    French: "médiane",
+    German: "Median",
+    Italian: "mediana",
+    image: "/images/vocab/median.jpg",
+    multiple_choice: ["middle point", "50th percentile", "center value"]
+  },
+
+  "correlation": {
+    definition: "A statistical measure that expresses the extent to which two variables are related.",
+    French: "corrélation",
+    German: "Korrelation",
+    Italian: "correlazione",
+    image: "/images/vocab/correlation.jpg",
+    multiple_choice: ["relationship", "association", "dependency"]
+  },
+
+  "outlier": {
+    definition: "A data point that differs significantly from other observations in the dataset.",
+    French: "valeur aberrante",
+    German: "Ausreißer",
+    Italian: "valore anomalo",
+    image: "/images/vocab/outlier.jpg",
+    multiple_choice: ["anomaly", "deviation", "extreme value"]
+  },
+
+  "sample": {
+    definition: "Returning a random selection of items from a dataset",
+    French: "échantillon",
+    German: "Stichprobe",
+    Italian: "campione",
+    image: "/images/vocab/sample.jpg",
+    multiple_choice: ["subset", "selection", "example"]
+  },
+
+  "row": {
+    definition: "A horizontal series of cells in a table.",
+    French: "ligne",
+    German: "Zeile",
+    Italian: "riga",
+    image: "/images/vocab/row.jpg",
+    multiple_choice: ["record", "observation", "horizontal line"]
+  },
+
+  "column": {
+    definition: "A vertical series of cells in a table.",
+    French: "colonne",
+    German: "Spalte",
+    Italian: "colonna",
+    image: "/images/vocab/column.jpg",
+    multiple_choice: ["feature", "field", "vertical line"]
+  },
+
+  "metric": {
+    definition: "A specific quantifiable value or measurement that makes it possible to track performance.",
+    French: "mesure",
+    German: "Metrik",
+    Italian: "metrica",
+    image: "/images/vocab/metric.jpg",
+    multiple_choice: ["KPI", "measure", "indicator"]
+  },
+
+  "data type": {
+    definition: "A kind of data, such as an integer, boolean, or text.",
+    French: "type de données",
+    German: "Datentyp",
+    Italian: "tipo di dati",
+    image: "/images/vocab/datatype.jpg",
+    multiple_choice: ["format", "class", "data category"]
+  },
+
+  "boolean": {
+    definition: "A single value of either TRUE or FALSE.",
+    French: "booléen",
+    German: "Boolesch",
+    Italian: "booleano",
+    image: "/images/vocab/boolean.jpg",
+    multiple_choice: ["logical value", "binary flag", "truth value"]
+  },
+
+  "integer": {
+    definition: "A whole number without a fractional component.",
+    French: "entier",
+    German: "Ganzzahl",
+    Italian: "intero",
+    image: "/images/vocab/integer.jpg",
+    multiple_choice: ["whole number", "count", "non-decimal"]
+  },
+
+  "decimal": {
+    definition: "A number with one or more digits to the right of the decimal point.",
+    French: "décimal",
+    German: "Dezimalzahl",
+    Italian: "decimale",
+    image: "/images/vocab/decimal.jpg",
+    multiple_choice: ["float", "fractional number", "real number"]
+  },
+
+  "graph": {
+    definition: "A general term for a visual representation of data.",
+    French: "graphique",
+    German: "Graph",
+    Italian: "grafico",
+    image: "/images/vocab/graph.jpg",
+    multiple_choice: ["chart", "diagram", "plot"]
+  },
+
+  "pie chart": {
+    definition: "A circular graph that divides a whole into slices to represent numerical proportions.",
+    French: "camembert",
+    German: "Tortendiagramm",
+    Italian: "grafico a torta",
+    image: "/images/vocab/piechart.jpg",
+    multiple_choice: ["circle graph", "sector chart", "proportion map"]
+  },
+
+  "x axis": {
+    definition: "The horizontal line on a graph.",
+    French: "axe des x",
+    German: "x-Achse",
+    Italian: "asse x",
+    image: "/images/vocab/xaxis.jpg",
+    multiple_choice: ["horizontal axis", "abscissa", "base line"]
+  },
+
+  "y axis": {
+    definition: "The vertical line on a graph.",
+    French: "axe des y",
+    German: "y-Achse",
+    Italian: "asse y",
+    image: "/images/vocab/yaxis.jpg",
+    multiple_choice: ["vertical axis", "ordinate", "side line"]
+  },
+
+  "legend": {
+    definition: "A key that explains the colors, patterns, or symbols used in a graph.",
+    French: "légende",
+    German: "Legende",
+    Italian: "legenda",
+    image: "/images/vocab/legend.jpg",
+    multiple_choice: ["key", "explanation", "map guide"]
+  },
+
+  "plot": {
+    definition: "The act of putting data on a graph (verb) or the graph itself (noun).",
+    French: "tracer",
+    German: "zeichnen",
+    Italian: "tracciare",
+    image: "/images/vocab/plot1.jpg",
+    multiple_choice: ["mapping", "charting", "drawing"]
+  },
+
+  "scatter plot": {
+    definition: "A graph where individual data points are plotted as dots without connecting lines.",
+    French: "nuage de points",
+    German: "Streudiagramm",
+    Italian: "grafico a dispersione",
+    image: "/images/vocab/scatterplot.jpg",
+    multiple_choice: ["dot plot", "scattergram", "point chart"]
+  },
+
+  "label": {
+    definition: "The visual element that identifies a category or value in a graph.",
+    French: "étiquette",
+    German: "Beschriftung",
+    Italian: "etichetta",
+    image: "/images/vocab/label.jpg",
+    multiple_choice: ["tag", "name", "identifier"]
+  },
+
+  "header": {
+    definition: "The name or title of a column of values, accessible via df.columns.",
+    French: "en-tête",
+    German: "Kopfzeile",
+    Italian: "intestazione",
+    image: "/images/vocab/header.jpg",
+    multiple_choice: ["title", "column name", "top row"]
+  },
+
+  "coordinates": {
+    definition: "Number pairs (x,y) that identify specific points on a plane.",
+    French: "coordonnées",
+    German: "Koordinaten",
+    Italian: "coordinate",
+    image: "/images/vocab/coordinates.jpg",
+    multiple_choice: ["location", "point markers", "grid reference"]
+  },
+
+  "trend line": {
+    definition: "A line drawn on a graph to show the general direction or pattern of data points.",
+    French: "ligne de tendance",
+    German: "Trendlinie",
+    Italian: "linea di tendenza",
+    image: "/images/vocab/trendline.jpg",
+    multiple_choice: ["regression line", "best fit", "direction line"]
+  },
+
+  "interval": {
+    definition: "The distance or difference between values on a graph's axes.",
+    French: "intervalle",
+    German: "Intervall",
+    Italian: "intervallo",
+    image: "/images/vocab/interval.jpg",
+    multiple_choice: ["gap", "step", "spacing"]
+  },
+
+  "tick": {
+    definition: "A marking on an axis that represents a specific interval or value.",
+    French: "graduation",
+    German: "Teilstrich",
+    Italian: "segno di graduazione",
+    image: "/images/vocab/tick.jpg",
+    multiple_choice: ["marker", "notch", "axis mark"]
+  },
+
+  "slope": {
+    definition: "The steepness of a line calculated as the vertical change divided by horizontal change (rise over run).",
+    French: "pente",
+    German: "Steigung",
+    Italian: "pendenza",
+    image: "/images/vocab/slope.jpg",
+    multiple_choice: ["gradient", "angle", "inclination"]
+  },
+
+  "origin": {
+    definition: "The starting point on a graph where coordinates are (0,0).",
+    French: "origine",
+    German: "Ursprung",
+    Italian: "origine",
+    image: "/images/vocab/origin.jpg",
+    multiple_choice: ["zero point", "base", "start"]
+  },
+
+  "grid": {
+    definition: "A network of intersecting lines that help to accurately map points on a graph.",
+    French: "grille",
+    German: "Gitter",
+    Italian: "griglia",
+    image: "/images/vocab/grid.jpg",
+    multiple_choice: ["mesh", "network", "lattice"]
+  },
+
+  "range": {
+    definition: "The span between the lowest and highest values in a dataset.",
+    French: "étendue",
+    German: "Bereich",
+    Italian: "intervallo di valori",
+    image: "/images/vocab/range.jpg",
+    multiple_choice: ["span", "spread", "scope"]
+  },
+
+  "histogram": {
+    definition: "A bar graph showing frequency distribution where the area of bars is proportional to the frequency.",
+    French: "histogramme",
+    German: "Histogramm",
+    Italian: "istogramma",
+    image: "/images/vocab/histogram.jpg",
+    multiple_choice: ["frequency chart", "distribution plot", "bar distribution"]
+  },
+
+  "cell": {
+    definition: "A single unit in a table containing a specific value.",
+    French: "cellule",
+    German: "Zelle",
+    Italian: "cella",
+    image: "/images/vocab/cell.jpg",
+    multiple_choice: ["entry", "box", "data point"]
+  },
+
+  "peak": {
+    definition: "The highest point on a curve, wave, or distribution graph.",
+    French: "sommet",
+    German: "Spitze",
+    Italian: "picco",
+    image: "/images/vocab/peak.jpg",
+    multiple_choice: ["maximum", "top", "apex"]
+  },
+
+  "trough": {
+    definition: "The lowest point on a curve or wave.",
+    French: "creux",
+    German: "Tiefpunkt",
+    Italian: "punto di minimo",
+    image: "/images/vocab/trough.jpg",
+    multiple_choice: ["bottom", "valley", "minimum"]
+  },
+
+  "data processing": {
+    definition: "Preparing and modifying raw data to make it ready for analysis and visualization.",
+    French: "traitement des données",
+    German: "Datenverarbeitung",
+    Italian: "elaborazione dati",
+    image: "/images/vocab/processing.jpg",
+    multiple_choice: ["transformation", "preparation", "data handling"]
+  },
+
+  "field": {
+    definition: "A space in a user interface or a specific column in a database/table where data is input.",
+    French: "champ",
+    German: "Feld",
+    Italian: "campo",
+    image: "/images/vocab/field2.jpg",
+    multiple_choice: ["entry box", "attribute", "input space"]
+  },
+
+  "distribution": {
+    definition: "How data values are spread out or arranged across a range or graph.",
+    French: "distribution",
+    German: "Verteilung",
+    Italian: "distribuzione",
+    image: "/images/vocab/distribution.jpg",
+    multiple_choice: ["spread", "arrangement", "frequency pattern"]
+  },
+
+  "index": {
+    definition: "A label for the category of a row, analogous to headers for columns.",
+    French: "indice",
+    German: "Index",
+    Italian: "indice",
+    image: "/images/vocab/index.jpg",
+    multiple_choice: ["row label", "pointer", "reference"]
+  },
+
+  "axes": {
+    definition: "The plural form of 'axis', representing both the horizontal and vertical lines (pronounced /AX-eez/).",
+    French: "axes",
+    German: "Achsen",
+    Italian: "assi",
+    image: "/images/vocab/axes.jpg",
+    multiple_choice: ["coordinates lines", "graph frames", "reference lines"]
+  },
+
+  "data": {
+    definition: "The plural form of 'datum'; information collected for analysis.",
+    French: "données",
+    German: "Daten",
+    Italian: "dati",
+    image: "/images/vocab/data.jpg",
+    multiple_choice: ["information", "facts", "records"]
+  },
+
+  "line graph": {
+    definition: "A graph that uses line segments to connect data points and show changes over time.",
+    French: "graphique linéaire",
+    German: "Liniendiagramm",
+    Italian: "grafico a linee",
+    image: "/images/vocab/linegraph.jpg",
+    multiple_choice: ["trend graph", "path plot", "sequence chart"]
+  },
+
+  "figure": {
+    definition: "The entire space in a visualization containing graphs, legends, labels and titles.",
+    French: "figure",
+    German: "Abbildung",
+    Italian: "figura",
+    image: "/images/vocab/figure.jpg",
+    multiple_choice: ["display area", "chart container", "illustration"]
+  }
+};
+
+export const Corporations = {
+  "balance sheet": {
+    definition: "A financial statement providing a snapshot of assets, liabilities, and equity at a specific point in time.",
+    French: "bilan",
+    German: "Bilanz",
+    Italian: "stato patrimoniale",
+    image: "/images/vocab/balancesheet.jpg",
+    multiple_choice: ["asset summary", "snapshot of wealth", "equity report"]
+  },
+
+  "supplier": {
+    definition: "A company or individual that provides goods or services to another company.",
+    French: "fournisseur",
+    German: "Lieferant",
+    Italian: "fornitore",
+    image: "/images/vocab/supplier.jpg",
+    multiple_choice: ["vendor", "provider", "source"]
+  },
+
+  "governance report": {
+    definition: "A document outlining a company's leadership structure, policies, and practices.",
+    French: "rapport de gouvernance",
+    German: "Governance-Bericht",
+    Italian: "relazione sulla governance",
+    image: "/images/vocab/governance.jpg",
+    multiple_choice: ["leadership outline", "policy doc", "oversight report"]
+  },
+
+  "profit and loss statement": {
+    definition: "A financial statement showing revenues, expenses, and net income over a specific period (P&L).",
+    French: "compte de résultat",
+    German: "Gewinn- und Verlustrechnung",
+    Italian: "conto economico",
+    image: "/images/vocab/pnl.jpg",
+    multiple_choice: ["income statement", "revenue report", "earnings summary"]
+  },
+
+  "cash-flow statement": {
+    definition: "A statement showing the actual inflows and outflows of cash over a specific period.",
+    French: "tableau des flux de trésorerie",
+    German: "Cashflow-Rechnung",
+    Italian: "rendiconto finanziario",
+    image: "/images/vocab/cashflow.jpg",
+    multiple_choice: ["liquidity flow", "money movement", "cash report"]
+  },
+
+  "reporting": {
+    definition: "The process of presenting financial and non-financial info to stakeholders and regulators.",
+    French: "reporting",
+    German: "Berichterstattung",
+    Italian: "rendicontazione",
+    image: "/images/vocab/reporting.jpg",
+    multiple_choice: ["disclosure", "data presentation", "notification"]
+  },
+
+  "taxes": {
+    definition: "Compulsory payments made by a company to the government, based on income or profits.",
+    French: "impôts",
+    German: "Steuern",
+    Italian: "tasse",
+    image: "/images/vocab/taxes.jpg",
+    multiple_choice: ["levies", "fiscal duties", "government fees"]
+  },
+
+  "subsidiary": {
+    definition: "A company that is owned and controlled by another company (the parent company).",
+    French: "filiale",
+    German: "Tochtergesellschaft",
+    Italian: "controllata",
+    image: "/images/vocab/subsidiary.jpg",
+    multiple_choice: ["branch company", "sub-firm", "owned entity"]
+  },
+
+  "holding company": {
+    definition: "A company created to buy and possess the shares of other companies, which it then controls.",
+    French: "société holding",
+    German: "Holdinggesellschaft",
+    Italian: "società holding",
+    image: "/images/vocab/holding.jpg",
+    multiple_choice: ["parent entity", "umbrella firm", "controlling corp"]
+  },
+
+  "kpi": {
+    definition: "Key Performance Indicator; a measurable value demonstrating how effectively a company achieves objectives.",
+    French: "indicateur clé de performance",
+    German: "Leistungskennzahl",
+    Italian: "indicatore chiave di prestazione",
+    image: "/images/vocab/kpi.jpg",
+    multiple_choice: ["success metric", "goal tracker", "benchmark"]
+  },
+
+  "esg concerns": {
+    definition: "Environmental, Social, and Governance factors that impact reputation and financial performance.",
+    French: "critères ESG",
+    German: "ESG-Kriterien",
+    Italian: "criteri ESG",
+    image: "/images/vocab/esg.jpg",
+    multiple_choice: ["sustainability factors", "social impact", "ethical standards"]
+  },
+
+  "ticker": {
+    definition: "A unique symbol used to identify a company's stock on an exchange (e.g., $AAPL).",
+    French: "symbole boursier",
+    German: "Börsenkürzel",
+    Italian: "simbolo azionario",
+    image: "/images/vocab/ticker.jpg",
+    multiple_choice: ["stock code", "trading symbol", "abbreviation"]
+  },
+
+  "franchise": {
+    definition: "A business model where a company grants permission to others to operate using its brand.",
+    French: "franchise",
+    German: "Franchise",
+    Italian: "franchising",
+    image: "/images/vocab/franchise.jpg",
+    multiple_choice: ["licensed business", "brand rental", "chain model"]
+  },
+
+  "stakeholder": {
+    definition: "Any individual or group with an interest in a company, including shareholders and employees.",
+    French: "partie prenante",
+    German: "Stakeholder",
+    Italian: "portatore di interesse",
+    image: "/images/vocab/stakeholder.jpg",
+    multiple_choice: ["interested party", "invested person", "participant"]
+  },
+
+  "board of directors": {
+    definition: "A group of individuals elected to oversee a company and make strategic decisions.",
+    French: "conseil d'administration",
+    German: "Vorstand / Aufsichtsrat",
+    Italian: "consiglio di amministrazione",
+    image: "/images/vocab/board.jpg",
+    multiple_choice: ["governing body", "directors", "oversight group"]
+  },
+
+  "c-suite": {
+    definition: "A term for top-ranking senior executives in an organization (CEO, CFO, COO).",
+    French: "équipe de direction",
+    German: "C-Suite",
+    Italian: "dirigenza",
+    image: "/images/vocab/csuite.jpg",
+    multiple_choice: ["executives", "top brass", "leadership team"]
+  },
+
+  "board member": {
+    definition: "An individual serving on the board of directors, providing guidance and oversight.",
+    French: "membre du conseil",
+    German: "Vorstandsmitglied",
+    Italian: "membro del consiglio",
+    image: "/images/vocab/boardmember.jpg",
+    multiple_choice: ["director", "trustee", "overseer"]
+  },
+
+  "mid-level management": {
+    definition: "Managers responsible for implementing strategic plans and overseeing daily operations.",
+    French: "cadres moyens",
+    German: "mittleres Management",
+    Italian: "quadri",
+    image: "/images/vocab/middlemanagement.jpg",
+    multiple_choice: ["department heads", "operational managers", "supervisors"]
+  },
+
+  "limited company": {
+    definition: "A company that offers liability protection to its shareholders' personal assets.",
+    French: "société à responsabilité limitée",
+    German: "GmbH / Gesellschaft mit beschränkter Haftung",
+    Italian: "società a responsabilità limitata",
+    image: "/images/vocab/limited.jpg",
+    multiple_choice: ["Ltd", "protected entity", "inc"]
+  },
+
+  "sme": {
+    definition: "Small and Medium-sized Enterprises; companies with limited employees and revenue.",
+    French: "PME",
+    German: "KMU",
+    Italian: "PMI",
+    image: "/images/vocab/sme.jpg",
+    multiple_choice: ["small biz", "local enterprise", "mid-market firm"]
+  },
+
+  "public company": {
+    definition: "A company that issues stocks to the public and is listed on a stock exchange.",
+    French: "société anonyme",
+    German: "börsennotiertes Unternehmen",
+    Italian: "società quotata",
+    image: "/images/vocab/public.jpg",
+    multiple_choice: ["listed firm", "open corporation", "stock-traded company"]
+  },
+
+  "private company": {
+    definition: "A company not listed on a stock exchange and owned by private entities.",
+    French: "société privée",
+    German: "Privatunternehmen",
+    Italian: "società privata",
+    image: "/images/vocab/private.jpg",
+    multiple_choice: ["closely held", "unlisted firm", "family business"]
+  },
+
+  "headquarters": {
+    definition: "The main office of a company where senior leadership is based.",
+    French: "siège social",
+    German: "Hauptsitz",
+    Italian: "sede centrale",
+    image: "/images/vocab/hq.jpg",
+    multiple_choice: ["main office", "central hub", "base of operations"]
+  },
+
+  "earnings": {
+    definition: "A company's profits or net income over a specific period.",
+    French: "bénéfices",
+    German: "Gewinn / Ertrag",
+    Italian: "utili",
+    image: "/images/vocab/earnings.jpg",
+    multiple_choice: ["returns", "net income", "yield"]
+  },
+
+  "profits": {
+    definition: "Money earned after deducting all expenses and taxes from revenue.",
+    French: "profits",
+    German: "Profit",
+    Italian: "profitti",
+    image: "/images/vocab/profit.jpg",
+    multiple_choice: ["gain", "surplus", "bottom line"]
+  },
+
+  "dividends": {
+    definition: "Payments made by a company to its shareholders from its profits.",
+    French: "dividendes",
+    German: "Dividenden",
+    Italian: "dividendi",
+    image: "/images/vocab/dividends.jpg",
+    multiple_choice: ["shareholder payout", "profit share", "reward"]
+  },
+
+  "reinvestment": {
+    definition: "Using a company's profits to invest in new projects or assets instead of paying dividends.",
+    French: "réinvestissement",
+    German: "Reinvestition",
+    Italian: "reinvestimento",
+    image: "/images/vocab/reinvest.jpg",
+    multiple_choice: ["growth funding", "plowing back", "capital renewal"]
+  },
+
+  "divisional structure": {
+    definition: "Organizational structure divided into separate divisions based on products or geography.",
+    French: "structure divisionnelle",
+    German: "Spartenorganisation",
+    Italian: "struttura divisionale",
+    image: "/images/vocab/divisional.jpg",
+    multiple_choice: ["product-based org", "unit structure", "segmented org"]
+  },
+
+  "functional structure": {
+    definition: "Structure divided by specialized functions like marketing, sales, and finance.",
+    French: "structure fonctionnelle",
+    German: "Funktionalorganisation",
+    Italian: "struttura funzionale",
+    image: "/images/vocab/functional.jpg",
+    multiple_choice: ["dept-based org", "expert-based structure", "skill-based org"]
+  },
+
+  "matrix structure": {
+    definition: "A structure where employees have dual reporting relationships (e.g., to both function and division).",
+    French: "structure matricielle",
+    German: "Matrixorganisation",
+    Italian: "struttura a matrice",
+    image: "/images/vocab/matrix.jpg",
+    multiple_choice: ["dual reporting", "grid structure", "complex org"]
+  },
+
+  "fiscal year": {
+    definition: "A one-year period used for financial reporting and budgeting.",
+    French: "exercice financier",
+    German: "Geschäftsjahr",
+    Italian: "anno fiscale",
+    image: "/images/vocab/fiscalyear.jpg",
+    multiple_choice: ["accounting period", "budget year", "tax year"]
+  },
+
+  "sourcing": {
+    definition: "Identifying, evaluating, and acquiring materials or suppliers.",
+    French: "sourcing",
+    German: "Beschaffung",
+    Italian: "approvvigionamento",
+    image: "/images/vocab/sourcing.jpg",
+    multiple_choice: ["procurement", "supply finding", "purchasing"]
+  },
+
+  "manufacturing": {
+    definition: "The process of turning raw materials into finished products, often on a large scale.",
+    French: "fabrication",
+    German: "Fertigung",
+    Italian: "produzione",
+    image: "/images/vocab/manufacturing.jpg",
+    multiple_choice: ["production", "industrial making", "assembly"]
+  },
+
+  "factory": {
+    definition: "A large building where machinery is used to manufacture goods.",
+    French: "usine",
+    German: "Fabrik",
+    Italian: "fabbrica",
+    image: "/images/vocab/factory.jpg",
+    multiple_choice: ["plant", "mill", "production site"]
+  },
+
+  "equity": {
+    definition: "The value of a company divided into shares; representing ownership interest.",
+    French: "fonds propres",
+    German: "Eigenkapital",
+    Italian: "capitale proprio",
+    image: "/images/vocab/equity.jpg",
+    multiple_choice: ["share capital", "ownership stake", "book value"]
+  },
+
+  "retail": {
+    definition: "The sale of goods in small quantities directly to consumers.",
+    French: "vente au détail",
+    German: "Einzelhandel",
+    Italian: "vendita al dettaglio",
+    image: "/images/vocab/retail.jpg",
+    multiple_choice: ["direct sales", "consumer trade", "shop selling"]
+  },
+
+  "wholesale": {
+    definition: "Buying or selling goods in large quantities at lower prices to retailers.",
+    French: "vente en gros",
+    German: "Großhandel",
+    Italian: "vendita all'ingrosso",
+    image: "/images/vocab/wholesale.jpg",
+    multiple_choice: ["bulk selling", "volume trade", "b2b sales"]
+  },
+
+  "outsource": {
+    definition: "To use outside suppliers and manufacturers to produce goods or services.",
+    French: "externaliser",
+    German: "auslagern",
+    Italian: "esternalizzare",
+    image: "/images/vocab/outsource.jpg",
+    multiple_choice: ["contract out", "subcontract", "delegate externally"]
+  },
+
+  "offshore": {
+    definition: "Moving part of a company's operations to another country, often to reduce costs.",
+    French: "délocaliser",
+    German: "offshore",
+    Italian: "delocalizzare",
+    image: "/images/vocab/offshore.jpg",
+    multiple_choice: ["overseas move", "foreign operation", "external relocation"]
+  },
+
+  "appoint": {
+    definition: "To officially choose someone for a specific office or position.",
+    French: "nommer",
+    German: "ernennen",
+    Italian: "nominare",
+    image: "/images/vocab/appoint.jpg",
+    multiple_choice: ["assign", "designate", "select"]
+  },
+
+  "line position": {
+    definition: "A position in the direct chain of command responsible for achieving company goals.",
+    French: "poste hiérarchique",
+    German: "Linienstelle",
+    Italian: "posizione di linea",
+    image: "/images/vocab/lineposition.jpg",
+    multiple_choice: ["chain position", "authority role", "operational role"]
+  },
+
+  "staff position": {
+    definition: "A position providing expertise, advice, and support (e.g., HR or Legal) to line positions.",
+    French: "poste fonctionnel",
+    German: "Stabsstelle",
+    Italian: "posizione di staff",
+    image: "/images/vocab/staffposition.jpg",
+    multiple_choice: ["advisory role", "support role", "expert role"]
+  },
+
+  "span of control": {
+    definition: "The number of subordinates who report directly to a manager.",
+    French: "éventail de subordination",
+    German: "Kontrollspanne",
+    Italian: "ampiezza del controllo",
+    image: "/images/vocab/spanofcontrol.jpg",
+    multiple_choice: ["management reach", "reporting width", "supervision limit"]
+  },
+
+  "chain of command": {
+    definition: "The line of authority that moves from top leadership to the lowest levels.",
+    French: "chaîne de commandement",
+    German: "Befehlskette",
+    Italian: "catena di comando",
+    image: "/images/vocab/chainofcommand.jpg",
+    multiple_choice: ["hierarchy", "order flow", "authority line"]
+  },
+
+  "silo mentality": {
+    definition: "When departments do not share information with others in the same company.",
+    French: "mentalité de silo",
+    German: "Silodenken",
+    Italian: "mentalità a compartimenti stagni",
+    image: "/images/vocab/silo.jpg",
+    multiple_choice: ["isolation", "fragmentation", "lack of cooperation"]
+  }
+};
+
+///////////////////////////
 
 export const productMarketing = {
   "core product": {
@@ -2861,7 +4094,7 @@ export const startUps = {
   },
 
   "lean startup": {
-    "definition": "A methodology for developing businesses and products that aims to shorten development cycles through experimentation and validated learning.",
+    "definition": "An approach that aims to shorten business development cycles through experimentation and a focus on speed.",
     "French": "startup lean",
     "German": "Lean Startup",
     "Italian": "lean startup",
@@ -2882,6 +4115,391 @@ export const startUps = {
     "synonyms": []
   }
 };
+
+
+/////////////////////////
+
+export const FinanceAndTrading = {
+  "short selling": {
+    definition: "The practice of selling borrowed securities in anticipation of buying them back later at a lower price.",
+    French: "vente à découvert",
+    German: "Leerverkauf",
+    Italian: "vendita allo scoperto",
+    image: "/images/vocab/shortselling.jpg",
+    multiple_choice: ["bearish trade", "borrowed sale", "price drop profit"]
+  },
+
+  "joint-stock company": {
+    definition: "A business entity where ownership is divided into shares held by multiple investors.",
+    French: "société par actions",
+    German: "Aktiengesellschaft",
+    Italian: "società per azioni",
+    image: "/images/vocab/jointstock.jpg",
+    multiple_choice: ["shareholder firm", "divided ownership", "early corporation"]
+  },
+
+  "derivative": {
+    definition: "A financial contract whose value is based on the performance of an underlying asset, rate, or index.",
+    French: "produit dérivé",
+    German: "Derivat",
+    Italian: "derivato",
+    image: "/images/vocab/derivative.jpg",
+    multiple_choice: ["linked contract", "secondary asset", "underlying security"]
+  },
+
+  "option": {
+    definition: "A contract giving the holder the right, but not the obligation, to buy or sell an asset at a set price.",
+    French: "option",
+    German: "Option",
+    Italian: "opzione",
+    image: "/images/vocab/option.jpg",
+    multiple_choice: ["choice contract", "right to trade", "conditional agreement"]
+  },
+
+  "futures contract": {
+    definition: "A standardized agreement to buy or sell an asset at a predetermined price on a future date.",
+    French: "contrat à terme",
+    German: "Terminkontrakt",
+    Italian: "contratto futures",
+    image: "/images/vocab/futures.jpg",
+    multiple_choice: ["forward deal", "locked price agreement", "delivery contract"]
+  },
+
+  "portfolio diversification": {
+    definition: "The strategy of spreading investments across multiple assets to minimize exposure to risk.",
+    French: "diversification de portefeuille",
+    German: "Portfoliodiversifikation",
+    Italian: "diversificazione del portafoglio",
+    image: "/images/vocab/diversification.jpg",
+    multiple_choice: ["risk spreading", "asset mixing", "balanced investing"]
+  },
+
+  "efficient frontier": {
+    definition: "The set of portfolios that offer the highest expected return for a defined level of risk.",
+    French: "frontière efficiente",
+    German: "Effizienzlinie",
+    Italian: "frontiera efficiente",
+    image: "/images/vocab/efficientfrontier.jpg",
+    multiple_choice: ["optimal portfolio set", "risk-return curve", "ideal investment line"]
+  },
+
+  "capm": {
+    definition: "Capital Asset Pricing Model; a model that explains the relationship between expected return and systematic risk.",
+    French: "MEDAF",
+    German: "CAPM",
+    Italian: "modello dei prezzi degli attivi di capitale",
+    image: "/images/vocab/capm.jpg",
+    multiple_choice: ["risk pricing model", "expected return formula", "asset valuation"]
+  },
+
+  "index fund": {
+    definition: "A passive investment fund that tracks a specific market index to replicate its performance.",
+    French: "fonds indiciel",
+    German: "Indexfonds",
+    Italian: "fondo indicizzato",
+    image: "/images/vocab/indexfund.jpg",
+    multiple_choice: ["passive fund", "benchmark tracker", "market replicator"]
+  },
+
+  "etf": {
+    definition: "Exchange-Traded Fund; a fund that trades on an exchange like a stock but holds a diversified portfolio.",
+    French: "FNB",
+    German: "ETF",
+    Italian: "ETF",
+    image: "/images/vocab/etf.jpg",
+    multiple_choice: ["traded fund", "basket security", "listed portfolio"]
+  },
+
+  "junk bond": {
+    definition: "A high-yield, high-risk bond with a low credit rating, often used for speculative financing.",
+    French: "obligation pourrie",
+    German: "Schrottanleihe",
+    Italian: "titolo spazzatura",
+    image: "/images/vocab/junkbond.jpg",
+    multiple_choice: ["high-yield bond", "risky debt", "speculative note"]
+  },
+
+  "quantitative finance": {
+    definition: "The use of mathematical models and statistics to analyze and manage financial markets.",
+    French: "finance quantitative",
+    German: "quantitative Finanzwirtschaft",
+    Italian: "finanza quantitativa",
+    image: "/images/vocab/quant.jpg",
+    multiple_choice: ["math-based finance", "statistical modeling", "algorithmic analysis"]
+  },
+
+  "algorithmic trading": {
+    definition: "The automated execution of trades using computer algorithms based on data models.",
+    French: "trading algorithmique",
+    German: "Algorithmus-Handel",
+    Italian: "trading algoritmico",
+    image: "/images/vocab/algotrading.jpg",
+    multiple_choice: ["bot trading", "automated execution", "black-box trading"]
+  },
+
+  "random walk": {
+    definition: "The theory that stock price changes have the same distribution and are independent of each other.",
+    French: "marche aléatoire",
+    German: "Random Walk",
+    Italian: "percorso casuale",
+    image: "/images/vocab/randomwalk.jpg",
+    multiple_choice: ["unpredictable path", "stochastic trend", "independent price movement"]
+  },
+
+  "risk management": {
+    definition: "The process of identifying, evaluating, and mitigating potential losses in financial activities.",
+    French: "gestion des risques",
+    German: "Risikomanagement",
+    Italian: "gestione del rischio",
+    image: "/images/vocab/riskmanagement.jpg",
+    multiple_choice: ["loss mitigation", "threat assessment", "hedging strategy"]
+  },
+
+  "value investing": {
+    definition: "An investment strategy focused on identifying undervalued securities based on fundamental analysis.",
+    French: "investissement axé sur la valeur",
+    German: "Value-Investing",
+    Italian: "value investing",
+    image: "/images/vocab/valueinvesting.jpg",
+    multiple_choice: ["bargain hunting", "fundamental strategy", "undervalued buying"]
+  },
+
+  "sharpe ratio": {
+    definition: "A measure of risk-adjusted performance, comparing excess return to the standard deviation of returns.",
+    French: "ratio de Sharpe",
+    German: "Sharpe-Quotient",
+    Italian: "indice di Sharpe",
+    image: "/images/vocab/sharpe.jpg",
+    multiple_choice: ["risk-adjusted return", "performance metric", "volatility measure"]
+  },
+
+  "speculative bubble": {
+    definition: "A rapid increase in asset prices driven by enthusiasm rather than fundamental value.",
+    French: "bulle spéculative",
+    German: "Spekulationsblase",
+    Italian: "bolla speculativa",
+    image: "/images/vocab/bubble.jpg",
+    multiple_choice: ["market mania", "overvaluation", "price surge"]
+  },
+
+  "market liquidity": {
+    definition: "The ease with which an asset can be bought or sold without significantly affecting its price.",
+    French: "liquidité du marché",
+    German: "Marktliquidität",
+    Italian: "liquidità del mercato",
+    image: "/images/vocab/marketliquidity.jpg",
+    multiple_choice: ["trade ease", "exit speed", "market depth"]
+  },
+
+  "leverage": {
+    definition: "The use of borrowed capital to increase the potential return (and risk) of an investment.",
+    French: "effet de levier",
+    German: "Hebelwirkung",
+    Italian: "leva finanziaria",
+    image: "/images/vocab/leverage.jpg",
+    multiple_choice: ["margin use", "gearing", "borrowed power"]
+  },
+
+  "mortgage": {
+    definition: "A loan used to buy real estate, where the property itself serves as collateral.",
+    French: "hypothèque",
+    German: "Hypothek",
+    Italian: "mutuo",
+    image: "/images/vocab/mortgage.jpg",
+    multiple_choice: ["home loan", "property debt", "real estate credit"]
+  },
+
+  "margin buying": {
+    definition: "Purchasing securities using funds borrowed from a broker.",
+    French: "achat sur marge",
+    German: "Kauf auf Marge",
+    Italian: "acquisto a margine",
+    image: "/images/vocab/marginbuying.jpg",
+    multiple_choice: ["leveraged purchase", "borrowed trading", "credit buying"]
+  },
+
+  "financial regulation": {
+    definition: "Rules designed to ensure transparency, fairness, and stability in financial markets.",
+    French: "réglementation financière",
+    German: "Finanzmarktregulierung",
+    Italian: "regolamentazione finanziaria",
+    image: "/images/vocab/regulation.jpg",
+    multiple_choice: ["market oversight", "policy control", "compliance rules"]
+  },
+
+  "securitization": {
+    definition: "The process of pooling various financial assets and selling them as tradable securities.",
+    French: "titrisation",
+    German: "Verbriefung",
+    Italian: "cartolarizzazione",
+    image: "/images/vocab/securitization.jpg",
+    multiple_choice: ["asset pooling", "debt packaging", "security creation"]
+  },
+
+  "systemic risk": {
+    definition: "The potential for the failure of one institution to trigger instability across the entire system.",
+    French: "risque systémique",
+    German: "systemisches Risiko",
+    Italian: "rischio sistemico",
+    image: "/images/vocab/systemicrisk.jpg",
+    multiple_choice: ["domino effect", "contagion risk", "market-wide failure"]
+  },
+
+  "defaulting": {
+    definition: "The failure to fulfill a legal obligation, such as failing to repay a loan.",
+    French: "faire défaut",
+    German: "ausfallen",
+    Italian: "andare in default",
+    image: "/images/vocab/default.jpg",
+    multiple_choice: ["non-payment", "breach of contract", "failure to pay"]
+  },
+
+  "mutual fund": {
+    definition: "A professionally managed investment fund that pools money from many investors.",
+    French: "fonds commun de placement",
+    German: "Investmentfonds",
+    Italian: "fondo comune di investimento",
+    image: "/images/vocab/mutualfund.jpg",
+    multiple_choice: ["pooled fund", "open-end fund", "managed basket"]
+  },
+
+  "margin call": {
+    definition: "A demand by a broker that an investor deposit further cash or securities to cover possible losses.",
+    French: "appel de marge",
+    German: "Nachschussforderung",
+    Italian: "richiesta di integrazione",
+    image: "/images/vocab/margincall.jpg",
+    multiple_choice: ["collateral demand", "broker alert", "repayment request"]
+  },
+
+  "broker": {
+    definition: "An individual or firm that acts as an intermediary between a buyer and a seller.",
+    French: "courtier",
+    German: "Börsenmakler",
+    Italian: "broker",
+    image: "/images/vocab/broker.jpg",
+    multiple_choice: ["agent", "middleman", "trader"]
+  },
+
+  "hedge fund": {
+    definition: "A private, less-regulated investment pool that uses speculative strategies to earn high returns.",
+    French: "fonds spéculatif",
+    German: "Hedgefonds",
+    Italian: "fondo speculativo",
+    image: "/images/vocab/hedgefund.jpg",
+    multiple_choice: ["private pool", "speculative fund", "alternative investment"]
+  },
+
+  "hedging": {
+    definition: "Entering a position to offset and reduce the risk of price movements in another investment.",
+    French: "couverture",
+    German: "Absicherung",
+    Italian: "copertura",
+    image: "/images/vocab/hedging.jpg",
+    multiple_choice: ["insurance trade", "risk balancing", "offsetting"]
+  },
+
+  "drawdown": {
+    definition: "The peak-to-trough decline during a specific period for an investment or fund.",
+    French: "baisse maximale",
+    German: "Drawdown",
+    Italian: "prelievo",
+    image: "/images/vocab/drawdown.jpg",
+    multiple_choice: ["equity dip", "peak-to-low loss", "decline measure"]
+  },
+
+  "short position": {
+    definition: "A position that profits if the price of an asset declines.",
+    French: "position courte",
+    German: "Short-Position",
+    Italian: "posizione corta",
+    image: "/images/vocab/shortposition.jpg",
+    multiple_choice: ["bearish bet", "sell position", "downside play"]
+  },
+
+  "long position": {
+    definition: "Buying and holding a security with the expectation that its price will rise.",
+    French: "position longue",
+    German: "Long-Position",
+    Italian: "posizione lunga",
+    image: "/images/vocab/longposition.jpg",
+    multiple_choice: ["bullish bet", "buy position", "ownership play"]
+  },
+
+  "liquidity": {
+    definition: "The availability of liquid assets to a market or company.",
+    French: "liquidité",
+    German: "Liquidität",
+    Italian: "liquidità",
+    image: "/images/vocab/liquidity.jpg",
+    multiple_choice: ["cash availability", "convertibility", "asset flow"]
+  },
+
+  "volatility": {
+    definition: "A statistical measure of the dispersion of returns for a given security or market index.",
+    French: "volatilité",
+    German: "Volatilität",
+    Italian: "volatilità",
+    image: "/images/vocab/volatility.jpg",
+    multiple_choice: ["price variance", "market swing", "risk factor"]
+  },
+
+  "slippage": {
+    definition: "The difference between the expected price of a trade and the price at which the trade is actually executed.",
+    French: "glissement de cours",
+    German: "Slippage",
+    Italian: "slippage",
+    image: "/images/vocab/slippage.jpg",
+    multiple_choice: ["price gap", "execution error", "spread difference"]
+  },
+
+  "liquidity crunch": {
+    definition: "A sudden decrease in the availability of cash or easily tradable assets in the financial system.",
+    French: "crise de liquidité",
+    German: "Liquiditätsengpass",
+    Italian: "crisi di liquidità",
+    image: "/images/vocab/crunch.jpg",
+    multiple_choice: ["cash shortage", "frozen market", "funding squeeze"]
+  },
+
+  "stop-out level": {
+    definition: "The point at which a broker automatically closes a trader's active positions due to a lack of margin.",
+    French: "niveau de stop-out",
+    German: "Stop-Out-Level",
+    Italian: "livello di stop-out",
+    image: "/images/vocab/stopout.jpg",
+    multiple_choice: ["automatic closure", "forced exit", "liquidation point"]
+  },
+
+  "day trading": {
+    definition: "Buying and selling financial instruments within the same trading day.",
+    French: "day trading",
+    German: "Tageshandel",
+    Italian: "day trading",
+    image: "/images/vocab/daytrading.jpg",
+    multiple_choice: ["short-term trading", "intra-day play", "active trading"]
+  },
+
+  "market maker": {
+    definition: "An institution that stands ready to buy and sell at publicly quoted prices to provide liquidity.",
+    French: "teneur de marché",
+    German: "Market-Maker",
+    Italian: "market maker",
+    image: "/images/vocab/marketmaker.jpg",
+    multiple_choice: ["liquidity provider", "price quoter", "bid-ask dealer"]
+  },
+
+  "bid-ask spread": {
+    definition: "The difference between the highest price a buyer is willing to pay and the lowest price a seller will accept.",
+    French: "écart acheteur-vendeur",
+    German: "Geld-Brief-Spanne",
+    Italian: "spread denaro-lettera",
+    image: "/images/vocab/spread.jpg",
+    multiple_choice: ["price gap", "transaction cost", "market margin"]
+  }
+};
+
+//////////////////////////////////
 
 export const businessEthics = {
   "ethical dilemma": {
@@ -3634,5 +5252,6 @@ export const sustainability = {
     "synonyms": []
   }
 }
+
 
 

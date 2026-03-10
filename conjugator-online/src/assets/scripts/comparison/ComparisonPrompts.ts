@@ -18,7 +18,7 @@ export const comparisonPrompts: Record<number, ComparisonPromptRaw> = {
     word: "athletic",
     person_A: "Lebron",
     person_B: "Mike",
-    answer: { comparative: ["more athletic"], superlative: ["the most athletic"], equality: ["as athletic as"] },
+    answer: { comparative: ["more athletic than"], superlative: ["the most athletic"], equality: ["as athletic as"] },
     negative: false,
     part_of_speech: "adjective",
     prompt: null,
