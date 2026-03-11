@@ -30,7 +30,19 @@
         </RouterLink>
       </v-col>
 
-
+      <!-- Word Stats -->
+      <v-col cols="12" sm="6" md="4" class="d-flex justify-center">
+        <RouterLink :to="{ name: 'word-stats' }" class="image-tile">
+          <div class="tile-frame">
+            <v-img
+              src="/images/banners/WordStats.png"
+              alt="Word Stats"
+              cover
+              class="tile-image"
+            />
+          </div>
+        </RouterLink>
+      </v-col>
 
     </v-row>
     <!-- Back Button -->

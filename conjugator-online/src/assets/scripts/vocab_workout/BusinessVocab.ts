@@ -3619,6 +3619,488 @@ export const promotionAndBusinessDevelopment = {
   }
 };
 
+export const BusinessAdjectives = {
+  "disruptive": {
+    definition: "Innovation that significantly alters the way a market or industry functions.",
+    French: "disruptif",
+    German: "disruptiv",
+    Italian: "dirompente",
+    image: "/images/vocab/disruptive.jpg",
+    multiple_choice: ["industry-changing", "revolutionary", "disturbing"]
+  },
+
+  "scalable": {
+    definition: "Able to be grown or made larger without being limited by resources or structure.",
+    French: "évolutif",
+    German: "skalierbar",
+    Italian: "scalabile",
+    image: "/images/vocab/scalable.jpg",
+    multiple_choice: ["expandable", "growth-oriented", "adaptable"]
+  },
+
+  "lucrative": {
+    definition: "Producing a great deal of profit.",
+    French: "lucratif",
+    German: "lukrativ",
+    Italian: "redditizio",
+    image: "/images/vocab/lucrative.jpg",
+    multiple_choice: ["profitable", "money-making", "rewarding"]
+  },
+
+  "volatile": {
+    definition: "Liable to change rapidly and unpredictably, especially for the worse.",
+    French: "volatile",
+    German: "volatil",
+    Italian: "volatile",
+    image: "/images/vocab/volatile.jpg",
+    multiple_choice: ["unstable", "erratic", "fluctuating"]
+  },
+
+  "robust": {
+    definition: "Strong and unlikely to break or fail; able to withstand adverse conditions.",
+    French: "robuste",
+    German: "robust",
+    Italian: "solido",
+    image: "/images/vocab/robust.jpg",
+    multiple_choice: ["sturdy", "resilient", "vigorous"]
+  },
+
+  "saturated": {
+    definition: "A market where the amount of product provided has reached the maximum demand.",
+    French: "saturé",
+    German: "gesättigt",
+    Italian: "saturo",
+    image: "/images/vocab/saturated.jpg",
+    multiple_choice: ["full", "overflowing", "crowded"]
+  },
+
+  "niche": {
+    definition: "An adjective describing products or services for a specialized section of the population.",
+    French: "de niche",
+    German: "Nischen-",
+    Italian: "di nicchia",
+    image: "/images/vocab/niche.jpg",
+    multiple_choice: ["specialized", "targeted", "limited"]
+  },
+
+  "obsolete": {
+    definition: "No longer produced or used; out of date.",
+    French: "obsolète",
+    German: "veraltet",
+    Italian: "obsoleto",
+    image: "/images/vocab/obsolete.jpg",
+    multiple_choice: ["outdated", "archaic", "discontinued"]
+  },
+
+  "sustainable": {
+    definition: "Able to be maintained; also relates to environmental responsibility.",
+    French: "durable",
+    German: "nachhaltig",
+    Italian: "sostenibile",
+    image: "/images/vocab/sustainable.jpg",
+    multiple_choice: ["viable", "long-lasting", "renewable"]
+  },
+
+  "feasible": {
+    definition: "Possible to do easily or conveniently.",
+    French: "faisable",
+    German: "machbar",
+    Italian: "fattibile",
+    image: "/images/vocab/feasible.jpg",
+    multiple_choice: ["attainable", "viable", "practical"]
+  },
+
+  "redundant": {
+    definition: "No longer needed or useful; superfluous.",
+    French: "redondant",
+    German: "überflüssig",
+    Italian: "ridondante",
+    image: "/images/vocab/redundant.jpg",
+    multiple_choice: ["unnecessary", "extra", "useless"]
+  },
+
+  "solvent": {
+    definition: "Having more assets than liabilities; able to pay one's debts.",
+    French: "solvable",
+    German: "zahlungsfähig",
+    Italian: "solvibile",
+    image: "/images/vocab/solvent.jpg",
+    multiple_choice: ["financially sound", "stable", "debt-free"]
+  },
+
+  "competitive": {
+    definition: "As good as or better than others of a comparable nature.",
+    French: "compétitif",
+    German: "wettbewerbsfähig",
+    Italian: "competitivo",
+    image: "/images/vocab/competitive.jpg",
+    multiple_choice: ["ambitious", "rivaling", "efficient"]
+  },
+
+  "agile": {
+    definition: "Able to move quickly and easily; in business, responding rapidly to change.",
+    French: "agile",
+    German: "agil",
+    Italian: "agile",
+    image: "/images/vocab/agile.jpg",
+    multiple_choice: ["nimble", "flexible", "responsive"]
+  },
+
+  "stagnant": {
+    definition: "Showing no activity; dull and sluggish growth.",
+    French: "stagnant",
+    German: "stagnierend",
+    Italian: "stagnante",
+    image: "/images/vocab/stagnant.jpg",
+    multiple_choice: ["motionless", "inactive", "static"]
+  },
+
+  "cutting-edge": {
+    definition: "Highly advanced; innovative or pioneering.",
+    French: "de pointe",
+    German: "hochmodern",
+    Italian: "all'avanguardia",
+    image: "/images/vocab/cuttingedge.jpg",
+    multiple_choice: ["modern", "advanced", "state-of-the-art"]
+  },
+
+  "overvalued": {
+    definition: "Estimated to be worth more than it actually is.",
+    French: "surévalué",
+    German: "überbewertet",
+    Italian: "sopravvalutato",
+    image: "/images/vocab/overvalued.jpg",
+    multiple_choice: ["overpriced", "inflated", "hyped"]
+  },
+
+  "underrated": {
+    definition: "Rated as less than its true value.",
+    French: "sous-estimé",
+    German: "unterschätzt",
+    Italian: "sottovalutato",
+    image: "/images/vocab/underrated.jpg",
+    multiple_choice: ["cheap", "overlooked", "discounted"]
+  },
+
+  "synergistic": {
+    definition: "Relating to the interaction of two or more agents to produce a combined effect greater than the sum of their separate effects.",
+    French: "synergique",
+    German: "synergetisch",
+    Italian: "sinergico",
+    image: "/images/vocab/synergy.jpg",
+    multiple_choice: ["collaborative", "combined", "cooperative"]
+  },
+
+  "resilient": {
+    definition: "Able to withstand or recover quickly from difficult conditions.",
+    French: "résilient",
+    German: "belastbar",
+    Italian: "resiliente",
+    image: "/images/vocab/resilient.jpg",
+    multiple_choice: ["tough", "adaptable", "rebounding"]
+  },
+
+  "capital-intensive": {
+    definition: "Requiring the investment of large amounts of money relative to labor.",
+    French: "à forte intensité de capital",
+    German: "kapitalintensiv",
+    Italian: "ad alta intensità di capitale",
+    image: "/images/vocab/capital_intensive.jpg",
+    multiple_choice: ["expensive", "asset-heavy", "investment-heavy"]
+  },
+
+  "labor-intensive": {
+    definition: "Requiring a large amount of labor relative to capital.",
+    French: "à forte intensité de main-d'œuvre",
+    German: "arbeitsintensiv",
+    Italian: "ad alta intensità di lavoro",
+    image: "/images/vocab/labor_intensive.jpg",
+    multiple_choice: ["manual", "worker-heavy", "demanding"]
+  },
+
+  "streamlined": {
+    definition: "Making an organization or system more efficient by employing faster or simpler working methods.",
+    French: "rationalisé",
+    German: "rationalisiert",
+    Italian: "razionalizzato",
+    image: "/images/vocab/streamlined.jpg",
+    multiple_choice: ["efficient", "simplified", "lean"]
+  },
+
+  "lean": {
+    definition: "Using less of everything compared to mass production; minimizing waste.",
+    French: "maigre",
+    German: "schlank",
+    Italian: "snello",
+    image: "/images/vocab/lean.jpg",
+    multiple_choice: ["efficient", "minimalist", "economical"]
+  },
+
+  "fragmented": {
+    definition: "A market where no single enterprise has a large enough share to move the industry.",
+    French: "fragmenté",
+    German: "fragmentiert",
+    Italian: "frammentato",
+    image: "/images/vocab/fragmented.jpg",
+    multiple_choice: ["divided", "scattered", "unconsolidated"]
+  },
+
+  "speculative": {
+    definition: "Engaged in, expressing, or based on conjecture rather than knowledge.",
+    French: "spéculatif",
+    German: "spekulativ",
+    Italian: "speculativo",
+    image: "/images/vocab/speculative.jpg",
+    multiple_choice: ["risky", "uncertain", "theoretical"]
+  },
+
+  "unprecedented": {
+    definition: "Never done or known before.",
+    French: "sans précédent",
+    German: "beispiellos",
+    Italian: "senza precedenti",
+    image: "/images/vocab/unprecedented.jpg",
+    multiple_choice: ["novel", "groundbreaking", "unique"]
+  },
+
+  "autonomous": {
+    definition: "Acting independently or having the freedom to do so.",
+    French: "autonome",
+    German: "autonom",
+    Italian: "autonomo",
+    image: "/images/vocab/autonomous.jpg",
+    multiple_choice: ["independent", "self-governing", "self-reliant"]
+  },
+
+  "proactive": {
+    definition: "Creating or controlling a situation by causing something to happen rather than responding to it.",
+    French: "proactif",
+    German: "proaktiv",
+    Italian: "proattivo",
+    image: "/images/vocab/proactive.jpg",
+    multiple_choice: ["enterprising", "anticipatory", "forward-looking"]
+  },
+  
+  "pioneering": {
+    definition: "Involving new ideas or methods.",
+    French: "pionnier",
+    German: "wegweisend",
+    Italian: "pionieristico",
+    image: "/images/vocab/pioneer.jpg",
+    multiple_choice: ["innovative", "original", "leading"]
+  },
+
+  "disposable": {
+    definition: "Available for use; or intended to be used once and thrown away.",
+    French: "jetable",
+    German: "Einweg-",
+    Italian: "usa e getta",
+    image: "/images/vocab/disposable.jpg",
+    multiple_choice: ["replaceable", "temporary", "expendable"]
+  },
+
+
+  "holistic": {
+    definition: "Characterized by comprehension of the parts of something as intimately interconnected.",
+    French: "holistique",
+    German: "ganzheitlich",
+    Italian: "olistico",
+    image: "/images/vocab/holistic.jpg",
+    multiple_choice: ["comprehensive", "all-inclusive", "integrated"]
+  },
+
+  "customized": {
+    definition: "Made to a particular customer's order; tailor-made.",
+    French: "sur mesure",
+    German: "massgeschneidert",
+    Italian: "su misura",
+    image: "/images/vocab/custom.jpg",
+    multiple_choice: ["custom", "tailored", "personalized"]
+  },
+
+  "profitable": {
+    definition: "Yielding a financial gain or advantage after all expenses are paid.",
+    French: "rentable",
+    German: "rentabel",
+    Italian: "redditizio",
+    image: "/images/vocab/profitable.jpg",
+    multiple_choice: ["lucrative", "money-making", "cost-effective"]
+  },
+
+  "beneficial": {
+    definition: "Resulting in good; favorable or advantageous for the company's goals.",
+    French: "bénéfique",
+    German: "vorteilhaft",
+    Italian: "benefico",
+    image: "/images/vocab/beneficial.jpg",
+    multiple_choice: ["helpful", "valuable", "useful"]
+  },
+
+  "successful": {
+    definition: "Accomplishing a desired aim or result, such as meeting a sales KPI.",
+    French: "réussi",
+    German: "erfolgreich",
+    Italian: "di successo",
+    image: "/images/vocab/successful.jpg",
+    multiple_choice: ["effective", "prosperous", "fruitful"]
+  },
+
+  "disappointing": {
+    definition: "Failing to fulfill expectations or hopes, such as lower-than-expected quarterly earnings.",
+    French: "décevant",
+    German: "enttäuschend",
+    Italian: "deludente",
+    image: "/images/vocab/disappointing.jpg",
+    multiple_choice: ["unsatisfactory", "lackluster", "discouraging"]
+  },
+
+  "dominant": {
+    definition: "Having power and influence over others; holding the largest market share.",
+    French: "dominant",
+    German: "dominant",
+    Italian: "dominante",
+    image: "/images/vocab/dominant.jpg",
+    multiple_choice: ["commanding", "superior", "leading"]
+  },
+
+  "colorful": {
+    definition: "In a business context, often refers to a marketing campaign that is vivid, striking, or full of character.",
+    French: "coloré",
+    German: "farbenfroh",
+    Italian: "vivace",
+    image: "/images/vocab/colorful.jpg",
+    multiple_choice: ["vibrant", "bright", "graphic"]
+  },
+
+  "impressive": {
+    definition: "Evoking admiration through size, quality, or skill (e.g., an impressive growth rate).",
+    French: "impressionnant",
+    German: "beeindruckend",
+    Italian: "impressionante",
+    image: "/images/vocab/impressive.jpg",
+    multiple_choice: ["notable", "striking", "remarkable"]
+  },
+
+  "convincing": {
+    definition: "Capable of causing someone to believe that something is true or real; essential for sales pitches.",
+    French: "convaincant",
+    German: "überzeugend",
+    Italian: "convincente",
+    image: "/images/vocab/convincing.jpg",
+    multiple_choice: ["persuasive", "credible", "plausible"]
+  },
+
+  "eye-catching": {
+    definition: "Immediately noticeable because it is particularly interesting, bright, or attractive.",
+    French: "accrocheur",
+    German: "auffällig",
+    Italian: "che attira l'attenzione",
+    image: "/images/vocab/eyecatching.jpg",
+    multiple_choice: ["striking", "bold", "noticeable"]
+  },
+
+  "flawless": {
+    definition: "Without any imperfections or defects; perfect execution of a business plan.",
+    French: "parfait / sans faute",
+    German: "makellos",
+    Italian: "impeccabile",
+    image: "/images/vocab/flawless.jpg",
+    multiple_choice: ["faultless", "immaculate", "seamless"]
+  },
+
+  "wasteful": {
+    definition: "Using or expending something of value carelessly, extravagantly, or to no purpose.",
+    French: "gaspilleur",
+    German: "verschwenderisch",
+    Italian: "dispendioso",
+    image: "/images/vocab/wasteful.jpg",
+    multiple_choice: ["inefficient", "profligate", "uneconomical"]
+  },
+
+  "inefficient": {
+    definition: "Not achieving maximum productivity; wasting or failing to make the best use of time or resources.",
+    French: "inefficace",
+    German: "ineffizient",
+    Italian: "inefficiente",
+    image: "/images/vocab/inefficient.jpg",
+    multiple_choice: ["unproductive", "disorganized", "clumsy"]
+  },
+
+  "unnecessary": {
+    definition: "Not needed; more than is required for the business operation.",
+    French: "inutile",
+    German: "unnötig",
+    Italian: "non necessario",
+    image: "/images/vocab/unnecessary.jpg",
+    multiple_choice: ["redundant", "superfluous", "optional"]
+  },
+
+  "hasty": {
+    definition: "Done with excessive speed or urgency; hurried (often leading to errors).",
+    French: "hâtif",
+    German: "hastig / voreilig",
+    Italian: "frettoloso",
+    image: "/images/vocab/hasty.jpg",
+    multiple_choice: ["rushed", "quick", "impulsive"]
+  },
+
+  "outdated": {
+    definition: "No longer modern or useful; superseded by newer technology or trends.",
+    French: "démodé",
+    German: "altmodisch",
+    Italian: "superato",
+    image: "/images/vocab/outdated.jpg",
+    multiple_choice: ["obsolete", "old-fashioned", "archaic"]
+  },
+
+  "brand new": {
+    definition: "Completely new; unused and recently introduced to the market.",
+    French: "flambant neuf",
+    German: "nagelneu",
+    Italian: "nuovissimo",
+    image: "/images/vocab/brandnew.jpg",
+    multiple_choice: ["fresh", "innovative", "original"]
+  },
+
+  "crude": {
+    definition: "In a business context, something in a raw or unprepared state (like crude data) or lacking finish.",
+    French: "brut",
+    German: "roh / grob",
+    Italian: "grezzo",
+    image: "/images/vocab/crude.jpg",
+    multiple_choice: ["raw", "unrefined", "basic"]
+  },
+
+  "imbalanced": {
+    definition: "Lack of proportion or relation between corresponding things (e.g., an imbalanced budget).",
+    French: "déséquilibré",
+    German: "unausgewogen",
+    Italian: "squilibrato",
+    image: "/images/vocab/imbalanced.jpg",
+    multiple_choice: ["uneven", "unstable", "disproportionate"]
+  },
+
+  "bold": {
+    definition: "Showing an ability to take risks; confident and courageous business moves.",
+    French: "audacieux",
+    German: "kühn / mutig",
+    Italian: "audace",
+    image: "/images/vocab/bold.jpg",
+    multiple_choice: ["daring", "adventurous", "brave"]
+  },
+
+  "subtle": {
+    definition: "So delicate or precise as to be difficult to analyze or describe (e.g., subtle marketing cues).",
+    French: "subtil",
+    German: "subtil",
+    Italian: "sottile",
+    image: "/images/vocab/subtle.jpg",
+    multiple_choice: ["understated", "fine", "nuanced"]
+  }
+
+
+};
+
 export const startUps = {
   "pitch": {
     "definition": "A brief presentation to investors or stakeholders explaining a business idea and its potential.",

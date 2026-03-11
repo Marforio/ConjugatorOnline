@@ -34,6 +34,7 @@ const routes = [
   { path: '/tools', name: 'tools', component: () => import('@/views/Tools.vue') },
   { path: '/tools/meeting-machine', name: 'meeting-machine', component: () => import('@/views/MeetingMachine.vue')},
   { path: '/tools/essay-creator', name: 'essay-creator', component: () => import('@/views/EssayCreator.vue')},
+  { path: '/tools/word-stats', name: 'word-stats', component: () => import('@/views/WordStats.vue')},
   { path : '/teacher-tools', name: 'teacher-tools', component: () => import('@/views/TeacherTools.vue'),  meta: { requiresAuth: true, requiresAdmin: true } },
   { path: '/teacher-tools/classroom-challenges', name: 'classroom-challenges', component: () => import('@/views/ClassroomChallenges.vue'), meta: { requiresAuth: true, requiresAdmin: true }, props: (route: RouteLocationNormalized) => ({
       game: route.query.game as string,
