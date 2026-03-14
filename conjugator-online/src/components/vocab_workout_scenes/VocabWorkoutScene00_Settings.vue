@@ -81,14 +81,22 @@
 
               <v-radio-group v-model="selectedListKey" hide-details density="compact">
                 <!-- Irregular verbs -->
-                <div class="text-caption text-medium-emphasis mb-1">Irregular verbs</div>
-                <v-radio
-                  v-for="item in irregularVerbItems"
-                  :key="item.value"
-                  :label="item.title"
-                  :value="item.value"
-                  class="mb-1"
-                />
+                <div class="text-caption text-medium-emphasis mb-1">General vocabulary</div>
+                <v-row dense>
+                  <v-col cols="12" sm="6">
+                    <v-radio
+                      v-for="item in irregularVerbItems"
+                      :key="item.value"
+                      :label="item.title"
+                      :value="item.value"
+                      class="mb-1"
+                    />
+                  </v-col>
+                  <v-col v-for="item in generalVocabItems" :key="item.value" cols="12" sm="6">
+                    <v-radio :label="item.title" :value="item.value" class="mb-1" />
+                  </v-col>
+                </v-row>
+                
 
                 <v-divider class="my-3" />
 
@@ -127,7 +135,7 @@
                 class="mb-2"
                 column
               >
-                <v-chip value="cards" color="primary" size="large">Cards</v-chip>
+                <v-chip value="cards" color="primary" size="large">Discover</v-chip>
                 <v-chip value="multiple_choice" variant="tonal" color="primary" size="large" disabled>
                   Multiple choice
                 </v-chip>
@@ -501,6 +509,27 @@ const domainItems = computed(() => {
     title: l.title,
     value: l.value,
     module: moduleKey,
+    supportsLevels: l.supportsLevels,
+  }));
+});
+
+
+const GENERAL_MODULE_NAME = "General Vocabulary";
+
+const generalVocabItems = computed(() => {
+  // Prefer exact key, but be tolerant of casing/spacing differences
+  const keys = Object.keys(availableListsComputed.value);
+  const key =
+    keys.find((k) => k === GENERAL_MODULE_NAME) ??
+    keys.find((k) => k.toLowerCase() === GENERAL_MODULE_NAME.toLowerCase()) ??
+    null;
+
+  if (!key) return [];
+
+  return (availableListsComputed.value[key] ?? []).map((l) => ({
+    title: l.title,
+    value: l.value,
+    module: key,
     supportsLevels: l.supportsLevels,
   }));
 });

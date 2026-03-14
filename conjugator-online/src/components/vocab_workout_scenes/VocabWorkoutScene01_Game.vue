@@ -1,27 +1,28 @@
 <template>
-    <v-overlay
-      :model-value="resumeHydrating"
-      persistent
-      scrim="black"
-      class="d-flex align-center justify-center"
-    >
-      <v-card class="pa-8" elevation="8">
-        <div class="d-flex flex-column align-center ga-4">
-          <v-progress-circular indeterminate size="64" color="primary" />
-          <div class="text-h6 text-center">Loading your session...</div>
-          <div class="text-caption text-medium-emphasis text-center">
-            Checking your progress and position
-          </div>
+  <v-overlay
+    :model-value="resumeHydrating"
+    persistent
+    scrim="black"
+    class="d-flex align-center justify-center"
+  >
+    <v-card class="pa-8" elevation="8">
+      <div class="d-flex flex-column align-center ga-4">
+        <v-progress-circular indeterminate size="64" color="primary" />
+        <div class="text-h6 text-center">Loading your session...</div>
+        <div class="text-caption text-medium-emphasis text-center">
+          Checking your progress and position
         </div>
-      </v-card>
-    </v-overlay>
-  <v-container fluid class="pa-6 d-flex flex-column justify-center align-center">
+      </div>
+    </v-card>
+  </v-overlay>
+
+  <div class="vw-shell">
+  <v-container fluid class="pa-6">
     <!-- Floating feedback -->
     <div v-if="showFloatingFeedback" class="floating-feedback success">
       <strong>Correct! <v-icon icon="mdi-emoticon-happy-outline" /></strong>
     </div>
 
-    <v-card class="p-4" width="760" min-height="600" elevation="3">
       <!-- PRE-GAME -->
       <div v-if="!gameStarted" class="p-3">
         <div class="d-flex justify-center mb-3">
@@ -39,7 +40,8 @@
           <v-list-item>
             <template #prepend><v-icon icon="mdi-book-open-variant" /></template>
             <v-list-item-title>
-              List: {{ prettyListKey }} <strong v-if="prettyListKey === 'Irregular verbs'">{{ levelLabel }}</strong>
+              List: {{ prettyListKey }}
+              <strong v-if="prettyListKey === 'Irregular verbs'">{{ levelLabel }}</strong>
             </v-list-item-title>
           </v-list-item>
 
@@ -84,7 +86,7 @@
 
         <template v-else>
           <!-- TOP HEADER -->
-          <div class="d-flex justify-space-between align-start mb-3">
+          <div class="d-flex justify-space-between align-start mb-3" style="margin-left: 10%; margin-right: 10%;">
             <!-- Left: list coverage (set coverage) -->
             <div v-if="mode === 'write'" class="d-flex flex-column justify-center ga-2">
               <div class="d-flex justify-center text-caption">
@@ -94,42 +96,41 @@
                   <div>❌ {{ isPersistedMode ? sessionCounters.wrong : wrongCount }}</div>
                 </div>
               </div>
-              
-              <v-btn v-if="selectedSessionId" @click="showSessionAttempts = true" size="small" class="mt-2">Session data</v-btn>
+
+              <v-btn v-if="selectedSessionId" @click="showSessionAttempts = true" size="small" class="mt-2"
+                >Session data</v-btn
+              >
             </div>
 
             <!-- Center: list chip -->
             <div class="d-flex flex-column align-center">
               <v-chip v-if="currentItem?.level" size="small" color="info" variant="tonal">
                 {{ prettyListKey }}
-                <span
-                  v-if="prettyListKey === 'Irregular verbs'"
-                  class="text-capitalize"
-                >
+                <span v-if="prettyListKey === 'Irregular verbs'" class="text-capitalize">
                   : {{ props.gameSettings.level }}
                 </span>
               </v-chip>
             </div>
 
+            <div v-if="mode==='cards'" class="d-flex justify-end mb-3">
+                  <v-btn
+                    variant="outlined"
+                    color="primary"
+                    @click="showEntireList = !showEntireList"
+                  >
+                    SHOW ENTIRE LIST
+                  </v-btn>
+                </div>
+
             <!-- Right -->
             <div class="d-flex flex-column align-end">
               <div v-if="!isPersistedMode">{{ currentIndex + 1 }} / {{ roundCount }}</div>
               <div class="d-flex ga-2 mt-1">
-                <v-chip
-                  v-if="isPersistedMode"
-                  size="small"
-                  variant="tonal"
-                  color="primary"
-                >
+                <v-chip v-if="isPersistedMode" size="small" variant="tonal" color="primary">
                   Unseen: <strong class="ms-1">{{ serverUnseenCount }}</strong>
                 </v-chip>
 
-                <v-chip
-                  v-if="isPersistedMode"
-                  size="small"
-                  variant="tonal"
-                  color="orange"
-                >
+                <v-chip v-if="isPersistedMode" size="small" variant="tonal" color="orange">
                   Review: <strong class="ms-1">{{ serverReviewCount }}</strong>
                 </v-chip>
               </div>
@@ -139,125 +140,238 @@
           <!-- CONTENT -->
           <div class="game-middle">
             <v-card class="pa-3" elevation="0">
-              <!-- CARDS -->
+              
+              <!-- DISCOVER (CARDS) -->
               <template v-if="mode === 'cards'">
-                <div class="d-flex justify-center">
-                  <div class="card-stage">
-                    <!-- LEFT NAV -->
-                    <v-btn
-                      class="nav-btn nav-left"
-                      color="primary"
-                      variant="flat"
-                      icon
-                      size="x-large"
-                      :disabled="currentIndex === 0"
-                      @click.stop="goPrevCard"
-                      aria-label="Previous card"
-                    >
-                      <v-icon size="40">mdi-chevron-left</v-icon>
-                    </v-btn>
 
-                    <!-- RIGHT NAV -->
-                    <v-btn
-                      class="nav-btn nav-right"
-                      color="primary"
-                      variant="flat"
-                      icon
-                      size="x-large"
-                      :disabled="currentIndex >= roundCount - 1"
-                      @click.stop="goNextCard"
-                      aria-label="Next card"
-                    >
-                      <v-icon size="40">mdi-chevron-right</v-icon>
-                    </v-btn>
+                <v-row class="ma-0" align="start" justify="center" dense>
+                  <!-- Cards (1/2 on lg+) -->
+                  <v-col cols="12" lg="6" class="d-flex flex-column align-center mt-8">
+                    <div class="card-stage">
+                      <!-- LEFT NAV -->
+                      <v-btn
+                        class="nav-btn nav-left"
+                        color="primary"
+                        variant="flat"
+                        icon
+                        size="x-large"
+                        :disabled="currentIndex === 0"
+                        @click.stop="goPrevCard"
+                        aria-label="Previous card"
+                      >
+                        <v-icon size="40">mdi-chevron-left</v-icon>
+                      </v-btn>
 
-                    <Transition :name="slideName" mode="out-in">
-                      <div :key="currentItem?.id || currentIndex">
-                        <div class="flip-wrap" @click="toggleSide">
-                          <div class="flip-inner" :class="{ 'is-back': shownSide === 'back' }">
-                            <!-- FRONT -->
-                            <v-card class="flip-face flip-front pa-4" elevation="2" width="540" height="400">
-                              <!-- Hidden loader (front) -->
-                              <v-img
-                                :src="currentItem?.image"
-                                cover
-                                :eager="true"
-                                class="invisible-loader"
-                                @load="frontImageLoaded = true"
-                                @error="frontImageLoaded = false"
-                              />
+                      <!-- RIGHT NAV -->
+                      <v-btn
+                        class="nav-btn nav-right"
+                        color="primary"
+                        variant="flat"
+                        icon
+                        size="x-large"
+                        :disabled="currentIndex >= roundCount - 1"
+                        @click.stop="goNextCard"
+                        aria-label="Next card"
+                      >
+                        <v-icon size="40">mdi-chevron-right</v-icon>
+                      </v-btn>
 
-                              <div
-                                v-if="frontImageReady"
-                                class="d-flex align-center ga-4 pa-3 w-100 mx-8"
-                                style="margin-top: 15%;"
-                              >
-                                <div class="flex-third d-flex align-center justify-center">
-                                  <v-avatar size="150" rounded="lg">
-                                    <v-img v-if="currentItem" :src="currentItem.image" cover />
-                                  </v-avatar>
-                                </div>
+                      <Transition :name="slideName" mode="out-in">
+                        <div :key="currentItem?.id || currentIndex">
+                          <div class="flip-wrap" @click="toggleSide">
+                            <div class="flip-inner" :class="{ 'is-back': shownSide === 'back' }">
+                              <!-- FRONT -->
+                              <v-card class="flip-face flip-front pa-4" elevation="2" width="540" height="400">
+                                <!-- Hidden loader (front) -->
+                                <v-img
+                                  :src="currentItem?.image"
+                                  cover
+                                  :eager="true"
+                                  class="invisible-loader"
+                                  @load="frontImageLoaded = true"
+                                  @error="frontImageLoaded = false"
+                                />
 
-                                <div class="flex-two-thirds d-flex align-center justify-start">
-                                  <div
+                                <div
+                                  v-if="frontImageReady"
+                                  class="d-flex align-center ga-4 pa-3 w-100 mx-8"
+                                  style="margin-top: 15%;"
+                                >
+                                  <div class="flex-third d-flex align-center justify-center">
+                                    <v-avatar size="150" rounded="lg">
+                                      <v-img v-if="currentItem" :src="currentItem.image" cover />
+                                    </v-avatar>
+                                  </div>
+
+                                  <div class="flex-two-thirds d-flex align-center justify-start">
+                                    <div
                                       class="text-h5 ms-4 mb-2 font-weight-regular font-italic"
                                       style="margin-right: 20%;"
                                     >
                                       {{ frontPreview }}
                                     </div>
+                                  </div>
                                 </div>
-                              </div>
 
-                              <div v-else class="d-flex justify-center align-center text-center h-100">
-                                <div :class="frontCardClass">
-                                  {{ frontPreview }}
+                                <div v-else class="d-flex justify-center align-center text-center h-100">
+                                  <div :class="frontCardClass">
+                                    {{ frontPreview }}
+                                  </div>
                                 </div>
-                              </div>
-                            </v-card>
+                              </v-card>
 
-                            <!-- BACK -->
-                            <v-card class="flip-face flip-back pa-4" elevation="2" width="540" height="400">
-                              <!-- Hidden loader (back) -->
-                              <v-img
-                                :src="currentItem?.image"
-                                cover
-                                :eager="true"
-                                class="invisible-loader"
-                                @load="backImageLoaded = true"
-                                @error="backImageLoaded = false"
-                              />
+                              <!-- BACK -->
+                              <v-card class="flip-face flip-back pa-4" elevation="2" width="540" height="400">
+                                <!-- Hidden loader (back) -->
+                                <v-img
+                                  :src="currentItem?.image"
+                                  cover
+                                  :eager="true"
+                                  class="invisible-loader"
+                                  @load="backImageLoaded = true"
+                                  @error="backImageLoaded = false"
+                                />
 
-                              <div
-                                v-if="backImageReady"
-                                class="d-flex flex-column justify-center align-center ga-4 mx-10"
-                                style="margin-top: 10%;"
-                              >
-                                <v-avatar size="200" rounded="lg">
-                                  <v-img v-if="currentItem" :src="currentItem.image" cover />
-                                </v-avatar>
+                                <!-- ✅ positioned container so the corner button is reliable -->
+                                <div class="vw-back-face">
+                                  <!-- ✅ always show button when we have an item -->
+                                  <v-tooltip text="Go to Wiktionary">
+                                    <template #activator="{ props: tprops }">
+                                      <v-btn
+                                        v-bind="tprops"
+                                        class="vw-wiki-btn"
+                                        size="small"
+                                        icon
+                                        variant="tonal"
+                                        color="primary"
+                                        @click.stop="openWiktionary(currentItem?.term)"
+                                        aria-label="Open Wiktionary"
+                                      >
+                                        <v-icon size="18">mdi-book-open-variant</v-icon>
+                                      </v-btn>
+                                    </template>
+                                  </v-tooltip>
 
-                                <div class="flex-1">
-                                  <div class="text-h4 mb-2">{{ backPreview }}</div>
+                                  <div
+                                    v-if="backImageReady"
+                                    class="d-flex flex-column justify-center align-center ga-4 mx-10"
+                                    style="margin-top: 10%;"
+                                  >
+                                    <v-avatar size="200" rounded="lg">
+                                      <v-img v-if="currentItem" :src="currentItem.image" cover />
+                                    </v-avatar>
+
+                                    <div class="flex-1">
+                                      <div class="text-h4 mb-2">{{ backPreview }}</div>
+                                    </div>
+                                  </div>
+
+                                  <div v-else class="d-flex justify-center align-center text-center h-100">
+                                    <div class="text-h4 mb-2 mx-4">
+                                      {{ backPreview }}
+                                    </div>
+                                  </div>
                                 </div>
-                              </div>
-
-                              <div v-else class="d-flex justify-center align-center text-center h-100">
-                                <div class="text-h4 mb-2 mx-4">
-                                  {{ backPreview }}
-                                </div>
-                              </div>
-                            </v-card>
+                              </v-card>
+                            </div>
                           </div>
                         </div>
+                      </Transition>
+                    </div>
+
+                    <!-- Seek bar lives with cards, spans the column -->
+                    <div class="vw-discover-slider d-flex align-center ga-3 mt-10 w-100">
+                      <v-btn variant="text" size="small" :disabled="currentIndex === 0" @click="jumpCards(-5)">
+                        -5
+                      </v-btn>
+
+                      <v-slider
+                        class="flex-grow-1"
+                        v-model="cardSeekIndex"
+                        :min="0"
+                        :max="Math.max(0, roundCount - 1)"
+                        :step="5"
+                        color="info"
+                        track-color="grey-lighten-2"
+                        thumb-color="info"
+                        hide-details
+                        show-ticks
+                        thumb-label="always"
+                        @end="commitCardSeek"
+                      >
+                        <template #thumb-label>
+                          {{ cardThumbLabel }}
+                        </template>
+                      </v-slider>
+
+                      <v-btn
+                        variant="text"
+                        size="small"
+                        :disabled="currentIndex >= roundCount - 1"
+                        @click="jumpCards(5)"
+                      >
+                        +5
+                      </v-btn>
+                    </div>
+                  </v-col>
+
+                  <!-- List (1/2 on lg+). Completely removed from DOM unless toggled on -->
+                  <v-col v-if="showEntireList" cols="12" lg="6">
+                    <v-card class="pa-3" elevation="1">
+                      <div class="d-flex align-center justify-space-between mb-2">
+                        <div class="text-subtitle-2"><span class="text-uppercase me-2">{{ prettyListKey }}:</span> all terms</div>
+                        <div class="text-caption text-medium-emphasis">
+                          {{ currentIndex + 1 }} / {{ roundCount }}
+                        </div>
                       </div>
-                    </Transition>
-                  </div>
-                </div>
+
+                      <div ref="termListWrap" class="discover-term-list mt-3">
+                        <div
+                          v-for="(t, i) in discoverRows"
+                          :key="t.id"
+                          class="discover-term-row"
+                          :class="{ active: i === currentIndex }"
+                          :data-term-index="i"
+                        >
+                          <button
+                            class="discover-term-btn"
+                            type="button"
+                            @click="jumpToCardIndex(i)"
+                            :aria-current="i === currentIndex ? 'true' : 'false'"
+                          >
+                            <span class="discover-term-index">{{ i + 1 }}.</span>
+                            <span class="discover-term-text">{{ t.term }}</span>
+                            <span class="discover-front-text">{{ t.frontText }}</span>
+                          </button>
+
+                          <v-tooltip text="go to Wiktionary">
+                            <template v-slot:activator="{ props }">
+                            <v-btn
+                            v-bind="props"
+                              size="x-small"
+                              variant="text"
+                              class="ms-2"
+                              @click.stop="openWiktionary(t.term)"
+                              aria-label="Open Wiktionary"
+                            >
+                              <v-icon size="18">mdi-book-open-variant</v-icon>
+                            </v-btn>
+                            </template>
+                          </v-tooltip>
+
+                        </div>
+                      </div>
+                    </v-card>
+                  </v-col>
+                </v-row>
               </template>
 
               <!-- WRITING -->
               <template v-else-if="mode === 'write'">
+                <div class="d-flex justify-center" >
+                <v-card elevation="2" min-width="60%">
                 <div class="d-flex flex-column align-center justify-center" style="height: 260px;">
+          
                   <!-- Hidden loader for write (reuse backImageLoaded as "prompt image") -->
                   <v-img
                     :src="currentItem?.image"
@@ -314,6 +428,8 @@
                     Submit
                   </v-btn>
                 </div>
+                </v-card>
+                </div>
               </template>
 
               <!-- MULTIPLE CHOICE -->
@@ -347,7 +463,7 @@
           </div>
 
           <!-- BOTTOM: PHASE PROGRESS BAR (changes meaning by phase) -->
-          <div class="mt-4">
+          <div class="mt-4" max-width="80%" style="margin-left: 10%; margin-right: 10%;">
             <div v-if="isPersistedMode" class="d-flex justify-space-between align-center mb-1">
               <div class="text-caption text-medium-emphasis">
                 {{ phaseLabel }}
@@ -357,45 +473,8 @@
               </div>
             </div>
 
-            <!-- Cards mode seek bar -->
-            <div v-if="mode === 'cards'" class="d-flex align-center ga-3 mt-3">
-              <!-- optional: jump back/forward by 5 -->
-              <v-btn variant="text" size="small" :disabled="currentIndex === 0" @click="jumpCards(-5)">
-                -5
-              </v-btn>
-
-              <v-slider
-                v-model="cardSeekIndex"
-                :min="0"
-                :max="Math.max(0, roundCount - 1)"
-                :step="5"
-                color="info"
-                track-color="grey-lighten-2"
-                thumb-color="info"
-                hide-details
-                show-ticks
-                thumb-label="always"
-                @update:model-value="() => {}"  
-                @end="commitCardSeek"          
-              >
-                <template #thumb-label>
-                  {{ cardThumbLabel }}
-                </template>
-              </v-slider>
-
-              <v-btn
-                variant="text"
-                size="small"
-                :disabled="currentIndex >= roundCount - 1"
-                @click="jumpCards(5)"
-              >
-                +5
-              </v-btn>
-            </div>
-
-            <!-- Other modes: existing progress bar -->
             <v-progress-linear
-              v-else
+              v-if="isPersistedMode"
               :model-value="isPersistedMode && serverCountsReady ? phaseProgressPct : listCoveragePct"
               height="10"
               class="mb-2"
@@ -404,9 +483,8 @@
           </div>
         </template>
       </div>
-    </v-card>
 
-    <div class="mt-3">
+    <div class="d-flex justify-center mt-3">
       <v-btn @click="goToSettings" icon elevation="0" class="ms-3">
         <v-icon color="grey-darken-3">mdi-arrow-left-circle</v-icon>
       </v-btn>
@@ -469,10 +547,9 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
-
   </v-container>
+  </div>
 </template>
-
 
 
 
@@ -524,6 +601,8 @@ const backField = computed<BackField>(() => props.gameSettings?.backField || "pa
 
 const isPersistedMode = computed<boolean>(() => mode.value === "write" || mode.value === "quiz");
 
+const showEntireList = ref(false);
+const showListLabel = computed(() => (showEntireList.value ? "HIDE ENTIRE LIST" : "SHOW ENTIRE LIST"));
 
 const sessionMeta = ref<null | { total_attempts: number; correct_count: number; wrong_count: number; status: string }>(null);
 function syncSessionMetaFromState(state: any) {
@@ -704,6 +783,42 @@ const listCoveragePct = computed(() => {
   return Math.round((currentIndex.value / roundCount.value) * 100);
 });
 
+/* =========================================================
+   Discover mode: term list + Wiktionary
+========================================================= */
+const termListWrap = ref<HTMLElement | null>(null);
+
+const discoverRows = computed(() =>
+  (props.planItems ?? []).map((it) => ({
+    id: it.id,
+    term: it.term,
+    frontText: getFrontText(it, frontField.value),
+  }))
+);
+
+// Wiktionary link helper
+const openWiktionary = (word?: string | null) => {
+  const w = String(word ?? "").trim();
+  if (!w) return;
+  window.open(`https://en.wiktionary.org/wiki/${encodeURIComponent(w)}`, "_blank");
+};
+
+function scrollActiveTermIntoView() {
+  if (!showEntireList.value) return;
+  const wrap = termListWrap.value;
+  if (!wrap) return;
+
+  const el = wrap.querySelector(`[data-term-index="${currentIndex.value}"]`) as HTMLElement | null;
+  el?.scrollIntoView({ block: "center", inline: "nearest", behavior: "smooth" });
+}
+
+function jumpToCardIndex(idx: number) {
+  if (mode.value !== "cards") return;
+  if (idx < 0 || idx >= roundCount.value) return;
+
+  slideName.value = idx > currentIndex.value ? "slide-left" : "slide-right";
+  currentIndex.value = idx;
+}
 
 /* =========================================================
    Slider
@@ -1315,6 +1430,20 @@ watch(currentIndex, async () => {
   if (mode.value === "multiple_choice") refreshMcOptions();
 });
 
+watch(
+  [mode, gameStarted, currentIndex, roundCount],
+  async () => {
+    if (!gameStarted.value) return;
+    if (mode.value !== "cards") return;
+    if (!roundCount.value) return;
+
+    await nextTick();
+    requestAnimationFrame(() => {
+      scrollActiveTermIntoView();
+    });
+  },
+  { immediate: true }
+);
 /* =========================================================
    Submit handlers
 ========================================================= */
@@ -1552,6 +1681,7 @@ async function finishGame() {
   }
 }
 
+
 /* =========================================================
    Global listeners
 ========================================================= */
@@ -1612,6 +1742,12 @@ onBeforeUnmount(() => {
 
 .game-layout { display: flex; flex-direction: column; height: 100%; }
 .game-middle { flex: 1; }
+
+.vw-shell {
+  width: 100%;
+  max-width: 1600px;  /* adjust: 1400-1800 depending on taste */
+  margin: 0 auto;     /* center on huge screens */
+}
 
 .flip-card { border-radius: 16px; }
 
@@ -1731,5 +1867,90 @@ onBeforeUnmount(() => {
   pointer-events: none;
 }
 
+/* Term list panel */
+.discover-term-list {
+  max-height: 420px;
+  overflow-y: auto;
+  border-radius: 10px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  padding: 6px;
+}
 
+.discover-term-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: 8px;
+}
+
+.discover-term-row.active {
+  background: rgba(76, 175, 80, 0.14);
+  outline: 1px solid rgba(76, 175, 80, 0.45);
+}
+
+
+.discover-term-btn:focus-visible {
+  outline: 2px solid rgba(25, 118, 210, 0.7);
+  border-radius: 8px;
+}
+
+.discover-term-index {
+  width: 2.2rem;
+  color: rgba(0, 0, 0, 0.55);
+  font-variant-numeric: tabular-nums;
+}
+
+.discover-term-text {
+  font-weight: 500;
+}
+
+.discover-term-btn {
+  all: unset;
+  cursor: pointer;
+  display: grid;
+  grid-template-columns: 3rem 1fr 2fr; /* index, term, frontText */
+  gap: 10px;
+  align-items: baseline;
+  width: 100%;
+}
+
+.discover-front-text {
+  color: rgba(0,0,0,0.65);
+  font-style: italic;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: normal;
+}
+
+.is-blurred {
+  filter: blur(10px);
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+.blur-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.vw-discover-slider {
+  width: 540px;          /* match card width exactly */
+  max-width: 70%;
+}
+
+.vw-back-face {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.vw-wiki-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 20;
+}
 </style>

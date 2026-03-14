@@ -1,3 +1,4 @@
+import { PhrasalVerbs, UsefulRegularVerbs } from "./GeneralVocab";
 import { houseElements, LocationAndMaterials, CitiesAndBuildings, LightSpaces, ArchCareer, AdjectivesForReviews } from "./ArchitectureVocab";
 import { civilVerbs, constructionSite, ConstructionScience, EarthAndMaterials, CitiesInfrastructureBuildings, DimensionsAndProperties, BusinessReports } from "./CivilVocab"
 import { productMarketing, promotionAndBusinessDevelopment, startUps, meetingExpressions, meetings, businessEthics, sustainability, DataVisualization, RegularVerbsBusiness, FinanceAndTrading, Corporations } from "./BusinessVocab";
@@ -6,13 +7,29 @@ import { CryptographyVocab, DataProcessingAndVisualization } from "./ITVocab";
 import { irregularVerbs } from "./IrregularVerbs";
 
 export const vocabLists = {
-  ////////////////////////////// GENERAL /////////////////////////////
+  ////////////////////////////// IRREGULARS /////////////////////////////
   irregular_verbs: {
     title: "Irregular Verbs",
     module: "Irregular verbs",
     data: irregularVerbs,
     supportsLevels: true,
   },
+  ////////////////////////////// GENERAL VOCABULARY /////////////////////////////
+  phrasal_verbs: {
+    title: "Phrasal Verbs",
+    module: "General Vocabulary",
+    data: PhrasalVerbs,
+    supportsLevels: false,
+  },
+  useful_regular_verbs: {
+    title: "Useful Regular Verbs",
+    module: "General Vocabulary",
+    data: UsefulRegularVerbs,
+    supportsLevels: false,
+  },
+
+
+
   ////////////////////////////// ARCHITECTURE /////////////////////////////
   house_elements: {
     title: "House Elements",
