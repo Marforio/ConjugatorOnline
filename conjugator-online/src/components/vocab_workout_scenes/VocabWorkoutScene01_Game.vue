@@ -25,52 +25,58 @@
 
       <!-- PRE-GAME -->
       <div v-if="!gameStarted" class="p-3">
-        <div class="d-flex justify-center mb-3">
-          <v-img src="/images/banners/VocabWorkout1.png" max-width="420" />
-        </div>
 
-        <v-list density="compact">
-          <v-list-item>
-            <template #prepend><v-icon icon="mdi-gamepad-variant-outline" /></template>
-            <v-list-item-title>
-              Mode: <strong class="text-capitalize">{{ modeLabel }}</strong>
-            </v-list-item-title>
-          </v-list-item>
+        <div class="d-flex justify-center">
+          <v-card elevation="2" min-width="450" min-height="500">
+            <v-img src="/images/banners/VocabWorkout1.png" max-width="420" class="ms-2" />
+            <v-list density="compact" class="mt-8 ms-6">
+            <v-list-item>
+              <template #prepend><v-icon icon="mdi-gamepad-variant-outline" /></template>
+              <v-list-item-title>
+                Mode: <strong class="text-capitalize">{{ modeLabel }}</strong>
+              </v-list-item-title>
+            </v-list-item>
 
-          <v-list-item>
-            <template #prepend><v-icon icon="mdi-book-open-variant" /></template>
-            <v-list-item-title>
-              List: {{ prettyListKey }}
-              <strong v-if="prettyListKey === 'Irregular verbs'">{{ levelLabel }}</strong>
-            </v-list-item-title>
-          </v-list-item>
+            <v-list-item>
+              <template #prepend><v-icon icon="mdi-book-open-variant" /></template>
+              <v-list-item-title>
+                List: {{ prettyListKey }}
+                <strong v-if="prettyListKey === 'Irregular verbs'">{{ levelLabel }}</strong>
+              </v-list-item-title>
+            </v-list-item>
 
-          <v-list-item v-if="isPersistedMode && gameSettings?.resumeIndex != null">
-            <template #prepend><v-icon icon="mdi-playlist-play" /></template>
-            <v-list-item-title>
-              Resume at: <strong>{{ resumeIndexDisplay }}</strong>
-              <span class="text-medium-emphasis"> of {{ roundCount }}</span>
-            </v-list-item-title>
-          </v-list-item>
+            <v-list-item v-if="isPersistedMode && gameSettings?.resumeIndex != null">
+              <template #prepend><v-icon icon="mdi-playlist-play" /></template>
+              <v-list-item-title>
+                Resume at: <strong>{{ resumeIndexDisplay }}</strong>
+                <span class="text-medium-emphasis"> of {{ roundCount }}</span>
+              </v-list-item-title>
+            </v-list-item>
 
-          <v-list-item>
-            <template #prepend><v-icon icon="mdi-swap-horizontal" /></template>
-            <v-list-item-title>
-              Study pair: <strong>{{ frontLabel }}</strong> → <strong>{{ backLabel }}</strong>
-            </v-list-item-title>
-          </v-list-item>
+            <v-list-item>
+              <template #prepend><v-icon icon="mdi-swap-horizontal" /></template>
+              <v-list-item-title>
+                Study pair: <strong>{{ frontLabel }}</strong> → <strong>{{ backLabel }}</strong>
+              </v-list-item-title>
+            </v-list-item>
 
-          <v-list-item>
-            <template #prepend><v-icon icon="mdi-counter" /></template>
-            <v-list-item-title>
-              {{ roundCount }} {{ roundCount === 1 ? "item" : "items" }}
-            </v-list-item-title>
-          </v-list-item>
-        </v-list>
+            <v-list-item>
+              <template #prepend><v-icon icon="mdi-counter" /></template>
+              <v-list-item-title>
+                {{ roundCount }} {{ roundCount === 1 ? "item" : "items" }}
+              </v-list-item-title>
+            </v-list-item>
+          </v-list>
 
-        <div class="d-flex justify-center mt-6">
+          <div class="d-flex justify-center mt-6 mb-8">
           <v-btn color="success" @click="begin" :disabled="!hasAnyItems">Start</v-btn>
         </div>
+
+        </v-card>
+
+        </div>
+        
+
 
         <div v-if="!hasAnyItems" class="text-caption text-center mt-4">
           No items were loaded. Please go back and try again.

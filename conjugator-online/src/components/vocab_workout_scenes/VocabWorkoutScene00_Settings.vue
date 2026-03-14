@@ -30,7 +30,7 @@
         :disabled="activePanel === 1"
         class="d-flex align-center ga-2"
       >
-        <span class="me-3">My progress</span>
+        <span class="me-3">Check my progress</span>
         <v-icon>mdi-chevron-right</v-icon>
       </v-btn>
     </div>
@@ -74,49 +74,61 @@
           <v-divider class="my-4" />
 
           <!-- TWO-COLUMN LAYOUT -->
-          <v-row>
-            <!-- LEFT COLUMN: LIST PICKER -->
-            <v-col cols="12" md="5">
-              <div class="text-subtitle-2 mb-2">Vocab list</div>
+          <v-row justify="center">
+            <!-- LIST PICKER -->
+            <v-col
+              cols="12"
+              :md="selectedListKey ? 5 : 8"
+              :lg="selectedListKey ? 5 : 6"
+              :class="selectedListKey ? '' : 'd-flex justify-center'"
+            >
+              <div :class="selectedListKey ? '' : 'w-100'">
+                <div class="text-subtitle-2 mb-2">Vocab list</div>
 
-              <v-radio-group v-model="selectedListKey" hide-details density="compact">
-                <!-- Irregular verbs -->
-                <div class="text-caption text-medium-emphasis mb-1">General vocabulary</div>
-                <v-row dense>
-                  <v-col cols="12" sm="6">
-                    <v-radio
-                      v-for="item in irregularVerbItems"
-                      :key="item.value"
-                      :label="item.title"
-                      :value="item.value"
-                      class="mb-1"
-                    />
-                  </v-col>
-                  <v-col v-for="item in generalVocabItems" :key="item.value" cols="12" sm="6">
-                    <v-radio :label="item.title" :value="item.value" class="mb-1" />
-                  </v-col>
-                </v-row>
-                
+                <v-radio-group v-model="selectedListKey" hide-details density="compact">
+                  <!-- General Vocabulary  -->
+                  <div v-if="generalVocabItems?.length" class="text-caption text-medium-emphasis mb-1">
+                    General Vocabulary
+                  </div>
 
-                <v-divider class="my-3" />
+                  <v-row v-if="generalVocabItems?.length" dense>
+                    <v-col cols="12" sm="6">
+                      <v-radio
+                        v-for="item in irregularVerbItems"
+                        :key="item.value"
+                        :label="item.title"
+                        :value="item.value"
+                        class="mb-1"
+                      />
+                    </v-col>
+                    <v-col v-for="item in generalVocabItems" :key="item.value" cols="12" sm="6">
+                      <v-radio :label="item.title" :value="item.value" class="mb-1" />
+                    </v-col>
+                  </v-row>
 
-                <!-- My domain -->
-                <div class="text-caption text-medium-emphasis mb-1">
-                  My domain: <span class="text-capitalize">{{ studentDomain }}</span>
-                </div>
+                  <v-divider v-if="generalVocabItems?.length" class="my-3" />
 
-                <v-row dense>
-                  <v-col v-for="item in domainItems" :key="item.value" cols="12" sm="6">
-                    <v-radio :label="item.title" :value="item.value" class="mb-1" />
-                  </v-col>
-                </v-row>
-              </v-radio-group>
+                  <!-- My domain -->
+                  <div class="text-caption text-medium-emphasis mb-1">
+                    My domain: <span class="text-capitalize">{{ studentDomain }}</span>
+                  </div>
+
+                  <v-row dense>
+                    <v-col v-for="item in domainItems" :key="item.value" cols="12" sm="6">
+                      <v-radio :label="item.title" :value="item.value" class="mb-1" />
+                    </v-col>
+                  </v-row>
+                </v-radio-group>
+              </div>
+              <div class="d-flex justify-start mt-8">
+                <HomeButton />
+              </div>
             </v-col>
 
-            <!-- RIGHT COLUMN: SETTINGS (only when list selected) -->
-            <v-col cols="12" md="7" v-if="selectedListKey">
+            <!-- SETTINGS (only after list selected) -->
+            <v-col v-if="selectedListKey" cols="12" md="7" lg="7">
               <!-- LEVEL -->
-              <div v-if="listSupportsLevels" class="mt-1">
+              <div v-if="listSupportsLevels" class="mt-1 ms-4">
                 <div class="text-subtitle-2 mb-2">Level</div>
                 <v-btn-toggle v-model="selectedLevel" mandatory divided class="level-toggle">
                   <v-btn value="essential" variant="outlined" color="primary">Essential</v-btn>
@@ -127,12 +139,12 @@
               </div>
 
               <!-- MODE -->
-              <div class="text-subtitle-2 mb-2">Mode</div>
+              <div class="text-subtitle-2 mb-2 ms-4">Mode</div>
               <v-chip-group
                 v-model="selectedMode"
                 mandatory
                 selected-class="text-primary"
-                class="mb-2"
+                class="mb-2 ms-4"
                 column
               >
                 <v-chip value="cards" color="primary" size="large">Discover</v-chip>
@@ -147,7 +159,7 @@
 
               <!-- STUDY PAIR -->
               <div v-if="selectedMode">
-                <div class="text-subtitle-2 mb-2">Study pair</div>
+                <div class="text-subtitle-2 mb-2 ms-4">Study pair</div>
 
                 <v-row>
                   <v-col cols="12" md="6">
@@ -156,6 +168,7 @@
                       :label="selectedMode === 'cards' ? 'Front (what you see first)' : 'Prompt (what you see)'"
                       density="compact"
                       hide-details
+                      class="ms-4"
                     >
                       <v-row dense>
                         <v-col
@@ -243,10 +256,6 @@
         />
       </v-window-item>
     </v-window>
-
-    <div class="d-flex justify-start mt-3">
-      <HomeButton />
-    </div>
   </v-container>
 </template>
 
