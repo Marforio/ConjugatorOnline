@@ -391,7 +391,7 @@ export const regretmachineData = {
     category: "essential",
     modal: "should",
     answers: ["shouldn't have given", "should not have given", "shouldnt have given", "shouldnt ve given", "shouldnt've given"],
-    negative: false
+    negative: true
   },
   "38": {
     prompt: "I didn't go with you, and now I wish I had.",
@@ -2288,10 +2288,10 @@ export const regretmachineData = {
   },
 
   "168": {
-    prompt: "I kept quiet, but I could have spoken up.",
-    verb: "keep",
-    highlight: "kept",
-    sentence: "I _____ up.",
+    prompt: "I spoke English, but the polite thing would have been to speak Italian.",
+    verb: "speak",
+    highlight: "speak",
+    sentence: "I _____ Italian.",
     category: "essential",
     modal: "could",
     answers: [

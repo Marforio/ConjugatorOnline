@@ -45,7 +45,7 @@
         />
       </v-col>
 
-      <v-col cols="12" md="4">
+      <v-col v-if="selectedModel === 'Pros and cons'" cols="12" md="4">
         <v-switch
           v-model="negativeFirst"
           label="Negative points first"
@@ -53,8 +53,10 @@
         />
       </v-col>
     </v-row>
+    
 
-    <!-- INTRODUCTION -->
+    <template v-if="selectedModel === 'Pros and cons'">
+      <!-- INTRODUCTION -->
     <v-card class="pa-4 mb-6" elevation="3">
       <div class="text-h6 mb-3">I. Introduction</div>
     
@@ -99,7 +101,6 @@
         />
       </v-row>
     </v-card>
-
     <!-- FIRST SECTION (Positive or Negative based on switch) -->
     <v-card class="pa-4 mb-6" elevation="3">
       <div class="text-h6 mb-3">{{ negativeFirst ? 'II. Negative points' : 'II. Positive points' }}</div>
@@ -129,7 +130,6 @@
                 :items="availableSequence"
                 label="Sequence"
                 v-model="firstSection[i-1].seqLinker"
-                @update:model-value="markLinkerUsed($event, firstSection[i-1].seqLinker)"
                 density="compact"
               />
             </v-col>
@@ -158,7 +158,6 @@
                 :items="availableExpansion"
                 label="Expansion"
                 v-model="firstSection[i-1].expLinker"
-                @update:model-value="markLinkerUsed($event, firstSection[i-1].expLinker)"
                 density="compact"
               />
             </v-col>
@@ -226,7 +225,6 @@
                 :items="availableSequence"
                 label="Sequence"
                 v-model="secondSection[i-1].seqLinker"
-                @update:model-value="markLinkerUsed($event, secondSection[i-1].seqLinker)"
                 density="compact"
               />
             </v-col>
@@ -255,7 +253,6 @@
                 :items="availableExpansion"
                 label="Expansion"
                 v-model="secondSection[i-1].expLinker"
-                @update:model-value="markLinkerUsed($event, secondSection[i-1].expLinker)"
                 density="compact"
               />
             </v-col>
@@ -278,7 +275,7 @@
       </v-row>
     </v-card>
 
-    <!-- CONCLUSION -->
+        <!-- CONCLUSION -->
     <v-card class="pa-4 mb-6" elevation="3">
       <div class="text-h6 mb-3">IV. Conclusion</div>
 
@@ -334,6 +331,278 @@
         class="mt-2 mx-8"
       />
     </v-card>
+    </template>
+
+<!-- POINT-BY-POINT MODEL -->
+<template v-else-if="selectedModel === 'Point-by-point'">
+  <!-- OPTIONS + CRITERIA SETUP -->
+  <v-card class="pa-4 mb-6" elevation="3">
+    <div class="text-h6 mb-3">0. Setup: Options & Criteria</div>
+
+    <v-row class="mx-4">
+      <v-col cols="12" md="6">
+        <v-text-field
+          v-model="optionA"
+          label="Option A (e.g., Coca-Cola)"
+          density="compact"
+          variant="outlined"
+        />
+      </v-col>
+
+      <v-col cols="12" md="6">
+        <v-text-field
+          v-model="optionB"
+          label="Option B (e.g., Pepsi)"
+          density="compact"
+          variant="outlined"
+        />
+      </v-col>
+    </v-row>
+
+    <v-row class="mx-4">
+      <v-col cols="12">
+        <div class="text-subtitle-2 mb-2">Criteria (3)</div>
+      </v-col>
+
+      <v-col
+        v-for="(row, idx) in criteria"
+        :key="'criteria-title-'+idx"
+        cols="12"
+        md="4"
+      >
+        <v-text-field
+          v-model="row.title"
+          :label="`Criterion ${idx + 1} (single word/short phrase)`"
+          density="compact"
+          variant="outlined"
+        />
+      </v-col>
+    </v-row>
+  </v-card>
+
+  <!-- INTRODUCTION -->
+  <v-card class="pa-4 mb-6" elevation="3">
+    <div class="text-h6 mb-3">I. Introduction</div>
+
+    <v-row>
+      <v-textarea
+        key="intro1"
+        label="Explain why the area of discussion is important or interesting"
+        v-model="intro[0]"
+        auto-grow rows="1" max-rows="2" density="compact" variant="outlined"
+        class="mx-8 mt-4"
+      />
+    </v-row>
+
+    <v-row class="mt-2 mx-4">
+      <v-col cols="3">
+        <v-select
+          :items="availableCounter"
+          label="Counter-expectation"
+          v-model="introCounterLinker"
+          density="compact"
+          max-width="220"
+        />
+      </v-col>
+
+      <v-col>
+        <v-textarea
+          key="intro2"
+          label="Introduce a complication or tension related to the topic"
+          v-model="intro[1]"
+          auto-grow rows="1" max-rows="2" density="compact" variant="outlined"
+        />
+        <div
+          v-if="introCounterLinker"
+          :class="['text-caption mt-1', getHintClass('counter-expectation')]"
+        >
+          {{ getBehaviorHint(introCounterLinker) }}
+        </div>
+      </v-col>
+    </v-row>
+
+    <v-row>
+      <v-textarea
+        key="intro3"
+        label="Introduce the two options that will be compared in the essay (e.g., two products, two choices, two perspectives)"
+        v-model="intro[2]"
+        auto-grow rows="1" max-rows="2" density="compact" variant="outlined"
+        class="mx-8"
+      />
+    </v-row>
+
+    <v-row>
+      <v-textarea
+        key="intro4"
+        label="State that the essay will compare these two options based on three specific criteria"
+        v-model="intro[3]"
+        auto-grow rows="1" max-rows="2" density="compact" variant="outlined"
+        class="mx-8"
+      />
+    </v-row>
+  </v-card>
+
+  <!-- ANALYSIS -->
+  <v-card class="pa-4 mb-6" elevation="3">
+    <div class="text-h6 mb-3">II. Point-by-point analysis</div>
+
+    <v-row
+      v-for="(row, idx) in criteria"
+      :key="'crit-'+idx"
+      class="mx-4"
+      align="start"
+    >
+      <v-col cols="12" class="mt-4">
+        <div class="text-h6">
+          {{ row.title?.trim() ? row.title : `Criterion ${idx + 1}` }}
+        </div>
+      </v-col>
+
+      <v-col cols="12">
+        <v-textarea
+          v-model="row.introText"
+          label="Intro sentence for this criterion paragraph (full sentence)"
+          auto-grow
+          rows="1"
+          max-rows="3"
+          density="compact"
+          variant="outlined"
+        />
+      </v-col>
+
+      <!-- Comparison 1 -->
+      <v-col cols="3">
+        <v-select
+          :items="[...availableContrast, ...availableCounter]"
+          label="Comparison"
+          v-model="row.comparison1Linker"
+          density="compact"
+        />
+      </v-col>
+
+      <v-col cols="9">
+        <v-textarea
+          v-model="row.comparison1Text"
+          label="Compare the two options based on this criterion."
+          auto-grow rows="1" max-rows="3"
+          density="compact" variant="outlined"
+        />
+      </v-col>
+
+      <!-- Expansion -->
+      <v-col cols="3">
+        <v-select
+          :items="availableExpansion"
+          label="Expansion"
+          v-model="row.expansionLinker"
+          density="compact"
+          />
+      </v-col>
+
+      <v-col cols="9">
+        <v-textarea
+          v-model="row.expansionText"
+          label="Add details or examples."
+          auto-grow rows="1" max-rows="3"
+          density="compact" variant="outlined"
+        />
+      </v-col>
+
+      <!-- Sequence -->
+      <v-col cols="3">
+        <v-select
+          :items="availableSequence"
+          label="Sequence"
+          v-model="row.sequenceLinker"
+          density="compact"
+        />
+      </v-col>
+
+      <v-col cols="9">
+        <v-textarea
+          v-model="row.comparison2Text"
+          label="Compare the two options again based on this criterion."
+          auto-grow rows="1" max-rows="3"
+          density="compact" variant="outlined"
+        />
+      </v-col>
+
+      <!-- Comparison 2 -->
+      <v-col cols="3">
+        <v-select
+          :items="[...availableContrast, ...availableCounter]"
+          label="Comparison"
+          v-model="row.comparison2Linker"
+          density="compact"
+        />
+      </v-col>
+
+      <v-col cols="9">
+        <v-textarea
+          v-model="row.finalComparisonText"
+          label="Finish the comparison."
+          auto-grow rows="1" max-rows="3"
+          density="compact" variant="outlined"
+        />
+      </v-col>
+    </v-row>
+  </v-card>
+
+  <!-- CONCLUSION -->
+  <v-card class="pa-4 mb-6" elevation="3">
+    <div class="text-h6 mb-3">IV. Conclusion</div>
+
+    <v-row class="mt-2 mx-6">
+      <v-col cols="3" max-width="220">
+        <v-select
+          :items="['Overall', 'On balance', 'On the whole', 'In summary', 'In conclusion', 'Summing up']"
+          label="Sequence >> Conclusion"
+          v-model="conclusionContrastLinker"
+          density="compact"
+        />
+      </v-col>
+
+      <v-col>
+        <v-textarea
+          label="Restate the contrast in one sentence"
+          v-model="conclusion.contrast"
+          auto-grow rows="1" max-rows="2"
+          density="compact" variant="outlined"
+        />
+      </v-col>
+    </v-row>
+
+    <v-row class="mt-2 mx-6">
+      <v-col cols="3" max-width="220">
+        <v-select
+          :items="availableEffect"
+          label="Effect"
+          v-model="conclusion.effectLinker"
+          density="compact"
+        />
+      </v-col>
+
+      <v-col>
+        <v-textarea
+          label="Draw the conclusion"
+          v-model="conclusion.effectText"
+          auto-grow rows="1" max-rows="2"
+          density="compact" variant="outlined"
+        />
+      </v-col>
+    </v-row>
+
+    <v-textarea
+      label="Final statement or recommendation"
+      v-model="conclusion.final"
+      auto-grow rows="1" max-rows="3"
+      density="compact" variant="outlined"
+      class="mt-2 mx-8"
+    />
+  </v-card>
+</template>
+
+
 
     <!-- EXPORT -->
     <v-row>
@@ -350,7 +619,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from "vue"
+import { ref, computed, watch, onMounted } from "vue"
 import { ideaLinkerPrompts } from "@/assets/scripts/idea_linker/IdeaLinkerPrompts"
 import { jsPDF } from 'jspdf'
 
@@ -481,7 +750,7 @@ const sequencePool = [...new Set(capitalizeLinkers(sequencePoolRaw))]
 const expansionPoolRaw = pool("expansion", ["exemplification", "add details or rephrase"])
 const expansionPool = [...new Set(capitalizeLinkers(expansionPoolRaw))]
 
-const contrastPoolRaw = pool("comparison", "constrast")
+const contrastPoolRaw = pool("comparison", "contrast")
 const contrastPool = [...new Set(capitalizeLinkers(contrastPoolRaw))]
 
 const counterPoolRaw = pool("counter-expectation")
@@ -524,7 +793,7 @@ const essayAuthor = ref("")
 const indication = ref("")
 const introCounterLinker = ref(null)
 const conclusionContrastLinker = ref(null)
-const textModels = ["Pros and cons"]
+const textModels = ["Pros and cons", "Point-by-point"]
 const selectedModel = ref(textModels[0])
 const negativeFirst = ref(false)
 
@@ -555,6 +824,71 @@ const conclusion = ref({
   effectText: "",
   final: ""
 })
+
+// Point-by-point specific state
+const optionA = ref("")
+const optionB = ref("")
+
+const criteria = ref([
+  { title: "",
+    introText: "",
+    comparison1Linker: null,
+    comparison1Text: "",       
+    expansionLinker: null,
+    expansionText: "",
+    sequenceLinker: null,
+    comparison2Text: "",
+    comparison2Linker: null,
+    finalComparisonText: "",
+  },
+  {
+    title: "",                
+    introText: "",
+    comparison1Linker: null,
+    comparison1Text: "",       
+    expansionLinker: null,
+    expansionText: "",
+    sequenceLinker: null,
+    comparison2Text: "",
+    comparison2Linker: null,
+    finalComparisonText: "",
+  },
+  {
+    title: "",                
+    introText: "",
+    comparison1Linker: null,
+    comparison1Text: "",      
+    expansionLinker: null,
+    expansionText: "",
+    sequenceLinker: null,
+    comparison2Text: "",
+    comparison2Linker: null,
+    finalComparisonText: "",
+  }
+])
+
+watch(
+  () => criteria.value,
+  () => {
+    const next = []
+
+    for (const row of criteria.value) {
+      if (row.comparison1Linker) next.push(row.comparison1Linker)
+      if (row.expansionLinker) next.push(row.expansionLinker)
+      if (row.sequenceLinker) next.push(row.sequenceLinker)
+      if (row.comparison2Linker) next.push(row.comparison2Linker)
+    }
+
+    // include the other single linkers you already track
+    if (introCounterLinker.value) next.push(introCounterLinker.value)
+    if (transition.value.linker) next.push(transition.value.linker)
+    if (conclusionContrastLinker.value) next.push(conclusionContrastLinker.value)
+    if (conclusion.value.effectLinker) next.push(conclusion.value.effectLinker)
+
+    usedLinkers.value = [...new Set(next)]
+  },
+  { deep: true }
+)
 
 // Watch intro counter linker
 watch(() => introCounterLinker.value, (newVal, oldVal) => {
@@ -599,6 +933,16 @@ watch(() => conclusion.value.effectLinker, (newVal, oldVal) => {
     usedLinkers.value.push(newVal)
   }
 })
+
+//////////////////////////////////// DEBUG PRINTS //////////////////////////////////
+
+onMounted(() => {
+  console.log('🚀 Essay Creator mounted')
+  console.log('Available contrast connectors:', availableContrast.value)
+  console.log('Raw contrast pool:', contrastPoolRaw)
+
+})  
+
 
 // =====================
 // PDF GENERATION
@@ -715,6 +1059,185 @@ const essayParagraphs = computed(() => {
   return paragraphs
 })
 
+
+// FOR POINT by point model
+function formatCriterionRow(row) {
+  const parts = []
+
+  // 1) Intro sentence (no linker)
+  if (row.introText?.trim()) {
+    parts.push({ linker: null, text: row.introText })
+  }
+
+  // 2) Comparison 1 (with comparison/counter linker)
+  if (row.comparison1Text?.trim()) {
+    parts.push({ linker: row.comparison1Linker, text: row.comparison1Text })
+  }
+
+  // 3) Expansion (examples/details)
+  if (row.expansionText?.trim()) {
+    parts.push({ linker: row.expansionLinker, text: row.expansionText })
+  }
+
+  // 4) Second comparison introduced by a sequence linker
+  if (row.comparison2Text?.trim()) {
+    parts.push({ linker: row.sequenceLinker, text: row.comparison2Text })
+  }
+
+  // 5) Finish the comparison (with comparison/counter linker)
+  if (row.finalComparisonText?.trim()) {
+    parts.push({ linker: row.comparison2Linker, text: row.finalComparisonText })
+  }
+
+  return parts
+}
+
+const essayBlocks = computed(() => {
+  const blocks = []
+
+  if (selectedModel.value === "Pros and cons") {
+    // Convert existing paragraphs into paragraph-blocks
+    for (const paraParts of essayParagraphs.value) {
+      blocks.push({ type: "paragraph", parts: paraParts })
+    }
+    return blocks
+  }
+
+  if (selectedModel.value === "Point-by-point") {
+    // ----- Introduction (note intro[3] exists in point-by-point) -----
+    const introParts = []
+    if (intro.value[0]?.trim()) introParts.push({ linker: null, text: intro.value[0] })
+    if (intro.value[1]?.trim()) introParts.push({ linker: introCounterLinker.value, text: intro.value[1] })
+    if (intro.value[2]?.trim()) introParts.push({ linker: null, text: intro.value[2] })
+    if (intro.value[3]?.trim()) introParts.push({ linker: null, text: intro.value[3] })
+    if (introParts.length) blocks.push({ type: "paragraph", parts: introParts })
+
+    // ----- Criteria: header + paragraph for each criterion -----
+    criteria.value.forEach((row, idx) => {
+      const header = row.title?.trim() ? row.title.trim() : `Criterion ${idx + 1}`
+      blocks.push({ type: "header", text: header })
+
+      const parts = formatCriterionRow(row)
+      if (parts.length) blocks.push({ type: "paragraph", parts })
+    })
+
+    // ----- Conclusion -----
+    const conclusionParts = []
+    if (conclusion.value?.contrast?.trim()) {
+      conclusionParts.push({ linker: conclusionContrastLinker.value, text: conclusion.value.contrast })
+    }
+    if (conclusion.value?.effectText?.trim()) {
+      conclusionParts.push({ linker: conclusion.value.effectLinker, text: conclusion.value.effectText })
+    }
+    if (conclusion.value?.final?.trim()) {
+      conclusionParts.push({ linker: null, text: conclusion.value.final })
+    }
+    if (conclusionParts.length) blocks.push({ type: "paragraph", parts: conclusionParts })
+
+    return blocks
+  }
+
+  return blocks
+})
+
+function renderParagraphParts(doc, parts, {
+  margin,
+  pageWidth,
+  pageHeight,
+  lineHeight,
+  getBehaviorColor,
+  getLightBehaviorColor
+}, state) {
+  // state: { yPosition } passed by reference-like object
+  let { yPosition } = state
+  let xPosition = margin + 10
+
+  for (let partIdx = 0; partIdx < parts.length; partIdx++) {
+    const part = parts[partIdx]
+
+    // space between parts
+    if (partIdx > 0) {
+      xPosition += doc.getTextWidth(" ")
+      if (xPosition > pageWidth - margin - 5) {
+        yPosition += lineHeight
+        xPosition = margin + 10
+        if (yPosition > pageHeight - margin - 5) {
+          doc.addPage()
+          yPosition = margin
+        }
+      }
+    }
+
+    if (part.linker) {
+      const color = getBehaviorColor(part.linker)
+      const bgColor = getLightBehaviorColor(part.linker)
+
+      // linker
+      doc.setFont("courier", "bold")
+      doc.setTextColor(color.r, color.g, color.b)
+
+      for (const word of part.linker.split(" ")) {
+        const w = doc.getTextWidth(word)
+        if (xPosition + w > pageWidth - margin - 5) {
+          yPosition += lineHeight
+          xPosition = margin + 10
+          if (yPosition > pageHeight - margin - 5) {
+            doc.addPage()
+            yPosition = margin
+          }
+        }
+        doc.text(word, xPosition, yPosition)
+        xPosition += w + doc.getTextWidth(" ")
+      }
+
+      // text
+      doc.setFont("courier", "normal")
+      doc.setTextColor(0)
+
+      for (const word of part.text.split(" ")) {
+        const w = doc.getTextWidth(word)
+        if (xPosition + w > pageWidth - margin - 5) {
+          yPosition += lineHeight
+          xPosition = margin + 10
+          if (yPosition > pageHeight - margin - 5) {
+            doc.addPage()
+            yPosition = margin
+          }
+        }
+
+        if (bgColor) {
+          doc.setFillColor(bgColor.r, bgColor.g, bgColor.b)
+          doc.rect(xPosition - 0.5, yPosition - 3.5, w + 1, 4.5, "F")
+        }
+
+        doc.text(word, xPosition, yPosition)
+        xPosition += w + doc.getTextWidth(" ")
+      }
+    } else {
+      // normal text
+      doc.setFont("courier", "normal")
+      doc.setTextColor(0)
+
+      for (const word of part.text.split(" ")) {
+        const w = doc.getTextWidth(word)
+        if (xPosition + w > pageWidth - margin - 5) {
+          yPosition += lineHeight
+          xPosition = margin + 10
+          if (yPosition > pageHeight - margin - 5) {
+            doc.addPage()
+            yPosition = margin
+          }
+        }
+        doc.text(word, xPosition, yPosition)
+        xPosition += w + doc.getTextWidth(" ")
+      }
+    }
+  }
+
+  state.yPosition = yPosition
+}
+
+
 function generateEssayPdf() {
   console.log('🎯 Starting essay PDF generation...')
   
@@ -759,127 +1282,47 @@ function generateEssayPdf() {
   // Monospace font for essay body
   doc.setFontSize(10)
   doc.setFont('courier', 'normal')
-  const paragraphs = essayParagraphs.value
   
-  const lineHeight = 5
-  const charWidth = doc.getTextWidth('M') // Monospace character width
-  
-  for (let paraIdx = 0; paraIdx < paragraphs.length; paraIdx++) {
-    const para = paragraphs[paraIdx]
-    
-    // Check if we need a new page before starting paragraph
-    if (yPosition > pageHeight - margin - 20) {
-      doc.addPage()
-      yPosition = margin
-    }
-    
-    let xPosition = margin + 10 // Start with indent
-    
-    // Process each part of the paragraph
-    for (let partIdx = 0; partIdx < para.length; partIdx++) {
-      const part = para[partIdx]
-      
-      // Add space between parts
-      if (partIdx > 0) {
-        const spaceWidth = doc.getTextWidth(' ')
-        xPosition += spaceWidth
-        
-        // Check line wrap
-        if (xPosition > pageWidth - margin - 5) {
-          yPosition += lineHeight
-          xPosition = margin + 10
-          if (yPosition > pageHeight - margin - 5) {
-            doc.addPage()
-            yPosition = margin
-          }
-        }
-      }
-      
-      if (part.linker) {
-        const color = getBehaviorColor(part.linker)
-        const bgColor = getLightBehaviorColor(part.linker)
-        
-        // Print linker in colored bold font (no background)
-        doc.setFont('courier', 'bold')
-        doc.setTextColor(color.r, color.g, color.b)
-        
-        const linkerWords = part.linker.split(' ')
-        for (let i = 0; i < linkerWords.length; i++) {
-          const word = linkerWords[i]
-          const wordWidth = doc.getTextWidth(word)
-          
-          // Check line wrap
-          if (xPosition + wordWidth > pageWidth - margin - 5) {
-            yPosition += lineHeight
-            xPosition = margin + 10
-            if (yPosition > pageHeight - margin - 5) {
-              doc.addPage()
-              yPosition = margin
-            }
-          }
-          
-          doc.text(word, xPosition, yPosition)
-          xPosition += wordWidth + doc.getTextWidth(' ')
-        }
-        
-        // Now print the modified text with background highlight
-        doc.setFont('courier', 'normal')
-        doc.setTextColor(0)
-        
-        const textWords = part.text.split(' ')
-        for (let i = 0; i < textWords.length; i++) {
-          const word = textWords[i]
-          const wordWidth = doc.getTextWidth(word)
-          
-          // Check line wrap
-          if (xPosition + wordWidth > pageWidth - margin - 5) {
-            yPosition += lineHeight
-            xPosition = margin + 10
-            if (yPosition > pageHeight - margin - 5) {
-              doc.addPage()
-              yPosition = margin
-            }
-          }
-          
-          // Draw background highlight for this word
-          if (bgColor) {
-            doc.setFillColor(bgColor.r, bgColor.g, bgColor.b)
-            doc.rect(xPosition - 0.5, yPosition - 3.5, wordWidth + 1, 4.5, 'F')
-          }
-          
-          doc.text(word, xPosition, yPosition)
-          xPosition += wordWidth + doc.getTextWidth(' ')
-        }
-      } else {
-        // Regular text without linker
-        doc.setFont('courier', 'normal')
-        doc.setTextColor(0)
-        
-        const textWords = part.text.split(' ')
-        for (let i = 0; i < textWords.length; i++) {
-          const word = textWords[i]
-          const wordWidth = doc.getTextWidth(word)
-          
-          // Check line wrap
-          if (xPosition + wordWidth > pageWidth - margin - 5) {
-            yPosition += lineHeight
-            xPosition = margin + 10
-            if (yPosition > pageHeight - margin - 5) {
-              doc.addPage()
-              yPosition = margin
-            }
-          }
-          
-          doc.text(word, xPosition, yPosition)
-          xPosition += wordWidth + doc.getTextWidth(' ')
-        }
-      }
-    }
-    
-    // Add space between paragraphs
-    yPosition += lineHeight * 2
+const blocks = essayBlocks.value
+const lineHeight = 5
+
+for (const block of blocks) {
+  // page break check
+  if (yPosition > pageHeight - margin - 20) {
+    doc.addPage()
+    yPosition = margin
   }
-  
+
+  if (block.type === "header") {
+    doc.setFontSize(12)
+    doc.setFont("courier", "bold")
+    doc.setTextColor(20)
+
+    const headerLines = doc.splitTextToSize(block.text, maxWidth)
+    doc.text(headerLines, margin, yPosition)
+    yPosition += headerLines.length * 6 + 3
+
+    // reset body font
+    doc.setFontSize(10)
+    doc.setFont("courier", "normal")
+    doc.setTextColor(0)
+
+    continue
+  }
+
+  // paragraph
+  const state = { yPosition }
+  renderParagraphParts(
+    doc,
+    block.parts,
+    { margin, pageWidth, pageHeight, lineHeight, getBehaviorColor, getLightBehaviorColor },
+    state
+  )
+  yPosition = state.yPosition
+
+  // paragraph spacing
+  yPosition += lineHeight * 2
+}
   // Add extra space before word count
   yPosition += lineHeight * 3
   
@@ -913,6 +1356,10 @@ function generateEssayPdf() {
 
 function generatePresentationPdf() {
   console.log('🎯 Starting presentation PDF generation...')
+
+  if (selectedModel.value === "Point-by-point") {
+    return generatePointByPointPresentationPdf()
+  }
   
   const doc = new jsPDF({
     orientation: 'landscape',
@@ -1349,6 +1796,196 @@ const wordCount = computed(() => {
   
   return text.split(/\s+/).filter(w => w.length > 0).length
 })
+
+function generatePointByPointPresentationPdf() {
+  console.log("🎯 Starting point-by-point presentation PDF generation...")
+
+  const doc = new jsPDF({
+    orientation: "landscape",
+    unit: "mm",
+    format: "a4",
+  })
+
+  const pageWidth = doc.internal.pageSize.getWidth()
+  const pageHeight = doc.internal.pageSize.getHeight()
+  const margin = 25
+  const maxWidth = pageWidth - margin * 2
+
+  let slideCreated = false
+  function newSlide(bg = { r: 248, g: 249, b: 250 }, bar = { r: 102, g: 126, b: 234 }) {
+    if (doc.getNumberOfPages() > 1 || slideCreated) doc.addPage()
+    slideCreated = true
+
+    // background
+    doc.setFillColor(bg.r, bg.g, bg.b)
+    doc.rect(0, 0, pageWidth, pageHeight, "F")
+
+    // header bar
+    doc.setFillColor(bar.r, bar.g, bar.b)
+    doc.rect(0, 0, pageWidth, 20, "F")
+  }
+
+  function headerText(text, color = { r: 255, g: 255, b: 255 }) {
+    doc.setTextColor(color.r, color.g, color.b)
+    doc.setFontSize(24)
+    doc.setFont("helvetica", "bold")
+    doc.text(text, margin, 13)
+  }
+
+  function bulletDot(x, y, radius = 1, color = { r: 44, g: 62, b: 80 }) {
+    doc.setFillColor(color.r, color.g, color.b)
+    doc.circle(x, y - 2, radius, "F")
+  }
+
+  // Renders one bullet line, coloring the linker if present
+  function renderBullet({ linker, text }, yPos, {
+    indent = 8,
+    sub = false,
+  } = {}) {
+    const dotX = margin + (sub ? 10 : 2)
+    const textX = margin + (sub ? 15 : indent)
+    const available = maxWidth - (textX - margin)
+
+    bulletDot(dotX, yPos, sub ? 0.8 : 1)
+
+    // If no linker, just render text
+    if (!linker) {
+      doc.setFont("helvetica", "normal")
+      doc.setTextColor(sub ? 90 : 44, sub ? 108 : 62, sub ? 125 : 80)
+      const lines = doc.splitTextToSize(text, available)
+      doc.text(lines, textX, yPos)
+      return yPos + Math.max(1, lines.length) * 8 + (sub ? 2 : 4)
+    }
+
+    // Linker + text, linker colored
+    const color = getBehaviorColor(linker)
+
+    doc.setFont("helvetica", "bold")
+    doc.setTextColor(color.r, color.g, color.b)
+    doc.text(linker, textX, yPos)
+
+    const linkerWidth = doc.getTextWidth(linker + " ")
+
+    doc.setFont("helvetica", "normal")
+    doc.setTextColor(sub ? 90 : 44, sub ? 108 : 62, sub ? 125 : 80)
+
+    const lines = doc.splitTextToSize(text, available - linkerWidth)
+    doc.text(lines, textX + linkerWidth, yPos)
+
+    return yPos + Math.max(1, lines.length) * 8 + (sub ? 2 : 4)
+  }
+
+  // --------------------
+  // 1) Title Slide
+  // --------------------
+  doc.setFillColor(102, 126, 234)
+  doc.rect(0, 0, pageWidth, pageHeight, "F")
+
+  doc.setFillColor(118, 75, 162)
+  doc.circle(20, 20, 40, "F")
+  doc.circle(pageWidth - 20, pageHeight - 20, 50, "F")
+
+  doc.setTextColor(255, 255, 255)
+  doc.setFontSize(34)
+  doc.setFont("helvetica", "bold")
+  const titleLines = doc.splitTextToSize(essayTitle.value || "Untitled Essay", maxWidth)
+  doc.text(titleLines, pageWidth / 2, pageHeight / 2 - 15, { align: "center" })
+
+  doc.setFontSize(18)
+  doc.setFont("helvetica", "normal")
+  const subtitle = "Point-by-point Analytical Text Presentation"
+  doc.text(subtitle, pageWidth / 2, pageHeight / 2 + 10, { align: "center" })
+
+  // --------------------
+  // 2) Introduction Slide
+  // --------------------
+  newSlide()
+  headerText("Introduction")
+
+  let yPos = margin + 15
+  doc.setFontSize(16)
+
+  // intro[0..3]
+  if (intro.value[0]?.trim()) {
+    yPos = renderBullet({ linker: null, text: intro.value[0] }, yPos)
+  }
+  if (intro.value[1]?.trim()) {
+    yPos = renderBullet({ linker: introCounterLinker.value, text: intro.value[1] }, yPos)
+  }
+  if (intro.value[2]?.trim()) {
+    yPos = renderBullet({ linker: null, text: intro.value[2] }, yPos)
+  }
+  if (intro.value[3]?.trim()) {
+    yPos = renderBullet({ linker: null, text: intro.value[3] }, yPos)
+  }
+
+  // optional “setup” info as small bullets
+  if (optionA.value?.trim() || optionB.value?.trim()) {
+    yPos += 4
+    const setupLine = `Options: ${optionA.value || "A"} vs ${optionB.value || "B"}`
+    doc.setFontSize(14)
+    yPos = renderBullet({ linker: null, text: setupLine }, yPos, { sub: true })
+    doc.setFontSize(16)
+  }
+
+  // --------------------
+  // 3) One slide per criterion
+  // --------------------
+  for (let idx = 0; idx < criteria.value.length; idx++) {
+    const row = criteria.value[idx]
+    const critTitle = row.title?.trim() ? row.title.trim() : `Criterion ${idx + 1}`
+
+    newSlide({ r: 248, g: 249, b: 250 }, { r: 102, g: 126, b: 234 })
+    headerText(critTitle)
+
+    yPos = margin + 15
+    doc.setFontSize(15)
+
+    // Build bullet list in the same order as the essay paragraph
+    if (row.introText?.trim()) {
+      yPos = renderBullet({ linker: null, text: row.introText }, yPos)
+    }
+    if (row.comparison1Text?.trim()) {
+      yPos = renderBullet({ linker: row.comparison1Linker, text: row.comparison1Text }, yPos)
+    }
+    if (row.expansionText?.trim()) {
+      // treat expansion as a sub-bullet (optional stylistic choice)
+      yPos = renderBullet({ linker: row.expansionLinker, text: row.expansionText }, yPos, { sub: true })
+    }
+    if (row.comparison2Text?.trim()) {
+      yPos = renderBullet({ linker: row.sequenceLinker, text: row.comparison2Text }, yPos)
+    }
+    if (row.finalComparisonText?.trim()) {
+      yPos = renderBullet({ linker: row.comparison2Linker, text: row.finalComparisonText }, yPos)
+    }
+  }
+
+  // --------------------
+  // 4) Conclusion Slide
+  // --------------------
+  newSlide({ r: 248, g: 249, b: 250 }, { r: 39, g: 174, b: 96 })
+  headerText("Conclusion")
+
+  yPos = margin + 15
+  doc.setFontSize(16)
+
+  if (conclusion.value.contrast?.trim()) {
+    yPos = renderBullet({ linker: conclusionContrastLinker.value, text: conclusion.value.contrast }, yPos)
+  }
+  if (conclusion.value.effectText?.trim()) {
+    yPos = renderBullet({ linker: conclusion.value.effectLinker, text: conclusion.value.effectText }, yPos)
+  }
+  if (conclusion.value.final?.trim()) {
+    yPos = renderBullet({ linker: null, text: conclusion.value.final }, yPos)
+  }
+
+  const filename = `presentation-${(essayTitle.value || "untitled")
+    .replace(/[^a-z0-9]/gi, "-")
+    .toLowerCase()}-point-by-point.pdf`
+
+  doc.save(filename)
+  console.log("✅ PDF saved:", filename)
+}
 
 </script>
 

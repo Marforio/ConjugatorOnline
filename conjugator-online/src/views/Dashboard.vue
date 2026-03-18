@@ -27,6 +27,9 @@
 
     <!-- Tab Content -->
     <v-window v-model="activeTab" class="mt-5" :touch="false">
+      <v-window-item value="to-do">
+        <ToDoDash v-if="!userStore.isStaff" />
+      </v-window-item>
       <v-window-item value="grammar-feedback">
         <div v-if="loading" class="text-center my-5">
           <v-progress-circular indeterminate color="primary" />
@@ -683,6 +686,7 @@ import AdminErrorDataTab from "@/components/AdminErrorDataTab.vue";
 import { useRouter, useRoute } from 'vue-router';
 import VocabDataTab from "@/components/VocabDataTab.vue";
 import GoalsDataTab from "@/components/GoalsDataTab.vue";
+import ToDoDash from "@/components/ToDoDash.vue";
 import Gauge from "@/components/Gauge.vue"
 
 // ---------------- Types ----------------
@@ -719,7 +723,7 @@ interface GameSession {
 // ---------------- Component ----------------
 export default defineComponent({
   name: "Dashboard",
-  components: { TopNavBar, PieChart, BarChart, ErrorsDataTab, AdminErrorDataTab, VocabDataTab, GoalsDataTab, OtherGamesDash, Gauge },
+  components: { TopNavBar, PieChart, BarChart, ErrorsDataTab, AdminErrorDataTab, VocabDataTab, GoalsDataTab, OtherGamesDash, ToDoDash, Gauge },
   setup() {
     const router = useRouter();
     const route = useRoute();
@@ -1014,8 +1018,9 @@ export default defineComponent({
     });
 
 
-    const activeTab = ref("grammar-feedback");
+    const activeTab = ref("to-do");
     const tabItems = [
+      { value: "to-do", label: "To-Do List" },  // To-Do List
       { value: "grammar-feedback", label: "Errors" },   // Error feedback
       { value: "vocabulary", label: "Vocab" },
       { value: "conjugation-game", label: "Conjugator" },

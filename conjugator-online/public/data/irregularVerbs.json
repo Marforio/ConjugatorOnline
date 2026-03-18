@@ -275,6 +275,10 @@
         "past_simple": "offset",
         "past_participle": "offset"
     },
+    "overcome":{
+        "past_simple": "overcame",
+        "past_participle": "overcome"
+    },
     "pay":{
         "past_simple": "paid",
         "past_participle": "paid"
@@ -470,6 +474,10 @@
     "throw":{
         "past_simple": "threw",
         "past_participle": "thrown"
+    },
+    "undergo":{
+        "past_simple": "underwent",
+        "past_participle": "undergone"
     },
     "understand":{
         "past_simple": "understood",

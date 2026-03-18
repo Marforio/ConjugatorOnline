@@ -80,7 +80,41 @@
       </div>
     </div>
   </v-col>
+
+  <!-- Balanced Opinions -->
+<v-col cols="12" sm="6" md="4" class="d-flex justify-center">
+  <div
+    class="image-tile"
+    @click="openDialog('Balanced Opinions')"
+  >
+    <div class="tile-frame">
+      <v-img
+        src="/images/banners/BalancedOpinions.png"
+        class="tile-image"
+        cover
+      />
+    </div>
+  </div>
+</v-col>
+
+<!-- Unfinished Business -->
+<v-col cols="12" sm="6" md="4" class="d-flex justify-center">
+  <div
+    class="image-tile"
+    @click="openDialog('Unfinished Business')"
+  >
+    <div class="tile-frame">
+      <v-img
+        src="/images/banners/UnfinishedBusiness.png"
+        class="tile-image"
+        cover
+      />
+    </div>
+  </div>    
+</v-col>
+
 </v-row>
+
 
 
     <!-- Back Button -->

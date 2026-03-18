@@ -76,43 +76,43 @@ export const vocabLists = {
   ////////////////////////////// CIVIL ENGINEERING /////////////////////////////
   civil_verbs: {
     title: "Verbs for Civil Engineering",
-    module: "Civil",
+    module: "Civil_1",
     data: civilVerbs,
     supportsLevels: false,
   },
   construction_site: {
     title: "The Construction Site",
-    module: "Civil",
+    module: "Civil_1",
     data: constructionSite,
     supportsLevels: false,
   },
   earth_and_materials: {
     title: "Earth and Materials",
-    module: "Civil",
+    module: "Civil_1",
     data: EarthAndMaterials,
     supportsLevels: false,
   },
   cities_infrastructure: {
     title: "Cities and Urban Infrastructure",
-    module: "Civil",
+    module: "Civil_1",
     data: CitiesInfrastructureBuildings,
     supportsLevels: false,
   },
   construction_science: {
     title: "Science of Construction",
-    module: "Civil",
+    module: "Civil_2",
     data: ConstructionScience,
     supportsLevels: false,
   },
   dimensions_properties_civ: {
     title: "Dimensions and Properties",
-    module: "Civil",
+    module: "Civil_2",
     data: DimensionsAndProperties,
     supportsLevels: false,
   },
   construction_business_reports: {
     title: "Business Report (Construction)",
-    module: "Civil",
+    module: "Civil_2",
     data: BusinessReports,
     supportsLevels: false,
   },
@@ -120,26 +120,26 @@ export const vocabLists = {
 
   mechanicalForces: {
     title: "Mechanical Forces",
-    module: "Mechanical",
+    module: "Mechanical_2",
     data: mechanicalForces,
     supportsLevels: false,
   },
    programmingSymbols: {
     title: "Programming Elements (Python)",
-    module: "Mechanical",
+    module: "Mechanical_2",
     data: programmingSymbols,
     supportsLevels: false,
   },
 
    meetingExpressionsM: {
     title: "Meeting Expressions",
-    module: "Mechanical",
+    module: "Mechanical_2",
     data: meetingExpressions,
     supportsLevels: false,
   },
   meetingsM: {
     title: "Meetings",
-    module: "Mechanical",
+    module: "Mechanical_2",
     data: meetings,
     supportsLevels: false,
   },
@@ -148,13 +148,13 @@ export const vocabLists = {
 
    meetingExpressionsE: {
     title: "Meeting Expressions",
-    module: "Electrical",
+    module: "Electrical_2",
     data: meetingExpressions,
     supportsLevels: false,
   },
   meetingsE: {
     title: "Meetings",
-    module: "Electrical",
+    module: "Electrical_2",
     data: meetings,
     supportsLevels: false,
   },
@@ -163,34 +163,31 @@ export const vocabLists = {
 
   Cryptography: {
     title: "Cryptography",
-    module: "Computer_science",
+    module: "Computer_science_2",
     data: CryptographyVocab,
     supportsLevels: false,
   },
 
   DataProcessingAndVisualization: {
     title: "Data Processing and Visualization",
-    module: "Computer_science",
+    module: "Computer_science_2",
     data: DataProcessingAndVisualization,
     supportsLevels: false,
   }, 
   
   meetingExpressionsIT: {
     title: "Meeting Expressions",
-    module: "Computer_science",
+    module: "Computer_science_2",
     data: meetingExpressions,
     supportsLevels: false,
   },
   meetingsIT: {
     title: "Meetings",
-    module: "Computer_science",
+    module: "Computer_science_2",
     data: meetings,
     supportsLevels: false,
   },
 
-// STARTUPS
-
-// 
 
  // PROGRAMMING ELEMENTS AND SYMBOLS
 

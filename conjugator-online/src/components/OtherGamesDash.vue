@@ -460,6 +460,7 @@ const sessionAccuracyTrend = computed(() => {
 
 // ----- Constants -----
 const GAME_NAMES = [
+  "Balanced Opinions",
   "Be Polite!",
   "Comparison",
   "Idea Linker",
@@ -472,17 +473,21 @@ const GAME_NAMES = [
   "Regret Machine",
   "Reported Speech",
   "Tricky Translator",
+  "Unfinished Business",
   "Uses Of Auxiliaries",
   "Verb Mixer",
   "Year 2040",
   "Word Families",
 ];
 const gamePictures: Record<string, string> = {
+  "Balanced Opinions": "/images/banners/BalancedOpinions.png",
   "Be Polite!": "/images/banners/BePolite.png",
   "Comparison": "/images/banners/Comparison.png",
   "Idea Linker": "/images/banners/IdeaLinker.png",
   "Pronoun Practice": "/images/banners/PronounPractice.png",
   "Quantifier Quest": "/images/banners/QuantifierQuest.png",
+  "Unfinished Business": "/images/banners/UnfinishedBusiness.png",
+  "Verb Mixer": "/images/banners/VerbMixer.png",
   "Uses Of Auxiliaries": "/images/banners/UsesOfAuxiliaries.png",
   "Tricky Translator": "/images/banners/TrickyTranslator.png",
   "Passive Party": "/images/banners/PassiveParty.png",

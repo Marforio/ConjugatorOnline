@@ -24,7 +24,7 @@
         <div
           v-else-if="lg || xl"
           class="language-title"
-          style="font-size: 9rem; margin-top: 2%; margin-bottom: 10%; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;"
+          style="font-size: 9rem; margin-top: 0.1%; margin-bottom: 4%; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;"
         >
           Language Labs
         </div>
@@ -58,7 +58,10 @@
     </v-row>
 
     <!-- Tiles with Icon Buttons for Navigation -->
-<v-row justify="center" align="center" dense style="margin-left: 17%; margin-right: 17%;">
+
+
+  <v-row justify="center" align="center" dense style="margin-left: 17%; margin-right: 17%;">
+
   <v-col
     cols="8"
     sm="6"
@@ -69,6 +72,7 @@
       large
       class="d-flex flex-column align-center pa-3 pa-sm-6"
       color="primary"
+      width="200px"
       href="https://book.language-labs.ch"
     >
       <v-icon large>mdi-book-open-variant</v-icon>
@@ -86,6 +90,7 @@
       large
       class="d-flex flex-column align-center pa-3 pa-sm-6"
       color="warning"
+      width="200px"
       :to="{ name: 'conjugator' }"
     >
       <v-icon large>mdi-controller</v-icon>
@@ -93,7 +98,7 @@
     </v-btn>
   </v-col>
 
-    <v-col
+  <v-col
     cols="12"
     sm="6"
     md="4"
@@ -103,6 +108,7 @@
       large
       class="d-flex flex-column align-center pa-3 pa-sm-6"
       color="red-lighten-1"
+      width="200px"
       :to="{ name: 'vocabworkout' }"
     >
       <v-icon large>mdi-cards-outline</v-icon>
@@ -110,7 +116,7 @@
     </v-btn>
   </v-col>
 
-    <v-col
+  <v-col
     cols="12"
     sm="6"
     md="4"
@@ -120,6 +126,7 @@
       large
       class="d-flex flex-column align-center pa-3 pa-sm-6"
       color="secondary"
+      width="200px"
       :to="{ name: 'games' }"
     >
       <v-icon large>mdi-gamepad-circle</v-icon>
@@ -136,31 +143,15 @@
     <v-btn
       large
       class="d-flex flex-column align-center pa-3 pa-sm-6"
-      color="success"
-      :to="{ name: 'dashboard' }"
-    >
-      <v-icon large>mdi-chart-bar</v-icon>
-      <span v-if="!$vuetify.display.xs" class="subtitle-1 font-weight-medium px-3">Dashboard</span>
-    </v-btn>
-  </v-col>
-
-  <v-col
-    cols="12"
-    sm="6"
-    md="4"
-    class="d-flex justify-center mb-0 mb-sm-4"
-  >
-    <v-btn
-      large
-      class="d-flex flex-column align-center pa-3 pa-sm-6"
       color="yellow-darken-2"
+      width="200px"
       :to="{ name: 'tools' }"
     >
       <v-icon large>mdi-tools</v-icon>
       <span v-if="!$vuetify.display.xs" class="subtitle-1 font-weight-medium px-3">Tools</span>
     </v-btn>
   </v-col>
-  <!-- TEACHER TOOLS (admin-only) -->
+
   <v-col
     v-if="userStore.isAuthenticated && userStore.isStaff"
     cols="12"
@@ -172,6 +163,7 @@
       large
       class="d-flex flex-column align-center pa-3 pa-sm-6"
       color="deep-purple-accent-4"
+      width="200px"
       :to="{ name: 'teacher-tools' }"
     >
       <v-icon large>mdi-school</v-icon>
@@ -179,7 +171,33 @@
     </v-btn>
   </v-col>
 
-</v-row>
+  </v-row>
+    <v-row justify="center" align="center" dense style="margin-left: 17%; margin-right: 17%; margin-top: 3%;">
+  
+    <v-col cols="12" md="8" class="d-flex justify-center mb-6 mb-sm-10 mx-auto">
+      <v-btn
+        :to="{ name: 'dashboard' }"
+        class="dashboard-hero-btn elevation-4"
+        block
+      >
+        <div v-if="xs" class="d-flex flex-column align-center justify-center">
+          <v-icon size="24" color="primary">mdi-view-dashboard</v-icon>
+          <span class="text-caption font-weight-bold text-primary mt-1">Dashboard</span>
+        </div>
+
+        <div v-else class="d-flex align-center justify-start w-100 px-6">
+          <div class="icon-blob me-6">
+            <v-icon size="32" color="primary">mdi-view-dashboard-variant</v-icon>
+          </div>
+          <div class="text-left">
+            <span class="text-h5 font-weight-black text-slate-800">Go to My Dashboard</span>
+          </div>
+          <v-spacer></v-spacer>
+          <v-icon class="arrow-icon ms-5" color="primary">mdi-arrow-right-circle-outline</v-icon>
+        </div>
+      </v-btn>
+    </v-col>
+  </v-row>
 
   </v-container>
 </template>
@@ -228,6 +246,66 @@ const { xs, sm, md, lg, xl, smAndDown } = useDisplay()
 .top-controls > *:last-child {
   margin-right: 0;
 }
+/* Dashboard Hero Button - Light Professional Theme */
+.dashboard-hero-btn {
+  /* Very light blue-to-white gradient */
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%) !important;
+  border: 1px solid #e2e8f0;
+  border-radius: 20px !important;
+  height: 110px !important;
+  text-transform: none !important;
+  letter-spacing: 0.5px !important;
+  transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
 
+.dashboard-hero-btn:hover {
+  transform: translateY(-4px);
+  background: #ffffff !important;
+  border-color: #3b82f6; /* Soft blue border on hover */
+  box-shadow: 0 15px 30px -10px rgba(59, 130, 246, 0.2) !important;
+}
+
+/* The circle behind the icon */
+.icon-blob {
+  background: rgba(59, 130, 246, 0.1);
+  padding: 14px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.3s ease;
+}
+
+.dashboard-hero-btn:hover .icon-blob {
+  transform: scale(1.1) rotate(-5deg);
+  background: rgba(59, 130, 246, 0.15);
+}
+
+.text-slate-800 {
+  color: #1e293b;
+}
+
+.arrow-icon {
+  font-size: 32px;
+  opacity: 0.3;
+  transition: all 0.3s ease;
+}
+
+.dashboard-hero-btn:hover .arrow-icon {
+  opacity: 1;
+  transform: translateX(8px);
+}
+
+/* Adjust the text-overline height for tight spacing */
+.text-overline {
+  font-size: 0.75rem !important;
+  line-height: 1rem;
+}
+
+/* Ensure the smaller buttons look consistent */
+.v-btn.flex-column {
+  border-radius: 12px !important;
+  text-transform: none !important;
+}
 
 </style>

@@ -1,7 +1,7 @@
 <template>
   <v-container fluid class="pa-5 d-flex justify-center" style="min-height: 100vh;">
     <!-- PRE-GAME -->
-    <div v-if="!gameStarted && !gameComplete" class="text-center">
+    <div v-if="!gameStarted && !gameComplete" class="text-center" style="max-width: 800px;">
       <div>
         <v-img
           :src="BANNERS[props.game]"
@@ -10,10 +10,10 @@
           contain
         />
       </div>
-      <p class="text-body-1 mb-4">
+      <p class="text-body-1 font-weight-medium mb-4" >
         {{ gameData[props.game]?.description }}
       </p>
-      <p class="text-body-1 mb-6">
+      <p class="text-body-1 mb-6" >
         {{ gameData[props.game]?.instructions }}
       </p>
 
@@ -75,7 +75,7 @@
         </v-progress-circular>
       </div>
       <!-- Flashcard -->
-      <v-card
+      <v-card v-if="props.game !== 'Balanced Opinions' && props.game !== 'Unfinished Business'"
         class="mx-auto mb-8 pa-10 text-center slide-card"
         elevation="4"
         :class="animationClass"
@@ -103,6 +103,66 @@
           {{ prompt?.question }}
         </v-card-text>
       </v-card>
+
+      <v-card v-else-if="props.game === 'Balanced Opinions'"
+        class="mx-auto mb-8 pa-10 text-center slide-card"
+        elevation="4"
+        :class="animationClass"
+        style="width: 600px; height: 400px; display: flex; flex-direction: column; align-items: center; justify-content: center;"
+      >
+        <v-card-title
+          class="text-center" style="margin-bottom: 2rem;"> What is your <span class="text-high-emphasis">balanced opinion</span> on...? </v-card-title>
+
+        <v-card-text class="text-wrap mt-5" style="font-size: 2.5rem; ">
+          {{ prompt?.question }}
+        </v-card-text>
+
+        <v-card-title
+          class="text-uppercase text-high-emphasis" style="margin-top: 3rem;"
+        > <span class="text-subtitle-1 me-8">Linking word:</span>
+          <span>  
+            <v-chip
+              color="primary"
+              size="x-large"
+              class="text-black"
+              variant="flat"
+            >
+              {{ prompt?.category }}
+            </v-chip>
+          </span>
+        </v-card-title>
+      </v-card>
+
+      <v-card v-else-if="props.game === 'Unfinished Business'"
+        class="mx-auto mb-8 pa-10 text-center slide-card"
+        elevation="4"
+        :class="animationClass"
+        style="width: 600px; height: 400px; display: flex; flex-direction: column; align-items: center; justify-content: center;"
+      >
+        <v-card-title
+          class="text-center" style="margin-bottom: 2rem;"> Use this verb in the given time frame </v-card-title>
+
+        <v-card-text class="text-wrap mt-5 text-uppercase" style="font-size: 3rem; ">
+          {{ prompt?.question }}
+        </v-card-text>
+
+        <v-card-title
+          class="text-uppercase text-high-emphasis" style="margin-top: 3rem;"
+        > <span class="text-subtitle-1 me-8">Time frame:</span>
+          <span>  
+            <v-chip
+              color="primary"
+              size="x-large"
+              class="text-black"
+              variant="flat"
+            >
+              {{ prompt?.category }}
+            </v-chip>
+          </span>
+        </v-card-title>
+      </v-card>
+
+
       <div class="my-6">
     <!-- Progress bar -->
     <v-progress-linear
@@ -146,7 +206,7 @@
         <h3 class="text-h6 mb-2">Needs Review</h3>
         <ul class="">
           <li v-for="(p, i) in flaggedPrompts" :key="i">
-            {{ p.question }}
+            {{ props.game === "Balanced Opinions" ? `${p.category}: ${p.question}` : p.question }}
           </li>
         </ul>
       </div>
@@ -182,7 +242,7 @@ import { ref, reactive, computed } from "vue"
 import api from "@/axios"
 
 const props = defineProps<{
-  game: "Spelling bee" | "Pronunciation Challenge" | "Prove it!" | "Be Polite!"
+  game: "Spelling bee" | "Pronunciation Challenge" | "Prove it!" | "Be Polite!" | "Balanced Opinions" | "Unfinished Business"
   student: string
 }>()
 
@@ -196,6 +256,8 @@ const BANNERS = {
   "Pronunciation Challenge": "/images/banners/PronunciationChallenge.png",
   "Prove it!": "/images/banners/ProveIt.png",
   "Be Polite!": "/images/banners/BePolite.png",
+  "Balanced Opinions": "/images/banners/BalancedOpinions.png",
+  "Unfinished Business": "/images/banners/UnfinishedBusiness.png",
 }
 
 const selectedCategory = ref<string>("")    // for Prove it!
@@ -206,7 +268,7 @@ const gameComplete = ref(false)
 
 const rightCount = ref(0)
 const wrongCount = ref(0)
-const score = computed(() => rightCount.value !== 0 ? (rightCount.value / totalRounds * 100).toFixed(1) : 0)
+const score = computed(() => rightCount.value !== 0 ? (rightCount.value / totalRounds.value * 100).toFixed(1) : 0)
 const hasAnyAnswer = ref(false)
 const unclearCount = ref(0)
 const wrongPrompts = ref<string[]>([])
@@ -226,8 +288,8 @@ const shownPrompts = ref<{
   is_correct: boolean | null
 }[]>([])
 
-const totalRounds = 30
-const remainingCount = ref(totalRounds)
+const totalRounds = computed(() => (props.game === "Balanced Opinions" ? 12 : props.game === "Unfinished Business" ? 24 : 30))
+const remainingCount = ref(totalRounds.value)
 const promptCounter = ref(0)
 
 const snackbar = reactive({ show: false, message: "", color: "success" })
@@ -237,7 +299,7 @@ const saving = ref(false)
 const animationClass = ref("")
 let slideTimeout: ReturnType<typeof setTimeout> | null = null
 
-const progressValue = computed(() => (promptCounter.value / totalRounds) * 100)
+const progressValue = computed(() => (promptCounter.value / totalRounds.value) * 100)
 
 
 const useTimer = ref(false)
@@ -249,6 +311,7 @@ const timerProgress = computed(() => (timeLeft.value / 10) * 100)
 // --------------------------
 // GAME DATA (extendable by game name)
 // --------------------------
+
 const gameData: Record<string, { description: string; instructions: string; prompts: Record<string, string[]> }> = {
   "Pronunciation Challenge": {
     description: "Practice pronunciation with feedback from the teacher",
@@ -270,6 +333,112 @@ const gameData: Record<string, { description: string; instructions: string; prom
       "pairs": ["desert (Sahara) vs dessert (cake)", "lead (to guide) vs lead (the metal)", "wind (air movement) vs wind (to turn)", "tear (rip) vs tear (from the eye)", "quiet (shhh!) vs quite ('quite good')", "suit (clothing) vs suite (set of rooms)", "choose vs chose", "live (to reside) vs live (not recorded)", "bass (fish) vs bass (low frequency sound)"],
     }
   },
+    "Balanced Opinions": {
+    description: "Practice giving balanced opinions with contrast/linking words.",
+    instructions:
+      "A card will show a linking word and a controversial topic. The student must give a balanced opinion aloud (pros + cons). The teacher validates the response.",
+    prompts: {
+      linking_words: [
+        "However",
+        "That being said",
+        "Nevertheless",
+        "Nonetheless",
+        "Still",
+        "And yet",
+        "Although",
+        "Even though",
+        "Though",
+        "Despite",
+        "In spite of",
+        "While",
+        "Whereas",
+        "On the other hand"
+      ],
+      topics: [
+        "Nuclear Power",
+        "Bitcoin",
+        "Bullfighting",
+        "Smoking",
+        "Alcohol",
+        "Marijuana",
+        "Plant-based meat",
+        "Tesla cars",
+        "Low taxes",
+        "Artificial Intelligence",
+        "Social Media",
+        "McDonald's",
+        "Temu",
+        "Working from home (Home office)",
+        "Living in a shared apartment (with roomates)",
+        "Living with your parents",
+        "Basejumping",
+        "Paragliding",
+        "Off-piste skiing",
+        "F1 racing",
+        "Golf",
+        "Curling",
+        "Animals in the zoo",
+        "Eating meat",
+        "Living in Fribourg",
+        "Living in a big city",
+        "Living in the countryside",
+        "Online education",
+        "Space exploration",
+        "Genetic engineering",
+        "Cloning",
+        "Ice cream",
+        "Growing up in Switzerland",
+        "Going to the military service",
+        "Being a professional athlete",
+        "Being a YouTuber",
+        "Having a pet",
+        "Allowing children to play video games",
+        "Allowing pre-teens to have a smartphone",
+        "Going to Scotland for a holiday",
+        "Going to Venice for a holiday",
+        "Having kids",
+        "Being a farmer",
+        "Being a doctor",
+        "Being an entrepreneur (having your own company)",
+        "Going to Sweden for a holiday",
+        "Going to Brazil for a holiday",
+        "Studying your bachelor's degree part-time while working",
+      ]
+    }
+  },
+  "Unfinished Business": {
+  description: "Practice talking about activities in finished vs unfinished time references and irregular verbs.",
+  instructions:
+    "A card will show an irregular verb (infinitive) and a time reference. The student must respond orally (teacher validates).",
+  prompts: {
+    time_references: [
+      "yesterday",
+      "last night",
+      "2 days ago",
+      "in 1999",
+      "in 2023",
+      "when I was a child",
+      "when I was growing up",
+      "last summer",
+      "last month",
+      "as a child",
+      "in my life",
+      "since 2020",
+      "for 5 years",
+      "for 2 years",
+      "already",
+      "never (in my life)",
+      "so far (in my life)",
+      "so far (this year)",
+      "this year",
+      "this week",
+      "today",
+      "just",
+      "recently",
+      "lately"
+    ]
+  }
+},
   "Be Polite!": {
     description: "Prove your ability to be polite by repeating the auxiliary verb in the question.",
     instructions: "A card will appear with a yes/no question. Answer the question politely by repeating the auxiliary verb.",
@@ -870,6 +1039,66 @@ function buildPromptQueue() {
       : gameData[props.game]
 
   if (!dataset) return
+    // SPECIAL: Unfinished Business => unique verbs from Essential irregulars past simple keys
+
+    if (props.game === "Unfinished Business") {
+      const essentials = gameData["Essential irregulars past simple"]
+      if (!essentials?.prompts) return
+
+      const verbs = shuffle(Object.keys(essentials.prompts))
+      const timeRefs = dataset.prompts.time_references as string[]
+
+      const queue: typeof promptQueue.value = []
+
+      // Ensure we never repeat a verb: take first N shuffled verbs
+      const rounds = Math.min(totalRounds.value, verbs.length)
+
+      for (let i = 0; i < rounds; i++) {
+        const verb = verbs[i]
+        const timeRef = timeRefs[Math.floor(Math.random() * timeRefs.length)]
+
+        queue.push({
+          question: `${verb}`,
+          verb,                 // stored as label in backend rounds[].label
+          correctAnswers: [],   // teacher validates orally; no hard-coded answers
+          category: `${timeRef}`
+        })
+      }
+
+      promptQueue.value = queue
+      return
+    }
+
+    // SPECIAL: Balanced Opinions => 12 unique (linking_word + topic) pairs, no repeats
+    if (props.game === "Balanced Opinions") {
+      const linkingWords = shuffle(dataset.prompts.linking_words)
+      const topics = shuffle(dataset.prompts.topics)
+
+      const rounds = totalRounds.value // 12
+
+      // Defensive: ensure we can make unique pairs
+      if (linkingWords.length < rounds || topics.length < rounds) {
+        console.warn("Balanced Opinions: not enough unique linking words or topics for", rounds, "rounds")
+      }
+
+      const queue: typeof promptQueue.value = []
+      for (let i = 0; i < rounds; i++) {
+        const link = linkingWords[i]
+        const topic = topics[i]
+
+        queue.push({
+          question: `${topic}`,
+          verb: topic,                // label in backend (you can swap this if you prefer linking word)
+          correctAnswers: [],         // not needed; teacher validates orally
+          category: link              // optional; available if you ever want to show it separately
+        })
+      }
+
+      promptQueue.value = queue
+      return
+    }
+
+    //////////////  Prove it!  ///////////////
 
   const queue: typeof promptQueue.value = []
 
@@ -915,7 +1144,7 @@ function buildPromptQueue() {
   })
 
   // Shuffle
-  promptQueue.value = shuffle(queue).slice(0, totalRounds)
+  promptQueue.value = shuffle(queue).slice(0, totalRounds.value)
 }
 
 
@@ -932,7 +1161,7 @@ function animateSlide() {
 }
 
 function loadNextPrompt() {
-  if (!promptQueue.value.length || promptCounter.value >= totalRounds) {
+    if (!promptQueue.value.length || promptCounter.value >= totalRounds.value) {
     endGame()
     return
   }
@@ -1016,7 +1245,7 @@ const flaggedPrompts = computed(() =>
 
 function resetCounts() {
   promptCounter.value = 0
-  remainingCount.value = totalRounds
+  remainingCount.value = totalRounds.value
   rightCount.value = 0
   wrongCount.value = 0
   unclearCount.value = 0
@@ -1071,7 +1300,7 @@ async function endGame() {
   saving.value = true
 
 const rounds = shownPrompts.value.map((r, index) => ({
-  question: r.question,
+  question: props.game === "Balanced Opinions" ? `${r.category}: ${r.question}` :  r.question,
   pronoun: null,
   image: null,
   label: r.verb,
@@ -1090,7 +1319,7 @@ const rounds = shownPrompts.value.map((r, index) => ({
   const payload = {
     game_name: updatedGameName.value,
     student_web_id: props.student,
-    total_rounds: totalRounds,
+    total_rounds: totalRounds.value,
     correct_count: rightCount.value,
     wrong_count: wrongCount.value,
     started_at: new Date().toISOString(),
@@ -1122,7 +1351,7 @@ function quitGame() {
   rightCount.value = 0
   wrongCount.value = 0
   unclearCount.value = 0
-  remainingCount.value = totalRounds
+  remainingCount.value = totalRounds.value
   promptCounter.value = 0
   wrongPrompts.value = []
 }

@@ -8,23 +8,29 @@
 
     <div class="d-flex align-center justify-space-between mb-4">
       <v-btn
-        variant="text"
+        :variant="activePanel === 0 ? 'elevated' : 'tonal'"
+        :color="activePanel === 0 ? 'grey' : 'primary'"
+        size="large"
+        rounded="pill"
         @click="activePanel = 0"
         :disabled="activePanel === 0"
-        class="d-flex align-center ga-2"
+        class="tab-btn d-flex align-center ga-2"
       >
-        <v-icon>mdi-chevron-left</v-icon>
-        <span class="ms-3">Feedback / notebook</span>
+        <v-icon size="24">mdi-chevron-left</v-icon>
+        <span class="ms-2">Feedback / notebook</span>
       </v-btn>
 
       <v-btn
-        variant="text"
+        :variant="activePanel === 1 ? 'elevated' : 'tonal'"
+        :color="activePanel === 1 ? 'grey' : 'primary'"
+        size="large"
+        rounded="pill"
         @click="activePanel = 1"
         :disabled="activePanel === 1"
-        class="d-flex align-center ga-2"
+        class="tab-btn d-flex align-center ga-2"
       >
-        <span class="me-3">Vocab workout progress</span>
-        <v-icon>mdi-chevron-right</v-icon>
+        <span class="me-2">Vocab workout progress</span>
+        <v-icon size="24">mdi-chevron-right</v-icon>
       </v-btn>
     </div>
 
@@ -166,10 +172,11 @@
       <v-window-item :value="1">
         <VWMyProgressPanel
           :completionTarget="COMPLETION_TARGET"
-          title="My progress"
+          title="Vocab Workout Progress"
           subtitle="Continue an ongoing session or review your progress"
           @continue="continueSession"
           @start="startNewSessionForList"
+          class="mt-5"
         />
       </v-window-item>
     </v-window>
@@ -335,5 +342,10 @@ onMounted(async () => {
 }
 .back {
   transform: rotateY(180deg);
+}
+
+.tab-btn {
+  min-width: 260px;
+  letter-spacing: 0.2px;
 }
 </style>

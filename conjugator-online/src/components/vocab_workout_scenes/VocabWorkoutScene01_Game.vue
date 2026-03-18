@@ -241,6 +241,24 @@
                                 <!-- ✅ positioned container so the corner button is reliable -->
                                 <div class="vw-back-face">
                                   <!-- ✅ always show button when we have an item -->
+                                  <!-- Examples button (left of Wiktionary) -->
+                                  <v-tooltip v-if="contextEnabledForThisList" text="Show examples">
+                                    <template #activator="{ props: eprops }">
+                                      <v-btn
+                                        v-bind="eprops"
+                                        class="vw-examples-btn"
+                                        size="small"
+                                        icon
+                                        variant="tonal"
+                                        color="secondary"
+                                        @click.stop="openContextExamples(currentItem?.term)"
+                                        aria-label="Show examples"
+                                      >
+                                        <v-icon size="18">mdi-text-box-search-outline</v-icon>
+                                      </v-btn>
+                                    </template>
+                                  </v-tooltip>
+
                                   <v-tooltip text="Go to Wiktionary">
                                     <template #activator="{ props: tprops }">
                                       <v-btn
@@ -350,6 +368,21 @@
                             <span class="discover-front-text">{{ t.frontText }}</span>
                           </button>
 
+                          <v-tooltip v-if="contextEnabledForThisList" text="Show examples">
+                            <template #activator="{ props: eprops }">
+                              <v-btn
+                                v-bind="eprops"
+                                size="x-small"
+                                variant="text"
+                                class="ms-1"
+                                @click.stop="openContextExamples(t.term)"
+                                aria-label="Show examples"
+                              >
+                                <v-icon size="18">mdi-text-box-search-outline</v-icon>
+                              </v-btn>
+                            </template>
+                          </v-tooltip>
+
                           <v-tooltip text="go to Wiktionary">
                             <template v-slot:activator="{ props }">
                             <v-btn
@@ -370,6 +403,64 @@
                     </v-card>
                   </v-col>
                 </v-row>
+
+                  <!-- Context examples DIALOG (Discover mode only) -->
+                  <v-dialog v-model="contextDialogOpen" max-width="900">
+                    <v-card class="pa-4">
+                      <div class="d-flex align-center justify-space-between">
+                        <div class="text-h6">
+                          Examples for: <strong>{{ contextTerm }}</strong>
+                        </div>
+
+                        <v-btn variant="text" @click="contextDialogOpen = false">Close</v-btn>
+                      </div>
+
+                      <v-divider class="my-3" />
+
+                      <div v-if="contextLoading" class="d-flex align-center ga-3">
+                        <v-progress-circular indeterminate size="20" />
+                        <div class="text-caption text-medium-emphasis">Loading examples…</div>
+                      </div>
+
+                      <div v-else-if="contextError" class="text-caption text-error">
+                        {{ contextError }}
+                      </div>
+
+                      <!-- ✅ neutral (not red) -->
+                      <div v-else-if="contextEmptyMessage" class="text-caption text-medium-emphasis">
+                        {{ contextEmptyMessage }}
+                      </div>
+
+                      <v-list v-else density="compact" class="vw-context-list">
+                        <v-list-item
+                          v-for="(h, i) in contextHits"
+                          :key="i"
+                          class="py-2"
+                        >
+                          <div class="d-flex align-center justify-space-between">
+                            <div class="text-caption text-medium-emphasis">
+                              Source: <strong>{{ h.source_page }}</strong>
+                            </div>
+
+                            <!-- optional: copy snippet -->
+                            <v-btn
+                              size="x-small"
+                              variant="text"
+                              @click="copyToClipboard(h.text)"
+                            >
+                              Copy
+                            </v-btn>
+                          </div>
+
+                          <div
+                              class="vw-context-snippet"
+                              v-html="highlightInSnippet(h.text, contextTerm)"
+                            />
+                        </v-list-item>
+                      </v-list>
+                    </v-card>
+                  </v-dialog>
+
               </template>
 
               <!-- WRITING -->
@@ -571,6 +662,9 @@ import { useVocabWorkoutStore } from "@/stores/vocabWorkout";
 import type { VWAttempt } from "@/stores/vocabWorkout";
 import VWSessionAttemptsTable from "@/components/vocab_workout_scenes/VWSessionAttemptsTable.vue"
 
+import type { ContextIndex, ContextHit } from "@/assets/scripts/vocab_workout/vocabWorkoutContextRegistry";
+import { contextByListKey, normalizeContextKey, contextApprovedListKeys } from "@/assets/scripts/vocab_workout/vocabWorkoutContextRegistry";
+
 /* =========================================================
    Props / Emits
 ========================================================= */
@@ -728,6 +822,129 @@ type LocalRoundRow = {
   at_index: number;
 };
 
+/* =========================================================
+   Vocab context
+========================================================= */
+const contextDialogOpen = ref(false);
+const contextTerm = ref<string>("");
+const contextHits = ref<ContextHit[]>([]);
+const contextLoading = ref(false);
+const contextError = ref<string | null>(null);
+const contextEmptyMessage = ref<string | null>(null);
+
+// cache per listKey so we load each JSON once per page visit
+const contextCache = ref<Record<string, ContextIndex>>({});
+
+const contextEnabledForThisList = computed(() => {
+  if (mode.value !== "cards") return false; // Discover only
+  const k = String(props.gameSettings?.listKey ?? "").trim();
+  return contextApprovedListKeys.has(k);
+});
+
+async function loadContextIndex(listKey: string): Promise<ContextIndex | null> {
+  const key = String(listKey ?? "").trim();
+  if (!key) return null;
+
+  if (contextCache.value[key]) return contextCache.value[key];
+
+  const loader = contextByListKey[key];
+  if (!loader) return null;
+
+  contextLoading.value = true;
+  contextError.value = null;
+  try {
+    const idx = await loader();
+    contextCache.value[key] = idx;
+    return idx;
+  } catch (e) {
+    console.error("[VocabWorkout] context json load failed:", e);
+    contextError.value = "Could not load examples for this list.";
+    return null;
+  } finally {
+    contextLoading.value = false;
+  }
+}
+
+async function openContextExamples(term?: string | null) {
+  const t = String(term ?? "").trim();
+  if (!t) return;
+
+  contextDialogOpen.value = true;
+  contextTerm.value = t;
+  contextHits.value = [];
+
+  contextLoading.value = false;
+  contextError.value = null;          // only for real load failures
+  contextEmptyMessage.value = null;   // neutral “no results” message
+
+  const listKey = String(props.gameSettings?.listKey ?? "").trim();
+  const idx = await loadContextIndex(listKey);
+
+  if (!idx) {
+    // loadContextIndex should set contextError if fetch fails or loader missing;
+    // if it didn't, set a generic one.
+    if (!contextError.value) contextError.value = `Context data unavailable for list "${listKey}".`;
+    return;
+  }
+
+  const key = normalizeContextKey(t);
+  const hits = idx[key] ?? [];
+
+  contextHits.value = hits.slice(0, 30);
+
+  if (contextHits.value.length === 0) {
+    contextEmptyMessage.value = "No examples found for this term.";
+  }
+}
+
+async function copyToClipboard(text: string) {
+  try {
+    await window.navigator.clipboard.writeText(text);
+  } catch (e) {
+    // Fallback for older browsers / blocked clipboard permissions
+    try {
+      const ta = document.createElement("textarea");
+      ta.value = text;
+      ta.style.position = "fixed";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.focus();
+      ta.select();
+      document.execCommand("copy");
+      document.body.removeChild(ta);
+    } catch (err) {
+      console.error("Copy failed:", err);
+    }
+  }
+}
+
+function escapeHtml(s: string): string {
+  return String(s ?? "").replace(/[&<>"']/g, (c) => {
+    switch (c) {
+      case "&": return "&amp;";
+      case "<": return "&lt;";
+      case ">": return "&gt;";
+      case '"': return "&quot;";
+      case "'": return "&#39;";
+      default: return c;
+    }
+  });
+}
+
+function highlightInSnippet(snippet: string, term: string): string {
+  const text = escapeHtml(snippet);
+  const t = String(term ?? "").trim();
+  if (!t) return text;
+
+  // Escape regex chars in the term
+  const escaped = t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+  // Highlight case-insensitively.
+  // Word boundary is optional; for phrases it’s usually fine without strict \b rules.
+  const re = new RegExp(`(${escaped})`, "ig");
+
+  return text.replace(re, `<mark class="vw-context-mark">$1</mark>`);
+}
 /* =========================================================
    Pretty labels
 ========================================================= */
@@ -1958,5 +2175,31 @@ onBeforeUnmount(() => {
   top: 10px;
   right: 10px;
   z-index: 20;
+}
+
+/* Context dialog */
+.vw-context-list {
+  max-height: 65vh;
+  overflow: auto;
+}
+
+.vw-context-snippet {
+  font-size: 0.95rem;
+  line-height: 1.35rem;
+  margin-top: 6px;
+}
+
+/* Back card: position examples button next to wiki button */
+.vw-examples-btn {
+  position: absolute;
+  top: 10px;
+  right: 56px; /* sits left of wiki button */
+  z-index: 20;
+}
+
+.vw-context-mark {
+  background: rgba(255, 235, 59, 0.55);
+  padding: 0 2px;
+  border-radius: 3px;
 }
 </style>
