@@ -36,7 +36,7 @@
         </v-list-item>
         <v-divider />
         <v-list-item
-          v-if="userStore.isAuthenticated && userStore.isStaff"
+          v-if="auth.isLoggedIn && userStore.isStaff"
           :to="{ name: 'teacher-tools' }"
         >
           <v-list-item-title>Teacher Tools</v-list-item-title>
@@ -130,7 +130,7 @@
         </v-tooltip>
 
         <v-tooltip
-          v-if="userStore.isAuthenticated && userStore.isStaff"
+          v-if="auth.isLoggedIn && userStore.isStaff"
           text="Teacher Tools"
           location="bottom"
         >
@@ -141,10 +141,10 @@
           </template>
         </v-tooltip>
 
-        <span v-if="userStore.isAuthenticated" style="align-self: center; margin-left: 50px; margin-right: 50px;">Hello <InitialsText /></span>
+        <span v-if="auth.isLoggedIn" style="align-self: center; margin-left: 50px; margin-right: 50px;">Hello <InitialsText /></span>
       </div>
         
-      <div v-if="userStore.isAuthenticated"><LogOutButton /></div>
+      <div v-if="auth.isLoggedIn"><LogOutButton /></div>
       <div v-else>
         <v-btn :to="{ name: 'login' }" color="primary" variant="tonal" class="px-4 m-4">Log in</v-btn>
       </div>
@@ -154,6 +154,7 @@
 
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
+import { useAuthStore } from "@/stores/auth";
 import { useUserStore } from "@/stores/user";
 import { useDisplay } from "vuetify";
 import InitialsText from './InitialsText.vue';
@@ -166,6 +167,7 @@ export default defineComponent({
     LogOutButton,
   },
   setup() {
+    const auth = useAuthStore();
     const userStore = useUserStore();
     const { smAndDown } = useDisplay();
     const drawer = ref(false);
@@ -173,7 +175,7 @@ export default defineComponent({
     const disabledGame = ref(false);
 
 
-    return { userStore, drawer };
+    return { auth, userStore, drawer };
   },
 });
 </script>

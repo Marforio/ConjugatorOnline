@@ -1,6 +1,6 @@
 <template>
   <span>
-    {{ initials ?? "Ghost" }}
+    {{ initials || "Ghost" }}
   </span>
 </template>
 
@@ -8,33 +8,25 @@
 import { onMounted, computed } from "vue";
 import { useUserStore } from "@/stores/user";
 import { useAuthStore } from "@/stores/auth";
-import api from "@/axios";
 
 const userStore = useUserStore();
 const auth = useAuthStore();
 
-const initials = computed(() => userStore.student?.initials);
+const initials = computed(() => userStore.student?.initials ?? "");
 
 onMounted(async () => {
-  if (!auth.isLoggedIn) {
-    console.warn("Not logged in — skipping student fetch.");
-    userStore.clearStudent();
-    return;
-  }
+  // Do not call protected endpoints if not logged in
+  if (!auth.access) return;
 
-  try {
-    const res = await api.get("/students/");
-    const studentData = Array.isArray(res.data) ? res.data[0] : res.data;
+  await userStore.ensureUserLoaded();
 
-    if (studentData) {
-      userStore.setStudent(studentData);
-    } else {
-      console.warn("No student record found for this user.");
-      userStore.clearStudent();
-    }
-  } catch (err) {
-    console.error("Failed to fetch student info:", err);
-    userStore.clearStudent();
+  // If staff, don’t fetch student
+  if (userStore.isStaff) return;
+
+  // Only fetch if we don't already have it
+  if (!userStore.student) {
+    await userStore.fetchStudentData();
   }
+  console.log("Initials loaded:", initials.value);
 });
 </script>

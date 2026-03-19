@@ -2,7 +2,7 @@
 
 import type { IdeaLinkerDataset, IdeaLinkerEntry, IdeaLinkerTranslations } from "./IdeaLinkerPrompts";
 
-export const ROUND_SECONDS = 45;
+export const ROUND_SECONDS = 60;
 
 export type IdeaLinkerSettings = {
   numRounds: number;

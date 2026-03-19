@@ -2,7 +2,7 @@
   <v-container fluid class="d-flex flex-column pa-1">
     <!-- Top controls: centered on xs, right-aligned on sm+ -->
     <div class="top-controls mb-8">
-      <div v-if="userStore.isAuthenticated" class="mt-4 me-4">
+      <div v-if="auth.isLoggedIn" class="mt-4 me-4">
         <LogOutButton v-if="!smAndDown"></LogOutButton>
       </div>
       <div v-else>
@@ -153,7 +153,7 @@
   </v-col>
 
   <v-col
-    v-if="userStore.isAuthenticated && userStore.isStaff"
+    v-if="auth.isLoggedIn && userStore.isStaff"
     cols="12"
     sm="6"
     md="4"
@@ -203,10 +203,12 @@
 </template>
 
 <script setup lang="ts">
+import { useAuthStore } from "@/stores/auth";
 import { useUserStore } from "@/stores/user";
 import LogOutButton from "@/components/LogOutButton.vue";
 import { useDisplay } from "vuetify";
 
+const auth = useAuthStore();
 const userStore = useUserStore();
 const { xs, sm, md, lg, xl, smAndDown } = useDisplay()
 

@@ -1,6 +1,6 @@
 import { ref, computed } from "vue";
 import { defineStore } from "pinia";
-import { getAccessToken, clearTokens } from "@/services/auth";
+import { useAuthStore } from "@/stores/auth";
 import api from "@/axios";
 
 // --- Interfaces ---
@@ -17,18 +17,16 @@ interface ScoreSnapshot {
   health_score: number;
 }
 
-
 interface Student {
   id: number;
   web_id: string;
   initials: string;
   total_correct_prompts: number;
   health_score: number;
-  domain: string | null;    
+  domain: string | null;
   user: User | null;
   score_history: Record<string, ScoreSnapshot>;
 }
-
 
 interface Course {
   slug: string;
@@ -39,7 +37,6 @@ interface StudentCourse {
   student: Student;
   course: Course;
 }
-
 
 interface VerbUsage {
   verb: string;
@@ -102,111 +99,115 @@ export type SmartVerbPoolByTense = {
   "Present perfect"?: string[];
 };
 
-
 // --- Store ---
 export const useUserStore = defineStore("user", () => {
-  // Auth state
+  const auth = useAuthStore(); // ✅ define once
+
+  // --- Core state ---
   const user = ref<User | null>(null);
   const student = ref<Student | null>(null);
 
-  const accessToken = ref<string | null>(getAccessToken());
-
-  const isAuthenticated = computed(() => !!accessToken.value);
+  // --- Computed ---
   const isStaff = computed(() => user.value?.is_staff ?? false);
   const isSuperuser = computed(() => user.value?.is_superuser ?? false);
   const studentId = computed(() => student.value?.id ?? null);
   const totalCorrect = computed(() => student.value?.total_correct_prompts ?? 0);
-  const healthScore = computed(() => student.value?.health_score ?? 0)
+  const healthScore = computed(() => student.value?.health_score ?? 0);
 
-  //  previous semester scores
-  const previousHealthScore = computed(() => {
-    if (!student.value?.score_history) return null;
-    
-    const entries = Object.entries(student.value.score_history);
-    if (entries.length === 0) return null;
-    
-    // Sort by date descending (most recent first)
-    const sorted = entries.sort(([dateA], [dateB]) => dateB.localeCompare(dateA));
-    return sorted[0][1].health_score;
-  });
-
-  const previousTotalCorrectPrompts = computed(() => {
-    if (!student.value?.score_history) return null;
-    
-    const entries = Object.entries(student.value.score_history);
-    if (entries.length === 0) return null;
-    
-    const sorted = entries.sort(([dateA], [dateB]) => dateB.localeCompare(dateA));
-    return sorted[0][1].total_correct_prompts;
-  });
-
-  const previousDate = computed(() => {
-    if (!student.value?.score_history) return null;
-    
-    const entries = Object.entries(student.value.score_history);
-    if (entries.length === 0) return null;
-    
-    const sorted = entries.sort(([dateA], [dateB]) => dateB.localeCompare(dateA));
-    return sorted[0][0]; // Returns date string in YYYY-MM-DD format
-  });
-
-  //  All historical scores sorted by date
-  const scoreHistory = computed(() => {
-    if (!student.value?.score_history) return [];
-    
-    return Object.entries(student.value.score_history)
-      .map(([date, scores]) => ({
-        date,
-        ...scores,
-      }))
-      .sort((a, b) => b.date.localeCompare(a.date)); // Most recent first
-  });
-
-
-  // Enrollments state 
-  const enrollments = ref<StudentCourse[]>([]);
-  const loadingEnrollments = ref(false);
-  const enrollmentError = ref<string | null>(null);
-
-
-  function setStudent(data: Student) {
-    student.value = data;
+  // --- Token exists check (single source of truth: auth store) ---
+  function hasAccessToken(): boolean {
+    return !!auth.access;
   }
 
-  function clearStudent() {
-    student.value = null;
-    accessToken.value = null;
-    clearTokens();
-  }
+  // --- User bootstrap ---
+  const userLoaded = ref(false);
 
-  function setAccessToken(token: string) {
-    accessToken.value = token;
-  }
-
-  async function fetchUserData() {
-    if (!accessToken.value) return;
+  async function ensureUserLoaded() {
+    if (userLoaded.value) return;
+    if (!hasAccessToken()) return;
 
     try {
       const res = await api.get<User>("/users/me/");
       user.value = res.data;
     } catch (err) {
       console.error("Failed to fetch user data:", err);
+      user.value = null;
+    } finally {
+      userLoaded.value = true;
     }
   }
 
-  async function fetchStudentData() {
-    if (!accessToken.value) return;
-
-    try {
-      const response = await api.get<Student>("/me/student/");
-      student.value = response.data;
-    } catch (err) {
-      console.error("Failed to fetch student data:", err);
-    }
+  // Optional: keep fetchUserData name if other parts of app call it
+  async function fetchUserData() {
+    await ensureUserLoaded();
   }
+
+  // --- Previous semester scores ---
+  const previousHealthScore = computed(() => {
+    if (!student.value?.score_history) return null;
+    const entries = Object.entries(student.value.score_history);
+    if (entries.length === 0) return null;
+    const sorted = entries.sort(([a], [b]) => b.localeCompare(a));
+    return sorted[0][1].health_score;
+  });
+
+  const previousTotalCorrectPrompts = computed(() => {
+    if (!student.value?.score_history) return null;
+    const entries = Object.entries(student.value.score_history);
+    if (entries.length === 0) return null;
+    const sorted = entries.sort(([a], [b]) => b.localeCompare(a));
+    return sorted[0][1].total_correct_prompts;
+  });
+
+  const previousDate = computed(() => {
+    if (!student.value?.score_history) return null;
+    const entries = Object.entries(student.value.score_history);
+    if (entries.length === 0) return null;
+    const sorted = entries.sort(([a], [b]) => b.localeCompare(a));
+    return sorted[0][0];
+  });
+
+  const scoreHistory = computed(() => {
+    if (!student.value?.score_history) return [];
+    return Object.entries(student.value.score_history)
+      .map(([date, scores]) => ({ date, ...scores }))
+      .sort((a, b) => b.date.localeCompare(a.date));
+  });
+
+  // --- Enrollments ---
+  const enrollments = ref<StudentCourse[]>([]);
+  const loadingEnrollments = ref(false);
+  const enrollmentError = ref<string | null>(null);
+
+  function setStudent(data: Student) {
+    student.value = data;
+  }
+
+  // NOTE: do NOT clear tokens here anymore; auth store owns tokens
+  function clearStudent() {
+    student.value = null;
+    user.value = null;
+    userLoaded.value = false;
+    enrollments.value = [];
+  }
+
+async function fetchStudentData() {
+  try {
+    const res = await api.get<Student[]>("/students/");
+    console.log("fetchStudentData response:", res.data);
+
+    const first = res.data?.[0] ?? null;  //  this is a hack where I'm taking the first element from a returned list. ideally the backend view should be changed to return a single student object under  /students/me/ endpoint
+    student.value = first;
+
+    console.log("fetchStudentData stored student:", student.value);
+  } catch (err: any) {
+    console.error("Failed to fetch student data:", err?.response?.status, err);
+    student.value = null;
+  }
+}
 
   async function fetchEnrollments() {
-    if (!accessToken.value) return;
+    if (!hasAccessToken()) return;
 
     loadingEnrollments.value = true;
     enrollmentError.value = null;
@@ -222,34 +223,32 @@ export const useUserStore = defineStore("user", () => {
       loadingEnrollments.value = false;
     }
   }
-  const enrolledCourses = computed(() =>
-    enrollments.value.map(e => e.course.slug)
-  );
 
-const studentDomain = computed(() => student.value?.domain ?? null);
+  const enrolledCourses = computed(() => enrollments.value.map((e) => e.course.slug));
 
-// optional: pretty label for UI
-const studentDomainLabel = computed(() => {
-  const d = studentDomain.value;
-  if (!d) return "—";
-  const map: Record<string, string> = {
-    architecture: "Architecture",
-    business_1: "Business 1 - Corporations",
-    business_2: "Business 2 - Marketing",
-    business_3: "Business 3 - Finance",
-    business_4: "Business 4 - Ethics",
-    chemistry: "Chemistry",
-    civil: "Civil",
-    computer_science: "Computer Science",
-    electrical: "Electrical",
-    mechanical: "Mechanical",
-    general: "General",
-  };
-  return map[d] ?? d;
-});
+  // --- Student domain ---
+  const studentDomain = computed(() => student.value?.domain ?? null);
 
+  const studentDomainLabel = computed(() => {
+    const d = studentDomain.value;
+    if (!d) return "—";
+    const map: Record<string, string> = {
+      architecture: "Architecture",
+      business_1: "Business 1 - Corporations",
+      business_2: "Business 2 - Marketing",
+      business_3: "Business 3 - Finance",
+      business_4: "Business 4 - Ethics",
+      chemistry: "Chemistry",
+      civil: "Civil",
+      computer_science: "Computer Science",
+      electrical: "Electrical",
+      mechanical: "Mechanical",
+      general: "General",
+    };
+    return map[d] ?? d;
+  });
 
-  // 📊 Verb usage state
+  // --- Verb usage ---
   const verbUsage = ref<VerbUsage[]>([]);
   const tierStats = ref<TierStats[]>([]);
   const tenseStats = ref<TenseStats>({
@@ -262,7 +261,9 @@ const studentDomainLabel = computed(() => {
   const loadingVerbUsage = ref(false);
   const verbUsageError = ref<string | null>(null);
 
-async function fetchVerbUsageDashboardData() {
+  async function fetchVerbUsageDashboardData() {
+    if (!hasAccessToken()) return;
+
     if (!studentId.value && !isStaff.value) {
       verbUsageError.value = "Student ID required.";
       return;
@@ -291,55 +292,50 @@ async function fetchVerbUsageDashboardData() {
     }
   }
 
-// smart verb pool for the COnjugator
-async function fetchSmartConjVerbPool(params: { verbSet: string; batchSize: number }) {
-  if (!accessToken.value) return null;
+  // --- Smart verb pool for conjugator ---
+  async function fetchSmartConjVerbPool(params: { verbSet: string; batchSize: number }) {
+    if (!hasAccessToken()) return null;
 
-  const sid = studentId.value;
+    const sid = studentId.value;
 
-  // Most likely correct for non-staff: /<student_id>/verb-usage/
-  // Staff might use /verb-usage/
-  const candidates = [
-    sid ? `/${sid}/verb-usage/` : null,
-    "/verb-usage/",
-    "/student-verb-usage/", // keep only if you actually wired this route in urls.py
-  ].filter(Boolean) as string[];
+    const candidates = [
+      sid ? `/${sid}/verb-usage/` : null,
+      "/verb-usage/",
+      "/student-verb-usage/",
+    ].filter(Boolean) as string[];
 
-  for (const url of candidates) {
-    try {
-      const res = await api.get<{ smart_pool?: any }>(url, {
-        params: {
-          verb_set: params.verbSet,
-          batch_size: params.batchSize,
-        },
-      });
+    for (const url of candidates) {
+      try {
+        const res = await api.get<{ smart_pool?: any }>(url, {
+          params: {
+            verb_set: params.verbSet,
+            batch_size: params.batchSize,
+          },
+        });
 
-      if (res.data?.smart_pool) return res.data.smart_pool;
-      // If the endpoint exists but doesn't include smart_pool, treat as "no pool"
-      return null;
-    } catch (err: any) {
-      const status = err?.response?.status;
-      // If this URL doesn't exist, try the next candidate
-      if (status === 404) continue;
+        if (res.data?.smart_pool) return res.data.smart_pool;
+        return null;
+      } catch (err: any) {
+        const status = err?.response?.status;
+        if (status === 404) continue;
 
-      console.error("fetchSmartConjVerbPool failed:", err);
-      return null;
+        console.error("fetchSmartConjVerbPool failed:", err);
+        return null;
+      }
     }
+
+    return null;
   }
 
-  // none of the endpoints existed
-  return null;
-}
-
-
-
-
-  // 📚 Vocab state
+  // --- Vocab ---
   const vocab = ref<VocabItem[]>([]);
   const loadingVocab = ref(true);
   const vocabError = ref<string | null>(null);
 
   async function fetchVocabDashboardData() {
+    if (!hasAccessToken()) return;
+    if (!studentId.value) return;
+
     loadingVocab.value = true;
     vocabError.value = null;
 
@@ -355,20 +351,22 @@ async function fetchSmartConjVerbPool(params: { verbSet: string; batchSize: numb
     }
   }
 
-
   const processedVocab = computed(() => {
-    const map = new Map<string, {
-      correct: string;
-      incorrects: string[];
-      times: number;
-      comment: string;
-      studentId?: number | null;
-    }>();
+    const map = new Map<
+      string,
+      {
+        correct: string;
+        incorrects: string[];
+        times: number;
+        comment: string;
+        studentId?: number | null;
+      }
+    >();
 
     for (const entry of vocab.value) {
       const key = entry.correct;
 
-      const studentId =
+      const sid =
         typeof entry.student === "number"
           ? entry.student
           : (entry.student as Student)?.id ?? entry.feedback?.student?.id ?? null;
@@ -378,15 +376,17 @@ async function fetchSmartConjVerbPool(params: { verbSet: string; batchSize: numb
           correct: entry.correct,
           incorrects: entry.incorrect ? [entry.incorrect] : [],
           times: entry.times,
-          comment: entry.comment || '',
-          studentId,
+          comment: entry.comment || "",
+          studentId: sid,
         });
       } else {
         const existing = map.get(key)!;
         existing.times += entry.times;
+
         if (entry.incorrect && !existing.incorrects.includes(entry.incorrect)) {
           existing.incorrects.push(entry.incorrect);
         }
+
         if (entry.comment) {
           existing.comment += existing.comment ? ` // ${entry.comment}` : entry.comment;
         }
@@ -394,9 +394,9 @@ async function fetchSmartConjVerbPool(params: { verbSet: string; batchSize: numb
     }
 
     return Array.from(map.values())
-      .map(entry => ({
+      .map((entry) => ({
         correct: entry.correct,
-        incorrect: entry.incorrects.join(', '),
+        incorrect: entry.incorrects.join(", "),
         times: entry.times,
         comment: entry.comment,
       }))
@@ -404,36 +404,64 @@ async function fetchSmartConjVerbPool(params: { verbSet: string; batchSize: numb
   });
 
   const vocabTableHeaders = [
-    { text: 'Correct', value: 'correct' },
-    { text: 'Incorrect form or Translation', value: 'incorrect' },
-    { text: 'Times', value: 'times' },
-    { text: 'Comment', value: 'comment' },
+    { text: "Correct", value: "correct" },
+    { text: "Incorrect form or Translation", value: "incorrect" },
+    { text: "Times", value: "times" },
+    { text: "Comment", value: "comment" },
   ];
 
-  // 🧠 Return state + actions
   return {
-    // Auth
-    student, accessToken, isAuthenticated, isStaff, isSuperuser, studentId, totalCorrect, healthScore,
-    setStudent, clearStudent, setAccessToken, fetchStudentData, fetchUserData,
+    // identity/role
+    user,
+    userLoaded,
+    ensureUserLoaded,
+    fetchUserData,
+    isStaff,
+    isSuperuser,
 
-    // Student domain
-    studentDomain, studentDomainLabel,
+    // student
+    student,
+    studentId,
+    totalCorrect,
+    healthScore,
+    setStudent,
+    clearStudent,
+    fetchStudentData,
 
-    // Previous semester scores
-    previousHealthScore, previousTotalCorrectPrompts, previousDate, scoreHistory,
+    // previous semester / history
+    previousHealthScore,
+    previousTotalCorrectPrompts,
+    previousDate,
+    scoreHistory,
 
-    // Enrollments
-    enrollments, loadingEnrollments, enrollmentError, enrolledCourses, fetchEnrollments,
+    // enrollments
+    enrollments,
+    loadingEnrollments,
+    enrollmentError,
+    enrolledCourses,
+    fetchEnrollments,
 
-    // Verb usage
-    verbUsage, tierStats, tenseStats, loadingVerbUsage, verbUsageError, 
-    fetchVerbUsageDashboardData, 
-    
-    // Conjugator smart pool
+    // domain
+    studentDomain,
+    studentDomainLabel,
+
+    // verb usage
+    verbUsage,
+    tierStats,
+    tenseStats,
+    loadingVerbUsage,
+    verbUsageError,
+    fetchVerbUsageDashboardData,
+
+    // conjugator
     fetchSmartConjVerbPool,
 
-    // Vocab
-    vocab, loadingVocab, vocabError, fetchVocabDashboardData,
-    processedVocab, vocabTableHeaders,
+    // vocab
+    vocab,
+    loadingVocab,
+    vocabError,
+    fetchVocabDashboardData,
+    processedVocab,
+    vocabTableHeaders,
   };
 });

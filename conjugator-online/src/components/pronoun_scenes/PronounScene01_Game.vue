@@ -123,12 +123,14 @@
             <div class="text-h6 mb-5">{{ currentPrompt.question }}</div>
 
             <v-text-field
+              ref="answerField"
               v-model="userAnswer"
-              @keyup.enter="submitAnswer"
+              @keydown.enter.prevent="handleEnter"
               label="Type the pronoun here"
               placeholder="Fill in the pronoun"
               variant="outlined"
               density="compact"
+              :disabled="inputLocked"
             ></v-text-field>
 
             <!-- Countdown Timer -->
@@ -145,7 +147,7 @@
           </div>
 
             <div class="d-flex justify-center mt-4">
-              <v-btn color="primary" large @click="submitAnswer">
+              <v-btn color="primary" large @click="submitAnswer" :disabled="inputLocked">
                 {{ submitButtonText }}
               </v-btn>
             </div>
@@ -198,6 +200,37 @@
       {{ snackbar.message }}
     </v-snackbar>
 
+    <!-- Wrong answer dialog -->
+     <v-dialog v-model="showWrongDialog" persistent max-width="520">
+      <v-card class="pa-3" color="yellow-lighten-2" @keydown.enter.prevent.stop="handleEnter">
+        <v-card-title class="text-h6 mt-2">
+          {{ lastOutOfTime ? "Time ran out" : "Wrong" }}
+          <v-icon :icon="lastOutOfTime ? 'mdi-timer-off-outline' : 'mdi-emoticon-sad-outline'" />
+        </v-card-title>
+
+        <v-card-text>
+          <p class="mb-2">
+            Prompt:
+            <strong>{{ currentPrompt.question }}</strong>
+          </p>
+
+          <p class="mb-2">
+            Your answer:
+            <strong>{{ lastUserAnswer || "—" }}</strong>
+          </p>
+
+          <p class="mb-0">
+            Accepted answers:
+            <strong>{{ lastCorrectAnswers || "—" }}</strong>
+          </p>
+        </v-card-text>
+
+        <v-card-actions class="justify-end">
+          <v-btn ref="wrongOkButton" color="secondary" @click="acknowledgeWrong">OK</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
     <!-- Blocking dialog while loading -->
     <v-dialog v-model="showBlockingDialog" persistent fullscreen transition="fade-transition">
       <v-card class="d-flex align-center justify-center" color="transparent" elevation="0">
@@ -209,7 +242,7 @@
 
 <script setup>
 import PronounGame from '@/assets/scripts/pronoun/pronounGame.js';
-import { ref, reactive, computed, onBeforeUnmount } from 'vue';
+import { ref, reactive, computed, onBeforeUnmount, nextTick, watch } from 'vue';
 import { onBeforeRouteLeave } from 'vue-router';
 import { useRouter } from 'vue-router';
 import api from '@/axios';
@@ -244,16 +277,111 @@ const timeLeft = ref(10);
 const timerColor = ref('primary');
 let timerInterval = null;
 
+const inputLocked = ref(false);
+
+const showWrongDialog = ref(false);
+const wrongOkButton = ref(null);
+
+const lastUserAnswer = ref("");
+const lastCorrectAnswers = ref("");
+const lastOutOfTime = ref(false);
+
+// Enter guard (prevents dialog close Enter from also submitting next round)
+const ignoreEnterUntil = ref(0);
+const ENTER_GUARD_MS = 900;
+
+function guardEnterFor(ms = ENTER_GUARD_MS) {
+  ignoreEnterUntil.value = Date.now() + ms;
+}
+function isEnterGuarded() {
+  return Date.now() < ignoreEnterUntil.value;
+}
 
 async function startGame() {
+  inputLocked.value = true;  
   game.value = new PronounGame({ numPrompts: gameSettings.numPrompts });
   showBlockingDialog.value = true;
-  startTime.value = new Date().getTime(); 
+  startTime.value = new Date().getTime();
   await game.value.start();
   showBlockingDialog.value = false;
   gameStarted.value = true;
   updatePrompt();
 }
+
+const answerField = ref(null);
+
+async function focusAnswerField() {
+  await nextTick();
+  const el = answerField.value;
+  el?.focus?.();
+  const root = el?.$el || el;
+  root?.querySelector?.("input")?.focus?.();
+  root?.querySelector?.("input")?.select?.();
+}
+
+function acknowledgeWrong() {
+  guardEnterFor(900);
+  showWrongDialog.value = false;
+
+  promptCounter.value++;
+  remainingCount.value--;
+
+  if (remainingCount.value <= 0) {
+    submitButtonText.value = 'FINISH';
+    endGame();
+    return;
+  }
+
+  game.value.nextPrompt();
+  updatePrompt();
+}
+
+function normalizeForCompare(s) {
+  return String(s || "")
+    .normalize("NFKC")
+    .toLowerCase()
+    .replace(/[?.!"¨'’‘`´]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function unlockInputWithDelay(ms = 80) {
+  setTimeout(() => {
+    inputLocked.value = false;
+    focusAnswerField();
+  }, ms);
+}
+
+function handleEnter(e) {
+  if (isEnterGuarded()) {
+    e?.preventDefault?.();
+    e?.stopPropagation?.();
+    return;
+  }
+
+  if (showWrongDialog.value) {
+    acknowledgeWrong();
+    return;
+  }
+
+  if (inputLocked.value) {
+    e?.preventDefault?.();
+    return;
+  }
+
+  submitAnswer();
+}
+
+onBeforeUnmount(() => {
+  stopTimer();
+  if (game.value && typeof game.value.stop === 'function') game.value.stop();
+});
+
+onBeforeRouteLeave((to, from, next) => {
+  stopTimer();
+  if (game.value && typeof game.value.stop === 'function') game.value.stop();
+  next();
+});
 
 function updatePrompt() {
   const prompt = game.value.getCurrentPrompt();
@@ -261,41 +389,81 @@ function updatePrompt() {
     console.error('No current prompt available.');
     return;
   }
+
   currentPrompt.question = prompt.questionText;
   currentPrompt.image = prompt.image;
   currentPrompt.subject = prompt.subject;
   roundStartTime.value = new Date().getTime();
 
-  startTimer();  // countdown timer
+  startTimer();
+  unlockInputWithDelay(50); 
 }
 
+watch(showWrongDialog, async (visible) => {
+  if (visible) {
+    await nextTick();
+    wrongOkButton.value?.$el?.focus?.();
+  } else {
+    guardEnterFor();
+    setTimeout(() => focusAnswerField(), 50);
+  }
+});
 
 function submitAnswer() {
+  if (inputLocked.value) return;
+  if (showWrongDialog.value) return;
+  if (isEnterGuarded()) return;
+  if (!gameStarted.value) return;
+
+  inputLocked.value = true;
   stopTimer();
-  const elapsedTime = ((new Date().getTime() - roundStartTime.value) / 1000).toFixed(1);
-  const isCorrect = game.value.submitAnswer(userAnswer.value, elapsedTime);
+
+  const elapsedTime = ((Date.now() - roundStartTime.value) / 1000).toFixed(1);
+
+  // Use the same normalization as PronounGame (optional but consistent)
+  const userRaw = userAnswer.value;
+  const user = normalizeForCompare(userRaw);
+
+  // Record once (this updates counts + results inside PronounGame)
+  const isCorrect = game.value.submitAnswer(user, elapsedTime, false);
+
+  // Sync UI counts from game
+  rightCount.value = game.value.getRightCount();
+  wrongCount.value = game.value.getWrongCount();
+
+  // Pull correct answers for dialog display (PronounPrompt usually has this)
+  const prompt = game.value.getCurrentPrompt();
+  const correctArr = Array.isArray(prompt?.correctAnswers) ? prompt.correctAnswers : [];
+  lastCorrectAnswers.value = correctArr.filter(Boolean).join(" / ");
+
+  lastUserAnswer.value = user || "—";
+  lastOutOfTime.value = false;
 
   snackbar.message = isCorrect
-    ? `Yes! "${userAnswer.value}" is correct!`
-    : `Sorry, "${userAnswer.value}" is wrong!`;
-  snackbar.color = isCorrect ? 'success' : 'warning';
+    ? `Yes! "${userRaw}" is correct!`
+    : `Sorry, "${userRaw}" is wrong!`;
+  snackbar.color = isCorrect ? "success" : "warning";
   snackbar.show = true;
 
-  if (isCorrect) rightCount.value = game.value.getRightCount();
-  else wrongCount.value = game.value.getWrongCount();
+  userAnswer.value = "";
 
-  promptCounter.value++;
-  remainingCount.value--;
+  if (isCorrect) {
+    promptCounter.value++;
+    remainingCount.value--;
 
-  userAnswer.value = '';
+    if (remainingCount.value <= 0) {
+      submitButtonText.value = "FINISH";
+      endGame();
+      return;
+    }
 
-  if (remainingCount.value === 0) {
-    submitButtonText.value = 'FINISH';
-    endGame();
-  } else {
     game.value.nextPrompt();
     updatePrompt();
+    return;
   }
+
+  // Wrong: do not advance until OK
+  showWrongDialog.value = true;
 }
 
 const emit = defineEmits(['gameOver']);
@@ -435,45 +603,28 @@ function stopTimer() {
 }
 
 function handleTimeout() {
-  // Mark round as out_of_time and treat as wrong answer
+  if (inputLocked.value) return;
+
+  inputLocked.value = true;
   stopTimer();
-  const elapsedTime = 10.0
-  game.value.submitAnswer('', elapsedTime, true); // you can add this third param in your PronounGame
 
-  snackbar.message = '⏰ Time is up!';
-  snackbar.color = 'error';
-  snackbar.show = true;
+  const elapsedTime = 10.0;
 
-  // Clear the input field
-  userAnswer.value = '';
+  // record wrong + out_of_time (your game supports third param per your comment)
+  game.value.submitAnswer('', elapsedTime, true);
 
   wrongCount.value = game.value.getWrongCount();
 
-  promptCounter.value++;
-  remainingCount.value--;
+  lastUserAnswer.value = "";
+  lastOutOfTime.value = true;
 
-  if (remainingCount.value === 0) {
-    endGame();
-  } else {
-    game.value.nextPrompt();
-    updatePrompt();
-  }
+  const prompt = game.value.getCurrentPrompt();
+  const correctAnswers = prompt?.correctAnswers || prompt?.pronoun || prompt?.answers || [];
+  const correctList = Array.isArray(correctAnswers) ? correctAnswers : [correctAnswers];
+  lastCorrectAnswers.value = correctList.filter(Boolean).join(" / ");
 
-  onBeforeUnmount(() => {
-    stopTimer();
-    if (game.value && typeof game.value.stop === 'function') {
-      game.value.stop();
-    }
-  });
-
-  onBeforeRouteLeave((to, from, next) => {
-    stopTimer();
-    if (game.value && typeof game.value.stop === 'function') {
-      game.value.stop();
-    }
-    next();
-  });
-
+  userAnswer.value = '';
+  showWrongDialog.value = true;
 }
 
 

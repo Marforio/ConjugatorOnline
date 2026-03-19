@@ -162,6 +162,20 @@
         </v-card-title>
       </v-card>
 
+      <v-card v-else-if="props.game === 'Verb Mixer Classroom Edition'"
+        class="mx-auto mb-8 pa-10 text-center slide-card"
+        elevation="4"
+        :class="animationClass"
+        style="width: 600px; height: 400px; display: flex; flex-direction: column; align-items: center; justify-content: center;"
+      >
+        <v-card-title
+          class="text-center" style="margin-bottom: 2rem;"> Answer the question using the correct verb form (infinitive or -ing) as a verb complement. </v-card-title>
+
+        <v-card-text class="text-wrap mt-5 text-uppercase" style="font-size: 2.5rem; ">
+          {{ prompt?.question }}
+        </v-card-text>
+      </v-card>
+
 
       <div class="my-6">
     <!-- Progress bar -->
@@ -242,7 +256,7 @@ import { ref, reactive, computed } from "vue"
 import api from "@/axios"
 
 const props = defineProps<{
-  game: "Spelling bee" | "Pronunciation Challenge" | "Prove it!" | "Be Polite!" | "Balanced Opinions" | "Unfinished Business"
+  game: "Spelling bee" | "Pronunciation Challenge" | "Prove it!" | "Be Polite!" | "Balanced Opinions" | "Unfinished Business" | "Verb Mixer Classroom Edition"
   student: string
 }>()
 
@@ -258,6 +272,7 @@ const BANNERS = {
   "Be Polite!": "/images/banners/BePolite.png",
   "Balanced Opinions": "/images/banners/BalancedOpinions.png",
   "Unfinished Business": "/images/banners/UnfinishedBusiness.png",
+  "Verb Mixer Classroom Edition": "/images/banners/VerbMixer.png",
 }
 
 const selectedCategory = ref<string>("")    // for Prove it!
@@ -288,7 +303,15 @@ const shownPrompts = ref<{
   is_correct: boolean | null
 }[]>([])
 
-const totalRounds = computed(() => (props.game === "Balanced Opinions" ? 12 : props.game === "Unfinished Business" ? 24 : 30))
+const totalRounds = computed(() =>
+  props.game === "Balanced Opinions"
+    ? 12
+    : props.game === "Unfinished Business"
+    ? 24
+    : props.game === "Verb Mixer Classroom Edition"
+    ? 28
+    : 30
+)
 const remainingCount = ref(totalRounds.value)
 const promptCounter = ref(0)
 
@@ -436,6 +459,103 @@ const gameData: Record<string, { description: string; instructions: string; prom
       "just",
       "recently",
       "lately"
+    ]
+  }
+},
+"Verb Mixer Classroom Edition": {
+  description: "Practice choosing the right verb complement (infinitive vs -ing)",
+  instructions: "A card will show a question. Answer the question using the correct verb form (infinitive or -ing) as a verb complement.",
+  prompts: {
+    "infinitive_verb": [
+      "What do you promise?",
+      "What do you refuse?",
+      "What did you manage?",
+      "What are you planning?",
+      "What do you deserve?",
+      "What did you agree __________?",
+      "What do you tend ____________ in the evenings?",
+      "What did you choose ____________ yesterday?",
+      "What do you sometimes pretend ____________?",
+      "Is there something you hope ____________ this year?",
+      "Is there something you can't wait ____________?",
+      "What did you offer ____________ ?",
+      "What do you wish ____________ for your next birthday?",
+      "What do you remind your colleagues ____________?",
+      "What did you persuade someone _________?",
+      "What do you expect ____________ in the future?",
+      "What will you never learn ____________?"    
+    ],
+    "adjective": [
+      "I think linear algebra is difficult ___________ .",
+      "I find German easy ____________ .",
+      "I consider this exercise important ____________ .",
+      "I feel motivated ____________ .",
+      "I think world peace is hard ____________ .",
+      "I think history is interesting ____________ .",
+    ],
+    "bare_infinitive": [
+      "What did your parents make you __________ as a kid?",
+      "What did your parents let you __________ as a kid?",
+      "What does the teacher make you __________ in class?",
+      "What does the teacher let you __________ in class?",
+    ],
+    "-ing_verb": [
+      "What do you suggest?",
+      "What do you recommend?",
+      "What do you regret?",
+      "What will you finish today?",
+      "What do you admit?",
+      "Which activity do you avoid?",
+      "Which activity can you NOT imagine ________?",
+      "What will you stop ________?",
+      "Which activity don't you mind?",
+      "What must you keep ________?",
+      "What do you enjoy ?",
+      "What do you dislike ?",
+      "If I left Switzerland, I would miss  ________ ",
+      "I would never risk _________",
+      "I want to quit ________",
+      "I will never quit ________",
+      "I can't stand ________",
+      "I have to keep ________",
+      "I have to practice ________",
+      "My parents enjoy ________",
+      "My parents dislike ________",
+    ],
+    "special_expression": [
+      "What are you not looking forward to?",
+      "What will you never get used to?",
+      "In the last few years, what did you get used to?",
+      "What do you look forward to?",
+      "Which unpleasant task are you used to?",
+      "What are you still not used to?",
+      "What hard activity are you used to?"
+    ],
+    "preposition": [
+      "What are you good at?",
+      "What are you bad at?",
+      "What are you focused on?",
+      "What are you working on?",
+      "What did you apologize for?",
+      "What are you interested in?",
+      "What are you tired of?",
+      "What are you sorry for?",
+      "What do you dream about?",
+      "I like to eat after ____________ (activity)",
+      "I like to do sports before ____________ (activity)",
+      "I like to go out after ____________ (activity)",
+    ],
+    "subject": [
+      "______________ is unhealthy.",
+      "______________ is fun.",
+      "______________ is difficult.",
+      "______________ is good exercise.",
+    ],
+    "change_in_meaning": [
+      "What do you remember _____________ when you were a kid?",
+      "What do you have to remember ____________? (an important task you mustn't forget)",
+      "What will you never forget ____________? (a memorable experience)",
+      "What is something you cannot forget ____________? (a future obligation you need to remember)",
     ]
   }
 },
@@ -1097,6 +1217,58 @@ function buildPromptQueue() {
       promptQueue.value = queue
       return
     }
+
+    // SPECIAL: Verb Mixer Classroom Edition => fixed distribution sampling across categories
+    if (props.game === "Verb Mixer Classroom Edition") {
+      const queue: typeof promptQueue.value = []
+
+      // category -> number of prompts to sample
+      const distribution: Record<string, number> = {
+        "infinitive_verb": 6,
+        "adjective": 2,
+        "bare_infinitive": 3,
+        "-ing_verb": 6,
+        "special_expression": 4,
+        "preposition": 3,
+        "change_in_meaning": 3,
+        "subject": 1,
+      }
+
+      // (Optional) sanity check total rounds match what you want / what totalRounds computes
+      const expectedTotal = Object.values(distribution).reduce((a, b) => a + b, 0) // 28
+      if (totalRounds.value !== expectedTotal) {
+        console.warn(
+          `Verb Mixer distribution totals ${expectedTotal} but totalRounds is ${totalRounds.value}.`
+        )
+      }
+
+      for (const [category, count] of Object.entries(distribution)) {
+        const values = (dataset.prompts as Record<string, string[]>)[category]
+        if (!Array.isArray(values) || values.length === 0) {
+          console.warn(`Verb Mixer: missing/empty category "${category}"`)
+          continue
+        }
+
+        // Prefer no repeats within a category: shuffle then take first N.
+        // If count > values.length, we’ll cycle (allow repeats) so the game can still run.
+        const shuffled = shuffle(values)
+        for (let i = 0; i < count; i++) {
+          const q = shuffled[i % shuffled.length]
+
+          queue.push({
+            question: q,
+            verb: category,          // saves as rounds[].label (category is useful for later analysis)
+            correctAnswers: [],      // teacher validates orally
+            category: category,      // shown in UI only if you decide to show it later
+          })
+        }
+      }
+
+      // Shuffle final mixed deck + enforce length
+      promptQueue.value = shuffle(queue).slice(0, totalRounds.value)
+      return
+    }
+
 
     //////////////  Prove it!  ///////////////
 

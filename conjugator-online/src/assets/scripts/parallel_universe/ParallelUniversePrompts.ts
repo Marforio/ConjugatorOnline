@@ -9,16 +9,16 @@ export const parallelUniversePrompts = {
         negative: false
     },
     2: {
-        verb: "feel",
+        verb: "eat",
         irreg_level: "essential",
         conditional_type: "second",
-        sentence: "If you _____ healthy, you'd feel better.",
+        sentence: "If you _____ better, you'd feel stronger.",
         condition: true,
         answers: ["ate"],
         negative: false
     },
     3: {
-        verb: "feel",
+        verb: "eat",
         irreg_level: "essential",
         conditional_type: "third",
         sentence: "If you _____ so much junk food last week, you'd feel better right now.",
@@ -39,7 +39,7 @@ export const parallelUniversePrompts = {
         verb: "go",
         irreg_level: "essential",
         conditional_type: "second",
-        sentence: "If you _____ more often, you'd get in shape.",
+        sentence: "If you _____ to the gym more often, you'd get in shape.",
         condition: true,
         answers: ["went"],
         negative: false
@@ -83,12 +83,12 @@ export const parallelUniversePrompts = {
     },
 
     10: {
-        verb: "eat",
+        verb: "feel",
         irreg_level: "essential",
         conditional_type: "first",
         sentence: "You _____ better if you avoid heavy meals.",
         condition: false,
-        answers: ["will eat", "'ll eat", "ll eat"],
+        answers: ["will feel", "'ll feel", "ll feel"],
         negative: false
     },
     11: {
@@ -114,7 +114,7 @@ export const parallelUniversePrompts = {
         verb: "pass",
         irreg_level: "regular",
         conditional_type: "first",
-        sentence: "You _____ your exams of you study.",
+        sentence: "You _____ your exams if you study 2 hours every day.",
         condition: false,
         answers: ["will pass", "'ll pass", "ll pass"],
         negative: false
@@ -142,7 +142,7 @@ export const parallelUniversePrompts = {
         verb: "take",
         irreg_level: "essential",
         conditional_type: "first",
-        sentence: "You _____ amazing photos if you bring your camera.",
+        sentence: "You _____ amazing photos if you are there at dawn.",
         condition: false,
         answers: ["will take", "'ll take", "ll take"],
         negative: false
@@ -170,7 +170,7 @@ export const parallelUniversePrompts = {
         verb: "clean",
         irreg_level: "regular",
         conditional_type: "first",
-        sentence: "You _____ faster if you start now.",
+        sentence: "You _____ faster if you listen to music.",
         condition: false,
         answers: ["will clean", "'ll clean", "ll clean"],
         negative: false
@@ -235,7 +235,7 @@ export const parallelUniversePrompts = {
         verb: "see",
         irreg_level: "essential",
         conditional_type: "second",
-        sentence: "If you _____ things differently, you'd feel more hopeful.",
+        sentence: "If you _____ things from my perspective, you'd understand.",
         condition: true,
         answers: ["saw"],
         negative: false
@@ -244,7 +244,7 @@ export const parallelUniversePrompts = {
         verb: "see",
         irreg_level: "essential",
         conditional_type: "third",
-        sentence: "If you _____ the warning signs, you'd have avoided the problem.",
+        sentence: "If I _____ the warning signs, I would have avoided the problem.",
         condition: true,
         answers: ["had seen"],
         negative: false
@@ -271,7 +271,7 @@ export const parallelUniversePrompts = {
         verb: "drink",
         irreg_level: "essential",
         conditional_type: "third",
-        sentence: "If you _____ so much coffee yesterday, you'd sleep better now.",
+        sentence: "If you _____ so much coffee yesterday, you'd have slept better.",
         condition: true,
         answers: ["had not drunk", "hadn't drunk", "hadnt drunk"],
         negative: true
@@ -281,7 +281,7 @@ export const parallelUniversePrompts = {
         verb: "come",
         irreg_level: "essential",
         conditional_type: "first",
-        sentence: "You _____ earlier if you leave on time.",
+        sentence: "I _____ to the meeting if you invite me.",
         condition: false,
         answers: ["will come", "'ll come", "ll come"],
         negative: false
@@ -290,7 +290,7 @@ export const parallelUniversePrompts = {
         verb: "come",
         irreg_level: "essential",
         conditional_type: "second",
-        sentence: "If you _____ to class more often, you'd understand everything.",
+        sentence: "If you _____ to class more often, you'd know the material better.",
         condition: true,
         answers: ["came"],
         negative: false
@@ -327,7 +327,7 @@ export const parallelUniversePrompts = {
         verb: "open",
         irreg_level: "regular",
         conditional_type: "third",
-        sentence: "If you _____ the package earlier, you'd have seen the mistake.",
+        sentence: "If I _____ the package earlier, I'd have seen the mistake.",
         condition: true,
         answers: ["had opened"],
         negative: false
@@ -346,7 +346,7 @@ export const parallelUniversePrompts = {
         verb: "break",
         irreg_level: "essential",
         conditional_type: "second",
-        sentence: "If you _____ the rules, you'd get in trouble.",
+        sentence: "If we _____ the rules, we'd get in trouble.",
         condition: true,
         answers: ["broke"],
         negative: false
@@ -357,7 +357,7 @@ export const parallelUniversePrompts = {
         conditional_type: "third",
         sentence: "If you _____ the vase yesterday, you'd be apologizing now.",
         condition: true,
-        answers: ["had broken"],
+        answers: ["had broken", "d broken"],
         negative: false
     },
 
@@ -385,7 +385,7 @@ export const parallelUniversePrompts = {
         conditional_type: "third",
         sentence: "If you _____ the grammar earlier, you'd feel more confident now.",
         condition: true,
-        answers: ["had learned"],
+        answers: ["had learned", "d learned", "'d learned"],
         negative: false
     },
 
@@ -449,7 +449,7 @@ export const parallelUniversePrompts = {
         verb: "give",
         irreg_level: "essential",
         conditional_type: "first",
-        sentence: "You _____ great advice if you listen carefully.",
+        sentence: "I _____ you great advice if you listen carefully.",
         condition: false,
         answers: ["will give", "'ll give", "ll give"],
         negative: false
@@ -458,7 +458,7 @@ export const parallelUniversePrompts = {
         verb: "give",
         irreg_level: "essential",
         conditional_type: "second",
-        sentence: "If you _____ yourself more time, you'd feel less rushed.",
+        sentence: "If I _____ myself more time, I'd feel less rushed.",
         condition: true,
         answers: ["gave"],
         negative: false
@@ -469,7 +469,7 @@ export const parallelUniversePrompts = {
         conditional_type: "third",
         sentence: "If you _____ it more thought, you'd have chosen differently.",
         condition: true,
-        answers: ["had given"],
+        answers: ["had given", "d given", "'d given"],
         negative: false
     },
     52: {
@@ -496,7 +496,7 @@ export const parallelUniversePrompts = {
         conditional_type: "third",
         sentence: "If you _____ the race yesterday, you'd be exhausted now.",
         condition: true,
-        answers: ["had run"],
+        answers: ["had run", "d run", "'d run"],
         negative: false
     },
 
@@ -524,7 +524,7 @@ export const parallelUniversePrompts = {
         conditional_type: "third",
         sentence: "If you _____ that ticket earlier, you'd be on the trip now.",
         condition: true,
-        answers: ["had bought"],
+        answers: ["had bought", "d bought", "'d bought"],
         negative: false
     },
 
@@ -552,7 +552,7 @@ export const parallelUniversePrompts = {
         conditional_type: "third",
         sentence: "If you _____ enough last night, you wouldn't be tired now.",
         condition: true,
-        answers: ["had slept"],
+        answers: ["had slept", "d slept", "'d slept"],
         negative: false
     },
 
@@ -569,7 +569,7 @@ export const parallelUniversePrompts = {
         verb: "lose",
         irreg_level: "essential",
         conditional_type: "second",
-        sentence: "If you _____ your keys less often, you'd save time.",
+        sentence: "If you _____ your keys less often, you'd save time and money.",
         condition: true,
         answers: ["lost"],
         negative: false
@@ -580,7 +580,7 @@ export const parallelUniversePrompts = {
         conditional_type: "third",
         sentence: "If you _____ your wallet yesterday, you'd be panicking now.",
         condition: true,
-        answers: ["had lost"],
+        answers: ["had lost", "d lost", "'d lost"],
         negative: false
     },
 
@@ -588,7 +588,7 @@ export const parallelUniversePrompts = {
         verb: "send",
         irreg_level: "essential",
         conditional_type: "first",
-        sentence: "You _____ the documents today if you finish reviewing them.",
+        sentence: "We _____ the documents today if we finish reviewing them.",
         condition: false,
         answers: ["will send", "'ll send", "ll send"],
         negative: false
@@ -597,7 +597,7 @@ export const parallelUniversePrompts = {
         verb: "send",
         irreg_level: "essential",
         conditional_type: "second",
-        sentence: "If you _____ the email earlier, they'd reply by now.",
+        sentence: "If we _____ email instead of letters, we'd lower our costs.",
         condition: true,
         answers: ["sent"],
         negative: false
@@ -606,7 +606,7 @@ export const parallelUniversePrompts = {
         verb: "send",
         irreg_level: "essential",
         conditional_type: "third",
-        sentence: "If you _____ the invitation last week, more people would have come.",
+        sentence: "If we _____ the invitation last week, more people would have come.",
         condition: true,
         answers: ["had sent"],
         negative: false
@@ -636,7 +636,7 @@ export const parallelUniversePrompts = {
         conditional_type: "third",
         sentence: "If you _____ your notes organized, you'd have found them easily.",
         condition: true,
-        answers: ["had kept"],
+        answers: ["had kept", "d kept", "'d kept"],
         negative: false
     },
 
@@ -644,7 +644,7 @@ export const parallelUniversePrompts = {
         verb: "call",
         irreg_level: "regular",
         conditional_type: "first",
-        sentence: "You _____ me if anything strange happens.",
+        sentence: "I _____ you if anything strange happens.",
         condition: false,
         answers: ["will call", "'ll call", "ll call"],
         negative: false
@@ -664,7 +664,7 @@ export const parallelUniversePrompts = {
         conditional_type: "third",
         sentence: "If you _____ me yesterday, I would have helped you.",
         condition: true,
-        answers: ["had called"],
+        answers: ["had called", "d called", "'d called"],
         negative: false
     },
     73: {
@@ -691,7 +691,7 @@ export const parallelUniversePrompts = {
         conditional_type: "third",
         sentence: "If Man City _____ Madrid, they would have completed the best season in history.",
         condition: true,
-        answers: ["had beaten"],
+        answers: ["had beaten", "d beaten", "'d beaten"],
         negative: false
     },
 
@@ -699,7 +699,7 @@ export const parallelUniversePrompts = {
         verb: "bite",
         irreg_level: "advanced",
         conditional_type: "first",
-        sentence: "You _____ your nails if you stay mindful.",
+        sentence: "You _____ your nails if you wear gloves.",
         condition: false,
         answers: ["will not bite", "won't bite"],
         negative: true
@@ -708,7 +708,7 @@ export const parallelUniversePrompts = {
         verb: "bite",
         irreg_level: "advanced",
         conditional_type: "second",
-        sentence: "If you _____ your tongue more often, you'd avoid arguments.",
+        sentence: "If we _____ our tongues more often, we'd avoid arguments.",
         condition: true,
         answers: ["bit"],
         negative: false
@@ -717,15 +717,15 @@ export const parallelUniversePrompts = {
         verb: "bite",
         irreg_level: "advanced",
         conditional_type: "third",
-        sentence: "If you _____ your lip yesterday, it wouldn't hurt now.",
+        sentence: "If that snake _____ your leg, you wouldn't have survived.",
         condition: true,
-        answers: ["had bitten"],
+        answers: ["had bitten", "d bitten", "'d bitten"],
         negative: false
     },
 
     79: {
-        verb: "forbid",
-        irreg_level: "advanced",
+        verb: "avoid",
+        irreg_level: "regular",
         conditional_type: "first",
         sentence: "You _____ trouble if you follow the rules.",
         condition: false,
@@ -736,7 +736,7 @@ export const parallelUniversePrompts = {
         verb: "forbid",
         irreg_level: "advanced",
         conditional_type: "second",
-        sentence: "If they _____ phones in class, students would focus more.",
+        sentence: "If schools _____ phones in class, students would focus more.",
         condition: true,
         answers: ["forbade"],
         negative: false
@@ -747,7 +747,7 @@ export const parallelUniversePrompts = {
         conditional_type: "third",
         sentence: "If they _____ it earlier, the issue wouldn't have happened.",
         condition: true,
-        answers: ["had forbidden"],
+        answers: ["had forbidden", "d forbidden", "'d forbidden"],
         negative: false
     },
 
@@ -764,7 +764,7 @@ export const parallelUniversePrompts = {
         verb: "blow",
         irreg_level: "advanced",
         conditional_type: "second",
-        sentence: "If you _____ on the embers, they'd glow again.",
+        sentence: "If the wind _____ stronger, the kite would fly higher.",
         condition: true,
         answers: ["blew"],
         negative: false
@@ -773,17 +773,17 @@ export const parallelUniversePrompts = {
         verb: "blow",
         irreg_level: "advanced",
         conditional_type: "third",
-        sentence: "If you _____ all your savings last year, you'd regret it now.",
+        sentence: "If you _____ all your savings last year, you'd be in a good position now.",
         condition: true,
-        answers: ["had blown"],
-        negative: false
+        answers: ["had not blown", "hadn't blown", "hadnt blown"],
+        negative: true
     },
 
     85: {
         verb: "offset",
         irreg_level: "advanced",
         conditional_type: "first",
-        sentence: "You _____ the cost if you apply the discount.",
+        sentence: "You _____ the cost of the solar panel if you use it for just 3 years.",
         condition: false,
         answers: ["will offset", "'ll offset", "ll offset"],
         negative: false
@@ -801,9 +801,9 @@ export const parallelUniversePrompts = {
         verb: "offset",
         irreg_level: "advanced",
         conditional_type: "third",
-        sentence: "If you _____ the damage earlier, the repair would be cheaper.",
+        sentence: "If the company _____ their emissions, they would have a better reputation now.",
         condition: true,
-        answers: ["had offset"],
+        answers: ["had offset", "d offset", "'d offset"],
         negative: false
     },
 
@@ -811,7 +811,7 @@ export const parallelUniversePrompts = {
         verb: "tear",
         irreg_level: "advanced",
         conditional_type: "first",
-        sentence: "You _____ the paper if you rush.",
+        sentence: "You _____ the paper if you open the envelope by hand.",
         condition: false,
         answers: ["will tear", "'ll tear", "ll tear"],
         negative: false
@@ -820,7 +820,7 @@ export const parallelUniversePrompts = {
         verb: "tear",
         irreg_level: "advanced",
         conditional_type: "second",
-        sentence: "If you _____ the page out carefully, it wouldn't rip.",
+        sentence: "If you _____ your ligament, you would be out for the season.",
         condition: true,
         answers: ["tore"],
         negative: false
@@ -829,26 +829,26 @@ export const parallelUniversePrompts = {
         verb: "tear",
         irreg_level: "advanced",
         conditional_type: "third",
-        sentence: "If you _____ open the envelope yesterday, you'd have seen the letter.",
+        sentence: "If I _____ my ligament, I would have played in the final.",
         condition: true,
-        answers: ["had torn"],
-        negative: false
+        answers: ["had not torn", "hadn't torn", "hadnt torn"],
+        negative: true
     },
 
     91: {
         verb: "hide",
         irreg_level: "essential",
         conditional_type: "first",
-        sentence: "You _____ your feelings if you trust me.",
+        sentence: "The squirrel _____ acorns if it doesn't find a good hiding spot.",
         condition: false,
-        answers: ["will not hide", "won't hide"],
+        answers: ["will not hide", "won't hide", "wont hide"],
         negative: true
     },
     92: {
         verb: "hide",
         irreg_level: "essential",
         conditional_type: "second",
-        sentence: "If you _____ your keys better, you'd stop losing them.",
+        sentence: "If I _____ the chocolate in my desk, my kids wouldn't steal it from me.",
         condition: true,
         answers: ["hid"],
         negative: false
@@ -857,9 +857,9 @@ export const parallelUniversePrompts = {
         verb: "hide",
         irreg_level: "essential",
         conditional_type: "third",
-        sentence: "If you _____ the gift earlier, they wouldn't have found it.",
+        sentence: "If you _____ the gift, she wouldn't have found it.",
         condition: true,
-        answers: ["had hidden"],
+        answers: ["had hidden", "d hidden", "'d hidden"],
         negative: false
     },
 
@@ -885,16 +885,16 @@ export const parallelUniversePrompts = {
         verb: "burn",
         irreg_level: "regular",
         conditional_type: "third",
-        sentence: "If you _____ the toast earlier, the kitchen wouldn't smell now.",
+        sentence: "If you _____ the meat, the meal would have been perfect.",
         condition: true,
-        answers: ["had burned", "had burnt"],
-        negative: false
+        answers: ["had not burned", "hadn't burned", "hadnt burned", "had not burnt", "hadn't burnt", "hadnt burnt"],
+        negative: true
     },
     97: {
         verb: "beat",
         irreg_level: "advanced",
         conditional_type: "first",
-        sentence: "If you _____ your personal best today, you'll feel proud.",
+        sentence: "If you _____ your personal record today, you'll feel proud.",
         condition: true,
         answers: ["beat"],
         negative: false
@@ -903,7 +903,7 @@ export const parallelUniversePrompts = {
         verb: "beat",
         irreg_level: "advanced",
         conditional_type: "second",
-        sentence: "If you trained harder, you _____ your rivals easily.",
+        sentence: "If you trained a bit harder, you _____ your rivals easily.",
         condition: false,
         answers: ["would beat", "d beat", "'d beat"],
         negative: false
@@ -912,7 +912,7 @@ export const parallelUniversePrompts = {
         verb: "beat",
         irreg_level: "advanced",
         conditional_type: "third",
-        sentence: "If you had tried harder, you _____ the record yesterday.",
+        sentence: "If conditions had been favorable, he _____ the world record yesterday.",
         condition: false,
         answers: ["would have beaten"],
         negative: false
@@ -931,7 +931,7 @@ export const parallelUniversePrompts = {
         verb: "bite",
         irreg_level: "advanced",
         conditional_type: "second",
-        sentence: "If you were more careful, you _____ your tongue so often.",
+        sentence: "If your dog was properly trained, it _____ people's legs so often.",
         condition: false,
         answers: ["wouldn't bite", "would not bite", "wouldnt bite"],
         negative: true
@@ -940,7 +940,7 @@ export const parallelUniversePrompts = {
         verb: "bite",
         irreg_level: "advanced",
         conditional_type: "third",
-        sentence: "If you had focused, you _____ your lip yesterday.",
+        sentence: "If you hadn't walked in the brush, that snake _________ you.",
         condition: false,
         answers: ["wouldn't have bitten", "wouldnt have bitten", "would not have bitten"],
         negative: true
@@ -968,7 +968,7 @@ export const parallelUniversePrompts = {
         verb: "forbid",
         irreg_level: "advanced",
         conditional_type: "third",
-        sentence: "If they had acted sooner, they _____ that behavior years ago.",
+        sentence: "If management had been more decisive, they _____ that behavior years ago.",
         condition: false,
         answers: ["would have forbidden"],
         negative: false
@@ -989,16 +989,16 @@ export const parallelUniversePrompts = {
         conditional_type: "second",
         sentence: "If you were more careful, you _____ your chance.",
         condition: false,
-        answers: ["wouldn't blow", "would not blow"],
+        answers: ["wouldn't blow", "would not blow", "wouldnt blow"],
         negative: true
     },
     108: {
         verb: "blow",
         irreg_level: "advanced",
         conditional_type: "third",
-        sentence: "If you had saved more, you _____ all your money last year.",
+        sentence: "If the hot air mass hadn't shifted, the wind _____ so intensely in the area.",
         condition: false,
-        answers: ["wouldn't have blown", "would not have blown"],
+        answers: ["wouldn't have blown", "wouldnt have blown", "would not have blown"],
         negative: true
     },
 
@@ -1017,7 +1017,7 @@ export const parallelUniversePrompts = {
         conditional_type: "second",
         sentence: "If you planned better, you _____ the extra costs.",
         condition: false,
-        answers: ["would offset"],
+        answers: ["would offset", "d offset", "'d offset"],
         negative: false
     },
     111: {
@@ -1026,7 +1026,7 @@ export const parallelUniversePrompts = {
         conditional_type: "third",
         sentence: "If you had acted earlier, you _____ the damage.",
         condition: false,
-        answers: ["would have offset"],
+        answers: ["would have offset", "would've offset"],
         negative: false
     },
 
@@ -1043,18 +1043,18 @@ export const parallelUniversePrompts = {
         verb: "tear",
         irreg_level: "advanced",
         conditional_type: "second",
-        sentence: "If you were gentler, you _____ the paper so often.",
+        sentence: "If you were more careful, you _____ the paper so often.",
         condition: false,
-        answers: ["wouldn't tear", "would not tear"],
+        answers: ["wouldn't tear", "would not tear", "wouldnt tear"],
         negative: true
     },
     114: {
         verb: "tear",
         irreg_level: "advanced",
         conditional_type: "third",
-        sentence: "If you had opened it carefully, you _____ the envelope.",
+        sentence: "If you had done more stretching, you _____ your muscles.",
         condition: false,
-        answers: ["wouldn't have torn", "would not have torn"],
+        answers: ["wouldn't have torn", "would not have torn", "wouldnt have torn"],
         negative: true
     },
 
@@ -1080,7 +1080,7 @@ export const parallelUniversePrompts = {
         verb: "hide",
         irreg_level: "essential",
         conditional_type: "third",
-        sentence: "If you had chosen a better spot, you _____ the gift properly.",
+        sentence: "If you had been smarter, you _____ the gift properly.",
         condition: false,
         answers: ["would have hidden"],
         negative: false
@@ -1126,7 +1126,7 @@ export const parallelUniversePrompts = {
         verb: "set",
         irreg_level: "essential",
         conditional_type: "second",
-        sentence: "If you worked more efficiently, you _____ new records.",
+        sentence: "If you trained harder, you _____ new records.",
         condition: false,
         answers: ["would set"],
         negative: false
@@ -1154,7 +1154,7 @@ export const parallelUniversePrompts = {
         verb: "hit",
         irreg_level: "essential",
         conditional_type: "second",
-        sentence: "If you were more careful, you _____ the target easily.",
+        sentence: "If you we had access to the Asian market, we _____ the sales target easily.",
         condition: false,
         answers: ["would hit"],
         negative: false
@@ -1163,9 +1163,9 @@ export const parallelUniversePrompts = {
         verb: "hit",
         irreg_level: "essential",
         conditional_type: "third",
-        sentence: "If you had reacted sooner, you _____ the wall.",
+        sentence: "If you had reacted sooner, you _____ the car in front of you.",
         condition: false,
-        answers: ["wouldn't have hit", "would not have hit"],
+        answers: ["wouldn't have hit", "wouldnt have hit", "would not have hit"],
         negative: true
     },
 
@@ -1182,18 +1182,18 @@ export const parallelUniversePrompts = {
         verb: "seek",
         irreg_level: "advanced",
         conditional_type: "second",
-        sentence: "If you were more open, you _____ better opportunities.",
+        sentence: "If you were more open-minded, you _____ better opportunities.",
         condition: false,
-        answers: ["would seek"],
+        answers: ["would seek", "d seek", "'d seek"],
         negative: false
     },
     129: {
         verb: "seek",
         irreg_level: "advanced",
         conditional_type: "third",
-        sentence: "If you had asked earlier, you _____ the right advice.",
+        sentence: "If you _____ the right advice, you wouldn't be in this situation.",
         condition: false,
-        answers: ["would have sought"],
+        answers: ["had sought", "d sought", "'d sought"],
         negative: false
     },
 
@@ -1212,16 +1212,16 @@ export const parallelUniversePrompts = {
         conditional_type: "second",
         sentence: "If you were more careful, you _____ the fire too quickly.",
         condition: false,
-        answers: ["wouldn't light", "would not light"],
+        answers: ["wouldn't light", "would not light", "wouldnt light"],
         negative: true
     },
     132: {
         verb: "light",
         irreg_level: "essential",
         conditional_type: "third",
-        sentence: "If you had used a match, you _____ the grill faster.",
+        sentence: "If you had used lighting fuel, you _____ the grill faster.",
         condition: false,
-        answers: ["would have lit", "would have lighted"],
+        answers: ["would have lit", "would have lighted", "would've lit", "would've lighted"],
         negative: false
     },
 
@@ -1238,7 +1238,7 @@ export const parallelUniversePrompts = {
         verb: "build",
         irreg_level: "essential",
         conditional_type: "second",
-        sentence: "If you had more time, you _____ a treehouse.",
+        sentence: "If I had more time, I _____ a treehouse for the kids.",
         condition: false,
         answers: ["would build"],
         negative: false
@@ -1247,9 +1247,9 @@ export const parallelUniversePrompts = {
         verb: "build",
         irreg_level: "essential",
         conditional_type: "third",
-        sentence: "If you had followed the plan, you _____ it correctly.",
+        sentence: "If you had followed the plan, you _____ the bookcase correctly.",
         condition: false,
-        answers: ["would have built"],
+        answers: ["would have built", "would've built"],
         negative: false
     },
 
@@ -1268,7 +1268,7 @@ export const parallelUniversePrompts = {
         conditional_type: "second",
         sentence: "If you were stronger, you _____ faster.",
         condition: false,
-        answers: ["would dig"],
+        answers: ["would dig", "d dig", "'d dig"],
         negative: false
     },
     138: {
@@ -1277,7 +1277,7 @@ export const parallelUniversePrompts = {
         conditional_type: "third",
         sentence: "If you had used the right tool, you _____ the hole sooner.",
         condition: false,
-        answers: ["would have dug"],
+        answers: ["would have dug", "would've dug"],
         negative: false
     },
 
@@ -1296,7 +1296,7 @@ export const parallelUniversePrompts = {
         conditional_type: "second",
         sentence: "If you saved more, you _____ a better phone.",
         condition: false,
-        answers: ["would buy"],
+        answers: ["would buy", "d buy", "'d buy"],
         negative: false
     },
     141: {
@@ -1305,7 +1305,7 @@ export const parallelUniversePrompts = {
         conditional_type: "third",
         sentence: "If you had compared prices, you _____ it cheaper.",
         condition: false,
-        answers: ["would have bought"],
+        answers: ["would have bought", "would've bought"],
         negative: false
     },
 
@@ -1352,16 +1352,16 @@ export const parallelUniversePrompts = {
         conditional_type: "second",
         sentence: "If you were more careful, you _____ extra fees.",
         condition: false,
-        answers: ["wouldn't pay", "would not pay"],
+        answers: ["wouldn't pay", "would not pay", "wouldnt pay"],
         negative: true
     },
     147: {
         verb: "pay",
         irreg_level: "essential",
         conditional_type: "third",
-        sentence: "If you had checked the bill, you _____ that mistake.",
+        sentence: "If you had checked the bill, you _____ for the wrong product.",
         condition: false,
-        answers: ["wouldn't have paid", "would not have paid"],
+        answers: ["wouldn't have paid", "would not have paid", "wouldnt have paid"],
         negative: true
     },
 
@@ -1380,7 +1380,7 @@ export const parallelUniversePrompts = {
         conditional_type: "second",
         sentence: "If you practiced more, you _____ better essays.",
         condition: false,
-        answers: ["would write"],
+        answers: ["would write", "d write", "'d write"],
         negative: false
     },
     150: {
@@ -1389,7 +1389,7 @@ export const parallelUniversePrompts = {
         conditional_type: "third",
         sentence: "If you had started earlier, you _____ a stronger report.",
         condition: false,
-        answers: ["would have written"],
+        answers: ["would have written", "would've written"],
         negative: false
     },
 
@@ -1406,9 +1406,9 @@ export const parallelUniversePrompts = {
         verb: "send",
         irreg_level: "essential",
         conditional_type: "second",
-        sentence: "If you were more organized, you _____ reminders on time.",
+        sentence: "If you were more organized, you _____ reminders to all participants.",
         condition: false,
-        answers: ["would send"],
+        answers: ["would send", "d send", "'d send"],
         negative: false
     },
     153: {
@@ -1417,7 +1417,7 @@ export const parallelUniversePrompts = {
         conditional_type: "third",
         sentence: "If you had checked the address, you _____ it correctly.",
         condition: false,
-        answers: ["would have sent"],
+        answers: ["would have sent", "would've sent"],
         negative: false
     },
 
@@ -1425,7 +1425,7 @@ export const parallelUniversePrompts = {
         verb: "forgive",
         irreg_level: "essential",
         conditional_type: "first",
-        sentence: "If you _____ him, you'll feel lighter.",
+        sentence: "If you _____ him, you'll be able to move on.",
         condition: true,
         answers: ["forgive"],
         negative: false
@@ -1434,18 +1434,18 @@ export const parallelUniversePrompts = {
         verb: "forgive",
         irreg_level: "essential",
         conditional_type: "second",
-        sentence: "If you were more patient, you _____ people more easily.",
+        sentence: "If you were more relaxed, you _____ people more easily.",
         condition: false,
-        answers: ["would forgive"],
+        answers: ["would forgive", "d forgive", "'d forgive"],
         negative: false
     },
     156: {
         verb: "forgive",
         irreg_level: "essential",
         conditional_type: "third",
-        sentence: "If you had understood his reasons, you _____ him sooner.",
+        sentence: "If you had understood her reasons, you _____ her sooner.",
         condition: false,
-        answers: ["would have forgiven"],
+        answers: ["would have forgiven", "would've forgiven"],
         negative: false
     },
 
@@ -1453,7 +1453,7 @@ export const parallelUniversePrompts = {
         verb: "forget",
         irreg_level: "essential",
         conditional_type: "first",
-        sentence: "If you _____ your keys again, you'll be locked out.",
+        sentence: "If you _____ your keys, you'll be locked out for the whole week.",
         condition: true,
         answers: ["forget"],
         negative: false
@@ -1490,19 +1490,19 @@ export const parallelUniversePrompts = {
         verb: "sweep",
         irreg_level: "advanced",
         conditional_type: "second",
-        sentence: "If you cleaned more often, you _____ dust everywhere.",
+        sentence: "If there was a storm, the wind _____ the tent away.",
         condition: false,
-        answers: ["wouldn't sweep", "would not sweep"],
-        negative: true
+        answers: ["would sweep", "d sweep", "'d sweep"],
+        negative: false
     },
     162: {
         verb: "sweep",
         irreg_level: "advanced",
         conditional_type: "third",
-        sentence: "If you had done it yesterday, you _____ it today.",
+        sentence: "If there had been a storm, the wind _____ the tent away.",
         condition: false,
-        answers: ["wouldn't have swept", "would not have swept"],
-        negative: true
+        answers: ["would have swept", "would've swept"],
+        negative: false
     },
 
     163: {
@@ -1518,7 +1518,7 @@ export const parallelUniversePrompts = {
         verb: "cling",
         irreg_level: "advanced",
         conditional_type: "second",
-        sentence: "If you were more confident, you _____ to others so much.",
+        sentence: "If you were more confident, you _____ to your friends so much.",
         condition: false,
         answers: ["wouldn't cling", "would not cling"],
         negative: true
@@ -1542,24 +1542,6 @@ export const parallelUniversePrompts = {
         answers: ["creep"],
         negative: false
     },
-    167: {
-        verb: "creep",
-        irreg_level: "advanced",
-        conditional_type: "second",
-        sentence: "If you moved more slowly, you _____ people out.",
-        condition: false,
-        answers: ["wouldn't creep", "would not creep"],
-        negative: true
-    },
-    168: {
-        verb: "creep",
-        irreg_level: "advanced",
-        conditional_type: "third",
-        sentence: "If you had walked normally, you _____ everyone out yesterday.",
-        condition: false,
-        answers: ["wouldn't have crept", "would not have crept"],
-        negative: true
-    },
 
     169: {
         verb: "sing",
@@ -1576,7 +1558,7 @@ export const parallelUniversePrompts = {
         conditional_type: "second",
         sentence: "If you practiced more, you _____ beautifully.",
         condition: false,
-        answers: ["would sing"],
+        answers: ["would sing", "d sing", "'d sing"],
         negative: false
     },
     171: {
@@ -1585,7 +1567,7 @@ export const parallelUniversePrompts = {
         conditional_type: "third",
         sentence: "If you had warmed up, you _____ better yesterday.",
         condition: false,
-        answers: ["would have sung"],
+        answers: ["would have sung", "would've sung"],
         negative: false
     },
     172: {
@@ -1601,16 +1583,16 @@ export const parallelUniversePrompts = {
         verb: "hang",
         irreg_level: "advanced",
         conditional_type: "second",
-        sentence: "If you were more careful, you _____ it crooked.",
+        sentence: "If you were more polite, you _____ up the phone so abruptly.",
         condition: false,
-        answers: ["wouldn't hang", "would not hang"],
+        answers: ["wouldn't hang", "would not hang", "wouldnt hang"],
         negative: true
     },
     174: {
         verb: "hang",
         irreg_level: "advanced",
         conditional_type: "third",
-        sentence: "If you had used a level, you _____ it unevenly.",
+        sentence: "If you had used a level, you _____ the painting unevenly.",
         condition: false,
         answers: ["wouldn't have hung", "would not have hung"],
         negative: true
@@ -1631,14 +1613,14 @@ export const parallelUniversePrompts = {
         conditional_type: "second",
         sentence: "If you had a better machine, you _____ the spices evenly.",
         condition: false,
-        answers: ["would grind"],
+        answers: ["would grind", "d grind", "'d grind"],
         negative: false
     },
     177: {
         verb: "grind",
         irreg_level: "advanced",
         conditional_type: "third",
-        sentence: "If you had taken your time, you _____ the gears.",
+        sentence: "If you had listened to me, you _____ the coffee into such fine powder.",
         condition: false,
         answers: ["wouldn't have ground", "would not have ground"],
         negative: true
@@ -1659,7 +1641,7 @@ export const parallelUniversePrompts = {
         conditional_type: "second",
         sentence: "If you moved more carefully, you _____ yourself so often.",
         condition: false,
-        answers: ["wouldn't hurt", "would not hurt"],
+        answers: ["wouldn't hurt", "would not hurt", "wouldnt hurt"],
         negative: true
     },
     180: {
@@ -1668,7 +1650,7 @@ export const parallelUniversePrompts = {
         conditional_type: "third",
         sentence: "If you had stretched properly, you _____ your back yesterday.",
         condition: false,
-        answers: ["wouldn't have hurt", "would not have hurt"],
+        answers: ["wouldn't have hurt", "would not have hurt", "wouldnt have hurt"],
         negative: true
     },
 
@@ -1687,7 +1669,7 @@ export const parallelUniversePrompts = {
         conditional_type: "second",
         sentence: "If you had more patience, you _____ so easily.",
         condition: false,
-        answers: ["wouldn't quit", "would not quit"],
+        answers: ["wouldn't quit", "would not quit", "wouldnt quit"],
         negative: true
     },
     183: {
@@ -1696,7 +1678,7 @@ export const parallelUniversePrompts = {
         conditional_type: "third",
         sentence: "If you had stayed focused, you _____ last week.",
         condition: false,
-        answers: ["wouldn't have quit", "would not have quit"],
+        answers: ["wouldn't have quit", "would not have quit", "wouldnt have quit"],
         negative: true
     },
 
@@ -1715,7 +1697,7 @@ export const parallelUniversePrompts = {
         conditional_type: "second",
         sentence: "If you practiced more, you _____ straighter.",
         condition: false,
-        answers: ["would shoot"],
+        answers: ["would shoot", "d shoot", "'d shoot"],
         negative: false
     },
     186: {
@@ -1724,13 +1706,13 @@ export const parallelUniversePrompts = {
         conditional_type: "third",
         sentence: "If you had aimed properly, you _____ the target.",
         condition: false,
-        answers: ["would have shot"],
+        answers: ["would have shot", "would've shot"],
         negative: false
     },
 
     187: {
         verb: "show",
-        irreg_level: "advanced",
+        irreg_level: "essential",
         conditional_type: "first",
         sentence: "If you _____ your work, they'll give feedback.",
         condition: true,
@@ -1739,7 +1721,7 @@ export const parallelUniversePrompts = {
     },
     188: {
         verb: "show",
-        irreg_level: "advanced",
+        irreg_level: "essential",
         conditional_type: "second",
         sentence: "If you were more confident, you _____ your talent.",
         condition: false,
@@ -1748,11 +1730,11 @@ export const parallelUniversePrompts = {
     },
     189: {
         verb: "show",
-        irreg_level: "advanced",
+        irreg_level: "essential",
         conditional_type: "third",
         sentence: "If you had arrived earlier, you _____ your project.",
         condition: false,
-        answers: ["would have shown"],
+        answers: ["would have shown", "would've shown"],
         negative: false
     },
 
@@ -1771,7 +1753,7 @@ export const parallelUniversePrompts = {
         conditional_type: "second",
         sentence: "If you were more careful, you _____ the wrong note.",
         condition: false,
-        answers: ["wouldn't strike", "would not strike"],
+        answers: ["wouldn't strike", "would not strike", "wouldnt strike"],
         negative: true
     },
     192: {
@@ -1780,7 +1762,7 @@ export const parallelUniversePrompts = {
         conditional_type: "third",
         sentence: "If you had reacted faster, you _____ the ball cleanly.",
         condition: false,
-        answers: ["would have struck"],
+        answers: ["would have struck", "would've struck"],
         negative: false
     },
 
@@ -1799,7 +1781,7 @@ export const parallelUniversePrompts = {
         conditional_type: "second",
         sentence: "If you were more disciplined, you _____ to your schedule.",
         condition: false,
-        answers: ["would stick"],
+        answers: ["would stick", "d stick", "'d stick"],
         negative: false
     },
     195: {
@@ -1808,7 +1790,7 @@ export const parallelUniversePrompts = {
         conditional_type: "third",
         sentence: "If you had followed the rules, you _____ to the guidelines.",
         condition: false,
-        answers: ["would have stuck"],
+        answers: ["would have stuck", "would've stuck"],
         negative: false
     },
 
@@ -1827,7 +1809,7 @@ export const parallelUniversePrompts = {
         conditional_type: "second",
         sentence: "If you were more alert, you _____ into motion sooner.",
         condition: false,
-        answers: ["would spring"],
+        answers: ["would spring", "d spring", "'d spring"],
         negative: false
     },
     198: {
@@ -1836,7 +1818,7 @@ export const parallelUniversePrompts = {
         conditional_type: "third",
         sentence: "If you had noticed the issue, you _____ into action earlier.",
         condition: false,
-        answers: ["would have sprung"],
+        answers: ["would have sprung", "would've sprung"],
         negative: false
     },
 
@@ -1853,9 +1835,9 @@ export const parallelUniversePrompts = {
         verb: "broadcast",
         irreg_level: "advanced",
         conditional_type: "second",
-        sentence: "If you had better equipment, you _____ the show live.",
+        sentence: "If I had better equipment, I _____ the show live.",
         condition: false,
-        answers: ["would broadcast"],
+        answers: ["would broadcast", "d broadcast", "'d broadcast"],
         negative: false
     },
     201: {
@@ -1864,7 +1846,7 @@ export const parallelUniversePrompts = {
         conditional_type: "third",
         sentence: "If you had checked the signal, you _____ it properly.",
         condition: false,
-        answers: ["would have broadcast"],
+        answers: ["would have broadcast", "would've broadcast"],
         negative: false
     },
 
@@ -1881,18 +1863,18 @@ export const parallelUniversePrompts = {
         verb: "flee",
         irreg_level: "advanced",
         conditional_type: "second",
-        sentence: "If you felt unsafe, you _____ immediately.",
+        sentence: "If I felt unsafe, I _____ immediately.",
         condition: false,
-        answers: ["would flee"],
+        answers: ["would flee", "d flee", "'d flee"],
         negative: false
     },
     204: {
         verb: "flee",
         irreg_level: "advanced",
         conditional_type: "third",
-        sentence: "If you had heard the warning, you _____ sooner.",
+        sentence: "If I had heard the warning, I _____ sooner.",
         condition: false,
-        answers: ["would have fled"],
+        answers: ["would have fled", "would've fled"],
         negative: false
     },
 
@@ -1909,9 +1891,9 @@ export const parallelUniversePrompts = {
         verb: "bleed",
         irreg_level: "advanced",
         conditional_type: "second",
-        sentence: "If you were more careful, you _____ so easily.",
+        sentence: "If you didn't scratch the scar, it _____ anymore.",
         condition: false,
-        answers: ["wouldn't bleed", "would not bleed"],
+        answers: ["wouldn't bleed", "would not bleed", "wouldnt bleed"],
         negative: true
     },
     207: {
@@ -1920,7 +1902,7 @@ export const parallelUniversePrompts = {
         conditional_type: "third",
         sentence: "If you had worn gloves, you _____ yesterday.",
         condition: false,
-        answers: ["wouldn't have bled", "would not have bled"],
+        answers: ["wouldn't have bled", "would not have bled", "wouldnt have bled"],
         negative: true
     },
 
@@ -1935,7 +1917,7 @@ export const parallelUniversePrompts = {
     },
     209: {
         verb: "lie",
-        irreg_level: "advanced",
+        irreg_level: "regular",
         conditional_type: "second",
         sentence: "If you were honest, you _____ about it.",
         condition: false,
@@ -1944,9 +1926,9 @@ export const parallelUniversePrompts = {
     },
     210: {
         verb: "lie",
-        irreg_level: "advanced",
+        irreg_level: "regular",
         conditional_type: "third",
-        sentence: "If you had told the truth, you _____ yesterday.",
+        sentence: "If I hadn't felt under pressure, I _____ yesterday.",
         condition: false,
         answers: ["wouldn't have lied", "would not have lied"],
         negative: true
@@ -1965,18 +1947,18 @@ export const parallelUniversePrompts = {
         verb: "shrink",
         irreg_level: "advanced",
         conditional_type: "second",
-        sentence: "If you washed it carefully, it _____ in the dryer.",
+        sentence: "If you washed the sweater carefully, it _____ in the dryer.",
         condition: false,
-        answers: ["wouldn't shrink", "would not shrink"],
+        answers: ["wouldn't shrink", "would not shrink", "wouldnt shrink"],
         negative: true
     },
     213: {
         verb: "shrink",
         irreg_level: "advanced",
         conditional_type: "third",
-        sentence: "If you had checked the label, it _____ last week.",
+        sentence: "If you had checked the label before washing last week, my favorite sweater _____ .",
         condition: false,
-        answers: ["wouldn't have shrunk", "would not have shrunk"],
+        answers: ["wouldn't have shrunk", "would not have shrunk", "wouldnt have shrunk"],
         negative: true
     },
 
@@ -1995,16 +1977,16 @@ export const parallelUniversePrompts = {
         conditional_type: "second",
         sentence: "If you overloaded it, it _____ quickly.",
         condition: false,
-        answers: ["would sink"],
+        answers: ["would sink", "d sink", "'d sink"],
         negative: false
     },
     216: {
         verb: "sink",
         irreg_level: "advanced",
         conditional_type: "third",
-        sentence: "If you had patched the hole, it _____ yesterday.",
+        sentence: "If you had patched the hole in the hull, the boat _____ .",
         condition: false,
-        answers: ["wouldn't have sunk", "would not have sunk"],
+        answers: ["wouldn't have sunk", "would not have sunk", "wouldnt have sunk"],
         negative: true
     },
 
@@ -2023,7 +2005,7 @@ export const parallelUniversePrompts = {
         conditional_type: "second",
         sentence: "If you pushed harder, it _____ faster.",
         condition: false,
-        answers: ["would spin"],
+        answers: ["would spin", "d spin", "'d spin"],
         negative: false
     },
     219: {
@@ -2032,7 +2014,7 @@ export const parallelUniversePrompts = {
         conditional_type: "third",
         sentence: "If you had tightened the bolt, it _____ yesterday.",
         condition: false,
-        answers: ["wouldn't have spun", "would not have spun"],
+        answers: ["wouldn't have spun", "would not have spun", "wouldnt have spun"],
         negative: true
     },
 
@@ -2053,16 +2035,16 @@ export const parallelUniversePrompts = {
         conditional_type: "second",
         sentence: "If you moved closer, you _____ comfortably.",
         condition: false,
-        answers: ["would sit"],
+        answers: ["would sit", "d sit", "'d sit"],
         negative: false
     },
     222: {
         verb: "sit",
         irreg_level: "essential",
         conditional_type: "third",
-        sentence: "If you had chosen the front row, you _____ better.",
+        sentence: "If you had bought your tickets last week, you _____ in the front row.",
         condition: false,
-        answers: ["would have sat"],
+        answers: ["would have sat", "would've sat", "wouldve sat"],
         negative: false
     },
 
@@ -2070,7 +2052,7 @@ export const parallelUniversePrompts = {
         verb: "cut",
         irreg_level: "essential",
         conditional_type: "first",
-        sentence: "If you _____ the rope, it will fall.",
+        sentence: "If you _____ the rope, the whole structure will fall.",
         condition: true,
         answers: ["cut"],
         negative: false
@@ -2079,18 +2061,18 @@ export const parallelUniversePrompts = {
         verb: "cut",
         irreg_level: "essential",
         conditional_type: "second",
-        sentence: "If you were more careful, you _____ yourself.",
+        sentence: "If you were more careful in the kitchen, you _____ yourself.",
         condition: false,
-        answers: ["wouldn't cut", "would not cut"],
+        answers: ["wouldn't cut", "would not cut", "wouldnt cut"],
         negative: true
     },
     225: {
         verb: "cut",
         irreg_level: "essential",
         conditional_type: "third",
-        sentence: "If you had used a sharper knife, you _____ it cleanly.",
+        sentence: "If you had used a sharper saw, you _____ the piece off cleanly.",
         condition: false,
-        answers: ["would have cut"],
+        answers: ["would have cut", "would've cut", "wouldve cut"],
         negative: false
     },
 
@@ -2107,18 +2089,18 @@ export const parallelUniversePrompts = {
         verb: "drink",
         irreg_level: "essential",
         conditional_type: "second",
-        sentence: "If you exercised more, you _____ more fluids.",
+        sentence: "If you listened to my advice, you _____ more fluids.",
         condition: false,
-        answers: ["would drink"],
+        answers: ["would drink", "d drink", "'d drink"],
         negative: false
     },
     228: {
         verb: "drink",
         irreg_level: "essential",
         conditional_type: "third",
-        sentence: "If you had brought a bottle, you _____ enough yesterday.",
+        sentence: "If you had brought your own bottle, you _____ enough.",
         condition: false,
-        answers: ["would have drunk"],
+        answers: ["would have drunk", "would've drunk", "wouldve drunk"],
         negative: false
     },
 
@@ -2137,7 +2119,7 @@ export const parallelUniversePrompts = {
         conditional_type: "second",
         sentence: "If it were on sale, it _____ less.",
         condition: false,
-        answers: ["would cost"],
+        answers: ["would cost", "d cost", "'d cost"],
         negative: false
     },
     231: {
@@ -2146,7 +2128,7 @@ export const parallelUniversePrompts = {
         conditional_type: "third",
         sentence: "If you had compared prices, it _____ you less.",
         condition: false,
-        answers: ["would have cost"],
+        answers: ["would have cost", "would've cost", "wouldve cost"],
         negative: false
     },
 
@@ -2174,9 +2156,36 @@ export const parallelUniversePrompts = {
         conditional_type: "third",
         sentence: "If you had defended yourself, you _____ back.",
         condition: false,
-        answers: ["would have fought"],
+        answers: ["would have fought", "would've fought", "wouldve fought"],
         negative: false
-    }
+    }, 
+    235: {
+        verb: "bring",
+        irreg_level: "essential",
+        conditional_type: "first",
+        sentence: "If you _____ your ID, you can enter the club.",
+        condition: true,
+        answers: ["bring"],
+        negative: false
+    },
+    236: {
+        verb: "bring",
+        irreg_level: "essential",
+        conditional_type: "second",
+        sentence: "If you were better organized, you _____ your own lunch.",
+        condition: false,
+        answers: ["would bring", "d bring", "'d bring"],
+        negative: false
+    },
+    237: {
+        verb: "bring",
+        irreg_level: "essential",
+        conditional_type: "third",
+        sentence: "If you had remembered to pack it, you _____ your own lunch yesterday.",
+        condition: false,
+        answers: ["would have brought", "would've brought", "wouldve brought"],
+        negative: false
+    },
 }
 
     

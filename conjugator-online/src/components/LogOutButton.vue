@@ -8,13 +8,15 @@
         :loading="loggingOut"
         style="align-self: center; margin-right: 15px;"
       >
-        <!-- Normal icon -->
-        <v-icon v-if="!loggingOut && !logoutDone" large>mdi-logout</v-icon>
+        <template #loader>
+          <v-progress-circular indeterminate size="20" width="2" />
+        </template>
 
-        <!-- Checkmark after logout -->
+        <v-icon v-if="!loggingOut && !logoutDone" size="large">mdi-logout</v-icon>
+
         <v-icon
-          v-if="logoutDone"
-          large
+          v-else-if="logoutDone"
+          size="large"
           color="green"
           class="logout-check"
         >
@@ -39,15 +41,17 @@ const logoutDone = ref(false);
 function logout() {
   loggingOut.value = true;
 
+  // Immediately clear session + user state (prevents any more authenticated calls)
+  auth.logout();
+  userStore.clearStudent(); // ensure this only clears user-related state
+
   // Spinner visible first
   setTimeout(() => {
     loggingOut.value = false;
     logoutDone.value = true; // show checkmark
 
-    // Keep checkmark visible briefly
+    // Keep checkmark visible briefly, then redirect
     setTimeout(() => {
-      auth.logout();
-      userStore.clearStudent();
       window.location.href = "/";
     }, 1000);
   }, 1000);

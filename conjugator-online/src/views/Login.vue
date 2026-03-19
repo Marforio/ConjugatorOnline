@@ -94,7 +94,6 @@ import { useRoute, useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
 import { useUserStore } from "@/stores/user";
 import { apiValidateToken } from "@/services/auth";
-import api from '@/axios'
 
 const auth = useAuthStore();
 const userStore = useUserStore();
@@ -103,14 +102,13 @@ const username = ref("");
 const password = ref("");
 const loading = ref(false);
 const error = ref("");
-const showError = ref(false)
+const showError = ref(false);
 
-const loginSuccess = ref(false); 
+const loginSuccess = ref(false);
 const loginError = ref(false);
 
 const route = useRoute();
 const router = useRouter();
-
 
 async function handleLogin() {
   error.value = "";
@@ -120,10 +118,15 @@ async function handleLogin() {
   showError.value = false;
 
   try {
-    const token = await auth.login(username.value, password.value);
-    api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+    // 1) Login -> auth store now owns the token
+    await auth.login(username.value, password.value);
+
+    // 2) (Optional but fine) validate token server-side
     await apiValidateToken();
-    userStore.setAccessToken(token);
+
+    // 3) Load user profile immediately so isStaff is correct before redirect
+    //    This prevents staff from accidentally mounting heavy student routes
+    await userStore.ensureUserLoaded();
 
     // Hide loading and show success animation
     loading.value = false;
@@ -134,7 +137,6 @@ async function handleLogin() {
       const redirectPath = (route.query.redirect as string) || "/";
       router.replace(redirectPath);
     }, 1200);
-
   } catch (err: any) {
     error.value =
       err.response?.status === 401
@@ -148,7 +150,7 @@ async function handleLogin() {
     // Brief delay to hide loading overlay
     setTimeout(() => {
       loading.value = false;
-      
+
       // NOW start the error animation timer (2.5 seconds from NOW)
       setTimeout(() => {
         loginError.value = false;

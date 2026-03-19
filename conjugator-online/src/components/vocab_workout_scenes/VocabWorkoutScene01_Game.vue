@@ -466,8 +466,8 @@
               <!-- WRITING -->
               <template v-else-if="mode === 'write'">
                 <div class="d-flex justify-center" >
-                <v-card elevation="2" min-width="60%">
-                <div class="d-flex flex-column align-center justify-center" style="height: 260px;">
+                <v-card elevation="2" min-width="60%" >
+                <div class="d-flex flex-column align-center justify-center" style="height: 260px;" >
           
                   <!-- Hidden loader for write (reuse backImageLoaded as "prompt image") -->
                   <v-img
@@ -484,13 +484,13 @@
                       <v-img v-if="currentItem" :src="currentItem.image" cover />
                     </v-avatar>
 
-                    <h5 class="mt-3 text-h5 text-center font-italic" style="margin-bottom: 3.5rem;">
+                    <h5 class="mt-3 text-h5 text-center font-italic" style="margin-bottom: 3.5rem; max-width: 650px;">
                       {{ frontPreview }}
                     </h5>
                   </template>
 
                   <template v-else>
-                    <h4 class="text-h4 text-center font-italic">
+                    <h4 class="text-h4 text-center font-italic" style="max-width: 650px;">
                       {{ frontPreview }}
                     </h4>
                   </template>

@@ -7,6 +7,7 @@ import Conjugator from '@/views/Conjugator.vue'
 import VocabWorkout from '@/views/VocabWorkout.vue'
 import Admin from '@/views/Admin.vue'
 import { path } from 'd3'
+import { useUserStore } from '@/stores/user'
 
 const routes = [
   { path: '/', name: 'home', component: Home },
@@ -14,7 +15,7 @@ const routes = [
   { path: '/admin', name: 'admin', component: Admin, meta: { requiresAuth: true, requiresAdmin: true } },
   { path: '/conjugator', name: 'conjugator', component: Conjugator, meta: { requiresAuth: true }},
   { path: '/vocab-workout', name: 'vocabworkout', component: VocabWorkout, meta: { requiresAuth: true} },
-  { path: '/dashboard', name: 'dashboard', component: () => import('@/views/Dashboard.vue'), meta: { requiresAuth: true } },
+  { path: '/dashboard', name: 'dashboard', component: () => import('@/views/Dashboard.vue'), meta: { requiresAuth: true, studentsOnly: true } },
   { path: '/exercises', name: 'exercises', component: () => import('@/views/Exercises.vue'), meta: { requiresAuth: true } },
   { path: '/exercises/:errorCode', name: 'exercise-detail', component: () => import('@/views/ExerciseDetail.vue'), props: true , meta: { requiresAuth: true } },
   { path: '/games', name: 'games', component: () => import('@/views/Games.vue')},
@@ -51,35 +52,46 @@ const router = createRouter({
 // Global auth guard
 router.beforeEach(async (to, from, next) => {
   const auth = useAuthStore();
+  const userStore = useUserStore();
 
-  // Wait for store hydration before running checks
+  // Wait for auth hydration before running checks
   if (!auth.isRestored) {
-    // Watch for hydration, then retry navigation
     const stop = watch(
       () => auth.isRestored,
       (ready: boolean) => {
         if (ready) {
           stop();
-          next(to); // retry navigation once hydrated
+          next(to);
         }
       }
     );
-    return; // Prevent further guard execution
+    return;
   }
 
-  if (!to.meta.requiresAuth) return next(); // No auth needed
+  if (!to.meta.requiresAuth) return next();
 
-  // If we have an access token, proceed optimistically
-  if (auth.access) return next();
+  // Ensure we have a valid session (token present + validated/refreshed)
+  if (!auth.access) {
+    const valid = await auth.validateSession();
+    if (!valid) return next({ name: "login", query: { redirect: to.fullPath } });
+  }
 
-  // Otherwise, validate session (runs refresh or logout as needed)
-  const valid = await auth.validateSession();
-  if (valid) return next();
+  // Only load user profile when route needs role checks
+  if (to.meta.studentsOnly || to.meta.requiresAdmin) {
+    await userStore.ensureUserLoaded(); // <-- implement in user store (below)
+  }
 
-  // Final fallback: redirect to login
-  next({ name: "login", query: { redirect: to.fullPath } });
+  if (to.meta.studentsOnly && userStore.isStaff) {
+    return next({ name: "home" }); // or teacher-tools/admin, your choice
+  }
+
+  // "requiresAdmin" probably means staff/admin in your app
+  if (to.meta.requiresAdmin && !userStore.isStaff) {
+    return next({ name: "home" });
+  }
+
+  return next();
 });
-
 
 
 export default router

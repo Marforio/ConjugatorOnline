@@ -40,6 +40,7 @@ export const useAuthStore = defineStore("auth", () => {
     const res = await apiRefresh(refresh.value);
     access.value = res.data.access;
     saveTokens(res.data.access, refresh.value);
+    return res.data.access; 
   }
 
   function logout() {

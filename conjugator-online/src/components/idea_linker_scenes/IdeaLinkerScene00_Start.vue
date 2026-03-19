@@ -15,7 +15,7 @@
 
           <v-list-item>
             <template #prepend><v-icon icon="mdi-timer-sand" /></template>
-            <v-list-item-title class="text-wrap">45 seconds per round</v-list-item-title>
+            <v-list-item-title class="text-wrap">60 seconds per round</v-list-item-title>
           </v-list-item>
 
           <v-list-item>
