@@ -1,7 +1,7 @@
 import { PhrasalVerbs, UsefulRegularVerbs } from "./GeneralVocab";
 import { houseElements, LocationAndMaterials, CitiesAndBuildings, LightSpaces, ArchCareer, AdjectivesForReviews } from "./ArchitectureVocab";
 import { civilVerbs, constructionSite, ConstructionScience, EarthAndMaterials, CitiesInfrastructureBuildings, DimensionsAndProperties, BusinessReports } from "./CivilVocab"
-import { productMarketing, promotionAndBusinessDevelopment, startUps, meetingExpressions, meetings, businessEthics, sustainability, DataVisualization, RegularVerbsBusiness, FinanceAndTrading, Corporations } from "./BusinessVocab";
+import { productMarketing, promotionAndBusinessDevelopment, startUps, meetingExpressions, meetings, businessEthics, sustainability, DataVisualization, RegularVerbsBusiness, FinanceAndTrading, Corporations, TakeoversAndMergers } from "./BusinessVocab";
 import { programmingSymbols, mechanicalForces } from "./MechVocab";
 import { CryptographyVocab, DataProcessingAndVisualization } from "./ITVocab";
 import { irregularVerbs } from "./IrregularVerbs";
@@ -289,5 +289,11 @@ export const vocabLists = {
     module: "Business_4",
     data: sustainability,
     supportsLevels: false,
-  }
+  },
+  takeovers_and_mergers: {
+    title: "Takeovers and Mergers",
+    module: "Business_4",
+    data: TakeoversAndMergers,
+    supportsLevels: false,
+  },
 } as const;

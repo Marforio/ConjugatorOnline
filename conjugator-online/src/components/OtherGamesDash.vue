@@ -476,6 +476,7 @@ const GAME_NAMES = [
   "Unfinished Business",
   "Uses Of Auxiliaries",
   "Verb Mixer",
+  "Verb Mixer Classroom Edition",
   "Year 2040",
   "Word Families",
 ];
@@ -488,6 +489,7 @@ const gamePictures: Record<string, string> = {
   "Quantifier Quest": "/images/banners/QuantifierQuest.png",
   "Unfinished Business": "/images/banners/UnfinishedBusiness.png",
   "Verb Mixer": "/images/banners/VerbMixer.png",
+  "Verb Mixer Classroom Edition": "/images/banners/VerbMixer.png",
   "Uses Of Auxiliaries": "/images/banners/UsesOfAuxiliaries.png",
   "Tricky Translator": "/images/banners/TrickyTranslator.png",
   "Passive Party": "/images/banners/PassiveParty.png",

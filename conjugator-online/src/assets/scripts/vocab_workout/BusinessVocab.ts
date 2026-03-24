@@ -1,4 +1,5 @@
 
+//////////////// 1 ///////////////
 export const RegularVerbsBusiness = {
   "manage": {
     definition: "To be in charge of a company, department, or team of people.",
@@ -2390,7 +2391,7 @@ export const Corporations = {
   }
 };
 
-///////////////////////////
+/////////////// 2 ////////////
 
 export const productMarketing = {
   "core product": {
@@ -4591,7 +4592,7 @@ export const startUps = {
     "French": "croissance en hockey",
     "German": "Hockey-Stick-Wachstum",
     "Italian": "crescita a forma di bastone da hockey",
-    "image": "/images/vocab/hockey_stick_growth.jpg",
+    "image": "/images/vocab/hockey-stick-growth.jpg",
     "multiple_choice": ["exponential growth", "rapid acceleration", "J-curve growth"],
     "accepted": [],
     "synonyms": []
@@ -4599,7 +4600,7 @@ export const startUps = {
 };
 
 
-/////////////////////////
+/////////////// 3 //////////
 
 export const FinanceAndTrading = {
   "short selling": {
@@ -4981,7 +4982,7 @@ export const FinanceAndTrading = {
   }
 };
 
-//////////////////////////////////
+/////////////////// 4 ///////////////
 
 export const businessEthics = {
   "ethical dilemma": {
@@ -5736,4 +5737,292 @@ export const sustainability = {
 }
 
 
+export const TakeoversAndMergers = {
+  "acquisition": {
+    definition: "A corporate action in which one company purchases most or all of another company's shares to gain control of it.",
+    French: "acquisition",
+    German: "Übernahme",
+    Italian: "acquisizione",
+    image: "/images/vocab/acquisition.jpg",
+    multiple_choice: ["divestiture", "merger", "joint venture"]
+  },
 
+  "merger": {
+    definition: "The voluntary fusion of two existing companies into one new legal entity on roughly equal terms.",
+    French: "fusion",
+    German: "Fusion / Zusammenschluss",
+    Italian: "fusione",
+    image: "/images/vocab/merger.jpg",
+    multiple_choice: ["acquisition", "hostile takeover", "subsidiary"]
+  },
+
+  "hostile takeover": {
+    definition: "The acquisition of one company by another that is accomplished by going directly to the company's shareholders or fighting to replace management.",
+    French: "OPA hostile",
+    German: "feindliche Übernahme",
+    Italian: "scalata ostile",
+    image: "/images/vocab/hostile-takeover.jpg",
+    multiple_choice: ["friendly takeover", "leveraged buyout", "merger"]
+  },
+
+  "due diligence": {
+    definition: "An investigation or audit of a potential investment or product to confirm all facts, such as reviewing all financial records.",
+    French: "audit préalable / diligence raisonnable",
+    German: "Sorgfaltspflicht / Due-Diligence-Prüfung",
+    Italian: "due diligence",
+    image: "/images/vocab/due-diligence.jpg",
+    multiple_choice: ["valuation", "compliance", "tender offer"]
+  },
+
+  "synergy": {
+    definition: "The concept that the combined value and performance of two companies will be greater than the sum of the separate individual parts.",
+    French: "synergie",
+    German: "Synergieeffekt",
+    Italian: "sinergia",
+    image: "/images/vocab/synergy.jpg",
+    multiple_choice: ["redundancy", "equity", "goodwill"]
+  },
+
+  "tender offer": {
+    definition: "A public bid to all shareholders of a company to purchase their stock at a specific price during a particular window of time.",
+    French: "offre publique d'achat (OPA)",
+    German: "Übernahmeangebot",
+    Italian: "offerta pubblica di acquisto",
+    image: "/images/vocab/tender-offer.jpg",
+    multiple_choice: ["ipo", "share buyback", "proxy fight"]
+  },
+
+  "leveraged buyout": {
+    definition: "The acquisition of another company using a significant amount of borrowed money (bonds or loans) to meet the cost of acquisition.",
+    French: "rachat par l'emprunt (LBO)",
+    German: "fremdfinanzierte Übernahme (LBO)",
+    Italian: "leveraged buyout",
+    image: "/images/vocab/lbo.jpg",
+    multiple_choice: ["management buyout", "asset flip", "recapitalization"]
+  },
+
+  "poison pill": {
+    definition: "A defense strategy used by a target firm to prevent or discourage a hostile takeover by making its stock less attractive to the acquirer.",
+    French: "pilule empoisonnée",
+    German: "Giftpille (Abwehrmaßnahme)",
+    Italian: "pillola avvelenata",
+    image: "/images/vocab/poison-pill.jpg",
+    multiple_choice: ["golden parachute", "white knight", "greenmail"]
+  },
+
+  "white knight": {
+    definition: "A friendly investor or company that acquires a corporation at fair considerations with the support of its board, preventing a hostile takeover.",
+    French: "chevalier blanc",
+    German: "weißer Ritter",
+    Italian: "cavaliere bianco",
+    image: "/images/vocab/white-knight.jpg",
+    multiple_choice: ["corporate raider", "black knight", "angel investor"]
+  },
+
+  "golden parachute": {
+    definition: "Large payments or other financial benefits guaranteed to company executives if their employment is terminated after a takeover.",
+    French: "parachute doré",
+    German: "goldener Fallschirm",
+    Italian: "paracadute d'oro",
+    image: "/images/vocab/golden-parachute.jpg",
+    multiple_choice: ["severance pay", "stock option", "dividend"]
+  },
+
+  "goodwill": {
+    definition: "An intangible asset that represents the excess of the purchase price over the fair market value of the net identifiable assets of an acquired company.",
+    French: "écart d'acquisition / goodwill",
+    German: "Firmenwert / Goodwill",
+    Italian: "avviamento",
+    image: "/images/vocab/goodwill.jpg",
+    multiple_choice: ["liquidity", "capital", "liability"]
+  },
+
+  "target company": {
+    definition: "A company that has been chosen as a candidate for a merger or an acquisition by a potential buyer.",
+    French: "société cible",
+    German: "Zielgesellschaft",
+    Italian: "società target",
+    image: "/images/vocab/target-company.jpg",
+    multiple_choice: ["acquirer", "subsidiary", "parent company"]
+  },
+
+  "horizontal merger": {
+    definition: "A merger between companies that operate in the same industry and at the same stage of production.",
+    French: "fusion horizontale",
+    German: "horizontaler Zusammenschluss",
+    Italian: "fusione orizzontale",
+    image: "/images/vocab/horizontal-merger.jpg",
+    multiple_choice: ["vertical merger", "conglomerate", "joint venture"]
+  },
+
+  "vertical merger": {
+    definition: "A merger between companies that operate at different stages of the same supply chain.",
+    French: "fusion verticale",
+    German: "vertikaler Zusammenschluss",
+    Italian: "fusione verticale",
+    image: "/images/vocab/vertical-merger.jpg",
+    multiple_choice: ["horizontal merger", "diversification", "spin-off"]
+  },
+
+  "spin-off": {
+    definition: "The creation of an independent company through the sale or distribution of new shares of an existing business or division of a parent company.",
+    French: "scission",
+    German: "Ausgründung / Spin-off",
+    Italian: "scissione",
+    image: "/images/vocab/spin-off.jpg",
+    multiple_choice: ["merger", "liquidation", "startup"]
+  },
+
+  "arbitrage": {
+    definition: "The simultaneous purchase and sale of an asset to profit from a difference in the price, common during takeover announcements.",
+    French: "arbitrage",
+    German: "Arbitrage",
+    Italian: "arbitraggio",
+    image: "/images/vocab/arbitrage.jpg",
+    multiple_choice: ["hedging", "speculation", "valuation"]
+  },
+
+  "corporate raider": {
+    definition: "An investor who buys a large number of shares in a corporation whose assets appear undervalued to effect a hostile takeover.",
+    French: "raider / prédateur boursier",
+    German: "Unternehmensjäger",
+    Italian: "predatore aziendale",
+    image: "/images/vocab/corporate-raider.jpg",
+    multiple_choice: ["white knight", "shareholder", "board member"]
+  },
+
+  "greenmail": {
+    definition: "The practice of buying enough shares in a company to threaten a takeover, forcing the target company to buy the shares back at a premium.",
+    French: "chantage vert / rachat de titres",
+    German: "Greenmail (Aktienrückkauf)",
+    Italian: "ricatto verde",
+    image: "/images/vocab/greenmail.jpg",
+    multiple_choice: ["poison pill", "insider trading", "proxy fight"]
+  },
+
+  "valuation": {
+    definition: "The analytical process of determining the current (or projected) worth of an asset or a company during merger talks.",
+    French: "valorisation / évaluation",
+    German: "Unternehmensbewertung",
+    Italian: "valutazione",
+    image: "/images/vocab/valuation.jpg",
+    multiple_choice: ["due diligence", "audit", "synergy"]
+  },
+
+  "friendly takeover": {
+    definition: "A takeover which is approved by the management and board of directors of the target company before it goes to the shareholders.",
+    French: "OPA amicale",
+    German: "freundliche Übernahme",
+    Italian: "acquisizione amichevole",
+    image: "/images/vocab/friendly-takeover.jpg",
+    multiple_choice: ["hostile takeover", "proxy fight", "leveraged buyout"]
+  },
+
+  "crown jewel": {
+    definition: "The most valuable or profitable unit of a company, which a target firm might sell to make itself less attractive to a raider.",
+    French: "joyau de la couronne",
+    German: "Kronjuwel (Kernbereich)",
+    Italian: "gioiello della corona",
+    image: "/images/vocab/crown-jewel.jpg",
+    multiple_choice: ["poison pill", "subsidiary", "liability"]
+  },
+
+  "asset stripping": {
+    definition: "The process of buying an undervalued company with the intention of selling off its assets individually for a profit.",
+    French: "dépeçage d'entreprise",
+    German: "Ausschlachten / Asset Stripping",
+    Italian: "spoliazione di beni",
+    image: "/images/vocab/asset-stripping.jpg",
+    multiple_choice: ["merger", "spin-off", "acquisition"]
+  },
+
+  "post-merger integration": {
+    definition: "The complex process of combining and rearranging businesses after a merger to release potential efficiencies and synergies.",
+    French: "intégration post-fusion",
+    German: "Post-Merger-Integration (PMI)",
+    Italian: "integrazione post-fusione",
+    image: "/images/vocab/pmi.jpg",
+    multiple_choice: ["due diligence", "tender offer", "restructuring"]
+  },
+
+  "culture clash": {
+    definition: "A conflict arising from different beliefs, values, and styles of working between the employees of the two merged companies.",
+    French: "conflit de culture d'entreprise",
+    German: "Kulturkonflikt",
+    Italian: "scontro culturale",
+    image: "/images/vocab/culture-clash.jpg",
+    multiple_choice: ["synergy", "harmonization", "attrition"]
+  },
+
+  "redundancy": {
+    definition: "The elimination of jobs or roles that are no longer needed because the functions overlap between the two merged companies.",
+    French: "doublon / licenciement économique",
+    German: "Redundanz / Stellenabbau",
+    Italian: "esubero",
+    image: "/images/vocab/redundancy.jpg",
+    multiple_choice: ["recruitment", "outsourcing", "onboarding"]
+  },
+
+  "attrition": {
+    definition: "The loss of key employees (talent drain) who choose to leave the company due to uncertainty or dissatisfaction following a merger.",
+    French: "attrition / départ de personnel",
+    German: "Personalfluktuation",
+    Italian: "logoramento del personale",
+    image: "/images/vocab/attrition.jpg",
+    multiple_choice: ["retention", "headhunting", "promotion"]
+  },
+
+  "harmonization": {
+    definition: "The process of aligning different systems, policies, and benefits (like payroll or IT) to ensure consistency across the new entity.",
+    French: "harmonisation",
+    German: "Harmonisierung",
+    Italian: "armonizzazione",
+    image: "/images/vocab/harmonization.jpg",
+    multiple_choice: ["diversification", "disruption", "segregation"]
+  },
+
+  "diseconomies of scale": {
+    definition: "An increase in unit costs that occurs when a merged company becomes too large or inefficient to manage effectively.",
+    French: "déséconomies d'échelle",
+    German: "Größennachteile",
+    Italian: "diseconomie di scala",
+    image: "/images/vocab/diseconomies.jpg",
+    multiple_choice: ["economies of scale", "profit margin", "asset strip"]
+  },
+
+  "restructuring": {
+    definition: "A significant overhaul of a company's internal structure and operations to improve efficiency after a merger.",
+    French: "restructuration",
+    German: "Umstrukturierung",
+    Italian: "ristrutturazione",
+    image: "/images/vocab/restructuring.jpg",
+    multiple_choice: ["incorporation", "expansion", "merger"]
+  },
+
+  "cannibalization": {
+    definition: "When a newly acquired brand or product reduces the sales of the acquiring company's existing products.",
+    French: "cannibalisation",
+    German: "Kannibalisierungseffekt",
+    Italian: "cannibalizzazione",
+    image: "/images/vocab/cannibalization.jpg",
+    multiple_choice: ["market penetration", "diversification", "synergy"]
+  },
+
+  "divestment": {
+    definition: "The forced or strategic sale of certain business units, often required by regulators to prevent a monopoly after a merger.",
+    French: "désinvestissement / cession",
+    German: "Desinvestition / Veräußerung",
+    Italian: "disinvestimento",
+    image: "/images/vocab/divestment.jpg",
+    multiple_choice: ["acquisition", "merger", "investment"]
+  },
+
+  "rebranding": {
+    definition: "The process of changing the corporate image or name of the merged companies to create a new unified identity.",
+    French: "changement d'image de marque",
+    German: "Rebranding / Markenumbenennung",
+    Italian: "rebranding",
+    image: "/images/vocab/rebranding.jpg",
+    multiple_choice: ["marketing", "trademarking", "positioning"]
+  }
+};
