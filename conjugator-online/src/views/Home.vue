@@ -2,7 +2,7 @@
   <v-container fluid class="d-flex flex-column pa-1">
     <div class="top-controls mb-8">
       <div v-if="auth.isLoggedIn" class="mt-4 me-4">
-        <span class="me-6 text-title-small">Welcome back <InitialsText />!</span>
+        <span v-if="!smAndDown" class="me-6 text-title-small">Welcome back <InitialsText />!</span>
         <LogOutButton v-if="!smAndDown"></LogOutButton>
       </div>
       <div v-else>
@@ -46,7 +46,7 @@
     >
       <!-- XS: hero button MUST be on top -->
       <v-col
-        v-if="xs && auth.isLoggedIn"
+        v-if="xs"
         cols="12"
         class="d-flex justify-center mb-4"
         style="order: -1;"
@@ -128,7 +128,7 @@
     </v-row>
 
     <!-- Non-XS hero dashboard button (unchanged) -->
-    <v-row v-if="!xs && auth.isLoggedIn" justify="center" align="center" dense style="margin-left: 17%; margin-right: 17%; margin-top: 2%;">
+    <v-row v-if="!xs" justify="center" align="center" dense style="margin-left: 17%; margin-right: 17%; margin-top: 2%;">
       <v-col cols="12" md="6" lg="5" class="d-flex justify-center mb-10 mx-auto">
         <v-btn
           :to="{ name: 'dashboard' }"
