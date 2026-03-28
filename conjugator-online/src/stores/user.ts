@@ -26,6 +26,32 @@ interface Student {
   domain: string | null;
   user: User | null;
   score_history: Record<string, ScoreSnapshot>;
+  linguistic_profile?: LinguisticProfile; 
+}
+
+interface ProfileType {
+  type: string;
+  emoji: string;
+  color: string;
+  description: string;
+  advice: string;
+  strengths: string[];
+  focus_areas: string[];
+}
+
+interface LinguisticProfile {
+  linguistic_precision: number | null;
+  linguistic_precision_comment: string | null;
+  phonetic_clarity: number | null;
+  phonetic_clarity_comment: string | null;
+  communicative_flow: number | null;
+  communicative_flow_comment: string | null;
+  expressive_range: number | null;
+  expressive_range_comment: string | null;
+  latest_assessment: string | null;
+  last_assessed_at: string | null;
+  linguistic_profile_history: Record<string, any>;
+  profile_type?: ProfileType;
 }
 
 interface Course {
@@ -107,12 +133,46 @@ export const useUserStore = defineStore("user", () => {
   const user = ref<User | null>(null);
   const student = ref<Student | null>(null);
 
+  // Linguistic Profile state
+  const linguisticProfile = ref<LinguisticProfile | null>(null);
+  const loadingLinguisticProfile = ref(false);
+  const linguisticProfileError = ref<string | null>(null);
+
   // --- Computed ---
   const isStaff = computed(() => user.value?.is_staff ?? false);
   const isSuperuser = computed(() => user.value?.is_superuser ?? false);
   const studentId = computed(() => student.value?.id ?? null);
   const totalCorrect = computed(() => student.value?.total_correct_prompts ?? 0);
   const healthScore = computed(() => student.value?.health_score ?? 0);
+
+    // Linguistic Profile Computed
+  const hasLinguisticProfile = computed(() => {
+    return linguisticProfile.value && (
+      linguisticProfile.value.linguistic_precision !== null ||
+      linguisticProfile.value.phonetic_clarity !== null ||
+      linguisticProfile.value.communicative_flow !== null ||
+      linguisticProfile.value.expressive_range !== null
+    );
+  });
+
+  const assessmentStageLabel = computed(() => {
+    if (!linguisticProfile.value?.latest_assessment) return null;
+    
+    const stages: Record<string, string> = {
+      'initial': 'Initial Assessment',
+      'mid_sem_1': 'Mid-Semester 1',
+      'end_sem_1': 'End Semester 1',
+      'mid_sem_2': 'Mid-Semester 2',
+      'end_sem_2': 'End Semester 2',
+      'mid_sem_3': 'Mid-Semester 3',
+      'end_sem_3': 'End Semester 3',
+      'mid_sem_4': 'Mid-Semester 4',
+      'end_sem_4': 'End Semester 4',
+      'exit': 'Exit Assessment',
+    };
+    
+    return stages[linguisticProfile.value.latest_assessment] || linguisticProfile.value.latest_assessment;
+  });
 
   // --- Token exists check (single source of truth: auth store) ---
   function hasAccessToken(): boolean {
@@ -173,6 +233,32 @@ export const useUserStore = defineStore("user", () => {
       .map(([date, scores]) => ({ date, ...scores }))
       .sort((a, b) => b.date.localeCompare(a.date));
   });
+
+  // Fetch Linguistic Profile
+  async function fetchLinguisticProfile() {
+    if (!hasAccessToken()) return;
+
+    loadingLinguisticProfile.value = true;
+    linguisticProfileError.value = null;
+
+    try {
+      const response = await api.get<LinguisticProfile>("/linguistic-profiles/me/");
+      linguisticProfile.value = response.data;
+      console.log("Fetched linguistic profile:", linguisticProfile.value);
+    } catch (err: any) {
+      console.error("Failed to fetch linguistic profile:", err);
+      
+      // Don't treat 404 as an error - student just doesn't have a profile yet
+      if (err?.response?.status === 404) {
+        linguisticProfile.value = null;
+        linguisticProfileError.value = null;
+      } else {
+        linguisticProfileError.value = "Failed to fetch linguistic profile";
+      }
+    } finally {
+      loadingLinguisticProfile.value = false;
+    }
+  }
 
   // --- Enrollments ---
   const enrollments = ref<StudentCourse[]>([]);
@@ -444,6 +530,14 @@ async function fetchStudentData() {
     // domain
     studentDomain,
     studentDomainLabel,
+
+    // linguistic profile
+    linguisticProfile,
+    loadingLinguisticProfile,
+    linguisticProfileError,
+    hasLinguisticProfile,
+    assessmentStageLabel,
+    fetchLinguisticProfile,
 
     // verb usage
     verbUsage,

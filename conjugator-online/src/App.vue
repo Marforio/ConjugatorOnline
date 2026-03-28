@@ -5,6 +5,8 @@
 
     <v-main>
       <RouterView />
+
+      <NotificationSnackbar />
     </v-main>
   </v-app>
 </template>
@@ -13,6 +15,7 @@
 import { useRoute } from 'vue-router'
 import { computed } from 'vue'
 import TopNavBar from '@/components/TopNavBar.vue'
+import NotificationSnackbar from '@/components/NotificationsSnackBar.vue';
 import { useInactivityTimeout } from "@/composables/useInactivityTimeout";
 import { useAuthStore } from './stores/auth';
 

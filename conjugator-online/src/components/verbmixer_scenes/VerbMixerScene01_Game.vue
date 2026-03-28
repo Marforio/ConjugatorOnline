@@ -198,6 +198,9 @@ import api from '@/axios'
 
 // game answer checking
 import { checkAnswer, getAcceptedAnswers } from '@/assets/scripts/verb_mixer/VerbMixerGameLogic'
+import { useGameCompletion } from '@/composables/useGameCompletion';
+
+const { onGameCompleted } = useGameCompletion();
 
 const ROUND_SECONDS = 15
 const WARN_SECONDS = 9
@@ -491,6 +494,7 @@ async function finishGame() {
   }
 
   emit('gameOver', payload)
+  onGameCompleted()
 }
 
 /* ------------------------------------------------------------------

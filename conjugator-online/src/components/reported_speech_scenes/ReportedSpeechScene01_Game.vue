@@ -243,6 +243,9 @@ import {
   highlightSubstringHtml,
   buildCorrectAnswerLabel,
 } from "@/assets/scripts/reported_speech/ReportedSpeechPromptEngine";
+import { useGameCompletion } from '@/composables/useGameCompletion';
+
+const { onGameCompleted } = useGameCompletion();
 
 const ROUND_SECONDS = 20;
 const WARN_SECONDS =10;
@@ -612,6 +615,7 @@ async function finishGame() {
   }
 
   emit("gameOver", payload);
+  onGameCompleted();
 }
 
 /* ------------------------------------------------------------------

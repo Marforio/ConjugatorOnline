@@ -27,7 +27,7 @@
 
     <!-- Tab Content -->
     <v-window v-model="activeTab" class="mt-5" :touch="false">
-      <v-window-item value="to-do">
+      <v-window-item value="welcome">
         <ToDoDash v-if="!userStore.isStaff" />
       </v-window-item>
       <v-window-item value="grammar-feedback">
@@ -688,6 +688,7 @@ import VocabDataTab from "@/components/VocabDataTab.vue";
 import GoalsDataTab from "@/components/GoalsDataTab.vue";
 import ToDoDash from "@/components/ToDoDash.vue";
 import Gauge from "@/components/Gauge.vue"
+import { useNotificationStore } from '@/stores/notifications';
 
 // ---------------- Types ----------------
 interface Round {
@@ -727,6 +728,7 @@ export default defineComponent({
   setup() {
     const router = useRouter();
     const route = useRoute();
+    const notificationStore = useNotificationStore();
     const sessions = ref<GameSession[]>([]);
     const loading = ref<boolean>(true);
     const errorsError = ref<string | null>(null);
@@ -1018,9 +1020,9 @@ export default defineComponent({
     });
 
 
-    const activeTab = ref("to-do");
+    const activeTab = ref("welcome");
     const tabItems = [
-      { value: "to-do", label: "To-Do List" },  // To-Do List
+      { value: "welcome", label: "Welcome" },  // Welcome
       { value: "grammar-feedback", label: "Errors" },   // Error feedback
       { value: "vocabulary", label: "Vocab" },
       { value: "conjugation-game", label: "Conjugator" },
@@ -1163,6 +1165,7 @@ export default defineComponent({
       setInitialTabFromRoute();
       pickRandomError();
       nextMasteredVerb();
+      notificationStore.checkNow();
     });
 
     function setInitialTabFromRoute(): void {

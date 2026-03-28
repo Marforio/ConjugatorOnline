@@ -664,6 +664,10 @@ import VWSessionAttemptsTable from "@/components/vocab_workout_scenes/VWSessionA
 
 import type { ContextIndex, ContextHit } from "@/assets/scripts/vocab_workout/vocabWorkoutContextRegistry";
 import { contextByListKey, normalizeContextKey, contextApprovedListKeys } from "@/assets/scripts/vocab_workout/vocabWorkoutContextRegistry";
+import { useGameCompletion } from '@/composables/useGameCompletion';
+
+const { onGameCompleted } = useGameCompletion();
+
 
 /* =========================================================
    Props / Emits
@@ -1897,6 +1901,7 @@ async function finishGame() {
       session_id: sessionId.value ?? null,
       finished: true,
     });
+    onGameCompleted();
 
     completing.value = false;
     isSubmitting.value = false;

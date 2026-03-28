@@ -189,6 +189,10 @@ import {
   buildCorrectAnswerLabel,
 } from "@/assets/scripts/comparison/ComparisonPromptEngine";
 
+import { useGameCompletion } from '@/composables/useGameCompletion';
+
+const { onGameCompleted } = useGameCompletion();
+
 const ROUND_SECONDS = 25;
 const WARN_SECONDS = 10;
 const DANGER_SECONDS = 4;
@@ -470,6 +474,7 @@ async function finishGame() {
   }
 
   emit("gameOver", payload);
+  onGameCompleted(); // Schedule notification check after game completion
 }
 
 function handleEnter(e) {

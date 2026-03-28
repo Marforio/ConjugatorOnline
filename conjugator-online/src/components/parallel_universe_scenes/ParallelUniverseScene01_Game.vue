@@ -192,6 +192,9 @@
 import { ref, computed, onMounted, onBeforeUnmount, nextTick, watch } from "vue";
 import api from "@/axios";
 import { checkAnswer, getAcceptedAnswers } from "@/assets/scripts/parallel_universe/ParallelUniversePromptEngine";
+import { useGameCompletion } from '@/composables/useGameCompletion';
+
+const { onGameCompleted } = useGameCompletion();
 
 const ROUND_SECONDS = 20;
 const WARN_SECONDS = 9;
@@ -467,7 +470,7 @@ async function finishGame() {
   const avgTime = resultsStore.value.length > 0 ? totalSeconds / resultsStore.value.length : 0;
 
   const payload = {
-    game_name: "Parallel Universe",
+    game_name: typesLabel === "3rd" ? "Parallel Universe - all 3rd" : typesLabel === "2nd" ? "Parallel Universe - all 2nd" : typesLabel === "1st" ? "Parallel Universe - all 1st" : "Parallel Universe -  mix",
     total_rounds: numRounds.value,
     correct_count: rightCount.value,
     wrong_count: wrongCount.value,
@@ -488,6 +491,7 @@ async function finishGame() {
   }
 
   emit("gameOver", payload);
+  onGameCompleted();
 }
 
 /* ---------------- Keyboard ---------------- */

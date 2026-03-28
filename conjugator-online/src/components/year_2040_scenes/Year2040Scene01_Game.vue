@@ -202,6 +202,9 @@ import { ref, computed, nextTick, watch, onMounted, onBeforeUnmount } from "vue"
 import api from "@/axios";
 
 import { checkAnswer, getAcceptedAnswers } from "@/assets/scripts/year_2040/Year2040PromptEngine";
+import { useGameCompletion } from '@/composables/useGameCompletion';
+
+const { onGameCompleted } = useGameCompletion();
 
 const ROUND_SECONDS = 20;
 const WARN_SECONDS = 9;
@@ -474,6 +477,7 @@ async function finishGame() {
   }
 
   emit("gameOver", payload);
+  onGameCompleted();
 }
 
 /* ---------------- Keyboard ---------------- */

@@ -328,6 +328,9 @@ import QuantifierGame from '@/assets/scripts/quantifier/quantifierGame.js';
 import { ref, reactive, computed, onBeforeUnmount } from 'vue';
 import { useRouter, onBeforeRouteLeave } from 'vue-router';
 import api from '@/axios';
+import { useGameCompletion } from '@/composables/useGameCompletion';
+
+const { onGameCompleted } = useGameCompletion();
 
 const router = useRouter();
 const emit = defineEmits(['gameOver']);
@@ -622,6 +625,7 @@ async function endGame() {
   setTimeout(() => {
     showBlockingDialog.value = false;
     emit('gameOver', payload);
+    onGameCompleted();
   }, 1000);
 }
 

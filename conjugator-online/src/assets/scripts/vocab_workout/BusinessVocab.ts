@@ -4130,7 +4130,7 @@ export const startUps = {
     "French": "pitch éclair",
     "German": "Elevator Pitch",
     "Italian": "elevator pitch",
-    "image": "/images/vocab/elevator_pitch.jpg",
+    "image": "/images/vocab/elevator-pitch.jpg",
     "multiple_choice": ["quick pitch", "short presentation", "summary speech"],
     "accepted": [],
     "synonyms": []
@@ -4163,7 +4163,7 @@ export const startUps = {
     "French": "cofondateur/cofondatrice",
     "German": "Mitgründer(in)",
     "Italian": "cofondatore/cofondatrice",
-    "image": "/images/vocab/co_founder.jpg",
+    "image": "/images/vocab/co-founder.jpg",
     "multiple_choice": ["joint founder", "founding partner", "collaborative founder"],
     "accepted": [],
     "synonyms": []
@@ -4317,7 +4317,7 @@ export const startUps = {
     "French": "produit minimum viable",
     "German": "Minimum Viable Product",
     "Italian": "prodotto minimo funzionante",
-    "image": "/images/vocab/mvp.jpg",
+    "image": "/images/vocab/MVP.jpg",
     "multiple_choice": ["prototype", "basic product", "initial version"],
     "accepted": [],
     "synonyms": []
@@ -4350,7 +4350,7 @@ export const startUps = {
     "French": "pivot",
     "German": "Strategiewechsel",
     "Italian": "pivot",
-    "image": "/images/vocab/pivot.jpg",
+    "image": "/images/vocab/pivot2.jpg",
     "multiple_choice": ["strategic shift", "direction change", "business transformation"],
     "accepted": [],
     "synonyms": []
@@ -4383,7 +4383,7 @@ export const startUps = {
     "French": "acquisition",
     "German": "Übernahme",
     "Italian": "acquisizione",
-    "image": "/images/vocab/acquisition.jpg",
+    "image": "/images/vocab/aquisition.jpg",
     "multiple_choice": ["buyout", "takeover", "purchase"],
     "accepted": [],
     "synonyms": []
@@ -5770,7 +5770,7 @@ export const TakeoversAndMergers = {
     French: "audit préalable / diligence raisonnable",
     German: "Sorgfaltspflicht / Due-Diligence-Prüfung",
     Italian: "due diligence",
-    image: "/images/vocab/due-diligence.jpg",
+    image: "/images/vocab/due_diligence.jpg",
     multiple_choice: ["valuation", "compliance", "tender offer"]
   },
 

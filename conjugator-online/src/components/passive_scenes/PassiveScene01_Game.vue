@@ -175,6 +175,9 @@
 import { ref, computed, onMounted, onBeforeUnmount, nextTick, watch } from 'vue'
 import { checkAnswer } from '@/assets/scripts/passive/PassivePromptEngine'
 import api from '@/axios'
+import { useGameCompletion } from '@/composables/useGameCompletion';
+
+const { onGameCompleted } = useGameCompletion();
 
 const ROUND_SECONDS = 25
 const WARN_SECONDS = 10
@@ -420,6 +423,7 @@ async function finishGame() {
   }
 
   emit('gameOver', payload);
+  onGameCompleted();
 }
 
 

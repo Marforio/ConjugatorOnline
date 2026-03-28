@@ -276,7 +276,9 @@ import { getAccessToken } from "@/services/auth";
 import Game from "@/assets/scripts/Game";
 import InitialsText from "../InitialsText.vue";
 import { useUserStore } from "@/stores/user";
+import { useGameCompletion } from '@/composables/useGameCompletion';
 
+const { onGameCompleted } = useGameCompletion();
 // ---------------- props / emits ----------------
 type GameSettings = {
   verbSet: string;
@@ -623,6 +625,7 @@ async function endGame() {
     emit("gameOver", payload);
     stopOverallTimer();
     endRoundTimer();
+    onGameCompleted(); // Schedule notification check after game completion   
   }, 600);
 }
 

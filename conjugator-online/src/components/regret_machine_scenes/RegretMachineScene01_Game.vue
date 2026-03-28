@@ -189,6 +189,9 @@
 import { ref, computed, onMounted, onBeforeUnmount, nextTick, watch } from "vue";
 import api from "@/axios";
 import { checkAnswer, getAcceptedAnswers } from "@/assets/scripts/regret_machine/RegretMachinepromptEngine";
+import { useGameCompletion } from '@/composables/useGameCompletion';
+
+const { onGameCompleted } = useGameCompletion();
 
 
 const ROUND_SECONDS = 25;
@@ -459,6 +462,7 @@ async function finishGame() {
   }
 
   emit("gameOver", payload);
+  onGameCompleted();
 }
 
 /* ---------------- Keyboard ---------------- */

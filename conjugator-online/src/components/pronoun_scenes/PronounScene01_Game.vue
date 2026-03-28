@@ -246,6 +246,9 @@ import { ref, reactive, computed, onBeforeUnmount, nextTick, watch } from 'vue';
 import { onBeforeRouteLeave } from 'vue-router';
 import { useRouter } from 'vue-router';
 import api from '@/axios';
+import { useGameCompletion } from '@/composables/useGameCompletion';
+
+const { onGameCompleted } = useGameCompletion();
 
 const router = useRouter();
 const gameSettings = reactive({
@@ -525,7 +528,7 @@ async function endGame() {
   setTimeout(() => {
     showBlockingDialog.value = false;
     emit('gameOver', payload);
-    console.log(payload)
+    onGameCompleted();
     // optionally stop timers if needed
     // endTimer();
   }, 1000);

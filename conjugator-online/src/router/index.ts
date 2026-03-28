@@ -8,6 +8,7 @@ import VocabWorkout from '@/views/VocabWorkout.vue'
 import Admin from '@/views/Admin.vue'
 import { path } from 'd3'
 import { useUserStore } from '@/stores/user'
+import { useNotificationStore } from '@/stores/notifications' 
 
 const routes = [
   { path: '/', name: 'home', component: Home },
@@ -53,6 +54,7 @@ const router = createRouter({
 router.beforeEach(async (to, from, next) => {
   const auth = useAuthStore();
   const userStore = useUserStore();
+  const notificationStore = useNotificationStore(); 
 
   // Wait for auth hydration before running checks
   if (!auth.isRestored) {
@@ -90,8 +92,31 @@ router.beforeEach(async (to, from, next) => {
     return next({ name: "home" });
   }
 
+    // Check for notifications when navigating to key pages
+  if (to.meta.checkNotifications && !userStore.isStaff) {
+    checkNotificationsIfNeeded(notificationStore);
+  }
+
+
   return next();
 });
+
+
+/**
+ * Check for notifications if it's been more than 5 minutes since last check
+ */
+function checkNotificationsIfNeeded(notificationStore: any) {
+  const lastCheck = notificationStore.lastChecked;
+  const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+  
+  if (!lastCheck || lastCheck < fiveMinutesAgo) {
+    console.log('🔔 Router: Checking for notifications (5+ minutes since last check)');
+    notificationStore.checkNow();
+  } else {
+    const timeSinceCheck = Math.floor((Date.now() - lastCheck.getTime()) / 1000);
+    console.log(`🔔 Router: Skipping notification check (last checked ${timeSinceCheck}s ago)`);
+  }
+}
 
 
 export default router

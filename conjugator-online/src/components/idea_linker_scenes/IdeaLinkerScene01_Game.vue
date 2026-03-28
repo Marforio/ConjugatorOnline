@@ -338,6 +338,10 @@ import {
   splitPromptIntoIdeas
 } from "@/assets/scripts/idea_linker/IdeaLinkerPromptEngine";
 
+import { useGameCompletion } from '@/composables/useGameCompletion';
+
+const { onGameCompleted } = useGameCompletion();
+
 const props = defineProps({
   rounds: { type: Array, required: true },
   gameSettings: { type: Object, default: null },
@@ -675,6 +679,7 @@ async function finishGame() {
   }
 
   emit("gameOver", payload);
+  onGameCompleted();
 }
 
 /* unified Enter */
