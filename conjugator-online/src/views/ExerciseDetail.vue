@@ -7,12 +7,12 @@
       <!--                       PRE-EXERCISE                       -->
       <!-- ========================================================= -->
       <div v-if="phase === 'pre'">
-        <h1 class="text-h5 mb-4">Error {{ errorCode }}</h1>
+        <h1 class="text-h5 mb-4">Error {{ errorCode }}: {{ errorEntry.description }}</h1>
 
-        <p><strong>Description:</strong> {{ errorEntry.description }}</p>
+        <p><strong>Description:</strong> </p>
         <p><strong>Recommendation:</strong> {{ errorEntry.recommendation }}</p>
         <p><strong>Examples:</strong> {{ errorEntry.examples }}</p>
-        <div v-html="errorEntry.reference"></div>
+        <p><strong>Reference:</strong> See the full explanation in the grammar book for <span class="ms-1" v-html="errorEntry.reference"></span> </p>
 
         <v-divider class="my-6" />
 

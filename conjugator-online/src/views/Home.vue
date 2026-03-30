@@ -1,6 +1,6 @@
 <template>
   <v-container fluid class="d-flex flex-column pa-1">
-    <div class="top-controls mb-8">
+    <div class="top-controls mb-4">
       <div v-if="auth.isLoggedIn" class="mt-4 me-4">
         <span v-if="!smAndDown" class="me-6 text-title-small">Welcome back <InitialsText />!</span>
         <LogOutButton v-if="!smAndDown"></LogOutButton>

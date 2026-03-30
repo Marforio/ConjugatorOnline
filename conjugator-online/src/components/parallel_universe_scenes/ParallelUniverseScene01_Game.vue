@@ -469,7 +469,14 @@ async function finishGame() {
 
   const avgTime = resultsStore.value.length > 0 ? totalSeconds / resultsStore.value.length : 0;
 
-  const payload = {
+const tl = typesLabel.value;
+
+const payload = {
+  game_name:
+    tl === "3rd" ? "Parallel Universe - all 3rd"
+    : tl === "2nd" ? "Parallel Universe - all 2nd"
+    : tl === "1st" ? "Parallel Universe - all 1st"
+    : "Parallel Universe - mix",
     game_name: typesLabel === "3rd" ? "Parallel Universe - all 3rd" : typesLabel === "2nd" ? "Parallel Universe - all 2nd" : typesLabel === "1st" ? "Parallel Universe - all 1st" : "Parallel Universe -  mix",
     total_rounds: numRounds.value,
     correct_count: rightCount.value,
