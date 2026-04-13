@@ -4,7 +4,7 @@
     <!-- Snackbar for new notifications -->
     <v-snackbar
       v-model="showSnackbar"
-      :timeout="6000"
+      :timeout="10000"
       location="top right"
       :color="currentNotification?.notification_type === 'achievement' ? 'amber-darken-2' : 'success'"
       elevation="8"

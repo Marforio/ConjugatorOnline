@@ -1,3 +1,5 @@
+// stores/user.ts
+
 import { ref, computed } from "vue";
 import { defineStore } from "pinia";
 import { useAuthStore } from "@/stores/auth";
@@ -118,6 +120,30 @@ interface VocabItem {
   feedback: Feedback;
 }
 
+// NEW: Workout interfaces
+interface WorkoutDrill {
+  id?: number;
+  type: 'pronunciation' | 'conjugation' | 'vocabulary' | 'grammar' | 'fluency' | 'listening' | 'other';
+  name: string;
+  description: string;
+  target_reps?: number | null;
+  target_sessions?: number | null;
+  completed_sessions: number;
+  notes: string;
+}
+
+interface Workout {
+  id: number;
+  student: number;
+  student_initials: string;
+  created_at: string;
+  updated_at: string;
+  is_current: boolean;
+  focus_area: string;
+  notes: string;
+  drills: WorkoutDrill[];
+}
+
 export type SmartVerbPoolByTense = {
   verb_set: string;
   batch_size: number | null;
@@ -127,7 +153,7 @@ export type SmartVerbPoolByTense = {
 
 // --- Store ---
 export const useUserStore = defineStore("user", () => {
-  const auth = useAuthStore(); // ✅ define once
+  const auth = useAuthStore();
 
   // --- Core state ---
   const user = ref<User | null>(null);
@@ -138,6 +164,12 @@ export const useUserStore = defineStore("user", () => {
   const loadingLinguisticProfile = ref(false);
   const linguisticProfileError = ref<string | null>(null);
 
+  // NEW: Workout state
+  const currentWorkout = ref<Workout | null>(null);
+  const workoutHistory = ref<Workout[]>([]);
+  const loadingWorkout = ref(false);
+  const workoutError = ref<string | null>(null);
+
   // --- Computed ---
   const isStaff = computed(() => user.value?.is_staff ?? false);
   const isSuperuser = computed(() => user.value?.is_superuser ?? false);
@@ -145,7 +177,7 @@ export const useUserStore = defineStore("user", () => {
   const totalCorrect = computed(() => student.value?.total_correct_prompts ?? 0);
   const healthScore = computed(() => student.value?.health_score ?? 0);
 
-    // Linguistic Profile Computed
+  // Linguistic Profile Computed
   const hasLinguisticProfile = computed(() => {
     return linguisticProfile.value && (
       linguisticProfile.value.linguistic_precision !== null ||
@@ -174,7 +206,32 @@ export const useUserStore = defineStore("user", () => {
     return stages[linguisticProfile.value.latest_assessment] || linguisticProfile.value.latest_assessment;
   });
 
-  // --- Token exists check (single source of truth: auth store) ---
+  // NEW: Workout computed
+  const hasCurrentWorkout = computed(() => currentWorkout.value !== null);
+
+  const workoutDrillCount = computed(() => {
+    return currentWorkout.value?.drills?.length ?? 0;
+  });
+
+  const workoutCompletionPercentage = computed(() => {
+    if (!currentWorkout.value?.drills?.length) return 0;
+    
+    const totalSessions = currentWorkout.value.drills.reduce(
+      (sum, drill) => sum + (drill.target_sessions ?? 0),
+      0
+    );
+    
+    if (totalSessions === 0) return 0;
+    
+    const completedSessions = currentWorkout.value.drills.reduce(
+      (sum, drill) => sum + drill.completed_sessions,
+      0
+    );
+    
+    return Math.round((completedSessions / totalSessions) * 100);
+  });
+
+  // --- Token exists check ---
   function hasAccessToken(): boolean {
     return !!auth.access;
   }
@@ -197,7 +254,6 @@ export const useUserStore = defineStore("user", () => {
     }
   }
 
-  // Optional: keep fetchUserData name if other parts of app call it
   async function fetchUserData() {
     await ensureUserLoaded();
   }
@@ -248,7 +304,6 @@ export const useUserStore = defineStore("user", () => {
     } catch (err: any) {
       console.error("Failed to fetch linguistic profile:", err);
       
-      // Don't treat 404 as an error - student just doesn't have a profile yet
       if (err?.response?.status === 404) {
         linguisticProfile.value = null;
         linguisticProfileError.value = null;
@@ -257,6 +312,155 @@ export const useUserStore = defineStore("user", () => {
       }
     } finally {
       loadingLinguisticProfile.value = false;
+    }
+  }
+
+  // Fetch Current Workout
+  async function fetchCurrentWorkout(studentIdOverride?: number) {
+    if (!hasAccessToken()) return;
+
+    const sid = studentIdOverride ?? studentId.value;
+    if (!sid) {
+      workoutError.value = "No student ID available";
+      return;
+    }
+
+    loadingWorkout.value = true;
+    workoutError.value = null;
+
+    try {
+      const response = await api.get<Workout>(`/workouts/current/${sid}/`);
+      currentWorkout.value = response.data;
+      console.log("Fetched current workout:", currentWorkout.value);
+    } catch (err: any) {
+      console.error("Failed to fetch current workout:", err);
+      
+      if (err?.response?.status === 404) {
+        currentWorkout.value = null;
+        workoutError.value = null; // Not an error, just no workout
+      } else {
+        workoutError.value = "Failed to fetch current workout";
+      }
+    } finally {
+      loadingWorkout.value = false;
+    }
+  }
+
+  // NEW: Fetch Workout History
+  async function fetchWorkoutHistory(studentIdOverride?: number) {
+    if (!hasAccessToken()) return;
+
+    const sid = studentIdOverride ?? studentId.value;
+    if (!sid) {
+      workoutError.value = "No student ID available";
+      return;
+    }
+
+    loadingWorkout.value = true;
+    workoutError.value = null;
+
+    try {
+      const response = await api.get<Workout[]>(`/workouts/by_student/${sid}/`);
+      workoutHistory.value = response.data;
+      console.log("Fetched workout history:", workoutHistory.value);
+    } catch (err: any) {
+      console.error("Failed to fetch workout history:", err);
+      workoutError.value = "Failed to fetch workout history";
+    } finally {
+      loadingWorkout.value = false;
+    }
+  }
+
+  // NEW: Create Workout
+  async function createWorkout(workoutData: {
+    student: number;
+    focus_area: string;
+    notes: string;
+    drills: WorkoutDrill[];
+  }) {
+    if (!hasAccessToken()) return null;
+
+    try {
+      const response = await api.post<Workout>('/workouts/', workoutData);
+      console.log("Created workout:", response.data);
+      
+      // Refresh current workout
+      await fetchCurrentWorkout(workoutData.student);
+      
+      return response.data;
+    } catch (err: any) {
+      console.error("Failed to create workout:", err);
+      workoutError.value = "Failed to create workout";
+      return null;
+    }
+  }
+
+  // NEW: Update Workout Progress
+  async function updateWorkoutProgress(workoutId: number, drills: WorkoutDrill[]) {
+    if (!hasAccessToken()) return null;
+
+    try {
+      const response = await api.post<Workout>(
+        `/workouts/${workoutId}/update_progress/`,
+        { drills }
+      );
+      console.log("Updated workout progress:", response.data);
+      
+      // Update local state
+      if (currentWorkout.value?.id === workoutId) {
+        currentWorkout.value = response.data;
+      }
+      
+      return response.data;
+    } catch (err: any) {
+      console.error("Failed to update workout progress:", err);
+      workoutError.value = "Failed to update workout progress";
+      return null;
+    }
+  }
+
+  // NEW: Update Workout Metadata
+  async function updateWorkout(
+    workoutId: number,
+    updates: { focus_area?: string; notes?: string; drills?: WorkoutDrill[] }
+  ) {
+    if (!hasAccessToken()) return null;
+
+    try {
+      const response = await api.patch<Workout>(`/workouts/${workoutId}/`, updates);
+      console.log("Updated workout:", response.data);
+      
+      // Update local state
+      if (currentWorkout.value?.id === workoutId) {
+        currentWorkout.value = response.data;
+      }
+      
+      return response.data;
+    } catch (err: any) {
+      console.error("Failed to update workout:", err);
+      workoutError.value = "Failed to update workout";
+      return null;
+    }
+  }
+
+  // NEW: Archive Workout
+  async function archiveWorkout(workoutId: number) {
+    if (!hasAccessToken()) return false;
+
+    try {
+      await api.post(`/workouts/${workoutId}/archive/`);
+      console.log("Archived workout:", workoutId);
+      
+      // Clear current workout if it was the one archived
+      if (currentWorkout.value?.id === workoutId) {
+        currentWorkout.value = null;
+      }
+      
+      return true;
+    } catch (err: any) {
+      console.error("Failed to archive workout:", err);
+      workoutError.value = "Failed to archive workout";
+      return false;
     }
   }
 
@@ -269,28 +473,29 @@ export const useUserStore = defineStore("user", () => {
     student.value = data;
   }
 
-  // NOTE: do NOT clear tokens here anymore; auth store owns tokens
   function clearStudent() {
     student.value = null;
     user.value = null;
     userLoaded.value = false;
     enrollments.value = [];
+    currentWorkout.value = null;
+    workoutHistory.value = [];
   }
 
-async function fetchStudentData() {
-  try {
-    const res = await api.get<Student[]>("/students/");
-    console.log("fetchStudentData response:", res.data);
+  async function fetchStudentData() {
+    try {
+      const res = await api.get<Student[]>("/students/");
+      console.log("fetchStudentData response:", res.data);
 
-    const first = res.data?.[0] ?? null;  //  this is a hack where I'm taking the first element from a returned list. ideally the backend view should be changed to return a single student object under  /students/me/ endpoint
-    student.value = first;
+      const first = res.data?.[0] ?? null;
+      student.value = first;
 
-    console.log("fetchStudentData stored student:", student.value);
-  } catch (err: any) {
-    console.error("Failed to fetch student data:", err?.response?.status, err);
-    student.value = null;
+      console.log("fetchStudentData stored student:", student.value);
+    } catch (err: any) {
+      console.error("Failed to fetch student data:", err?.response?.status, err);
+      student.value = null;
+    }
   }
-}
 
   async function fetchEnrollments() {
     if (!hasAccessToken()) return;
@@ -538,6 +743,21 @@ async function fetchStudentData() {
     hasLinguisticProfile,
     assessmentStageLabel,
     fetchLinguisticProfile,
+
+    // NEW: workouts
+    currentWorkout,
+    workoutHistory,
+    loadingWorkout,
+    workoutError,
+    hasCurrentWorkout,
+    workoutDrillCount,
+    workoutCompletionPercentage,
+    fetchCurrentWorkout,
+    fetchWorkoutHistory,
+    createWorkout,
+    updateWorkoutProgress,
+    updateWorkout,
+    archiveWorkout,
 
     // verb usage
     verbUsage,

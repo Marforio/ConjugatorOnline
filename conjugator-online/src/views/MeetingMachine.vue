@@ -69,7 +69,7 @@
                 </RouterLink>
             </div>
         </div>
-        <div v-else-if="!simulationRunning" class="text-center mt-3" style="max-width: 1100px">
+        <div v-else-if="!simulationRunning" class="text-center mt-1" style="max-width: 1100px">
           <div ref="pdfContent" id="pdfContent">
           <v-list class="mb-1">
           <div style="margin-bottom: 50px;">

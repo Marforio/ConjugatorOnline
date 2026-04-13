@@ -5,19 +5,28 @@
         v-bind="props"
         color="grey-darken-2"
         @click="logout"
-        :loading="loggingOut"
+        :disabled="loggingOut || logoutDone"
         style="align-self: center; margin-right: 15px;"
       >
-        <template #loader>
-          <v-progress-circular indeterminate size="20" width="2" />
-        </template>
+        <!-- Show spinner during logout -->
+        <v-progress-circular 
+          v-if="loggingOut" 
+          indeterminate 
+          size="24" 
+          width="3"
+          color="white"
+        />
 
-        <v-icon v-if="!loggingOut && !logoutDone" size="large">mdi-logout</v-icon>
+        <!-- Show logout icon initially -->
+        <v-icon v-else-if="!logoutDone" size="large">
+          mdi-logout
+        </v-icon>
 
+        <!-- Show checkmark when done -->
         <v-icon
-          v-else-if="logoutDone"
+          v-else
           size="large"
-          color="green"
+          color="success"
           class="logout-check"
         >
           mdi-check
@@ -41,31 +50,41 @@ const logoutDone = ref(false);
 function logout() {
   loggingOut.value = true;
 
-  // Immediately clear session + user state (prevents any more authenticated calls)
-  auth.logout();
-  userStore.clearStudent(); // ensure this only clears user-related state
-
-  // Spinner visible first
+  // Show spinner for 800ms
   setTimeout(() => {
     loggingOut.value = false;
     logoutDone.value = true; // show checkmark
 
-    // Keep checkmark visible briefly, then redirect
+    // Keep checkmark visible for 600ms, then logout
     setTimeout(() => {
+      // Clear session + user state
+      auth.logout();
+      userStore.clearStudent();
+      
+      // Redirect
       window.location.href = "/";
-    }, 1000);
-  }, 1000);
+    }, 600);
+  }, 800);
 }
 </script>
 
 <style scoped>
 .logout-check {
-  animation: pop 0.35s ease-out forwards;
+  animation: pop 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
 }
 
 @keyframes pop {
-  0% { transform: scale(0.4); opacity: 0; }
-  70% { transform: scale(1.2); opacity: 1; }
-  100% { transform: scale(1); }
+  0% { 
+    transform: scale(0); 
+    opacity: 0; 
+  }
+  50% { 
+    transform: scale(1.3); 
+    opacity: 1; 
+  }
+  100% { 
+    transform: scale(1); 
+    opacity: 1; 
+  }
 }
 </style>

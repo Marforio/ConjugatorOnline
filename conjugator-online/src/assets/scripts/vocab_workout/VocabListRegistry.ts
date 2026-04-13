@@ -116,6 +116,18 @@ export const vocabLists = {
     data: BusinessReports,
     supportsLevels: false,
   },
+     meetingExpressionsM: {
+    title: "Meeting Expressions",
+    module: "Civil_2",
+    data: meetingExpressions,
+    supportsLevels: false,
+  },
+  meetingsM: {
+    title: "Meetings",
+    module: "Civil_2",
+    data: meetings,
+    supportsLevels: false,
+  },
   ////////////////////////////// MECHANICAL /////////////////////////////
 
   mechanicalForces: {
@@ -131,13 +143,13 @@ export const vocabLists = {
     supportsLevels: false,
   },
 
-   meetingExpressionsM: {
+   meetingExpressionsG: {
     title: "Meeting Expressions",
     module: "Mechanical_2",
     data: meetingExpressions,
     supportsLevels: false,
   },
-  meetingsM: {
+  meetingsG: {
     title: "Meetings",
     module: "Mechanical_2",
     data: meetings,

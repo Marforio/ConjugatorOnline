@@ -1,3 +1,4 @@
+// AdminErrorDataTab.vue
 <template>
   <div>
     <!-- Course filter -->

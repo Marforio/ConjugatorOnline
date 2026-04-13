@@ -19,6 +19,7 @@
       <!-- LEFT COLUMN: Latest Activity (full height) -->
       <v-col cols="12" md="5">
         <v-card class="activity-card" elevation="2" rounded="lg">
+          <!-- Header with Stats Integrated -->
           <div class="card-header pa-5">
             <div class="d-flex align-center justify-space-between">
               <div>
@@ -32,9 +33,6 @@
               </div>
             </div>
           </div>
-
-          <v-divider />
-
           <!-- Activity Feed -->
           <div class="activity-list pa-4">
             <!-- Loading State -->
@@ -43,44 +41,110 @@
               <div class="text-body-2 mt-2">Loading activity...</div>
             </div>
 
-            <!-- Activity Items -->
-            <v-timeline v-else-if="activityFeed.length > 0" density="compact" align="start">
-              <v-timeline-item
-                v-for="(activity, index) in activityFeed"
-                :key="index"
-                :dot-color="getActivityColor(activity.type)"
-                size="small"
-              >
-                <template v-slot:icon>
-                  <v-icon size="16">{{ getActivityIcon(activity.type) }}</v-icon>
-                </template>
+            <!-- Activity Filter & Timeline -->
+            <template v-else-if="activityFeed.length > 0">
+              <!-- Activity Filter -->
+              <div class="mb-4">
+                <v-chip-group
+                  v-model="activityFilter"
+                  column
+                  @update:model-value="fetchActivityFeed"
+                >
+                  <v-chip
+                    size="small"
+                    filter
+                    variant="outlined"
+                    value="all"
+                  >
+                    All
+                  </v-chip>
+                  <v-chip
+                    size="small"
+                    filter
+                    variant="outlined"
+                    value="conjugation"
+                    :prepend-icon="getActivityIcon('conjugation')"
+                  >
+                    Conjugation
+                  </v-chip>
+                  <v-chip
+                    size="small"
+                    filter
+                    variant="outlined"
+                    value="other_game"
+                    :prepend-icon="getActivityIcon('other_game')"
+                  >
+                    Games
+                  </v-chip>
+                  <v-chip
+                    size="small"
+                    filter
+                    variant="outlined"
+                    value="exercise"
+                    :prepend-icon="getActivityIcon('exercise')"
+                  >
+                    Exercises
+                  </v-chip>
+                  <v-chip
+                    size="small"
+                    filter
+                    variant="outlined"
+                    value="vocab_workout"
+                    :prepend-icon="getActivityIcon('vocab_workout')"
+                  >
+                    Vocab
+                  </v-chip>
+                  <v-chip
+                    size="small"
+                    filter
+                    variant="outlined"
+                    value="achievement"
+                    :prepend-icon="getActivityIcon('achievement')"
+                  >
+                    Achievements
+                  </v-chip>
+                </v-chip-group>
+              </div>
 
-                <div class="activity-item pa-3">
-                  <div class="d-flex align-items-start justify-space-between">
-                    <div class="flex-grow-1">
-                      <div class="text-body-2 font-weight-medium">
-                        {{ activity.title }}
+              <!-- Timeline -->
+              <v-timeline density="compact" align="start">
+                <v-timeline-item
+                  v-for="(activity, index) in activityFeed"
+                  :key="index"
+                  :dot-color="getActivityColor(activity.type)"
+                  size="small"
+                >
+                  <template v-slot:icon>
+                    <v-icon size="16">{{ getActivityIcon(activity.type) }}</v-icon>
+                  </template>
+
+                  <div class="activity-item pa-3">
+                    <div class="d-flex align-items-start justify-space-between">
+                      <div class="flex-grow-1">
+                        <div class="text-body-2 font-weight-medium">
+                          {{ activity.title }}
+                        </div>
+                        <div class="text-caption text-medium-emphasis mt-1">
+                          {{ activity.description }}
+                        </div>
                       </div>
-                      <div class="text-caption text-medium-emphasis mt-1">
-                        {{ activity.description }}
-                      </div>
+                      <v-chip 
+                        size="x-small" 
+                        :color="getActivityColor(activity.type)"
+                        variant="tonal"
+                        class="ml-2"
+                      >
+                        {{ getActivityLabel(activity.type) }}
+                      </v-chip>
                     </div>
-                    <v-chip 
-                      size="x-small" 
-                      :color="getActivityColor(activity.type)"
-                      variant="tonal"
-                      class="ml-2"
-                    >
-                      {{ getActivityLabel(activity.type) }}
-                    </v-chip>
+                    <div class="text-caption text-medium-emphasis mt-2">
+                      <v-icon size="12" class="mr-1">mdi-clock-outline</v-icon>
+                      {{ formatActivityTime(activity.timestamp) }}
+                    </div>
                   </div>
-                  <div class="text-caption text-medium-emphasis mt-2">
-                    <v-icon size="12" class="mr-1">mdi-clock-outline</v-icon>
-                    {{ formatActivityTime(activity.timestamp) }}
-                  </div>
-                </div>
-              </v-timeline-item>
-            </v-timeline>
+                </v-timeline-item>
+              </v-timeline>
+            </template>
 
             <!-- Empty State -->
             <div v-else class="text-center pa-8">
@@ -270,6 +334,175 @@
 
       <!-- Assignment Cards (existing content) -->
       <v-row v-else dense>
+
+        <!-- Workout Drills Section -->
+        <v-col cols="12" md="6">
+          <v-card class="assignment-card" elevation="2" rounded="lg">
+            <div class="card-header pa-5">
+              <div class="d-flex align-center justify-space-between mb-2">
+                <div class="text-h6 font-weight-medium">
+                  Practice Drills
+                </div>
+                <v-icon size="28">mdi-clipboard-text</v-icon>
+              </div>
+              <div class="text-body-2 text-medium-emphasis">
+                Complete assigned practice drills with your teacher.
+              </div>
+              <div v-if="currentWorkout" class="mt-2">
+                <v-chip size="small" color="primary" variant="tonal" class="mr-2">
+                  {{ currentWorkout.focus_area }}
+                </v-chip>
+                <v-chip size="small" :color="workoutProgressColor" variant="tonal">
+                  {{ workoutCompletionPercentage }}% complete
+                </v-chip>
+              </div>
+            </div>
+
+            <v-divider />
+
+            <div class="assignment-list pa-4">
+              <template v-if="currentWorkout && currentWorkout.drills.length > 0">
+                <!-- Completed Drills -->
+                <div v-if="completedDrills.length > 0" class="mb-4">
+                  <div class="text-caption font-weight-bold text-success mb-2">
+                    COMPLETED ({{ completedDrills.length }})
+                  </div>
+                  <v-list density="compact" class="pa-0">
+                    <v-list-item
+                      v-for="drill in completedDrills"
+                      :key="drill.id"
+                      class="assignment-item mb-2 completed"
+                      rounded="lg"
+                    >
+                      <template v-slot:prepend>
+                        <v-icon color="success" size="20">mdi-check-circle</v-icon>
+                      </template>
+                      <v-list-item-title class="text-body-2">
+                        {{ drill.name }}
+                      </v-list-item-title>
+                      <v-list-item-subtitle class="text-caption">
+                        <v-chip
+                          :color="getDrillTypeColor(drill.type)"
+                          size="x-small"
+                          variant="tonal"
+                          class="mr-2"
+                        >
+                          {{ drill.type }}
+                        </v-chip>
+                        {{ drill.completed_sessions }}/{{ drill.target_sessions }} sessions
+                      </v-list-item-subtitle>
+                    </v-list-item>
+                  </v-list>
+                </div>
+
+                <!-- In Progress Drills -->
+                <div v-if="inProgressDrills.length > 0" class="mb-4">
+                  <div class="text-caption font-weight-bold text-warning mb-2">
+                    IN PROGRESS ({{ inProgressDrills.length }})
+                  </div>
+                  <v-list density="compact" class="pa-0">
+                    <v-list-item
+                      v-for="drill in inProgressDrills"
+                      :key="drill.id"
+                      class="assignment-item mb-2"
+                      rounded="lg"
+                    >
+                      <template v-slot:prepend>
+                        <v-icon color="warning" size="20">mdi-clock-outline</v-icon>
+                      </template>
+                      <v-list-item-title class="text-body-2">
+                        {{ drill.name }}
+                      </v-list-item-title>
+                      <v-list-item-subtitle class="text-caption">
+                        <v-chip
+                          :color="getDrillTypeColor(drill.type)"
+                          size="x-small"
+                          variant="tonal"
+                          class="mr-2"
+                        >
+                          {{ drill.type }}
+                        </v-chip>
+                        {{ drill.completed_sessions }}/{{ drill.target_sessions }} sessions
+                        <span v-if="drill.notes" class="ml-2 text-medium-emphasis">
+                          • {{ drill.notes.substring(0, 50) }}{{ drill.notes.length > 50 ? '...' : '' }}
+                        </span>
+                      </v-list-item-subtitle>
+                      <template v-slot:append>
+                        <v-progress-linear
+                          :model-value="(drill.completed_sessions / (drill.target_sessions || 1)) * 100"
+                          :color="getDrillProgressColor(drill)"
+                          height="4"
+                          rounded
+                          class="mt-1"
+                          style="width: 60px;"
+                        />
+                      </template>
+                    </v-list-item>
+                  </v-list>
+                </div>
+
+                <!-- Not Started Drills -->
+                <div v-if="notStartedDrills.length > 0">
+                  <div class="text-caption font-weight-bold text-grey mb-2">
+                    NOT STARTED ({{ notStartedDrills.length }})
+                  </div>
+                  <v-list density="compact" class="pa-0">
+                    <v-list-item
+                      v-for="drill in notStartedDrills"
+                      :key="drill.id"
+                      class="assignment-item mb-2"
+                      rounded="lg"
+                    >
+                      <template v-slot:prepend>
+                        <v-icon color="grey" size="20">mdi-circle-outline</v-icon>
+                      </template>
+                      <v-list-item-title class="text-body-2">
+                        {{ drill.name }}
+                      </v-list-item-title>
+                      <v-list-item-subtitle class="text-caption">
+                        <v-chip
+                          :color="getDrillTypeColor(drill.type)"
+                          size="x-small"
+                          variant="tonal"
+                          class="mr-2"
+                        >
+                          {{ drill.type }}
+                        </v-chip>
+                        {{ drill.target_sessions }} sessions to complete
+                      </v-list-item-subtitle>
+                    </v-list-item>
+                  </v-list>
+                </div>
+
+                <!-- Workout Notes -->
+                <v-alert
+                  v-if="currentWorkout.notes"
+                  type="info"
+                  variant="tonal"
+                  density="compact"
+                  class="mt-4"
+                  rounded="lg"
+                >
+                  <template v-slot:prepend>
+                    <v-icon size="20">mdi-information</v-icon>
+                  </template>
+                  <div class="text-caption">
+                    <strong>Teacher's notes:</strong> {{ currentWorkout.notes }}
+                  </div>
+                </v-alert>
+              </template>
+
+              <!-- No Workout State -->
+              <div v-else class="text-caption text-medium-emphasis text-center pa-4">
+                <v-icon size="40" color="grey-lighten-1" class="mb-2">mdi-clipboard-text-outline</v-icon>
+                <div>No practice drills assigned yet.</div>
+                <div class="mt-1">Your teacher will create a workout for you.</div>
+              </div>
+            </div>
+          </v-card>
+        </v-col>
+
+
         <!-- Vocab Lists Section -->
         <v-col cols="6">
           <v-card class="assignment-card" elevation="2" rounded="lg">
@@ -682,12 +915,38 @@ interface ActivityItem {
   timestamp: string;
 }
 
+// Add this interface with your other interfaces
+interface WorkoutDrill {
+  id?: number;
+  type: 'pronunciation' | 'conjugation' | 'vocabulary' | 'grammar' | 'fluency' | 'listening' | 'other';
+  name: string;
+  description: string;
+  target_reps?: number | null;
+  target_sessions?: number | null;
+  completed_sessions: number;
+  notes: string;
+  question_url?: string;
+}
+
+interface Workout {
+  id: number;
+  student: number;
+  student_initials: string;
+  created_at: string;
+  updated_at: string;
+  is_current: boolean;
+  focus_area: string;
+  notes: string;
+  drills: WorkoutDrill[];
+}
+
 // State
 const loading = ref(true);
 const error = ref<string | null>(null);
 const allAssignments = ref<Assignment[]>([]);
 const loadingActivity = ref(true);
 const activityFeed = ref<ActivityItem[]>([]);
+const currentWorkout = ref<Workout | null>(null);
 
 // Scroll functions with better offset
 function scrollToAssignments() {
@@ -710,18 +969,16 @@ function scrollToProfile() {
   }
 }
 
-// Activity Feed Functions
 function getActivityIcon(type: string): string {
   const icons: Record<string, string> = {
     'conjugation': 'mdi-controller',
-    'game': 'mdi-gamepad-circle',
+    'other_game': 'mdi-gamepad-variant',
     'exercise': 'mdi-weight-lifter',
-    'vocab': 'mdi-card-text',
     'vocab_workout': 'mdi-cards-outline',
+    'achievement': 'mdi-trophy',
+    'workout_drill': 'mdi-clipboard-check',
     'feedback': 'mdi-comment-alert',
     'profile_update': 'mdi-account-voice',
-    'assignment': 'mdi-clipboard-check',
-    'achievement': 'mdi-trophy-award',
   };
   return icons[type] || 'mdi-circle';
 }
@@ -729,14 +986,13 @@ function getActivityIcon(type: string): string {
 function getActivityColor(type: string): string {
   const colors: Record<string, string> = {
     'conjugation': 'blue',
-    'game': 'purple',
+    'other_game': 'purple',
     'exercise': 'orange',
-    'vocab': 'green',
     'vocab_workout': 'teal',
+    'achievement': 'amber',
+    'workout_drill': 'green',
     'feedback': 'red',
     'profile_update': 'indigo',
-    'assignment': 'cyan',
-    'achievement': 'amber',
   };
   return colors[type] || 'grey';
 }
@@ -744,14 +1000,13 @@ function getActivityColor(type: string): string {
 function getActivityLabel(type: string): string {
   const labels: Record<string, string> = {
     'conjugation': 'Conjugation',
-    'game': 'Game',
+    'other_game': 'Game',
     'exercise': 'Exercise',
-    'vocab': 'Vocabulary',
-    'vocab_workout': 'Vocab Workout',
+    'vocab_workout': 'Vocabulary',
+    'achievement': 'Achievement',
+    'workout_drill': 'Drill',
     'feedback': 'Feedback',
     'profile_update': 'Profile',
-    'assignment': 'Assignment',
-    'achievement': 'Achievement',
   };
   return labels[type] || type;
 }
@@ -772,138 +1027,52 @@ function formatActivityTime(timestamp: string): string {
   return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 }
 
+const weeklyActivityCount = computed(() => {
+  const oneWeekAgo = new Date();
+  oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+  
+  return activityFeed.value.filter(a => {
+    const activityDate = new Date(a.timestamp);
+    return activityDate >= oneWeekAgo && 
+           ['conjugation', 'other_game', 'exercise', 'vocab_workout'].includes(a.type);
+  }).length;
+});
+
+const weeklyAchievementCount = computed(() => {
+  const oneWeekAgo = new Date();
+  oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+  
+  return activityFeed.value.filter(a => {
+    const activityDate = new Date(a.timestamp);
+    return activityDate >= oneWeekAgo && a.type === 'achievement';
+  }).length;
+});
+
+const activityFilter = ref<string>('all');
+
 async function fetchActivityFeed() {
   loadingActivity.value = true;
-  const activities: ActivityItem[] = [];
 
   try {
-    // Fetch from different APIs and combine
-    
-    // 1. Conjugation game sessions
-    try {
-      const conjResponse = await api.get('/conj-game-sessions/?limit=5');
-      conjResponse.data.forEach((session: any) => {
-        activities.push({
-          type: 'conjugation',
-          title: 'Practiced Conjugation on The Conjugator',
-          description: `${session.correct_count || 0} correct answers`,
-          timestamp: session.created_at || session.started_at,
-        });
-      });
-    } catch (e) {
-      console.log('Conjugation sessions not available');
+    const params: any = {
+      student: userStore.studentId,
+      limit: 30,
+      days: 90,
+    };
+
+    // Add type filter if not "all"
+    if (activityFilter.value && activityFilter.value !== 'all') {
+      params.type = activityFilter.value;
     }
 
-    // 2. Other game sessions
-    try {
-      const gamesResponse = await api.get('/other-games-sessions/?limit=5');
-      gamesResponse.data.forEach((session: any) => {
-        activities.push({
-          type: 'game',
-          title: `Played ${session.game_name || 'Grammar Game'}`,
-          description: `Score: ${session.correct_count || 0} / ${session.total_rounds || 0}`,
-          timestamp: session.created_at || session.started_at,
-        });
-      });
-    } catch (e) {
-      console.log('Other games not available');
-    }
+    const response = await api.get('/student-activities/', { params });
 
-    // 3. Exercise sessions
-    try {
-      const exerciseResponse = await api.get('/exercise-sessions/?limit=5');
-      exerciseResponse.data.forEach((session: any) => {
-        activities.push({
-          type: 'exercise',
-          title: 'Grammar Exercises Completed',
-          description: `Did grammar exercises for error ${session.error_code || 'Grammar practice'}`,
-          timestamp: session.started_at,
-        });
-      });
-    } catch (e) {
-      console.log('Exercise sessions not available');
-    }
-
-    // 4. Vocab workout sessions
-    try {
-      const vocabWorkoutResponse = await api.get('/vocab-workout-sessions/?limit=5');
-      vocabWorkoutResponse.data.forEach((session: any) => {
-        activities.push({
-          type: 'vocab_workout',
-          title: 'Completed Vocab Workout',
-          description: `Practiced vocabulary list ${session.list_key || ''}`,
-          timestamp: session.started_at,
-        });
-      });
-    } catch (e) {
-      console.log('Vocab workout not available');
-    }
-
-    // 5. Assignments (completed)
-    if (allAssignments.value.length > 0) {
-      allAssignments.value
-        .filter(a => a.status === 'completed' && a.completed_at)
-        .slice(0, 5)
-        .forEach(assignment => {
-          activities.push({
-            type: 'assignment',
-            title: 'Completed Assignment',
-            description: assignment.description,
-            timestamp: assignment.completed_at!,
-          });
-        });
-    }
-
-    // 6. Feedback updates
-    try {
-      const feedbackResponse = await api.get('/feedback/?limit=3');
-      feedbackResponse.data.forEach((feedback: any) => {
-        activities.push({
-          type: 'feedback',
-          title: 'New Feedback Received',
-          description: 'Your teacher added feedback on your work',
-          timestamp: feedback.created_at || feedback.date,
-        });
-      });
-    } catch (e) {
-      console.log('Feedback not available');
-    }
-
-    // 7. Profile updates
-    if (userStore.linguisticProfile?.last_assessed_at) {
-      activities.push({
-        type: 'profile_update',
-        title: 'Linguistic Profile Updated',
-        description: 'Your teacher updated your language profile',
-        timestamp: userStore.linguisticProfile.last_assessed_at,
-      });
-    }
-
-    // 8. Achievements
-    try {
-      const achievementsResponse = await api.get('/achievements/?limit=5');
-      
-      // Check if response has a 'results' array (paginated) or is a direct array
-      const achievementsData = achievementsResponse.data.results || achievementsResponse.data;
-      
-      if (Array.isArray(achievementsData)) {
-        achievementsData.forEach((achievement: any) => {
-          activities.push({
-            type: 'achievement',
-            title: 'Achievement Unlocked',
-            description: achievement.description || 'New achievement earned!',
-            timestamp: achievement.achieved_on || achievement.unlocked_at || achievement.created_at,
-          });
-        });
-      }
-    } catch (e) {
-      console.log('Achievements not available', e);
-    }
-
-    // Sort by timestamp (newest first) and limit to 30
-    activityFeed.value = activities
-      .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
-      .slice(0, 30);
+    activityFeed.value = response.data.map((activity: any) => ({
+      type: activity.activity_type,
+      title: activity.activity_name,
+      description: activity.description,
+      timestamp: activity.timestamp,
+    }));
 
   } catch (err: any) {
     console.error('Error fetching activity feed:', err);
@@ -1067,10 +1236,90 @@ async function fetchAssignments() {
   }
 }
 
+// Computed properties for current workout
+const completedDrills = computed(() => {
+  if (!currentWorkout.value?.drills) return [];
+  return currentWorkout.value.drills.filter(
+    drill => drill.completed_sessions >= (drill.target_sessions ?? 0) && (drill.target_sessions ?? 0) > 0
+  );
+});
+
+const inProgressDrills = computed(() => {
+  if (!currentWorkout.value?.drills) return [];
+  return currentWorkout.value.drills.filter(
+    drill => drill.completed_sessions > 0 && drill.completed_sessions < (drill.target_sessions ?? 0)
+  );
+});
+
+const notStartedDrills = computed(() => {
+  if (!currentWorkout.value?.drills) return [];
+  return currentWorkout.value.drills.filter(
+    drill => drill.completed_sessions === 0
+  );
+});
+
+const workoutCompletionPercentage = computed(() => {
+  if (!currentWorkout.value?.drills?.length) return 0;
+  
+  const totalSessions = currentWorkout.value.drills.reduce(
+    (sum, drill) => sum + (drill.target_sessions || 0),
+    0
+  );
+  
+  if (totalSessions === 0) return 0;
+  
+  const completedSessions = currentWorkout.value.drills.reduce(
+    (sum, drill) => sum + drill.completed_sessions,
+    0
+  );
+  
+  return Math.round((completedSessions / totalSessions) * 100);
+});
+
+const workoutProgressColor = computed(() => {
+  const percentage = workoutCompletionPercentage.value;
+  if (percentage >= 75) return 'success';
+  if (percentage >= 50) return 'warning';
+  if (percentage >= 25) return 'orange';
+  return 'error';
+});
+
+// Helper functions for drills
+function getDrillTypeColor(type: string): string {
+  const colors: Record<string, string> = {
+    'pronunciation': 'blue',
+    'conjugation': 'purple',
+    'vocabulary': 'green',
+    'grammar': 'orange',
+    'fluency': 'teal',
+    'listening': 'pink',
+    'other': 'grey',
+  };
+  return colors[type] || 'grey';
+}
+
+function getDrillProgressColor(drill: any): string {
+  if (!drill.target_sessions) return 'grey';
+  const percentage = (drill.completed_sessions / drill.target_sessions) * 100;
+  if (percentage >= 75) return 'success';
+  if (percentage >= 50) return 'warning';
+  return 'orange';
+}
+
+async function fetchCurrentWorkout() {
+  try {
+    await userStore.fetchCurrentWorkout();
+    currentWorkout.value = userStore.currentWorkout;
+  } catch (error) {
+    console.error('Failed to fetch workout:', error);
+  }
+}
+
 onMounted(async () => {
   await fetchAssignments();
   await userStore.fetchLinguisticProfile();
   await fetchActivityFeed();
+  await fetchCurrentWorkout();
 });
 </script>
 

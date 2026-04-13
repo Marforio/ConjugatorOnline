@@ -41,7 +41,11 @@ const routes = [
   { path: '/teacher-tools/classroom-challenges', name: 'classroom-challenges', component: () => import('@/views/ClassroomChallenges.vue'), meta: { requiresAuth: true, requiresAdmin: true }, props: (route: RouteLocationNormalized) => ({
       game: route.query.game as string,
       student: route.query.student as string,
-    }), }
+    }), },
+  { path : '/teacher-manage', name: 'teacher-manage', component: () => import('@/views/TeacherManage.vue'),  meta: { requiresAuth: true, requiresAdmin: true } },
+  { path : '/teacher-manage/manage-workouts', name: 'manage-workouts', component: () => import('@/views/ManageWorkouts.vue'),  meta: { requiresAuth: true, requiresAdmin: true } },
+  { path : '/teacher-manage/manage-feedback', name: 'manage-feedback', component: () => import('@/views/ManageFeedback.vue'),  meta: { requiresAuth: true, requiresAdmin: true } },
+  { path : '/teacher-manage/manage-data', name: 'manage-data', component: () => import('@/views/ManageData.vue'),  meta: { requiresAuth: true, requiresAdmin: true } }
 ]
 
 
