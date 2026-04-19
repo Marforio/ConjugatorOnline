@@ -155,6 +155,12 @@ export const vocabLists = {
     data: meetings,
     supportsLevels: false,
   },
+  CorporationsM: {
+    title: "Corporations",
+    module: "Mechanical_2",
+    data: Corporations,
+    supportsLevels: false,
+  },
 
   ////////////////////////////// ELECTRICAL /////////////////////////////
 
@@ -168,6 +174,12 @@ export const vocabLists = {
     title: "Meetings",
     module: "Electrical_2",
     data: meetings,
+    supportsLevels: false,
+  },
+    CorporationsE: {
+    title: "Corporations",
+    module: "Electrical_2",
+    data: Corporations,
     supportsLevels: false,
   },
 
@@ -197,6 +209,12 @@ export const vocabLists = {
     title: "Meetings",
     module: "Computer_science_2",
     data: meetings,
+    supportsLevels: false,
+  },
+    CorporationsIT: {
+    title: "Corporations",
+    module: "Computer_science_2",
+    data: Corporations,
     supportsLevels: false,
   },
 
