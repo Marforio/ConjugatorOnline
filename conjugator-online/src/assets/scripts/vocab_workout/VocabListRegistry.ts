@@ -4,6 +4,7 @@ import { civilVerbs, constructionSite, ConstructionScience, EarthAndMaterials, C
 import { productMarketing, promotionAndBusinessDevelopment, startUps, meetingExpressions, meetings, businessEthics, sustainability, DataVisualization, RegularVerbsBusiness, FinanceAndTrading, Corporations, TakeoversAndMergers } from "./BusinessVocab";
 import { programmingSymbols, mechanicalForces } from "./MechVocab";
 import { CryptographyVocab, DataProcessingAndVisualization } from "./ITVocab";
+import { RoboticsAndAutomation } from "./ElecVocab";
 import { irregularVerbs } from "./IrregularVerbs";
 
 export const vocabLists = {
@@ -140,6 +141,13 @@ export const vocabLists = {
     title: "Programming Elements (Python)",
     module: "Mechanical_2",
     data: programmingSymbols,
+    supportsLevels: false,
+  },
+
+  Automation: {
+    title: "Robotics and Automation",
+    module: "Mechanical_2",
+    data: RoboticsAndAutomation,
     supportsLevels: false,
   },
 
