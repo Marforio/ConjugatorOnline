@@ -4,16 +4,19 @@
     <v-navigation-drawer
     v-if="$vuetify.display.smAndUp"  
     permanent
-      width="280"
+      width="350"
       class="pa-4 d-flex flex-column align-center ml-3 align-self-center"
     >
+    <div class="d-flex justify-center">
       <v-img
         src="/images/banners/Conjugator3.png"
         alt="Logo"
-        class="rounded-lg w-100 mb-5 mt-4"
-        min-width="250"
+        class="rounded-lg mb-3 mt-4"
+        width="220"
         cover
       />
+    </div>
+
 
       <h2 class="text-h6 text-center font-weight-bold">Game Settings</h2>
 
@@ -28,7 +31,6 @@
         <v-list-item>
             <span class="font-weight-medium">Rounds: </span>{{ remainingCount }} <v-chip v-if="isSmartList" size="x-small" color="primary" class="ms-5">smart list</v-chip>
         </v-list-item>
-        <v-divider></v-divider>
         <v-list-item>
           <v-list-item-title style="text-wrap: wrap;">
             <span class="font-weight-medium">Sentence type(s):</span> {{ gameSettings?.sentenceTypes?.join(', ') || '' }}
@@ -41,7 +43,7 @@
         </v-list-item>
         <v-switch :label="showKeyword ? 'See time reference' : 'See tense name'" v-model="showKeyword" class="ms-6" />
       </v-list>
-      <v-divider></v-divider>
+            <v-divider></v-divider>
 
       <div class="mt-auto d-flex justify-space-between align-center w-100 px-3">
         <v-btn icon elevation="1" class="ms-3" @click="goBack">
@@ -122,8 +124,36 @@
          }" :class="$vuetify.display.smAndUp ? 'pa-6' : 'pa-2'" elevation="2" color="grey-lighten-4">
           <v-card-title class="text-h5 text-center text-primary">Verb</v-card-title>
           <v-card-text class="text-center">
-            <div v-if="$vuetify.display.mdAndUp" class="text-h2 font-weight-bold mb-6">{{ currentPrompt.verb }}</div>
-            <div v-else="$vuetify.display.mdAndUp" class="text-h4 font-weight-bold mb-6">{{ currentPrompt.verb }}</div>
+              <div class="d-flex align-center mb-6" style="width: 100%;">
+                <!-- left spacer to balance the left width -->
+                <div style="width: 44px;"></div>
+
+                <!-- True centered verb -->
+                <div class="flex-grow-1 text-center" :class="$vuetify.display.mdAndUp ? 'text-h2' : 'text-h4'" style="font-weight: 700;">
+                  {{ currentPrompt.verb }}
+                </div>
+
+                <div class="d-flex justify-end" style="width: 44px;">
+                  <AiTutorHintDialog v-model="hintOpen" :context="hintContext" api-url="/llm/chat/">
+                    <template #activator="{ open }">
+                      <v-tooltip text="What does this verb mean?" location="right">
+                        <template #activator="{ props: tprops }">
+                          <v-btn
+                            icon
+                            size="x-small"
+                            variant="tonal"
+                            color="primary"
+                            v-bind="tprops"
+                            @click.stop="open"
+                          >
+                            <v-icon size="20">mdi-head-question-outline</v-icon>
+                          </v-btn>
+                        </template>
+                      </v-tooltip>
+                    </template>
+                  </AiTutorHintDialog>
+                </div>
+              </div>
             
             <v-row justify="center" align="center">
               <v-col cols="12" md="4">
@@ -257,7 +287,6 @@
       {{ snackbar.message }}
     </v-snackbar>
 
-
     <!-- Blocking dialog while loading -->
     <v-dialog v-model="showBlockingDialog" persistent fullscreen transition="fade-transition">
       <v-card class="d-flex align-center justify-center" color="transparent" elevation="0">
@@ -277,6 +306,7 @@ import Game from "@/assets/scripts/Game";
 import InitialsText from "../InitialsText.vue";
 import { useUserStore } from "@/stores/user";
 import { useGameCompletion } from '@/composables/useGameCompletion';
+import AiTutorHintDialog from "../AiTutorHintDialog.vue";
 
 const { onGameCompleted } = useGameCompletion();
 // ---------------- props / emits ----------------
@@ -351,6 +381,16 @@ const showKeyword = ref(true);
 const randomTenseDisplay = ref("");
 
 const keywords = ref<Record<string, string[]>>({});
+
+const hintOpen = ref(false);
+
+const hintContext = computed(() => ({
+  verb: currentPrompt.verb,
+  person: currentPrompt.person,
+  tense: currentPrompt.tense,
+  sentence_type: currentPrompt.sentenceType,
+  acceptable_answers: game.value?.getCurrentCorrectAnswers?.() ?? [],
+}));
 
 // ---------------- helpers ----------------
 function deepClone<T>(obj: T): T {

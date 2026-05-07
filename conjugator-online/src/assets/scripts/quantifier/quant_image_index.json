@@ -1289,7 +1289,7 @@
     },
     "194": {
         "filename": "SBB_RABDe_500_bei_Twann.jpg",
-        "countable": false,
+        "countable": true,
         "subject": "train",
         "plural": "trains",
         "plural_noun": false

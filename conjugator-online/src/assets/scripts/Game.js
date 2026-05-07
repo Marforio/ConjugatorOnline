@@ -34,6 +34,14 @@ class Game {
     return this.currentPrompt;
   }
 
+  getCurrentCorrectAnswers() {
+    const p = this.currentPrompt;
+    if (!p) return [];
+    if (typeof p.getCorrectAnswers === "function") return p.getCorrectAnswers() || [];
+    const res = typeof p.getResult === "function" ? p.getResult() : null;
+    return (res && res.correctAnswers) ? res.correctAnswers : [];
+  }
+
   nextPrompt() {
     this.currentPrompt = this.conjugationSet.getPrompt();
   }

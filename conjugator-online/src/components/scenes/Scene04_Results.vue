@@ -134,6 +134,17 @@
                       </ul>
                       <p class="font-weight-medium">Acceptable answer(s):</p>
                       <p><em>{{ result.acceptable_answers.join(', ') }}</em></p>
+                      <div class="d-flex justify-center">
+                        <v-btn
+                        size="small"
+                        variant="tonal"
+                        class="mt-2"
+                        color="primary"
+                        @click="openTutorForRound(result)"
+                      >
+                        Ask tutor
+                      </v-btn>
+                      </div>
                     </v-card-text>
                   </v-card>
                 </swiper-slide>
@@ -155,40 +166,60 @@
       <HomeButton />
     </v-row>
   </v-container>
+
+  <AiTutorChatDialog
+    v-model="aiOpen"
+    title="AI Grammar Tutor"
+    :context="aiContext"
+    :build-initial-user-message="buildInitialPrompt"
+    :show-context-preview="false"
+    :reset-on-context-change="true"
+    api-url="/llm/chat/"
+    :max-tokens="250"
+    :temperature="0.4"
+  >
+  </AiTutorChatDialog>
+
 </template>
 
 <script>
 import * as d3 from "d3";
-import { Swiper, SwiperSlide } from 'swiper/vue';
-import { Navigation } from 'swiper/modules';
+import { Swiper, SwiperSlide } from "swiper/vue";
+import { Navigation } from "swiper/modules";
 import { markRaw } from "vue";
-import 'swiper/css';
-import 'swiper/css/navigation';
+import "swiper/css";
+import "swiper/css/navigation";
 import HomeButton from "../HomeButton.vue";
+import AiTutorChatDialog from "../AiTutorChatDialog.vue";
 
 export default {
   data() {
     return {
-      swiperModules: markRaw([Navigation])
+      swiperModules: markRaw([Navigation]),
+
+      // NEW: AI tutor dialog state
+      aiOpen: false,
+      aiContext: null,
     };
   },
   components: {
     Swiper,
     SwiperSlide,
-    HomeButton
+    HomeButton,
+    AiTutorChatDialog, // NEW
   },
   props: {
-    results: { type: Object, required: true }
+    results: { type: Object, required: true },
   },
   computed: {
     correctResults() {
       return Array.isArray(this.results?.rounds)
-        ? this.results.rounds.filter(r => r.is_correct === true)
+        ? this.results.rounds.filter((r) => r.is_correct === true)
         : [];
     },
     wrongResults() {
       return Array.isArray(this.results?.rounds)
-        ? this.results.rounds.filter(r => r.is_correct === false)
+        ? this.results.rounds.filter((r) => r.is_correct === false)
         : [];
     },
     percentCorrect() {
@@ -202,31 +233,87 @@ export default {
         { label: "Correct", value: this.results.correct_count },
         { label: "Wrong", value: this.results.wrong_count },
       ];
-    }
+    },
   },
   methods: {
     goToScene(sceneName) {
       this.$emit("changeScene", sceneName);
     },
+
+    // NEW: where your JWT comes from (adjust to your app)
+    getJwt() {
+      return localStorage.getItem("access");
+    },
+
+    // NEW: open dialog for one specific wrong round
+    openTutorForRound(round) {
+      this.aiContext = {
+        game: "conjugation",
+        prompt_number: round.prompt_number,
+        verb: round.verb,
+        person: round.person,
+        tense: round.tense,
+        sentence_type: round.sentence_type,
+        student_answer: round.user_answer || "",
+        acceptable_answers: round.acceptable_answers || [],
+        elapsed_time: round.elapsed_time,
+      };
+      this.aiOpen = true;
+    },
+
+  buildInitialPrompt(ctx) {
+    return [
+      "You are an English grammar tutor helping me, the student, after a conjugation game question.",
+      "",
+      "Task:",
+      "Explain (in a short paragraph) why my answer is wrong and how to fix it.",
+      "Then write the same explanation again in French.",
+      "",
+      "Hard formatting rules (must follow):",
+      "- Output exactly TWO paragraphs:",
+      "  Paragraph 1: English",
+      "  Paragraph 2: French",
+      "- No numbered lists, no bullet points, no headings, no labels like 'English:' or 'French:'.",
+      "- Keep the explanation concise (about 3–6 sentences per paragraph).",
+      "",
+      "Content rules:",
+      `- Target tense: ${ctx.tense} (keep this tense name in English even in the French paragraph).`,
+      "- Mention the key rule(s) needed for this tense in plain language.",
+      "- Compare briefly with the tense the student accidentally used (if relevant).",
+      "- Use the verb 'be' as the auxiliary name (in English) and mention '-ing' form as needed.",
+      `- Use exactly ONE correct version chosen from the acceptable answers below (repeat it in both paragraphs).`,
+      "- Provide exactly TWO example sentences that illustrate the target tense; keep those example sentences in English in BOTH paragraphs.",
+      "",
+      "Exercise context:",
+      `verb=${ctx.verb}, person=${ctx.person}, tense=${ctx.tense}, sentence_type=${ctx.sentence_type}`,
+      `Student answer: ${ctx.student_answer || "(no answer)"}`,
+      `Acceptable answers: ${(ctx.acceptable_answers || []).join(" | ") || "(none provided)"}`,
+      "",
+      "Reminder: Examples + tense names stay in English even in the French paragraph.",
+    ].join("\n");
+  },
+
     renderPieChart() {
       const container = d3.select("#pie-chart").node();
       const containerWidth = container.getBoundingClientRect().width;
-      const size = Math.min(containerWidth - 25); // responsive but capped at 300px
+      const size = Math.min(containerWidth - 25);
 
       const width = size;
       const height = size;
       const radius = Math.min(width, height) / 2;
 
-      d3.select("#pie-chart").selectAll("*").remove(); // clear old chart
+      d3.select("#pie-chart").selectAll("*").remove();
 
-      const svg = d3.select("#pie-chart")
+      const svg = d3
+        .select("#pie-chart")
         .append("svg")
         .attr("width", width)
         .attr("height", height)
         .append("g")
         .attr("transform", `translate(${width / 2}, ${height / 2})`);
 
-      const color = d3.scaleOrdinal()
+      const color = d3
+        .scaleOrdinal()
         .domain(this.chartData.map((d) => d.label))
         .range(["#4CAF50", "#F44336"]);
 
@@ -235,7 +322,8 @@ export default {
 
       const arc = d3.arc().innerRadius(0).outerRadius(radius);
 
-      svg.selectAll("path")
+      svg
+        .selectAll("path")
         .data(dataReady)
         .join("path")
         .attr("d", arc)
@@ -243,7 +331,8 @@ export default {
         .attr("stroke", "white")
         .style("stroke-width", "2px");
 
-      svg.selectAll("text")
+      svg
+        .selectAll("text")
         .data(dataReady)
         .join("text")
         .text((d) => `${d.data.label}: ${d.data.value}`)
@@ -254,7 +343,7 @@ export default {
   },
   mounted() {
     this.renderPieChart();
-  }
+  },
 };
 </script>
 
