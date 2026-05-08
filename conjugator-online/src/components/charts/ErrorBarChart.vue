@@ -9,7 +9,7 @@
       <!-- Floating popover box pinned top-right of chart -->
       <v-card
         class="popover-card"
-        :style="{ top: popover.y + 'px', left: popover.x + 'px', maxWidth: '300px', width: 'auto' }"
+        :style="{ top: popover.y + 'px', left: popover.x + 'px', maxWidth: '300px', width: 'auto', display: popoverReady ? 'block' : 'none' }"
         elevation="6"
       >
         <v-list density="compact">
@@ -36,8 +36,27 @@
       <v-card v-if="selectedEvidence" class="info-card" max-width="95%" width="95%" elevation="2">
         <v-list density="compact">
           <v-list-subheader>
-            <span class="text-uppercase text-high-emphasis">{{ selectedEvidence.error }} :</span>
-            {{ selectedEvidence.description }}
+            <div class="d-flex align-center w-100 ga-2">
+              <div class="flex-grow-1 min-width-0 text-truncate">
+                <span class="text-uppercase text-high-emphasis">
+                  {{ selectedEvidence.error }} :
+                </span>
+                {{ selectedEvidence.description }}
+              </div>
+
+              <!-- IMPORTANT: ms-auto on the flex item itself -->
+              <div class="ms-12 flex-shrink-0">
+                <v-btn
+                  size="small"
+                  variant="text"
+                  @click.stop="openTutorFromSelected"
+                  :disabled="!selectedEvidence"
+                >
+                  Ask AI tutor
+                  <v-icon size="18" class="ms-2">mdi-robot-outline</v-icon>
+                </v-btn>
+              </div>
+            </div>
           </v-list-subheader>
 
           <v-list-item>
@@ -65,6 +84,7 @@ import { errorsData } from '@/assets/scripts/errorsData';
 
 export default {
   name: 'ErrorFrequencyChart',
+  emits: ['open-ai-tutor'],
   props: {
     errorData: {
       type: Array,
@@ -78,6 +98,7 @@ export default {
       svgHeight: 400,
       selectedEvidence: null,
       popover: { x: 0, y: 0 },
+      popoverReady: false, 
       display
     };
   },
@@ -85,11 +106,18 @@ export default {
     if (this.display.smAndDown) this.svgWidth = 1000;
     this.calculateSvgHeight();
     this.drawChart();
-    this.updatePopoverPosition();
+
+    this.$nextTick(() => {
+      this.updatePopoverPosition();
+      this.popoverReady = true; // show only after positioned
+    });
+
     window.addEventListener('resize', this.updatePopoverPosition);
+    this.$refs.container?.addEventListener('scroll', this.updatePopoverPosition);
   },
   beforeUnmount() {
     window.removeEventListener('resize', this.updatePopoverPosition);
+    this.$refs.container?.removeEventListener('scroll', this.updatePopoverPosition);
   },
   watch: {
     errorData: {
@@ -135,6 +163,20 @@ export default {
       // Adjust for scrollLeft!
       this.popover.x = cont.scrollLeft + Math.max(0, contRect.width - popoverWidth - padding - adjustment);
       this.popover.y = Math.max(0, padding);
+    },
+
+    openTutorFromSelected() {
+      if (!this.selectedEvidence) return;
+
+      // selectedEvidence.error is like "Error G12" -> extract code
+      const code = String(this.selectedEvidence.error || "").replace(/^Error\s*/i, "").trim();
+
+      this.$emit("open-ai-tutor", {
+        error_code: code,
+        description: this.selectedEvidence.description,
+        evidence: this.selectedEvidence.evidence,      // includes quotes in your code
+        reference: this.selectedEvidence.reference,
+      });
     },
 
     drawChart() {

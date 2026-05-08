@@ -142,7 +142,7 @@
                         color="primary"
                         @click="openTutorForRound(result)"
                       >
-                        Ask tutor
+                        Ask the AI Tutor <v-icon class="ms-1" size="14">mdi-robot-outline</v-icon>
                       </v-btn>
                       </div>
                     </v-card-text>

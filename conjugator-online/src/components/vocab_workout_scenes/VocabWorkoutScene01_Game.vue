@@ -272,7 +272,7 @@
                                         @click.stop="openTutor(currentItem?.term)"
                                         aria-label="AI examples"
                                       >
-                                        <v-icon size="18">mdi-chat-outline</v-icon>
+                                        <v-icon size="18">mdi-robot-outline</v-icon>
                                       </v-btn>
                                     </template>
                                   </v-tooltip>
@@ -411,7 +411,7 @@
                                 @click.stop="openTutor(t.term)"
                                 aria-label="Open AI tutor examples"
                               >
-                                <v-icon size="18">mdi-chat-outline</v-icon>
+                                <v-icon size="18">mdi-robot-outline</v-icon>
                               </v-btn>
                             </template>
                           </v-tooltip>
@@ -1495,9 +1495,12 @@ watch(showWrongDialog, async (vis) => {
 const showFloatingFeedback = ref(false);
 
 
-const vocabTutorSystemMessage =
+function buildVocabTutorInitialUserMessage(ctx: any) {
+  const term = String(ctx?.term ?? "").trim();
+  const def = String(ctx?.front_text ?? "").trim();
+  const vocabTutorSystemMessage =
   "You are a helpful vocabulary tutor.\n" +
-  "Default behavior: Say, 'Here are 5 examples of [given term]:' and then provide exactly 5 short, natural example sentences in English using the given term. Use varied lexical contexts.\n" +
+  `Default behavior: First, say, 'Here are 5 examples of ${term}.' Then, provide exactly 5 short, natural example sentences in English using the given term. Use varied lexical contexts.\n` +
   "After the 5 examples, add exactly this final line:\n" +
   "write 'more' if you want more examples, or 'oui'/'ja'/'si' if you want translations in french/german/italian\n" +
   "\n" +
@@ -1507,20 +1510,11 @@ const vocabTutorSystemMessage =
   "If the user says 'si': provide Italian equivalents for the last 5 examples.\n" +
   "Keep formatting simple: numbered 1-5 for examples/translations. No long explanations.";
 
-function buildVocabTutorInitialUserMessage(ctx: any) {
-  const term = String(ctx?.term ?? "").trim();
-  const def = String(ctx?.front_text ?? "").trim();
-
   return [
     `Term: ${term}`,
     def ? `Definition shown to learner: ${def}` : "",
     "",
-    `Write 5 different example sentences using "${term}".`,
-    "Use varied lexical contexts (different collocations / topics / registers).",
-    "Keep them short and natural. Do not explain grammar.",
-    "",
-    "At the end, write exactly this line:",
-    "write 'more' if you want , or oui/ja/si  if you want  equivalents in french/german/italian",
+    vocabTutorSystemMessage,
   ]
     .filter(Boolean)
     .join("\n");

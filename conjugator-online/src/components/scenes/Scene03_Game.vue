@@ -146,7 +146,7 @@
                             v-bind="tprops"
                             @click.stop="open"
                           >
-                            <v-icon size="20">mdi-head-question-outline</v-icon>
+                            <v-icon size="20">mdi-robot-outline</v-icon>
                           </v-btn>
                         </template>
                       </v-tooltip>
