@@ -18,6 +18,7 @@
         <v-divider />
 
         <v-card-text class="pt-4">
+          <slot name="context-summary" :ctx="context" />
           <v-alert
             v-if="shouldShowContextPreview"
             type="info"
@@ -110,7 +111,7 @@ const props = defineProps({
 
   model: { type: String, default: "NousResearch/Hermes-4-14B" },
   temperature: { type: Number, default: 0.4 },
-  maxTokens: { type: Number, default: 250 },
+  maxTokens: { type: Number, default: 400 },
 
   context: { type: Object, default: () => ({}) },
 

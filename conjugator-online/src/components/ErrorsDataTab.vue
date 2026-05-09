@@ -110,7 +110,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, onMounted, computed } from "vue";
+import { defineComponent, ref, onMounted, computed, nextTick } from "vue";
 import ErrorBarChart from "./charts/ErrorBarChart.vue";
 import ErrorHorizontalBarChart from "./charts/ErrorHorizontalBarChart.vue";
 import InitialsText from "./InitialsText.vue";
@@ -162,13 +162,17 @@ const tutorContext = computed(() => {
   return {
     error_code: code,
     description: errorData?.[code]?.description ?? "No description available",
+    examples: errorData?.[code]?.examples ?? [],
     evidence: e.evidence ?? "",
+    recommendation: errorData?.[code]?.recommendation ?? "",
     reference: errorData?.[code]?.reference ?? "",
   };
 });
 
-function openErrorTutorFromChart(payload: any) {
-  // Create a minimal ErrorItem-like object so tutorContext computed can read it
+async function openErrorTutorFromChart(payload: any) {
+  tutorOpen.value = false;           // ensure closed first
+  await nextTick();
+
   selectedError.value = {
     error_id: payload.error_id ?? "chart",
     error_code: payload.error_code,
@@ -177,12 +181,18 @@ function openErrorTutorFromChart(payload: any) {
     feedback: payload.feedback ?? "chart",
   } as ErrorItem;
 
+  await nextTick();
   tutorOpen.value = true;
 }
 
 const errorTutorSystemMessage =
   "Tu es un tuteur de grammaire.\n" +
   "Réponds en français, de façon concise et utile.\n" +
+  "Utilise les données suivantes pour expliquer l’erreur de l’étudiant et comment la corriger:\n" +
+  "- Description" +
+  "- Examples (si disponibles)\n" +
+  "- Recommendation (si disponible)\n" +
+  "- Evidence (la phrase exacte de l’étudiant qui a causé l’erreur)\n" +
   "Conserve tous les termes grammaticaux anglais (ex: Present perfect, auxiliary verb, subject-verb agreement) et les exemples (évidences) tels quels.\n" +
   "Structure:\n" +
   "1) explication courte de l’erreur\n" +

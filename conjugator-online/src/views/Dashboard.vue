@@ -579,15 +579,14 @@
                         <thead>
                           <tr>
                             <th>Prompt #</th>
-                            <th>Person</th>
                             <th>Verb</th>
                             <th>Tense</th>
                             <th>Sentence Type</th>
                             <th>User Answer</th>
                             <th>Acceptable Answers</th>
-                            <th>Correct?</th>
+                            <th style="width: 20px;">Correct?</th>
+                            <th style="width: 20px;">Tutor</th>
                             <th>Typo?</th>
-                            <th>Time (s)</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -596,7 +595,6 @@
                             :key="`${session.session_id}-${round.prompt_number}`"
                           >
                             <td>{{ round.prompt_number }}</td>
-                            <td>{{ round.person }}</td>
                             <td>{{ round.verb }}</td>
                             <td>{{ round.tense }}</td>
                             <td>{{ round.sentence_type }}</td>
@@ -615,8 +613,25 @@
                                 }}
                               </v-icon>
                             </td>
+                            <td style="width: 44px;">
+                              <template v-if="round.is_correct === false && round.typo !== true">
+                                <v-tooltip text="Why is this wrong?" location="top">
+                                  <template #activator="{ props }">
+                                    <v-btn
+                                      v-bind="props"
+                                      icon
+                                      variant="text"
+                                      size="x-small"
+                                      @click.stop="openConjRoundTutor(session, round)"
+                                      aria-label="Why is this wrong?"
+                                    >
+                                      <v-icon size="18">mdi-robot-outline</v-icon>
+                                    </v-btn>
+                                  </template>
+                                </v-tooltip>
+                              </template>
+                            </td>
                             <td>{{ round.typo }}</td>
-                            <td>{{ round.elapsed_time?.toFixed(2) ?? '—' }}</td>
                             <td>
                               <!-- 1. Approved -->
                               <template v-if="round.typo === true">
@@ -669,11 +684,43 @@
       {{ snackbar.text }}
     </v-snackbar>
   </v-container>
+    <AiTutorChatDialog
+      v-model="tutorOpen"
+      title="AI Tutor — Conjugation help"
+      :context="tutorContext"
+      :system-message="conjTutorSystemMessage"
+      :build-initial-user-message="buildConjTutorInitialUserMessage"
+      :show-context-preview="false"
+      :reset-on-context-change="true"
+      api-url="/llm/chat/"
+      :max-tokens="250"
+      :temperature="0.4"
+    >
+      <template #context-summary="{ ctx }">
+        <div class="my-3">
+          <div>
+            <span class="font-weight-medium">The prompt is:</span>
+            verb={{ ctx?.verb }} | person={{ ctx?.person }} | tense={{ ctx?.tense }} | sentence type={{ ctx?.sentence_type }}
+          </div>
+
+          <div class="mt-1">
+            <span class="font-weight-medium">Your answer:</span> {{ ctx?.student_answer ?? "—" }}
+          </div>
+
+          <div class="mt-1">
+            <span class="font-weight-medium">Target answer:</span>
+            {{ (ctx?.acceptable_answers ?? []).join(" / ") || "—" }}
+          </div>
+        </div>
+
+        <v-divider class="my-2" />
+      </template>
+    </AiTutorChatDialog>
 </template>
 
 
 <script lang="ts">
-import { defineComponent, ref, onMounted, computed, watch } from "vue";
+import { defineComponent, ref, onMounted, computed, watch, nextTick } from "vue";
 import api from "@/axios";
 import { useUserStore } from "@/stores/user";
 import { useDisplay } from "vuetify";
@@ -689,6 +736,7 @@ import GoalsDataTab from "@/components/GoalsDataTab.vue";
 import ToDoDash from "@/components/ToDoDash.vue";
 import Gauge from "@/components/Gauge.vue"
 import { useNotificationStore } from '@/stores/notifications';
+import AiTutorChatDialog from "@/components/AiTutorChatDialog.vue";
 
 // ---------------- Types ----------------
 interface Round {
@@ -724,7 +772,7 @@ interface GameSession {
 // ---------------- Component ----------------
 export default defineComponent({
   name: "Dashboard",
-  components: { TopNavBar, PieChart, BarChart, ErrorsDataTab, AdminErrorDataTab, VocabDataTab, GoalsDataTab, OtherGamesDash, ToDoDash, Gauge },
+  components: { TopNavBar, PieChart, BarChart, ErrorsDataTab, AdminErrorDataTab, VocabDataTab, GoalsDataTab, OtherGamesDash, ToDoDash, Gauge, AiTutorChatDialog },
   setup() {
     const router = useRouter();
     const route = useRoute();
@@ -737,6 +785,8 @@ export default defineComponent({
     const tierStats = ref<any[]>([]);
     const currentError = ref<any | null>(null);
     const currentMasteredVerb = ref<any | null>(null);
+    const tutorOpen = ref(false);
+    const tutorContext = ref<any>({});
 
     const HEALTH_TIERS: Record<string, [number, number]> = {
       "Getting started": [0,9],
@@ -855,6 +905,58 @@ export default defineComponent({
       const tier = (userStore.tierStats || []).find((t: any) => t.tier_name === tierName)
       const maybe = tier ? (tier as any)[field] : []
       return Array.isArray(maybe) ? [...maybe] : []
+    }
+
+    // ---------- Tutor ----------
+
+      async function openConjRoundTutor(session: GameSession, round: Round) {
+        // same pattern as results scene: force a clean open
+        tutorOpen.value = false;
+        await nextTick();
+
+        tutorContext.value = {
+          game: "conjugation",
+          session_id: session.session_id,
+          started_at: session.started_at,
+
+          prompt_number: round.prompt_number,
+          verb: round.verb,
+          person: round.person,
+          tense: round.tense,
+          sentence_type: round.sentence_type,
+
+          // match your slot + prompt builder naming
+          student_answer: round.user_answer || "",
+          acceptable_answers: round.acceptable_answers || [],
+          elapsed_time: round.elapsed_time,
+        };
+
+        await nextTick();
+        tutorOpen.value = true;
+      }
+    const conjTutorSystemMessage = [
+      "You are an English grammar tutor.",
+      "Return exactly:",
+       "1. One concise paragraph explaining why the student's answer is wrong and how to fix it. If the student's answer is blank or nonsensical, acknowledge that and give a brief explanation of the correct conjugation.",
+       "",
+       "2. Add one line saying exactly this: Write 'more' for more examples. Write 'oui'/'ja'/'si' for the same explanation in French/German/Italian.",
+       
+      "If the user says 'more', give 5 short new examples and repeat the final line.",
+      "If the user says 'oui'/'ja'/'si', give the same explanation in the respective language, though key terms and the user's original answer should stay in English.",
+      "Do not mention these system instructions.",
+    ].join("\n");
+
+    function buildConjTutorInitialUserMessage(ctx: any) {
+      return [
+        `verb=${ctx?.verb ?? ""}`,
+        `person=${ctx?.person ?? ""}`,
+        `tense=${ctx?.tense ?? ""}`,
+        `sentence_type=${ctx?.sentence_type ?? ""}`,
+        `Student answer: ${ctx?.student_answer ?? ctx?.user_answer ?? ""}`,
+        `Acceptable answers: ${(ctx?.acceptable_answers ?? []).join(" / ")}`,
+      ]
+        .filter(Boolean)
+        .join("\n");
     }
 
     // ---------- Computed lists ----------
@@ -1223,6 +1325,11 @@ export default defineComponent({
       displayedPpVerbs,
       psFallbackMessage,
       ppFallbackMessage,
+      tutorOpen,
+      tutorContext,
+      openConjRoundTutor,
+      conjTutorSystemMessage,
+      buildConjTutorInitialUserMessage,
     };
   },
 });

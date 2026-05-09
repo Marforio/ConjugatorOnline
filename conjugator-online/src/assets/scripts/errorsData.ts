@@ -44,10 +44,10 @@ export const errorsData: Record<string, ErrorEntry> = {
     },
     "0140":{
         "short_slug": "compound-noun",
-        "description": "incorrect use of a compound noun",
+        "description": "incorrect use of plural forms inside a compound noun",
         "reference": "<a href='https://book.language-labs.ch/ch1#e0140' target='_blank'>error 0140</a>",
-        "recommendation": "remember that nouns in compound nouns do not have plural endings, except for the last one, which is the base noun",
-        "examples": "a woman who is 30 years old is a 30-year old woman; two houses with 3 floors are two 3-floor houses."
+        "recommendation": "remember that the internal components of compound nouns do not have plural endings. Only the last noun can have a plural ending if the compound noun is plural",
+        "examples": "a woman who is 30 years old is a 30-year old woman (no -s after 'year'); two houses with 3 floors are two 3-floor houses (no -s after 'floor')."
     },
     "0141":{
         "short_slug": "compound-noun-style",

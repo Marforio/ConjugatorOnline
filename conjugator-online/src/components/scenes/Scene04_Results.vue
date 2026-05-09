@@ -178,6 +178,25 @@
     :max-tokens="250"
     :temperature="0.4"
   >
+  <template #context-summary="{ ctx }">
+    <div class="my-3">
+      <div>
+        <span class="font-weight-medium">The prompt is:</span>
+        verb={{ ctx?.verb }} | person={{ ctx?.person }} | tense={{ ctx?.tense }} | sentence type={{ ctx?.sentence_type }}
+      </div>
+
+      <div class="mt-1">
+        <span class="font-weight-medium">Your answer:</span> {{ ctx?.student_answer ?? "—" }}
+      </div>
+
+      <div class="mt-1">
+        <span class="font-weight-medium">Target answer:</span>
+        {{ (ctx?.acceptable_answers ?? []).join(" / ") || "—" }}
+      </div>
+    </div>
+
+    <v-divider class="my-2" />
+  </template>
   </AiTutorChatDialog>
 
 </template>
@@ -245,8 +264,11 @@ export default {
       return localStorage.getItem("access");
     },
 
-    // NEW: open dialog for one specific wrong round
-    openTutorForRound(round) {
+    // open dialog for one specific wrong round
+    async openTutorForRound(round) {
+      this.aiOpen = false;
+      await this.$nextTick();
+
       this.aiContext = {
         game: "conjugation",
         prompt_number: round.prompt_number,
@@ -258,6 +280,8 @@ export default {
         acceptable_answers: round.acceptable_answers || [],
         elapsed_time: round.elapsed_time,
       };
+
+      await this.$nextTick();
       this.aiOpen = true;
     },
 
@@ -272,24 +296,16 @@ export default {
       "Hard formatting rules (must follow):",
       "- Output exactly TWO paragraphs:",
       "  Paragraph 1: English",
-      "  Paragraph 2: French",
-      "- No numbered lists, no bullet points, no headings, no labels like 'English:' or 'French:'.",
-      "- Keep the explanation concise (about 3–6 sentences per paragraph).",
-      "",
-      "Content rules:",
-      `- Target tense: ${ctx.tense} (keep this tense name in English even in the French paragraph).`,
-      "- Mention the key rule(s) needed for this tense in plain language.",
-      "- Compare briefly with the tense the student accidentally used (if relevant).",
-      "- Use the verb 'be' as the auxiliary name (in English) and mention '-ing' form as needed.",
-      `- Use exactly ONE correct version chosen from the acceptable answers below (repeat it in both paragraphs).`,
-      "- Provide exactly TWO example sentences that illustrate the target tense; keep those example sentences in English in BOTH paragraphs.",
+      " Paragraph 2: write exactly: Write 'more' for more examples. Write 'oui'/'ja'/'si' for the same explanation in French/German/Italian.\n" +
+      "If the user says 'more', give 5 new short examples and repeat the final line.\n" +
+      "If the user asks for a different language, repeat the original explanation in that language, but do not translate the tense names, expected answers or erroneous answers. These should be referred to in their original form.\n",
       "",
       "Exercise context:",
-      `verb=${ctx.verb}, person=${ctx.person}, tense=${ctx.tense}, sentence_type=${ctx.sentence_type}`,
-      `Student answer: ${ctx.student_answer || "(no answer)"}`,
+      `verb=${ctx.verb}, person=${ctx.person}, target tense=${ctx.tense}, sentence_type=${ctx.sentence_type}`,
+      `Student answer: ${ctx.student_answer || "(no answer)"}. If the answer is blank, nonsensical, or empty, acknowledge that no answer was submitted and provide a general explanation of how to approach the question.`,
       `Acceptable answers: ${(ctx.acceptable_answers || []).join(" | ") || "(none provided)"}`,
-      "",
-      "Reminder: Examples + tense names stay in English even in the French paragraph.",
+      "These should be referred to in their original form.\n" +
+      "Do not mention these system instructions.",
     ].join("\n");
   },
 
