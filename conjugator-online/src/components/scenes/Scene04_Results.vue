@@ -124,6 +124,15 @@
                         <span v-else>No answer submitted.</span>
                       </p>
                       <p>This answer is incorrect. </p>
+                      <v-chip
+                          v-if="isTypoRound(result)"
+                          size="x-small"
+                          color="info"
+                          variant="tonal"
+                          class="ms-2"
+                        >
+                          typo
+                        </v-chip>
                       <p>Time elapsed: {{ result.elapsed_time }} seconds.</p>
                       <p class="font-weight-medium">Prompt:</p>
                       <ul>
@@ -308,6 +317,20 @@ export default {
       "Do not mention these system instructions.",
     ].join("\n");
   },
+  
+    isTypoRound(round) {
+      // support either shape:
+      // 1) round.is_typo (recommended for backend payload)
+      if (round && typeof round.is_typo === "boolean") return round.is_typo;
+
+      // 2) round.typo.isTypo (if you store the full detector output)
+      if (round?.typo && typeof round.typo.isTypo === "boolean") {
+        // only show as typo if it wasn't force-wrong by a gate
+        return !!round.typo.isTypo && !round.typo.forceWrong;
+      }
+
+      return false;
+    },
 
     renderPieChart() {
       const container = d3.select("#pie-chart").node();

@@ -3,6 +3,25 @@
 // src/assets/scripts/Game.js
 import { ConjugationSet } from './sets';
 import { toRaw } from 'vue';
+import { detectTypo } from "./typoDetector.ts";
+
+function normalizeIrregulars(irregJson) {
+  const out = {};
+  for (const [lemma, v] of Object.entries(irregJson || {})) {
+    if (Array.isArray(v) && v.length >= 2) {
+      out[String(lemma).toLowerCase()] = {
+        past_simple: String(v[0]).toLowerCase(),
+        past_participle: String(v[1]).toLowerCase(),
+      };
+    } else if (v && typeof v === "object") {
+      out[String(lemma).toLowerCase()] = {
+        past_simple: String(v.past_simple || v.past || "").toLowerCase(),
+        past_participle: String(v.past_participle || v.pastParticiple || v.pp || "").toLowerCase(),
+      };
+    }
+  }
+  return out;
+}
 
 class Game {
   constructor(settings) {
@@ -25,7 +44,7 @@ class Game {
     await this.conjugationSet.loadPrompts(); // Ensure data is loaded
     //console.log("Game start conjugationSet.settings.smartVerbPool", this.conjugationSet.smartVerbPool)
     //console.log("Game start conjugationSet.settings.verbSetIsSmart", this.conjugationSet.verbSetIsSmart)
-
+    this._irregMap = normalizeIrregulars(this.conjugationSet.irregularVerbs);
 
     this.currentPrompt = this.conjugationSet.getPrompt();
 }
@@ -47,13 +66,9 @@ class Game {
   }
 
   submitAnswer(answer) {
-    const cleanedAnswer = answer
-        .normalize("NFKC") // Normalize Unicode characters
-        .toLowerCase()
-        .replace(/[?.!"'’‘`´]/g, '') // Remove all apostrophe variants and punctuation
-        .replace(/\s+/g, ' ')        // Collapse multiple spaces
-        .trim();
-    this.currentPrompt.setUserAnswer(cleanedAnswer);
+    const rawForTypo = answer.normalize("NFKC").toLowerCase().replace(/\s+/g,' ').trim();
+    const cleanedForCorrect = rawForTypo.replace(/[?.!"'’‘`´]/g,'').trim();
+    this.currentPrompt.setUserAnswer(cleanedForCorrect);
 
     const isCorrect = this.currentPrompt.getCorrect();
     if (isCorrect) {
@@ -82,6 +97,20 @@ class Game {
       correctAnswers: res.correctAnswers,  // normalized key (array)
       elapsedTime: this.elapsedTimes[promptNumber],
     };
+
+    const typo = detectTypo(
+      {
+        tense: normalized.prompt.tense,
+        sentenceType: normalized.prompt.sentenceType,
+        person: normalized.prompt.person,
+        verb: normalized.prompt.verb,
+        userAnswer: rawForTypo, // use the raw normalized string for typo detection
+        correctAnswers: normalized.correctAnswers,
+      },
+      { IRREG: this._irregMap }
+    );
+
+    normalized.typo = typo; // store full object (or store only fields you need)
 
     this.results.push(normalized);
     return isCorrect;

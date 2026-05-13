@@ -623,17 +623,35 @@ async function endGame() {
       ? ((Date.now() - startTime.value) / 1000 / totalRounds).toFixed(1)
       : "0.0";
 
-  const rounds = results.value.map((r: any, index: number) => ({
-    prompt_number: index + 1,
-    person: r.prompt.person,
-    verb: r.prompt.verb,
-    tense: r.prompt.tense,
-    sentence_type: r.prompt.sentenceType,
-    user_answer: r.userAnswer,
-    is_correct: !!r.correct,
-    acceptable_answers: Array.isArray(r.correctAnswers) ? r.correctAnswers : [],
-    elapsed_time: parseFloat(r.elapsedTime ?? 0),
-  }));
+const rounds = results.value.map((r: any, index: number) => {
+    const typoCandidate = !!r.typo?.isTypo && !r.typo?.forceWrong;
+
+    // typo "likelihood / closeness"
+    const typoLevMin = r.typo?.debug?.levMin ?? null;
+    const typoBestAccepted = r.typo?.debug?.bestAccepted ?? null;
+
+    return {
+      prompt_number: index + 1,
+      person: r.prompt.person,
+      verb: r.prompt.verb,
+      tense: r.prompt.tense,
+      sentence_type: r.prompt.sentenceType,
+      user_answer: r.userAnswer,
+      acceptable_answers: Array.isArray(r.correctAnswers) ? r.correctAnswers : [],
+      elapsed_time: parseFloat(r.elapsedTime ?? 0),
+
+      // IMPORTANT: if typo candidate, mark correctness unknown and request review
+      is_correct: typoCandidate ? null : !!r.correct,
+      typo_requested: typoCandidate ? true : false,
+
+      // OPTIONAL: send "closeness" metadata if backend supports fields (see section C)
+      typo_lev_min: typoLevMin,
+      typo_best_accepted: typoBestAccepted,
+      typo_detector_version: r.typo?.version ?? null,
+      typo_force_wrong: r.typo?.forceWrong ?? null,
+      typo_force_wrong_reason: r.typo?.forceWrongReason ?? "",
+    };
+  });
 
   const payload = {
     verb_set: localGameSettings.value?.verbSet ?? props.gameSettings.verbSet,
@@ -648,6 +666,8 @@ async function endGame() {
     avg_time_per_prompt: parseFloat(avgTime),
     rounds,
   };
+  console.log("round keys", payload.rounds.map(r => Object.keys(r)));
+  console.log("round id values", payload.rounds.map(r => (r as any).id));
 
   try {
     await api.post("/conj-game-sessions/", payload, {
@@ -671,7 +691,7 @@ async function endGame() {
 
 async function submitAnswer() {
   if (!gameStarted.value || !game.value) return;
-
+  
   const now = Date.now();
   const elapsedMs = roundStartTime.value ? now - roundStartTime.value : 0;
   const elapsedSecondsDecimal = (elapsedMs / 1000).toFixed(1);
@@ -681,11 +701,24 @@ async function submitAnswer() {
   if (realPrompt) realPrompt.elapsedTime = elapsedSecondsDecimal;
 
   const isCorrect = game.value.submitAnswer(userAnswer.value);
+  const last = game.value?.results?.[game.value.results.length - 1];
+  const typo = last?.typo;
+  console.log("typo debug", { isCorrect, typo });
 
-  snackbar.message = isCorrect
-    ? `Yes! "${userAnswer.value}" is correct!`
-    : `Sorry, "${userAnswer.value}" is wrong!`;
-  snackbar.color = isCorrect ? "success" : "warning";
+  const shouldShowTypo =
+    !isCorrect &&
+    typo &&
+    typo.isTypo === true &&
+    typo.forceWrong === false;
+
+  snackbar.message = shouldShowTypo
+    ? `That looks like a typo. Your answer is very close.`
+    : (isCorrect
+        ? `Yes! "${userAnswer.value}" is correct!`
+        : `Sorry, "${userAnswer.value}" is wrong!`);
+
+  snackbar.color = shouldShowTypo ? "info" : (isCorrect ? "success" : "warning");
+
   snackbar.show = false;
   await nextTick();
   snackbar.show = true;

@@ -96,9 +96,9 @@ const props = defineProps({
   title: { type: String, default: "Translation hint" },
 
   apiUrl: { type: String, default: "/llm/chat/" },
-  model: { type: String, default: "NousResearch/Hermes-4-14B" },
+  model: { type: String, default: "google/gemma-4-31B-turbo-TEE" },
   temperature: { type: Number, default: 0.2 },
-  maxTokens: { type: Number, default: 200 },
+  maxTokens: { type: Number, default: 300 },
 
   // Provide the game prompt + acceptable answers
   context: { type: Object as () => HintCtx, default: () => ({}) },

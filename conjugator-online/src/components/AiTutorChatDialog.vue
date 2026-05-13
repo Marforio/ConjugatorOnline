@@ -109,7 +109,7 @@ const props = defineProps({
   // this should be "/llm/chat/" not "/api/llm/chat/"
   apiUrl: { type: String, default: "/llm/chat/" },
 
-  model: { type: String, default: "NousResearch/Hermes-4-14B" },
+  model: { type: String, default: "google/gemma-4-31B-turbo-TEE" },
   temperature: { type: Number, default: 0.4 },
   maxTokens: { type: Number, default: 400 },
 
