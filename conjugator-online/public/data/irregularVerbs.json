@@ -435,6 +435,10 @@
         "past_simple": "struck",
         "past_participle": "struck"
     },
+    "strive":{
+        "past_simple": "strove",
+        "past_participle": "striven"
+    },
     "swim":{
         "past_simple": "swam",
         "past_participle": "swum"

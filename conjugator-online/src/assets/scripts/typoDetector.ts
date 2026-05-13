@@ -249,9 +249,9 @@ export function normalizeIrregulars(irregJson: any) {
 const AUX_FAM: Record<string, Set<string>> = {
   DID: new Set(["did", "didnt", "didn't"]),
   DO: new Set(["do", "does", "dont", "don't", "doesnt", "doesn't"]),
-  HAVE: new Set(["have", "has", "havent", "haven't", "hasnt", "hasn't"]),
+  HAVE: new Set(["have", "has", "havent", "haven't", "hasnt", "hasn't", "ve", "'ve"]), // include contractions like 've (they've) as HAVE family
   HAD: new Set(["had", "hadnt", "hadn't"]),
-  BE: new Set(["am", "is", "are", "was", "were", "aint", "isnt", "isn't", "arent", "aren't"]),
+  BE: new Set(["am", "is", "are", "was", "were", "aint", "isnt", "isn't", "arent", "aren't","m", "'m", "re", "'re"]), 
   SHOULD: new Set(["should", "shouldnt", "shouldn't"]),
   WILL: new Set(["will", "wont", "won't", "ll"]),
 };
@@ -272,12 +272,36 @@ function auxCandidateTokens(userAnswer: string): string[] {
   // Excludes participle-looking tokens to reduce e.g. "done" matching "don't".
   const toks = tokens(userAnswer);
   const cand: string[] = [];
+
   for (let i = 0; i < toks.length; i++) {
     const t = toks[i];
+
+    // keep original token selection logic
     if (i <= 3) cand.push(t);
     else if (t.endsWith("nt") || t.includes("n't")) cand.push(t);
+
+    // NEW: also extract contraction suffix from tokens like "you've", "they're", "i'm", "he's"
+    // tokens() keeps apostrophes, so these arrive as a single token with "'"
+    const apos = t.indexOf("'");
+    if (apos > 0 && apos < t.length - 1) {
+      const suffix = t.slice(apos);      // e.g. "'ve", "'re", "'m", "'s", "n't"
+      const suffixNoApos = t.slice(apos + 1); // e.g. "ve", "re", "m", "s", "nt"
+
+      // push both forms so it matches either "'ve" or "ve" depending on your AUX_FAM sets
+      cand.push(suffix);
+      cand.push(suffixNoApos);
+    }
   }
-  return cand.filter((t) => !(t.endsWith("ed") || t.endsWith("en") || t.endsWith("ing")));
+
+  // keep your original "not participle-looking" filter, but apply it at the end
+  // so contraction suffixes like "'ve" aren't accidentally dropped.
+  return cand.filter((t) => {
+    // don't drop contractions like "'ve" just because they end with "e"
+    if (t.startsWith("'")) return true;
+
+    // drop obvious participle-ish tokens to avoid false aux matches
+    return !(t.endsWith("ed") || t.endsWith("en") || t.endsWith("ing"));
+  });
 }
 
 function bestFamilyMatch(userToks: string[], famWords: Set<string>) {
@@ -744,6 +768,45 @@ function gatePresentContinuousMissingDoubling(input: TypoInput) {
   return { bad: false, reason: "" };
 }
 
+function gatePresentContinuousBeAgreement(input: TypoInput, minBeSim = 0.72) {
+  const tense = input.tense as Tense;
+  if (tense !== "Present continuous") return { bad: false, reason: "" };
+
+  // expected BE form from person
+  const p = normToken(input.person);
+  if (!p) return { bad: false, reason: "" };
+
+  const expected =
+    p === "i" ? "am" :
+    (p === "he" || p === "she" || p === "it") ? "is" :
+    "are"; // you/we/they default
+
+  const cand = auxCandidateTokens(input.userAnswer);
+  const m = bestFamilyMatch(cand, AUX_FAM.BE);
+  if (m.bestS < minBeSim) return { bad: false, reason: "" }; // BE not confidently present; other gates handle missing BE
+
+  // find best token match to the expected form specifically
+  let bestS = 0;
+  let bestTok = "";
+  for (const t of cand) {
+    const s = sim(t, expected);
+    if (s > bestS) {
+      bestS = s;
+      bestTok = t;
+    }
+  }
+
+  // If they used BE but it's not the right member (isnt vs arent, etc.)
+  if (bestS < 0.85) {
+    return {
+      bad: true,
+      reason: `present_continuous_be_agreement(expected=${expected}, best_tok=${bestTok}, best_sim=${bestS.toFixed(2)})`,
+    };
+  }
+
+  return { bad: false, reason: "" };
+}
+
 /** -------------------- GATES: DO agreement -------------------- **/
 
 /**
@@ -1126,6 +1189,10 @@ export function detectTypo(
   // Gate PC1: Present continuous requires BE.
   const gPc1 = gatePresentContinuousMissingBe(normInput2);
   if (gPc1.bad) return forceWrong(gPc1.reason);
+
+  // GAte PC1b: If BE is present, it should agree with the subject (he is vs he are).
+  const gPcAgree = gatePresentContinuousBeAgreement(normInput2);
+  if (gPcAgree.bad) return forceWrong(gPcAgree.reason);
 
   // Gate PC2: Present continuous negative must include BE with negation (blocks "she not instructing").
   const gPc2 = gatePresentContinuousNegativeRequiresBeNot(normInput2);

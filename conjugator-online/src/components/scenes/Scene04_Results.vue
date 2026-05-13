@@ -115,25 +115,27 @@
                   v-for="(result, index) in wrongResults"
                   :key="'wrong-' + index"
                 >
-                  <v-card class="mx-auto my-3" color="amber-lighten-5" max-width="300" elevation="2">
+                  <v-card class="mx-auto my-3" :color="isTypoRound(result) ? 'blue-lighten-5' : 'amber-lighten-5'" max-width="300" elevation="2">
                     <v-card-title>Question {{ result.prompt_number }}</v-card-title>
                     <v-card-text>
+                      <div v-if="isTypoRound(result)" class="d-flex align-center justify-center mt-1 mb-3">
+                        <v-chip size="large" color="info" variant="tonal">
+                          typo?
+                        </v-chip>
+                      </div>
                       <p class="text-subtitle-1">Your answer:</p>
                       <p class="text-center text-h6">
                         <em v-if="result.user_answer">{{ result.user_answer }}</em>
                         <span v-else>No answer submitted.</span>
                       </p>
-                      <p>This answer is incorrect. </p>
-                      <v-chip
-                          v-if="isTypoRound(result)"
-                          size="x-small"
-                          color="info"
-                          variant="tonal"
-                          class="ms-2"
-                        >
-                          typo
-                        </v-chip>
-                      <p>Time elapsed: {{ result.elapsed_time }} seconds.</p>
+                      <div v-if="isTypoRound(result)">
+                        <p class="text-caption font-weight-light font-size-xs">This might be a typo. If approved by the teacher, it will be counted as correct.</p>
+
+                      </div>
+                      
+
+                      <p v-else>This answer is incorrect. </p>
+                      
                       <p class="font-weight-medium">Prompt:</p>
                       <ul>
                         <li>Verb: {{ result.verb }}</li>
@@ -247,7 +249,7 @@ export default {
     },
     wrongResults() {
       return Array.isArray(this.results?.rounds)
-        ? this.results.rounds.filter((r) => r.is_correct === false)
+        ? this.results.rounds.filter((r) => r.is_correct === false || r.is_correct === null) // include null as potentially wrong (e.g. pending typo validation)
         : [];
     },
     percentCorrect() {
@@ -319,13 +321,16 @@ export default {
   },
   
     isTypoRound(round) {
-      // support either shape:
-      // 1) round.is_typo (recommended for backend payload)
-      if (round && typeof round.is_typo === "boolean") return round.is_typo;
+      if (!round) return false;
 
-      // 2) round.typo.isTypo (if you store the full detector output)
+      // New canonical backend shape: pending manual review
+      if (round.typo_requested === true && round.is_correct === null) return true;
+
+      // Optional: if you ever add an explicit boolean from backend
+      if (typeof round.is_typo === "boolean") return round.is_typo;
+
+      // Legacy shape (if you ever pass the full detector output)
       if (round?.typo && typeof round.typo.isTypo === "boolean") {
-        // only show as typo if it wasn't force-wrong by a gate
         return !!round.typo.isTypo && !round.typo.forceWrong;
       }
 
