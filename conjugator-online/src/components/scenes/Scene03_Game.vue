@@ -624,34 +624,35 @@ async function endGame() {
       : "0.0";
 
 const rounds = results.value.map((r: any, index: number) => {
-    const typoCandidate = !!r.typo?.isTypo && !r.typo?.forceWrong;
+  const isCorrectRound = r.correct === true; // strict is better than !!
+  const typoCandidate =
+    !isCorrectRound &&
+    r.typo?.isTypo === true &&
+    r.typo?.forceWrong === false;
 
-    // typo "likelihood / closeness"
-    const typoLevMin = r.typo?.debug?.levMin ?? null;
-    const typoBestAccepted = r.typo?.debug?.bestAccepted ?? null;
+  const typoLevMin = r.typo?.debug?.levMin ?? null;
+  const typoBestAccepted = r.typo?.debug?.bestAccepted ?? null;
 
-    return {
-      prompt_number: index + 1,
-      person: r.prompt.person,
-      verb: r.prompt.verb,
-      tense: r.prompt.tense,
-      sentence_type: r.prompt.sentenceType,
-      user_answer: r.userAnswer,
-      acceptable_answers: Array.isArray(r.correctAnswers) ? r.correctAnswers : [],
-      elapsed_time: parseFloat(r.elapsedTime ?? 0),
+  return {
+    prompt_number: index + 1,
+    person: r.prompt.person,
+    verb: r.prompt.verb,
+    tense: r.prompt.tense,
+    sentence_type: r.prompt.sentenceType,
+    user_answer: r.userAnswer,
+    acceptable_answers: Array.isArray(r.correctAnswers) ? r.correctAnswers : [],
+    elapsed_time: parseFloat(r.elapsedTime ?? 0),
 
-      // IMPORTANT: if typo candidate, mark correctness unknown and request review
-      is_correct: typoCandidate ? null : !!r.correct,
-      typo_requested: typoCandidate ? true : false,
+    is_correct: typoCandidate ? null : isCorrectRound,
+    typo_requested: typoCandidate,
 
-      // OPTIONAL: send "closeness" metadata if backend supports fields (see section C)
-      typo_lev_min: typoLevMin,
-      typo_best_accepted: typoBestAccepted,
-      typo_detector_version: r.typo?.version ?? null,
-      typo_force_wrong: r.typo?.forceWrong ?? null,
-      typo_force_wrong_reason: r.typo?.forceWrongReason ?? "",
-    };
-  });
+    typo_lev_min: typoLevMin,
+    typo_best_accepted: typoBestAccepted,
+    typo_detector_version: r.typo?.version ?? null,
+    typo_force_wrong: r.typo?.forceWrong ?? null,
+    typo_force_wrong_reason: r.typo?.forceWrongReason ?? "",
+  };
+});
 
   const payload = {
     verb_set: localGameSettings.value?.verbSet ?? props.gameSettings.verbSet,
