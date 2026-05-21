@@ -487,6 +487,10 @@
         "past_simple": "understood",
         "past_participle": "understood"
     },
+    "undertake":{
+        "past_simple": "undertook",
+        "past_participle": "undertaken"
+    },
     "upset":{
         "past_simple": "upset",
         "past_participle": "upset"

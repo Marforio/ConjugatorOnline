@@ -605,8 +605,8 @@
                                 :color="round.typo ? 'grey' : round.is_correct ? 'green' : 'red'"
                               >
                                 {{
-                                  round.typo
-                                    ? 'mdi-cancel' // or 'mdi-minus-circle-outline'
+                                  round.typo_requested
+                                    ? 'mdi-help-circle-outline' 
                                     : round.is_correct
                                     ? 'mdi-check-circle'
                                     : 'mdi-close-circle'

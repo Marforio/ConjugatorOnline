@@ -38,12 +38,12 @@
             prepend-icon="mdi-account"
             variant="outlined"
             clearable
-            @update:model-value="fetchAllData"
+            @update:model-value="onStudentFilterChange"
           >
             <template v-slot:item="{ props, item }">
               <v-list-item v-bind="props">
                 <template v-slot:prepend>
-                  <v-avatar color="primary" size="32">
+                  <v-avatar color="primary" size="32" class="mr-2">
                     <span class="text-white text-caption">{{ item.raw.initials }}</span>
                   </v-avatar>
                 </template>
@@ -78,57 +78,83 @@
             <v-icon size="32" color="error">mdi-alert-circle</v-icon>
           </div>
 
+          <!-- View Toggle for COURSES vs Students -->
+          <v-btn-toggle
+            v-model="errorViewMode"
+            mandatory
+            variant="outlined"
+            color="error"
+            class="mb-4 w-100"
+            @update:model-value="handleErrorViewToggle"
+          >
+            <v-btn value="COURSES" class="flex-grow-1" size="small">
+              <v-icon start>mdi-google-classroom</v-icon>
+              COURSES
+            </v-btn>
+            <v-btn value="STUDENTS" class="flex-grow-1" size="small">
+              <v-icon start>mdi-account</v-icon>
+              Students
+            </v-btn>
+          </v-btn-toggle>
+
           <!-- Loading State -->
           <v-progress-linear v-if="loadingErrors" indeterminate color="primary" class="mb-4" />
 
-          <!-- Error Bar Chart -->
-          <div v-else-if="topErrors.length > 0" class="mb-4">
+          <!-- Error Chart Presentation Structure -->
+          <div v-else-if="hasChartData" class="mb-4">
             <canvas ref="errorChartCanvas" height="400"></canvas>
           </div>
 
+          <!-- No Data Messages Contextualized by Active Selection state -->
           <div v-else class="text-center text-medium-emphasis pa-8">
-            No error data available for this course
+            <span v-if="errorViewMode === 'STUDENTS' && !selectedStudent">
+              Please select a specific student from the filters above to see individual breakdown data.
+            </span>
+            <span v-else>
+              No error data available for this criteria.
+            </span>
           </div>
 
-          <!-- Error Details Dropdown -->
-          <v-divider class="my-4" />
-          
-          <div class="text-h6 mb-3">Error Details</div>
-          <v-select
-            v-model="selectedErrorCode"
-            :items="errorDropdownItems"
-            label="Select an error to view details"
-            variant="outlined"
-            clearable
-          />
+          <!-- Class-only Details Layout Blocks -->
+          <div v-if="errorViewMode === 'COURSES'">
+            <v-divider class="my-4" />
+            <div class="text-h6 mb-3">Error Details</div>
+            <v-select
+              v-model="selectedErrorCode"
+              :items="errorDropdownItems"
+              label="Select an error to view details"
+              variant="outlined"
+              clearable
+            />
 
-          <!-- Selected Error Details -->
-          <v-card v-if="selectedErrorObj" variant="outlined" class="pa-4 mt-4">
-            <div class="text-subtitle-1 font-weight-bold mb-2">
-              {{ selectedErrorObj.error_code }}
-            </div>
-            <div class="text-body-2 mb-3">
-              <strong>Total occurrences:</strong> {{ selectedErrorObj.total_times }}
-            </div>
-            <div class="text-body-2 mb-2">
-              <strong>Evidence samples:</strong>
-            </div>
-            <v-list density="compact" class="evidence-list">
-              <v-list-item
-                v-for="(sample, i) in selectedErrorObj.evidence_samples.slice(0, 10)"
-                :key="i"
-                class="px-0"
-              >
-                <template v-slot:prepend>
-                  <v-icon size="small" class="mr-2">mdi-chevron-right</v-icon>
-                </template>
-                <span v-html="sample" class="text-body-2"></span>
-              </v-list-item>
-            </v-list>
-          </v-card>
+            <!-- Selected Error Details View -->
+            <v-card v-if="selectedErrorObj" variant="outlined" class="pa-4 mt-4">
+              <div class="text-subtitle-1 font-weight-bold mb-2">
+                {{ selectedErrorObj.error_code }}
+              </div>
+              <div class="text-body-2 mb-3">
+                <strong>Total occurrences:</strong> {{ selectedErrorObj.total_times }}
+              </div>
+              <div class="text-body-2 mb-2">
+                <strong>Evidence samples:</strong>
+              </div>
+              <v-list density="compact" class="evidence-list">
+                <v-list-item
+                  v-for="(sample, i) in selectedErrorObj.evidence_samples.slice(0, 10)"
+                  :key="i"
+                  class="px-0"
+                >
+                  <template v-slot:prepend>
+                    <v-icon size="small" class="mr-2">mdi-chevron-right</v-icon>
+                  </template>
+                  <span v-html="sample" class="text-body-2"></span>
+                </v-list-item>
+              </v-list>
+            </v-card>
 
-          <div v-else-if="selectedErrorCode" class="text-center text-medium-emphasis pa-4">
-            Error details not found
+            <div v-else-if="selectedErrorCode" class="text-center text-medium-emphasis pa-4">
+              Error details not found
+            </div>
           </div>
         </v-card>
       </v-col>
@@ -285,106 +311,106 @@
       </v-col>
     </v-row>
 
-   <!-- Summary Stats -->
-<v-row>
-  <v-col cols="12" sm="6" md="3">
-    <v-card class="pa-4" elevation="2" rounded="lg">
-      <div class="d-flex align-center justify-space-between">
-        <div>
-          <div class="text-caption text-medium-emphasis">Total Errors</div>
-          <div class="text-h4 font-weight-bold">{{ totalErrorOccurrences }}</div>
-        </div>
-        <v-icon size="40" color="error">mdi-alert-circle</v-icon>
-      </div>
-    </v-card>
-  </v-col>
-  <v-col cols="12" sm="6" md="3">
-    <v-card class="pa-4" elevation="2" rounded="lg">
-      <div class="d-flex align-center justify-space-between">
-        <div>
-          <div class="text-caption text-medium-emphasis">Total Sessions</div>
-          <div class="text-h4 font-weight-bold">{{ totalSessions }}</div>
-        </div>
-        <v-icon size="40" color="info">mdi-play-circle</v-icon>
-      </div>
-    </v-card>
-  </v-col>
-  <v-col cols="12" sm="6" md="3">
-    <v-card class="pa-4" elevation="2" rounded="lg">
-      <div class="d-flex align-center justify-space-between">
-        <div>
-          <div class="text-caption text-medium-emphasis">Total Achievements</div>
-          <div class="text-h4 font-weight-bold">{{ totalAchievements }}</div>
-        </div>
-        <v-icon size="40" color="amber">mdi-trophy</v-icon>
-      </div>
-    </v-card>
-  </v-col>
-  <v-col cols="12" sm="6" md="3">
-    <v-card class="pa-4" elevation="2" rounded="lg">
-      <div class="d-flex align-center justify-space-between">
-        <div>
-          <div class="text-caption text-medium-emphasis">Active Students</div>
-          <div class="text-h4 font-weight-bold">{{ activeStudentCount }}</div>
-        </div>
-        <v-icon size="40" color="success">mdi-account-check</v-icon>
-      </div>
-    </v-card>
-  </v-col>
-</v-row>
+    <!-- Summary Stats -->
+    <v-row>
+      <v-col cols="12" sm="6" md="3">
+        <v-card class="pa-4" elevation="2" rounded="lg">
+          <div class="d-flex align-center justify-space-between">
+            <div>
+              <div class="text-caption text-medium-emphasis">Total Errors</div>
+              <div class="text-h4 font-weight-bold">{{ totalErrorOccurrences }}</div>
+            </div>
+            <v-icon size="40" color="error">mdi-alert-circle</v-icon>
+          </div>
+        </v-card>
+      </v-col>
+      <v-col cols="12" sm="6" md="3">
+        <v-card class="pa-4" elevation="2" rounded="lg">
+          <div class="d-flex align-center justify-space-between">
+            <div>
+              <div class="text-caption text-medium-emphasis">Total Sessions</div>
+              <div class="text-h4 font-weight-bold">{{ totalSessions }}</div>
+            </div>
+            <v-icon size="40" color="info">mdi-play-circle</v-icon>
+          </div>
+        </v-card>
+      </v-col>
+      <v-col cols="12" sm="6" md="3">
+        <v-card class="pa-4" elevation="2" rounded="lg">
+          <div class="d-flex align-center justify-space-between">
+            <div>
+              <div class="text-caption text-medium-emphasis">Total Achievements</div>
+              <div class="text-h4 font-weight-bold">{{ totalAchievements }}</div>
+            </div>
+            <v-icon size="40" color="amber">mdi-trophy</v-icon>
+          </div>
+        </v-card>
+      </v-col>
+      <v-col cols="12" sm="6" md="3">
+        <v-card class="pa-4" elevation="2" rounded="lg">
+          <div class="d-flex align-center justify-space-between">
+            <div>
+              <div class="text-caption text-medium-emphasis">Active Students</div>
+              <div class="text-h4 font-weight-bold">{{ activeStudentCount }}</div>
+            </div>
+            <v-icon size="40" color="success">mdi-account-check</v-icon>
+          </div>
+        </v-card>
+      </v-col>
+    </v-row>
 
-<!-- Activity Breakdown (New!) -->
-<v-row class="mt-4">
-  <v-col cols="12">
-    <v-card class="pa-6" elevation="2" rounded="lg">
-      <div class="text-h6 mb-4">Activity Breakdown</div>
-      <v-row>
-        <v-col cols="6" sm="4" md="2">
-          <div class="text-center">
-            <v-icon size="32" color="blue">mdi-controller</v-icon>
-            <div class="text-h5 font-weight-bold mt-2">{{ activityBreakdown.conjugation }}</div>
-            <div class="text-caption text-medium-emphasis">Conjugation</div>
-          </div>
-        </v-col>
-        <v-col cols="6" sm="4" md="2">
-          <div class="text-center">
-            <v-icon size="32" color="purple">mdi-gamepad-variant</v-icon>
-            <div class="text-h5 font-weight-bold mt-2">{{ activityBreakdown.other_game }}</div>
-            <div class="text-caption text-medium-emphasis">Games</div>
-          </div>
-        </v-col>
-        <v-col cols="6" sm="4" md="2">
-          <div class="text-center">
-            <v-icon size="32" color="orange">mdi-weight-lifter</v-icon>
-            <div class="text-h5 font-weight-bold mt-2">{{ activityBreakdown.exercise }}</div>
-            <div class="text-caption text-medium-emphasis">Exercises</div>
-          </div>
-        </v-col>
-        <v-col cols="6" sm="4" md="2">
-          <div class="text-center">
-            <v-icon size="32" color="green">mdi-card-text</v-icon>
-            <div class="text-h5 font-weight-bold mt-2">{{ activityBreakdown.vocab_workout }}</div>
-            <div class="text-caption text-medium-emphasis">Vocab</div>
-          </div>
-        </v-col>
-        <v-col cols="6" sm="4" md="2">
-          <div class="text-center">
-            <v-icon size="32" color="amber">mdi-trophy</v-icon>
-            <div class="text-h5 font-weight-bold mt-2">{{ activityBreakdown.achievement }}</div>
-            <div class="text-caption text-medium-emphasis">Achievements</div>
-          </div>
-        </v-col>
-        <v-col cols="6" sm="4" md="2">
-          <div class="text-center">
-            <v-icon size="32" color="teal">mdi-clipboard-check</v-icon>
-            <div class="text-h5 font-weight-bold mt-2">{{ activityBreakdown.workout_drill }}</div>
-            <div class="text-caption text-medium-emphasis">Drills</div>
-          </div>
-        </v-col>
-      </v-row>
-    </v-card>
-  </v-col>
-</v-row>
+    <!-- Activity Breakdown -->
+    <v-row class="mt-4">
+      <v-col cols="12">
+        <v-card class="pa-6" elevation="2" rounded="lg">
+          <div class="text-h6 mb-4">Activity Breakdown</div>
+          <v-row>
+            <v-col cols="6" sm="4" md="2">
+              <div class="text-center">
+                <v-icon size="32" color="blue">mdi-controller</v-icon>
+                <div class="text-h5 font-weight-bold mt-2">{{ activityBreakdown.conjugation }}</div>
+                <div class="text-caption text-medium-emphasis">Conjugation</div>
+              </div>
+            </v-col>
+            <v-col cols="6" sm="4" md="2">
+              <div class="text-center">
+                <v-icon size="32" color="purple">mdi-gamepad-variant</v-icon>
+                <div class="text-h5 font-weight-bold mt-2">{{ activityBreakdown.other_game }}</div>
+                <div class="text-caption text-medium-emphasis">Games</div>
+              </div>
+            </v-col>
+            <v-col cols="6" sm="4" md="2">
+              <div class="text-center">
+                <v-icon size="32" color="orange">mdi-weight-lifter</v-icon>
+                <div class="text-h5 font-weight-bold mt-2">{{ activityBreakdown.exercise }}</div>
+                <div class="text-caption text-medium-emphasis">Exercises</div>
+              </div>
+            </v-col>
+            <v-col cols="6" sm="4" md="2">
+              <div class="text-center">
+                <v-icon size="32" color="green">mdi-card-text</v-icon>
+                <div class="text-h5 font-weight-bold mt-2">{{ activityBreakdown.vocab_workout }}</div>
+                <div class="text-caption text-medium-emphasis">Vocab</div>
+              </div>
+            </v-col>
+            <v-col cols="6" sm="4" md="2">
+              <div class="text-center">
+                <v-icon size="32" color="amber">mdi-trophy</v-icon>
+                <div class="text-h5 font-weight-bold mt-2">{{ activityBreakdown.achievement }}</div>
+                <div class="text-caption text-medium-emphasis">Achievements</div>
+              </div>
+            </v-col>
+            <v-col cols="6" sm="4" md="2">
+              <div class="text-center">
+                <v-icon size="32" color="teal">mdi-clipboard-check</v-icon>
+                <div class="text-h5 font-weight-bold mt-2">{{ activityBreakdown.workout_drill }}</div>
+                <div class="text-caption text-medium-emphasis">Drills</div>
+              </div>
+            </v-col>
+          </v-row>
+        </v-card>
+      </v-col>
+    </v-row>
 
     <!-- Snackbar -->
     <v-snackbar v-model="snackbar" :color="snackbarColor" :timeout="3000">
@@ -478,6 +504,9 @@ const dateRangeOptions = [
 ];
 
 const errorData = ref<ErrorData[]>([]);
+const studentErrorData = ref<ErrorData[]>([]); // Separated list container for specific user records
+const errorViewMode = ref<'COURSES' | 'STUDENTS'>('COURSES');
+
 const achievements = ref<Achievement[]>([]);
 const activities = ref<Activity[]>([]);
 const selectedErrorCode = ref<string | null>(null);
@@ -494,10 +523,22 @@ const selectedCourseName = computed(() => {
   return found ? found.name : 'Unknown Course';
 });
 
+// Computed properties mapping context lists safely depending on the current toggle state
+const currentActiveErrors = computed(() => {
+  return errorViewMode.value === 'COURSES' ? errorData.value : studentErrorData.value;
+});
+
 const topErrors = computed(() => {
-  return [...errorData.value]
+  return [...currentActiveErrors.value]
     .sort((a, b) => b.total_times - a.total_times)
     .slice(0, 20);
+});
+
+const hasChartData = computed(() => {
+  if (errorViewMode.value === 'STUDENTS') {
+    return !!selectedStudent.value && topErrors.value.length > 0;
+  }
+  return topErrors.value.length > 0;
 });
 
 const errorDropdownItems = computed(() => {
@@ -515,22 +556,17 @@ const selectedErrorObj = computed(() => {
 
 const filteredAchievements = computed(() => {
   let filtered = [...achievements.value];
-
-  // Filter by date range
   if (dateRange.value !== 'all') {
     const now = new Date();
     const daysAgo = dateRange.value === '7days' ? 7 : dateRange.value === '30days' ? 30 : 90;
     const cutoffDate = new Date(now.getTime() - daysAgo * 24 * 60 * 60 * 1000);
-    
     filtered = filtered.filter(a => new Date(a.achieved_on) >= cutoffDate);
   }
-
   return filtered;
 });
 
 const achievementsByStudent = computed(() => {
   const grouped: Record<number, StudentAchievements> = {};
-
   filteredAchievements.value.forEach(ach => {
     if (!grouped[ach.student]) {
       grouped[ach.student] = {
@@ -542,27 +578,21 @@ const achievementsByStudent = computed(() => {
     }
     grouped[ach.student].achievements.push(ach);
   });
-
-  return Object.values(grouped)
-    .sort((a, b) => b.achievements.length - a.achievements.length);
+  return Object.values(grouped).sort((a, b) => b.achievements.length - a.achievements.length);
 });
 
 const achievementTypeOptions = computed(() => {
   const types = new Set<string>();
-  filteredAchievements.value.forEach(a => {
-    types.add(a.description);
-  });
+  filteredAchievements.value.forEach(a => { types.add(a.description); });
   return Array.from(types).sort().map(t => ({ title: t, value: t }));
 });
 
 const studentsWithSelectedAchievement = computed(() => {
   if (!selectedAchievementType.value) return [];
-
-  const students: StudentWithAchievement[] = [];
-  
+  const results: StudentWithAchievement[] = [];
   filteredAchievements.value.forEach(a => {
     if (a.description === selectedAchievementType.value) {
-      students.push({
+      results.push({
         student_id: a.student,
         initials: a.student_initials || `Student ${a.student}`,
         web_id: a.student_web_id || '',
@@ -571,29 +601,20 @@ const studentsWithSelectedAchievement = computed(() => {
       });
     }
   });
-
-  return students.sort((a, b) => 
-    new Date(b.achieved_on).getTime() - new Date(a.achieved_on).getTime()
-  );
+  return results.sort((a, b) => new Date(b.achieved_on).getTime() - new Date(a.achieved_on).getTime());
 });
 
 const totalErrorOccurrences = computed(() => {
-  return errorData.value.reduce((sum, e) => sum + e.total_times, 0);
+  return currentActiveErrors.value.reduce((sum, e) => sum + e.total_times, 0);
 });
 
 const uniqueErrorCount = computed(() => {
-  return errorData.value.length;
+  return currentActiveErrors.value.length;
 });
 
-const totalAchievements = computed(() => {
-  return filteredAchievements.value.length;
-});
+const totalAchievements = computed(() => filteredAchievements.value.length);
+const activeStudentCount = computed(() => achievementsByStudent.value.length);
 
-const activeStudentCount = computed(() => {
-  return achievementsByStudent.value.length;
-});
-
-// Activity stats from the lightweight API
 const totalSessions = computed(() => {
   return activities.value.filter(a => 
     ['conjugation', 'other_game', 'exercise', 'vocab_workout'].includes(a.activity_type)
@@ -609,13 +630,11 @@ const activityBreakdown = computed(() => {
     achievement: 0,
     workout_drill: 0,
   };
-
   activities.value.forEach(a => {
     if (breakdown.hasOwnProperty(a.activity_type)) {
       breakdown[a.activity_type]++;
     }
   });
-
   return breakdown;
 });
 
@@ -647,40 +666,85 @@ async function fetchErrorData() {
   loadingErrors.value = true;
   try {
     const params: any = {};
+    
+    // 1. Apply the course filter if one is selected
     if (selectedCourse.value !== 'all') {
       params.course = selectedCourse.value;
     }
 
+    // 2. If looking at a student profile, attach their ID to the API request
+    if (errorViewMode.value === 'STUDENTS') {
+      if (!selectedStudent.value) {
+        // If no student is chosen yet, clear out the display data and stop
+        studentErrorData.value = [];
+        await nextTick();
+        renderErrorChart();
+        return;
+      }
+      params.student = selectedStudent.value;
+    }
+
+    // 3. Make the clean API call using your new Django parameters
     const response = await api.get<ErrorData[]>('/admin-error-summary/summary/', { params });
     const raw = response.data || [];
 
-    if (selectedCourse.value === 'all') {
-      const grouped: Record<string, ErrorData> = {};
-
-      raw.forEach(e => {
-        if (!grouped[e.error_code]) {
-          grouped[e.error_code] = {
-            error_code: e.error_code,
-            total_times: 0,
-            evidence_samples: [],
-          };
-        }
-        grouped[e.error_code].total_times += e.total_times;
-        grouped[e.error_code].evidence_samples.push(...e.evidence_samples);
-      });
-
-      errorData.value = Object.values(grouped);
+    // 4. Distribute the incoming database response to the correct tracking array
+    if (errorViewMode.value === 'STUDENTS') {
+      studentErrorData.value = raw;
     } else {
-      errorData.value = raw;
+      // If viewing CLASSES across All Courses, aggregate matching error codes cleanly
+      if (selectedCourse.value === 'all') {
+        const grouped: Record<string, ErrorData> = {};
+        raw.forEach(e => {
+          if (!grouped[e.error_code]) {
+            grouped[e.error_code] = {
+              error_code: e.error_code,
+              total_times: 0,
+              evidence_samples: [],
+            };
+          }
+          grouped[e.error_code].total_times += e.total_times;
+          grouped[e.error_code].evidence_samples.push(...e.evidence_samples);
+        });
+        errorData.value = Object.values(grouped);
+      } else {
+        errorData.value = raw;
+      }
     }
 
+    // 5. Trigger the visual interface refresh updates seamlessly
     await nextTick();
     renderErrorChart();
-
-    showSnackbar('Error data loaded', 'success');
   } catch (error) {
     console.error('Failed to fetch error data:', error);
     showSnackbar('Failed to load error data', 'error');
+  } finally {
+    loadingErrors.value = false;
+  }
+}
+
+async function fetchStudentSpecificErrors() {
+  if (!selectedStudent.value) {
+    studentErrorData.value = [];
+    renderErrorChart();
+    return;
+  }
+
+  loadingErrors.value = true;
+  try {
+    const params: any = { student: selectedStudent.value };
+    if (selectedCourse.value !== 'all') {
+      params.course = selectedCourse.value;
+    }
+
+    // Hits your modified Django viewset action directly!
+    const response = await api.get<ErrorData[]>('/admin-error-summary/summary/', { params });
+    studentErrorData.value = response.data || [];
+
+    await nextTick();
+    renderErrorChart();
+  } catch (error) {
+    console.error('Failed to fetch student error records:', error);
   } finally {
     loadingErrors.value = false;
   }
@@ -690,7 +754,6 @@ async function fetchAchievements() {
   loadingAchievements.value = true;
   try {
     const params: any = { limit: 1000 };
-    
     let studentIds: number[] = [];
     
     if (selectedCourse.value !== 'all') {
@@ -701,29 +764,21 @@ async function fetchAchievements() {
     }
 
     const response = await api.get('/achievements/', { params });
-    
     const responseData: any = response.data;
     let data = responseData.results || responseData;
     
     if (Array.isArray(data)) {
-      // Filter by course
       if (selectedCourse.value !== 'all' && studentIds.length > 0) {
         data = data.filter((ach: any) => studentIds.includes(ach.student));
       }
-
-      // Filter by student
       if (selectedStudent.value) {
         data = data.filter((ach: any) => ach.student === selectedStudent.value);
       }
       
       const studentsResponse = await api.get('/students/');
       const studentsMap = new Map<number, { initials: string; web_id: string }>();
-      
       studentsResponse.data.forEach((s: any) => {
-        studentsMap.set(s.id, {
-          initials: s.initials || '',
-          web_id: s.web_id || ''
-        });
+        studentsMap.set(s.id, { initials: s.initials || '', web_id: s.web_id || '' });
       });
       
       const enrichedAchievements: Achievement[] = data.map((ach: any) => {
@@ -746,11 +801,8 @@ async function fetchAchievements() {
     } else {
       achievements.value = [];
     }
-
-    showSnackbar('Achievements loaded', 'success');
   } catch (error) {
     console.error('Failed to fetch achievements:', error);
-    showSnackbar('Failed to load achievements', 'error');
   } finally {
     loadingAchievements.value = false;
   }
@@ -759,40 +811,30 @@ async function fetchAchievements() {
 async function fetchActivityData() {
   loadingActivity.value = true;
   try {
-    const params: any = {
-      limit: 500,
-    };
-
-    // Filter by course
-    if (selectedCourse.value !== 'all') {
-      params.course = selectedCourse.value;
-    }
-
-    // Filter by student
-    if (selectedStudent.value) {
-      params.student = selectedStudent.value;
-    }
-
-    // Filter by date range
+    const params: any = { limit: 500 };
+    if (selectedCourse.value !== 'all') params.course = selectedCourse.value;
+    if (selectedStudent.value) params.student = selectedStudent.value;
     if (dateRange.value !== 'all') {
-      const days = dateRange.value === '7days' ? 7 : dateRange.value === '30days' ? 30 : 90;
-      params.days = days;
+      params.days = dateRange.value === '7days' ? 7 : dateRange.value === '30days' ? 30 : 90;
     }
 
     const response = await api.get<Activity[]>('/student-activities/', { params });
     activities.value = response.data;
-
-    console.log(`Loaded ${activities.value.length} activities`);
   } catch (error) {
     console.error('Failed to fetch activity data:', error);
-    showSnackbar('Failed to load activity data', 'error');
   } finally {
     loadingActivity.value = false;
   }
 }
 
 function renderErrorChart() {
-  if (!errorChartCanvas.value || topErrors.value.length === 0) return;
+  if (!errorChartCanvas.value || !hasChartData.value) {
+    if (errorChart) {
+      errorChart.destroy();
+      errorChart = null;
+    }
+    return;
+  }
 
   if (errorChart) {
     errorChart.destroy();
@@ -801,16 +843,20 @@ function renderErrorChart() {
   const ctx = errorChartCanvas.value.getContext('2d');
   if (!ctx) return;
 
+  const currentToggleColor = errorViewMode.value === 'COURSES' 
+    ? { fill: 'rgba(244, 67, 54, 0.6)', border: 'rgba(244, 67, 54, 1)' }
+    : { fill: 'rgba(33, 150, 243, 0.6)', border: 'rgba(33, 150, 243, 1)' };
+
   errorChart = new Chart(ctx, {
     type: 'bar',
     data: {
       labels: topErrors.value.map(e => e.error_code),
       datasets: [
         {
-          label: 'Occurrences',
+          label: errorViewMode.value === 'COURSES' ? 'Class Occurrences' : 'Student Occurrences',
           data: topErrors.value.map(e => e.total_times),
-          backgroundColor: 'rgba(244, 67, 54, 0.6)',
-          borderColor: 'rgba(244, 67, 54, 1)',
+          backgroundColor: currentToggleColor.fill,
+          borderColor: currentToggleColor.border,
           borderWidth: 1,
         },
       ],
@@ -819,9 +865,7 @@ function renderErrorChart() {
       responsive: true,
       maintainAspectRatio: false,
       plugins: {
-        legend: {
-          display: false,
-        },
+        legend: { display: false },
         tooltip: {
           callbacks: {
             label: (context) => `Occurrences: ${context.parsed.y}`,
@@ -831,9 +875,7 @@ function renderErrorChart() {
       scales: {
         y: {
           beginAtZero: true,
-          ticks: {
-            stepSize: 1,
-          },
+          ticks: { stepSize: 1 },
         },
       },
     },
@@ -848,10 +890,31 @@ async function fetchAllData() {
   ]);
 }
 
+// Fired whenever the standalone autocomplete filter selection changes
+async function onStudentFilterChange() {
+  if (errorViewMode.value === 'STUDENTS') {
+    await fetchStudentSpecificErrors();
+  }
+  await Promise.all([
+    fetchAchievements(),
+    fetchActivityData()
+  ]);
+}
+
+// React to view adjustments gracefully and cycle UI renders seamlessly
+async function handleErrorViewToggle(mode: 'COURSES' | 'STUDENTS') {
+  if (mode === 'STUDENTS') {
+    await fetchStudentSpecificErrors();
+  } else {
+    await nextTick();
+    renderErrorChart();
+  }
+}
+
 function formatDate(dateString: string): string {
   const date = new Date(dateString);
   const now = new Date();
-  const diffDays = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 1000 / 24));
+  const diffDays = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
 
   if (diffDays === 0) return 'Today';
   if (diffDays === 1) return 'Yesterday';
@@ -868,7 +931,7 @@ function showSnackbar(message: string, color: string = 'success') {
 }
 
 watch(errorChartCanvas, () => {
-  if (errorChartCanvas.value && topErrors.value.length > 0) {
+  if (errorChartCanvas.value && hasChartData.value) {
     nextTick(() => renderErrorChart());
   }
 });
