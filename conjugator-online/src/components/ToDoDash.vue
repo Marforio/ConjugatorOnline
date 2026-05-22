@@ -1050,36 +1050,45 @@ const weeklyAchievementCount = computed(() => {
 
 const activityFilter = ref<string>('all');
 
+
 async function fetchActivityFeed() {
   loadingActivity.value = true;
-
   try {
+    // 🛡️ Keep parameters minimal: Rely on the backend's automatic request.user mapping
     const params: any = {
-      student: userStore.studentId,
-      limit: 30,
       days: 90,
     };
 
-    // Add type filter if not "all"
+    // Correctly map frontend interface names to your model's activity_type choices
     if (activityFilter.value && activityFilter.value !== 'all') {
       params.type = activityFilter.value;
     }
 
     const response = await api.get('/student-activities/', { params });
 
-    activityFeed.value = response.data.map((activity: any) => ({
-      type: activity.activity_type,
-      title: activity.activity_name,
-      description: activity.description,
-      timestamp: activity.timestamp,
-    }));
+    // Extract records safely handling paginated results blocks vs flat arrays
+    const rawData = response.data.results ? response.data.results : response.data;
 
-  } catch (err: any) {
+    if (Array.isArray(rawData)) {
+      activityFeed.value = rawData.map((activity: any) => ({
+        // Ensure accurate property mapping from your database schema keys
+        type: activity.activity_type, 
+        title: activity.activity_name || getActivityLabel(activity.activity_type),
+        description: activity.description || 'Activity session updated successfully.',
+        timestamp: activity.timestamp,
+      }));
+    } else {
+      activityFeed.value = [];
+    }
+
+  } catch (err) {
     console.error('Error fetching activity feed:', err);
+    activityFeed.value = [];
   } finally {
     loadingActivity.value = false;
   }
 }
+
 
 function getScoreColor(score: number | null | undefined): string {
   if (score === null || score === undefined) return '#grey';

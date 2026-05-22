@@ -131,11 +131,11 @@
 
         <v-tooltip
           v-if="auth.isLoggedIn && userStore.isStaff"
-          text="Teacher Tools"
+          text="Teacher"
           location="bottom"
         >
           <template v-slot:activator="{ props }">
-            <v-btn icon v-bind="props" :to="{ name: 'teacher-tools' }">
+            <v-btn icon v-bind="props" :to="{ name: 'teacher' }">
               <v-icon>mdi-school</v-icon>
             </v-btn>
           </template>

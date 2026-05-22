@@ -42,10 +42,12 @@ const routes = [
       game: route.query.game as string,
       student: route.query.student as string,
     }), },
-  { path : '/teacher-manage', name: 'teacher-manage', component: () => import('@/views/TeacherManage.vue'),  meta: { requiresAuth: true, requiresAdmin: true } },
-  { path : '/teacher-manage/manage-workouts', name: 'manage-workouts', component: () => import('@/views/ManageWorkouts.vue'),  meta: { requiresAuth: true, requiresAdmin: true } },
-  { path : '/teacher-manage/manage-feedback', name: 'manage-feedback', component: () => import('@/views/ManageFeedback.vue'),  meta: { requiresAuth: true, requiresAdmin: true } },
-  { path : '/teacher-manage/manage-data', name: 'manage-data', component: () => import('@/views/ManageData.vue'),  meta: { requiresAuth: true, requiresAdmin: true } }
+  { path : '/teacher', name: 'teacher', component: () => import('@/views/Teacher.vue'),  meta: { requiresAuth: true, requiresAdmin: true } },
+  { path : '/teacher/manage-students', name: 'manage-students', component: () => import('@/views/ManageStudents.vue'),  meta: { requiresAuth: true, requiresAdmin: true } },
+  { path : '/teacher/manage-workouts', name: 'manage-workouts', component: () => import('@/views/ManageWorkouts.vue'),  meta: { requiresAuth: true, requiresAdmin: true } },
+  { path : '/teacher/manage-feedback', name: 'manage-feedback', component: () => import('@/views/ManageFeedback.vue'),  meta: { requiresAuth: true, requiresAdmin: true } },
+  { path : '/teacher/manage-error-data', name: 'manage-error-data', component: () => import('@/views/ManageErrorData.vue'),  meta: { requiresAuth: true, requiresAdmin: true } },
+  { path : '/teacher/manage-achievement-data', name: 'manage-achievement-data', component: () => import('@/views/ManageAchievementData.vue'),  meta: { requiresAuth: true, requiresAdmin: true } },
 ]
 
 
@@ -88,7 +90,7 @@ router.beforeEach(async (to, from, next) => {
   }
 
   if (to.meta.studentsOnly && userStore.isStaff) {
-    return next({ name: "home" }); // or teacher-tools/admin, your choice
+    return next({ name: "home" }); // or teacher, your choice
   }
 
   // "requiresAdmin" probably means staff/admin in your app

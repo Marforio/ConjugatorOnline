@@ -133,7 +133,7 @@
     <!-- Recent Activity Feed (last 20 activities) -->
     <v-divider class="my-6" />
     
-    <div class="text-subtitle-2 mb-3">Recent Activity (Last 5 minutes)</div>
+    <div class="text-subtitle-2 mb-3">Latest Activity</div>
     
     <v-timeline v-if="recentActivities.length > 0" density="compact" side="end">
       <v-timeline-item
@@ -191,8 +191,9 @@ const onlineStudents = ref<OnlineStudent[]>([]);
 const recentActivities = ref<RecentActivity[]>([]);
 const lastUpdate = ref<Date | null>(null);
 const isPolling = ref(true);
-const pollInterval = ref(10000); // 10 seconds
+const pollInterval = ref(60000); // 60 seconds
 let pollTimer: number | null = null;
+let localClockTimer: number | null = null; // Local ticker variable
 
 const formatLastUpdate = computed(() => {
   if (!lastUpdate.value) return 'Never';
@@ -223,19 +224,28 @@ async function fetchRecentActivities() {
     const response = await api.get('/student-activities/', {
       params: {
         limit: 50,
-        // Only get last 5 minutes
-        days: 1, // Still need to pass days param, will filter on client
+        include_heartbeats: 'true'
       }
     });
     
-    // Filter to only last 5 minutes
-    const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
-    recentActivities.value = response.data.filter((a: any) => {
-      return new Date(a.timestamp) >= fiveMinutesAgo;
-    });
+    // 🔍 Smart Extraction Check: 
+    // Handle both paginated envelopes ({ results: [] }) and clean flat arrays ([]) safely!
+    if (response.data && response.data.results) {
+      recentActivities.value = response.data.results;
+    } else {
+      recentActivities.value = response.data;
+    }
   } catch (error) {
     console.error('Failed to fetch recent activities:', error);
   }
+}
+
+function startLocalClocks() {
+  localClockTimer = window.setInterval(() => {
+    onlineStudents.value.forEach(student => {
+      student.seconds_ago += 1;
+    });
+  }, 1000);
 }
 
 async function poll() {
@@ -260,6 +270,10 @@ function stopPolling() {
   if (pollTimer) {
     clearInterval(pollTimer);
     pollTimer = null;
+  }
+  if (localClockTimer) {
+    clearInterval(localClockTimer);
+    localClockTimer = null;
   }
   isPolling.value = false;
 }
@@ -334,6 +348,7 @@ function formatTimeAgo(timestamp: string): string {
 
 onMounted(() => {
   startPolling();
+  startLocalClocks();
 });
 
 onUnmounted(() => {

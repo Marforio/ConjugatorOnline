@@ -46,7 +46,7 @@
     >
       <!-- XS: hero button MUST be on top -->
       <v-col
-        v-if="xs"
+        v-if="xs && !userStore.isStaff"
         cols="12"
         class="d-flex justify-center mb-4"
         style="order: -1;"
@@ -120,15 +120,15 @@
         class="d-flex justify-center mb-0 mb-sm-4"
         :class="xs ? 'nav-col--xs' : ''"
       >
-        <v-btn class="nav-tile-btn" width="80%" color="deep-purple-accent-4" :class="xs ? 'nav-tile-btn--xs' : ''" :to="{ name: 'teacher-tools' }">
+        <v-btn class="nav-tile-btn" width="80%" color="deep-purple-accent-4" :class="xs ? 'nav-tile-btn--xs' : ''" :to="{ name: 'teacher' }">
           <v-icon :size="xs ? 28 : undefined" :large="!xs">mdi-school</v-icon>
-          <span v-if="!xs" class="subtitle-1 font-weight-medium px-3">Teacher Tools</span>
+          <span v-if="!xs" class="subtitle-1 font-weight-medium px-3">Teacher</span>
         </v-btn>
       </v-col>
     </v-row>
 
     <!-- Non-XS hero dashboard button (unchanged) -->
-    <v-row v-if="!xs" justify="center" align="center" dense style="margin-left: 17%; margin-right: 17%; margin-top: 2%;">
+    <v-row v-if="!xs && !userStore.isStaff" justify="center" align="center" dense style="margin-left: 17%; margin-right: 17%; margin-top: 2%;">
       <v-col cols="12" md="6" lg="5" class="d-flex justify-center mb-10 mx-auto">
         <v-btn
           :to="{ name: 'dashboard' }"
