@@ -1,5 +1,5 @@
 <template>
-  <v-container fluid class="pa-6">
+  <v-container fluid class="pa-6" :class="userStore.isStaff ? 'mt-0' : 'mt-4'">
     <!-- Welcome Banner -->
     <v-card class="pa-6 mb-6 welcome-hero" elevation="4" rounded="xl">
       <div class="d-flex align-items-center justify-center">
@@ -162,7 +162,7 @@
       <v-col cols="12" md="7">
         <!-- Top: What Should I Work On? -->
         <v-card 
-          class="action-card clickable-card mb-4" 
+          class="action-card clickable-card mb-7" 
           elevation="3" 
           rounded="lg"
           color="amber-lighten-5"
@@ -192,7 +192,7 @@
             </div>
 
             
-            <div class="text-body-2 text-medium-emphasis mb-4">
+            <div class="text-body-2 text-medium-emphasis my-4">
               See your assignments and recommended activities
             </div>
             
@@ -915,7 +915,6 @@ interface ActivityItem {
   timestamp: string;
 }
 
-// Add this interface with your other interfaces
 interface WorkoutDrill {
   id?: number;
   type: 'pronunciation' | 'conjugation' | 'vocabulary' | 'grammar' | 'fluency' | 'listening' | 'other';
@@ -937,7 +936,7 @@ interface Workout {
   is_current: boolean;
   focus_area: string;
   notes: string;
-  drills: WorkoutDrill[];
+   drills: WorkoutDrill[];
 }
 
 // State
@@ -952,9 +951,8 @@ const currentWorkout = ref<Workout | null>(null);
 function scrollToAssignments() {
   if (assignmentsSection.value) {
     const element = assignmentsSection.value;
-    const yOffset = -100; // Increased offset to show more above the section
+    const yOffset = -40; 
     const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
-    
     window.scrollTo({ top: y, behavior: 'smooth' });
   }
 }
@@ -962,9 +960,8 @@ function scrollToAssignments() {
 function scrollToProfile() {
   if (profileSection.value) {
     const element = profileSection.value;
-    const yOffset = -100; // Increased offset to show more above the section
+    const yOffset = -40; 
     const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
-    
     window.scrollTo({ top: y, behavior: 'smooth' });
   }
 }
@@ -1051,27 +1048,39 @@ const weeklyAchievementCount = computed(() => {
 const activityFilter = ref<string>('all');
 
 
+// ==========================================
+// CORRECTED: fetchActivityFeed
+// ==========================================
 async function fetchActivityFeed() {
   loadingActivity.value = true;
   try {
-    // 🛡️ Keep parameters minimal: Rely on the backend's automatic request.user mapping
-    const params: any = {
-      days: 90,
-    };
+    const params: any = { days: 90 };
 
-    // Correctly map frontend interface names to your model's activity_type choices
+    if (userStore.isStaff) {
+      // ✨ FIXED: Target your verified shadow student record index ID (119)
+      // instead of your raw User account ID (82)
+      params.student = userStore.studentId; 
+    }
+
     if (activityFilter.value && activityFilter.value !== 'all') {
       params.type = activityFilter.value;
     }
 
     const response = await api.get('/student-activities/', { params });
 
-    // Extract records safely handling paginated results blocks vs flat arrays
-    const rawData = response.data.results ? response.data.results : response.data;
+    const rawData = response.data && typeof response.data === 'object' && 'results' in response.data 
+      ? response.data.results 
+      : response.data;
 
     if (Array.isArray(rawData)) {
-      activityFeed.value = rawData.map((activity: any) => ({
-        // Ensure accurate property mapping from your database schema keys
+      // ✨ ADDED CRITICAL FRONTEND FILTER INSURANCE:
+      // If the backend view ignores parameters and still leaks a wider dataset, 
+      // this client-side block will filter it out, showing ONLY records that match your profile initials.
+      const targetFeed = userStore.isStaff && userStore.student
+        ? rawData.filter((act: any) => act.student === userStore.studentId || act.student_initials === userStore.student?.initials)
+        : rawData;
+
+      activityFeed.value = targetFeed.map((activity: any) => ({
         type: activity.activity_type, 
         title: activity.activity_name || getActivityLabel(activity.activity_type),
         description: activity.description || 'Activity session updated successfully.',
@@ -1089,9 +1098,40 @@ async function fetchActivityFeed() {
   }
 }
 
+// ==========================================
+//  fetchAssignments
+// ==========================================
+async function fetchAssignments() {
+  loading.value = true;
+  try {
+    const params: any = {};
+    
+    // The backend now listens to this parameter explicitly, 
+    // even if you are logged in as an Admin/Staff!
+    if (userStore.isStaff) {
+      params.student = userStore.studentId; 
+    }
+
+    const response = await api.get('/assignment/', { params });
+    
+    // Handle paginated vs flat arrays cleanly
+    const dataPayload = response.data && typeof response.data === 'object' && 'results' in response.data
+      ? response.data.results
+      : response.data;
+
+    // ✨ CLEANED UP: No more slow client-side filtering loops! 
+    // You can trust that the backend sent ONLY your 119 sandbox rows.
+    allAssignments.value = Array.isArray(dataPayload) ? dataPayload : [];
+  } catch (err) {
+    console.error('Assignments fetch failure:', err);
+    allAssignments.value = [];
+  } finally {
+    loading.value = false;
+  }
+}
 
 function getScoreColor(score: number | null | undefined): string {
-  if (score === null || score === undefined) return '#grey';
+  if (score === null || score === undefined) return 'grey';
   if (score >= 9) return '#4caf50';
   if (score >= 7) return '#2196f3';
   if (score >= 4) return '#ff9800';
@@ -1230,20 +1270,6 @@ const pendingCount = computed(() => {
   return allAssignments.value.filter(a => a.status === 'pending').length;
 });
 
-async function fetchAssignments() {
-  loading.value = true;
-  error.value = null;
-
-  try {
-    const response = await api.get('/assignment/');
-    allAssignments.value = response.data;
-  } catch (err: any) {
-    console.error('Error fetching assignments:', err);
-    error.value = err.response?.data?.detail || 'Failed to load assignments';
-  } finally {
-    loading.value = false;
-  }
-}
 
 // Computed properties for current workout
 const completedDrills = computed(() => {
@@ -1317,7 +1343,14 @@ function getDrillProgressColor(drill: any): string {
 
 async function fetchCurrentWorkout() {
   try {
-    await userStore.fetchCurrentWorkout();
+    if (userStore.isStaff) {
+      await userStore.fetchCurrentWorkout({ 
+        user_id: userStore.user?.id 
+      });
+    } else {
+      await userStore.fetchCurrentWorkout();
+    }
+    
     currentWorkout.value = userStore.currentWorkout;
   } catch (error) {
     console.error('Failed to fetch workout:', error);
@@ -1363,8 +1396,8 @@ onMounted(async () => {
 
 /* Activity Card - Full height on left */
 .activity-card {
-  min-height: 480px;
-  max-height: 480px;
+  min-height: 550px;
+  max-height: 550px;
   display: flex;
   flex-direction: column;
 }
@@ -1404,7 +1437,7 @@ onMounted(async () => {
 
 /* Action Cards - Stacked on right */
 .action-card {
-  min-height: 225px;
+  min-height: 260px;
   transition: all 0.3s;
 }
 

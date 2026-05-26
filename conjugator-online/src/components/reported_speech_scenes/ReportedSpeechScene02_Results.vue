@@ -49,7 +49,7 @@
             ▶️ Play Again
           </v-btn>
 
-          <router-link :to="{ path: '/dashboard', query: { tab: 'other-games', game: 'Reported Speech' } }">
+          <router-link :to="{ path: '/my-data', query: { tab: 'other-games', game: 'Reported Speech' } }">
             <v-btn>Go to Dashboard</v-btn>
           </router-link>
 

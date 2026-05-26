@@ -1,32 +1,29 @@
 <template>
-  <v-container fluid class="pa-6">
-    <!-- Header -->
+  <v-container fluid class="pa-6 text-slate-800">
     <v-card class="pa-6 mb-6 data-header" elevation="4" rounded="xl">
       <div class="d-flex align-center justify-space-between">
         <div>
-          <div class="text-h4 font-weight-bold text-white">Student Error Dashboard</div>
-          <div class="text-subtitle-1 text-white text-opacity-90 mt-1">
-            View errors, breakdown statistics, and generate progress reports by class
+          <div class="text-h4 font-weight-black text-white tracking-tight">Student Error Dashboard</div>
+          <div class="text-subtitle-1 text-white text-opacity-90 mt-1 font-weight-medium">
+            View errors, breakdown statistics, and generate progress reports by class or individual student profiles
           </div>
         </div>
         <div class="d-flex align-center gap-4">
-          <!-- New navigation button to go to manage-feedback -->
           <v-btn
             color="white"
             variant="elevated"
-            class="text-primary font-weight-bold"
+            class="text-primary font-weight-black text-none rounded-lg"
             prepend-icon="mdi-comment-text-multiple"
             :to="{ name: 'manage-feedback' }"
           >
-            Manage Feedback
+            Give Feedback
           </v-btn>
           <v-icon size="56" class="text-white">mdi-chart-box</v-icon>
         </div>
       </div>
     </v-card>
 
-    <!-- Filters -->
-    <v-card class="pa-6 mb-6" elevation="2" rounded="lg">
+    <v-card class="pa-6 mb-6 border bg-white" flat rounded="lg">
       <v-row>
         <v-col cols="12" md="4">
           <v-select
@@ -37,9 +34,13 @@
             label="Filter by Course"
             prepend-icon="mdi-book-open-variant"
             variant="outlined"
+            :disabled="errorViewMode === 'STUDENTS'"
+            :persistent-placeholder="errorViewMode === 'STUDENTS'"
+            :placeholder="errorViewMode === 'STUDENTS' ? 'Not applicable in Student Mode' : ''"
             @update:model-value="fetchAllData"
           />
         </v-col>
+        
         <v-col cols="12" md="4">
           <v-autocomplete
             v-model="selectedStudent"
@@ -50,22 +51,26 @@
             prepend-icon="mdi-account"
             variant="outlined"
             clearable
+            :disabled="errorViewMode === 'COURSES'"
+            :persistent-placeholder="errorViewMode === 'COURSES'"
+            :placeholder="errorViewMode === 'COURSES' ? 'Not applicable in Class Mode' : ''"
             @update:model-value="onStudentFilterChange"
           >
             <template v-slot:item="{ props, item }">
               <v-list-item v-bind="props">
                 <template v-slot:prepend>
                   <v-avatar color="primary" size="32" class="mr-2">
-                    <span class="text-white text-caption">{{ item.raw.initials }}</span>
+                    <span class="text-white text-caption font-weight-bold">{{ item.raw.initials }}</span>
                   </v-avatar>
                 </template>
                 <template v-slot:subtitle>
-                  <span class="text-caption">{{ item.raw.web_id }}</span>
+                  <span class="text-caption font-mono">{{ item.raw.web_id }}</span>
                 </template>
               </v-list-item>
             </template>
           </v-autocomplete>
         </v-col>
+
         <v-col cols="12" md="4">
           <v-select
             v-model="dateRange"
@@ -80,12 +85,11 @@
     </v-card>
 
     <v-row>
-      <!-- Errors Section -->
       <v-col cols="12">
-        <v-card class="pa-6 mb-6" elevation="2" rounded="lg">
+        <v-card class="pa-6 mb-6 border bg-white" flat rounded="lg">
           <div class="d-flex align-center justify-space-between mb-4">
-            <div class="text-h5 font-weight-bold">
-              Errors ({{ selectedCourseName }})
+            <div class="text-h5 font-weight-black text-slate-900 tracking-tight">
+              {{ dynamicChartTitle }}
             </div>
             <div class="d-flex align-center gap-2">
               <v-btn
@@ -94,39 +98,35 @@
                 color="secondary"
                 variant="elevated"
                 prepend-icon="mdi-file-pdf-box"
-                class="mr-2"
+                class="rounded-lg text-none font-weight-bold"
                 size="small"
                 @click="generateStudentPdfReport"
               >
                 PDF Report
               </v-btn>
-              <v-icon size="32" color="error">mdi-alert-circle</v-icon>
             </div>
           </div>
 
-          <!-- View Toggle for Courses vs Students -->
           <v-btn-toggle
             v-model="errorViewMode"
             mandatory
             variant="outlined"
-            color="error"
-            class="mb-4 w-100"
+            color="primary"
+            class="mb-6 w-100 rounded-lg overflow-hidden"
             @update:model-value="handleErrorViewToggle"
           >
-            <v-btn value="COURSES" class="flex-grow-1" size="small">
+            <v-btn value="COURSES" class="flex-grow-1 font-weight-bold text-none" size="small">
               <v-icon start>mdi-google-classroom</v-icon>
-              Classes
+              Consolidated Class Data
             </v-btn>
-            <v-btn value="STUDENTS" class="flex-grow-1" size="small">
+            <v-btn value="STUDENTS" class="flex-grow-1 font-weight-bold text-none" size="small">
               <v-icon start>mdi-account</v-icon>
-              Students
+              Individual Student Profiles
             </v-btn>
           </v-btn-toggle>
 
-          <!-- Loading State -->
           <v-progress-linear v-if="loadingErrors" indeterminate color="primary" class="mb-4" />
 
-          <!-- Interactive D3 Stacked Error Bar Chart component mounting context -->
           <div v-else-if="hasChartData" class="mb-4">
             <TeacherErrorFrequencyChart 
               :errorData="topErrors" 
@@ -135,138 +135,131 @@
             />
           </div>
 
-          <!-- No Data Fallback Messages -->
-          <div v-else class="text-center text-medium-emphasis pa-8">
-            <span v-if="errorViewMode === 'STUDENTS' && !selectedStudent">
-              Please select a specific student from the filters above to see their individual breakdown.
-            </span>
-            <span v-else>
-              No error data available for this criteria.
-            </span>
+          <div v-else class="text-center text-slate-400 font-weight-medium border border-dashed rounded-xl pa-8 bg-slate-50">
+            <v-icon size="36" class="mb-2" color="slate-300">mdi-chart-line-variant</v-icon>
+            <div>
+              <span v-if="errorViewMode === 'STUDENTS' && !selectedStudent">
+                Please pick a student from the active filter filters above to see their analytics summary trace metrics.
+              </span>
+              <span v-else>
+                No telemetry logging errors match your specified criteria window.
+              </span>
+            </div>
           </div>
 
-          <!-- Class-only Details Dropdowns -->
           <div v-if="errorViewMode === 'COURSES'">
-            <v-divider class="my-4" />
-            <div class="text-h6 mb-3">Error Details</div>
+            <v-divider class="my-6" />
+            <div class="text-overline font-weight-black text-slate-400 tracking-wider mb-2">Error Breakdown Inspector</div>
             <v-select
               v-model="selectedErrorCode"
               :items="errorDropdownItems"
-              label="Select an error to view details"
+              label="Select a logged error pattern code to view specific class samples"
               variant="outlined"
               clearable
             />
 
-            <!-- Selected Error Details -->
-            <v-card v-if="selectedErrorObj" variant="outlined" class="pa-4 mt-4">
-              <div class="text-subtitle-1 font-weight-bold mb-2">
+            <v-card v-if="selectedErrorObj" variant="outlined" class="pa-4 mt-4 rounded-xl bg-slate-50 border-slate-200">
+              <div class="text-subtitle-1 font-weight-black text-slate-900 mb-2">
                 {{ selectedErrorObj.error_code }} — 
-                {{ errorsData[selectedErrorObj.error_code]?.description || 'No description available' }}
+                <span class="text-slate-600 font-weight-medium font-italic">
+                  {{ errorsData[selectedErrorObj.error_code]?.description || 'No description available' }}
+                </span>
               </div>
-              <div class="text-body-2 mb-3">
-                <strong>Total occurrences:</strong> {{ selectedErrorObj.total_times }}
+              <div class="text-body-2 mb-3 font-weight-bold text-slate-700">
+                Total Class Occurrences: <v-chip size="x-small" color="error" class="font-weight-black font-mono ml-1">{{ selectedErrorObj.total_times }}</v-chip>
               </div>
-              <div class="text-body-2 mb-2">
-                <strong>Evidence samples:</strong>
+              <div class="text-caption font-weight-black text-slate-400 text-uppercase tracking-wider mb-2">
+                Evidence Log Snippets
               </div>
-              <v-list density="compact" class="evidence-list">
+              <v-list density="compact" class="evidence-list rounded-lg border bg-white">
                 <v-list-item
                   v-for="(sample, i) in selectedErrorObj.evidence_samples.slice(0, 10)"
                   :key="i"
-                  class="px-0"
+                  class="border-b last-no-border"
                 >
                   <template v-slot:prepend>
-                    <v-icon size="small" class="mr-2">mdi-chevron-right</v-icon>
+                    <v-icon size="small" class="mr-2 text-slate-400">mdi-chevron-right</v-icon>
                   </template>
-                  <span v-html="sample" class="text-body-2"></span>
+                  <span v-html="sample" class="text-body-2 text-slate-700 font-mono"></span>
                 </v-list-item>
               </v-list>
             </v-card>
 
-            <div v-else-if="selectedErrorCode" class="text-center text-medium-emphasis pa-4">
-              Error details not found
+            <div v-else-if="selectedErrorCode" class="text-center text-slate-400 text-caption font-weight-bold pa-4">
+              Error data signature entry could not be computed.
             </div>
           </div>
         </v-card>
       </v-col>
     </v-row>
 
-    <!-- Summary Stats -->
     <v-row>
       <v-col cols="12" sm="6" md="4">
-        <v-card class="pa-4" elevation="2" rounded="lg">
+        <v-card class="pa-4 border bg-white" flat rounded="lg">
           <div class="d-flex align-center justify-space-between">
             <div>
-              <div class="text-caption text-medium-emphasis">Total Errors</div>
-              <div class="text-h4 font-weight-bold">{{ totalErrorOccurrences }}</div>
+              <div class="text-caption text-slate-400 font-weight-bold text-uppercase tracking-wider">Total Errors</div>
+              <div class="text-h4 font-weight-black text-slate-900 mt-1">{{ totalErrorOccurrences }}</div>
             </div>
-            <v-icon size="40" color="error">mdi-alert-circle</v-icon>
+            <v-avatar color="red-lighten-5" rounded="lg" size="44">
+              <v-icon size="24" color="error">mdi-alert-circle</v-icon>
+            </v-avatar>
           </div>
         </v-card>
       </v-col>
       <v-col cols="12" sm="6" md="4">
-        <v-card class="pa-4" elevation="2" rounded="lg">
+        <v-card class="pa-4 border bg-white" flat rounded="lg">
           <div class="d-flex align-center justify-space-between">
             <div>
-              <div class="text-caption text-medium-emphasis">Total Sessions</div>
-              <div class="text-h4 font-weight-bold">{{ totalSessions }}</div>
+              <div class="text-caption text-slate-400 font-weight-bold text-uppercase tracking-wider">Unique Errors Flagged</div>
+              <div class="text-h4 font-weight-black text-slate-900 mt-1">{{ uniqueErrorCount }}</div>
             </div>
-            <v-icon size="40" color="info">mdi-play-circle</v-icon>
-          </div>
-        </v-card>
-      </v-col>
-      <v-col cols="12" sm="6" md="4">
-        <v-card class="pa-4" elevation="2" rounded="lg">
-          <div class="d-flex align-center justify-space-between">
-            <div>
-              <div class="text-caption text-medium-emphasis">Unique Errors Found</div>
-              <div class="text-h4 font-weight-bold">{{ uniqueErrorCount }}</div>
-            </div>
-            <v-icon size="40" color="warning">mdi-gavel</v-icon>
+            <v-avatar color="amber-lighten-5" rounded="lg" size="44">
+              <v-icon size="24" color="warning">mdi-gavel</v-icon>
+            </v-avatar>
           </div>
         </v-card>
       </v-col>
     </v-row>
 
-    <!-- Activity Breakdown -->
     <v-row class="mt-4">
       <v-col cols="12">
-        <v-card class="pa-6" elevation="2" rounded="lg">
-          <div class="text-h6 mb-4">Activity Breakdown</div>
+        <v-card class="pa-6 border bg-white" flat rounded="lg">
+          <div class="text-overline font-weight-black text-slate-400 tracking-wider mb-4">Activity</div>
           <v-row>
             <v-col cols="6" sm="4" md="2.4">
-              <div class="text-center">
-                <v-icon size="32" color="blue">mdi-controller</v-icon>
-                <div class="text-h5 font-weight-bold mt-2">{{ activityBreakdown.conjugation }}</div>
-                <div class="text-caption text-medium-emphasis">Conjugation</div>
+              <div class="text-center pa-3 bg-slate-50 border rounded-xl">
+                <v-icon size="28" color="blue">mdi-controller</v-icon>
+                <div class="text-h5 font-weight-black text-slate-900 mt-2">{{ activityBreakdown.conjugation }}</div>
+                <div class="text-caption text-slate-500 font-weight-bold mt-0.5">Conjugation</div>
               </div>
             </v-col>
             <v-col cols="6" sm="4" md="2.4">
-              <div class="text-center">
-                <v-icon size="32" color="purple">mdi-gamepad-variant</v-icon>
-                <div class="text-h5 font-weight-bold mt-2">{{ activityBreakdown.other_game }}</div>
-                <div class="text-caption text-medium-emphasis">Games</div>
+              <div class="text-center pa-3 bg-slate-50 border rounded-xl">
+                <v-icon size="28" color="purple">mdi-gamepad-variant</v-icon>
+                <div class="text-h5 font-weight-black text-slate-900 mt-2">{{ activityBreakdown.other_game }}</div>
+                <div class="text-caption text-slate-500 font-weight-bold mt-0.5">Other Games</div>
               </div>
             </v-col>
             <v-col cols="6" sm="4" md="2.4">
-              <div class="text-center">
-                <v-icon size="32" color="orange">mdi-weight-lifter</v-icon>
-                <div class="text-h5 font-weight-bold mt-2">{{ activityBreakdown.exercise }}</div>
-                <div class="text-caption text-medium-emphasis">Exercises</div>
+              <div class="text-center pa-3 bg-slate-50 border rounded-xl">
+                <v-icon size="28" color="orange">mdi-weight-lifter</v-icon>
+                <div class="text-h5 font-weight-black text-slate-900 mt-2">{{ activityBreakdown.exercise }}</div>
+                <div class="text-caption text-slate-500 font-weight-bold mt-0.5">Exercises</div>
               </div>
             </v-col>
             <v-col cols="6" sm="4" md="2.4">
-              <div class="text-center">
-                <v-icon size="32" color="green">mdi-card-text</v-icon>
-                <div class="text-h5 font-weight-bold mt-2">{{ activityBreakdown.vocab_workout }}</div>
-                <div class="text-caption text-medium-emphasis">Vocab</div>
+              <div class="text-center pa-3 bg-slate-50 border rounded-xl">
+                <v-icon size="28" color="green">mdi-card-text</v-icon>
+                <div class="text-h5 font-weight-black text-slate-900 mt-2">{{ activityBreakdown.vocab_workout }}</div>
+                <div class="text-caption text-slate-500 font-weight-bold mt-0.5">Vocab Labs</div>
               </div>
             </v-col>
             <v-col cols="6" sm="4" md="2.4">
-              <div class="text-center">
-                <v-icon size="32" color="teal">mdi-clipboard-check</v-icon>
-                <div class="text-h5 font-weight-bold mt-2">{{ activityBreakdown.workout_drill }}</div>
-                <div class="text-caption text-medium-emphasis">Drills</div>
+              <div class="text-center pa-3 bg-slate-50 border rounded-xl">
+                <v-icon size="28" color="teal">mdi-clipboard-check</v-icon>
+                <div class="text-h5 font-weight-black text-slate-900 mt-2">{{ activityBreakdown.workout_drill }}</div>
+                <div class="text-caption text-slate-500 font-weight-bold mt-0.5">Drills</div>
               </div>
             </v-col>
           </v-row>
@@ -274,8 +267,7 @@
       </v-col>
     </v-row>
 
-    <!-- Snackbar -->
-    <v-snackbar v-model="snackbar" :color="snackbarColor" :timeout="3000">
+    <v-snackbar v-model="snackbar" :color="snackbarColor" :timeout="3000" rounded="lg">
       {{ snackbarMessage }}
     </v-snackbar>
   </v-container>
@@ -363,6 +355,18 @@ const errorViewMode = ref<'COURSES' | 'STUDENTS'>('COURSES');
 const achievements = ref<Achievement[]>([]);
 const activities = ref<Activity[]>([]);
 const selectedErrorCode = ref<string | null>(null);
+
+/* =========================================================
+   📊 COMPUTED VIEW TITLE LABELS (UX TARGET REFURBISH)
+   ========================================================= */
+const dynamicChartTitle = computed(() => {
+  if (errorViewMode.value === 'STUDENTS') {
+    if (!selectedStudent.value) return 'Errors (No Student Selected)';
+    const foundStudent = students.value.find(s => s.id === selectedStudent.value);
+    return `Errors (Student: ${foundStudent ? foundStudent.initials : 'Active Profile'})`;
+  }
+  return `Errors (${selectedCourseName.value})`;
+});
 
 const selectedCourseName = computed(() => {
   if (selectedCourse.value === 'all') return 'All Courses';
@@ -498,7 +502,9 @@ async function fetchErrorData() {
   loadingErrors.value = true;
   try {
     const params: any = {};
-    if (selectedCourse.value !== 'all') {
+    
+    // UX Split Safeguards: Ignore parameters that don't belong to the active mode
+    if (errorViewMode.value === 'COURSES' && selectedCourse.value !== 'all') {
       params.course = selectedCourse.value;
     }
 
@@ -550,15 +556,15 @@ async function fetchAchievementsFallbackContext() {
   try {
     const params: any = { limit: 1000 };
     let studentIds: number[] = [];
-    if (selectedCourse.value !== 'all') {
+    if (errorViewMode.value === 'COURSES' && selectedCourse.value !== 'all') {
       const enrollmentResponse = await api.get('/enrollment/', { params: { course: selectedCourse.value } });
       studentIds = enrollmentResponse.data.map((e: any) => e.student?.id || e.student);
     }
     const response = await api.get('/achievements/', { params });
     let data = response.data.results || response.data;
     if (Array.isArray(data)) {
-      if (selectedCourse.value !== 'all' && studentIds.length > 0) data = data.filter((ach: any) => studentIds.includes(ach.student));
-      if (selectedStudent.value) data = data.filter((ach: any) => ach.student === selectedStudent.value);
+      if (errorViewMode.value === 'COURSES' && selectedCourse.value !== 'all' && studentIds.length > 0) data = data.filter((ach: any) => studentIds.includes(ach.student));
+      if (errorViewMode.value === 'STUDENTS' && selectedStudent.value) data = data.filter((ach: any) => ach.student === selectedStudent.value);
       achievements.value = data;
     }
   } catch (e) { console.error(e); }
@@ -568,8 +574,8 @@ async function fetchActivityData() {
   loadingActivity.value = true;
   try {
     const params: any = { limit: 500 };
-    if (selectedCourse.value !== 'all') params.course = selectedCourse.value;
-    if (selectedStudent.value) params.student = selectedStudent.value;
+    if (errorViewMode.value === 'COURSES' && selectedCourse.value !== 'all') params.course = selectedCourse.value;
+    if (errorViewMode.value === 'STUDENTS' && selectedStudent.value) params.student = selectedStudent.value;
     if (dateRange.value !== 'all') {
       params.days = dateRange.value === '7days' ? 7 : dateRange.value === '30days' ? 30 : 90;
     }
@@ -591,9 +597,7 @@ async function fetchAllData() {
 }
 
 async function onStudentFilterChange() {
-  await fetchErrorData();
-  await fetchActivityData();
-  await fetchAchievementsFallbackContext();
+  await fetchAllData();
 }
 
 function openErrorTutorFromChart(payload: any) {
@@ -604,14 +608,25 @@ async function generateStudentPdfReport() {
   if (!selectedStudent.value) return;
   pdfLoading.value = true;
   try {
+    // 🛡️ RE-ALIGNED METHOD PAYLOAD STRUCTURING
+    // Wrap selectedStudent.value into an object payload matching the new store signature
     await Promise.all([
       userStore.fetchLinguisticProfile(),
-      userStore.fetchCurrentWorkout(selectedStudent.value)
+      userStore.fetchCurrentWorkout({ user_id: selectedStudent.value })
     ]);
+    
+    // Extract audited student metadata properties accurately from the components local reactive tracking cache
     const targetStudent = students.value.find(s => s.id === selectedStudent.value);
     const initials = targetStudent ? targetStudent.initials : 'ST';
-    const studentScore = userStore.student?.health_score ?? 0;
-    const studentPrompts = userStore.student?.total_correct_prompts ?? 0;
+    
+    // Fall back to target student properties dynamically if store states are clearing for teachers
+    const studentScore = targetStudent && 'health_score' in targetStudent 
+      ? (targetStudent as any).health_score 
+      : (userStore.student?.health_score ?? 0);
+
+    const studentPrompts = targetStudent && 'total_correct_prompts' in targetStudent 
+      ? (targetStudent as any).total_correct_prompts 
+      : (userStore.student?.total_correct_prompts ?? 0);
     
     const doc = new jsPDF({ orientation: 'portrait', unit: 'pt', format: 'a4' });
     const pageWidth = doc.internal.pageSize.getWidth();
@@ -640,7 +655,7 @@ async function generateStudentPdfReport() {
       margin: { left: margin, right: margin },
       head: [['Your Key Stats', 'Current Standing']],
       body: [
-        ['Language Focus Area', userStore.studentDomainLabel || 'General Practice'],
+        ['Language Focus Area', (targetStudent as any)?.domain || userStore.studentDomainLabel || 'General Practice'],
         ['Correct Answers Added', `${studentPrompts} sentences`],
         ['Overall Accuracy Score', `${studentScore}% Precision`],
         ['Practice Rounds Completed', `${totalSessions.value} sessions`]
@@ -791,7 +806,7 @@ async function generateStudentPdfReport() {
         body: [
           ['Grammar & Structural Precision', p.linguistic_precision ? `${p.linguistic_precision}/10` : '—', p.linguistic_precision_comment || 'Keep going!'],
           ['Pronunciation & Clarity', p.phonetic_clarity ? `${p.phonetic_clarity}/10` : '—', p.phonetic_clarity_comment || 'Looking good.'],
-          ['Conversation Flow & Speed', p.communicative_flow ? `${p.communicative_flow}/10` : '—', p.communicative_flow_comment || 'Nicely paced.'],
+          ['Communication Flow & Speed', p.communicative_flow ? `${p.communicative_flow}/10` : '—', p.communicative_flow_comment || 'Nicely paced.'],
           ['Vocabulary Range', p.expressive_range ? `${p.expressive_range}/10` : '—', p.expressive_range_comment || 'Great choice of words.']
         ],
         theme: 'grid',
@@ -867,7 +882,13 @@ async function generateStudentPdfReport() {
 }
 
 async function handleErrorViewToggle(mode: 'COURSES' | 'STUDENTS') {
-  await fetchErrorData();
+  // Clear the contextual parameter of the opposing hidden field to maintain data sanitization
+  if (mode === 'COURSES') {
+    selectedStudent.value = null;
+  } else {
+    selectedCourse.value = 'all';
+  }
+  await fetchAllData();
 }
 
 function showSnackbar(message: string, color: string = 'success') {
@@ -908,4 +929,14 @@ onMounted(async () => {
 }
 .gap-2 { gap: 8px; }
 .gap-4 { gap: 16px; }
+.text-slate-900 { color: #0f172a; }
+.text-slate-700 { color: #334155; }
+.text-slate-600 { color: #475569; }
+.text-slate-500 { color: #64748b; }
+.text-slate-400 { color: #94a3b8; }
+.bg-slate-50 { background-color: #f8fafc !important; }
+.border-slate-200 { border-color: #e2e8f0 !important; }
+.text-xxs { font-size: 0.75rem; }
+.leading-none { line-height: 1 !important; }
+.last-no-border:last-child { border-bottom: 0 !important; }
 </style>

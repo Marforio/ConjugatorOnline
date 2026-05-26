@@ -2,72 +2,109 @@
   <div>
     <slot name="activator" :open="openDialog" />
 
-    <v-dialog v-model="isOpen" max-width="700">
-      <v-card rounded="lg">
-        <v-card-title class="d-flex align-center justify-space-between">
-          <div class="text-h6">{{ title }}</div>
+    <v-dialog v-model="isOpen" max-width="650" scrollable>
+      <v-card rounded="xl" class="text-slate-800 bg-white border">
+        
+        <!-- Header -->
+        <v-card-title class="pa-4 d-flex align-center justify-space-between border-b bg-slate-50">
+          <div class="d-flex align-center">
+            <v-avatar color="blue-lighten-5" size="36" class="mr-3">
+              <v-icon color="primary" size="20">mdi-robot-outline</v-icon>
+            </v-avatar>
+            <div>
+              <div class="text-subtitle-1 font-weight-black line-height-tight">{{ title }}</div>
+              <div class="text-caption text-slate-500">Cross-linguistic translation matrix</div>
+            </div>
+          </div>
+          
           <div class="d-flex ga-2">
-            <v-btn size="small" variant="text" @click="reload" :disabled="isLoading">
+            <v-btn size="small" variant="tonal" color="slate-600" class="rounded-lg text-none font-weight-bold" @click="reload" :disabled="isLoading">
               Refresh
             </v-btn>
-            <v-btn size="small" variant="text" @click="closeDialog" :disabled="isLoading">
+            <v-btn size="small" variant="text" color="slate-500" class="text-none font-weight-bold" @click="closeDialog" :disabled="isLoading">
               Close
             </v-btn>
           </div>
         </v-card-title>
 
-        <v-divider />
-
-        <v-card-text class="pt-2">
-          <div class="mb-4 text-body-2 text-grey-darken-1">
-            <div class="text-subtitle-2">
-              The verb <span class="font-weight-bold text-uppercase">{{ ctx.verb }}</span> means
-              <v-chip size="small" color="blue-lighten-1" class="mx-3">{{ verbTranslations.fr || "—" }}</v-chip>
-              <v-chip size="small" color="green-lighten-1" class="mx-3">{{ verbTranslations.de || "—" }}</v-chip>
-              <v-chip size="small" color="deep-orange-lighten-1" class="mx-3">{{ verbTranslations.it || "—" }}</v-chip>
-              .
+        <v-card-text class="pa-4">
+          <!-- 🚀 REWORKED PROMPT PROFILE GRAPHICS BLOCK -->
+          <div class="mb-5 bg-slate-50 rounded-xl border pa-4">
+            
+            <!-- Base Verb Dictionary Header Line -->
+            <div class="text-subtitle-1 font-weight-bold text-slate-900 d-flex align-center flex-wrap mb-4" style="gap: 8px;">
+              The verb <span class="text-primary text-uppercase font-weight-black decoration-underline">{{ ctx.verb }}</span> means:
+              <div class="d-inline-flex ga-1 ml-auto">
+                <v-chip size="small" color="blue-lighten-1" variant="flat" class="font-weight-bold text-white">FR: {{ verbTranslations.fr || "—" }}</v-chip>
+                <v-chip size="small" color="green-lighten-1" variant="flat" class="font-weight-bold text-white">DE: {{ verbTranslations.de || "—" }}</v-chip>
+                <v-chip size="small" color="deep-orange-lighten-1" variant="flat" class="font-weight-bold text-white">IT: {{ verbTranslations.it || "—" }}</v-chip>
+              </div>
             </div>
-            <div class="my-3"><span class="font-weight-medium">The prompt is:</span> verb= {{ ctx.verb }}  |  person= {{ ctx.person }}  |  tense= {{ ctx.tense }}  |  sentence type= {{ ctx.sentence_type }}</div>
-            <div class="mt-3"><span class="font-weight-bold">Your conjugation must match these translations:</span></div>
-          </div>
-          
 
-          <v-alert v-if="errorMessage" type="error" variant="tonal" density="compact" class="mb-4">
+            <v-divider class="mb-4 border-opacity-40"></v-divider>
+
+            <!-- 2x2 Metadata Alignment Grid -->
+            <v-row no-gutters class="bg-white border rounded-xl pa-2 text-center shadow-sm">
+              <v-col cols="6" class="border-r border-b pb-2 mb-2">
+                <div class="text-caption font-weight-medium text-slate-400">Verb Anchor</div>
+                <div class="text-body-2 font-weight-black text-slate-800">{{ ctx.verb }}</div>
+              </v-col>
+              <v-col cols="6" class="border-b pb-2 mb-2">
+                <div class="text-caption font-weight-medium text-slate-400">Target Subject</div>
+                <div class="text-body-2 font-weight-bold text-slate-700">{{ ctx.person }}</div>
+              </v-col>
+              <v-col cols="6" class="border-r pt-1">
+                <div class="text-caption font-weight-medium text-slate-400">Sentence Type</div>
+                <div class="text-body-2 font-weight-bold text-slate-700">{{ ctx.sentence_type }}</div>
+              </v-col>
+              <v-col cols="6" class="pt-1 px-1 text-truncate">
+                <!-- Smart Header Swap: Captures if context payload contains a formatted keyword string -->
+                <div class="text-caption font-weight-medium text-slate-400">
+                  {{ ctx.showing_keyword_mode ? 'Time Reference' : 'Target Tense' }}
+                </div>
+                <div class="text-body-2 font-weight-bold text-slate-700 text-truncate" :title="ctx.displayed_keyword || ctx.tense">
+                  {{ ctx.displayed_keyword || ctx.tense }}
+                </div>
+              </v-col>
+            </v-row>
+            
+          </div>
+
+          <!-- Output Content States Interface -->
+          <v-alert v-if="errorMessage" type="error" variant="tonal" density="compact" class="mb-4 rounded-xl">
             {{ errorMessage }}
           </v-alert>
 
-          <div v-if="isLoading" class="d-flex align-center justify-center py-8">
-            <v-progress-circular indeterminate color="primary" size="40" />
+          <div v-if="isLoading" class="d-flex align-center justify-center py-10">
+            <v-progress-circular indeterminate color="primary" size="36" />
           </div>
 
-          <div v-else>
-            <v-card variant="outlined" class="mb-3">
-              <v-card-title class="text-subtitle-1">French</v-card-title>
-              <v-card-text class="text-body-1" style="white-space: pre-wrap;">
+          <div v-else class="ga-3 d-flex flex-column">
+            <v-card variant="flat" class="bg-slate-50 border rounded-xl pa-4">
+              <div class="text-overline font-weight-black text-blue-darken-2 mb-1 tracking-widest">French Target</div>
+              <div class="text-body-1 font-weight-medium text-slate-800" style="white-space: pre-wrap;">
                 {{ translations.fr || "—" }}
-              </v-card-text>
+              </div>
             </v-card>
 
-            <v-card variant="outlined" class="mb-3">
-              <v-card-title class="text-subtitle-1">German</v-card-title>
-              <v-card-text class="text-body-1" style="white-space: pre-wrap;">
+            <v-card variant="flat" class="bg-slate-50 border rounded-xl pa-4">
+              <div class="text-overline font-weight-black text-green-darken-2 mb-1 tracking-widest">German Target</div>
+              <div class="text-body-1 font-weight-medium text-slate-800" style="white-space: pre-wrap;">
                 {{ translations.de || "—" }}
-              </v-card-text>
+              </div>
             </v-card>
 
-            <v-card variant="outlined">
-              <v-card-title class="text-subtitle-1">Italian</v-card-title>
-              <v-card-text class="text-body-1" style="white-space: pre-wrap;">
+            <v-card variant="flat" class="bg-slate-50 border rounded-xl pa-4">
+              <div class="text-overline font-weight-black text-deep-orange-darken-2 mb-1 tracking-widest">Italian Target</div>
+              <div class="text-body-1 font-weight-medium text-slate-800" style="white-space: pre-wrap;">
                 {{ translations.it || "—" }}
-              </v-card-text>
+              </div>
             </v-card>
           </div>
         </v-card-text>
 
-        <v-divider />
-
-        <v-card-actions class="pa-4 d-flex justify-end">
-          <v-btn color="primary" variant="flat" @click="closeDialog" :disabled="isLoading">
+        <v-card-actions class="pa-4 bg-slate-50 d-flex justify-end">
+          <v-btn color="primary" variant="flat" height="40" class="px-6 rounded-xl font-weight-bold text-none" @click="closeDialog" :disabled="isLoading">
             Done
           </v-btn>
         </v-card-actions>
@@ -85,7 +122,9 @@ type HintCtx = {
   person?: string;
   tense?: string;
   sentence_type?: string;
-  sentenceType?: string; // allow either key
+  sentenceType?: string;
+  displayed_keyword?: string;
+  showing_keyword_mode?: boolean;
   acceptable_answers?: string[];
   acceptableAnswers?: string[];
   [k: string]: any;
@@ -100,10 +139,7 @@ const props = defineProps({
   temperature: { type: Number, default: 0.2 },
   maxTokens: { type: Number, default: 300 },
 
-  // Provide the game prompt + acceptable answers
   context: { type: Object as () => HintCtx, default: () => ({}) },
-
-  // Auto-run when opened
   autoRunOnOpen: { type: Boolean, default: true },
 });
 
@@ -132,13 +168,15 @@ const ctx = computed(() => {
     person: c.person ?? "",
     tense: c.tense ?? "",
     sentence_type: c.sentence_type ?? c.sentenceType ?? "",
+    displayed_keyword: c.displayed_keyword ?? "",
+    showing_keyword_mode: c.showing_keyword_mode ?? false,
     acceptable_answers: (c.acceptable_answers ?? c.acceptableAnswers ?? []) as string[],
   };
 });
+
 const verbTranslations = reactive<{ fr: string; de: string; it: string }>({ fr: "", de: "", it: "" });
 const correctAnswer = computed(() => {
   const list = ctx.value.acceptable_answers || [];
-  // pick the first acceptable answer as canonical
   return list.length ? list[0] : "";
 });
 
@@ -151,40 +189,44 @@ watch(
   }
 );
 
-function openDialog() {
-  isOpen.value = true;
-}
-function closeDialog() {
-  isOpen.value = false;
-}
+function openDialog() { isOpen.value = true; }
+function closeDialog() { isOpen.value = false; }
 
 function resetOutput() {
-  verbTranslations.fr = "";
-  verbTranslations.de = "";
-  verbTranslations.it = "";
-  translations.fr = "";
-  translations.de = "";
-  translations.it = "";
+  verbTranslations.fr = ""; verbTranslations.de = ""; verbTranslations.it = "";
+  translations.fr = ""; translations.de = ""; translations.it = "";
   errorMessage.value = "";
 }
 
 function buildPrompt(): string {
+  // 🚀 Determine exactly what context language constraint the student is looking at on screen
+  const dynamicTimeContext = ctx.value.showing_keyword_mode && ctx.value.displayed_keyword
+    ? `The student is seeing the time reference keyword "${ctx.value.displayed_keyword}" instead of a generic tense name.`
+    : `The student is looking directly at the tense name "${ctx.value.tense}".`;
+
   return [
     "You are a translation helper for a language learning conjugation game.",
     "",
     "Task:",
     "1) Translate the base meaning of the English verb into French, German, and Italian (dictionary-style; short).",
-    "2) Translate the MEANING of the correct English answer into French, German, and Italian (natural full translation).",
+    "2) Translate the MEANING of the correct answer into French, German, and Italian (natural full translation).",
     "",
-    "Hard rules:",
-    "- Output ONLY valid minified JSON. No markdown. No backticks. No extra text.",
+    "CRITICAL TRANSLATION RULE:",
+    `${ctx.value.showing_keyword_mode && ctx.value.displayed_keyword 
+      ? `- You MUST explicitly include the meaning of the active time reference keyword "${ctx.value.displayed_keyword}" as part of the full answer translation for French, German, and Italian while placing it in parentheses. For example, if the keyword is "yesterday", make sure words like "hier", "gestern", or "ieri" are naturally integrated into the sentence in parentheses: "(hier)", "(gestern)", "(ieri)".` 
+      : "- Translate the full conjugated phrase naturally into the target languages."
+    }`,
+    "",
+    "Hard constraints:",
+    "- Output ONLY valid minified JSON. No markdown backticks (```). No conversational extra text.",
     '- Exactly this shape: {"verb":{"fr":"...","de":"...","it":"..."},"answer":{"fr":"...","de":"...","it":"..."}}',
     "- Keep strings concise and natural.",
     "- If a translation has multiple good options, pick the most common one.",
     "",
-    `Game prompt: verb=${ctx.value.verb}, person=${ctx.value.person}, tense=${ctx.value.tense}, sentence_type=${ctx.value.sentence_type}`,
+    `Context: ${dynamicTimeContext}`,
+    `Game prompt parameters: verb=${ctx.value.verb}, person=${ctx.value.person}, tense=${ctx.value.tense}, sentence_type=${ctx.value.sentence_type}`,
     `English verb: ${ctx.value.verb || "(missing)"}`,
-    `Correct answer (English): ${correctAnswer.value || "(missing)"}`,
+    `Correct answer (English phrase): ${correctAnswer.value || "(missing)"}`,
   ].join("\n");
 }
 
@@ -200,12 +242,9 @@ async function reload() {
 
   try {
     const userPrompt = buildPrompt();
-
     const payload = {
       model: props.model,
-      messages: [
-        { role: "user", content: userPrompt },
-      ],
+      messages: [{ role: "user", content: userPrompt }],
       max_tokens: props.maxTokens,
       temperature: props.temperature,
       stream: false,
@@ -218,48 +257,28 @@ async function reload() {
     const out: string = res.data?.content ?? "";
     if (!out) throw new Error("LLM returned no content.");
 
-let parsed: any = null;
+    let parsed: any = null;
+    try {
+      parsed = JSON.parse(String(out ?? "").trim());
+    } catch {
+      throw new Error(`LLM did not return valid JSON. Raw output: ${out}`);
+    }
 
-try {
-  parsed = JSON.parse(String(out ?? "").trim());
-} catch {
-  // Sometimes models add whitespace/newlines; still should parse if JSON. If not, show raw.
-  throw new Error(`LLM did not return valid JSON. Raw output: ${out}`);
-}
+    verbTranslations.fr = String(parsed?.verb?.fr ?? "");
+    verbTranslations.de = String(parsed?.verb?.de ?? "");
+    verbTranslations.it = String(parsed?.verb?.it ?? "");
 
-// NEW SHAPE:
-// {
-//   verb:   { fr, de, it },
-//   answer: { fr, de, it }
-// }
+    translations.fr = String(parsed?.answer?.fr ?? "");
+    translations.de = String(parsed?.answer?.de ?? "");
+    translations.it = String(parsed?.answer?.it ?? "");
 
-// verb translations (dictionary-style)
-verbTranslations.fr = String(parsed?.verb?.fr ?? "");
-verbTranslations.de = String(parsed?.verb?.de ?? "");
-verbTranslations.it = String(parsed?.verb?.it ?? "");
-
-// full answer meaning translations
-translations.fr = String(parsed?.answer?.fr ?? "");
-translations.de = String(parsed?.answer?.de ?? "");
-translations.it = String(parsed?.answer?.it ?? "");
-
-// validate
-if (
-  !verbTranslations.fr ||
-  !verbTranslations.de ||
-  !verbTranslations.it ||
-  !translations.fr ||
-  !translations.de ||
-  !translations.it
-) {
-  throw new Error(`LLM JSON missing keys. Raw output: ${out}`);
-}
+    if (!verbTranslations.fr || !verbTranslations.de || !verbTranslations.it || !translations.fr || !translations.de || !translations.it) {
+      throw new Error(`LLM JSON missing keys. Raw output: ${out}`);
+    }
   } catch (e: any) {
     const data = e?.response?.data;
     if (data) {
-      errorMessage.value = `LLM error (${e?.response?.status}): ${
-        typeof data === "string" ? data : JSON.stringify(data)
-      }`;
+      errorMessage.value = `LLM error (${e?.response?.status}): ${typeof data === "string" ? data : JSON.stringify(data)}`;
     } else {
       errorMessage.value = e?.message || String(e);
     }
@@ -268,3 +287,15 @@ if (
   }
 }
 </script>
+
+<style scoped>
+.line-height-tight { line-height: 1.2; }
+.decoration-underline { text-decoration: underline; text-underline-offset: 3px; }
+.text-slate-900 { color: #0f172a; }
+.text-slate-800 { color: #1e293b; }
+.text-slate-700 { color: #334155; }
+.text-slate-500 { color: #64748b; }
+.text-slate-400 { color: #94a3b8; }
+.bg-slate-50 { background-color: #f8fafc !important; }
+.blue-lighten-5 { background-color: rgba(59, 130, 246, 0.08) !important; }
+</style>

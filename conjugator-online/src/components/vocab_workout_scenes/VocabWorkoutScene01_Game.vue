@@ -16,609 +16,256 @@
     </v-card>
   </v-overlay>
 
-  <div class="vw-shell">
-  <v-container fluid class="pa-6">
-    <!-- Floating feedback -->
-    <div v-if="showFloatingFeedback" class="floating-feedback success">
-      <strong>Correct! <v-icon icon="mdi-emoticon-happy-outline" /></strong>
-    </div>
-
-      <!-- PRE-GAME -->
-      <div v-if="!gameStarted" class="p-3">
-
-        <div class="d-flex justify-center">
-          <v-card elevation="2" min-width="450" min-height="500">
-            <v-img src="/images/banners/VocabWorkout1.png" max-width="420" class="ms-2" />
-            <v-list density="compact" class="mt-8 ms-6">
-            <v-list-item>
-              <template #prepend><v-icon icon="mdi-gamepad-variant-outline" /></template>
-              <v-list-item-title>
-                Mode: <strong class="text-capitalize">{{ modeLabel }}</strong>
-              </v-list-item-title>
-            </v-list-item>
-
-            <v-list-item>
-              <template #prepend><v-icon icon="mdi-book-open-variant" /></template>
-              <v-list-item-title>
-                List: {{ prettyListKey }}
-                <strong v-if="prettyListKey === 'Irregular verbs'">{{ levelLabel }}</strong>
-              </v-list-item-title>
-            </v-list-item>
-
-            <v-list-item v-if="isPersistedMode && gameSettings?.resumeIndex != null">
-              <template #prepend><v-icon icon="mdi-playlist-play" /></template>
-              <v-list-item-title>
-                Resume at: <strong>{{ resumeIndexDisplay }}</strong>
-                <span class="text-medium-emphasis"> of {{ roundCount }}</span>
-              </v-list-item-title>
-            </v-list-item>
-
-            <v-list-item>
-              <template #prepend><v-icon icon="mdi-swap-horizontal" /></template>
-              <v-list-item-title>
-                Study pair: <strong>{{ frontLabel }}</strong> → <strong>{{ backLabel }}</strong>
-              </v-list-item-title>
-            </v-list-item>
-
-            <v-list-item>
-              <template #prepend><v-icon icon="mdi-counter" /></template>
-              <v-list-item-title>
-                {{ roundCount }} {{ roundCount === 1 ? "item" : "items" }}
-              </v-list-item-title>
-            </v-list-item>
-          </v-list>
-
-          <div class="d-flex justify-center mt-6 mb-8">
-          <v-btn color="success" @click="begin" :disabled="!hasAnyItems">Start</v-btn>
-        </div>
-
-        </v-card>
-
-        </div>
-        
-
-
-        <div v-if="!hasAnyItems" class="text-caption text-center mt-4">
-          No items were loaded. Please go back and try again.
-        </div>
+  <div class="vw-shell text-slate-800">
+    <v-container fluid class="pa-4 pa-sm-6">
+      <!-- Floating feedback alert segment -->
+      <div v-if="showFloatingFeedback" class="floating-feedback success">
+        <strong>Correct! <v-icon icon="mdi-emoticon-happy-outline" /></strong>
       </div>
 
-      <!-- GAME -->
-      <div v-else class="game-layout">
-        <div v-if="!hasItem" class="p-6 text-center">
-          <v-progress-circular indeterminate />
-          <div class="text-caption mt-3">Loading…</div>
+      <!-- ==========================================
+           🎮 LIVE WORKOUT WORKSPACE RUNWAY
+           ========================================== -->
+      <div class="game-layout">
+        <div v-if="!hasItem" class="pa-10 text-center d-flex flex-column align-center justify-center">
+          <v-progress-circular indeterminate color="primary" size="36" />
+          <div class="text-caption text-slate-500 mt-3 font-weight-bold">Synchronizing session state matrices...</div>
         </div>
 
         <template v-else>
-          <!-- TOP HEADER -->
-          <div class="d-flex justify-space-between align-start mb-3" style="margin-left: 10%; margin-right: 10%;">
-            <!-- Left: list coverage (set coverage) -->
-            <div v-if="mode === 'write'" class="d-flex flex-column justify-center ga-2">
-              <div class="d-flex justify-center text-caption">
-                <div class="d-flex justify-center text-caption">
-                  <div>This session:</div>
-                  <div>✅ {{ isPersistedMode ? sessionCounters.correct : rightCount }}</div>
-                  <div>❌ {{ isPersistedMode ? sessionCounters.wrong : wrongCount }}</div>
+          <!-- 🔝 DYNAMIC INSTRUMENTATION PANEL (SETTINGS READOUT + CONTROLS) -->
+          <v-card class="border rounded-xl bg-slate-50 pa-4 mb-6 max-width-card-hub mx-auto w-100" flat>
+            <div class="d-flex flex-column flex-sm-row align-start align-sm-center justify-space-between ga-3 border-b pb-3 mb-3">
+              <div>
+                <div class="text-caption font-weight-black text-slate-400 text-uppercase tracking-wider">Vocab list</div>
+                <div class="text-subtitle-1 font-weight-black text-slate-900 leading-tight d-flex align-center mt-0.5">
+                  {{ prettyListKey }}
                 </div>
               </div>
 
-              <v-btn v-if="selectedSessionId" @click="showSessionAttempts = true" size="small" class="mt-2"
-                >Session data</v-btn
-              >
-            </div>
-
-            <!-- Center: list chip -->
-            <div class="d-flex flex-column align-center">
-              <v-chip v-if="currentItem?.level" size="small" color="info" variant="tonal">
-                {{ prettyListKey }}
-                <span v-if="prettyListKey === 'Irregular verbs'" class="text-capitalize">
-                  : {{ props.gameSettings.level }}
-                </span>
-              </v-chip>
-            </div>
-
-            <div v-if="mode==='cards'" class="d-flex justify-end mb-3">
-                  <v-btn
-                    variant="outlined"
-                    color="primary"
-                    @click="showEntireList = !showEntireList"
-                  >
-                    SHOW ENTIRE LIST
-                  </v-btn>
+              <!-- Vector Direction Metadata Badge Runway -->
+              <div class="bg-white border rounded-lg px-3 py-2 w-100 w-sm-auto">
+                <div class="text-xxs font-weight-black text-slate-400 text-uppercase tracking-wider leading-none mb-1">Transformation</div>
+                <div class="text-caption font-weight-black text-primary d-flex align-center leading-none">
+                  {{ currentVectorDirectionLabel }}
                 </div>
-
-            <!-- Right -->
-            <div class="d-flex flex-column align-end">
-              <div v-if="!isPersistedMode">{{ currentIndex + 1 }} / {{ roundCount }}</div>
-              <div class="d-flex ga-2 mt-1">
-                <v-chip v-if="isPersistedMode" size="small" variant="tonal" color="primary">
-                  Unseen: <strong class="ms-1">{{ serverUnseenCount }}</strong>
-                </v-chip>
-
-                <v-chip v-if="isPersistedMode" size="small" variant="tonal" color="orange">
-                  Review: <strong class="ms-1">{{ serverReviewCount }}</strong>
-                </v-chip>
               </div>
             </div>
+
+            <div class="d-flex align-center justify-space-between">
+              <!-- Left: Mode Metadata Markers & Stats Logs -->
+              <div class="d-flex align-center">
+                <v-chip size="small" variant="text" color="primary-lighten-5" class="text-primary font-weight-black text-capitalize mr-2">
+                  <v-icon size="14" start>mdi-layers-outline</v-icon>
+                  {{ modeLabel }} Mode
+                </v-chip>
+                
+                <div v-if="mode === 'write'" class="d-flex align-center ga-1 text-caption font-weight-black">
+                  <span class="text-success mr-1">✅ {{ isPersistedMode ? sessionCounters.correct : rightCount }}</span>
+                  <span class="text-error">❌ {{ isPersistedMode ? sessionCounters.wrong : wrongCount }}</span>
+                </div>
+              </div>
+
+              <!-- Right: Target Counters & Interactive Drawer Toggle -->
+              <div class="d-flex align-center ga-2">
+                <v-btn
+                  v-if="mode === 'cards'"
+                  variant="flat"
+                  :color="showEntireList ? 'primary' : 'white'"
+                  height="30"
+                  class="rounded-lg text-none font-weight-black text-caption border px-3"
+                  prepend-icon="mdi-format-list-bulleted"
+                  @click="showEntireList = !showEntireList"
+                >
+                  {{ showListLabel }}
+                </v-btn>
+
+                <div class="text-caption font-weight-black text-slate-600 bg-white border px-2.5 py-1 rounded-lg leading-none">
+                  <span v-if="!isPersistedMode" class="px-3">{{ currentIndex + 1 }} / {{ roundCount }}</span>
+                  <span v-else><v-btn v-if="selectedSessionId" variant="text" size="small" color="primary" class="font-weight-bold text-none px-1 h-auto min-w-0" @click="showSessionAttempts = true">Session log</v-btn></span>
+                </div>
+              </div>
+            </div>
+          </v-card>
+
+          <!-- Extra Server Tracking Progress Metrics -->
+          <div v-if="isPersistedMode" class="d-flex justify-end ga-2 max-width-card-hub mx-auto w-100 mt-n4 mb-4 px-2">
+            <v-chip size="small" variant="text" color="slate-100" class="text-slate-600 font-weight-bold">Unseen Items: {{ serverUnseenCount }}</v-chip>
+            <v-chip size="small" variant="flat" color="orange-lighten-5" class="text-orange-darken-3 font-weight-bold">To Review: {{ serverReviewCount }}</v-chip>
+            
           </div>
 
-          <!-- CONTENT -->
-          <div class="game-middle">
-            <v-card class="pa-3" elevation="0">
-              
-              <!-- DISCOVER (CARDS) -->
-              <template v-if="mode === 'cards'">
+          <!-- ==========================================
+               🔄 MIDDLE MAIN STAGE WORKSPACE MATRIX
+               ========================================== -->
+          <div class="game-middle max-width-card-hub mx-auto w-100 px-1">
+            
+            <!-- MODE MODULE CONTEXT A: DISCOVER BLOCKS (FLIP CARDS LAB) -->
+            <template v-if="mode === 'cards'">
+              <div class="d-flex flex-column align-center position-relative my-4">
+                
+                <!-- STANDALONE CENTER CARD STAGE CANVAS -->
+                <div class="card-stage-canvas-box">
+                  <v-btn class="swiper-paddle-nav left-paddle shadow-md border bg-white" icon="mdi-chevron-left" size="large" variant="elevated" :disabled="currentIndex === 0" @click.stop="goPrevCard" />
+                  <v-btn class="swiper-paddle-nav right-paddle shadow-md border bg-white" icon="mdi-chevron-right" size="large" variant="elevated" :disabled="currentIndex >= roundCount - 1" @click.stop="goNextCard" />
 
-                <v-row class="ma-0" align="start" justify="center" dense>
-                  <!-- Cards (1/2 on lg+) -->
-                  <v-col cols="12" lg="6" class="d-flex flex-column align-center mt-8">
-                    <div class="card-stage">
-                      <!-- LEFT NAV -->
-                      <v-btn
-                        class="nav-btn nav-left"
-                        color="primary"
-                        variant="flat"
-                        icon
-                        size="x-large"
-                        :disabled="currentIndex === 0"
-                        @click.stop="goPrevCard"
-                        aria-label="Previous card"
-                      >
-                        <v-icon size="40">mdi-chevron-left</v-icon>
-                      </v-btn>
-
-                      <!-- RIGHT NAV -->
-                      <v-btn
-                        class="nav-btn nav-right"
-                        color="primary"
-                        variant="flat"
-                        icon
-                        size="x-large"
-                        :disabled="currentIndex >= roundCount - 1"
-                        @click.stop="goNextCard"
-                        aria-label="Next card"
-                      >
-                        <v-icon size="40">mdi-chevron-right</v-icon>
-                      </v-btn>
-
-                      <Transition :name="slideName" mode="out-in">
-                        <div :key="currentItem?.id || currentIndex">
-                          <div class="flip-wrap" @click="toggleSide">
-                            <div class="flip-inner" :class="{ 'is-back': shownSide === 'back' }">
-                              <!-- FRONT -->
-                              <v-card class="flip-face flip-front pa-4" elevation="2" width="540" height="400">
-                                <!-- Hidden loader (front) -->
-                                <v-img
-                                  :src="currentItem?.image"
-                                  cover
-                                  :eager="true"
-                                  class="invisible-loader"
-                                  @load="frontImageLoaded = true"
-                                  @error="frontImageLoaded = false"
-                                />
-
-                                <div
-                                  v-if="frontImageReady"
-                                  class="d-flex align-center ga-4 pa-3 w-100 mx-8"
-                                  style="margin-top: 15%;"
-                                >
-                                  <div class="flex-third d-flex align-center justify-center">
-                                    <v-avatar size="150" rounded="lg">
-                                      <v-img v-if="currentItem" :src="currentItem.image" cover />
-                                    </v-avatar>
-                                  </div>
-
-                                  <div class="flex-two-thirds d-flex align-center justify-start">
-                                    <div
-                                      class="text-h5 ms-4 mb-2 font-weight-regular font-italic"
-                                      style="margin-right: 20%;"
-                                    >
-                                      {{ frontPreview }}
-                                    </div>
-                                  </div>
-                                </div>
-
-                                <div v-else class="d-flex justify-center align-center text-center h-100">
-                                  <div :class="frontCardClass">
-                                    {{ frontPreview }}
-                                  </div>
-                                </div>
-                              </v-card>
-
-                              <!-- BACK -->
-                              <v-card class="flip-face flip-back pa-4" elevation="2" width="540" height="400">
-                                <!-- Hidden loader (back) -->
-                                <v-img
-                                  :src="currentItem?.image"
-                                  cover
-                                  :eager="true"
-                                  class="invisible-loader"
-                                  @load="backImageLoaded = true"
-                                  @error="backImageLoaded = false"
-                                />
-
-                                <!-- ✅ positioned container so the corner button is reliable -->
-                                <div class="vw-back-face">
-                                  <!-- ✅ always show button when we have an item -->
-                                  <!-- Examples button (left of Wiktionary) -->
-                                  <v-tooltip v-if="contextEnabledForThisList" text="Show examples">
-                                    <template #activator="{ props: eprops }">
-                                      <v-btn
-                                        v-bind="eprops"
-                                        class="vw-examples-btn"
-                                        size="small"
-                                        icon
-                                        variant="tonal"
-                                        color="secondary"
-                                        @click.stop="openContextExamples(currentItem?.term)"
-                                        aria-label="Show examples"
-                                      >
-                                        <v-icon size="18">mdi-text-box-search-outline</v-icon>
-                                      </v-btn>
-                                    </template>
-                                  </v-tooltip>
-                                  
-                                  <!-- AI examples button -->
-                                  <v-tooltip text="AI examples (chat)">
-                                    <template #activator="{ props: aprops }">
-                                      <v-btn
-                                        v-bind="aprops"
-                                        class="vw-ai-btn"
-                                        size="small"
-                                        icon
-                                        variant="tonal"
-                                        color="info"
-                                        @click.stop="openTutor(currentItem?.term)"
-                                        aria-label="AI examples"
-                                      >
-                                        <v-icon size="18">mdi-robot-outline</v-icon>
-                                      </v-btn>
-                                    </template>
-                                  </v-tooltip>
-
-                                  <v-tooltip text="Go to Wiktionary">
-                                    <template #activator="{ props: tprops }">
-                                      <v-btn
-                                        v-bind="tprops"
-                                        class="vw-wiki-btn"
-                                        size="small"
-                                        icon
-                                        variant="tonal"
-                                        color="primary"
-                                        @click.stop="openWiktionary(currentItem?.term)"
-                                        aria-label="Open Wiktionary"
-                                      >
-                                        <v-icon size="18">mdi-book-open-variant</v-icon>
-                                      </v-btn>
-                                    </template>
-                                  </v-tooltip>
-
-                                  <div
-                                    v-if="backImageReady"
-                                    class="d-flex flex-column justify-center align-center ga-4 mx-10"
-                                    style="margin-top: 10%;"
-                                  >
-                                    <v-avatar size="200" rounded="lg">
-                                      <v-img v-if="currentItem" :src="currentItem.image" cover />
-                                    </v-avatar>
-
-                                    <div class="flex-1">
-                                      <div class="text-h4 mb-2">{{ backPreview }}</div>
-                                    </div>
-                                  </div>
-
-                                  <div v-else class="d-flex justify-center align-center text-center h-100">
-                                    <div class="text-h4 mb-2 mx-4">
-                                      {{ backPreview }}
-                                    </div>
-                                  </div>
-                                </div>
-                              </v-card>
+                  <Transition :name="slideName" mode="out-in">
+                    <div :key="currentItem?.id || currentIndex" class="w-100 h-100">
+                      <div class="flip-wrap-capsule" @click="toggleSide">
+                        <div class="flip-inner-axis" :class="{ 'is-flipped-back-side': shownSide === 'back' }">
+                          
+                          <!-- CARD FACE FRONT -->
+                          <v-card class="flip-sheet-face face-front-hull border rounded-xl pa-5 bg-white shadow-sm" flat>
+                            <v-img :src="currentItem?.image" cover :eager="true" class="invisible-loader" @load="frontImageLoaded = true" @error="frontImageLoaded = false" />
+                            <div v-if="frontImageReady" class="d-flex align-center ga-5 h-100 w-100 px-4">
+                              <v-avatar size="140" rounded="xl" class="border shadow-sm flex-shrink-0"><v-img v-if="currentItem" :src="currentItem.image" cover /></v-avatar>
+                              <div class="flex-grow-1 min-width-0">
+                                <div class="text-h5 font-weight-black text-slate-900 leading-tight tracking-tight">{{ frontPreview }}</div>
+                                <div class="text-caption text-slate-400 mt-1 font-weight-bold">Tap to flip card</div>
+                              </div>
                             </div>
-                          </div>
-                        </div>
-                      </Transition>
-                    </div>
-
-                    <!-- Seek bar lives with cards, spans the column -->
-                    <div class="vw-discover-slider d-flex align-center ga-3 mt-10 w-100">
-                      <v-btn variant="text" size="small" :disabled="currentIndex === 0" @click="jumpCards(-5)">
-                        -5
-                      </v-btn>
-
-                      <v-slider
-                        class="flex-grow-1"
-                        v-model="cardSeekIndex"
-                        :min="0"
-                        :max="Math.max(0, roundCount - 1)"
-                        :step="5"
-                        color="info"
-                        track-color="grey-lighten-2"
-                        thumb-color="info"
-                        hide-details
-                        show-ticks
-                        thumb-label="always"
-                        @end="commitCardSeek"
-                      >
-                        <template #thumb-label>
-                          {{ cardThumbLabel }}
-                        </template>
-                      </v-slider>
-
-                      <v-btn
-                        variant="text"
-                        size="small"
-                        :disabled="currentIndex >= roundCount - 1"
-                        @click="jumpCards(5)"
-                      >
-                        +5
-                      </v-btn>
-                    </div>
-                  </v-col>
-
-                  <!-- List (1/2 on lg+). Completely removed from DOM unless toggled on -->
-                  <v-col v-if="showEntireList" cols="12" lg="6">
-                    <v-card class="pa-3" elevation="1">
-                      <div class="d-flex align-center justify-space-between mb-2">
-                        <div class="text-subtitle-2"><span class="text-uppercase me-2">{{ prettyListKey }}:</span> all terms</div>
-                        <div class="text-caption text-medium-emphasis">
-                          {{ currentIndex + 1 }} / {{ roundCount }}
-                        </div>
-                      </div>
-
-                      <div ref="termListWrap" class="discover-term-list mt-3">
-                        <div
-                          v-for="(t, i) in discoverRows"
-                          :key="t.id"
-                          class="discover-term-row"
-                          :class="{ active: i === currentIndex }"
-                          :data-term-index="i"
-                        >
-                          <button
-                            class="discover-term-btn"
-                            type="button"
-                            @click="jumpToCardIndex(i)"
-                            :aria-current="i === currentIndex ? 'true' : 'false'"
-                          >
-                            <span class="discover-term-index">{{ i + 1 }}.</span>
-                            <span class="discover-term-text">{{ t.term }}</span>
-                            <span class="discover-front-text">{{ t.frontText }}</span>
-                          </button>
-
-                          <v-tooltip v-if="contextEnabledForThisList" text="Show examples">
-                            <template #activator="{ props: eprops }">
-                              <v-btn
-                                v-bind="eprops"
-                                size="x-small"
-                                variant="text"
-                                class="ms-1"
-                                @click.stop="openContextExamples(t.term)"
-                                aria-label="Show examples"
-                              >
-                                <v-icon size="18">mdi-text-box-search-outline</v-icon>
-                              </v-btn>
-                            </template>
-                          </v-tooltip>
-
-                          <v-tooltip text="AI examples">
-                            <template #activator="{ props: aprops }">
-                              <v-btn
-                                v-bind="aprops"
-                                size="x-small"
-                                variant="text"
-                                class="ms-1"
-                                @click.stop="openTutor(t.term)"
-                                aria-label="Open AI tutor examples"
-                              >
-                                <v-icon size="18">mdi-robot-outline</v-icon>
-                              </v-btn>
-                            </template>
-                          </v-tooltip>
-
-                          <v-tooltip text="go to Wiktionary">
-                            <template v-slot:activator="{ props }">
-                            <v-btn
-                            v-bind="props"
-                              size="x-small"
-                              variant="text"
-                              class="ms-1"
-                              @click.stop="openWiktionary(t.term)"
-                              aria-label="Open Wiktionary"
-                            >
-                              <v-icon size="18">mdi-book-open-variant</v-icon>
-                            </v-btn>
-                            </template>
-                          </v-tooltip>
-
-                        </div>
-                      </div>
-                    </v-card>
-                  </v-col>
-                </v-row>
-
-                  <!-- Context examples DIALOG (Discover mode only) -->
-                  <v-dialog v-model="contextDialogOpen" max-width="900">
-                    <v-card class="pa-4">
-                      <div class="d-flex align-center justify-space-between">
-                        <div class="text-h6">
-                          Examples for: <strong>{{ contextTerm }}</strong>
-                        </div>
-
-                        <v-btn variant="text" @click="contextDialogOpen = false">Close</v-btn>
-                      </div>
-
-                      <v-divider class="my-3" />
-
-                      <div v-if="contextLoading" class="d-flex align-center ga-3">
-                        <v-progress-circular indeterminate size="20" />
-                        <div class="text-caption text-medium-emphasis">Loading examples…</div>
-                      </div>
-
-                      <div v-else-if="contextError" class="text-caption text-error">
-                        {{ contextError }}
-                      </div>
-
-                      <!-- ✅ neutral (not red) -->
-                      <div v-else-if="contextEmptyMessage" class="text-caption text-medium-emphasis">
-                        {{ contextEmptyMessage }}
-                      </div>
-
-                      <v-list v-else density="compact" class="vw-context-list">
-                        <v-list-item
-                          v-for="(h, i) in contextHits"
-                          :key="i"
-                          class="py-2"
-                        >
-                          <div class="d-flex align-center justify-space-between">
-                            <div class="text-caption text-medium-emphasis">
-                              Source: <strong>{{ h.source_page }}</strong>
+                            <div v-else class="d-flex flex-column justify-center align-center text-center h-100 w-100 pa-4">
+                              <div :class="frontCardClass" class="text-slate-900 tracking-tight font-weight-black px-4 leading-tight">{{ frontPreview }}</div>
+                              <div class="text-caption text-slate-400 mt-4 font-weight-bold d-flex align-center"><v-icon size="12" class="mr-1">mdi-rotate-3d-variant</v-icon> Tap anywhere to flip card</div>
                             </div>
+                          </v-card>
 
-                            <!-- optional: copy snippet -->
-                            <v-btn
-                              size="x-small"
-                              variant="text"
-                              @click="copyToClipboard(h.text)"
-                            >
-                              Copy
-                            </v-btn>
-                          </div>
+                          <!-- CARD FACE BACK -->
+                          <v-card class="flip-sheet-face face-back-hull border rounded-xl pa-5 bg-slate-50 shadow-sm" flat>
+                            <v-img :src="currentItem?.image" cover :eager="true" class="invisible-loader" @load="backImageLoaded = true" @error="backImageLoaded = false" />
+                            <div class="vw-back-face h-100 w-100">
+                              <div class="absolute-card-toolbar d-flex ga-1.5">
+                                <v-tooltip v-if="contextEnabledForThisList" text="Show Examples" location="top"><template #activator="{ props: eprops }"><v-btn v-bind="eprops" icon="mdi-text-box-search-outline" size="small" variant="elevated" color="white" class="border text-slate-600 rounded-lg shadow-sm" @click.stop="openContextExamples(currentItem?.term)" /></template></v-tooltip>
+                                <v-tooltip text="AI-generated examples" location="top"><template #activator="{ props: aprops }"><v-btn v-bind="aprops" icon="mdi-robot-outline" size="small" variant="elevated" color="white" class="me-2 border text-info rounded-lg shadow-sm" @click.stop="openTutor(currentItem?.term)" /></template></v-tooltip>
+                                <v-tooltip text="Wiktionary" location="top"><template #activator="{ props: tprops }"><v-btn v-bind="tprops" icon="mdi-book-open-variant" size="small" variant="elevated" color="white" class="border text-primary rounded-lg shadow-sm" @click.stop="openWiktionary(currentItem?.term)" /></template></v-tooltip>
+                              </div>
+                              <div v-if="backImageReady" class="d-flex align-center ga-5 h-100 w-100 px-4">
+                                <v-avatar size="140" rounded="xl" class="border shadow-sm flex-shrink-0 bg-white"><v-img v-if="currentItem" :src="currentItem.image" cover /></v-avatar>
+                                <div class="flex-grow-1 min-width-0 pr-10">
+                                  <div class="text-h5 font-weight-black text-primary leading-tight tracking-tight">{{ backPreview }}</div>
+                                </div>
+                              </div>
+                              <div v-else class="d-flex flex-column justify-center align-center text-center h-100 w-100 pa-6 pr-14">
+                                <div class="text-h4 font-weight-black text-primary px-2 leading-tight tracking-tight">{{ backPreview }}</div>
+                              </div>
+                            </div>
+                          </v-card>
 
-                          <div
-                              class="vw-context-snippet"
-                              v-html="highlightInSnippet(h.text, contextTerm)"
-                            />
-                        </v-list-item>
-                      </v-list>
-                    </v-card>
-                  </v-dialog>
-
-              </template>
-
-              <!-- WRITING -->
-              <template v-else-if="mode === 'write'">
-                <div class="d-flex justify-center" >
-                <v-card elevation="2" min-width="60%" >
-                <div class="d-flex flex-column align-center justify-center" style="height: 260px;" >
-          
-                  <!-- Hidden loader for write (reuse backImageLoaded as "prompt image") -->
-                  <v-img
-                    :src="currentItem?.image"
-                    cover
-                    :eager="true"
-                    class="d-none"
-                    @load="backImageLoaded = true"
-                    @error="backImageLoaded = false"
-                  />
-
-                  <template v-if="hasImage && backImageLoaded">
-                    <v-avatar size="200" rounded="lg">
-                      <v-img v-if="currentItem" :src="currentItem.image" cover />
-                    </v-avatar>
-
-                    <h5 class="mt-3 text-h5 text-center font-italic" style="margin-bottom: 3.5rem; max-width: 650px;">
-                      {{ frontPreview }}
-                    </h5>
-                  </template>
-
-                  <template v-else>
-                    <h4 class="text-h4 text-center font-italic" style="max-width: 650px;">
-                      {{ frontPreview }}
-                    </h4>
-                  </template>
+                        </div>
+                      </div>
+                    </div>
+                  </Transition>
                 </div>
 
-                <div class="d-flex justify-center align-center">
-                  <span class="text-caption me-2">Write the</span>
-                  <v-chip size="small" color="red" class="text-uppercase font-weight-bold">
-                    {{ prettyBackField }}
-                  </v-chip>
+                <!-- BOTTOM PROGRESS SEEK BAR RUNWAY -->
+                <div class="vw-discover-slider d-flex align-center ga-3 mt-8 w-100 px-2">
+                  <v-btn variant="tonal" size="small" color="slate-600" class="rounded-lg font-weight-bold" :disabled="currentIndex === 0" @click="jumpCards(-5)">-5</v-btn>
+                  <v-slider v-model="cardSeekIndex" :min="0" :max="Math.max(0, roundCount - 1)" :step="5" color="primary" track-color="slate-200" hide-details show-ticks thumb-label="always" class="flex-grow-1" @end="commitCardSeek"><template #thumb-label>{{ cardThumbLabel }}</template></v-slider>
+                  <v-btn variant="tonal" size="small" color="slate-600" class="rounded-lg font-weight-bold" :disabled="currentIndex >= roundCount - 1" @click="jumpCards(5)">+5</v-btn>
+                </div>
+              </div>
+
+              <!-- ==========================================
+                   📁 OVERLAY LIST INDEX SIDE NAVIGATION DRAWER
+                   ========================================== -->
+              <v-navigation-drawer v-model="showEntireList" location="right" temporary width="360" class="border-l border-slate-200 bg-white shadow-xl" elevation="0">
+                <div class="pa-4 border-b d-flex align-center justify-space-between bg-slate-50" style="height: 64px;">
+                  <div class="d-flex align-center">
+                    <v-icon color="slate-500" class="mr-2" size="18">mdi-format-list-bulleted</v-icon>
+                    <span class="text-body-2 font-weight-black text-slate-900 text-uppercase tracking-wider">{{ prettyListKey }}</span>
+                  </div>
+                  <v-btn icon="mdi-close" variant="text" size="small" color="slate-400" @click="showEntireList = false" />
                 </div>
 
-                <div ref="answerWrap" class="d-flex justify-center" style="margin-top: 1rem;">
-                  <v-text-field
-                    v-model="userAnswer"
-                    :disabled="!canSubmitNow()"
-                    label="Your answer"
-                    max-width="400px"
-                    hide-details
-                    density="comfortable"
-                    @keydown.enter.prevent="submitWrite($event)"
-                  />
-                </div>
+                <!-- Scrolling container wrapper node -->
+                <div ref="termListWrap" class="pa-3 h-calc-drawer overflow-y-auto style-custom-scroll">
+                  <div v-for="(t, i) in discoverRows" :key="t.id" class="discover-term-row mb-1.5 border" :class="{ 'active-row-highlight': i === currentIndex }" :data-term-index="i">
+                    <button class="discover-term-btn px-2 py-1.5" type="button" @click="jumpToCardIndex(i)" :aria-current="i === currentIndex ? 'true' : 'false'">
+                      <span class="discover-term-index font-weight-bold text-xxs">{{ i + 1 }}.</span>
+                      <div class="d-flex flex-column text-left leading-tight pr-1">
+                        <span class="discover-term-text text-body-2 font-weight-black text-slate-800">{{ t.term }}</span>
+                        <span class="discover-front-text text-xxs text-slate-500 font-italic mt-0.5 text-wrap">{{ t.frontText }}</span>
+                      </div>
+                    </button>
 
-                <div class="d-flex justify-center mt-4" style="margin-bottom: 1.5rem;">
-                  <v-btn
-                    color="primary"
-                    :disabled="!canSubmitNow()"
-                    :loading="isAdvancing || isSubmitting"
-                    @click="submitWrite"
-                  >
-                    Submit
-                  </v-btn>
+                    <div class="d-flex align-center pr-1 opacity-actions-group">
+                      <v-btn v-if="contextEnabledForThisList" icon="mdi-text-box-search-outline" size="x-small" variant="text" color="slate-400" @click.stop="openContextExamples(t.term)" />
+                      <v-btn icon="mdi-robot-outline" size="x-small" variant="text" color="slate-400" @click.stop="openTutor(t.term)" />
+                      <v-btn icon="mdi-book-open-variant" size="x-small" variant="text" color="slate-400" @click.stop="openWiktionary(t.term)" />
+                    </div>
+                  </div>
                 </div>
+              </v-navigation-drawer>
+            </template>
+
+            <template v-else-if="mode === 'write'">
+              <div class="d-flex justify-center my-4 animate-fade-in">
+                <v-card class="border rounded-xl pa-5 bg-white w-100 max-width-card-hub" flat>
+                  <div class="d-flex flex-column align-center justify-center bg-slate-50 rounded-xl border pa-4 mb-4" style="height: 240px;">
+                    <v-img :src="currentItem?.image" cover :eager="true" class="d-none" @load="backImageLoaded = true" @error="backImageLoaded = false" />
+                    
+                    <template v-if="hasImage && backImageLoaded">
+                      <v-avatar size="130" rounded="xl" class="border shadow-sm bg-white flex-shrink-0 mb-3">
+                        <v-img v-if="currentItem" :src="currentItem.image" cover />
+                      </v-avatar>
+                      <h5 class="text-subtitle-1 text-center font-weight-black text-slate-900 tracking-tight px-4 leading-tight text-truncate w-100 max-w-500">
+                        {{ frontPreview }}
+                      </h5>
+                    </template>
+                    <template v-else>
+                      <h4 class="text-h5 text-center font-weight-black text-slate-900 tracking-tight px-4 leading-snug max-w-500">
+                        {{ frontPreview }}
+                      </h4>
+                    </template>
+                  </div>
+
+                  <div class="d-flex justify-center align-center mb-4">
+                    <span class="text-caption font-weight-bold text-slate-400 text-uppercase tracking-wider mr-2">Target:</span>
+                    <v-chip size="small" color="error" variant="flat" class="font-weight-bold text-uppercase">{{ prettyBackField }}</v-chip>
+                  </div>
+
+                  <div ref="answerWrap" class="d-flex justify-center max-w-400 mx-auto w-100 mb-4">
+                    <v-text-field v-model="userAnswer" :disabled="!canSubmitNow()" label="Type your answer" variant="outlined" color="primary" hide-details density="comfortable" class="rounded-lg font-weight-bold text-center-input w-100" @keydown.enter.prevent="submitWrite($event)" />
+                  </div>
+
+                  <div class="d-flex justify-center mb-2">
+                    <v-btn color="primary" height="40" class="px-8 rounded-xl font-weight-black text-none" :disabled="!canSubmitNow()" :loading="isAdvancing || isSubmitting" @click="submitWrite">
+                      Submit Solution
+                    </v-btn>
+                  </div>
                 </v-card>
-                </div>
-              </template>
+              </div>
+            </template>
 
-              <!-- MULTIPLE CHOICE -->
-              <template v-else-if="mode === 'multiple_choice'">
-                <div class="text-caption text-medium-emphasis mb-2">
-                  Choose the correct <strong>{{ backLabel }}</strong> for
-                  <span class="text-subtitle-1">{{ frontPreview }}</span>.
+            <template v-else-if="mode === 'multiple_choice'">
+              <v-card class="border rounded-xl pa-5 bg-white text-center" flat>
+                <div class="text-caption font-weight-bold text-slate-400 text-uppercase tracking-wider mb-2">
+                  Identify the proper <span class="text-primary font-weight-black">{{ backLabel }}</span> representation for:
                 </div>
+                <div class="text-h5 font-weight-black text-slate-900 mb-6 px-4">"{{ frontPreview }}"</div>
 
-                <div class="d-flex flex-wrap ga-2 justify-center">
-                  <v-chip
-                    v-for="opt in mcOptions"
-                    :key="opt"
-                    class="ma-1"
-                    variant="outlined"
-                    :disabled="!canSubmitNow()"
-                    @click="submitChoice(opt)"
-                  >
+                <div class="d-flex flex-wrap justify-center mx-auto max-w-500" style="gap: 10px;">
+                  <v-chip v-for="opt in mcOptions" :key="opt" filter variant="tonal" color="primary" size="large" class="font-weight-bold px-5 rounded-lg py-4 border cursor-pointer" :disabled="!canSubmitNow()" @click="submitChoice(opt)">
                     {{ opt }}
                   </v-chip>
                 </div>
-              </template>
+              </v-card>
+            </template>
 
-              <!-- QUIZ / MATCH placeholders -->
-              <template v-else>
-                <div class="text-caption text-medium-emphasis">
-                  Mode "{{ mode }}" is scaffolded but not implemented yet in this pass.
-                </div>
-              </template>
-            </v-card>
+            <template v-else>
+              <div class="pa-8 border rounded-xl text-center bg-slate-50 text-caption font-weight-medium text-slate-400">
+                Mode template target string validation signature identity block "{{ mode }}" is currently unassigned in this session view.
+              </div>
+            </template>
           </div>
 
-          <!-- BOTTOM: PHASE PROGRESS BAR (changes meaning by phase) -->
-          <div class="mt-4" max-width="80%" style="margin-left: 10%; margin-right: 10%;">
-            <div v-if="isPersistedMode" class="d-flex justify-space-between align-center mb-1">
-              <div class="text-caption text-medium-emphasis">
-                {{ phaseLabel }}
-              </div>
-              <div class="text-caption text-medium-emphasis">
-                <strong>Progress: {{ phaseProgressPct }}% ({{ sessionCounters.correct }} / {{ serverTotalCount }})</strong>
-              </div>
-            </div>
-
-            <v-progress-linear
-              v-if="isPersistedMode"
-              :model-value="isPersistedMode && serverCountsReady ? phaseProgressPct : listCoveragePct"
-              height="10"
-              class="mb-2"
-              :color="phase === 'review' ? 'orange' : (phase === 'done' ? 'success' : 'success')"
-            />
+          <div class="d-flex justify-center mt-3">
+            <v-btn @click="goToSettings" icon elevation="0" class="ms-3">
+              <v-icon color="grey-darken-3">mdi-arrow-left-circle</v-icon>
+            </v-btn>
           </div>
         </template>
       </div>
-
-    <div class="d-flex justify-center mt-3">
-      <v-btn @click="goToSettings" icon elevation="0" class="ms-3">
-        <v-icon color="grey-darken-3">mdi-arrow-left-circle</v-icon>
-      </v-btn>
-    </div>
 
     <!-- WRONG DIALOG -->
     <v-dialog v-model="showWrongDialog" persistent max-width="520">
@@ -1100,13 +747,28 @@ const openWiktionary = (word?: string | null) => {
   window.open(`https://en.wiktionary.org/wiki/${encodeURIComponent(w)}`, "_blank");
 };
 
+/* =========================================================
+   📁 AUTOMATED MIDDLE DRAWER SCROLL CODES
+   ========================================================= */
 function scrollActiveTermIntoView() {
   if (!showEntireList.value) return;
+  
   const wrap = termListWrap.value;
   if (!wrap) return;
 
-  const el = wrap.querySelector(`[data-term-index="${currentIndex.value}"]`) as HTMLElement | null;
-  el?.scrollIntoView({ block: "center", inline: "nearest", behavior: "smooth" });
+  // Query row based on index cursor mapping attribute bounds
+  const targetRow = wrap.querySelector(`[data-term-index="${currentIndex.value}"]`) as HTMLElement | null;
+  if (!targetRow) return;
+
+  // Calculate position to center the item directly in the middle of the drawer viewport
+  const containerHeight = wrap.clientHeight;
+  const rowOffsetTop = targetRow.offsetTop;
+  const rowHeight = targetRow.offsetHeight;
+
+  wrap.scrollTo({
+    top: rowOffsetTop - (containerHeight / 2) + (rowHeight / 2),
+    behavior: "smooth"
+  });
 }
 
 function jumpToCardIndex(idx: number) {
@@ -1152,6 +814,17 @@ watch(
   },
   { immediate: true }
 );
+
+// Ensure index scrolls dynamically when visibility state changes
+watch(showEntireList, async (isVisible) => {
+  if (isVisible) {
+    await nextTick();
+    // Microtask frame deferral allows elements to render completely before scrolling
+    requestAnimationFrame(() => {
+      scrollActiveTermIntoView();
+    });
+  }
+});
 
 const cardThumbLabel = computed(() => {
   const total = roundCount.value ?? 0;
@@ -1309,6 +982,8 @@ const backImageReady = computed(() => hasImage.value && backImageLoaded.value);
 
 // If you ever want a single indicator:
 const bothSidesImageReady = computed(() => frontImageReady.value && backImageReady.value);
+
+
 
 /* =========================================================
    Initialize server counts (once per mount/begin)
@@ -1469,6 +1144,17 @@ function refreshMcOptions() {
   }
   mcOptions.value = buildMultipleChoiceOptions(it, backField.value as any, props.planItems, 4);
 }
+
+/* =========================================================
+   📊 COMPUTE RUNTIME TRANSLATION VECTOR LABELS
+   ========================================================= */
+const currentVectorDirectionLabel = computed(() => {
+  // Generates a clean textual mapping (e.g., "French ➔ Term" or "Definition ➔ Past Simple")
+  const from = frontLabel.value || "Unknown Source";
+  const to = backLabel.value || "Target Form";
+  return `${from} ➔ ${to}`;
+});
+
 
 /* =========================================================
    Dialogs / feedback
@@ -2044,13 +1730,12 @@ async function onBeforeUnload() {
 /* =========================================================
    Mount / Unmount
 ========================================================= */
-onMounted(() => {
+onMounted(async () => {
   window.addEventListener("keydown", onKeydown);
   window.addEventListener("beforeunload", onBeforeUnload as any);
 
-  // If your template calls begin() explicitly, remove this.
-  // Otherwise, this makes the scene start automatically once mounted.
-  // begin();
+  // Directly call the session initiation routine, skipping the pre-game landing page
+  await begin();
 });
 
 onBeforeUnmount(() => {
@@ -2310,4 +1995,162 @@ onBeforeUnmount(() => {
   padding: 0 2px;
   border-radius: 3px;
 }
+
+/* ==========================================
+   🧱 SLLEK HUB CARD VIEWPORT PERSPECTIVES
+   ========================================== */
+.max-width-card-hub {
+  max-width: 680px; /* Locked compact profile footprint avoiding split horizontal stretch */
+  width: 100%;
+}
+
+.max-w-400 { max-width: 400px; }
+.max-w-500 { max-width: 500px; }
+.text-center-input :deep(input) { text-align: center !important; }
+.h-calc-drawer { height: calc(100vh - 64px); }
+.text-xxs { font-size: 0.72rem; }
+
+.card-stage-canvas-box {
+  position: relative;
+  height: 380px;
+  width: 100%;
+  max-width: 540px; /* Card size stays locked on center stage canvas grid */
+  margin: 0 auto;
+}
+
+/* ==========================================
+   ⚡ ABSOLUTE FLOATING GLASS SWIPER PADDLES
+   ========================================== */
+.swiper-paddle-nav {
+  position: absolute !important;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 40;
+  border-color: #e2e8f0 !important;
+  background-color: rgba(255, 255, 255, 0.9) !important;
+  backdrop-filter: blur(4px);
+  color: #475569 !important;
+  transition: all 0.2s ease;
+}
+
+.swiper-paddle-nav:hover:not(.v-btn--disabled) {
+  background-color: #ffffff !important;
+  color: #3b82f6 !important;
+  transform: translateY(-50%) scale(1.06);
+}
+
+.left-paddle { left: -68px; }
+.right-paddle { right: -68px; }
+
+/* Responsive adjustments for paddles on tablet breakpoints */
+@media (max-width: 720px) {
+  .left-paddle { left: -12px; }
+  .right-paddle { right: -12px; }
+  .swiper-paddle-nav { opacity: 0.85; }
+}
+
+/* 3D Vertical Axis Card Turning Engine styles */
+.flip-wrap-capsule {
+  width: 100%;
+  height: 100%;
+  perspective: 1200px;
+  cursor: pointer;
+}
+
+.flip-inner-axis {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 0.48s cubic-bezier(0.175, 0.885, 0.32, 1.15);
+}
+
+.flip-inner-axis.is-flipped-back-side {
+  transform: rotateX(180deg);
+}
+
+.flip-sheet-face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  border-radius: 16px;
+  width: 100%;
+  height: 100%;
+}
+
+.face-front-hull {
+  border-color: #e2e8f0 !important;
+}
+
+.face-back-hull {
+  transform: rotateX(180deg);
+  border-color: #e2e8f0 !important;
+}
+
+.absolute-card-toolbar {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 50;
+}
+
+/* ==========================================
+   📁 EXTRACTED RE-INDEX OVERLAY LIST DRAWER
+   ========================================== */
+.discover-term-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.discover-term-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-color: #f1f5f9 !important;
+  background-color: #ffffff;
+  border-radius: 10px;
+  transition: all 0.2s ease;
+}
+
+.discover-term-btn {
+  all: unset;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  flex-grow: 1;
+  min-width: 0;
+}
+
+.active-row-highlight {
+  background-color: rgba(59, 130, 246, 0.05) !important;
+  border-color: rgba(59, 130, 246, 0.3) !important;
+  outline: 1px solid rgba(59, 130, 246, 0.2);
+}
+
+.active-row-highlight .discover-term-text {
+  color: #3b82f6 !important;
+}
+
+.discover-term-index {
+  min-width: 22px;
+  color: #94a3b8;
+}
+
+/* Global design systems tokens */
+.text-slate-900 { color: #0f172a; }
+.text-slate-800 { color: #1e293b; }
+.text-slate-600 { color: #475569; }
+.text-slate-500 { color: #64748b; }
+.text-slate-400 { color: #94a3b8; }
+.bg-slate-50 { background-color: #f8fafc !important; }
+
+.animate-fade-in {
+  animation: setup-fade 0.25s cubic-bezier(0.165, 0.84, 0.44, 1) forwards;
+}
+@keyframes setup-fade {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
 </style>
+

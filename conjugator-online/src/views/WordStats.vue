@@ -6,10 +6,10 @@
         <div>
           <h1 class="text-h3 text-white mb-2">
             <v-icon size="large" color="white" class="me-2">mdi-book-alphabet</v-icon>
-            Lexicon Visualizer Pro
+            Word Stats
           </h1>
           <div class="text-subtitle-1 text-white opacity-90">
-            Advanced linguistic data analysis & visualization
+            Discover fun facts about English words
           </div>
         </div>
         <div class="d-flex ga-3 align-center">

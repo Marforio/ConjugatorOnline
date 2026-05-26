@@ -4,9 +4,9 @@
     <v-card class="pa-6 mb-6 data-header" elevation="4" rounded="xl">
       <div class="d-flex align-center justify-space-between">
         <div>
-          <div class="text-h4 font-weight-bold text-white">Student Achievements Directory</div>
+          <div class="text-h4 font-weight-bold text-white">Student Achievements</div>
           <div class="text-subtitle-1 text-white text-opacity-90 mt-1">
-            Track milestones, reward badges, and browse automated system achievements
+            Track and browse student achievements across courses and time periods
           </div>
         </div>
         <v-icon size="56" class="text-white">mdi-trophy</v-icon>

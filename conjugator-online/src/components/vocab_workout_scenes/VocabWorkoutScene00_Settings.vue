@@ -1,253 +1,243 @@
-<!-- VocabWorkoutScene00_Settings.vue -->
 <template>
-  <v-container class="pa-6">
+  <v-container class="pa-1 pa-md-1 bg-white min-h-screen text-slate-800" fluid>
+    
     <div class="d-flex justify-center">
       <v-window-controls v-model="activePanel" length="2" />
     </div>
 
-    <!-- ARROWS ONLY -->
-    <div class="d-flex align-center justify-space-between mt-2">
+    <div class="d-flex align-center justify-space-between max-width-hub mx-auto">
       <v-btn
-        variant="text"
+        variant="tonal"
+        color="slate-600"
         @click="activePanel = 0"
         :disabled="activePanel === 0"
-        class="d-flex align-center ga-2"
+        class="rounded-lg text-none font-weight-bold px-4"
+        prepend-icon="mdi-chevron-left"
       >
-        <v-icon>mdi-chevron-left</v-icon>
-        <span class="ms-3">New session</span>
+        New Workout Session
       </v-btn>
 
       <v-img
         src="/images/banners/VocabWorkout1.png"
-        max-width="300px"
-        class="mx-4"
-        cover
+        max-width="200px"
+        class="mx-4 d-none d-sm-flex"
+        contain
       />
 
       <v-btn
-        variant="text"
+        variant="tonal"
+        color="slate-600"
         @click="activePanel = 1"
         :disabled="activePanel === 1"
-        class="d-flex align-center ga-2"
+        class="rounded-lg text-none font-weight-bold px-4"
+        append-icon="mdi-chevron-right"
       >
-        <span class="me-3">Check my progress</span>
-        <v-icon>mdi-chevron-right</v-icon>
+        Check My Progress
       </v-btn>
     </div>
 
-    <v-window v-model="activePanel">
-      <!-- PANEL 1: Start studying -->
+    <v-window v-model="activePanel" class="max-width-hub mx-auto overflow-visible">
+      
       <v-window-item :value="0">
-        <v-card class="pa-4" max-width="1200" min-height="420">
-          <div class="d-flex align-center justify-space-between">
+        <v-card class="border rounded-xl bg-white" flat max-width="1200">
+          
+          <div class="px-4 px-md-5 py-3 border-b bg-slate-50 rounded-t-xl d-flex flex-column flex-sm-row align-start align-sm-center justify-space-between ga-4">
             <div>
-              <div class="text-h5 font-weight-medium">Settings</div>
-              <div class="text-subtitle-1 text-medium-emphasis">
-                Start a new training session
-              </div>
+              <div class="text-h6 font-weight-black text-slate-900 leading-none mb-1">Workout Settings</div>
+              <div class="text-caption text-slate-500">Choose a list and study mode</div>
             </div>
+            
+            <div v-if="selectedListKey" class="d-flex align-center ga-2 w-100 w-sm-auto justify-end flex-wrap">
               
-              <!-- START + PDF BUTTONS -->
-              <div v-if="selectedListKey" class="d-flex justify-end ga-2 align-center">
-                <v-btn
-                  variant="tonal"
-                  color="primary"
-                  size="large"
-                  @click="downloadListPdf"
-                  :loading="pdfLoading"
-                >
-                  Export PDF
-                </v-btn>
+              <v-btn
+                variant="outlined"
+                color="slate-600"
+                size="small"
+                height="36"
+                class="rounded-lg text-none font-weight-bold bg-white max-width-pdf-btn px-3"
+                prepend-icon="mdi-file-pdf-box"
+                @click="downloadListPdf"
+                :loading="pdfLoading"
+              >
+                <span class="text-truncate">
+                  Export PDF: {{ selectedListMeta?.title || selectedListKey }}
+                </span>
+              </v-btn>
 
-                <v-btn
-                  v-if="selectedMode"
-                  color="success"
-                  size="x-large"
-                  @click="start"
-                  :disabled="!valid"
-                >
-                  Start
-                </v-btn>
-              </div>
+              <v-btn
+                :color="valid ? 'success' : 'slate-300'"
+                :disabled="!valid"
+                size="small"
+                height="36"
+                class="rounded-lg text-none font-weight-black tracking-wide px-4 elevation-1"
+                prepend-icon="mdi-play-circle"
+                @click="start"
+              >
+                Launch Workout
+              </v-btn>
             </div>
+          </div>
 
-          <v-divider class="my-4" />
-
-          <!-- TWO-COLUMN LAYOUT -->
-          <v-row justify="center">
-            <!-- LIST PICKER -->
+          <v-row no-gutters class="pa-4 pa-md-5">
+            
             <v-col
               cols="12"
-              :md="selectedListKey ? 5 : 8"
-              :lg="selectedListKey ? 5 : 6"
-              :class="selectedListKey ? '' : 'd-flex justify-center'"
+              :md="selectedListKey ? 5 : 12"
+              :class="selectedListKey ? 'pr-md-4' : 'px-0 text-center mx-auto max-width-initial-picker'"
             >
-              <div :class="selectedListKey ? '' : 'w-100'">
-                <div class="text-subtitle-2 mb-2">Vocab list</div>
+              <div class="border rounded-xl pa-4 bg-slate-50 h-100">
+                <div class="d-flex align-center mb-3">
+                  <v-avatar color="primary" size="22" class="text-caption font-weight-black text-white mr-2">1</v-avatar>
+                  <span class="text-subtitle-2 font-weight-black text-slate-900 uppercase tracking-wide">Select Vocab List</span>
+                </div>
 
-                <v-radio-group v-model="selectedListKey" hide-details density="compact">
-                  <!-- General Vocabulary  -->
-                  <div v-if="generalVocabItems?.length" class="text-caption text-medium-emphasis mb-1">
+                <v-radio-group v-model="selectedListKey" hide-details density="compact" class="ma-0 pa-0 inline-radio-group">
+                  
+                  <div v-if="generalVocabItems?.length" class="text-overline font-weight-bold text-slate-400 tracking-wider mb-2 block leading-none">
                     General Vocabulary
                   </div>
 
-                  <v-row v-if="generalVocabItems?.length" dense>
-                    <v-col cols="12" sm="6">
-                      <v-radio
-                        v-for="item in irregularVerbItems"
-                        :key="item.value"
-                        :label="item.title"
-                        :value="item.value"
-                        class="mb-1"
-                      />
-                    </v-col>
-                    <v-col v-for="item in generalVocabItems" :key="item.value" cols="12" sm="6">
-                      <v-radio :label="item.title" :value="item.value" class="mb-1" />
-                    </v-col>
-                  </v-row>
-
-                  <v-divider v-if="generalVocabItems?.length" class="my-3" />
-
-                  <!-- My domain -->
-                  <div class="text-caption text-medium-emphasis mb-1">
-                    My domain: <span class="text-capitalize">{{ studentDomain }}</span>
+                  <div v-if="generalVocabItems?.length" class="bg-white border rounded-xl pa-3 mb-4 space-stack-items">
+                    <v-radio
+                      v-for="item in irregularVerbItems"
+                      :key="item.value"
+                      :label="item.title"
+                      :value="item.value"
+                      color="primary"
+                      class="compact-pills-radio border-b pb-1.5 mb-1.5"
+                    />
+                    <v-radio 
+                      v-for="(item, idx) in generalVocabItems" 
+                      :key="item.value" 
+                      :label="item.title" 
+                      :value="item.value" 
+                      color="primary"
+                      :class="{ 'border-b pb-1.5 mb-1.5': idx !== generalVocabItems.length - 1 }"
+                      class="compact-pills-radio" 
+                    />
                   </div>
 
-                  <v-row dense>
-                    <v-col v-for="item in domainItems" :key="item.value" cols="12" sm="6">
-                      <v-radio :label="item.title" :value="item.value" class="mb-1" />
-                    </v-col>
-                  </v-row>
+                  <div class="text-overline font-weight-bold text-slate-400 tracking-wider mb-2 block leading-none">
+                    My Domain (<span class="text-primary text-lowercase font-weight-black">{{ studentDomain }}</span>)
+                  </div>
+
+                  <div class="bg-white border rounded-xl pa-3 space-stack-items">
+                    <v-radio 
+                      v-for="(item, idx) in domainItems" 
+                      :key="item.value" 
+                      :label="item.title" 
+                      :value="item.value" 
+                      color="primary"
+                      :class="{ 'border-b pb-1.5 mb-1.5': idx !== domainItems.length - 1 }"
+                      class="compact-pills-radio" 
+                    />
+                  </div>
                 </v-radio-group>
-              </div>
-              <div class="d-flex justify-start mt-8">
-                <HomeButton />
               </div>
             </v-col>
 
-            <!-- SETTINGS (only after list selected) -->
-            <v-col v-if="selectedListKey" cols="12" md="7" lg="7">
-              <!-- LEVEL -->
-              <div v-if="listSupportsLevels" class="mt-1 ms-4">
-                <div class="text-subtitle-2 mb-2">Level</div>
-                <v-btn-toggle v-model="selectedLevel" mandatory divided class="level-toggle">
-                  <v-btn value="essential" variant="outlined" color="primary">Essential</v-btn>
-                  <v-btn value="advanced" variant="outlined" color="primary">Advanced</v-btn>
-                </v-btn-toggle>
+            <v-col v-if="selectedListKey" cols="12" md="7" class="pl-md-4 mt-5 mt-md-0">
+              <div class="border rounded-xl pa-4 bg-white h-100 d-flex flex-column justify-space-between">
+                <div>
+                  <div class="d-flex align-center mb-4">
+                    <v-avatar color="primary" size="22" class="text-caption font-weight-black text-white mr-2">2</v-avatar>
+                    <span class="text-subtitle-2 font-weight-black text-slate-900 uppercase tracking-wide">Define Study Mode</span>
+                  </div>
 
-                <v-divider class="my-4" />
-              </div>
+                  <div v-if="listSupportsLevels" class="mb-4 animate-fade-in">
+                    <div class="text-overline font-weight-bold text-slate-400 tracking-wider mb-2">Choose essential or advanced</div>
+                    <v-btn-toggle v-model="selectedLevel" mandatory divided color="primary" variant="outlined" class="rounded-xl flex-width-toggle border" height="38">
+                      <v-btn value="essential" class="text-none font-weight-bold flex-grow-1 text-caption">Essential</v-btn>
+                      <v-btn value="advanced" class="text-none font-weight-bold flex-grow-1 text-caption">Advanced</v-btn>
+                    </v-btn-toggle>
+                  </div>
 
-              <!-- MODE -->
-              <div class="text-subtitle-2 mb-2 ms-4">Mode</div>
-              <v-chip-group
-                v-model="selectedMode"
-                mandatory
-                selected-class="text-primary"
-                class="mb-2 ms-4"
-                column
-              >
-                <v-chip value="cards" color="primary" size="large">Discover</v-chip>
-                <v-chip value="multiple_choice" variant="tonal" color="primary" size="large" disabled>
-                  Multiple choice
-                </v-chip>
-                <v-chip value="write" variant="tonal" color="primary" size="large">Writing</v-chip>
-                <v-chip value="quiz" variant="tonal" disabled color="primary" size="large">Quiz</v-chip>
-              </v-chip-group>
+                  <div class="mb-4">
+                    <div class="text-overline font-weight-bold text-slate-400 tracking-wider mb-1">Study Mode</div>
+                    <v-chip-group v-model="selectedMode" mandatory color="primary" column class="ma-0 chip-matrix-row">
+                      <v-chip value="cards" filter variant="tonal" size="comfortable" class="font-weight-bold rounded-lg px-4 py-1">Cards</v-chip>
+                      <v-chip value="multiple_choice" filter variant="tonal" size="comfortable" disabled class="font-weight-bold rounded-lg px-4 py-1">Multiple Choice</v-chip>
+                      <v-chip value="write" filter variant="tonal" size="comfortable" class="font-weight-bold rounded-lg px-4 py-1">Write</v-chip>
+                      <v-chip value="quiz" filter variant="tonal" size="comfortable" disabled class="font-weight-bold rounded-lg px-4 py-1">Quiz</v-chip>
+                    </v-chip-group>
+                  </div>
 
-              <v-divider class="my-4" />
+                  <v-divider class="my-4 border-opacity-40"></v-divider>
 
-              <!-- STUDY PAIR -->
-              <div v-if="selectedMode">
-                <div class="text-subtitle-2 mb-2 ms-4">Study pair</div>
+                  <div v-if="selectedMode" class="mb-4 bg-slate-50 border rounded-xl pa-3 animate-fade-in">
+                    <div class="text-overline font-weight-bold text-slate-400 tracking-wider mb-2 d-flex align-center">
+                      <v-icon size="14" class="mr-2" color="slate-400">mdi-swap-horizontal</v-icon> Study Pair
+                    </div>
 
-                <v-row>
-                  <v-col cols="12" md="6">
-                    <v-radio-group
-                      v-model="selectedFrontField"
-                      :label="selectedMode === 'cards' ? 'Front (what you see first)' : 'Prompt (what you see)'"
-                      density="compact"
+                    <v-row no-gutters>
+                      <v-col cols="12" sm="6" class="pr-sm-2 mb-3 mb-sm-0">
+                        <div class="bg-white border rounded-lg pa-2">
+                          <v-radio-group v-model="selectedFrontField" :label="selectedMode === 'cards' ? 'Card Front' : 'What you see (prompt)'" density="compact" hide-details class="custom-group-label">
+                            <v-radio v-for="item in sortedFrontItems" :key="item.value" :label="item.title" :value="item.value" color="primary" class="text-caption font-weight-bold mt-1 text-slate-700" />
+                          </v-radio-group>
+                        </div>
+                      </v-col>
+
+                      <v-col cols="12" sm="6" class="pl-sm-2">
+                        <div class="bg-white border rounded-lg pa-2 h-100">
+                          <v-radio-group v-model="selectedBackField" :label="selectedMode === 'cards' ? 'Card Back (Target)' : 'What you write (target)'" density="compact" hide-details class="custom-group-label">
+                            <v-radio v-for="item in allowedBackItems" :key="item.value" :label="item.title" :value="item.value" color="primary" class="text-caption font-weight-bold mt-1 text-slate-700" />
+                          </v-radio-group>
+                        </div>
+                      </v-col>
+                    </v-row>
+
+                    <div v-if="selectedListKey && allowedPairs.length === 0" class="text-caption font-weight-bold text-error mt-2 d-flex align-center px-1">
+                      <v-icon size="14" class="mr-1">mdi-alert-circle-outline</v-icon>
+                      This list has no valid study pairs configured yet.
+                    </div>
+                  </div>
+
+                  <div v-if="selectedMode === 'quiz'" class="mb-4 animate-fade-in">
+                    <v-text-field
+                      v-model.number="selectedQuizCount"
+                      label="Quiz Length Vector (Total Items)"
+                      type="number"
+                      min="1"
+                      max="200"
+                      variant="outlined"
+                      density="comfortable"
+                      color="primary"
                       hide-details
-                      class="ms-4"
-                    >
-                      <v-row dense>
-                        <v-col
-                          v-for="item in sortedFrontItems"
-                          :key="item.value"
-                          cols="12"
-                          sm="6"
-                        >
-                          <v-radio :label="item.title" :value="item.value" />
-                        </v-col>
-                      </v-row>
-                    </v-radio-group>
-                  </v-col>
-
-                  <v-col cols="12" md="6">
-                    <v-radio-group
-                      v-model="selectedBackField"
-                      :label="
-                        selectedMode === 'cards'
-                          ? 'Back'
-                          : selectedMode === 'multiple_choice'
-                            ? 'The answer you have to select'
-                            : 'What you have to write'
-                      "
-                      density="compact"
-                      hide-details
-                    >
-                      <v-radio
-                        v-for="item in allowedBackItems"
-                        :key="item.value"
-                        :label="item.title"
-                        :value="item.value"
-                      />
-                    </v-radio-group>
-                  </v-col>
-                </v-row>
-
-                <div
-                  v-if="selectedListKey && allowedPairs.length === 0"
-                  class="text-caption text-error mt-2"
-                >
-                  This list has no valid study pairs configured yet.
+                      class="rounded-xl font-weight-bold"
+                    />
+                  </div>
                 </div>
 
-                <!-- QUIZ COUNT -->
-                <v-text-field
-                  v-if="selectedMode === 'quiz'"
-                  v-model.number="selectedQuizCount"
-                  label="Quiz length"
-                  type="number"
-                  min="1"
-                  max="200"
-                  density="comfortable"
-                  hide-details
-                  class="mt-2"
-                />
-              </div>
+                <div class="mt-4 pt-2 border-t">
+                  <div v-if="!valid" class="text-caption font-weight-bold text-error mb-2 d-flex align-center">
+                    <v-icon size="14" class="mr-1">mdi-lock-outline</v-icon>
+                    <template v-if="!selectedListKey">Please choose a vocab list from Step 1.</template>
+                    <template v-else-if="listSupportsLevels && !selectedLevel">Please choose a level.</template>
+                    <template v-else-if="selectedMode === 'write' && !computedTrackKey">Writing progress is only tracked for specific study pairs.</template>
+                    <template v-else>Please try different settings.</template>
+                  </div>
 
-              <!-- VALIDATION -->
-              <div v-if="!valid" class="text-caption text-error mt-2">
-                <template v-if="!selectedListKey">
-                  Please choose a vocab list.
-                </template>
-                <template v-else-if="listSupportsLevels && !selectedLevel">
-                  Please choose a level (essential/advanced).
-                </template>
-                <template v-else-if="selectedMode === 'write' && !computedTrackKey">
-                  Writing progress is only tracked for specific study pairs.
-                </template>
-                <template v-else>
-                  Please review your settings.
-                </template>
+                  <v-btn
+                    block
+                    height="46"
+                    :color="valid ? 'success' : 'slate-300'"
+                    :disabled="!valid"
+                    class="rounded-xl font-weight-black text-none tracking-wide text-subtitle-2 elevation-1"
+                    prepend-icon="mdi-play-circle"
+                    @click="start"
+                  >
+                    Launch Workout
+                  </v-btn>
+                </div>
+
               </div>
             </v-col>
           </v-row>
+
         </v-card>
       </v-window-item>
 
-      <!-- PANEL 2: My progress (REPACKAGED) -->
       <v-window-item :value="1">
         <VWMyProgressPanel
           :completionTarget="COMPLETION_TARGET"
@@ -768,3 +758,89 @@ function start() {
   });
 }
 </script>
+
+<style scoped>
+.min-h-screen {
+  min-height: 100vh;
+}
+
+.max-width-hub {
+  max-width: 1100px;
+  width: 100%;
+}
+
+.max-width-initial-picker {
+  max-width: 540px;
+  width: 100%;
+}
+
+/* Wizard Container Content Adjustments */
+.flex-width-toggle {
+  width: 100%;
+  border-color: #e2e8f0 !important;
+}
+
+.flex-width-toggle :deep(.v-btn) {
+  border-color: transparent !important;
+}
+
+.chip-matrix-row :deep(.v-chip--disabled) {
+  opacity: 0.45 !important;
+}
+
+/* Micro Typography Alignment Rules Overrides */
+.compact-pills-radio :deep(.v-selection-control) {
+  min-height: 30px !important;
+}
+
+.compact-pills-radio :deep(.v-label) {
+  font-size: 0.85rem !important;
+  font-weight: 600;
+  color: #334155 !important;
+}
+
+.space-stack-items {
+  gap: 4px;
+  display: flex;
+  flex-column: initial;
+  flex-direction: column;
+}
+
+/* Restricts the wide PDF text string from blowing out layout constraints on small screens */
+.max-width-pdf-btn {
+  max-width: 280px !important;
+}
+
+@media (max-width: 600px) {
+  .max-width-pdf-btn {
+    max-width: 100% !important;
+    width: 100%;
+  }
+}
+
+.custom-group-label :deep(.v-label.v-radio-group__label) {
+  font-size: 0.7rem !important;
+  text-transform: uppercase !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.8px !important;
+  color: #94a3b8 !important;
+  margin-bottom: 6px !important;
+}
+
+/* Animation Acceleration Parameters */
+.animate-fade-in {
+  animation: setup-fade 0.25s cubic-bezier(0.165, 0.84, 0.44, 1) forwards;
+}
+
+@keyframes setup-fade {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.text-slate-900 { color: #0f172a; }
+.text-slate-800 { color: #1e293b; }
+.text-slate-700 { color: #334155; }
+.text-slate-500 { color: #64748b; }
+.text-slate-400 { color: #94a3b8; }
+.bg-slate-50 { background-color: #f8fafc !important; }
+</style>

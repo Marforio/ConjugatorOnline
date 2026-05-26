@@ -50,7 +50,7 @@
           <v-btn @click="goToScene('PassiveScene01_Game')">
             ▶️ Play Again
           </v-btn>
-          <router-link :to="{ path: '/dashboard', query: { tab: 'other-games', game: 'Passive Party' } }">
+          <router-link :to="{ path: '/my-data', query: { tab: 'other-games', game: 'Passive Party' } }">
             <v-btn>Go to Dashboard</v-btn>
           </router-link>
           <HomeButton />

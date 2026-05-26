@@ -45,7 +45,7 @@
 
         <div class="d-flex justify-center align-center mt-4 gap-5">
           <v-btn @click="goToScene('ParallelUniverseScene00_Start')">▶️ Play Again</v-btn>
-          <router-link :to="{ path: '/dashboard', query: { tab: 'other-games', game: 'Parallel Universe' } }">
+          <router-link :to="{ path: '/my-data', query: { tab: 'other-games', game: 'Parallel Universe' } }">
             <v-btn>Go to Dashboard</v-btn>
           </router-link>
         </div>

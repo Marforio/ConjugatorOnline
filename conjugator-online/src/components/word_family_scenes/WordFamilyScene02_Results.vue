@@ -46,7 +46,7 @@
 
         <div class="d-flex justify-center align-center mt-4 gap-5">
           <v-btn @click="goToScene('WordFamilyScene01_Game')">▶️ Play Again</v-btn>
-          <router-link :to="{ path: '/dashboard', query: { tab: 'other-games', game: 'Word Families' } }">
+          <router-link :to="{ path: '/my-data', query: { tab: 'other-games', game: 'Word Families' } }">
             <v-btn>Go to Dashboard</v-btn>
           </router-link>
           <HomeButton />

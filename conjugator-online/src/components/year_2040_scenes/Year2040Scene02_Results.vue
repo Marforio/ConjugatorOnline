@@ -50,7 +50,7 @@
             ▶️ Play Again
           </v-btn>
 
-          <router-link :to="{ path: '/dashboard', query: { tab: 'other-games', game: 'Year 2040' } }">
+          <router-link :to="{ path: '/my-data', query: { tab: 'other-games', game: 'Year 2040' } }">
             <v-btn>Go to Dashboard</v-btn>
           </router-link>
 

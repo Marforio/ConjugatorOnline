@@ -93,8 +93,8 @@ const props = withDefaults(
   }>(),
   {
     completionTarget: 3,
-    title: "Settings",
-    subtitle: "Continue an ongoing session or review your progress",
+    title: "My Progress",
+    subtitle: "Continue an ongoing workout or review your progress",
   }
 );
 

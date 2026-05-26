@@ -26,7 +26,7 @@ interface Student {
   total_correct_prompts: number;
   health_score: number;
   domain: string | null;
-  user: User | null;
+  user: User | number | null; // Updated to handle nested object or raw ID number safely
   score_history: Record<string, ScoreSnapshot>;
   linguistic_profile?: LinguisticProfile; 
 }
@@ -62,7 +62,7 @@ interface Course {
 
 interface StudentCourse {
   id: number;
-  student: Student;
+  student: Student | number;
   course: Course;
 }
 
@@ -120,7 +120,6 @@ interface VocabItem {
   feedback: Feedback;
 }
 
-// NEW: Workout interfaces
 interface WorkoutDrill {
   id?: number;
   type: 'pronunciation' | 'conjugation' | 'vocabulary' | 'grammar' | 'fluency' | 'listening' | 'other';
@@ -246,6 +245,8 @@ export const useUserStore = defineStore("user", () => {
     try {
       const res = await api.get<User>("/users/me/");
       user.value = res.data;
+      // Immediately cascade down to gather profile layers
+      await fetchStudentData();
     } catch (err) {
       console.error("Failed to fetch user data:", err);
       user.value = null;
@@ -290,7 +291,9 @@ export const useUserStore = defineStore("user", () => {
       .sort((a, b) => b.date.localeCompare(a.date));
   });
 
-  // Fetch Linguistic Profile
+  // ==========================================
+  // 1. MODIFIED: fetchLinguisticProfile
+  // ==========================================
   async function fetchLinguisticProfile() {
     if (!hasAccessToken()) return;
 
@@ -298,9 +301,14 @@ export const useUserStore = defineStore("user", () => {
     linguisticProfileError.value = null;
 
     try {
-      const response = await api.get<LinguisticProfile>("/linguistic-profiles/me/");
+      const params: any = {};
+      if (isStaff.value) {
+        params.user = user.value?.id;
+      }
+
+      const response = await api.get<LinguisticProfile>("/linguistic-profiles/me/", { params });
       linguisticProfile.value = response.data;
-      console.log("Fetched linguistic profile:", linguisticProfile.value);
+      console.log("Fetched linguistic profile context:", linguisticProfile.value);
     } catch (err: any) {
       console.error("Failed to fetch linguistic profile:", err);
       
@@ -315,13 +323,17 @@ export const useUserStore = defineStore("user", () => {
     }
   }
 
-  // Fetch Current Workout
-  async function fetchCurrentWorkout(studentIdOverride?: number) {
+  // ==========================================
+  // 2. MODIFIED: fetchCurrentWorkout
+  // ==========================================
+  async function fetchCurrentWorkout(payload?: { user_id?: number }) {
     if (!hasAccessToken()) return;
 
-    const sid = studentIdOverride ?? studentId.value;
-    if (!sid) {
-      workoutError.value = "No student ID available";
+    let sid = studentId.value;
+
+    if (isStaff.value && !sid) {
+      console.log("Teacher sandbox mode: No linked student shadow record discovered. Skipping workout query.");
+      currentWorkout.value = null;
       return;
     }
 
@@ -331,13 +343,13 @@ export const useUserStore = defineStore("user", () => {
     try {
       const response = await api.get<Workout>(`/workouts/current/${sid}/`);
       currentWorkout.value = response.data;
-      console.log("Fetched current workout:", currentWorkout.value);
+      console.log("Fetched current sandbox workout:", currentWorkout.value);
     } catch (err: any) {
       console.error("Failed to fetch current workout:", err);
       
       if (err?.response?.status === 404) {
         currentWorkout.value = null;
-        workoutError.value = null; // Not an error, just no workout
+        workoutError.value = null; 
       } else {
         workoutError.value = "Failed to fetch current workout";
       }
@@ -346,13 +358,16 @@ export const useUserStore = defineStore("user", () => {
     }
   }
 
-  // NEW: Fetch Workout History
-  async function fetchWorkoutHistory(studentIdOverride?: number) {
+  // ==========================================
+  // 3. MODIFIED: fetchWorkoutHistory
+  // ==========================================
+  async function fetchWorkoutHistory(payload?: { user_id?: number }) {
     if (!hasAccessToken()) return;
 
-    const sid = studentIdOverride ?? studentId.value;
-    if (!sid) {
-      workoutError.value = "No student ID available";
+    let sid = studentId.value;
+
+    if (isStaff.value && !sid) {
+      workoutHistory.value = [];
       return;
     }
 
@@ -362,7 +377,7 @@ export const useUserStore = defineStore("user", () => {
     try {
       const response = await api.get<Workout[]>(`/workouts/by_student/${sid}/`);
       workoutHistory.value = response.data;
-      console.log("Fetched workout history:", workoutHistory.value);
+      console.log("Fetched workout history data layout:", workoutHistory.value);
     } catch (err: any) {
       console.error("Failed to fetch workout history:", err);
       workoutError.value = "Failed to fetch workout history";
@@ -371,7 +386,7 @@ export const useUserStore = defineStore("user", () => {
     }
   }
 
-  // NEW: Create Workout
+  // Create Workout
   async function createWorkout(workoutData: {
     student: number;
     focus_area: string;
@@ -384,8 +399,7 @@ export const useUserStore = defineStore("user", () => {
       const response = await api.post<Workout>('/workouts/', workoutData);
       console.log("Created workout:", response.data);
       
-      // Refresh current workout
-      await fetchCurrentWorkout(workoutData.student);
+      await fetchCurrentWorkout({ user_id: workoutData.student });
       
       return response.data;
     } catch (err: any) {
@@ -395,7 +409,7 @@ export const useUserStore = defineStore("user", () => {
     }
   }
 
-  // NEW: Update Workout Progress
+  // Update Workout Progress
   async function updateWorkoutProgress(workoutId: number, drills: WorkoutDrill[]) {
     if (!hasAccessToken()) return null;
 
@@ -406,7 +420,6 @@ export const useUserStore = defineStore("user", () => {
       );
       console.log("Updated workout progress:", response.data);
       
-      // Update local state
       if (currentWorkout.value?.id === workoutId) {
         currentWorkout.value = response.data;
       }
@@ -419,7 +432,7 @@ export const useUserStore = defineStore("user", () => {
     }
   }
 
-  // NEW: Update Workout Metadata
+  // Update Workout Metadata
   async function updateWorkout(
     workoutId: number,
     updates: { focus_area?: string; notes?: string; drills?: WorkoutDrill[] }
@@ -430,7 +443,6 @@ export const useUserStore = defineStore("user", () => {
       const response = await api.patch<Workout>(`/workouts/${workoutId}/`, updates);
       console.log("Updated workout:", response.data);
       
-      // Update local state
       if (currentWorkout.value?.id === workoutId) {
         currentWorkout.value = response.data;
       }
@@ -443,7 +455,7 @@ export const useUserStore = defineStore("user", () => {
     }
   }
 
-  // NEW: Archive Workout
+  // Archive Workout
   async function archiveWorkout(workoutId: number) {
     if (!hasAccessToken()) return false;
 
@@ -451,7 +463,6 @@ export const useUserStore = defineStore("user", () => {
       await api.post(`/workouts/${workoutId}/archive/`);
       console.log("Archived workout:", workoutId);
       
-      // Clear current workout if it was the one archived
       if (currentWorkout.value?.id === workoutId) {
         currentWorkout.value = null;
       }
@@ -480,40 +491,98 @@ export const useUserStore = defineStore("user", () => {
     enrollments.value = [];
     currentWorkout.value = null;
     workoutHistory.value = [];
+    linguisticProfile.value = null;
   }
 
+  // ==========================================
+  // 4. MODIFIED: fetchStudentData
+  // ==========================================
   async function fetchStudentData() {
+    if (!hasAccessToken()) return;
+    
     try {
       const res = await api.get<Student[]>("/students/");
-      console.log("fetchStudentData response:", res.data);
+      
+      // Handle Django REST Framework paginated blocks vs flat arrays cleanly
+      const rawArray = res.data && typeof res.data === 'object' && 'results' in res.data 
+        ? (res.data as any).results 
+        : res.data;
 
-      const first = res.data?.[0] ?? null;
-      student.value = first;
+      console.log("--- 🕵️‍♂️ DATABASE PROFILE INSPECTOR ---");
+      console.log("Your Logged-in User ID is:", user.value?.id);
+      console.log("Raw students array length from server:", rawArray?.length);
+      
+      if (Array.isArray(rawArray)) {
+        if (isStaff.value) {
+          const targetId = user.value?.id;
+          
+          // Use robust cross-type String evaluations to safely catch the admin row
+          const mySandboxProfile = rawArray.find(s => {
+            if (!s.user) return false;
+            if (typeof s.user === 'object') {
+              return String(s.user.id) === String(targetId);
+            }
+            return String(s.user) === String(targetId);
+          });
+          
+          if (mySandboxProfile) {
+            student.value = mySandboxProfile;
+            if (mySandboxProfile.linguistic_profile) {
+              linguisticProfile.value = mySandboxProfile.linguistic_profile;
+            }
+            console.log("✨ Success! Bound your Admin Shadow Student profile row:", student.value);
+          } else {
+            console.warn("Admin warning: You are logged in as staff, but no profile row matches your user.id.");
+            student.value = null;
+          }
+        } else {
+          // Regular student fallback strategy
+          student.value = rawArray[0] ?? null;
+          if (student.value?.linguistic_profile) {
+            linguisticProfile.value = student.value.linguistic_profile;
+          }
+        }
+      }
+      console.log("-------------------------------------");
 
-      console.log("fetchStudentData stored student:", student.value);
     } catch (err: any) {
-      console.error("Failed to fetch student data:", err?.response?.status, err);
+      console.error("Failed to fetch student data trace profiles:", err);
       student.value = null;
     }
   }
 
-  async function fetchEnrollments() {
-    if (!hasAccessToken()) return;
+  // ==========================================
+  // fetchEnrollments
+  // ==========================================
+// Inside stores/user.ts -> Simplify fetchEnrollments
+async function fetchEnrollments() {
+  if (!hasAccessToken()) return;
 
-    loadingEnrollments.value = true;
-    enrollmentError.value = null;
+  loadingEnrollments.value = true;
+  enrollmentError.value = null;
 
-    try {
-      const response = await api.get<StudentCourse[]>("/enrollment/");
-      enrollments.value = response.data;
-      console.log("Fetched enrollments:", response.data);
-    } catch (err: any) {
-      console.error("Failed to fetch enrollments:", err);
-      enrollmentError.value = "Failed to fetch enrollments";
-    } finally {
-      loadingEnrollments.value = false;
+  try {
+    // Pass parameters explicitly so the backend uses its SQL index tree trees
+    const params: any = {};
+    if (isStaff.value) {
+      params.student = studentId.value;
     }
+
+    const response = await api.get<StudentCourse[]>("/enrollment/", { params });
+    
+    const rawData = response.data && typeof response.data === 'object' && 'results' in response.data
+      ? (response.data as any).results
+      : response.data;
+
+    // ✨ CLEANED UP: Directly assign the server's clean payload 
+    enrollments.value = Array.isArray(rawData) ? rawData : [];
+  } catch (err: any) {
+    console.error("Failed to fetch enrollments:", err);
+    enrollmentError.value = "Failed to fetch enrollments";
+  } finally {
+    loadingEnrollments.value = false;
   }
+}
 
   const enrolledCourses = computed(() => enrollments.value.map((e) => e.course.slug));
 
@@ -555,22 +624,22 @@ export const useUserStore = defineStore("user", () => {
   async function fetchVerbUsageDashboardData() {
     if (!hasAccessToken()) return;
 
-    if (!studentId.value && !isStaff.value) {
-      verbUsageError.value = "Student ID required.";
-      return;
-    }
-
     loadingVerbUsage.value = true;
     verbUsageError.value = null;
 
     const url = isStaff.value ? "/verb-usage/" : `/${studentId.value}/verb-usage/`;
+    const params: any = {};
+    
+    if (isStaff.value) {
+      params.user = user.value?.id; 
+    }
 
     try {
       const res = await api.get<{
         verbs: VerbUsage[];
         tier_stats: TierStats[];
         tense_stats: TenseStats;
-      }>(url);
+      }>(url, { params });
 
       verbUsage.value = res.data.verbs;
       tierStats.value = res.data.tier_stats;
@@ -587,8 +656,16 @@ export const useUserStore = defineStore("user", () => {
   async function fetchSmartConjVerbPool(params: { verbSet: string; batchSize: number }) {
     if (!hasAccessToken()) return null;
 
-    const sid = studentId.value;
+    const queryParams: any = {
+      verb_set: params.verbSet,
+      batch_size: params.batchSize,
+    };
 
+    if (isStaff.value) {
+      queryParams.user = user.value?.id;
+    }
+
+    const sid = studentId.value;
     const candidates = [
       sid ? `/${sid}/verb-usage/` : null,
       "/verb-usage/",
@@ -598,10 +675,7 @@ export const useUserStore = defineStore("user", () => {
     for (const url of candidates) {
       try {
         const res = await api.get<{ smart_pool?: any }>(url, {
-          params: {
-            verb_set: params.verbSet,
-            batch_size: params.batchSize,
-          },
+          params: queryParams,
         });
 
         if (res.data?.smart_pool) return res.data.smart_pool;
@@ -625,15 +699,20 @@ export const useUserStore = defineStore("user", () => {
 
   async function fetchVocabDashboardData() {
     if (!hasAccessToken()) return;
-    if (!studentId.value) return;
+    
+    if (!studentId.value && !isStaff.value) return;
 
     loadingVocab.value = true;
     vocabError.value = null;
 
     try {
-      const response = await api.get<VocabItem[]>(`/vocab/?student=${studentId.value}`);
+      const queryParamKey = isStaff.value ? 'user' : 'student';
+      const queryParamValue = isStaff.value ? user.value?.id : studentId.value;
+
+      const response = await api.get<VocabItem[]>(`/vocab/?${queryParamKey}=${queryParamValue}`);
+      
       vocab.value = response.data;
-      console.log("Fetched vocab:", vocab.value);
+      console.log("Fetched sandbox preview vocab:", vocab.value);
     } catch (err: any) {
       console.error("Failed to fetch vocab:", err);
       vocabError.value = "Failed to fetch vocab";
@@ -744,7 +823,7 @@ export const useUserStore = defineStore("user", () => {
     assessmentStageLabel,
     fetchLinguisticProfile,
 
-    // NEW: workouts
+    // workouts
     currentWorkout,
     workoutHistory,
     loadingWorkout,

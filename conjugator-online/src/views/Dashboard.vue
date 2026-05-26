@@ -1,6 +1,5 @@
 <template>
   <v-container>
-    <!-- Tabs Navigation -->
     <v-select
       v-if="isMobile"
       v-model="activeTab"
@@ -25,11 +24,7 @@
       </v-tab>
     </v-tabs>
 
-    <!-- Tab Content -->
     <v-window v-model="activeTab" class="mt-5" :touch="false">
-      <v-window-item value="welcome">
-        <ToDoDash v-if="!userStore.isStaff" />
-      </v-window-item>
       <v-window-item value="grammar-feedback">
         <div v-if="loading" class="text-center my-5">
           <v-progress-circular indeterminate color="primary" />
@@ -40,7 +35,6 @@
         <div v-else>
           <AdminErrorDataTab v-if="userStore.isStaff" :key="'admin'"/>
           <ErrorsDataTab v-else :key="'student'" />
-
         </div>
       </v-window-item>
 
@@ -164,7 +158,7 @@
                               </v-chip>
                             </div>
                           </template>
-                          <div v-else class="text-caption text-medium-emphasis py-4">
+                          <div class="text-caption text-medium-emphasis py-4" v-else>
                             No historical data available
                           </div>
                         </div>
@@ -197,10 +191,8 @@
 
             <v-divider class="my-6" v-if="!xs"/>
 
-            <!-- spacer card-->
             <v-col v-if="$vuetify.display.xlAndUp" xl="1"></v-col>
 
-            <!-- Error explainer -->
             <v-col cols="12" lg="6" xl="4">
               <v-card
                 class="pa-4 d-flex flex-column justify-space-between"
@@ -235,7 +227,6 @@
                   No conjugation errors yet.
                 </v-card-text>
 
-
                 <v-card-actions class="d-flex justify-end">
                   <v-btn
                     color="brown-lighten-1"
@@ -250,11 +241,8 @@
               </v-card>
             </v-col>
             
-            <!-- spacer card -->
             <v-col v-if="$vuetify.display.xlAndUp" xl="2"></v-col>
             
-            
-            <!-- Use your mastered verbs -->
             <v-col cols="12" lg="6" xl="4">
               <v-card
                 class="pa-4 d-flex flex-column justify-space-between bg-teal-lighten-4"
@@ -266,7 +254,7 @@
                   Use your mastered irregs
                 </v-card-title>
                 <v-card-subtitle class="text-center text-wrap">
-                  You have mastered {{ userStore.tenseStats.mastered_verbs_ps.length }} irregular verbs in past simple form and {{ userStore.tenseStats.mastered_verbs_pp.length }} in present perfect form
+                  You have mastered {{ userStore.tenseStats?.mastered_verbs_ps?.length ?? 0 }} irregular verbs in past simple form and {{ userStore.tenseStats?.mastered_verbs_pp?.length ?? 0 }} in present perfect form
                 </v-card-subtitle>
 
                 <v-card-text v-if="currentMasteredVerb" class="flex-grow-1 d-flex flex-column justify-center">
@@ -299,6 +287,7 @@
               </v-card>
             </v-col>
 
+          </div>
 
           <v-divider class="my-6"/>
 
@@ -306,10 +295,8 @@
           <v-row dense>
           <v-col cols="12" lg="6">
             <v-sheet elevation="2" class="p-4 w-100 d-flex flex-column gap-4">
-              
               <h5 class="text-h6">Past simple</h5>
 
-              <!-- Basic 75 past simple -->
               <div>
                 <div class="font-weight-medium mb-2">Basic 75 irregs</div>
                 <v-progress-linear
@@ -340,7 +327,6 @@
                 <div class="text-caption text-muted">Mastered (written correctly 3x)</div>
               </div>
 
-              <!-- Master 110 past simple -->
               <div>
                 <div class="font-weight-medium mb-2">Master 110 irregs</div>
                 <v-progress-linear
@@ -370,7 +356,7 @@
                 </v-progress-linear>
                 <div class="text-caption text-muted">Mastered (written correctly 3x)</div>
               </div>
-              <!-- All Irregs past simple -->
+              
               <div>
                 <div class="font-weight-medium mb-2">All 130 irregs</div>
                 <v-progress-linear
@@ -401,8 +387,7 @@
                 <div class="text-caption text-muted">Mastered (written correctly 3x)</div>
                 
                 <div class="mt-8">  
-                <v-subheader class="mt-8 mb-4 font-weight-medium">My verbs — Past Simple</v-subheader>
-
+                  <v-subheader class="mt-8 mb-4 font-weight-medium">My verbs — Past Simple</v-subheader>
                   <v-select
                     v-model="selectedPsOption"
                     :items="pastSimpleOptionsWithCounts"
@@ -412,23 +397,18 @@
                     density="compact"
                     class="mt-4"
                   />
-
                   <div class="text-caption mt-2">
                     {{ displayedPsVerbs.join(', ') || psFallbackMessage }}
                   </div>
                 </div>
               </div> 
-
             </v-sheet>
           </v-col>
-
-
 
           <v-col cols="12" lg="6">
             <v-sheet elevation="2" class="p-4 w-100 d-flex flex-column gap-4">
               <h5 class="text-h6">Present perfect</h5>
               
-              <!-- Basic 75 present perfect -->
               <div>
                 <div class="font-weight-medium mb-2">Basic 75 irregs</div>
                 <v-progress-linear
@@ -459,7 +439,6 @@
                 <div class="text-caption text-muted">Mastered (written correctly 3x)</div>
               </div>
               
-              <!-- Master 110 present perfect -->
               <div>
                 <div class="font-weight-medium mb-2">Master 110 irregs</div>
                 <v-progress-linear
@@ -489,8 +468,6 @@
                 </v-progress-linear>
                 <div class="text-caption text-muted">Mastered (written correctly 3x)</div>
               </div>
-
-              <!-- All Irregs present perfect -->
 
               <div>
                 <div class="font-weight-medium mb-2">All 130 irregs</div>
@@ -524,7 +501,6 @@
               
               <div class="mt-3">
                 <v-subheader class="mt-8 mb-4 font-weight-medium">My verbs — Present Perfect</v-subheader>
-
                 <v-select
                   v-model="selectedPpOption"
                   :items="presentPerfectOptionsWithCounts"
@@ -534,146 +510,148 @@
                   density="compact"
                   class="mt-4"
                 />
-
                 <div class="text-caption mt-2">
                   {{ displayedPpVerbs.join(', ') || ppFallbackMessage }}
                 </div>
               </div>
-
             </v-sheet>
           </v-col>
-          
         </v-row>
           
-          <v-divider />
+        <v-divider />
 
-
-          <v-card
-            v-if="!xs"  
-            class="pa-4 mb-6"
-            elevation="2"
-            style="max-height: 1000px; overflow-y: scroll;"
-            :style="{
-              minWidth: xs ? '250px' : '95%',
-              maxWidth: xs ? '500px' : '99%',
-              marginLeft: xs ? '5px' : '16px',
-              marginRight: xs ? '5px' : '16px',
-              marginTop: '20px',
-            }"
-          >
-            <div class="text-h5 mt-2">
-              Game details ({{ sessions.length }} game{{ sessions.length !== 1 ? 's' : '' }} played)
-            </div>
-            <div v-for="session in sessions" :key="session.session_id" class="mt-6">
-              <v-expansion-panels>
-                <v-expansion-panel>
-                  <v-expansion-panel-title>
-                    <span class="font-weight-medium">
-                      {{ session.correct_count }} correct out of {{ session.total_rounds }} 
-                    </span>
-                    — {{ new Date(session.started_at).toLocaleString() }} — {{ session.tenses.join(', ').slice(0, 50) }}
-                  </v-expansion-panel-title>
-                  <v-expansion-panel-text>
-                    <div v-if="session.rounds?.length">
-                      <v-table>
-                        <thead>
-                          <tr>
-                            <th>Prompt #</th>
-                            <th>Verb</th>
-                            <th>Tense</th>
-                            <th>Sentence Type</th>
-                            <th>User Answer</th>
-                            <th>Acceptable Answers</th>
-                            <th style="width: 20px;">Correct?</th>
-                            <th style="width: 20px;">Tutor</th>
-                            <th>Typo?</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          <tr
-                            v-for="round in session.rounds"
-                            :key="`${session.session_id}-${round.prompt_number}`"
-                          >
-                            <td>{{ round.prompt_number }}</td>
-                            <td>{{ round.verb }}</td>
-                            <td>{{ round.tense }}</td>
-                            <td>{{ round.sentence_type }}</td>
-                            <td>{{ round.user_answer }}</td>
-                                                        <td>{{ round.acceptable_answers?.join(' / ') }}</td>
-                            <td>
-                              <v-icon
-                                :color="round.typo ? 'grey' : round.is_correct ? 'green' : 'red'"
+        <v-card
+          v-if="!xs"  
+          class="pa-4 mb-6"
+          elevation="2"
+          style="max-height: 1000px; overflow-y: scroll;"
+          :style="{
+            minWidth: xs ? '250px' : '95%',
+            maxWidth: xs ? '500px' : '99%',
+            marginLeft: xs ? '5px' : '16px',
+            marginRight: xs ? '5px' : '16px',
+            marginTop: '20px',
+          }"
+        >
+          <div class="text-h5 mt-2">
+            Game details ({{ sessions.length }} game{{ sessions.length !== 1 ? 's' : '' }} played)
+          </div>
+          <div v-for="session in sessions" :key="session.session_id" class="mt-6">
+            <v-expansion-panels>
+              <v-expansion-panel>
+                <v-expansion-panel-title>
+                  <span class="font-weight-medium">
+                    {{ session.correct_count }} correct out of {{ session.total_rounds }} 
+                  </span>
+                  &nbsp;— {{ new Date(session.started_at).toLocaleString() }} — {{ session.tenses.join(', ').slice(0, 50) }}
+                </v-expansion-panel-title>
+                <v-expansion-panel-text>
+                  <div v-if="session.rounds?.length">
+                    <v-table>
+                      <thead>
+                        <tr>
+                          <th>Prompt #</th>
+                          <th>Verb</th>
+                          <th>Tense</th>
+                          <th>Sentence Type</th>
+                          <th>User Answer</th>
+                          <th>Acceptable Answers</th>
+                          <th style="width: 20px;">Correct?</th>
+                          <th style="width: 20px;">Tutor</th>
+                          <th>Typo State?</th>
+                          <th v-if="userStore.isStaff">Moderation</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr
+                          v-for="round in session.rounds"
+                          :key="`${session.session_id}-${round.prompt_number}`"
+                        >
+                          <td>{{ round.prompt_number }}</td>
+                          <td>{{ round.verb }}</td>
+                          <td>{{ round.tense }}</td>
+                          <td>{{ round.sentence_type }}</td>
+                          <td>{{ round.user_answer }}</td>
+                          <td>{{ round.acceptable_answers?.join(' / ') }}</td>
+                          <td>
+                            <v-icon
+                              :color="round.typo ? 'grey' : round.is_correct ? 'green' : 'red'"
+                            >
+                              {{
+                                round.typo_requested
+                                  ? 'mdi-help-circle-outline' 
+                                  : round.is_correct
+                                  ? 'mdi-check-circle'
+                                  : 'mdi-close-circle'
+                              }}
+                            </v-icon>
+                          </td>
+                          <td style="width: 44px;">
+                            <template v-if="round.is_correct === false && round.typo !== true">
+                              <v-tooltip text="Why is this wrong?" location="top">
+                                <template #activator="{ props }">
+                                  <v-btn
+                                    v-bind="props"
+                                    icon
+                                    variant="text"
+                                    size="x-small"
+                                    @click.stop="openConjRoundTutor(session, round)"
+                                    aria-label="Why is this wrong?"
+                                  >
+                                    <v-icon size="18">mdi-robot-outline</v-icon>
+                                  </v-btn>
+                                </template>
+                              </v-tooltip>
+                            </template>
+                          </td>
+                          <td>
+                            <template v-if="round.typo === true">
+                              <span class="badge bg-success">Typo approved</span>
+                            </template>
+                            <template v-else-if="round.typo_accepted === false">
+                              <span class="badge bg-danger text-white">Typo denied</span>
+                            </template>
+                            <template v-else-if="round.typo_requested === true">
+                              <span class="badge bg-warning text-dark">Pending approval</span>
+                            </template>
+                            <template v-else-if="!round.is_correct && !userStore.isStaff">
+                              <v-btn
+                                size="small"
+                                color="primary"
+                                :disabled="typoRequests.has(round.id)"
+                                @click="requestTypo(round)"
                               >
-                                {{
-                                  round.typo_requested
-                                    ? 'mdi-help-circle-outline' 
-                                    : round.is_correct
-                                    ? 'mdi-check-circle'
-                                    : 'mdi-close-circle'
-                                }}
-                              </v-icon>
-                            </td>
-                            <td style="width: 44px;">
-                              <template v-if="round.is_correct === false && round.typo !== true">
-                                <v-tooltip text="Why is this wrong?" location="top">
-                                  <template #activator="{ props }">
-                                    <v-btn
-                                      v-bind="props"
-                                      icon
-                                      variant="text"
-                                      size="x-small"
-                                      @click.stop="openConjRoundTutor(session, round)"
-                                      aria-label="Why is this wrong?"
-                                    >
-                                      <v-icon size="18">mdi-robot-outline</v-icon>
-                                    </v-btn>
-                                  </template>
-                                </v-tooltip>
-                              </template>
-                            </td>
-                            <td>{{ round.typo }}</td>
-                            <td>
-                              <!-- 1. Approved -->
-                              <template v-if="round.typo === true">
-                                <span class="badge bg-success">Typo approved</span>
-                              </template>
-
-                              <!-- 2. Denied (show whenever typo_accepted is explicitly false) -->
-                              <template v-else-if="round.typo_accepted === false">
-                                <span class="badge bg-warning">Typo denied</span>
-                              </template>
-
-                              <!-- 3. Pending -->
-                              <template v-else-if="round.typo_requested === true">
-                                <span class="badge bg-warning text-dark">Pending approval</span>
-                              </template>
-
-                              <!-- 4. Request button (only when not correct and no other state) -->
-                              <template v-else-if="!round.is_correct">
-                                <v-btn
-                                  size="small"
-                                  color="primary"
-                                  :disabled="typoRequests.has(round.id)"
-                                  @click="requestTypo(round)"
-                                >
-                                  This was a typo
-                                </v-btn>
-                              </template>
-                            </td>
-
-                          </tr>
-                        </tbody>
-                      </v-table>
-                    </div>
-                    <div v-else>
-                      <p class="text-muted">No rounds data available for this session.</p>
-                    </div>
-                  </v-expansion-panel-text>
-                </v-expansion-panel>
-              </v-expansion-panels>
-            </div>
-          </v-card>
-        </div>
+                                This was a typo
+                              </v-btn>
+                            </template>
+                            <template v-else>
+                              <span class="text-caption text-grey">—</span>
+                            </template>
+                          </td>
+                          
+                          <td v-if="userStore.isStaff">
+                            <div v-if="round.typo_requested && round.typo_accepted === null" class="d-flex gap-1">
+                              <v-btn size="x-small" color="success" class="me-1" @click="acceptTypo(round)">
+                                Approve
+                              </v-btn>
+                              <v-btn size="x-small" color="error" @click="denyTypo(round)">
+                                Deny
+                              </v-btn>
+                            </div>
+                            <span v-else class="text-caption text-grey">Processed</span>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </v-table>
+                  </div>
+                  <div v-else>
+                    <p class="text-muted">No rounds data available for this session.</p>
+                  </div>
+                </v-expansion-panel-text>
+              </v-expansion-panel>
+            </v-expansion-panels>
+          </div>
+        </v-card>
       </v-container>
       </v-window-item>
       <v-window-item value="other-games">
@@ -702,22 +680,18 @@
             <span class="font-weight-medium">The prompt is:</span>
             verb={{ ctx?.verb }} | person={{ ctx?.person }} | tense={{ ctx?.tense }} | sentence type={{ ctx?.sentence_type }}
           </div>
-
           <div class="mt-1">
             <span class="font-weight-medium">Your answer:</span> {{ ctx?.student_answer ?? "—" }}
           </div>
-
           <div class="mt-1">
             <span class="font-weight-medium">Target answer:</span>
             {{ (ctx?.acceptable_answers ?? []).join(" / ") || "—" }}
           </div>
         </div>
-
         <v-divider class="my-2" />
       </template>
     </AiTutorChatDialog>
 </template>
-
 
 <script lang="ts">
 import { defineComponent, ref, onMounted, computed, watch, nextTick } from "vue";
@@ -733,12 +707,10 @@ import AdminErrorDataTab from "@/components/AdminErrorDataTab.vue";
 import { useRouter, useRoute } from 'vue-router';
 import VocabDataTab from "@/components/VocabDataTab.vue";
 import GoalsDataTab from "@/components/GoalsDataTab.vue";
-import ToDoDash from "@/components/ToDoDash.vue";
 import Gauge from "@/components/Gauge.vue"
 import { useNotificationStore } from '@/stores/notifications';
 import AiTutorChatDialog from "@/components/AiTutorChatDialog.vue";
 
-// ---------------- Types ----------------
 interface Round {
   id: number;
   is_correct: boolean;
@@ -769,10 +741,9 @@ interface GameSession {
   rounds: Round[];
 }
 
-// ---------------- Component ----------------
 export default defineComponent({
-  name: "Dashboard",
-  components: { TopNavBar, PieChart, BarChart, ErrorsDataTab, AdminErrorDataTab, VocabDataTab, GoalsDataTab, OtherGamesDash, ToDoDash, Gauge, AiTutorChatDialog },
+  name: "student-data",
+  components: { TopNavBar, PieChart, BarChart, ErrorsDataTab, AdminErrorDataTab, VocabDataTab, GoalsDataTab, OtherGamesDash, Gauge, AiTutorChatDialog },
   setup() {
     const router = useRouter();
     const route = useRoute();
@@ -814,7 +785,6 @@ export default defineComponent({
       mastered_verbs_ps: string[];
       mastered_verbs_pp: string[];
     }
-    const tenseStats = ref<TenseStats | null>(null);
 
     const typoRequests = ref<Set<number>>(new Set());
     const snackbar = ref({
@@ -831,7 +801,6 @@ export default defineComponent({
 
     const userStore = useUserStore();
       
-    // ---------- Dropdown option lists ----------
     const pastSimpleOptions = [
       { key: 'Discovered_verbs_ps', label: 'Discovered verbs' },
       { key: 'Mastered_verbs_ps', label: 'Mastered verbs' },
@@ -854,11 +823,9 @@ export default defineComponent({
       { key: 'All Irregular_unmastered_verbs_pp', label: 'All Irregular – Unmastered' },
     ]
 
-    // default selections
     const selectedPsOption = ref(pastSimpleOptions[0].key)
     const selectedPpOption = ref(presentPerfectOptions[0].key)
 
-    // ---------- Types ----------
     type VerbField =
       | 'undiscovered_verbs_ps'
       | 'unmastered_verbs_ps'
@@ -869,14 +836,6 @@ export default defineComponent({
       | 'discovered_verbs_pp'
       | 'mastered_verbs_pp'
 
-    interface TenseStats {
-      discovered_verbs_ps: string[]
-      discovered_verbs_pp: string[]
-      mastered_verbs_ps: string[]
-      mastered_verbs_pp: string[]
-    }
-
-    // ---------- Helpers ----------
     function parseKey(key: string): { tierName: string | null; field: VerbField | null } {
       if (key.startsWith('Discovered_') || key.startsWith('Mastered_')) {
         const field = key.charAt(0).toLowerCase() + key.slice(1) as VerbField
@@ -893,7 +852,6 @@ export default defineComponent({
       const { tierName, field } = parseKey(key)
       if (!field) return []
 
-      // global discovered/mastered lists
       if (!tierName && (field.startsWith('discovered') || field.startsWith('mastered'))) {
         const tenseStats = userStore.tenseStats as TenseStats | undefined
         return tenseStats && Array.isArray((tenseStats as any)[field])
@@ -901,49 +859,39 @@ export default defineComponent({
           : []
       }
 
-      // per-tier undiscovered/unmastered
       const tier = (userStore.tierStats || []).find((t: any) => t.tier_name === tierName)
       const maybe = tier ? (tier as any)[field] : []
       return Array.isArray(maybe) ? [...maybe] : []
     }
 
-    // ---------- Tutor ----------
+    async function openConjRoundTutor(session: GameSession, round: Round) {
+      tutorOpen.value = false;
+      await nextTick();
 
-      async function openConjRoundTutor(session: GameSession, round: Round) {
-        // same pattern as results scene: force a clean open
-        tutorOpen.value = false;
-        await nextTick();
+      tutorContext.value = {
+        game: "conjugation",
+        session_id: session.session_id,
+        started_at: session.started_at,
+        prompt_number: round.prompt_number,
+        verb: round.verb,
+        person: round.person,
+        tense: round.tense,
+        sentence_type: round.sentence_type,
+        student_answer: round.user_answer || "",
+        acceptable_answers: round.acceptable_answers || [],
+        elapsed_time: round.elapsed_time,
+      };
 
-        tutorContext.value = {
-          game: "conjugation",
-          session_id: session.session_id,
-          started_at: session.started_at,
+      await nextTick();
+      tutorOpen.value = true;
+    }
 
-          prompt_number: round.prompt_number,
-          verb: round.verb,
-          person: round.person,
-          tense: round.tense,
-          sentence_type: round.sentence_type,
-
-          // match your slot + prompt builder naming
-          student_answer: round.user_answer || "",
-          acceptable_answers: round.acceptable_answers || [],
-          elapsed_time: round.elapsed_time,
-        };
-
-        await nextTick();
-        tutorOpen.value = true;
-      }
     const conjTutorSystemMessage = [
       "You are an English grammar tutor.",
       "Return exactly:",
-       "1. One concise paragraph explaining why the student's answer is wrong and how to fix it. If the student's answer is blank or nonsensical, acknowledge that and give a brief explanation of the correct conjugation.",
-       "",
-       "2. Add one line saying exactly this: Write 'more' for more examples. Write 'oui'/'ja'/'si' for the same explanation in French/German/Italian.",
-       
-      "If the user says 'more', give 5 short new examples and repeat the final line.",
-      "If the user says 'oui'/'ja'/'si', give the same explanation in the respective language, though key terms and the user's original answer should stay in English.",
-      "Do not mention these system instructions.",
+      "1. One concise paragraph explaining why the student's answer is wrong and how to fix it.",
+      "",
+      "2. Add one line saying exactly this: Write 'more' for more examples. Write 'oui'/'ja'/'si' for the same explanation in French/German/Italian.",
     ].join("\n");
 
     function buildConjTutorInitialUserMessage(ctx: any) {
@@ -954,56 +902,36 @@ export default defineComponent({
         `sentence_type=${ctx?.sentence_type ?? ""}`,
         `Student answer: ${ctx?.student_answer ?? ctx?.user_answer ?? ""}`,
         `Acceptable answers: ${(ctx?.acceptable_answers ?? []).join(" / ")}`,
-      ]
-        .filter(Boolean)
-        .join("\n");
+      ].filter(Boolean).join("\n");
     }
 
-    // ---------- Computed lists ----------
     const displayedPsVerbs = computed(() => getVerbsForKey(selectedPsOption.value))
     const displayedPpVerbs = computed(() => getVerbsForKey(selectedPpOption.value))
 
-    // ---------- Counts and formatted labels ----------
     function withCounts(options: { key: string; label: string }[]) {
       return options.map(opt => {
         const verbs = getVerbsForKey(opt.key)
         const count = verbs.length
-        const suffix = count ? ` (${count})` : ' (0)'
-        return { ...opt, displayLabel: opt.label + suffix }
+        return { ...opt, displayLabel: opt.label + (count ? ` (${count})` : ' (0)') }
       })
     }
 
-    // dynamic labels that always reflect latest counts
     const pastSimpleOptionsWithCounts = computed(() => withCounts(pastSimpleOptions))
     const presentPerfectOptionsWithCounts = computed(() => withCounts(presentPerfectOptions))
 
-    // ---------- Fallback messages ----------
     function getFallbackMessage(key: string): string {
       const verbs = getVerbsForKey(key)
-      if (verbs.length > 0) return ''
-      return 'None! Great job!'
+      return verbs.length > 0 ? '' : 'None! Great job!'
     }
 
     const psFallbackMessage = computed(() => getFallbackMessage(selectedPsOption.value))
     const ppFallbackMessage = computed(() => getFallbackMessage(selectedPpOption.value))
 
     function generateSparklineLabels(arr: number[]): string[] {
-      if (arr.length <= 8) {
-        return arr.map(val => `${val}%`);
-      }
-
+      if (arr.length <= 8) return arr.map(val => `${val}%`);
       const lastIndex = arr.length - 1;
-      const showIndices = [
-        0,
-        Math.floor(arr.length * 0.25),
-        Math.floor(arr.length * 0.5),
-        Math.floor(arr.length * 0.75),
-        lastIndex,
-      ];
-
-      return arr.map((val, i) =>
-        showIndices.includes(i) ? `${val}%` : "\u00A0" // non-breaking space
-      );
+      const showIndices = [0, Math.floor(arr.length * 0.25), Math.floor(arr.length * 0.5), Math.floor(arr.length * 0.75), lastIndex];
+      return arr.map((val, i) => showIndices.includes(i) ? `${val}%` : "\u00A0");
     }
 
     function pickRandomError() {
@@ -1019,37 +947,30 @@ export default defineComponent({
       pickRandomError();
     }
 
+    type LabeledVerb = { verb: string; tense: string };
+
     function nextMasteredVerb() {
-      const verbsPs = userStore.tenseStats?.mastered_verbs_ps ?? [];
-      const verbsPp = userStore.tenseStats?.mastered_verbs_pp ?? [];
+      const verbsPs: string[] = userStore.tenseStats?.mastered_verbs_ps ?? [];
+      const verbsPp: string[] = userStore.tenseStats?.mastered_verbs_pp ?? [];
 
-      // Attach tense labels to each verb
-      const labeledPs = verbsPs.map(verb => ({ verb, tense: "Past Simple" }));
-      const labeledPp = verbsPp.map(verb => ({ verb, tense: "Present Perfect" }));
-
+      const labeledPs: LabeledVerb[] = verbsPs.map(verb => ({ verb, tense: "Past Simple" }));
+      const labeledPp: LabeledVerb[] = verbsPp.map(verb => ({ verb, tense: "Present Perfect" }));
       const allLabeledVerbs = [...labeledPs, ...labeledPp];
 
       if (!allLabeledVerbs.length) {
         currentMasteredVerb.value = null;
         return;
       }
-
       const randomIndex = Math.floor(Math.random() * allLabeledVerbs.length);
       currentMasteredVerb.value = allLabeledVerbs[randomIndex];
     }
 
-
-    // ---------------- Stats ----------------
     const healthTier = computed(() => {
-      const score = userStore.healthScore ?? 0;;
-
+      const score = userStore.healthScore ?? 0;
       for (const [tier, [min, max]] of Object.entries(HEALTH_TIERS)) {
-        if (score >= min && score <= max) {
-          return tier;
-        }
+        if (score >= min && score <= max) return tier;
       }
-
-      return "Unknown"; // fallback if score is outside defined ranges
+      return "Unknown";
     });
     
     const avgTimePerRound = computed(() => {
@@ -1062,11 +983,9 @@ export default defineComponent({
       { label: "Incorrect", value: totalPercentIncorrect.value },
     ]);
 
-
     const totalRoundsPlayed = computed(() =>
       sessions.value.reduce((sum, session) => {
-        const validRounds = session.rounds.filter((round: Round) => !round.typo);
-        return sum + validRounds.length;
+        return sum + session.rounds.filter((round: Round) => !round.typo).length;
       }, 0)
     );
 
@@ -1077,38 +996,29 @@ export default defineComponent({
     );
 
     const totalCorrect = computed(() =>
-      sessions.value.reduce(
-        (sum, session) =>
-          sum + session.rounds.filter((round: Round) => round.is_correct && !round.typo).length,
-        0
+      sessions.value.reduce((sum, session) =>
+        sum + session.rounds.filter((round: Round) => round.is_correct && !round.typo).length, 0
       )
     );
 
     const totalIncorrect = computed(() =>
-      sessions.value.reduce(
-        (sum, session) =>
-          sum + session.rounds.filter((round: Round) => !round.is_correct && !round.typo).length,
-        0
+      sessions.value.reduce((sum, session) =>
+        sum + session.rounds.filter((round: Round) => !round.is_correct && !round.typo).length, 0
       )
     );
 
     const totalPercentCorrect = computed(() => {
-      return totalRoundsPlayed.value > 0
-        ? Number(((totalCorrect.value / totalRoundsPlayed.value) * 100).toFixed(0))
-        : 0;
+      return totalRoundsPlayed.value > 0 ? Number(((totalCorrect.value / totalRoundsPlayed.value) * 100).toFixed(0)) : 0;
     });
 
     const totalPercentIncorrect = computed(() => {
-      return totalRoundsPlayed.value > 0
-        ? Number(((totalIncorrect.value / totalRoundsPlayed.value) * 100).toFixed(0))
-        : 0;
+      return totalRoundsPlayed.value > 0 ? Number(((totalIncorrect.value / totalRoundsPlayed.value) * 100).toFixed(0)) : 0;
     });
 
-        const incorrectAnswersData = computed(() => {
-      const rounds = sessions.value.flatMap(session => session.rounds || []);
-
-      return rounds
-        .filter(round => !round.is_correct) // only keep incorrect ones
+    const incorrectAnswersData = computed(() => {
+      const rList = sessions.value.flatMap(session => session.rounds || []);
+      return rList
+        .filter(round => !round.is_correct)
         .map(round => ({
           user_answer: round.user_answer || "",
           verb: round.verb || "unknown",
@@ -1121,67 +1031,60 @@ export default defineComponent({
         }));
     });
 
-
-    const activeTab = ref("welcome");
+    const activeTab = ref("grammar-feedback");
     const tabItems = [
-      { value: "welcome", label: "Welcome" },  // Welcome
-      { value: "grammar-feedback", label: "Errors" },   // Error feedback
+      { value: "grammar-feedback", label: "Errors" },
       { value: "vocabulary", label: "Vocab" },
       { value: "conjugation-game", label: "Conjugator" },
       { value: "other-games", label: "Other Games"},
-      { value: "goals", label: "Trophies" }  // Trophy room
-
+      { value: "goals", label: "Trophies" }
     ];
 
     const { xs, smAndDown } = useDisplay();
     const isMobile = computed(() => smAndDown.value);
 
-    const BarchartColorPalette = [
-      "#4CAF50", "#2196F3", "#FFC107", "#E91E63", "#9C27B0", "#FF5722",
-    ];
-    const sparklineGradients = [
-      ['#222'], ['#42b3f4'], ['green', 'yellow', 'red'],
-      ['purple', 'violet'], ['#00c6ff', '#F0F', '#FF0'],
-      ['#f72047', '#ffd200', '#1feaea'],
-    ];
+    const BarchartColorPalette = ["#4CAF50", "#2196F3", "#FFC107", "#E91E63", "#9C27B0", "#FF5722"];
+    const sparklineGradients = [['#222'], ['#42b3f4'], ['green', 'yellow', 'red']];
 
-    // ---------------- API Calls ----------------
+    // ==========================================
+    // 🎯 MODIFIED: fetchConjGameSessionsDashboardData
+    // ==========================================
     const fetchConjGameSessionsDashboardData = async (): Promise<void> => {
       loading.value = true;
       conjGameError.value = null;
       try {
-        const sessionsRes = await api.get<GameSession[]>("/conj-game-sessions/");
+        const params: any = {};
+        
+        // ✨ Injects target query parameter constraints into the API cycle securely!
+        if (userStore.isStaff) {
+          params.student = userStore.studentId;
+        }
+
+        const sessionsRes = await api.get<GameSession[]>("/conj-game-sessions/", { params });
         sessions.value = sessionsRes.data;
       } catch (err: any) {
         console.error("Conj game sessions fetch failed:", err);
-        conjGameError.value = conjGameError.value
-          ? `${conjGameError.value}; Failed to fetch sessions`
-          : "Failed to fetch sessions";
+        conjGameError.value = "Failed to fetch sessions";
       }
       loading.value = false;
     };
 
     const sessionAccuracyTrend = computed(() => {
       return sessions.value
-        .slice() // shallow copy so we don’t mutate original
+        .slice()
         .reverse()
         .map(session => {
           const total = session.total_rounds ?? 0;
-          return total
-            ? Number(((session.correct_count / total) * 100).toFixed(0))
-            : null;
+          return total ? Number(((session.correct_count / total) * 100).toFixed(0)) : null;
         })
         .filter((x): x is number => x !== null);
     });
 
-    // ---------------- Typo Actions ----------------
     const requestTypo = async (round: Round): Promise<void> => {
       if (typoRequests.value.has(round.id)) return;
       typoRequests.value.add(round.id);
       try {
-        await api.patch(`/conj-game-rounds/${round.id}/request-typo/`, {
-          typo_requested: true,
-        });
+        await api.patch(`/conj-game-rounds/${round.id}/request-typo/`, { typo_requested: true });
         round.typo_requested = true;
         round.typo_accepted = null;
         showSnackbar("Typo request submitted!");
@@ -1219,14 +1122,11 @@ export default defineComponent({
       }
     };
 
-    // ---------------- Derived Stats ----------------
-    const sessionAccuracyTrendArray = computed(() => sessionAccuracyTrend.value);
-
     const tenseAccuracyData = computed(() => {
-      const rounds = sessions.value.flatMap(session => session.rounds || []);
+      const rList = sessions.value.flatMap(session => session.rounds ?? []);
       const tenseGroups: Record<string, { correct: number; total: number }> = {};
-      for (const round of rounds) {
-        const tense = round.tense || "unknown";
+      for (const round of rList) {
+        const tense = round.tense ?? "unknown";
         if (!tenseGroups[tense]) tenseGroups[tense] = { correct: 0, total: 0 };
         tenseGroups[tense].total += 1;
         if (round.is_correct) tenseGroups[tense].correct += 1;
@@ -1241,10 +1141,10 @@ export default defineComponent({
     });
 
     const sentenceTypeAccuracyData = computed(() => {
-      const rounds = sessions.value.flatMap(session => session.rounds || []);
+      const rList = sessions.value.flatMap(session => session.rounds ?? []);
       const typeGroups: Record<string, { correct: number; total: number }> = {};
-      for (const round of rounds) {
-        const type = round.sentence_type || "unknown";
+      for (const round of rList) {
+        const type = round.sentence_type ?? "unknown";
         if (!typeGroups[type]) typeGroups[type] = { correct: 0, total: 0 };
         typeGroups[type].total += 1;
         if (round.is_correct) typeGroups[type].correct += 1;
@@ -1258,8 +1158,6 @@ export default defineComponent({
       }));
     });
 
-
-    // ---------------- Lifecycle ----------------
     onMounted(async () => {
       await userStore.fetchUserData();
       await fetchConjGameSessionsDashboardData();
@@ -1276,7 +1174,6 @@ export default defineComponent({
       activeTab.value = isValidTab ? tabFromRoute : tabItems[0].value;
     }
 
-    // ---------------- Expose ----------------
     return {
       sessions,
       loading,
@@ -1288,7 +1185,7 @@ export default defineComponent({
       userStore,
       TopNavBar,
       PieChart,
-      sessionAccuracyTrend: sessionAccuracyTrendArray,
+      sessionAccuracyTrend,
       totalCorrect,
       totalIncorrect,
       totalRightWrongChartData,
@@ -1303,7 +1200,6 @@ export default defineComponent({
       xs,
       verbUsage,
       tierStats,
-      tenseStats,
       typoRequests,
       snackbar,
       requestTypo,
@@ -1334,7 +1230,6 @@ export default defineComponent({
   },
 });
 </script>
-
 
 <style scoped>
 .chart-card {

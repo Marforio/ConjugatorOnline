@@ -57,7 +57,7 @@
 
           <router-link
             :to="{
-              path: '/dashboard',
+              path: '/my-data',
               query: { tab: 'other-games', game: 'Uses Of Auxiliaries' },
             }"
           >

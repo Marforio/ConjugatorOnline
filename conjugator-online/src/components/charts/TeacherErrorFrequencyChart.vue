@@ -67,7 +67,7 @@
           <!-- Dynamic contextual examples layout section -->
           <v-list-item class="px-0 text-body-2 mb-2">
             <v-icon color="warning" class="mr-2" size="20">mdi-text-box-search-outline</v-icon>
-            <strong>Collected Student Evidence Samples:</strong>
+            <strong>Collected Evidence:</strong>
             <div class="bg-grey-lighten-4 pa-3 rounded-lg mt-2 text-italic color-dark-neutral style-wrap-text">
               {{ selectedEvidence.evidence }}
             </div>
@@ -75,7 +75,7 @@
 
           <v-list-item class="px-0 text-body-2">
             <v-icon color="success" class="mr-2" size="20">mdi-lightbulb-on-outline</v-icon>
-            <strong>Correction Recommendation Strategy:</strong>
+            <strong>Correction Recommendation:</strong>
             <div class="mt-1">
               {{ selectedEvidence.recommendation }}. For instance, <span class="font-weight-medium">{{ selectedEvidence.examples }}</span>.
             </div>

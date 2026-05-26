@@ -1,47 +1,58 @@
 <template>
-  <v-container fluid class="trophy-room">
-    <!-- 2x2 grid (Vuetify will wrap cols automatically) -->
+  <v-container fluid class="trophy-room pa-4 pa-sm-6">
+    <!-- 2x2 grid -->
     <v-row class="align-stretch">
+      
       <!-- 1) Conjugator achievements -->
       <v-col cols="12" lg="6" class="d-flex">
-        <v-card elevation="2" class="pa-4 mb-6 card-fixed trophy-card">
-          <v-card-title class="text-h5">
-            <v-icon class="me-3">mdi-controller</v-icon>Conjugator achievements
+        <v-card elevation="3" class="pa-4 mb-6 card-fixed trophy-card border-gold flex-column">
+          <v-card-title class="text-h5 d-flex align-center font-weight-bold pb-3">
+            <v-icon size="28" class="me-3 color-gold-icon">mdi-controller</v-icon>
+            Conjugator Achievements
           </v-card-title>
+          <v-divider class="mb-4 alpha-divider" />
 
-          <v-card-text>
-            <v-progress-linear v-if="loading" indeterminate color="primary" class="mb-4" />
-            <v-alert v-else-if="error" type="error" class="mb-4">{{ error }}</v-alert>
+          <v-card-text class="flex-grow-1 overflow-y-auto">
+            <v-progress-linear v-if="loading" indeterminate color="amber-darken-2" class="mb-4 rounded" height="6" />
+            <v-alert v-else-if="error" type="error" variant="tonal" class="mb-4" closable>{{ error }}</v-alert>
 
             <template v-else>
-              <v-list v-if="conjugatorAchievements.length">
+              <v-list v-if="conjugatorAchievements.length" class="bg-transparent pa-0">
                 <template v-for="(achievement, index) in conjugatorAchievements" :key="achievement.id">
-                  <v-list-item class="py-2">
-                    <v-list-item-content>
-                      <v-list-item-title class="font-weight-bold text-wrap">
+                  <v-hover v-slot="{ isHovering, props }">
+                    <v-list-item 
+                      v-bind="props"
+                      class="py-3 px-4 my-1 rounded-lg transition-all"
+                      :class="{ 'bg-amber-lighten-5 elevation-1': isHovering }"
+                    >
+                      <template #prepend>
+                        <v-avatar color="amber-lighten-4" class="me-3">
+                          <v-icon :icon="achievementIcons[achievement.criteria_key] || 'mdi-star'" color="amber-darken-3" />
+                        </v-avatar>
+                      </template>
+
+                      <v-list-item-title class="font-weight-bold text-wrap text-subtitle-1 text-grey-darken-4">
                         {{ achievement.name }}
-                        <v-icon
-                          class="ms-2"
-                          :icon="achievementIcons[achievement.criteria_key] || 'mdi-star'"
-                        />
                       </v-list-item-title>
 
-                      <v-list-item-subtitle class="text-wrap">
+                      <v-list-item-subtitle class="text-wrap text-body-2 text-grey-darken-1 mt-1">
                         {{ achievement.description }}
                       </v-list-item-subtitle>
 
-                      <v-list-item-subtitle>
-                        <strong>Achieved on:</strong> {{ formatDate(achievement.achieved_on) }}
+                      <v-list-item-subtitle class="text-caption text-medium-emphasis mt-2 d-flex align-center">
+                        <v-icon size="14" class="me-1">mdi-calendar-check</v-icon>
+                        <span>Achieved: <strong>{{ formatDate(achievement.achieved_on) }}</strong></span>
                       </v-list-item-subtitle>
-                    </v-list-item-content>
-                  </v-list-item>
-
-                  <v-divider v-if="index < conjugatorAchievements.length - 1" class="my-3" />
+                    </v-list-item>
+                  </v-hover>
+                  <v-divider v-if="index < conjugatorAchievements.length - 1" class="my-2 opacity-40" />
                 </template>
               </v-list>
 
-              <div v-else class="text-center mt-6">
-                <h2 class="text-h6">No conjugator achievements yet</h2>
+              <div v-else class="text-center py-12 d-flex flex-column align-center justify-center h-100 opacity-60">
+                <v-icon size="64" color="grey-lighten-1" class="mb-3">mdi-trophy-outline</v-icon>
+                <h3 class="text-h6 font-weight-medium text-grey-darken-2">No conjugator achievements yet</h3>
+                <p class="text-caption text-neutral mt-1">Keep practicing variations to unlock milestones!</p>
               </div>
             </template>
           </v-card-text>
@@ -50,41 +61,54 @@
 
       <!-- 2) Vocabulary achievements -->
       <v-col cols="12" lg="6" class="d-flex">
-        <v-card elevation="2" class="pa-4 mb-6 card-fixed trophy-card">
-          <v-card-title class="text-h5">
-            <v-icon class="me-3">mdi-cards-outline</v-icon>Vocabulary achievements
+        <v-card elevation="3" class="pa-4 mb-6 card-fixed trophy-card border-gold flex-column">
+          <v-card-title class="text-h5 d-flex align-center font-weight-bold pb-3">
+            <v-icon size="28" class="me-3 color-gold-icon">mdi-cards-outline</v-icon>
+            Vocabulary Achievements
           </v-card-title>
+          <v-divider class="mb-4 alpha-divider" />
 
-          <v-card-text>
-            <v-progress-linear v-if="loading" indeterminate color="primary" class="mb-4" />
-            <v-alert v-else-if="error" type="error" class="mb-4">{{ error }}</v-alert>
+          <v-card-text class="flex-grow-1 overflow-y-auto">
+            <v-progress-linear v-if="loading" indeterminate color="amber-darken-2" class="mb-4 rounded" height="6" />
+            <v-alert v-else-if="error" type="error" variant="tonal" class="mb-4" closable>{{ error }}</v-alert>
 
             <template v-else>
-              <v-list v-if="vocabularyAchievements.length">
+              <v-list v-if="vocabularyAchievements.length" class="bg-transparent pa-0">
                 <template v-for="(achievement, index) in vocabularyAchievements" :key="achievement.id">
-                  <v-list-item class="py-2">
-                    <v-list-item-content>
-                      <v-list-item-title class="font-weight-bold text-wrap">
+                  <v-hover v-slot="{ isHovering, props }">
+                    <v-list-item 
+                      v-bind="props"
+                      class="py-3 px-4 my-1 rounded-lg transition-all"
+                      :class="{ 'bg-amber-lighten-5 elevation-1': isHovering }"
+                    >
+                      <template #prepend>
+                        <v-avatar color="orange-lighten-4" class="me-3">
+                          <v-icon icon="mdi-bookmark-check" color="orange-darken-3" />
+                        </v-avatar>
+                      </template>
+
+                      <v-list-item-title class="font-weight-bold text-wrap text-subtitle-1 text-grey-darken-4">
                         {{ achievement.name }}
-                        <v-icon class="ms-2" icon="mdi-bookmark-check" />
                       </v-list-item-title>
 
-                      <v-list-item-subtitle class="text-wrap wrap-fix">
+                      <v-list-item-subtitle class="text-wrap wrap-fix text-body-2 text-grey-darken-1 mt-1">
                         {{ achievement.description }}
                       </v-list-item-subtitle>
 
-                      <v-list-item-subtitle>
-                        <strong>Achieved on:</strong> {{ formatDate(achievement.achieved_on) }}
+                      <v-list-item-subtitle class="text-caption text-medium-emphasis mt-2 d-flex align-center">
+                        <v-icon size="14" class="me-1">mdi-calendar-check</v-icon>
+                        <span>Achieved: <strong>{{ formatDate(achievement.achieved_on) }}</strong></span>
                       </v-list-item-subtitle>
-                    </v-list-item-content>
-                  </v-list-item>
-
-                  <v-divider v-if="index < vocabularyAchievements.length - 1" class="my-3" />
+                    </v-list-item>
+                  </v-hover>
+                  <v-divider v-if="index < vocabularyAchievements.length - 1" class="my-2 opacity-40" />
                 </template>
               </v-list>
 
-              <div v-else class="text-center mt-6">
-                <h2 class="text-h6">No vocabulary achievements yet</h2>
+              <div v-else class="text-center py-12 d-flex flex-column align-center justify-center h-100 opacity-60">
+                <v-icon size="64" color="grey-lighten-1" class="mb-3">mdi-book-open-blank-variant</v-icon>
+                <h3 class="text-h6 font-weight-medium text-grey-darken-2">No vocabulary achievements yet</h3>
+                <p class="text-caption text-neutral mt-1">Complete targeted item workouts to reveal badges.</p>
               </div>
             </template>
           </v-card-text>
@@ -93,106 +117,116 @@
 
       <!-- 3) Other game achievements -->
       <v-col cols="12" lg="6" class="d-flex">
-        <v-card elevation="2" class="pa-4 card-fixed trophy-card">
-          <v-card-title class="text-h5">
-            <v-icon class="me-3">mdi-gamepad-circle</v-icon>Other game achievements
+        <v-card elevation="3" class="pa-4 mb-6 mb-lg-0 card-fixed trophy-card border-gold flex-column">
+          <v-card-title class="text-h5 d-flex align-center font-weight-bold pb-3">
+            <v-icon size="28" class="me-3 color-gold-icon">mdi-gamepad-circle</v-icon>
+            Other Game Achievements
           </v-card-title>
+          <v-divider class="mb-4 alpha-divider" />
 
-          <v-card-text>
-            <v-progress-linear v-if="loading" indeterminate color="primary" class="mb-4" />
-            <v-alert v-else-if="error" type="error" class="mb-4">{{ error }}</v-alert>
+          <v-card-text class="flex-grow-1 overflow-y-auto">
+            <v-progress-linear v-if="loading" indeterminate color="amber-darken-2" class="mb-4 rounded" height="6" />
+            <v-alert v-else-if="error" type="error" variant="tonal" class="mb-4" closable>{{ error }}</v-alert>
 
             <template v-else>
-              <v-list v-if="otherGameAchievements.length">
+              <v-list v-if="otherGameAchievements.length" class="bg-transparent pa-0">
                 <template v-for="(achievement, index) in otherGameAchievements" :key="achievement.id">
-                  <v-list-item class="py-2">
-                    <v-list-item-content>
-                      <v-list-item-title class="font-weight-bold">
+                  <v-hover v-slot="{ isHovering, props }">
+                    <v-list-item 
+                      v-bind="props"
+                      class="py-3 px-4 my-1 rounded-lg transition-all"
+                      :class="{ 'bg-amber-lighten-5 elevation-1': isHovering }"
+                    >
+                      <template #prepend>
+                        <v-avatar color="purple-lighten-4" class="me-3">
+                          <v-icon icon="mdi-star" color="purple-darken-3" />
+                        </v-avatar>
+                      </template>
+
+                      <v-list-item-title class="font-weight-bold text-subtitle-1 text-grey-darken-4">
                         {{ achievement.name }}
-                        <v-icon class="ms-2" icon="mdi-star" />
                       </v-list-item-title>
 
-                      <v-list-item-subtitle class="wrap-fix">
+                      <v-list-item-subtitle class="wrap-fix text-body-2 text-grey-darken-1 mt-1">
                         {{ achievement.description }}
                       </v-list-item-subtitle>
 
-                      <v-list-item-subtitle>
-                        <strong>Achieved on:</strong> {{ formatDate(achievement.achieved_on) }}
+                      <v-list-item-subtitle class="text-caption text-medium-emphasis mt-2 d-flex align-center">
+                        <v-icon size="14" class="me-1">mdi-calendar-check</v-icon>
+                        <span>Achieved: <strong>{{ formatDate(achievement.achieved_on) }}</strong></span>
                       </v-list-item-subtitle>
-                    </v-list-item-content>
-                  </v-list-item>
-
-                  <v-divider v-if="index < otherGameAchievements.length - 1" class="my-3" />
+                    </v-list-item>
+                  </v-hover>
+                  <v-divider v-if="index < otherGameAchievements.length - 1" class="my-2 opacity-40" />
                 </template>
               </v-list>
 
-              <div v-else class="text-center mt-6">
-                <h2 class="text-h6">No other game achievements yet</h2>
+              <div v-else class="text-center py-12 d-flex flex-column align-center justify-center h-100 opacity-60">
+                <v-icon size="64" color="grey-lighten-1" class="mb-3">mdi-gamepad-variant-outline</v-icon>
+                <h3 class="text-h6 font-weight-medium text-grey-darken-2">No alternative game achievements yet</h3>
+                <p class="text-caption text-neutral mt-1">Unlock badges by exploring additional modules.</p>
               </div>
             </template>
           </v-card-text>
         </v-card>
       </v-col>
 
-      <!-- 4) Roadmap (last card) -->
+      <!-- 4) Roadmap -->
       <v-col cols="12" lg="6" class="d-flex">
-        <v-card elevation="2" class="pa-4 card-fixed trophy-card">
-          <v-card-title class="text-h5 mb-1">
-            <v-icon class="me-3">mdi-road-variant</v-icon>Roadmap to advanced level
+        <v-card elevation="3" class="pa-4 card-fixed trophy-card border-gold flex-column">
+          <v-card-title class="text-h5 d-flex align-center font-weight-bold pb-1">
+            <v-icon size="28" class="me-3 color-gold-icon">mdi-road-variant</v-icon>
+            Roadmap to Advanced Level
           </v-card-title>
 
-          <v-card-subtitle class="mb-5">
+          <v-card-subtitle class="mb-3 text-wrap text-caption text-medium-emphasis">
             Milestones reached in SPEAKING exercises without reading from notes
           </v-card-subtitle>
+          <v-divider class="mb-4 alpha-divider" />
 
-          <v-card-text>
-            <v-expansion-panels multiple>
+          <v-card-text class="flex-grow-1 overflow-y-auto">
+            <v-expansion-panels multiple variant="accordion" class="custom-panels">
               <v-expansion-panel
                 v-for="(items, category) in groupedRoadmap"
                 :key="category"
                 :class="getProgressColorClass(getCategoryProgress(String(category)).percent)"
+                class="mb-2 rounded border"
               >
-                <v-expansion-panel-title>
-                  {{ category }} —
-                  <span class="ms-2 text-caption">
-                    {{ getCategoryProgress(String(category)).percent }}% complete
-                  </span>
-                  <span
-                    class="ms-3"
-                    v-if="getCategoryProgress(String(category)).percent === 100"
-                  >
-                    Done! Great job!
-                  </span>
-                  <span
-                    class="ms-3"
-                    v-else-if="getCategoryProgress(String(category)).percent > 75"
-                  >
-                    Almost there!
-                  </span>
+                <v-expansion-panel-title class="font-weight-bold">
+                  <div class="d-flex align-center justify-space-between w-100 pe-4">
+                    <span>{{ category }}</span>
+                    <v-chip 
+                      size="small" 
+                      variant="flat" 
+                      :color="getCategoryProgress(String(category)).percent === 100 ? 'success' : 'amber-darken-2'"
+                      class="font-weight-bold text-caption"
+                    >
+                      {{ getCategoryProgress(String(category)).percent }}% Done
+                    </v-chip>
+                  </div>
                 </v-expansion-panel-title>
 
-                <v-expansion-panel-text>
-                  <v-list>
-                    <v-list-item v-for="{ key, item } in items" :key="key">
-                      <v-list-item-content>
-                        <v-list-item-title class="font-weight-medium">
-                          {{ item.pretty_title }}
-                        </v-list-item-title>
-
-                        <v-list-item class="px-0">
-                          <v-icon
-                            class="me-2"
-                            :color="achievedKeys.has(key) ? 'green-accent-4' : 'grey'"
-                          >
-                            {{
-                              achievedKeys.has(key)
-                                ? "mdi-checkbox-marked"
-                                : "mdi-checkbox-blank-outline"
-                            }}
-                          </v-icon>
-                          {{ item.description }}
-                        </v-list-item>
-                      </v-list-item-content>
+                <v-expansion-panel-text class="bg-white border-top pa-0">
+                  <v-list class="pa-0">
+                    <v-list-item v-for="{ key, item } in items" :key="key" class="py-3 px-4 border-bottom">
+                      <div class="d-flex align-start w-100">
+                        <v-icon
+                          class="me-3 mt-1"
+                          size="22"
+                          :color="achievedKeys.has(key) ? 'success' : 'grey-lighten-1'"
+                        >
+                          {{ achievedKeys.has(key) ? "mdi-checkbox-marked-circle" : "mdi-radiobox-blank" }}
+                        </v-icon>
+                        
+                        <div class="flex-grow-1">
+                          <h4 class="font-weight-bold text-subtitle-2 text-grey-darken-4">
+                            {{ item.pretty_title }}
+                          </h4>
+                          <p class="text-caption text-grey-darken-1 mt-1 text-wrap line-height-sm">
+                            {{ item.description }}
+                          </p>
+                        </div>
+                      </div>
                     </v-list-item>
                   </v-list>
                 </v-expansion-panel-text>
@@ -253,33 +287,20 @@ const achievementIcons = ref<Record<string, string>>({
   "2000_correct_prompts": "mdi-fire",
 })
 
-/**
- * ---- Grouping helpers (based on backend naming conventions) ----
- */
 const isConjugatorAchievement = (a: Achievement) => {
   const k = (a.criteria_key || "").toLowerCase()
-
-  // cumulative correct thresholds
   if (k.endsWith("_correct_prompts")) return true
-
-  // irregular verbs discovery/mastery tiers
-  // e.g. "basic75_discovery_past_simple", "master110_mastery_present_perfect"
   if (k.includes("_discovery_") || k.includes("_mastery_")) return true
   if (k.startsWith("basic75_") || k.startsWith("master110_") || k.startsWith("all_")) return true
-
-  // health tier achievements
   if (k.startsWith("health_tier_")) return true
-
   return false
 }
 
 const isVocabularyAchievement = (a: Achievement) => {
   const k = (a.criteria_key || "").toLowerCase()
-  // e.g. vw_write_complete_..., vw_write_complete_3x_..., vw_quiz_perfect20_...
   return k.startsWith("vw_")
 }
 
-// Everything automatic that is not conjugator or vocab becomes "Other games"
 const conjugatorAchievements = computed(() =>
   automaticAchievements.value.filter(isConjugatorAchievement)
 )
@@ -317,10 +338,18 @@ const fetchAchievements = async () => {
   loading.value = true
   error.value = null
   try {
-    const res = await api.get<Achievement[]>("/achievements/")
+    const params: any = {}
+    
+    // ==========================================
+    // 🎯 TAILORED LOOKUP RESTRICTION INJECTED HERE
+    // ==========================================
+    if (userStore.isStaff) {
+      params.student = userStore.studentId
+    }
+
+    const res = await api.get<Achievement[]>("/achievements/", { params })
     achievements.value = res.data
 
-    // keep your old split (manual achievements power the roadmap checkmarks)
     automaticAchievements.value = res.data
       .filter((a) => String(a.manually_created) === "false")
       .sort((a, b) => new Date(b.achieved_on).getTime() - new Date(a.achieved_on).getTime())
@@ -338,6 +367,7 @@ const fetchAchievements = async () => {
 }
 
 const formatDate = (dateStr: string): string => {
+  if (!dateStr) return "—"
   const date = new Date(dateStr)
   return date.toLocaleDateString()
 }
@@ -351,21 +381,17 @@ const getCategoryProgress = (category: string) => {
 }
 
 const getProgressColorClass = (percent: number): string => {
-  if (percent >= 100) return "bg-green-lighten-1"
-  if (percent >= 75) return "bg-light-green-lighten-2"
-  if (percent >= 50) return "bg-light-green-lighten-3"
-  if (percent >= 25) return "bg-lime-lighten-4"
-  if (percent > 0) return "bg-lime-lighten-5"
-  return ""
+  if (percent >= 100) return "status-complete"
+  if (percent >= 75) return "status-high"
+  if (percent >= 50) return "status-mid"
+  if (percent >= 25) return "status-low"
+  return "status-started"
 }
 
 onMounted(() => {
   fetchAchievements()
 })
 
-/**
- * (keeping your existing courseProgram bits untouched)
- */
 const coursePrograms: Record<string, string> = {
   A: "Architecture",
   M: "Mechanical engineering",
@@ -387,63 +413,72 @@ const courseProgram = computed(() => {
 </script>
 
 <style scoped>
-
-
 .trophy-card {
   position: relative;
-  border: 1px solid rgba(212, 175, 55, 0.35);
-  background:
-    linear-gradient(180deg, #ffffff 0%, #fffaf0 100%);
-  box-shadow:
-    0 6px 18px rgba(180, 150, 60, 0.12);
+  border-radius: 12px !important;
+  background: linear-gradient(180deg, #ffffff 0%, #fffcf5 100%) !important;
+  box-shadow: 0 4px 20px rgba(200, 160, 40, 0.08) !important;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.trophy-card::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
+.border-gold {
+  border: 1px solid rgba(218, 165, 32, 0.3) !important;
+}
 
-  background:
-    linear-gradient(
-      120deg,
-      transparent 20%,
-      rgba(255, 235, 160, 0.35) 40%,
-      rgba(255, 215, 120, 0.2) 50%,
-      transparent 70%
-    );
+.alpha-divider {
+  border-color: rgba(218, 165, 32, 0.15) !important;
+}
 
-  opacity: 0.5;
+.color-gold-icon {
+  color: #caa600 !important;
 }
 
 .trophy-card .v-card-title {
-  color: #b38b00;
-  font-weight: 600;
+  color: #a37f00;
 }
 
-.trophy-card .v-icon {
-  color: #caa600;
+.transition-all {
+  transition: all 0.2s ease-in-out;
 }
 
-
-.v-list-item-subtitle {
-  margin-top: 4px;
+.line-height-sm {
+  line-height: 1.4 !important;
 }
 
-/* pick one height for all 4 */
+.border-top {
+  border-top: 1px solid #f0f0f0 !important;
+}
+
+.border-bottom {
+  border-bottom: 1px solid #f5f5f5 !important;
+}
+.border-bottom:last-child {
+  border-bottom: none !important;
+}
+
+/* Roadmap expansion panel contextual alerts styles mapping options */
+.status-complete { background-color: #e8f5e9 !important; border-color: #c8e6c9 !important; }
+.status-high { background-color: #f1f8e9 !important; border-color: #dcedc8 !important; }
+.status-mid { background-color: #f9fbe7 !important; border-color: #f0f4c3 !important; }
+.status-low { background-color: #fffde7 !important; border-color: #fff9c4 !important; }
+.status-started { background-color: #fff8e1 !important; border-color: #ffecb3 !important; }
+
+.custom-panels :deep(.v-expansion-panel-title) {
+  padding: 12px 16px !important;
+  min-height: 48px !important;
+}
+
 .card-fixed {
-  height: 520px;      /* or whatever */
+  height: 540px !important;
   width: 100%;
-  display: flex;
-  flex-direction: column;
 }
 
-/* makes the card body scroll if it overflows */
 .card-fixed .v-card-text {
   flex: 1 1 auto;
-  overflow: auto;
+  overflow-y: auto;
 }
 
-.wrap-fix { white-space: normal !important; }
-
+.wrap-fix { 
+  white-space: normal !important; 
+}
 </style>

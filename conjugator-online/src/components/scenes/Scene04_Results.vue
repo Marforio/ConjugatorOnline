@@ -1,215 +1,277 @@
 <template>
-  <v-container v-if="results" fluid class="pa-4">
-    <!-- Heading -->
-    <v-row v-if="$vuetify.display.lgAndUp" class="m-2" justify="center">
-      <h1 class="text-h2">Conjugation Game Results</h1>
+  <v-container v-if="results" fluid class="pa-4 bg-white min-h-screen text-slate-800">
+    
+    <!-- Heading (Visible on larger resolutions) -->
+    <v-row v-if="$vuetify.display.lgAndUp" class="my-6" justify="center">
+      <h1 class="text-h4 font-weight-black text-slate-900 tracking-tight">Conjugation Game Results</h1>
     </v-row>
 
-    <v-row align="start" justify="center" class="settings-scene">
-      <!-- Left Column: Summary + Chart -->
-      <v-col cols="12" lg="5">
-        <v-card class="pa-4 mb-1" elevation="2" rounded="lg">
-          <v-card-title class="text-h5">Results</v-card-title>
-          <v-card-text class="text-body-2">
-            <div>
-              <span class="text-subtitle-1">Accuracy: </span>
-              <span>
-                {{ results.correct_count }} correct answers out of {{ results.total_rounds }}.
-                That's {{ percentCorrect }}%!
-              </span>
+    <v-row align="start" justify="center" class="mt-2 ga-0">
+      
+      <!-- Left Column: Summary Metrics Display & Data Chart Wheel -->
+      <v-col cols="12" lg="4" class="pr-lg-4">
+        <v-card class="pa-5 rounded-xl border mb-4" flat color="white">
+          <v-card-title class="px-0 pt-0 text-subtitle-1 font-weight-black text-slate-900 d-flex align-center">
+            <v-icon color="primary" class="mr-2" size="20">mdi-google-analytics</v-icon>
+            Performance Metrics
+          </v-card-title>
+          
+          <v-card-text class="px-0 pb-0 text-body-2 text-slate-600">
+            <!-- Accuracy summary metric tile -->
+            <div class="bg-slate-50 border rounded-xl pa-4 mb-3">
+              <div class="text-overline font-weight-bold text-slate-400 tracking-wider mb-1">Accuracy</div>
+              <div class="text-h5 font-weight-black text-slate-900 leading-none">
+                {{ percentCorrect }}% <span class="text-caption text-slate-500 font-weight-bold ml-1">Score</span>
+              </div>
+              <div class="text-caption text-slate-500 mt-1 font-weight-medium">
+                Successfully resolved {{ results.correct_count }} out of {{ results.total_rounds }} verbs.
+              </div>
             </div>
-            <div>
-              <span class="text-subtitle-1">Speed: </span>
-              Your average response time was: {{ results.avg_time_per_prompt }} seconds.
-              <span v-if="results.avg_time_per_prompt < 10 && percentCorrect > 70">
-                Nice work! Your speed and accuracy show that you are good at conjugation!
-              </span>
+
+            <!-- Speed summary metric tile -->
+            <div class="bg-slate-50 border rounded-xl pa-4">
+              <div class="text-overline font-weight-bold text-slate-400 tracking-wider mb-1">Pace Velocity</div>
+              <div class="text-h5 font-weight-black text-slate-900 leading-none d-flex align-baseline">
+                {{ results.avg_time_per_prompt }}s <span class="text-caption text-slate-500 font-weight-bold ml-1">avg round</span>
+              </div>
+              <div v-if="results.avg_time_per_prompt < 10 && percentCorrect > 70" class="text-caption text-success font-weight-bold mt-2 d-flex align-center">
+                <v-icon size="14" class="mr-1" color="success">mdi-star-face</v-icon>
+                Excellent reflex mastery and accuracy!
+              </div>
             </div>
-            <v-responsive max-width="500" class="mx-auto mt-5 mb-2">
-              <div id="pie-chart"></div>
+
+            <!-- D3 Visual Anchor Container -->
+            <v-responsive max-width="320" class="mx-auto mt-6">
+              <div id="pie-chart" class="d3-pie-stage-canvas"></div>
             </v-responsive>
           </v-card-text>
         </v-card>
       </v-col>
 
-      <!-- Right Column: Expansion Panels -->
-      <v-col cols="12" lg="7">
-        <v-expansion-panels multiple>
-          <!-- Correct Answers Panel -->
-          <v-expansion-panel>
-            <v-expansion-panel-title>
+      <!-- Right Column: Slide Swiper Lists Expansion Panels -->
+      <v-col cols="12" lg="8" class="pl-lg-4">
+        <v-expansion-panels multiple variant="separated" class="results-accordion-group">
+          
+          <!-- Panel A: Correct Answers Deck -->
+          <v-expansion-panel class="border rounded-xl mb-3 overflow-hidden" elevation="0">
+            <v-expansion-panel-title class="bg-slate-50 font-weight-black text-slate-800 py-4">
+              <v-icon color="success" class="mr-2" size="20">mdi-check-circle-outline</v-icon>
               Correct Answers ({{ results.correct_count }})
             </v-expansion-panel-title>
-            <v-expansion-panel-text>
-              <div v-if="correctResults.length === 0">
-                <v-alert type="info" dense>No correct answers 😢</v-alert>
+            
+            <v-expansion-panel-text class="pt-2 px-1 position-relative">
+              <div v-if="correctResults.length === 0" class="pa-4">
+                <v-alert type="info" variant="tonal" class="rounded-xl text-body-2" density="comfortable">No correct answers recorded this round 😢</v-alert>
               </div>
-              <swiper
-                v-else
-                ref="correctSwiperRef"
-                :modules="swiperModules"
-                :slides-per-view="2"
-                :space-between="20"
-                class="mySwiper"
-                :navigation="{
-                  prevEl: '.correct-button-prev',
-                  nextEl: '.correct-button-next'
-                }"
-                :breakpoints="{
-                  0: { slidesPerView: 1 },
-                  500: { slidesPerView: 2 },
-                  700: { slidesPerView: 3 }
-                }"
-              >
-                <swiper-slide
-                  v-for="(result, index) in correctResults"
-                  :key="'correct-' + index"
+              
+              <div v-else class="swiper-relative-viewport">
+                <swiper
+                  ref="correctSwiperRef"
+                  :modules="swiperModules"
+                  :slides-per-view="2"
+                  :space-between="16"
+                  class="results-swiper-container"
+                  :navigation="{
+                    prevEl: '.correct-button-prev',
+                    nextEl: '.correct-button-next'
+                  }"
+                  :breakpoints="{
+                    0: { slidesPerView: 1 },
+                    600: { slidesPerView: 2 },
+                    960: { slidesPerView: 2.5 }
+                  }"
                 >
-                  <v-card class="mx-auto my-3" color="green-lighten-5" max-width="300" elevation="2">
-                    <v-card-title>Question {{ result.prompt_number }}</v-card-title>
-                    <v-card-text>
-                      <p class="text-subtitle-1">Your answer:</p>
-                      <p class="text-center text-h6"><em>{{ result.user_answer }}</em></p>
-                      <p>Congrats! You got it right in {{ result.elapsed_time }} seconds.</p>
-                      <p class="font-weight-medium">Prompt:</p>
-                      <ul>
-                        <li>Verb: {{ result.verb }}</li>
-                        <li>Person: {{ result.person }}</li>
-                        <li>Tense: {{ result.tense }}</li>
-                        <li>Sentence Type: {{ result.sentence_type }}</li>
-                      </ul>
-                      <p class="font-weight-medium">Acceptable answer(s):</p>
-                      <p><em>{{ result.acceptable_answers.join(', ') }}</em></p>
-                    </v-card-text>
-                  </v-card>
-                </swiper-slide>
-                <div class="correct-button-prev swiper-button-prev"></div>
-                <div class="correct-button-next swiper-button-next"></div>
-              </swiper>
+                  <swiper-slide v-for="(result, index) in correctResults" :key="'correct-' + index">
+                    <!-- Clean white modern card featuring targeted top accent stroke -->
+                    <v-card class="result-deck-card border rounded-xl pa-4 bg-white accent-border-success flex-grow-1" flat>
+                      <div class="d-flex align-center justify-space-between mb-2">
+                        <span class="text-caption font-weight-black text-slate-400 text-uppercase">Question {{ result.prompt_number }}</span>
+                        <v-chip size="x-small" color="success" variant="flat" class="font-weight-bold">{{ result.elapsed_time }}s</v-chip>
+                      </div>
+                      
+                      <div class="text-center bg-slate-50 border rounded-lg py-2 my-2">
+                        <div class="text-overline font-weight-bold text-slate-400 leading-none">Your Answer</div>
+                        <div class="text-body-1 font-weight-black text-success mt-1"><em>{{ result.user_answer }}</em></div>
+                      </div>
+
+                      <div class="text-overline font-weight-bold text-slate-400 mt-3 mb-1">Exercise Parameters</div>
+                      <div class="prompt-meta-grid-box rounded-lg border pa-2 bg-white mb-2">
+                        <div class="d-flex justify-space-between border-b py-0.5 text-caption"><span class="text-slate-400 font-weight-medium">Verb</span><span class="font-weight-black text-slate-800 text-uppercase">{{ result.verb }}</span></div>
+                        <div class="d-flex justify-space-between border-b py-0.5 text-caption"><span class="text-slate-400 font-weight-medium">Subject</span><span class="font-weight-bold text-slate-700">{{ result.person }}</span></div>
+                        <div class="d-flex justify-space-between border-b py-0.5 text-caption"><span class="text-slate-400 font-weight-medium">Tense</span><span class="font-weight-bold text-slate-700 text-truncate max-w-140" :title="result.tense">{{ result.tense }}</span></div>
+                        <div class="d-flex justify-space-between py-0.5 text-caption"><span class="text-slate-400 font-weight-medium">Type</span><span class="font-weight-bold text-slate-700">{{ result.sentence_type }}</span></div>
+                      </div>
+                    </v-card>
+                  </swiper-slide>
+                </swiper>
+                <!-- Floating Glass Arrow Navigation Controls -->
+                <v-btn icon="mdi-chevron-left" size="small" variant="elevated" class="correct-button-prev floating-swiper-arrow arrow-left bg-white border elevation-2" />
+                <v-btn icon="mdi-chevron-right" size="small" variant="elevated" class="correct-button-next floating-swiper-arrow arrow-right bg-white border elevation-2" />
+              </div>
             </v-expansion-panel-text>
           </v-expansion-panel>
 
-          <!-- Incorrect Answers Panel -->
-          <v-expansion-panel>
-            <v-expansion-panel-title>
+          <!-- Panel B: Incorrect Answers Deck -->
+          <v-expansion-panel class="border rounded-xl overflow-hidden" elevation="0">
+            <v-expansion-panel-title class="bg-slate-50 font-weight-black text-slate-800 py-4">
+              <v-icon color="error" class="mr-2" size="20">mdi-close-circle-outline</v-icon>
               Incorrect Answers ({{ results.wrong_count }})
             </v-expansion-panel-title>
-            <v-expansion-panel-text>
-              <swiper
-                v-if="wrongResults.length > 0"
-                :modules="swiperModules"
-                :slides-per-view="2"
-                :space-between="20"
-                class="mySwiper"
-                :navigation="{
-                  prevEl: '.wrong-button-prev',
-                  nextEl: '.wrong-button-next'
-                }"
-                :breakpoints="{
-                  0: { slidesPerView: 1 },
-                  500: { slidesPerView: 2 },
-                  700: { slidesPerView: 3 }
-                }"
-              >
-                <swiper-slide
-                  v-for="(result, index) in wrongResults"
-                  :key="'wrong-' + index"
+            
+            <v-expansion-panel-text class="pt-2 px-1 position-relative">
+              <div v-if="wrongResults.length === 0" class="pa-4">
+                <v-alert type="success" variant="tonal" class="rounded-xl text-body-2" density="comfortable">Flawless execution! No incorrect answers recorded. 🌟</v-alert>
+              </div>
+
+              <div v-else class="swiper-relative-viewport">
+                <swiper
+                  :modules="swiperModules"
+                  :slides-per-view="2"
+                  :space-between="16"
+                  class="results-swiper-container"
+                  :navigation="{
+                    prevEl: '.wrong-button-prev',
+                    nextEl: '.wrong-button-next'
+                  }"
+                  :breakpoints="{
+                    0: { slidesPerView: 1 },
+                    600: { slidesPerView: 2 },
+                    960: { slidesPerView: 2.5 }
+                  }"
                 >
-                  <v-card class="mx-auto my-3" :color="isTypoRound(result) ? 'blue-lighten-5' : 'amber-lighten-5'" max-width="300" elevation="2">
-                    <v-card-title>Question {{ result.prompt_number }}</v-card-title>
-                    <v-card-text>
-                      <div v-if="isTypoRound(result)" class="d-flex align-center justify-center mt-1 mb-3">
-                        <v-chip size="large" color="info" variant="tonal">
-                          typo?
-                        </v-chip>
-                      </div>
-                      <p class="text-subtitle-1">Your answer:</p>
-                      <p class="text-center text-h6">
-                        <em v-if="result.user_answer">{{ result.user_answer }}</em>
-                        <span v-else>No answer submitted.</span>
-                      </p>
-                      <div v-if="isTypoRound(result)">
-                        <p class="text-caption font-weight-light font-size-xs">This might be a typo. If approved by the teacher, it will be counted as correct.</p>
-
+                  <swiper-slide v-for="(result, index) in wrongResults" :key="'wrong-' + index">
+                    <v-card class="result-deck-card border rounded-xl pa-4 bg-white flex-grow-1 d-flex flex-column" :class="isTypoRound(result) ? 'accent-border-info' : 'accent-border-error'" flat>
+                      
+                      <div class="d-flex align-center justify-space-between mb-2">
+                        <span class="text-caption font-weight-black text-slate-400 text-uppercase">Question {{ result.prompt_number }}</span>
+                        <!-- Typo badge flag placeholder injection -->
+                        <v-chip v-if="isTypoRound(result)" size="x-small" color="info" variant="flat" class="font-weight-bold">Typo Pending</v-chip>
+                        <v-chip v-else size="x-small" color="error" variant="flat" class="font-weight-bold">Incorrect</v-chip>
                       </div>
                       
+                      <div class="text-center bg-slate-50 border rounded-lg py-2 my-2">
+                        <div class="text-overline font-weight-bold text-slate-400 leading-none">Your Submission</div>
+                        <div class="text-body-1 font-weight-black mt-1" :class="isTypoRound(result) ? 'text-info' : 'text-error'">
+                          <em v-if="result.user_answer">"{{ result.user_answer }}"</em>
+                          <span v-else class="text-caption font-weight-bold text-slate-400">No answer submitted</span>
+                        </div>
+                      </div>
 
-                      <p v-else>This answer is incorrect. </p>
-                      
-                      <p class="font-weight-medium">Prompt:</p>
-                      <ul>
-                        <li>Verb: {{ result.verb }}</li>
-                        <li>Person: {{ result.person }}</li>
-                        <li>Tense: {{ result.tense }}</li>
-                        <li>Sentence Type: {{ result.sentence_type }}</li>
-                      </ul>
-                      <p class="font-weight-medium">Acceptable answer(s):</p>
-                      <p><em>{{ result.acceptable_answers.join(', ') }}</em></p>
-                      <div class="d-flex justify-center">
-                        <v-btn
+                      <div v-if="isTypoRound(result)" class="bg-blue-init-lighten pa-2 rounded-lg text-center mb-2 border border-blue-100">
+                        <p class="text-xxs text-slate-600 font-weight-medium line-height-tight ma-0">Very close match! Awaiting staff validation approval criteria confirmation to award credit points.</p>
+                      </div>
+
+                      <div class="text-overline font-weight-bold text-slate-400 mt-2 mb-1">Target Requirements</div>
+                      <div class="prompt-meta-grid-box rounded-lg border pa-2 bg-white mb-3">
+                        <div class="d-flex justify-space-between border-b py-0.5 text-caption"><span class="text-slate-400 font-weight-medium">Verb</span><span class="font-weight-black text-slate-800 text-uppercase">{{ result.verb }}</span></div>
+                        <div class="d-flex justify-space-between border-b py-0.5 text-caption"><span class="text-slate-400 font-weight-medium">Subject</span><span class="font-weight-bold text-slate-700">{{ result.person }}</span></div>
+                        <div class="d-flex justify-space-between border-b py-0.5 text-caption"><span class="text-slate-400 font-weight-medium">Tense</span><span class="font-weight-bold text-slate-700 text-truncate max-w-140" :title="result.tense">{{ result.tense }}</span></div>
+                        <div class="d-flex justify-space-between py-0.5 text-caption"><span class="text-slate-400 font-weight-medium">Type</span><span class="font-weight-bold text-slate-700">{{ result.sentence_type }}</span></div>
+                      </div>
+
+                      <!-- Expected Valid Suffix Answers list -->
+                      <div class="text-caption text-slate-500 font-weight-medium mb-3">
+                        <span class="font-weight-bold text-slate-700">Acceptable:</span> 
+                        <span class="text-success font-weight-bold ml-1"><em>{{ result.acceptable_answers.join(', ') }}</em></span>
+                      </div>
+
+                      <!-- AI Dialog Trigger Button footer segment -->
+                      <v-btn
+                        block
                         size="small"
                         variant="tonal"
-                        class="mt-2"
                         color="primary"
+                        class="mt-auto rounded-lg text-none font-weight-bold"
+                        prepend-icon="mdi-robot-outline"
                         @click="openTutorForRound(result)"
                       >
-                        Ask the AI Tutor <v-icon class="ms-1" size="14">mdi-robot-outline</v-icon>
+                        Ask AI Assistant
                       </v-btn>
-                      </div>
-                    </v-card-text>
-                  </v-card>
-                </swiper-slide>
-                <div class="wrong-button-prev swiper-button-prev"></div>
-                <div class="wrong-button-next swiper-button-next"></div>
-              </swiper>
+                    </v-card>
+                  </swiper-slide>
+                </swiper>
+                <!-- Floating Glass Arrow Navigation Controls -->
+                <v-btn icon="mdi-chevron-left" size="small" variant="elevated" class="wrong-button-prev floating-swiper-arrow arrow-left bg-white border elevation-2" />
+                <v-btn icon="mdi-chevron-right" size="small" variant="elevated" class="wrong-button-next floating-swiper-arrow arrow-right bg-white border elevation-2" />
+              </div>
             </v-expansion-panel-text>
           </v-expansion-panel>
         </v-expansion-panels>
       </v-col>
     </v-row>
 
-    <!-- Action Buttons -->
-    <v-row class="d-flex justify-center align-center mt-4 gap-4">
-      <v-btn @click="goToScene('Scene02_Settings')">PLAY AGAIN</v-btn>
-      <router-link :to="{ path: '/dashboard', query: { tab: 'conjugation-game' } }">
-        <v-btn>GO TO Dashboard</v-btn>
-      </router-link>
+    <!-- Global Platform Layout Action Controls Button Footer Bar row panel -->
+    <v-row no-gutters class="d-flex justify-center align-center mt-10 ga-3 pb-8">
+      <v-btn color="primary" height="44" class="px-6 rounded-xl font-weight-bold text-none elevation-1" prepend-icon="mdi-refresh" @click="goToScene('Scene02_Settings')">Play Another Session</v-btn>
+      <v-btn :to="{ path: '/my-data', query: { tab: 'conjugation-game' } }" height="44" variant="outlined" color="slate-600" class="px-6 rounded-xl font-weight-bold text-none bg-white">Go to My Dashboard</v-btn>
       <HomeButton />
     </v-row>
   </v-container>
 
-  <AiTutorChatDialog
-    v-model="aiOpen"
-    title="AI Grammar Tutor"
-    :context="aiContext"
-    :build-initial-user-message="buildInitialPrompt"
-    :show-context-preview="false"
-    :reset-on-context-change="true"
-    api-url="/llm/chat/"
-    :max-tokens="250"
-    :temperature="0.4"
-  >
-  <template #context-summary="{ ctx }">
-    <div class="my-3">
-      <div>
-        <span class="font-weight-medium">The prompt is:</span>
-        verb={{ ctx?.verb }} | person={{ ctx?.person }} | tense={{ ctx?.tense }} | sentence type={{ ctx?.sentence_type }}
+  <!-- AI Tutor Chat Component Modal Frame view portal drawer -->
+  <v-dialog v-model="aiOpen" max-width="560px" scrollable transition="dialog-bottom-transition">
+    <v-card class="rounded-xl border bg-white text-slate-800" v-if="aiContext">
+      <v-card-title class="pa-4 d-flex align-center border-b bg-slate-50">
+        <v-avatar color="blue-lighten-5" size="36" class="mr-3">
+          <v-icon color="primary" size="20">mdi-robot-outline</v-icon>
+        </v-avatar>
+        <div>
+          <div class="text-subtitle-1 font-weight-black line-height-tight">AI Grammar Tutor</div>
+          <div class="text-caption text-slate-500">Post-round syntax diagnostic run</div>
+        </div>
+        <v-spacer />
+        <v-btn icon="mdi-close" variant="text" density="comfortable" color="slate-500" @click="aiOpen = false" />
+      </v-card-title>
+
+      <!-- Sub-view data summaries profile matrix box info row layer context -->
+      <div class="pa-4 bg-slate-50 border-b">
+        <div class="text-overline font-weight-bold text-slate-400 mb-1 tracking-wider">Target Failure Profile</div>
+        <div class="bg-white border rounded-xl pa-3 text-center text-caption font-weight-medium">
+          <v-row no-gutters class="mb-2">
+            <v-col cols="6" class="border-r pb-1">
+              <span class="text-slate-400 block mb-0.5">Prompt Formula</span>
+              <span class="font-weight-black text-slate-800 text-uppercase">{{ aiContext.verb }}</span> ({{ aiContext.person }})
+            </v-col>
+            <v-col cols="6" class="pb-1">
+              <span class="text-slate-400 block mb-0.5">Tense Style</span>
+              <span class="font-weight-bold text-slate-700">{{ aiContext.tense }}</span>
+            </v-col>
+          </v-row>
+          <v-divider class="my-1.5"></v-divider>
+          <v-row no-gutters>
+            <v-col cols="6" class="border-r pt-1 text-error">
+              <span class="text-slate-400 block mb-0.5">Your Submission</span>
+              <span class="font-weight-black">"{{ aiContext.student_answer || 'Empty' }}"</span>
+            </v-col>
+            <v-col cols="6" class="pt-1 text-success">
+              <span class="text-slate-400 block mb-0.5">Acceptable Target</span>
+              <span class="font-weight-black">{{ aiContext.acceptable_answers.join(' / ') }}</span>
+            </v-col>
+          </v-row>
+        </div>
       </div>
 
-      <div class="mt-1">
-        <span class="font-weight-medium">Your answer:</span> {{ ctx?.student_answer ?? "—" }}
-      </div>
+      <v-card-text class="pa-4 style-markdown-body text-body-2 line-height-relaxed">
+        <AiTutorChatDialog
+          v-model="aiOpen"
+          title="AI Grammar Tutor"
+          :context="aiContext"
+          :build-initial-user-message="buildInitialPrompt"
+          :show-context-preview="false"
+          :reset-on-context-change="true"
+          api-url="/llm/chat/"
+          :max-tokens="250"
+          :temperature="0.4"
+          embed-mode
+        />
+      </v-card-text>
 
-      <div class="mt-1">
-        <span class="font-weight-medium">Target answer:</span>
-        {{ (ctx?.acceptable_answers ?? []).join(" / ") || "—" }}
-      </div>
-    </div>
-
-    <v-divider class="my-2" />
-  </template>
-  </AiTutorChatDialog>
-
+      <v-divider />
+      <v-card-actions class="pa-4 bg-slate-50">
+        <v-btn block color="primary" variant="flat" height="40" class="rounded-xl font-weight-bold text-none" @click="aiOpen = false">Done, Close Tutor</v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
 </template>
 
 <script>
@@ -226,8 +288,6 @@ export default {
   data() {
     return {
       swiperModules: markRaw([Navigation]),
-
-      // NEW: AI tutor dialog state
       aiOpen: false,
       aiContext: null,
     };
@@ -236,7 +296,7 @@ export default {
     Swiper,
     SwiperSlide,
     HomeButton,
-    AiTutorChatDialog, // NEW
+    AiTutorChatDialog,
   },
   props: {
     results: { type: Object, required: true },
@@ -249,19 +309,21 @@ export default {
     },
     wrongResults() {
       return Array.isArray(this.results?.rounds)
-        ? this.results.rounds.filter((r) => r.is_correct === false || r.is_correct === null) // include null as potentially wrong (e.g. pending typo validation)
+        ? this.results.rounds.filter((r) => r.is_correct === false || r.is_correct === null)
         : [];
     },
     percentCorrect() {
+      if (!this.results?.total_rounds) return 0;
       return ((this.results.correct_count / this.results.total_rounds) * 100).toFixed(0);
     },
     percentIncorrect() {
+      if (!this.results?.total_rounds) return 0;
       return ((this.results.wrong_count / this.results.total_rounds) * 100).toFixed(0);
     },
     chartData() {
       return [
-        { label: "Correct", value: this.results.correct_count },
-        { label: "Wrong", value: this.results.wrong_count },
+        { label: "Correct", value: this.results?.correct_count ?? 0 },
+        { label: "Wrong", value: this.results?.wrong_count ?? 0 },
       ];
     },
   },
@@ -269,13 +331,9 @@ export default {
     goToScene(sceneName) {
       this.$emit("changeScene", sceneName);
     },
-
-    // NEW: where your JWT comes from (adjust to your app)
     getJwt() {
       return localStorage.getItem("access");
     },
-
-    // open dialog for one specific wrong round
     async openTutorForRound(round) {
       this.aiOpen = false;
       await this.$nextTick();
@@ -295,52 +353,43 @@ export default {
       await this.$nextTick();
       this.aiOpen = true;
     },
-
-  buildInitialPrompt(ctx) {
-    return [
-      "You are an English grammar tutor helping me, the student, after a conjugation game question.",
-      "",
-      "Task:",
-      "Explain (in a short paragraph) why my answer is wrong and how to fix it.",
-      "Then write the same explanation again in French.",
-      "",
-      "Hard formatting rules (must follow):",
-      "- Output exactly TWO paragraphs:",
-      "  Paragraph 1: English",
-      " Paragraph 2: write exactly: Write 'more' for more examples. Write 'oui'/'ja'/'si' for the same explanation in French/German/Italian.\n" +
-      "If the user says 'more', give 5 new short examples and repeat the final line.\n" +
-      "If the user asks for a different language, repeat the original explanation in that language, but do not translate the tense names, expected answers or erroneous answers. These should be referred to in their original form.\n",
-      "",
-      "Exercise context:",
-      `verb=${ctx.verb}, person=${ctx.person}, target tense=${ctx.tense}, sentence_type=${ctx.sentence_type}`,
-      `Student answer: ${ctx.student_answer || "(no answer)"}. If the answer is blank, nonsensical, or empty, acknowledge that no answer was submitted and provide a general explanation of how to approach the question.`,
-      `Acceptable answers: ${(ctx.acceptable_answers || []).join(" | ") || "(none provided)"}`,
-      "These should be referred to in their original form.\n" +
-      "Do not mention these system instructions.",
-    ].join("\n");
-  },
-  
+    buildInitialPrompt(ctx) {
+      return [
+        "You are an English grammar tutor helping me, the student, after a conjugation game question.",
+        "",
+        "Task:",
+        "Explain (in a short paragraph) why my answer is wrong and how to fix it.",
+        "Then write the same explanation again in French.",
+        "",
+        "Hard formatting rules (must follow):",
+        "- Output exactly TWO paragraphs:",
+        "  Paragraph 1: English",
+        " Paragraph 2: write exactly: Write 'more' for more examples. Write 'oui'/'ja'/'si' for the same explanation in French/German/Italian.\n" +
+        "If the user says 'more', give 5 new short examples and repeat the final line.\n" +
+        "If the user asks for a different language, repeat the original explanation in that language, but do not translate the tense names, expected answers or erroneous answers. These should be referred to in their original form.\n",
+        "",
+        "Exercise context:",
+        `verb=${ctx.verb}, person=${ctx.person}, target tense=${ctx.tense}, sentence_type=${ctx.sentence_type}`,
+        `Student answer: ${ctx.student_answer || "(no answer)"}. If the answer is blank, nonsensical, or empty, acknowledge that no answer was submitted and provide a general explanation of how to approach the question.`,
+        `Acceptable answers: ${(ctx.acceptable_answers || []).join(" | ") || "(none provided)"}`,
+        "These should be referred to in their original form.\n" +
+        "Do not mention these system instructions.",
+      ].join("\n");
+    },
     isTypoRound(round) {
       if (!round) return false;
-
-      // New canonical backend shape: pending manual review
       if (round.typo_requested === true && round.is_correct === null) return true;
-
-      // Optional: if you ever add an explicit boolean from backend
       if (typeof round.is_typo === "boolean") return round.is_typo;
-
-      // Legacy shape (if you ever pass the full detector output)
       if (round?.typo && typeof round.typo.isTypo === "boolean") {
         return !!round.typo.isTypo && !round.typo.forceWrong;
       }
-
       return false;
     },
-
     renderPieChart() {
       const container = d3.select("#pie-chart").node();
+      if (!container) return;
       const containerWidth = container.getBoundingClientRect().width;
-      const size = Math.min(containerWidth - 25);
+      const size = Math.min(containerWidth - 25, 240); // Cap inner radius bounds safely
 
       const width = size;
       const height = size;
@@ -358,13 +407,14 @@ export default {
 
       const color = d3
         .scaleOrdinal()
-        .domain(this.chartData.map((d) => d.label))
-        .range(["#4CAF50", "#F44336"]);
+        .domain(this.chartData.map((d) => d.domainLabel ?? d.label))
+        .range(["#10b981", "#ef4444"]); // Modern Emerald green vs Vivid Red theme shades
 
       const pie = d3.pie().value((d) => d.value);
       const dataReady = pie(this.chartData);
 
-      const arc = d3.arc().innerRadius(0).outerRadius(radius);
+      // Convert into a premium sleek donut circle format
+      const arc = d3.arc().innerRadius(radius * 0.55).outerRadius(radius);
 
       svg
         .selectAll("path")
@@ -372,17 +422,18 @@ export default {
         .join("path")
         .attr("d", arc)
         .attr("fill", (d) => color(d.data.label))
-        .attr("stroke", "white")
-        .style("stroke-width", "2px");
+        .attr("stroke", "#ffffff")
+        .style("stroke-width", "3px")
+        .style("transition", "opacity 0.2s ease");
 
-      svg
-        .selectAll("text")
-        .data(dataReady)
-        .join("text")
-        .text((d) => `${d.data.label}: ${d.data.value}`)
-        .attr("transform", (d) => `translate(${arc.centroid(d)})`)
-        .style("text-anchor", "middle")
-        .style("font-size", "12px");
+      // Appends a centralized numeric efficiency metric readout in center arc hollows
+      svg.append("text")
+         .attr("text-anchor", "middle")
+         .attr("dy", "0.35em")
+         .style("font-size", "22px")
+         .style("font-weight", "900")
+         .style("fill", "#0f172a")
+         .text(`${this.percentCorrect}%`);
     },
   },
   mounted() {
@@ -392,18 +443,80 @@ export default {
 </script>
 
 <style scoped>
+.min-h-screen { min-height: 100vh; }
+.line-height-tight { line-height: 1.2; }
+.line-height-relaxed { line-height: 1.6; }
+.max-w-140 { max-width: 140px; display: inline-block; }
+
 #pie-chart {
   display: flex;
   justify-content: center;
   align-items: center;
+  min-height: 200px;
 }
-.mySwiper {
+
+/* ==========================================
+   🎴 RESULTS CARD ACCENT WORKSPACES 
+   ========================================== */
+.result-deck-card {
+  min-height: 250px;
+  border-width: 1px !important;
+  border-top-width: 5px !important; /* Top colored accent stroke */
+  transition: transform 0.2s ease;
+}
+.result-deck-card:hover {
+  transform: translateY(-2px);
+}
+
+.accent-border-success { border-color: #e2e8f0 !important; border-top-color: #10b981 !important; }
+.accent-border-error { border-color: #e2e8f0 !important; border-top-color: #ef4444 !important; }
+.accent-border-info { border-color: #e2e8f0 !important; border-top-color: #0ea5e9 !important; }
+
+.prompt-meta-grid-box div:last-child {
+  border-bottom: none !important;
+}
+
+.swiper-relative-viewport {
+  position: relative;
+  padding: 0 40px; /* Expands wings for absolute navigation icons arrows placement */
+}
+
+.results-swiper-container {
   width: 100%;
-  max-width: 1200px;
-  margin: 2rem auto;
+  padding: 12px 4px !important;
 }
-.swiper-slide {
-  display: flex;
-  justify-content: center;
+
+/* Glass UI Navigation Arrows Overrides */
+.floating-swiper-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+  border-color: #e2e8f0 !important;
+  background-color: rgba(255, 255, 255, 0.9) !important;
+  backdrop-filter: blur(4px);
 }
+.floating-swiper-arrow::after {
+  display: none !important; /* Strips ugly default Swiper font strings elements away */
+}
+.floating-swiper-arrow.arrow-left { left: 0px; }
+.floating-swiper-arrow.arrow-right { right: 0px; }
+
+.v-expansion-panel-title {
+  font-size: 0.95rem;
+}
+.bg-blue-init-lighten {
+  background-color: rgba(14, 165, 233, 0.06);
+}
+.text-xxs {
+  font-size: 0.72rem;
+}
+
+.text-slate-900 { color: #0f172a; }
+.text-slate-800 { color: #1e293b; }
+.text-slate-700 { color: #334155; }
+.text-slate-600 { color: #475569; }
+.text-slate-500 { color: #64748b; }
+.text-slate-400 { color: #94a3b8; }
+.bg-slate-50 { background-color: #f8fafc !important; }
 </style>
