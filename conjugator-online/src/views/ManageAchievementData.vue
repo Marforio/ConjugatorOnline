@@ -1,6 +1,5 @@
 <template>
   <v-container fluid class="pa-6">
-    <!-- Header -->
     <v-card class="pa-6 mb-6 data-header" elevation="4" rounded="xl">
       <div class="d-flex align-center justify-space-between">
         <div>
@@ -13,7 +12,6 @@
       </div>
     </v-card>
 
-    <!-- Filters -->
     <v-card class="pa-6 mb-6" elevation="2" rounded="lg">
       <v-row>
         <v-col cols="12" md="4">
@@ -68,7 +66,6 @@
     </v-card>
 
     <v-row>
-      <!-- Achievements Section -->
       <v-col cols="12">
         <v-card class="pa-6 mb-6" elevation="2" rounded="lg">
           <div class="d-flex align-center justify-space-between mb-4">
@@ -78,10 +75,8 @@
             <v-icon size="32" color="amber">mdi-trophy</v-icon>
           </div>
 
-          <!-- Loading State -->
           <v-progress-linear v-if="loadingAchievements" indeterminate color="primary" class="mb-4" />
 
-          <!-- View Toggle -->
           <v-btn-toggle
             v-model="achievementView"
             mandatory
@@ -99,8 +94,7 @@
             </v-btn>
           </v-btn-toggle>
 
-          <!-- By Student View -->
-          <div v-if="achievementView === 'by-student'" class="achievements-container">
+          <div class="achievements-container" v-if="achievementView === 'by-student'">
             <div v-if="achievementsByStudent.length > 0">
               <v-expansion-panels variant="accordion">
                 <v-expansion-panel
@@ -111,7 +105,7 @@
                     <div class="d-flex align-items-center w-100">
                       <v-avatar color="primary" size="32" class="mr-3">
                         <span class="text-white text-caption">
-                          {{ studentData.student_initials || studentData.initials.charAt(0) }}
+                          {{ studentData.initials }}
                         </span>
                       </v-avatar>
                       <div class="flex-grow-1">
@@ -163,7 +157,6 @@
             </div>
           </div>
 
-          <!-- By Achievement View -->
           <div v-else class="achievements-container">
             <v-select
               v-model="selectedAchievementType"
@@ -220,7 +213,6 @@
       </v-col>
     </v-row>
 
-    <!-- Summary Stats -->
     <v-row>
       <v-col cols="12" sm="6">
         <v-card class="pa-4" elevation="2" rounded="lg">
@@ -251,7 +243,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import api from '@/axios';
-// ✨ FIX 1: Import user store to secure roster access boundaries
 import { useUserStore } from '@/stores/user'; 
 
 interface Course {
@@ -292,7 +283,6 @@ interface StudentWithAchievement {
   manually_created: boolean;
 }
 
-// Instantiate secure store coordinates tracking references
 const userStore = useUserStore();
 
 const loadingAchievements = ref(false);
@@ -311,7 +301,6 @@ const achievements = ref<Achievement[]>([]);
 const achievementView = ref<'by-student' | 'by-achievement'>('by-student');
 const selectedAchievementType = ref<string | null>(null);
 
-// ✨ FIX 2: Compute students dropdown options cleanly from the teacher's secure roster state
 const filteredStudentsDropdown = computed<Student[]>(() => {
   const sourceList = userStore.isStaff ? userStore.teacherRoster : [];
   return sourceList.map(s => ({
@@ -383,7 +372,6 @@ const activeStudentCount = computed(() => achievementsByStudent.value.length);
 
 async function fetchCourses() {
   try {
-    // Let the custom backend viewset filter out only managed courses matching the teacher
     const response = await api.get<Course[]>('/courses/');
     courseOptions.value = [
       { id: 'all', name: 'All Courses' },
@@ -397,7 +385,6 @@ async function fetchCourses() {
 async function fetchAchievements() {
   loadingAchievements.value = true;
   try {
-    // ✨ FIX 3: Pass clean, filtered query params directly to the backend viewset
     const params: any = { limit: 1000 };
     
     if (selectedStudent.value) {
@@ -414,7 +401,6 @@ async function fetchAchievements() {
       achievements.value = data.map((ach: any) => ({
         id: ach.id,
         student: ach.student,
-        // Utilize the direct data bindings fallback properties straight from serialization loops
         student_initials: ach.student_initials || `Student ${ach.student}`,
         student_web_id: ach.student_web_id || '',
         description: ach.description,
@@ -437,6 +423,8 @@ async function onStudentFilterChange() {
   await fetchAchievements();
 }
 
+function formatTime(secs: number): string { return secs ? `${Math.floor(secs / 3600)}h ${Math.floor((secs % 3600) / 60)}m` : '0h 0m'; }
+
 function formatDate(dateString: string): string {
   const date = new Date(dateString);
   const now = new Date();
@@ -451,7 +439,6 @@ function formatDate(dateString: string): string {
 }
 
 onMounted(async () => {
-  // Rely on global initialization chains to keep multi-tenant state accurate
   if (userStore.isStaff && userStore.teacherRoster.length === 0) {
     await userStore.fetchTeacherRoster();
   }
@@ -459,6 +446,7 @@ onMounted(async () => {
   await fetchAchievements();
 });
 </script>
+
 
 <style scoped>
 .data-header {
