@@ -17,7 +17,7 @@
         Language Labs
       </h1>
       <p class="text-body-1 text-slate-500 max-width-text mx-auto mb-8">
-        Custom language tools for students.
+        Custom language-learning tools
       </p>
 
       <!-- Dynamic Entry Actions Core -->
@@ -54,7 +54,7 @@
           >
             Log In to Begin
           </v-btn>
-          <span class="text-caption text-slate-400 mt-2">Ask your teacher for login credentials.</span>
+          <span class="text-caption text-slate-400 mt-2">Ask your teacher for login credentials</span>
         </template>
       </div>
     </div>

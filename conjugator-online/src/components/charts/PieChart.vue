@@ -68,7 +68,7 @@ export default defineComponent({
 .chart-container {
   position: relative;
   width: 100%;
-  max-width: 250px; /* Limits size on desktop so it doesn't get huge */
+  max-width: 180px; /* Limits size on desktop so it doesn't get huge */
   margin: 0 auto;
 }
 </style>

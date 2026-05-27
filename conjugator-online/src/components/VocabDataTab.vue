@@ -9,21 +9,20 @@
           :variant="activePanel === 0 ? 'elevated' : 'tonal'"
           :color="activePanel === 0 ? 'primary' : 'grey-darken-1'"
           size="large"
-          class="flex-grow-1 rounded-xl text-subtitle-2 font-weight-black tracking-wide py-4 panel-toggle-btn"
+          class="flex-grow-1 rounded-xl text-subtitle-1 font-weight-medium tracking-wide panel-toggle-btn"
           @click="activePanel = 0"
         >
-          <v-icon start class="me-1">mdi-notebook-outline</v-icon>
-          Feedback Notebook
+          Notebook
         </v-btn>
 
         <v-btn
           :variant="activePanel === 1 ? 'elevated' : 'tonal'"
           :color="activePanel === 1 ? 'primary' : 'grey-darken-1'"
           size="large"
-          class="flex-grow-1 rounded-xl text-subtitle-2 font-weight-black tracking-wide py-4 panel-toggle-btn"
+          class="flex-grow-1 rounded-xl text-subtitle-1 font-weight-medium tracking-wide panel-toggle-btn"
           @click="activePanel = 1"
         >
-          Workout Metrics
+          Vocab Workout Data
           <v-icon end class="ms-1">mdi-chart-timeline-variant-outline</v-icon>
         </v-btn>
       </v-col>
@@ -40,11 +39,11 @@
           <v-col cols="12" md="8" class="d-flex">
             <v-card class="pa-4 w-100 rounded-xl border border-light shadow-sm flex-column" elevation="0">
               <v-card-title class="text-h5 font-weight-black text-grey-darken-3 pb-1 d-flex align-center">
-                <v-icon class="me-3" color="indigo">mdi-bookmark-multiple-outline</v-icon>
+                <v-icon class="me-3" color="indigo">mdi-note-text-outline</v-icon>
                 My Vocabulary Notebook
               </v-card-title>
               <v-card-subtitle class="text-caption font-weight-medium text-medium-emphasis">
-                Logged lexical items highlighted during your interactive speaking feedback loops
+                Words you have trouble with or want to remember go here
               </v-card-subtitle>
               <v-divider class="my-4 opacity-40" />
 
@@ -105,7 +104,7 @@
                 Expand Notebook
               </v-card-title>
               <v-card-subtitle class="text-caption font-weight-medium text-medium-emphasis">
-                Manually catalog idioms or custom expressions
+                Add vocabulary to your notebook
               </v-card-subtitle>
               <v-divider class="my-4 opacity-40" />
 
@@ -113,7 +112,7 @@
                 <v-form @submit.prevent="submitNewVocab" class="d-flex flex-column gap-3">
                   <v-text-field 
                     v-model="newVocab.correct" 
-                    label="Target / Natural Expression" 
+                    label="Correct / Natural Form" 
                     placeholder="e.g., look forward to hearing from you"
                     variant="outlined"
                     density="comfortable"
@@ -125,7 +124,7 @@
                   
                   <v-text-field 
                     v-model="newVocab.incorrect" 
-                    label="Unnatural / Faulty Form" 
+                    label="Wrong Form or Translation" 
                     placeholder="e.g., look forward to hear from you"
                     variant="outlined"
                     density="comfortable"
@@ -136,8 +135,8 @@
                   
                   <v-textarea 
                     v-model="newVocab.comment" 
-                    label="Linguistic Context Notes" 
-                    placeholder="Write context triggers or semantic notes..."
+                    label="Notes or comments (optional)" 
+                    placeholder="How can you explain this?"
                     variant="outlined"
                     density="comfortable"
                     bg-color="white"
@@ -151,10 +150,9 @@
                     color="teal-darken-2" 
                     variant="flat"
                     size="large"
-                    class="mt-2 font-weight-bold rounded-lg text-button py-3 shadow-sm"
+                    class="mt-2 rounded-lg text-button font-weight-medium shadow-sm"
                   >
-                    Commit Entry To Stack
-                    <v-icon end class="ms-1">mdi-plus-box-outline</v-icon>
+                    Submit
                   </v-btn>
                 </v-form>
 
@@ -173,10 +171,10 @@
           <v-col cols="12" sm="10" md="8" lg="6" xl="5">
             <div class="text-center mb-6">
               <h3 class="text-h4 font-weight-black text-grey-darken-3 d-flex align-center justify-center">
-                <v-icon class="me-3 text-cyan-darken-3">mdi-cards-playing-outline</v-icon>Spontaneous Recall Deck
+                <v-icon class="me-3 text-cyan-darken-3">mdi-cards-playing-outline</v-icon>Practice Flashcards
               </h3>
               <p class="text-caption font-weight-medium text-medium-emphasis mt-1">
-                Click on the container bounds below to flip your workspace review cards instantly
+                Click to flip
               </p>
             </div>
 
@@ -190,25 +188,21 @@
                     class="front pa-5 d-flex flex-column justify-space-between bg-cyan-panel rounded-xl border-cyan shadow-md"
                     elevation="0"
                   >
-                    <div class="text-center w-100 mt-2">
-                      <v-chip size="x-small" color="cyan-darken-4" variant="flat" class="font-weight-black tracking-wider text-uppercase px-3 py-2">
-                        Morphological Anomaly Check
-                      </v-chip>
-                    </div>
+
 
                     <v-card-text v-if="currentVocabItem" class="d-flex flex-column align-center justify-center text-center py-6 flex-grow-1">
-                      <div class="text-body-2 font-weight-bold text-cyan-subtitle mb-4">How do you translate or correctly reconstruct this phrasing?</div>
+                      <div class="text-body-2 font-weight-bold text-cyan-subtitle mb-4">What is a better way to say this?</div>
                       <div class="text-h3 font-weight-black text-cyan-header font-code tracking-tight line-clamp-3 px-2 break-word">
-                        "{{ currentVocabItem.incorrect || 'Missing target baseline phrase' }}"
+                        "{{ currentVocabItem.incorrect || 'Missing data' }}"
                       </div>
                     </v-card-text>
                     <v-card-text v-else class="text-center text-body-2 text-medium-emphasis my-auto py-8">
-                      No lexical tracking components stored inside the store profile cache yet.
+                      No vocabulary yet.
                     </v-card-text>
 
                     <div class="d-flex align-center justify-space-between pt-3 border-top border-cyan mt-auto">
                       <span class="text-caption font-weight-black text-cyan-subtitle d-flex align-center">
-                        <v-icon size="14" class="me-1">mdi-gesture-tap</v-icon> Click to reveal key
+                        <v-icon size="14" class="me-1">mdi-gesture-tap</v-icon> Click to reveal
                       </span>
                       <v-btn
                         color="cyan-darken-4"
@@ -229,20 +223,14 @@
                     class="back pa-5 d-flex flex-column justify-space-between bg-emerald-panel rounded-xl border-emerald shadow-md"
                     elevation="0"
                   >
-                    <div class="text-center w-100 mt-2">
-                      <v-chip size="x-small" color="emerald-darken-4" variant="flat" class="font-weight-black tracking-wider text-uppercase px-3 py-2">
-                        Target Structural Solution Found
-                      </v-chip>
-                    </div>
 
                     <v-card-text v-if="currentVocabItem" class="d-flex flex-column align-center justify-center text-center py-6 flex-grow-1">
-                      <div class="text-body-2 font-weight-bold text-emerald-subtitle mb-4">The natural expression vector maps to:</div>
                       <div class="text-h3 font-weight-black text-emerald-header font-code tracking-tight line-clamp-3 px-2 break-word">
                         {{ currentVocabItem.correct }}
                       </div>
                     </v-card-text>
                     <v-card-text v-else class="text-center text-body-2 text-medium-emphasis my-auto py-8">
-                      No active configuration layers tracked.
+                      No vocabulary yet.
                     </v-card-text>
 
                     <div class="d-flex align-center justify-space-between pt-3 border-top border-emerald mt-auto">
@@ -274,8 +262,8 @@
       <v-window-item :value="1">
         <VWMyProgressPanel
           :completionTarget="COMPLETION_TARGET"
-          title="Vocabulary Workout Standings"
-          subtitle="Initialize modern interactive spaced-repetition drills or track retention graphs"
+          title="Your progress — Vocab Workout"
+          subtitle="See your pending work, start a new session or continue where you left off"
           @continue="continueSession"
           @start="startNewSessionForList"
           class="mt-2 fade-in"
@@ -469,11 +457,6 @@ onMounted(async () => {
 .max-w-container {
   max-width: 1440px;
   margin: 0 auto;
-}
-
-.panel-toggle-btn {
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
 }
 
 .vw-table-scroll {

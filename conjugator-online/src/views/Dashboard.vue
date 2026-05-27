@@ -69,7 +69,7 @@
           <div v-if="!sessions.length" class="text-center my-12 py-12 opacity-60">
             <v-icon size="64" color="grey-lighten-1" class="mb-3">mdi-database-off-outline</v-icon>
             <h3 class="text-h6 font-weight-medium text-grey-darken-2">No game sessions found</h3>
-            <p class="text-body-2 text-neutral mt-1">Complete your diagnostic drills to establish baseline charts.</p>
+            <p class="text-body-2 text-neutral mt-1">Play a game to start tracking your progress.</p>
           </div>
           
           <div v-else>
@@ -78,26 +78,26 @@
               <v-col cols="12" lg="5" class="d-flex">
                 <v-card class="chart-card pa-4 py-6 w-100 rounded-xl border border-light shadow-sm flex-column" elevation="0">
                   <v-card-title class="text-h5 font-weight-black text-grey-darken-3 pb-2 d-flex align-center">
-                    <v-icon class="me-2" color="teal">mdi-calculator-variant-outline</v-icon> Conjugator Aggregate Metrics
+                    <v-icon class="me-2" color="teal">mdi-calculator-variant-outline</v-icon> Conjugator Stats
                   </v-card-title>
                   <v-divider class="my-3 opacity-40" />
                   <v-card-text class="d-flex flex-column align-center justify-center flex-grow-1">
                     <PieChart :data="totalRightWrongChartData" />
 
                     <v-chip size="small" variant="flat" color="teal-lighten-5" class="text-teal-darken-3 font-weight-bold mt-6 mb-2 px-4">
-                      {{ sessions.length }} Module Run{{ sessions.length !== 1 ? 's' : '' }} Completed
+                      {{ sessions.length }} Game{{ sessions.length !== 1 ? 's' : '' }} Completed
                     </v-chip>
                     <div class="text-subtitle-1 font-weight-black text-grey-darken-3">
-                      Total Evaluations Tracked: <strong>{{ totalRoundsPlayed }}</strong> rounds
+                      Total rounds played: <strong>{{ totalRoundsPlayed }}</strong> rounds
                     </div>
                     <div class="text-body-2 font-weight-medium text-grey-darken-2 mt-1">
-                      {{ totalCorrect }} verified &bull; {{ totalIncorrect }} corrections
+                      {{ totalCorrect }} correct &bull; {{ totalIncorrect }} incorrect
                     </div>
                     <div v-if="totalTypos > 0" class="text-caption text-medium-emphasis font-weight-medium mt-1 italic-label">
-                      ({{ totalTypos }} formatting exception{{ totalTypos > 1 ? 's' : '' }} bypassed)
+                      ({{ totalTypos }} typo{{ totalTypos > 1 ? 's' : '' }})
                     </div>
                     <div class="text-subtitle-2 font-weight-bold text-indigo-darken-2 border rounded-lg px-3 py-1 mt-4 bg-indigo-lighten-5">
-                      Velocity Constant: <strong>{{ avgTimePerRound }}</strong> seconds per entry
+                      Speed: <strong>{{ avgTimePerRound }}</strong> seconds per answer on average
                     </div>
                   </v-card-text>
                 </v-card>
@@ -108,7 +108,7 @@
                   <div v-if="sessionAccuracyTrend.length > 1" class="flex-grow-1 d-flex flex-column justify-space-between">
                     <v-card variant="flat" class="pa-4 bg-grey-lighten-5 rounded-lg border mb-4">
                       <div class="text-subtitle-1 font-weight-bold text-grey-darken-3 mb-3 d-flex align-center">
-                        <v-icon class="me-2" color="blue">mdi-chart-bell-curve-cumulative</v-icon> Run Accuracy Over Time
+                        <v-icon class="me-2" color="blue">mdi-chart-bell-curve-cumulative</v-icon> Accuracy Over Time
                       </div>
                       <v-sparkline
                         :model-value="sessionAccuracyTrend"
@@ -129,11 +129,11 @@
                       <v-col cols="12" sm="4" class="d-flex">
                         <v-card class="pa-4 flex-grow-1 text-center d-flex flex-column justify-center border rounded-xl" elevation="0">
                           <v-card-title class="text-caption font-weight-black text-uppercase text-wrap text-grey pa-0">
-                            Semester Mark Total
+                            This Semester's Total
                           </v-card-title>
                           <div class="text-h4 my-2 font-weight-black text-emerald">{{ userStore.totalCorrect ?? 0 }}</div>
                           <div class="text-caption text-medium-emphasis line-height-xs">
-                            Correct inputs logged since semester start
+                            Correct answers since semester start
                           </div>
                         </v-card>
                       </v-col>
@@ -147,7 +147,7 @@
                               elevation="0"
                             >
                               <v-card-title class="text-caption font-weight-black text-uppercase text-wrap text-indigo-darken-3 pa-0">
-                                Language Power Index
+                                Conjugation Health Score
                               </v-card-title>
                               <div class="d-flex justify-center my-2">
                                 <Gauge
@@ -167,9 +167,9 @@
                       <v-col cols="12" sm="4" class="d-flex">
                         <v-card class="pa-4 flex-grow-1 text-center d-flex flex-column justify-center border rounded-xl" elevation="0">
                           <v-card-title class="text-caption font-weight-black text-uppercase text-wrap text-grey pa-0">
-                            Historical Anchor
+                            Last Semester's Total
                           </v-card-title>
-                          <v-card-subtitle class="text-caption text-medium-emphasis font-weight-bold pa-0 mt-0">Prior Semester Record</v-card-subtitle>
+                          <v-card-subtitle class="text-caption text-medium-emphasis font-weight-bold pa-0 mt-0">Your previous record</v-card-subtitle>
                           
                           <div class="flex-grow-1 d-flex flex-column justify-center mt-2">
                             <template v-if="userStore.previousDate">
@@ -178,7 +178,7 @@
                               </div>
                               <div>
                                 <v-chip size="x-small" color="primary" variant="flat" class="font-weight-bold">
-                                  {{ userStore.previousHealthScore }}% Precision
+                                  {{ userStore.previousHealthScore }}% Health Score
                                 </v-chip>
                               </div>
                             </template>
@@ -192,7 +192,7 @@
                   </div>
                   <div v-else class="text-center py-12 text-medium-emphasis my-auto opacity-50">
                     <v-icon size="48" class="mb-2">mdi-chart-timeline-variant</v-icon>
-                    <p class="text-body-2">Complete secondary test sets to activate trending telemetry graphs.</p>
+                    <p class="text-body-2">Play more to raise your scores.</p>
                   </div>
                 </v-card>
               </v-col>
@@ -200,13 +200,13 @@
               <v-col cols="12" lg="6" class="d-flex">
                 <v-card class="chart-card pa-4 w-100 rounded-xl border border-light shadow-sm" elevation="0">
                   <v-card-title class="text-h6 font-weight-bold text-grey-darken-3 pb-0">
-                    <v-icon class="me-2" color="green">mdi-clock-fast</v-icon> Tense Form Calibration Accuracy
+                    <v-icon class="me-2" color="green">mdi-clock-fast</v-icon> Accuracy by Tense
                   </v-card-title>
                   <v-divider class="my-3 opacity-40" />
                   <v-card-text class="d-flex flex-column align-center flex-grow-1 justify-center">
                     <BarChart :data="tenseAccuracyData" class="w-100" />
                     <div class="text-caption font-weight-medium text-medium-emphasis mt-4 text-center">
-                      Percentage distribution ratio calculated strictly via valid outputs per structural paradigm
+                      Percentage of correct answers for each tense
                     </div>
                   </v-card-text>
                 </v-card>
@@ -215,13 +215,13 @@
               <v-col cols="12" lg="6" class="d-flex">
                 <v-card class="chart-card pa-4 w-100 rounded-xl border border-light shadow-sm" elevation="0">
                   <v-card-title class="text-h6 font-weight-bold text-grey-darken-3 pb-0">
-                    <v-icon class="me-2" color="purple">mdi-code-brackets</v-icon> Sentence Type Variance Precision
+                    <v-icon class="me-2" color="purple">mdi-code-brackets</v-icon> Accuracy by Sentence Type
                   </v-card-title>
                   <v-divider class="my-3 opacity-40" />
                   <v-card-text class="d-flex flex-column align-center flex-grow-1 justify-center">
                     <BarChart :data="sentenceTypeAccuracyData" class="w-100" />
                     <div class="text-caption font-weight-medium text-medium-emphasis mt-4 text-center">
-                      Successful execution boundaries mapping interrogative, affirmative, and negative structural flags
+                      Percentage of correct answers for each sentence type
                     </div>
                   </v-card-text>
                 </v-card>
@@ -240,21 +240,21 @@
                   <div>
                     <v-card-title class="text-h5 font-weight-black text-amber-header d-flex align-center pb-1">
                       <v-icon class="me-3 mb-1 text-amber-icon" size="26">mdi-lightbulb-on-outline</v-icon>
-                      Conjugator Error Explainer
+                      Explain your Errors
                     </v-card-title>
                     <v-card-subtitle class="font-weight-medium text-amber-subtitle">
-                      Isolating <strong>{{ totalIncorrect }}</strong> tracked structural variations
+                      You have <strong>{{ totalIncorrect }}</strong> wrong answers
                     </v-card-subtitle>
                     <v-divider class="my-3 border-amber alpha-divider" />
                   </div>
 
                   <v-card-text v-if="currentError" class="flex-grow-1 d-flex flex-column justify-center pa-1">
                     <div class="text-center w-100">
-                      <div class="text-body-2 font-weight-bold text-grey-darken-3 mb-3">Isolate the morphological breakdown inside this input parameter:</div>
+                      <div class="text-body-2 font-weight-bold text-grey-darken-3 mb-3">Can you explain why this answer was wrong?</div>
                       
                       <v-sheet color="white" class="pa-4 rounded-xl border border-dashed mb-4 border-amber-light">
                         <div class="text-h4 font-weight-black text-error tracking-wide text-wrap py-2 break-word font-code">
-                          "{{ currentError.user_answer || 'Timeout' }}"
+                          <span>{{ currentError.user_answer  }}</span><span v-if="!currentError.user_answer">No answer</span>
                         </div>
                       </v-sheet>
 
@@ -267,7 +267,7 @@
                     </div>
                   </v-card-text>
                   <v-card-text v-else class="text-center text-body-2 text-medium-emphasis my-auto py-8">
-                    No active runtime conjugation conflicts verified yet.
+                    No errors to display.
                   </v-card-text>
 
                   <v-card-actions class="d-flex justify-end pt-3 border-top border-amber">
@@ -279,7 +279,7 @@
                       @click="nextError"
                       :disabled="!incorrectAnswersData.length"
                     >
-                      Cycle Next Error
+                      Next
                       <v-icon size="18" class="ms-2">mdi-arrow-right-circle-outline</v-icon>
                     </v-btn>
                   </v-card-actions>
@@ -294,17 +294,17 @@
                   <div>
                     <v-card-title class="text-h5 font-weight-black text-teal-header d-flex align-center pb-1">
                       <v-icon class="me-3 mb-1 text-teal-icon" size="26">mdi-bullhorn-variant-outline</v-icon>
-                      Target Active Recall Drills
+                      Use your Mastered Verbs
                     </v-card-title>
                     <v-card-subtitle class="font-weight-medium text-teal-subtitle">
-                      Leveraging <strong>{{ userStore.tenseStats?.mastered_verbs_ps?.length ?? 0 }} Past Simple</strong> & <strong>{{ userStore.tenseStats?.mastered_verbs_pp?.length ?? 0 }} Present Perfect</strong> verified roots
+                      You have mastered <strong>{{ userStore.tenseStats?.mastered_verbs_ps?.length ?? 0 }} Past Simple</strong> & <strong>{{ userStore.tenseStats?.mastered_verbs_pp?.length ?? 0 }} Present Perfect</strong> irregular verb forms
                     </v-card-subtitle>
                     <v-divider class="my-3 border-teal alpha-divider" />
                   </div>
 
                   <v-card-text v-if="currentMasteredVerb" class="flex-grow-1 d-flex flex-column justify-center pa-1">
                     <div class="text-center w-100">
-                      <div class="text-body-2 font-weight-bold text-grey-darken-3 mb-3">Synthesize a spontaneous context sentence utilizing this specific bound target configuration:</div>
+                      <div class="text-body-2 font-weight-bold text-grey-darken-3 mb-3">Can you use this verb in a sentence?</div>
                       
                       <v-sheet color="white" class="pa-4 rounded-xl border border-dashed mb-4 border-teal-light">
                         <div class="text-h3 font-weight-black text-teal-darken-4 tracking-tight py-2">
@@ -313,12 +313,12 @@
                       </v-sheet>
 
                       <div class="text-subtitle-2 font-weight-bold text-grey-darken-2">
-                        Imposed Framework Parameter: <v-chip size="small" color="teal" variant="flat" class="font-weight-bold font-uppercase ms-1">{{ currentMasteredVerb?.tense }}</v-chip>
+                        Use this tense: <v-chip size="small" color="teal" variant="flat" class="font-weight-bold font-uppercase ms-1">{{ currentMasteredVerb?.tense }}</v-chip>
                       </div>
                     </div>
                   </v-card-text>
                   <v-card-text v-else class="text-center text-body-2 text-medium-emphasis my-auto py-8">
-                    Accumulate vocabulary mastery traces within training sessions to release prompts.
+                    Play the conjugation game with irregular verbs to master more forms.
                   </v-card-text>
                   
                   <v-card-actions v-if="currentMasteredVerb" class="d-flex justify-end pt-3 border-top border-teal">
@@ -329,7 +329,7 @@
                       class="rounded-lg text-button font-weight-bold px-5"
                       @click="nextMasteredVerb"
                     >
-                      Next Core Root
+                      Next
                       <v-icon size="18" class="ms-2">mdi-shuffle-variant</v-icon>
                     </v-btn>
                   </v-card-actions>
@@ -339,39 +339,39 @@
             </v-row>
 
             <v-divider class="my-8"/>
-            <h3 class="text-h4 font-weight-black text-grey-darken-4 tracking-tight mb-4 px-2">Irregular Verbs Tracking Tiers</h3>
+            <h3 class="text-h4 font-weight-black text-grey-darken-4 tracking-tight mb-4 px-2">Irregular Verb Mastery</h3>
             
             <v-row class="align-stretch mb-6">
               
               <v-col cols="12" md="6" class="d-flex">
                 <v-sheet elevation="0" class="pa-5 w-100 border rounded-xl d-flex flex-column gap-4 bg-grey-fluid">
                   <h4 class="text-h6 font-weight-black text-grey-darken-3 d-flex align-center mb-1">
-                    <v-icon class="me-2" color="indigo">mdi-label-outline</v-icon> Past Simple Paradigm Tiers
+                    <v-icon class="me-2" color="indigo">mdi-label-outline</v-icon> Past Simple
                   </h4>
                   <v-divider class="opacity-40 mb-2" />
 
                   <div v-for="(tier, idx) in ['Basic 75', 'Master 110', 'All 130']" :key="tier" class="mb-4 bg-white pa-3 rounded-lg border">
-                    <div class="font-weight-bold text-subtitle-2 text-grey-darken-3 mb-2">{{ tier }} Irregulars Group</div>
+                    <div class="font-weight-bold text-subtitle-2 text-grey-darken-3 mb-2">{{ tier }} Irregulars</div>
                     
-                    <div class="text-caption font-weight-bold text-medium-emphasis mb-1">Discovered Profile Ratio (1x Validation)</div>
+                    <div class="text-caption font-weight-bold text-medium-emphasis mb-1">Discovery (1x Correct)</div>
                     <v-progress-linear :model-value="userStore.tierStats?.[idx]?.discovered_pct_ps ?? 0" height="20" color="indigo-lighten-2" class="mb-2 rounded font-weight-black" striped>
                       <template #default="{ value }"><span>{{ value }}%</span></template>
                     </v-progress-linear>
                     
-                    <div class="text-caption font-weight-bold text-medium-emphasis mb-1">Mastery Retention Threshold (3x Validations)</div>
+                    <div class="text-caption font-weight-bold text-medium-emphasis mb-1">Mastery (3x Correct)</div>
                     <v-progress-linear :model-value="userStore.tierStats?.[idx]?.mastered_pct_ps ?? 0" height="20" color="indigo" class="rounded font-weight-black" striped>
                       <template #default="{ value }"><span>{{ value }}%</span></template>
                     </v-progress-linear>
                   </div>
 
-                  <div class="mt-2 pt-2 border-top border-dashed">  
-                    <div class="font-weight-black text-subtitle-2 text-grey-darken-3 mb-1">Interactive Target Dictionary — Past Simple</div>
+                  <div class="mt-2 pt-2 border-top">  
+                    <div class="font-weight-black text-subtitle-2 text-grey-darken-3 mb-1">Your verb pools — Past Simple</div>
                     <v-select
                       v-model="selectedPsOption"
                       :items="pastSimpleOptionsWithCounts"
                       item-title="displayLabel"
                       item-value="key"
-                      label="Query Selection Boundary Category"
+                      label="Choose a category"
                       density="comfortable"
                       variant="outlined"
                       bg-color="white"
@@ -388,32 +388,32 @@
               <v-col cols="12" md="6" class="d-flex">
                 <v-sheet elevation="0" class="pa-5 w-100 border rounded-xl d-flex flex-column gap-4 bg-grey-fluid">
                   <h4 class="text-h6 font-weight-black text-grey-darken-3 d-flex align-center mb-1">
-                    <v-icon class="me-2" color="deep-orange">mdi-label-outline</v-icon> Present Perfect Paradigm Tiers
+                    <v-icon class="me-2" color="deep-orange">mdi-label-outline</v-icon> Present Perfect
                   </h4>
                   <v-divider class="opacity-40 mb-2" />
 
                   <div v-for="(tier, idx) in ['Basic 75', 'Master 110', 'All 130']" :key="tier" class="mb-4 bg-white pa-3 rounded-lg border">
-                    <div class="font-weight-bold text-subtitle-2 text-grey-darken-3 mb-2">{{ tier }} Irregulars Group</div>
+                    <div class="font-weight-bold text-subtitle-2 text-grey-darken-3 mb-2">{{ tier }} Irregulars</div>
                     
-                    <div class="text-caption font-weight-bold text-medium-emphasis mb-1">Discovered Profile Ratio (1x Validation)</div>
+                    <div class="text-caption font-weight-bold text-medium-emphasis mb-1">Discovery (1x Correct)</div>
                     <v-progress-linear :model-value="userStore.tierStats?.[idx]?.discovered_pct_pp ?? 0" height="20" color="deep-orange-lighten-2" class="mb-2 rounded font-weight-black" striped>
                       <template #default="{ value }"><span>{{ value }}%</span></template>
                     </v-progress-linear>
                     
-                    <div class="text-caption font-weight-bold text-medium-emphasis mb-1">Mastery Retention Threshold (3x Validations)</div>
+                    <div class="text-caption font-weight-bold text-medium-emphasis mb-1">Mastery (3x Correct)</div>
                     <v-progress-linear :model-value="userStore.tierStats?.[idx]?.mastered_pct_pp ?? 0" height="20" color="deep-orange" class="rounded font-weight-black" striped>
                       <template #default="{ value }"><span>{{ value }}%</span></template>
                     </v-progress-linear>
                   </div>
 
-                  <div class="mt-2 pt-2 border-top border-dashed">
-                    <div class="font-weight-black text-subtitle-2 text-grey-darken-3 mb-1">Interactive Target Dictionary — Present Perfect</div>
+                  <div class="mt-2 pt-2 border-top">
+                    <div class="font-weight-black text-subtitle-2 text-grey-darken-3 mb-1">Your verb pools - Present Perfect</div>
                     <v-select
                       v-model="selectedPpOption"
                       :items="presentPerfectOptionsWithCounts"
                       item-title="displayLabel"
                       item-value="key"
-                      label="Query Selection Boundary Category"
+                      label="Choose a category"
                       density="comfortable"
                       variant="outlined"
                       bg-color="white"
@@ -430,9 +430,9 @@
             
             <v-card class="pa-4 mt-6 rounded-xl border card-fixed d-flex flex-column" elevation="1">
               <div class="text-h6 font-weight-black text-grey-darken-3 mb-3 d-flex align-center flex-shrink-0">
-                <v-icon class="me-2" color="indigo">mdi-history</v-icon> Granular Evaluation Log Audit Trails
+                <v-icon class="me-2" color="indigo">mdi-history</v-icon> Full Game Logs
                 <v-chip size="small" class="ms-2 font-weight-bold" color="indigo" variant="tonal">
-                  {{ sessions.length }} Checked Matches
+                  {{ sessions.length }} Game{{ sessions.length !== 1 ? 's' : '' }}
                 </v-chip>
               </div>
               
@@ -447,11 +447,11 @@
                       <template #default>
                         <div class="d-flex flex-column flex-sm-row align-sm-center justify-space-between w-100 pe-4 gap-2">
                           <span class="text-subtitle-2 font-weight-black text-indigo-darken-3">
-                            🎯 {{ session.correct_count }} / {{ session.total_rounds }} Passes Verified
+                            🎯 {{ session.correct_count }} correct out of {{ session.total_rounds }}
                           </span>
                           <span class="text-caption text-medium-emphasis">
                             {{ new Date(session.started_at).toLocaleString() }} &bull; 
-                            <strong class="text-grey-darken-2 ms-1 text-wrap font-code">{{ session.tenses.join(', ').slice(0, 45) }}...</strong>
+                            <strong class="text-grey-darken-2 ms-1 text-wrap font-code">{{ session.tenses.join(', ').slice(0, 100) }}</strong>
                           </span>
                         </div>
                       </template>
@@ -463,15 +463,14 @@
                           <thead>
                             <tr>
                               <th class="font-weight-black text-grey-darken-3 text-center">#</th>
-                              <th class="font-weight-black text-grey-darken-3">Root Verb</th>
-                              <th class="font-weight-black text-grey-darken-3">Tense Scope</th>
-                              <th class="font-weight-black text-grey-darken-3">Structure Class</th>
-                              <th class="font-weight-black text-grey-darken-3">User Input String</th>
-                              <th class="font-weight-black text-grey-darken-3">Acceptable Base Paradigms</th>
-                              <th class="font-weight-black text-grey-darken-3 text-center">Status</th>
-                              <th class="font-weight-black text-grey-darken-3 text-center">Analysis</th>
-                              <th class="font-weight-black text-grey-darken-3 text-center">Typo Vector</th>
-                              <th v-if="userStore.isStaff" class="font-weight-black text-grey-darken-3 text-end">Staff Panel</th>
+                              <th class="font-weight-black text-grey-darken-3">Verb</th>
+                              <th class="font-weight-black text-grey-darken-3">Tense</th>
+                              <th class="font-weight-black text-grey-darken-3">Sentence</th>
+                              <th class="font-weight-black text-grey-darken-3">User Answer</th>
+                              <th class="font-weight-black text-grey-darken-3">Acceptable Answers</th>
+                              <th class="font-weight-black text-grey-darken-3 text-center">Correct?</th>
+                              <th class="font-weight-black text-grey-darken-3 text-center">AI Tutor</th>
+                              <th class="font-weight-black text-grey-darken-3 text-center">Typo?</th>
                             </tr>
                           </thead>
                           <tbody>
@@ -496,7 +495,7 @@
                                 <span v-else class="text-caption text-grey">—</span>
                               </td>
                               <td class="text-center">
-                                <v-chip v-if="round.typo === true" size="x-small" color="success" variant="flat" class="font-weight-bold">Overruled (Ok)</v-chip>
+                                <v-chip v-if="round.typo === true" size="x-small" color="success" variant="flat" class="font-weight-bold">Accepted</v-chip>
                                 <v-chip v-else-if="round.typo_accepted === false" size="x-small" color="error" variant="flat" class="font-weight-bold">Denied</v-chip>
                                 <v-chip v-else-if="round.typo_requested === true" size="x-small" color="warning" variant="flat" class="font-weight-bold text-dark">Pending</v-chip>
                                 <v-btn v-else-if="!round.is_correct && !userStore.isStaff" size="x-small" color="primary" variant="tonal" class="font-weight-bold" :disabled="typoRequests.has(round.id)" @click="requestTypo(round)">
@@ -504,19 +503,11 @@
                                 </v-btn>
                                 <span v-else class="text-caption text-grey">—</span>
                               </td>
-                              
-                              <td v-if="userStore.isStaff" class="text-end">
-                                <div v-if="round.typo_requested && round.typo_accepted === null" class="d-flex justify-end gap-1">
-                                  <v-btn size="x-small" color="success" variant="flat" class="font-weight-bold me-1" @click="acceptTypo(round)">Approve</v-btn>
-                                  <v-btn size="x-small" color="error" variant="flat" class="font-weight-bold" @click="denyTypo(round)">Deny</v-btn>
-                                </div>
-                                <v-chip v-else size="x-small" variant="tonal" color="grey-darken-2" class="font-weight-bold">Settled</v-chip>
-                              </td>
                             </tr>
                           </tbody>
                         </v-table>
                       </div>
-                      <div v-else class="text-center py-4 text-caption text-disabled">No analytical subset recorded for this execution frame.</div>
+                      <div v-else class="text-center py-4 text-caption text-disabled">No data available.</div>
                     </v-expansion-panel-text>
                   </v-expansion-panel>
                 </v-expansion-panels>
@@ -541,7 +532,7 @@
 
     <AiTutorChatDialog
       v-model="tutorOpen"
-      title="AI Tutor — Conjugation Analysis Engine"
+      title="AI Tutor — Conjugation Error Analysis"
       :context="tutorContext"
       :system-message="conjTutorSystemMessage"
       :build-initial-user-message="buildConjTutorInitialUserMessage"
@@ -554,14 +545,14 @@
       <template #context-summary="{ ctx }">
         <div class="my-2 pa-2 bg-grey-lighten-4 rounded-xl border border-dashed">
           <div class="text-body-2 font-weight-bold text-grey-darken-3">
-            <span class="text-indigo-darken-3 font-weight-black">Target Directive:</span>
+            <span class="text-indigo-darken-3 font-weight-black">Prompt:</span>
             verb={{ ctx?.verb }} | person={{ ctx?.person }} | tense={{ ctx?.tense }} | format={{ ctx?.sentence_type }}
           </div>
           <div class="mt-1 text-body-2 text-error font-weight-bold">
-            <span class="text-grey-darken-2 font-weight-medium">Your submission sequence:</span> "{{ ctx?.student_answer ?? "—" }}"
+            <span class="text-grey-darken-2 font-weight-medium">Your answer:</span> "{{ ctx?.student_answer ?? "—" }}"
           </div>
           <div class="mt-1 text-body-2 text-success font-weight-bold">
-            <span class="text-grey-darken-2 font-weight-medium">Acceptable configurations:</span> {{ (ctx?.acceptable_answers ?? []).join(" / ") || "—" }}
+            <span class="text-grey-darken-2 font-weight-medium">Acceptable answers:</span> {{ (ctx?.acceptable_answers ?? []).join(" / ") || "—" }}
           </div>
         </div>
         <v-divider class="my-3" />
@@ -1077,9 +1068,7 @@ onMounted(async () => {
 }
 
 .text-error-underlined {
-  color: #b91c1c;
   font-weight: 700;
-  text-decoration: underline dashed rgba(185, 28, 28, 0.4);
 }
 
 .max-h-dictionary {

@@ -15,8 +15,8 @@
     <!-- Empty State -->
     <div v-else-if="availableGames.length === 0" class="text-center my-12 py-12 d-flex flex-column align-center justify-center opacity-70">
       <v-icon size="80" color="grey-lighten-1" class="mb-4">mdi-gamepad-variant-outline</v-icon>
-      <h3 class="text-h5 font-weight-medium text-grey-darken-2">No gameplay history recorded</h3>
-      <p class="text-body-2 text-neutral mt-1">Complete modular training exercises to generate analytics.</p>
+      <h3 class="text-h5 font-weight-medium text-grey-darken-2">No gameplay history</h3>
+      <p class="text-body-2 text-neutral mt-1">Play games to generate data!</p>
     </div>
 
     <!-- Main Content Grid -->
@@ -82,10 +82,10 @@
                   {{ groupedGames[selectedGame].sessions.length }} Game Session{{ groupedGames[selectedGame].sessions.length !== 1 ? 's' : '' }}
                 </v-chip>
                 <div class="text-subtitle-2 font-weight-medium text-grey-darken-2">
-                  Total Processing Load: <strong>{{ groupedGames[selectedGame].totalRounds }}</strong> rounds
+                  Total rounds played: <strong>{{ groupedGames[selectedGame].totalRounds }}</strong> rounds
                 </div>
                 <div class="text-caption text-medium-emphasis mt-1">
-                  {{ groupedGames[selectedGame].totalCorrect }} verified correct responses &bull; {{ groupedGames[selectedGame].totalIncorrect }} correction cycles
+                  {{ groupedGames[selectedGame].totalCorrect }} correct &bull; {{ groupedGames[selectedGame].totalIncorrect }} incorrect
                 </div>
               </v-card-text>
             </v-card>
@@ -95,7 +95,7 @@
           <v-col cols="12" md="6" class="d-flex">
             <v-card class="chart-card pa-4 w-100 rounded-xl" elevation="2">
               <v-card-title class="text-h6 font-weight-bold text-grey-darken-3 pb-0 d-flex align-center">
-                <v-icon class="me-2" color="blue-darken-1">mdi-chart-timeline-variant-shimmer</v-icon> Performance Evolution
+                <v-icon class="me-2" color="blue-darken-1">mdi-chart-timeline-variant-shimmer</v-icon> Performance Trend
               </v-card-title>
               <v-divider class="my-3 opacity-40" />
               <v-card-text class="d-flex flex-column justify-center flex-grow-1">
@@ -115,12 +115,12 @@
                     :show-labels="true"
                   />
                   <div class="text-caption text-medium-emphasis text-center font-weight-medium mt-4">
-                    Accuracy precision ratio mapped per structural iteration sequence
+                    Your accuracy over time
                   </div>
                 </div>
                 <div v-else class="text-center py-12 text-muted my-auto opacity-60">
                   <v-icon size="44" color="grey-lighten-1" class="mb-2">mdi-chart-line-variant</v-icon>
-                  <p class="text-body-2">Accumulate multiple consecutive runs to render contextual delta trends.</p>
+                  <p class="text-body-2">Play more to see your performance trend.</p>
                 </div>
               </v-card-text>
             </v-card>
@@ -131,7 +131,7 @@
             <v-card elevation="2" class="chart-card trophy-card pa-4 w-100 rounded-xl flex-column">
               <v-card-title class="text-h5 font-weight-bold d-flex align-center text-amber-darken-4 pb-2">
                 <v-icon class="me-3 color-gold-icon" size="28">mdi-trophy-variant</v-icon>
-                Milestones & Badges
+                Achievements
               </v-card-title>
               <v-divider class="mb-4 border-gold opacity-40" />
 
@@ -169,8 +169,8 @@
 
                 <div v-else class="text-center py-12 opacity-60 my-auto d-flex flex-column align-center justify-center h-100">
                   <v-icon size="56" color="amber-lighten-3" class="mb-2">mdi-trophy-broken</v-icon>
-                  <div class="text-subtitle-1 font-weight-medium text-grey-darken-2">No active rewards found</div>
-                  <p class="text-caption text-neutral">High accuracy tiers or speed parameters unlock automatic honors.</p>
+                  <div class="text-subtitle-1 font-weight-medium text-grey-darken-2">No trophies earned yet</div>
+                  <p class="text-caption text-neutral">Earn trophies by playing perfect games.</p>
                 </div>
               </v-card-text>
             </v-card>
@@ -184,20 +184,20 @@
             >
               <v-card-title class="text-h5 font-weight-bold text-emerald-header d-flex align-center pb-2">
                 <v-icon class="me-3 text-emerald-icon" size="28">mdi-lightbulb-on-outline</v-icon>
-                Interactive Critique Explainer
+                Explain your errors
               </v-card-title>
               <v-divider class="mb-3 border-emerald alpha-divider" />
               
               <v-card-subtitle class="text-center font-weight-medium text-emerald-subtitle mb-2">
-                Anomalies Detected: <strong>{{ groupedGames[selectedGame].totalIncorrect }}</strong> logged items
+                You have <strong>{{ groupedGames[selectedGame].totalIncorrect }}</strong> wrong answers
               </v-card-subtitle>
 
               <v-card-text v-if="currentError(selectedGame)" class="flex-grow-1 d-flex flex-column justify-center pa-2">
                 <div class="text-center">
                   <p class="text-body-2 font-weight-medium text-grey-darken-3 mb-4">
-                    <span v-if="selectedGame !== 'Prove it!' && selectedGame !== 'Pronunciation Challenge'">Analyze the structural failure below to reinforce proper usage parameters:</span>
-                    <span v-else-if="selectedGame === 'Prove it!'">Incorporate the irregular past paradigm constraint into your active recall structure:</span>
-                    <span v-else-if="selectedGame === 'Pronunciation Challenge'">Acoustic phoneme disparity detected. Isolate and match native cadence markers:</span>
+                    <span v-if="selectedGame !== 'Prove it!' && selectedGame !== 'Pronunciation Challenge'">Can you explain the error?</span>
+                    <span v-else-if="selectedGame === 'Prove it!'">You were not able to use this verb correctly:</span>
+                    <span v-else-if="selectedGame === 'Pronunciation Challenge'">Try again to say the following:</span>
                   </p>
 
                   <!-- Image context rendering loops -->
@@ -220,10 +220,10 @@
 
                   <div v-if="selectedGame !== 'Prove it!' && selectedGame !== 'Pronunciation Challenge'" class="mt-2 text-center">
                     <v-chip v-if="currentError(selectedGame)?.out_of_time || currentError(selectedGame)?.user_answer === ''" color="error" variant="flat" size="small">
-                      Sequence Timed Out (No Submission)
+                      Out of time! No answer was recorded.
                     </v-chip>
                     <v-chip v-else color="red-darken-1" variant="tonal" class="font-weight-bold text-body-2">
-                      Your execution trace: <strong class="ms-1">"{{ currentError(selectedGame)?.user_answer }}"</strong>
+                      Your answer <strong class="ms-1">"{{ currentError(selectedGame)?.user_answer }}"</strong>
                     </v-chip>
                   </div>
                 </div>
@@ -231,8 +231,8 @@
 
               <v-card-text v-else class="text-center py-12 text-caption text-muted my-auto opacity-60 d-flex flex-column align-center justify-center h-100">
                 <v-icon size="56" color="green-lighten-3" class="mb-2">mdi-shield-check-outline</v-icon>
-                <div class="text-subtitle-1 font-weight-medium text-grey-darken-2">Perfect execution score!</div>
-                <p class="text-caption">No tracked evaluation flags exist for this game module configuration.</p>
+                <div class="text-subtitle-1 font-weight-medium text-grey-darken-2">Perfect so far!</div>
+                <p class="text-caption">No errors to analyze.</p>
               </v-card-text>
 
               <v-card-actions class="d-flex justify-end pt-2 border-top alpha-divider">
@@ -244,7 +244,7 @@
                   @click="nextError(selectedGame)"
                   :disabled="!groupedGames[selectedGame].incorrectRounds.length"
                 >
-                  Inspect Next Case
+                  Next
                   <v-icon size="20" class="ms-2">mdi-arrow-right-circle</v-icon>
                 </v-btn>
               </v-card-actions>
@@ -255,7 +255,7 @@
         <!-- Session Details Expansion Accordions Panels -->
         <v-card class="pa-4 mt-6 rounded-xl border" elevation="1">
           <div class="text-h6 font-weight-bold text-grey-darken-3 mb-3 d-flex align-center">
-            <v-icon class="me-2" color="indigo">mdi-history</v-icon> Historical Logs & Audits
+            <v-icon class="me-2" color="indigo">mdi-history</v-icon> Full Game Logs
           </div>
           <v-expansion-panels variant="accordion" class="historical-panels shadow-sm">
             
@@ -270,7 +270,7 @@
                 <template #default>
                   <div class="d-flex align-center justify-space-between w-100 pe-4">
                     <span class="text-subtitle-2 font-weight-black text-indigo-darken-3">
-                      {{ session.correct_count }} / {{ session.total_rounds }} Pass Marks
+                      {{ session.correct_count }} / {{ session.total_rounds }} questions correct
                     </span>
                     <span class="text-caption text-medium-emphasis">
                       <v-icon size="12" class="me-1">mdi-clock-outline</v-icon>
@@ -285,12 +285,12 @@
                   <thead>
                     <tr>
                       <th class="font-weight-bold text-grey-darken-3">#</th>
-                      <th class="font-weight-bold text-grey-darken-3">Semantic Prompt Evaluation Challenge</th>
+                      <th class="font-weight-bold text-grey-darken-3">Game</th>
                       <th v-if="selectedGame === 'Quantifier Quest' || selectedGame === 'Pronoun Practice'" class="font-weight-bold text-grey-darken-3">Visual Variable</th>
-                      <th class="font-weight-bold text-grey-darken-3">User Input</th>
+                      <th class="font-weight-bold text-grey-darken-3">User Answer</th>
                       <th class="font-weight-bold text-grey-darken-3 text-center">Status</th>
-                      <th class="font-weight-bold text-grey-darken-3 text-center">Typo Class?</th>
-                      <th class="font-weight-bold text-grey-darken-3 text-end">Moderation Workflow</th>
+                      <th class="font-weight-bold text-grey-darken-3 text-center">Typo?</th>
+                      <th class="font-weight-bold text-grey-darken-3 text-end">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -327,10 +327,10 @@
                           </v-btn>
                         </template>
                         <template v-else-if="round.typo_requested">
-                          <v-chip size="small" color="warning" variant="flat" class="font-weight-bold">Pending Review</v-chip>
+                          <v-chip size="small" color="warning" variant="flat" class="font-weight-bold">Pending</v-chip>
                         </template>
                         <template v-else-if="round.typo_accepted">
-                          <v-chip size="small" color="success" variant="flat" class="font-weight-bold">Overruled (Ok)</v-chip>
+                          <v-chip size="small" color="success" variant="flat" class="font-weight-bold">Accepted</v-chip>
                         </template>
                         <span v-else class="text-caption text-grey">—</span>
                       </td>
@@ -351,7 +351,7 @@
                 <template #default>
                   <div class="d-flex align-center justify-space-between w-100 pe-4">
                     <span class="text-subtitle-2 font-weight-black text-teal-darken-3">
-                      {{ session.correct_count }} / {{ session.total_rounds }} Verified
+                      {{ session.correct_count }} correct / {{ session.total_rounds }} total answers
                     </span>
                     <span class="text-caption text-medium-emphasis">
                       <v-icon size="12" class="me-1">mdi-clock-outline</v-icon>
@@ -366,9 +366,9 @@
                   <thead>
                     <tr>
                       <th class="font-weight-bold text-grey-darken-3" style="width: 60px;">#</th>
-                      <th v-if="selectedGame === 'Prove it!'" class="font-weight-bold text-grey-darken-3" style="width: 140px;">Irregular Anchor</th>
-                      <th class="font-weight-bold text-grey-darken-3">Lexical Challenge Context Prompt</th>
-                      <th class="font-weight-bold text-grey-darken-3 text-center" style="width: 100px;">Outcome</th>
+                      <th v-if="selectedGame === 'Prove it!'" class="font-weight-bold text-grey-darken-3" style="width: 140px;">Irregular Verb</th>
+                      <th class="font-weight-bold text-grey-darken-3">Prompt</th>
+                      <th class="font-weight-bold text-grey-darken-3 text-center" style="width: 100px;">Result</th>
                     </tr>
                   </thead>
                   <tbody>
