@@ -55,6 +55,10 @@
         "past_simple": "built",
         "past_participle": "built"
     },
+    "burst":{
+        "past_simple": "burst",
+        "past_participle": "burst"
+    },
     "buy":{
         "past_simple": "bought",
         "past_participle": "bought"

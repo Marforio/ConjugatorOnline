@@ -1,18 +1,19 @@
 <template>
   <v-container fluid class="trophy-room pa-4 pa-sm-6">
-    <!-- 2x2 grid -->
+    <!-- 2x2 scannable structural grid layout -->
     <v-row class="align-stretch">
       
       <!-- 1) Conjugator achievements -->
       <v-col cols="12" lg="6" class="d-flex">
-        <v-card elevation="3" class="pa-4 mb-6 card-fixed trophy-card border-gold flex-column">
-          <v-card-title class="text-h5 d-flex align-center font-weight-bold pb-3">
+        <v-card elevation="3" class="pa-4 mb-6 card-fixed trophy-card border-gold d-flex flex-column">
+          <v-card-title class="text-h5 d-flex align-center font-weight-bold pb-3 flex-shrink-0">
             <v-icon size="28" class="me-3 color-gold-icon">mdi-controller</v-icon>
             Conjugator Achievements
           </v-card-title>
-          <v-divider class="mb-4 alpha-divider" />
+          <v-divider class="mb-4 alpha-divider flex-shrink-0" />
 
-          <v-card-text class="flex-grow-1 overflow-y-auto">
+          <!-- Inner scroll container boundary tracking block -->
+          <v-card-text class="flex-grow-1 overflow-y-auto custom-scroll-container">
             <v-progress-linear v-if="loading" indeterminate color="amber-darken-2" class="mb-4 rounded" height="6" />
             <v-alert v-else-if="error" type="error" variant="tonal" class="mb-4" closable>{{ error }}</v-alert>
 
@@ -61,14 +62,14 @@
 
       <!-- 2) Vocabulary achievements -->
       <v-col cols="12" lg="6" class="d-flex">
-        <v-card elevation="3" class="pa-4 mb-6 card-fixed trophy-card border-gold flex-column">
-          <v-card-title class="text-h5 d-flex align-center font-weight-bold pb-3">
+        <v-card elevation="3" class="pa-4 mb-6 card-fixed trophy-card border-gold d-flex flex-column">
+          <v-card-title class="text-h5 d-flex align-center font-weight-bold pb-3 flex-shrink-0">
             <v-icon size="28" class="me-3 color-gold-icon">mdi-cards-outline</v-icon>
             Vocabulary Achievements
           </v-card-title>
-          <v-divider class="mb-4 alpha-divider" />
+          <v-divider class="mb-4 alpha-divider flex-shrink-0" />
 
-          <v-card-text class="flex-grow-1 overflow-y-auto">
+          <v-card-text class="flex-grow-1 overflow-y-auto custom-scroll-container">
             <v-progress-linear v-if="loading" indeterminate color="amber-darken-2" class="mb-4 rounded" height="6" />
             <v-alert v-else-if="error" type="error" variant="tonal" class="mb-4" closable>{{ error }}</v-alert>
 
@@ -117,14 +118,14 @@
 
       <!-- 3) Other game achievements -->
       <v-col cols="12" lg="6" class="d-flex">
-        <v-card elevation="3" class="pa-4 mb-6 mb-lg-0 card-fixed trophy-card border-gold flex-column">
-          <v-card-title class="text-h5 d-flex align-center font-weight-bold pb-3">
+        <v-card elevation="3" class="pa-4 mb-6 mb-lg-0 card-fixed trophy-card border-gold d-flex flex-column">
+          <v-card-title class="text-h5 d-flex align-center font-weight-bold pb-3 flex-shrink-0">
             <v-icon size="28" class="me-3 color-gold-icon">mdi-gamepad-circle</v-icon>
             Other Game Achievements
           </v-card-title>
-          <v-divider class="mb-4 alpha-divider" />
+          <v-divider class="mb-4 alpha-divider flex-shrink-0" />
 
-          <v-card-text class="flex-grow-1 overflow-y-auto">
+          <v-card-text class="flex-grow-1 overflow-y-auto custom-scroll-container">
             <v-progress-linear v-if="loading" indeterminate color="amber-darken-2" class="mb-4 rounded" height="6" />
             <v-alert v-else-if="error" type="error" variant="tonal" class="mb-4" closable>{{ error }}</v-alert>
 
@@ -173,18 +174,20 @@
 
       <!-- 4) Roadmap -->
       <v-col cols="12" lg="6" class="d-flex">
-        <v-card elevation="3" class="pa-4 card-fixed trophy-card border-gold flex-column">
-          <v-card-title class="text-h5 d-flex align-center font-weight-bold pb-1">
-            <v-icon size="28" class="me-3 color-gold-icon">mdi-road-variant</v-icon>
-            Roadmap to Advanced Level
-          </v-card-title>
+        <v-card elevation="3" class="pa-4 card-fixed trophy-card border-gold d-flex flex-column">
+          <div class="flex-shrink-0">
+            <v-card-title class="text-h5 d-flex align-center font-weight-bold pb-1">
+              <v-icon size="28" class="me-3 color-gold-icon">mdi-road-variant</v-icon>
+              Roadmap to Advanced Level
+            </v-card-title>
 
-          <v-card-subtitle class="mb-3 text-wrap text-caption text-medium-emphasis">
-            Milestones reached in SPEAKING exercises without reading from notes
-          </v-card-subtitle>
-          <v-divider class="mb-4 alpha-divider" />
+            <v-card-subtitle class="mb-3 text-wrap text-caption text-medium-emphasis">
+              Milestones reached in SPEAKING exercises without reading from notes
+            </v-card-subtitle>
+            <v-divider class="mb-4 alpha-divider" />
+          </div>
 
-          <v-card-text class="flex-grow-1 overflow-y-auto">
+          <v-card-text class="flex-grow-1 overflow-y-auto custom-scroll-container">
             <v-expansion-panels multiple variant="accordion" class="custom-panels">
               <v-expansion-panel
                 v-for="(items, category) in groupedRoadmap"

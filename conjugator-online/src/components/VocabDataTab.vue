@@ -1,60 +1,64 @@
 <!-- VocabDashboard.vue -->
 <template>
-  <v-container fluid>
-    <!-- Panel controls -->
-    <div class="d-flex justify-center my-4">
-      <v-window-controls v-model="activePanel" length="2" />
-    </div>
+  <v-container fluid class="vocab-room pa-4 pa-sm-6 max-w-container">
+    
+    <!-- Top Segment Control Navigation View Toggles -->
+    <v-row justify="center" class="mb-6">
+      <v-col cols="12" md="10" lg="8" class="d-flex justify-space-between align-center gap-4 flex-wrap flex-sm-nowrap">
+        <v-btn
+          :variant="activePanel === 0 ? 'elevated' : 'tonal'"
+          :color="activePanel === 0 ? 'primary' : 'grey-darken-1'"
+          size="large"
+          class="flex-grow-1 rounded-xl text-subtitle-2 font-weight-black tracking-wide py-4 panel-toggle-btn"
+          @click="activePanel = 0"
+        >
+          <v-icon start class="me-1">mdi-notebook-outline</v-icon>
+          Feedback Notebook
+        </v-btn>
 
-    <div class="d-flex align-center justify-space-between mb-4">
-      <v-btn
-        :variant="activePanel === 0 ? 'elevated' : 'tonal'"
-        :color="activePanel === 0 ? 'grey' : 'primary'"
-        size="large"
-        rounded="pill"
-        @click="activePanel = 0"
-        :disabled="activePanel === 0"
-        class="tab-btn d-flex align-center ga-2"
-      >
-        <v-icon size="24">mdi-chevron-left</v-icon>
-        <span class="ms-2">Feedback / notebook</span>
-      </v-btn>
+        <v-btn
+          :variant="activePanel === 1 ? 'elevated' : 'tonal'"
+          :color="activePanel === 1 ? 'primary' : 'grey-darken-1'"
+          size="large"
+          class="flex-grow-1 rounded-xl text-subtitle-2 font-weight-black tracking-wide py-4 panel-toggle-btn"
+          @click="activePanel = 1"
+        >
+          Workout Metrics
+          <v-icon end class="ms-1">mdi-chart-timeline-variant-outline</v-icon>
+        </v-btn>
+      </v-col>
+    </v-row>
 
-      <v-btn
-        :variant="activePanel === 1 ? 'elevated' : 'tonal'"
-        :color="activePanel === 1 ? 'grey' : 'primary'"
-        size="large"
-        rounded="pill"
-        @click="activePanel = 1"
-        :disabled="activePanel === 1"
-        class="tab-btn d-flex align-center ga-2"
-      >
-        <span class="me-2">Vocab workout progress</span>
-        <v-icon size="24">mdi-chevron-right</v-icon>
-      </v-btn>
-    </div>
-
-    <v-window v-model="activePanel">
-      <!-- PANEL 1: Feedback / notebook (DEFAULT) -->
+    <!-- Master Dashboard Interface Panels Window -->
+    <v-window v-model="activePanel" class="mt-2" :touch="false">
+      
+      <!-- PANEL 1: Feedback / Notebook Interface -->
       <v-window-item :value="0">
-        <v-row>
-          <!-- Vocab Table -->
-          <v-col cols="12" md="8">
-            <v-card elevation="2" class="pa-4">
-              <v-card-title class="text-h5 mb-5">
-                <v-icon class="me-3">mdi-notebook</v-icon>My vocabulary notebook
+        <v-row class="align-stretch">
+          
+          <!-- Primary Vocabulary Notebook Collection Table Block -->
+          <v-col cols="12" md="8" class="d-flex">
+            <v-card class="pa-4 w-100 rounded-xl border border-light shadow-sm flex-column" elevation="0">
+              <v-card-title class="text-h5 font-weight-black text-grey-darken-3 pb-1 d-flex align-center">
+                <v-icon class="me-3" color="indigo">mdi-bookmark-multiple-outline</v-icon>
+                My Vocabulary Notebook
               </v-card-title>
+              <v-card-subtitle class="text-caption font-weight-medium text-medium-emphasis">
+                Logged lexical items highlighted during your interactive speaking feedback loops
+              </v-card-subtitle>
+              <v-divider class="my-4 opacity-40" />
 
-              <v-card-text>
-                <div class="vw-table-scroll">
+              <v-card-text class="pa-1 flex-grow-1 d-flex flex-column">
+                <div class="vw-table-scroll border rounded-lg overflow-hidden flex-grow-1">
                   <v-data-table
                     :items="userStore.processedVocab"
                     :headers="tableHeaders"
                     :loading="userStore.loadingVocab"
-                    class="elevation-1 vw-vocab-table"
-                    loading-text="Loading vocab entries..."
+                    class="vw-vocab-table bg-white text-subtitle-2 font-weight-medium"
+                    loading-text="Syncing current notebook entries..."
                     item-value="vocab_id"
                   >
+                    <!-- Custom AI Row Action Column -->
                     <template #item.ai="{ item }">
                       <v-tooltip text="Ask AI tutor" location="top">
                         <template #activator="{ props }">
@@ -62,155 +66,236 @@
                             v-bind="props"
                             icon
                             variant="text"
+                            color="primary"
                             size="x-small"
+                            class="rounded-lg bg-indigo-lighten-5"
                             @click.stop="openTutorFromRow(item)"
                           >
-                            <v-icon size="18">mdi-robot-outline</v-icon>
+                            <v-icon size="16">mdi-robot-outline</v-icon>
                           </v-btn>
                         </template>
                       </v-tooltip>
                     </template>
+
+                    <!-- Spruced Up Sub-Column Custom Formatters -->
+                    <template #item.incorrect="{ item }">
+                      <span class="text-error font-weight-bold font-code">{{ item.incorrect || '—' }}</span>
+                    </template>
+                    <template #item.correct="{ item }">
+                      <span class="text-success font-weight-bold font-code">{{ item.correct }}</span>
+                    </template>
+                    <template #item.comment="{ item }">
+                      <span class="text-body-2 text-grey-darken-1 font-weight-medium text-wrap block-text">{{ item.comment || '—' }}</span>
+                    </template>
                   </v-data-table>
                 </div>
 
-                <div v-if="userStore.vocabError" class="text-error mt-4">
+                <v-alert v-if="userStore.vocabError" type="error" variant="tonal" class="mt-4 rounded-xl">
                   {{ userStore.vocabError }}
-                </div>
+                </v-alert>
               </v-card-text>
             </v-card>
           </v-col>
 
-          <!-- Add Vocab Form -->
-          <v-col cols="12" md="4">
-            <v-card elevation="2" class="pa-4">
-              <v-card-title class="text-h5">
-                <v-icon class="me-3 mb-2">mdi-notebook-plus</v-icon>Add New Vocab
+          <!-- Input Block Column: Dynamic Manual Entry Form -->
+          <v-col cols="12" md="4" class="d-flex">
+            <v-card class="pa-4 w-100 rounded-xl border border-light shadow-sm flex-column bg-slate-fluid" elevation="0">
+              <v-card-title class="text-h5 font-weight-black text-grey-darken-3 pb-1 d-flex align-center">
+                <v-icon class="me-3" color="teal">mdi-book-plus-outline</v-icon>
+                Expand Notebook
               </v-card-title>
+              <v-card-subtitle class="text-caption font-weight-medium text-medium-emphasis">
+                Manually catalog idioms or custom expressions
+              </v-card-subtitle>
+              <v-divider class="my-4 opacity-40" />
 
-              <v-card-text>
-                <v-form @submit.prevent="submitNewVocab">
-                  <v-text-field v-model="newVocab.correct" label="Correct" required />
-                  <v-text-field v-model="newVocab.incorrect" label="Incorrect" />
-                  <v-textarea v-model="newVocab.comment" label="Comment" rows="2" />
-                  <v-btn type="submit" color="primary" class="mt-3">Submit</v-btn>
+              <v-card-text class="pa-1">
+                <v-form @submit.prevent="submitNewVocab" class="d-flex flex-column gap-3">
+                  <v-text-field 
+                    v-model="newVocab.correct" 
+                    label="Target / Natural Expression" 
+                    placeholder="e.g., look forward to hearing from you"
+                    variant="outlined"
+                    density="comfortable"
+                    bg-color="white"
+                    hide-details
+                    class="rounded-lg font-code font-weight-bold" 
+                    required 
+                  />
+                  
+                  <v-text-field 
+                    v-model="newVocab.incorrect" 
+                    label="Unnatural / Faulty Form" 
+                    placeholder="e.g., look forward to hear from you"
+                    variant="outlined"
+                    density="comfortable"
+                    bg-color="white"
+                    hide-details
+                    class="rounded-lg font-code text-error" 
+                  />
+                  
+                  <v-textarea 
+                    v-model="newVocab.comment" 
+                    label="Linguistic Context Notes" 
+                    placeholder="Write context triggers or semantic notes..."
+                    variant="outlined"
+                    density="comfortable"
+                    bg-color="white"
+                    rows="3"
+                    hide-details
+                    class="rounded-lg text-body-2 font-weight-medium" 
+                  />
+                  
+                  <v-btn 
+                    type="submit" 
+                    color="teal-darken-2" 
+                    variant="flat"
+                    size="large"
+                    class="mt-2 font-weight-bold rounded-lg text-button py-3 shadow-sm"
+                  >
+                    Commit Entry To Stack
+                    <v-icon end class="ms-1">mdi-plus-box-outline</v-icon>
+                  </v-btn>
                 </v-form>
 
-                <div v-if="formError" class="text-error mt-2">{{ formError }}</div>
+                <v-alert v-if="formError" type="error" variant="tonal" class="mt-4 rounded-xl" closable>
+                  {{ formError }}
+                </v-alert>
               </v-card-text>
             </v-card>
           </v-col>
         </v-row>
 
-        <v-divider style="margin-top: 100px; margin-bottom: 50px;" />
+        <v-divider class="custom-divider-break" />
 
-        <!-- Flip Card -->
-        <v-row justify="center" style="margin-bottom: 200px;">
-          <v-col cols="8" lg="6" xl="5">
-            <h3 class="text-h4 text-center mb-6">
-              <v-icon class="me-3 mb-2">mdi-repeat</v-icon>Use your vocabulary
-            </h3>
+        <!-- Flashcard Spatial Dynamic Retention Module -->
+        <v-row justify="center" class="mb-12">
+          <v-col cols="12" sm="10" md="8" lg="6" xl="5">
+            <div class="text-center mb-6">
+              <h3 class="text-h4 font-weight-black text-grey-darken-3 d-flex align-center justify-center">
+                <v-icon class="me-3 text-cyan-darken-3">mdi-cards-playing-outline</v-icon>Spontaneous Recall Deck
+              </h3>
+              <p class="text-caption font-weight-medium text-medium-emphasis mt-1">
+                Click on the container bounds below to flip your workspace review cards instantly
+              </p>
+            </div>
 
-            <div class="flip-container" :class="{ flipped: isFlipped }" @click="flipCard">
-              <div class="flipper">
-                <!-- Front side -->
-                <v-card
-                  class="front pa-4 d-flex flex-column justify-space-between bg-cyan-lighten-4"
-                  elevation="2"
-                  style="min-height: 430px;"
-                >
-                  <v-card-text
-                    v-if="currentVocabItem"
-                    class="d-flex flex-column align-center justify-center text-center"
-                    style="flex-grow: 1;"
+            <!-- CSS Perspective Animation Outer View Frame -->
+            <div class="flip-container-wrapper">
+              <div class="flip-container" :class="{ flipped: isFlipped }" @click="flipCard">
+                <div class="flipper">
+                  
+                  <!-- FLIP FRONT: Error Detection Target Mode -->
+                  <v-card
+                    class="front pa-5 d-flex flex-column justify-space-between bg-cyan-panel rounded-xl border-cyan shadow-md"
+                    elevation="0"
                   >
-                    <div class="text-caption text-muted mb-2">What is the correct way to say this?</div>
-                    <div class="text-h2 font-weight-light font-italic mb-4">
-                      {{ currentVocabItem.incorrect }}
+                    <div class="text-center w-100 mt-2">
+                      <v-chip size="x-small" color="cyan-darken-4" variant="flat" class="font-weight-black tracking-wider text-uppercase px-3 py-2">
+                        Morphological Anomaly Check
+                      </v-chip>
                     </div>
-                    <div class="text-caption text-muted">
-                      Can you use this word in a sentence about your life?
+
+                    <v-card-text v-if="currentVocabItem" class="d-flex flex-column align-center justify-center text-center py-6 flex-grow-1">
+                      <div class="text-body-2 font-weight-bold text-cyan-subtitle mb-4">How do you translate or correctly reconstruct this phrasing?</div>
+                      <div class="text-h3 font-weight-black text-cyan-header font-code tracking-tight line-clamp-3 px-2 break-word">
+                        "{{ currentVocabItem.incorrect || 'Missing target baseline phrase' }}"
+                      </div>
+                    </v-card-text>
+                    <v-card-text v-else class="text-center text-body-2 text-medium-emphasis my-auto py-8">
+                      No lexical tracking components stored inside the store profile cache yet.
+                    </v-card-text>
+
+                    <div class="d-flex align-center justify-space-between pt-3 border-top border-cyan mt-auto">
+                      <span class="text-caption font-weight-black text-cyan-subtitle d-flex align-center">
+                        <v-icon size="14" class="me-1">mdi-gesture-tap</v-icon> Click to reveal key
+                      </span>
+                      <v-btn
+                        color="cyan-darken-4"
+                        variant="flat"
+                        size="comfortable"
+                        class="rounded-lg text-caption font-weight-bold px-4"
+                        @click.stop="nextVocabItem"
+                        :disabled="!userStore.vocab.length"
+                      >
+                        Skip Item
+                        <v-icon size="14" class="ms-1">mdi-skip-next-outline</v-icon>
+                      </v-btn>
                     </div>
-                  </v-card-text>
+                  </v-card>
 
-                  <v-card-text v-else class="text-center text-caption text-muted mt-6">
-                    No vocabulary entries yet.
-                  </v-card-text>
-
-                  <v-card-actions class="d-flex justify-end">
-                    <v-btn
-                      color="black"
-                      size="large"
-                      @click.stop="nextVocabItem"
-                      :disabled="!userStore.vocab.length"
-                    >
-                      Next word
-                      <v-icon size="32" class="ms-2">mdi-arrow-right-thin-circle-outline</v-icon>
-                    </v-btn>
-                  </v-card-actions>
-                </v-card>
-
-                <!-- Back side -->
-                <v-card
-                  class="back pa-4 d-flex flex-column justify-space-between bg-cyan-lighten-4"
-                  elevation="2"
-                  style="min-height: 430px;"
-                >
-                  <v-card-text
-                    v-if="currentVocabItem"
-                    class="d-flex flex-column align-center justify-center text-center text-caption"
-                    style="flex-grow: 1;"
+                  <!-- FLIP BACK: Verified Structural Native Targets Form -->
+                  <v-card
+                    class="back pa-5 d-flex flex-column justify-space-between bg-emerald-panel rounded-xl border-emerald shadow-md"
+                    elevation="0"
                   >
-                    <div class="text-caption text-muted mb-2">The correct form of the word is:</div>
-                    <div class="text-h2">{{ currentVocabItem.correct }}</div>
-                  </v-card-text>
+                    <div class="text-center w-100 mt-2">
+                      <v-chip size="x-small" color="emerald-darken-4" variant="flat" class="font-weight-black tracking-wider text-uppercase px-3 py-2">
+                        Target Structural Solution Found
+                      </v-chip>
+                    </div>
 
-                  <v-card-text v-else class="text-center text-caption text-muted mt-6">
-                    No vocabulary entries yet.
-                  </v-card-text>
+                    <v-card-text v-if="currentVocabItem" class="d-flex flex-column align-center justify-center text-center py-6 flex-grow-1">
+                      <div class="text-body-2 font-weight-bold text-emerald-subtitle mb-4">The natural expression vector maps to:</div>
+                      <div class="text-h3 font-weight-black text-emerald-header font-code tracking-tight line-clamp-3 px-2 break-word">
+                        {{ currentVocabItem.correct }}
+                      </div>
+                    </v-card-text>
+                    <v-card-text v-else class="text-center text-body-2 text-medium-emphasis my-auto py-8">
+                      No active configuration layers tracked.
+                    </v-card-text>
 
-                  <v-card-actions class="d-flex justify-end">
-                    <v-btn
-                      color="black"
-                      size="large"
-                      @click.stop="nextVocabItem"
-                      :disabled="!userStore.vocab.length"
-                    >
-                      Next word
-                      <v-icon size="32" class="ms-2">mdi-arrow-right-thin-circle-outline</v-icon>
-                    </v-btn>
-                  </v-card-actions>
-                </v-card>
+                    <div class="d-flex align-center justify-space-between pt-3 border-top border-emerald mt-auto">
+                      <span class="text-caption font-weight-black text-emerald-subtitle d-flex align-center">
+                        <v-icon size="14" class="me-1">mdi-repeat-variant</v-icon> Click to reset card
+                      </span>
+                      <v-btn
+                        color="emerald-darken-4"
+                        variant="flat"
+                        size="comfortable"
+                        class="rounded-lg text-caption font-weight-bold px-4"
+                        @click.stop="nextVocabItem"
+                        :disabled="!userStore.vocab.length"
+                      >
+                        Next Word
+                        <v-icon size="14" class="ms-1">mdi-arrow-right</v-icon>
+                      </v-btn>
+                    </div>
+                  </v-card>
+
+                </div>
               </div>
             </div>
           </v-col>
         </v-row>
       </v-window-item>
 
-      <!-- PANEL 2: My progress -->
+      <!-- PANEL 2: Interactive Workout Activity Grid Telemetry -->
       <v-window-item :value="1">
         <VWMyProgressPanel
           :completionTarget="COMPLETION_TARGET"
-          title="Vocab Workout Progress"
-          subtitle="Continue an ongoing session or review your progress"
+          title="Vocabulary Workout Standings"
+          subtitle="Initialize modern interactive spaced-repetition drills or track retention graphs"
           @continue="continueSession"
           @start="startNewSessionForList"
-          class="mt-5"
+          class="mt-2 fade-in"
         />
       </v-window-item>
     </v-window>
 
+    <!-- Isolated AI Context Explanation Dialog Wrapper Modal -->
+    <AiTutorChatDialog
+      v-model="tutorOpen"
+      title="AI Tutor — Vocabulary Analysis Engine"
+      :context="tutorContext"
+      :build-initial-user-message="buildVocabErrorInitialUserMessage"
+      :system-message="vocabTutorSystemMessage"
+      :auto-send-on-open="true"
+      :hide-system-message="true"
+      :hide-initial-user-message="true"
+      :reset-on-context-change="true"
+    />
   </v-container>
-  <AiTutorChatDialog
-    v-model="tutorOpen"
-    title="AI Tutor — Vocabulary explanation"
-    :context="tutorContext"
-    :build-initial-user-message="buildVocabErrorInitialUserMessage"
-    :system-message="vocabTutorSystemMessage"
-    :auto-send-on-open="true"
-    :hide-system-message="true"
-    :hide-initial-user-message="true"
-    :reset-on-context-change="true"
-  />
 </template>
 
 <script setup lang="ts">
@@ -224,48 +309,54 @@ import VWMyProgressPanel from "@/components/vocab_workout_scenes/VWMyProgressPan
 const router = useRouter();
 const userStore = useUserStore();
 
+// View navigation active index value mappings
 const activePanel = ref(0);
 
-/** Flip card state */
+// Spaced-Repetition Interactive Flashcard Reactive Coordinates
 const currentVocabItem = ref<{ correct: string; incorrect: string } | null>(null);
 const isFlipped = ref(false);
 
-/** Form state */
-const newVocab = ref({
-  correct: "",
-  incorrect: "",
-  comment: "",
-});
+// Structural form storage fields model references
+const newVocab = ref({ correct: "", incorrect: "", comment: "" });
 const formError = ref<string | null>(null);
 
+const COMPLETION_TARGET = 3;
+const START_PAYLOAD_KEY = "vw_start_payload";
+const DEBUG_VW = false;
+
+function d(...args: any[]) {
+  if (DEBUG_VW) console.log("[VocabDashboard]", ...args);
+}
+
+// Map configuration arrays dynamically for rendering systems
 const tableHeaders = computed(() => {
   const base = userStore.vocabTableHeaders ?? [];
-
   const normalized = base.map((h: any) => {
-    // Convert Vuetify2-style { text, value } -> Vuetify3-style { title, key }
     const key = h.key ?? h.value;
     const title = h.title ?? h.text ?? "";
-
     const out: any = { title, key, sortable: h.sortable ?? false };
 
-    // carry widths if you set them
     if (h.width) out.width = h.width;
-
-    // optional: tighten some columns
-    if (key === "times") out.width = 70;
-    if (key === "comment") out.width = 260;
+    if (key === "times") out.width = 80;
+    if (key === "comment") out.width = 320;
 
     return out;
   });
 
   return [
-    { title: "", key: "ai", sortable: false, width: 42 },
+    { title: "AI Explain", key: "ai", sortable: false, width: 90, align: 'center' },
     ...normalized,
   ];
 });
 
+// Post analytical custom data objects up to endpoint instances
 async function submitNewVocab() {
   formError.value = null;
+  if (!newVocab.value.correct.trim()) {
+    formError.value = "Target structural term cannot remain blank.";
+    return;
+  }
+  
   try {
     await api.post("/vocab/", {
       feedback: null,
@@ -278,13 +369,15 @@ async function submitNewVocab() {
 
     newVocab.value = { correct: "", incorrect: "", comment: "" };
     await userStore.fetchVocabDashboardData();
+    nextVocabItem();
   } catch (err: any) {
-    console.error("Failed to submit vocab:", err);
-    formError.value = "Failed to submit vocab entry.";
+    console.error("Failed to submit vocab payload context:", err);
+    formError.value = "Failed to synchronize vocabulary item entry.";
   }
 }
 
 function nextVocabItem() {
+  isFlipped.value = false;
   const vocabList = userStore.vocab ?? [];
   if (!vocabList.length) {
     currentVocabItem.value = null;
@@ -294,7 +387,7 @@ function nextVocabItem() {
   const selected = vocabList[randomIndex];
   currentVocabItem.value = {
     correct: selected.correct ?? "",
-    incorrect: selected.incorrect ?? "",
+    incorrect: selected.incorrect ?? "—",
   };
 }
 
@@ -302,53 +395,25 @@ function flipCard() {
   isFlipped.value = !isFlipped.value;
 }
 
-/**
- * ✅ These handlers now match the Settings page semantics:
- * - continueSession(sessionId) -> emitStartGame({ resumeSessionId, resume: true })
- * - startNewSessionForList(listKey, level, trackKey) -> emitStartGame({...})
- *
- * Note: VWMyProgressPanel may emit @start either as (listKey, level, trackKey)
- * OR as a single object { listKey, level, trackKey } depending on your version.
- * This handler supports both.
- */
-
-const COMPLETION_TARGET = 3;
-const START_PAYLOAD_KEY = "vw_start_payload";
-const DEBUG_VW = false;
-function d(...args: any[]) {
-  if (DEBUG_VW) console.log("[VocabDashboard]", ...args);
-}
-
 function goToWorkoutWithPayload(payload: any) {
-  d("goToWorkoutWithPayload called with:", payload);
+  d("goToWorkoutWithPayload initialized with context object:", payload);
+  sessionStorage.setItem(START_PAYLOAD_KEY, JSON.stringify(payload));
 
-  const json = JSON.stringify(payload);
-  sessionStorage.setItem(START_PAYLOAD_KEY, json);
-
-  // Verify it was written
-  const check = sessionStorage.getItem(START_PAYLOAD_KEY);
-  d("stored payload raw:", check);
-
-  router.push({ name: "vocabworkout" }).then(() => {
-    d("router.push resolved -> currentRoute:", router.currentRoute.value.fullPath);
-  }).catch((e) => {
-    console.error("[VocabDashboard] router.push error:", e);
+  router.push({ name: "vocabworkout" }).catch((e) => {
+    console.error("[VocabDashboard] Engine transition routing intercept failed:", e);
   });
 }
 
 function continueSession(sessionId: number) {
-  d("continueSession sessionId:", sessionId);
   goToWorkoutWithPayload({ resumeSessionId: sessionId, resume: true });
 }
 
 function startNewSessionForList(a: any, b?: any, c?: any) {
-  d("startNewSessionForList raw args:", a, b, c);
-
   const listKey = typeof a === "object" ? a.listKey : a;
   const level = typeof a === "object" ? a.level ?? null : b ?? null;
   const trackKey = typeof a === "object" ? a.trackKey ?? null : c ?? null;
 
-  const payload = {
+  goToWorkoutWithPayload({
     listKey,
     level,
     mode: "write",
@@ -356,10 +421,7 @@ function startNewSessionForList(a: any, b?: any, c?: any) {
     backField: "term",
     trackKey,
     resume: false,
-  };
-
-  d("start payload:", payload);
-  goToWorkoutWithPayload(payload);
+  });
 }
 
 const tutorOpen = ref(false);
@@ -394,50 +456,147 @@ function buildVocabErrorInitialUserMessage(ctx: any) {
     `Student wrote (incorrect): ${incorrect}`,
     `Correct form: ${correct}`,
     comment ? `Teacher comment/context: ${comment}` : "",
-  ]
-    .filter(Boolean)
-    .join("\n");
+  ].filter(Boolean).join("\n");
 }
 
 onMounted(async () => {
   await userStore.fetchVocabDashboardData();
   nextVocabItem();
-  console.log("headers", tableHeaders.value);
 });
 </script>
 
 <style scoped>
-.flip-container {
-  perspective: 1000px;
-  position: relative;
-  height: 430px;
+.max-w-container {
+  max-width: 1440px;
+  margin: 0 auto;
 }
+
+.panel-toggle-btn {
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.vw-table-scroll {
+  max-height: 520px;
+  overflow-y: auto;
+}
+
+.border-light {
+  border: 1px solid #e2e8f0 !important;
+}
+
+.shadow-sm {
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05) !important;
+}
+
+.shadow-md {
+  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.06), 0 2px 4px -1px rgba(0,0,0,0.03) !important;
+}
+
+.bg-slate-fluid {
+  background-color: #f8fafc !important;
+}
+
+.font-code {
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace !important;
+}
+
+.block-text {
+  line-height: 1.5;
+}
+
+.custom-divider-break {
+  margin-top: 60px;
+  margin-bottom: 40px;
+  border-color: #e2e8f0 !important;
+}
+
+/* 🔄 ADVANCED CSS 3D FLASHCARD FLIP MECHANICS STYLE SHEET HOOKS */
+.flip-container-wrapper {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  padding: 10px;
+}
+
+.flip-container {
+  perspective: 1400px;
+  position: relative;
+  width: 100%;
+  height: 380px;
+  cursor: pointer;
+}
+
 .flipper {
   position: relative;
   width: 100%;
   height: 100%;
-  transition: transform 0.6s ease;
+  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
   transform-style: preserve-3d;
 }
-.flipped .flipper {
+
+.flip-container.flipped .flipper {
   transform: rotateY(180deg);
 }
+
 .front,
 .back {
-  backface-visibility: hidden;
+  backface-visibility: hidden !important;
+  -webkit-backface-visibility: hidden !important;
   position: absolute;
   width: 100%;
   height: 100%;
   top: 0;
   left: 0;
+  display: flex;
+  flex-direction: column;
 }
+
 .back {
   transform: rotateY(180deg);
 }
 
-.tab-btn {
-  min-width: 260px;
-  letter-spacing: 0.2px;
+/* Flashcard Front Layout Configuration (Cyan Color Accents Blueprint) */
+.bg-cyan-panel {
+  background-color: #ecfeff !important;
+  border: 1px solid rgba(8, 145, 178, 0.25) !important;
+}
+.text-cyan-header { color: #083344 !important; }
+.text-cyan-subtitle { color: #0e7490 !important; }
+.border-cyan { border-color: rgba(8, 145, 178, 0.2) !important; }
+
+/* Flashcard Back Layout Configuration (Emerald Color Accents Blueprint) */
+.bg-emerald-panel {
+  background-color: #f0fdf4 !important;
+  border: 1px solid rgba(5, 150, 105, 0.25) !important;
+}
+.text-emerald-header { color: #064e3b !important; }
+.text-emerald-subtitle { color: #059669 !important; }
+.border-emerald { border-color: rgba(5, 150, 105, 0.2) !important; }
+
+.break-word {
+  word-break: break-word;
 }
 
+.gap-3 { gap: 12px; }
+.gap-4 { gap: 16px; }
+
+.fade-in {
+  animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 600px) {
+  .flip-container {
+    height: 340px;
+  }
+  .text-h3 {
+    font-size: 1.75rem !important;
+    line-height: 2.2rem;
+  }
+}
 </style>

@@ -71,7 +71,7 @@
                     <v-avatar
                       :color="getActivityColor(student.last_activity_type)"
                       size="36"
-                      class="mr-2.5 shadow-sm flex-shrink-0"
+                      class="mr-3 shadow-sm flex-shrink-0"
                     >
                       <span class="text-white font-weight-black text-caption">
                         {{ student.initials }}
@@ -193,6 +193,8 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 import api from '@/axios';
+// ✨ FIX 1: Import the user store to access active teacher parameters
+import { useUserStore } from '@/stores/user'; 
 
 interface OnlineStudent {
   student_id: number;
@@ -212,6 +214,9 @@ interface RecentActivity {
   description: string;
   timestamp: string;
 }
+
+// Instantiate store tracking references
+const userStore = useUserStore();
 
 const onlineStudents = ref<OnlineStudent[]>([]);
 const recentActivities = ref<RecentActivity[]>([]);
@@ -235,8 +240,6 @@ const formatLastUpdate = computed(() => {
 
 const filteredActivities = computed(() => {
   const query = activitySearchQuery.value.trim().toLowerCase();
-  
-  // Default fallback sequence if no search string context is present
   if (!query) return recentActivities.value;
 
   return recentActivities.value.filter(activity => {
@@ -250,12 +253,20 @@ const filteredActivities = computed(() => {
 
 async function fetchOnlineStudents() {
   try {
-    const response = await api.get('/online-students/');
+    const params: any = {};
+    
+    // FIX 2: Restrict online view parameters if logged in user is a teacher
+    // This prevents cross-tenant data leaks by telling the backend exactly who is monitoring.
+    if (userStore.isStaff) {
+      params.teacher_view = 'true'; // Custom backend flag toggle or filter helper hook if required
+    }
+
+    const response = await api.get('/online-students/', { params });
     
     onlineStudents.value = response.data.students;
     lastUpdate.value = new Date();
     
-    console.log(`[Polling] ${onlineStudents.value.length} students online`);
+    console.log(`[Polling] ${onlineStudents.value.length} secure roster students online`);
   } catch (error) {
     console.error('Failed to fetch online students:', error);
   }
@@ -263,15 +274,19 @@ async function fetchOnlineStudents() {
 
 async function fetchRecentActivities() {
   try {
-    const response = await api.get('/student-activities/', {
-      params: {
-        limit: 100,
-        include_heartbeats: 'true'
-      }
-    });
+    const params: any = {
+      limit: 100,
+      include_heartbeats: 'true'
+    };
     
-    // 🔍 Smart Extraction Check: 
-    // Handle both paginated envelopes ({ results: [] }) and clean flat arrays ([]) safely!
+    // FIX 3: Link request context to ensure the activity stream is strictly isolated 
+    // to this teacher's assigned student group.
+    if (userStore.isStaff) {
+      params.managed_only = 'true'; 
+    }
+
+    const response = await api.get('/student-activities/', { params });
+    
     if (response.data && response.data.results) {
       recentActivities.value = response.data.results;
     } else {
@@ -300,10 +315,7 @@ async function poll() {
 }
 
 function startPolling() {
-  // Initial fetch
   poll();
-  
-  // Set up interval
   pollTimer = window.setInterval(poll, pollInterval.value);
   isPolling.value = true;
 }

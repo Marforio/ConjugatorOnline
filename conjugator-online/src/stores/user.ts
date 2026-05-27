@@ -1,5 +1,3 @@
-// stores/user.ts
-
 import { ref, computed } from "vue";
 import { defineStore } from "pinia";
 import { useAuthStore } from "@/stores/auth";
@@ -12,11 +10,13 @@ interface User {
   is_staff: boolean;
   email?: string;
   is_superuser?: boolean;
+  teacher_profile?: { id: number }; 
 }
 
 interface ScoreSnapshot {
   total_correct_prompts: number;
   health_score: number;
+  period_speaking_seconds?: number; // 🕒 Added to track history snapshots cleanly
 }
 
 interface Student {
@@ -26,9 +26,12 @@ interface Student {
   total_correct_prompts: number;
   health_score: number;
   domain: string | null;
-  user: User | number | null; // Updated to handle nested object or raw ID number safely
+  user: User | number | null;
   score_history: Record<string, ScoreSnapshot>;
   linguistic_profile?: LinguisticProfile; 
+  // ⏱️ NEW: Speaking Telemetry Fields from Backend API
+  current_period_speaking_seconds: number;
+  grand_total_speaking_seconds: number;
 }
 
 interface ProfileType {
@@ -70,7 +73,7 @@ interface VerbUsage {
   verb: string;
   tier: string;
   discovered_ps: boolean;
-  mastered_ps: boolean;
+  marked_ps: boolean;
   discovered_pp: boolean;
   mastered_pp: boolean;
   past_simple: { correct: number; incorrect: number; used_count: number };
@@ -150,31 +153,64 @@ export type SmartVerbPoolByTense = {
   "Present perfect"?: string[];
 };
 
-// --- Store ---
+// --- Store Definition ---
 export const useUserStore = defineStore("user", () => {
   const auth = useAuthStore();
 
-  // --- Core state ---
+  // --- Core State ---
   const user = ref<User | null>(null);
   const student = ref<Student | null>(null);
+  const teacherId = ref<number | null>(null);
+  
+  // ✨ NEW TEACHER MODULE STATE: Track assigned students roster cleanly
+  const teacherRoster = ref<Student[]>([]);
+  const selectedStudentId = ref<number | null>(null);
+  const loadingRoster = ref(false);
 
   // Linguistic Profile state
   const linguisticProfile = ref<LinguisticProfile | null>(null);
   const loadingLinguisticProfile = ref(false);
   const linguisticProfileError = ref<string | null>(null);
 
-  // NEW: Workout state
+  // Workout state
   const currentWorkout = ref<Workout | null>(null);
   const workoutHistory = ref<Workout[]>([]);
   const loadingWorkout = ref(false);
   const workoutError = ref<string | null>(null);
 
-  // --- Computed ---
+  // --- Enrollments ---  
+  const enrollments = ref<StudentCourse[]>([]);
+  const loadingEnrollments = ref(false);
+  const enrollmentError = ref<string | null>(null);
+
+
+  // --- Computed Coordinates ---
   const isStaff = computed(() => user.value?.is_staff ?? false);
   const isSuperuser = computed(() => user.value?.is_superuser ?? false);
-  const studentId = computed(() => student.value?.id ?? null);
+  const teacherProfileId = computed(() => teacherId.value);
+  
+  // ✨ FIX 1: Make studentId context-aware. 
+  // If staff is viewing a targeted student, return that selected student ID instead of their own.
+  const studentId = computed(() => {
+    if (isStaff.value && selectedStudentId.value) {
+      return selectedStudentId.value;
+    }
+    return student.value?.id ?? null;
+  });
+  
   const totalCorrect = computed(() => student.value?.total_correct_prompts ?? 0);
   const healthScore = computed(() => student.value?.health_score ?? 0);
+
+  // ⏱️ NEW COMPUTED FIELDS: Human-readable speaking metrics calculations (Minutes representation)
+  const currentPeriodSpeakingMinutes = computed(() => {
+    const seconds = student.value?.current_period_speaking_seconds ?? 0;
+    return parseFloat((seconds / 60).toFixed(1));
+  });
+
+  const grandTotalSpeakingMinutes = computed(() => {
+    const seconds = student.value?.grand_total_speaking_seconds ?? 0;
+    return parseFloat((seconds / 60).toFixed(1));
+  });
 
   // Linguistic Profile Computed
   const hasLinguisticProfile = computed(() => {
@@ -205,12 +241,9 @@ export const useUserStore = defineStore("user", () => {
     return stages[linguisticProfile.value.latest_assessment] || linguisticProfile.value.latest_assessment;
   });
 
-  // NEW: Workout computed
+  // Workout computed
   const hasCurrentWorkout = computed(() => currentWorkout.value !== null);
-
-  const workoutDrillCount = computed(() => {
-    return currentWorkout.value?.drills?.length ?? 0;
-  });
+  const workoutDrillCount = computed(() => currentWorkout.value?.drills?.length ?? 0);
 
   const workoutCompletionPercentage = computed(() => {
     if (!currentWorkout.value?.drills?.length) return 0;
@@ -230,28 +263,101 @@ export const useUserStore = defineStore("user", () => {
     return Math.round((completedSessions / totalSessions) * 100);
   });
 
-  // --- Token exists check ---
   function hasAccessToken(): boolean {
     return !!auth.access;
   }
 
-  // --- User bootstrap ---
+
+// --- User Bootstrap Sequencers ---
   const userLoaded = ref(false);
 
-  async function ensureUserLoaded() {
-    if (userLoaded.value) return;
-    if (!hasAccessToken()) return;
+async function ensureUserLoaded() {
+  if (userLoaded.value) return;
+  if (!hasAccessToken()) return;
 
-    try {
-      const res = await api.get<User>("/users/me/");
-      user.value = res.data;
-      // Immediately cascade down to gather profile layers
+  try {
+    const res = await api.get<User>("/users/me/");
+    user.value = res.data;
+    
+    if (user.value.is_staff) {
+      // 🌟 Extract and save the teacher profile ID right here:
+      teacherId.value = user.value.teacher_profile?.id ?? null;
+
+      // 1. Synchronize the teacher's classroom cohort array roster
+      await fetchTeacherRoster();
+      
+      // 2. Clear out any selection garbage leftover in memory snapshots
+      selectedStudentId.value = null;
+      
+      // Pull the teacher's *personal* account details by user link target scoping parameters
+      await fetchSelfStudentProfile();
+    } else {
+      // Regular isolated student execution track
+      teacherId.value = null; // Ensure it resets for clean single-student access
       await fetchStudentData();
+    }
+  } catch (err) {
+    console.error("Failed to fetch user context data:", err);
+    user.value = null;
+    teacherId.value = null;
+  } finally {
+    userLoaded.value = true;
+  }
+}
+
+  // Dedicated action for superusers to profile their student id specifically
+  async function fetchSelfStudentProfile() {
+    try {
+      // Query by user ID explicitly to bypass roster lists matching view lookups
+      const res = await api.get<any>("/students/", {
+        params: { user: user.value?.id }
+      });
+      
+      const rawData = res.data && typeof res.data === 'object' && 'results' in res.data 
+        ? (res.data as any).results 
+        : res.data;
+
+      if (Array.isArray(rawData) && rawData.length > 0) {
+        // Lock the superuser's personal metrics safely to the core container
+        student.value = rawData.find((s: any) => s.user?.id === user.value?.id || s.user === user.value?.id) || rawData[0];
+        if (student.value?.linguistic_profile) {
+          linguisticProfile.value = student.value.linguistic_profile;
+        }
+      }
     } catch (err) {
-      console.error("Failed to fetch user data:", err);
-      user.value = null;
-    } finally {
-      userLoaded.value = true;
+      console.error("Failed fetching self shadow profile:", err);
+    }
+  }
+
+  // Optimized target inspection pipeline tracking method
+  async function fetchStudentData() {
+    if (!hasAccessToken()) return;
+    
+    try {
+      // If inspecting a distinct card, query detail layout explicitly by PK location routing path
+      if (isStaff.value && selectedStudentId.value) {
+        const res = await api.get<any>(`/students/${selectedStudentId.value}/`);
+        student.value = res.data;
+        if (student.value?.linguistic_profile) {
+          linguisticProfile.value = student.value.linguistic_profile;
+        }
+      } else if (!isStaff.value) {
+        // Regular standard student loading process pipeline paths tracking endpoints
+        const res = await api.get<any>("/students/");
+        const rawArray = res.data && typeof res.data === 'object' && 'results' in res.data 
+          ? (res.data as any).results 
+          : res.data;
+
+        if (Array.isArray(rawArray) && rawArray.length > 0) {
+          student.value = rawArray[0];
+          if (student.value?.linguistic_profile) {
+            linguisticProfile.value = student.value.linguistic_profile;
+          }
+        }
+      }
+    } catch (err: any) {
+      console.error("Failed to fetch student data profile trace context:", err);
+      student.value = null;
     }
   }
 
@@ -259,7 +365,7 @@ export const useUserStore = defineStore("user", () => {
     await ensureUserLoaded();
   }
 
-  // --- Previous semester scores ---
+  // --- Previous Semester History Evaluation Blocks ---
   const previousHealthScore = computed(() => {
     if (!student.value?.score_history) return null;
     const entries = Object.entries(student.value.score_history);
@@ -274,6 +380,14 @@ export const useUserStore = defineStore("user", () => {
     if (entries.length === 0) return null;
     const sorted = entries.sort(([a], [b]) => b.localeCompare(a));
     return sorted[0][1].total_correct_prompts;
+  });
+
+  const previousSpeakingSeconds = computed(() => {
+    if (!student.value?.score_history) return null;
+    const entries = Object.entries(student.value.score_history);
+    if (entries.length === 0) return null;
+    const sorted = entries.sort(([a], [b]) => b.localeCompare(a));
+    return sorted[0][1].period_speaking_seconds ?? 0;
   });
 
   const previousDate = computed(() => {
@@ -291,48 +405,60 @@ export const useUserStore = defineStore("user", () => {
       .sort((a, b) => b.date.localeCompare(a.date));
   });
 
-  // ==========================================
-  // 1. MODIFIED: fetchLinguisticProfile
-  // ==========================================
+  // --- API Communications Actions Methods ---
+
+  // ✨ NEW API VIEW METHOD: Pulls the scoped roster assigned strictly to this authenticated teacher
+  async function fetchTeacherRoster() {
+    if (!hasAccessToken() || !isStaff.value) return;
+    loadingRoster.value = true;
+    try {
+      const res = await api.get<Student[]>("/students/");
+      const rawArray = res.data && typeof res.data === 'object' && 'results' in res.data 
+        ? (res.data as any).results 
+        : res.data;
+      
+      teacherRoster.value = Array.isArray(rawArray) ? rawArray : [];
+      console.log("🎒 Loaded assigned secure teacher student roster:", teacherRoster.value.length, "items");
+    } catch (err) {
+      console.error("Failed to load secure teacher student list:", err);
+      teacherRoster.value = [];
+    } finally {
+      loadingRoster.value = false;
+    }
+  }
+
+
   async function fetchLinguisticProfile() {
     if (!hasAccessToken()) return;
-
     loadingLinguisticProfile.value = true;
     linguisticProfileError.value = null;
 
     try {
       const params: any = {};
-      if (isStaff.value) {
-        params.user = user.value?.id;
+      // Secure fallback verification hook
+      if (isStaff.value && studentId.value) {
+        params.student = studentId.value;
       }
-
+      
       const response = await api.get<LinguisticProfile>("/linguistic-profiles/me/", { params });
       linguisticProfile.value = response.data;
-      console.log("Fetched linguistic profile context:", linguisticProfile.value);
     } catch (err: any) {
-      console.error("Failed to fetch linguistic profile:", err);
-      
+      console.error("Failed to fetch linguistic profile metrics stack:", err);
       if (err?.response?.status === 404) {
         linguisticProfile.value = null;
-        linguisticProfileError.value = null;
       } else {
-        linguisticProfileError.value = "Failed to fetch linguistic profile";
+        linguisticProfileError.value = "Failed to synchronize linguistic metrics profile.";
       }
     } finally {
       loadingLinguisticProfile.value = false;
     }
   }
 
-  // ==========================================
-  // 2. MODIFIED: fetchCurrentWorkout
-  // ==========================================
   async function fetchCurrentWorkout(payload?: { user_id?: number }) {
     if (!hasAccessToken()) return;
-
     let sid = studentId.value;
 
-    if (isStaff.value && !sid) {
-      console.log("Teacher sandbox mode: No linked student shadow record discovered. Skipping workout query.");
+    if (!sid) {
       currentWorkout.value = null;
       return;
     }
@@ -343,30 +469,23 @@ export const useUserStore = defineStore("user", () => {
     try {
       const response = await api.get<Workout>(`/workouts/current/${sid}/`);
       currentWorkout.value = response.data;
-      console.log("Fetched current sandbox workout:", currentWorkout.value);
     } catch (err: any) {
-      console.error("Failed to fetch current workout:", err);
-      
+      console.error("Failed to fetch current workout state model:", err);
       if (err?.response?.status === 404) {
         currentWorkout.value = null;
-        workoutError.value = null; 
       } else {
-        workoutError.value = "Failed to fetch current workout";
+        workoutError.value = "Failed to map active workout template parameters.";
       }
     } finally {
       loadingWorkout.value = false;
     }
   }
 
-  // ==========================================
-  // 3. MODIFIED: fetchWorkoutHistory
-  // ==========================================
   async function fetchWorkoutHistory(payload?: { user_id?: number }) {
     if (!hasAccessToken()) return;
-
     let sid = studentId.value;
 
-    if (isStaff.value && !sid) {
+    if (!sid) {
       workoutHistory.value = [];
       return;
     }
@@ -377,16 +496,14 @@ export const useUserStore = defineStore("user", () => {
     try {
       const response = await api.get<Workout[]>(`/workouts/by_student/${sid}/`);
       workoutHistory.value = response.data;
-      console.log("Fetched workout history data layout:", workoutHistory.value);
     } catch (err: any) {
-      console.error("Failed to fetch workout history:", err);
-      workoutError.value = "Failed to fetch workout history";
+      console.error("Failed to fetch historical workouts stack logs:", err);
+      workoutError.value = "Failed to fetch historical workouts array stack.";
     } finally {
       loadingWorkout.value = false;
     }
   }
 
-  // Create Workout
   async function createWorkout(workoutData: {
     student: number;
     focus_area: string;
@@ -394,167 +511,66 @@ export const useUserStore = defineStore("user", () => {
     drills: WorkoutDrill[];
   }) {
     if (!hasAccessToken()) return null;
-
     try {
       const response = await api.post<Workout>('/workouts/', workoutData);
-      console.log("Created workout:", response.data);
-      
       await fetchCurrentWorkout({ user_id: workoutData.student });
-      
       return response.data;
     } catch (err: any) {
-      console.error("Failed to create workout:", err);
-      workoutError.value = "Failed to create workout";
+      console.error("Failed to create workout entry record:", err);
+      workoutError.value = "Failed to persist active workout schema.";
       return null;
     }
   }
 
-  // Update Workout Progress
   async function updateWorkoutProgress(workoutId: number, drills: WorkoutDrill[]) {
     if (!hasAccessToken()) return null;
-
     try {
-      const response = await api.post<Workout>(
-        `/workouts/${workoutId}/update_progress/`,
-        { drills }
-      );
-      console.log("Updated workout progress:", response.data);
-      
+      const response = await api.post<Workout>(`/workouts/${workoutId}/update_progress/`, { drills });
       if (currentWorkout.value?.id === workoutId) {
         currentWorkout.value = response.data;
       }
-      
       return response.data;
     } catch (err: any) {
-      console.error("Failed to update workout progress:", err);
-      workoutError.value = "Failed to update workout progress";
+      console.error("Failed to update workout progress parameters:", err);
+      workoutError.value = "Failed to update target workout progress data metrics.";
       return null;
     }
   }
 
-  // Update Workout Metadata
   async function updateWorkout(
     workoutId: number,
     updates: { focus_area?: string; notes?: string; drills?: WorkoutDrill[] }
   ) {
     if (!hasAccessToken()) return null;
-
     try {
       const response = await api.patch<Workout>(`/workouts/${workoutId}/`, updates);
-      console.log("Updated workout:", response.data);
-      
       if (currentWorkout.value?.id === workoutId) {
         currentWorkout.value = response.data;
       }
-      
       return response.data;
     } catch (err: any) {
-      console.error("Failed to update workout:", err);
-      workoutError.value = "Failed to update workout";
+      console.error("Failed to process workout patch sequence:", err);
       return null;
     }
   }
 
-  // Archive Workout
   async function archiveWorkout(workoutId: number) {
     if (!hasAccessToken()) return false;
-
     try {
       await api.post(`/workouts/${workoutId}/archive/`);
-      console.log("Archived workout:", workoutId);
-      
       if (currentWorkout.value?.id === workoutId) {
         currentWorkout.value = null;
       }
-      
       return true;
     } catch (err: any) {
-      console.error("Failed to archive workout:", err);
-      workoutError.value = "Failed to archive workout";
+      console.error("Failed to execute layout archiving method:", err);
       return false;
     }
   }
 
-  // --- Enrollments ---
-  const enrollments = ref<StudentCourse[]>([]);
-  const loadingEnrollments = ref(false);
-  const enrollmentError = ref<string | null>(null);
-
-  function setStudent(data: Student) {
-    student.value = data;
-  }
-
-  function clearStudent() {
-    student.value = null;
-    user.value = null;
-    userLoaded.value = false;
-    enrollments.value = [];
-    currentWorkout.value = null;
-    workoutHistory.value = [];
-    linguisticProfile.value = null;
-  }
-
-  // ==========================================
-  // 4. MODIFIED: fetchStudentData
-  // ==========================================
-  async function fetchStudentData() {
-    if (!hasAccessToken()) return;
-    
-    try {
-      const res = await api.get<Student[]>("/students/");
-      
-      // Handle Django REST Framework paginated blocks vs flat arrays cleanly
-      const rawArray = res.data && typeof res.data === 'object' && 'results' in res.data 
-        ? (res.data as any).results 
-        : res.data;
-
-      console.log("--- 🕵️‍♂️ DATABASE PROFILE INSPECTOR ---");
-      console.log("Your Logged-in User ID is:", user.value?.id);
-      console.log("Raw students array length from server:", rawArray?.length);
-      
-      if (Array.isArray(rawArray)) {
-        if (isStaff.value) {
-          const targetId = user.value?.id;
-          
-          // Use robust cross-type String evaluations to safely catch the admin row
-          const mySandboxProfile = rawArray.find(s => {
-            if (!s.user) return false;
-            if (typeof s.user === 'object') {
-              return String(s.user.id) === String(targetId);
-            }
-            return String(s.user) === String(targetId);
-          });
-          
-          if (mySandboxProfile) {
-            student.value = mySandboxProfile;
-            if (mySandboxProfile.linguistic_profile) {
-              linguisticProfile.value = mySandboxProfile.linguistic_profile;
-            }
-            console.log("✨ Success! Bound your Admin Shadow Student profile row:", student.value);
-          } else {
-            console.warn("Admin warning: You are logged in as staff, but no profile row matches your user.id.");
-            student.value = null;
-          }
-        } else {
-          // Regular student fallback strategy
-          student.value = rawArray[0] ?? null;
-          if (student.value?.linguistic_profile) {
-            linguisticProfile.value = student.value.linguistic_profile;
-          }
-        }
-      }
-      console.log("-------------------------------------");
-
-    } catch (err: any) {
-      console.error("Failed to fetch student data trace profiles:", err);
-      student.value = null;
-    }
-  }
-
-  // ==========================================
-  // fetchEnrollments
-  // ==========================================
-// Inside stores/user.ts -> Simplify fetchEnrollments
+// =========================================================
+// 🎓 SECURE ENROLLMENT PIPELINE METHOD
+// =========================================================
 async function fetchEnrollments() {
   if (!hasAccessToken()) return;
 
@@ -562,31 +578,36 @@ async function fetchEnrollments() {
   enrollmentError.value = null;
 
   try {
-    // Pass parameters explicitly so the backend uses its SQL index tree trees
     const params: any = {};
-    if (isStaff.value) {
-      params.student = studentId.value;
+    
+    // ✨ FIX: Only attach the student query parameter if a Staff/Teacher user
+    // is intentionally inspecting a specific student's workspace card.
+    if (isStaff.value && selectedStudentId.value) {
+      params.student = selectedStudentId.value;
     }
 
     const response = await api.get<StudentCourse[]>("/enrollment/", { params });
     
+    // Unpack DRF's default paginated dictionary wrapper safely
     const rawData = response.data && typeof response.data === 'object' && 'results' in response.data
       ? (response.data as any).results
       : response.data;
 
-    // ✨ CLEANED UP: Directly assign the server's clean payload 
     enrollments.value = Array.isArray(rawData) ? rawData : [];
+    console.log("📚 Synced enrollment records count:", enrollments.value.length);
   } catch (err: any) {
-    console.error("Failed to fetch enrollments:", err);
-    enrollmentError.value = "Failed to fetch enrollments";
+    console.error("Failed to map enrollment model array streams:", err);
+    enrollmentError.value = "Failed to fetch active student course enrollment records.";
+    enrollments.value = []; // Prevent broken iteration loops in UI templates by falling back to a clean array
   } finally {
     loadingEnrollments.value = false;
   }
 }
-
-  const enrolledCourses = computed(() => enrollments.value.map((e) => e.course.slug));
-
-  // --- Student domain ---
+  const enrolledCourses = computed(() => 
+    enrollments.value
+      .filter(e => e && e.course)
+      .map((e) => e.course.slug)
+  );
   const studentDomain = computed(() => student.value?.domain ?? null);
 
   const studentDomainLabel = computed(() => {
@@ -608,7 +629,7 @@ async function fetchEnrollments() {
     return map[d] ?? d;
   });
 
-  // --- Verb usage ---
+  // --- Verb Usage Datasets Controllers ---
   const verbUsage = ref<VerbUsage[]>([]);
   const tierStats = ref<TierStats[]>([]);
   const tenseStats = ref<TenseStats>({
@@ -622,16 +643,17 @@ async function fetchEnrollments() {
   const verbUsageError = ref<string | null>(null);
 
   async function fetchVerbUsageDashboardData() {
-    if (!hasAccessToken()) return;
+    if (!hasAccessToken() || !studentId.value) return;
 
     loadingVerbUsage.value = true;
     verbUsageError.value = null;
 
+    // Secure multi-tenant URL selection routing logic
     const url = isStaff.value ? "/verb-usage/" : `/${studentId.value}/verb-usage/`;
     const params: any = {};
     
     if (isStaff.value) {
-      params.user = user.value?.id; 
+      params.student = studentId.value; 
     }
 
     try {
@@ -645,16 +667,15 @@ async function fetchEnrollments() {
       tierStats.value = res.data.tier_stats;
       tenseStats.value = res.data.tense_stats;
     } catch (err: any) {
-      console.error("Verb usage fetch failed:", err);
-      verbUsageError.value = "Failed to fetch verb usage";
+      console.error("Verb usage telemetry mapping session crashed:", err);
+      verbUsageError.value = "Failed to sync verb matrix traces.";
     } finally {
       loadingVerbUsage.value = false;
     }
   }
 
-  // --- Smart verb pool for conjugator ---
   async function fetchSmartConjVerbPool(params: { verbSet: string; batchSize: number }) {
-    if (!hasAccessToken()) return null;
+    if (!hasAccessToken() || !studentId.value) return null;
 
     const queryParams: any = {
       verb_set: params.verbSet,
@@ -662,82 +683,58 @@ async function fetchEnrollments() {
     };
 
     if (isStaff.value) {
-      queryParams.user = user.value?.id;
+      queryParams.student = studentId.value;
     }
 
-    const sid = studentId.value;
     const candidates = [
-      sid ? `/${sid}/verb-usage/` : null,
+      `/${studentId.value}/verb-usage/`,
       "/verb-usage/",
-      "/student-verb-usage/",
-    ].filter(Boolean) as string[];
+    ];
 
     for (const url of candidates) {
       try {
-        const res = await api.get<{ smart_pool?: any }>(url, {
-          params: queryParams,
-        });
-
+        const res = await api.get<{ smart_pool?: any }>(url, { params: queryParams });
         if (res.data?.smart_pool) return res.data.smart_pool;
         return null;
       } catch (err: any) {
-        const status = err?.response?.status;
-        if (status === 404) continue;
-
-        console.error("fetchSmartConjVerbPool failed:", err);
+        if (err?.response?.status === 404) continue;
         return null;
       }
     }
-
     return null;
   }
 
-  // --- Vocab ---
+  // --- Vocabulary Modules Controls Stack ---
   const vocab = ref<VocabItem[]>([]);
   const loadingVocab = ref(true);
   const vocabError = ref<string | null>(null);
 
   async function fetchVocabDashboardData() {
-    if (!hasAccessToken()) return;
-    
-    if (!studentId.value && !isStaff.value) return;
+    if (!hasAccessToken() || !studentId.value) return;
 
     loadingVocab.value = true;
     vocabError.value = null;
 
     try {
-      const queryParamKey = isStaff.value ? 'user' : 'student';
-      const queryParamValue = isStaff.value ? user.value?.id : studentId.value;
-
-      const response = await api.get<VocabItem[]>(`/vocab/?${queryParamKey}=${queryParamValue}`);
-      
+      // Clean query parameter assignment matching secure update parameters rules
+      const response = await api.get<VocabItem[]>("/vocab/", {
+        params: { student: studentId.value }
+      });
       vocab.value = response.data;
-      console.log("Fetched sandbox preview vocab:", vocab.value);
     } catch (err: any) {
-      console.error("Failed to fetch vocab:", err);
-      vocabError.value = "Failed to fetch vocab";
+      console.error("Failed to map vocabulary notebook traces stack:", err);
+      vocabError.value = "Failed to refresh workspace notebook entries.";
     } finally {
       loadingVocab.value = false;
     }
   }
 
   const processedVocab = computed(() => {
-    const map = new Map<
-      string,
-      {
-        correct: string;
-        incorrects: string[];
-        times: number;
-        comment: string;
-        studentId?: number | null;
-      }
-    >();
+    const map = new Map<string, { correct: string; incorrects: string[]; times: number; comment: string; studentId?: number | null; }>();
 
     for (const entry of vocab.value) {
       const key = entry.correct;
-
-      const sid =
-        typeof entry.student === "number"
+      const sid = typeof entry.student === "number"
           ? entry.student
           : (entry.student as Student)?.id ?? entry.feedback?.student?.id ?? null;
 
@@ -752,11 +749,9 @@ async function fetchEnrollments() {
       } else {
         const existing = map.get(key)!;
         existing.times += entry.times;
-
         if (entry.incorrect && !existing.incorrects.includes(entry.incorrect)) {
           existing.incorrects.push(entry.incorrect);
         }
-
         if (entry.comment) {
           existing.comment += existing.comment ? ` // ${entry.comment}` : entry.comment;
         }
@@ -780,42 +775,70 @@ async function fetchEnrollments() {
     { text: "Comment", value: "comment" },
   ];
 
+  function setStudent(data: Student) {
+    student.value = data;
+  }
+
+ function clearStudent() {
+  student.value = null;
+  user.value = null;
+  teacherId.value = null; 
+  userLoaded.value = false;
+  enrollments.value = [];
+  teacherRoster.value = [];
+  selectedStudentId.value = null;
+  currentWorkout.value = null;
+  workoutHistory.value = [];
+  linguisticProfile.value = null;
+}
+
   return {
-    // identity/role
+    // Identity/Role properties
     user,
+    teacherId,
+    teacherProfileId,
     userLoaded,
     ensureUserLoaded,
     fetchUserData,
     isStaff,
     isSuperuser,
+    
+    // Teacher workspace elements controls
+    teacherRoster,
+    selectedStudentId,
+    loadingRoster,
+    fetchTeacherRoster,
 
-    // student
+    // Student coordinates
     student,
     studentId,
     totalCorrect,
     healthScore,
+    currentPeriodSpeakingMinutes,
+    grandTotalSpeakingMinutes,
     setStudent,
     clearStudent,
     fetchStudentData,
 
-    // previous semester / history
+    // Historical analytics metrics
     previousHealthScore,
     previousTotalCorrectPrompts,
+    previousSpeakingSeconds,
     previousDate,
     scoreHistory,
 
-    // enrollments
+    // Course enrollments mapping
     enrollments,
     loadingEnrollments,
     enrollmentError,
     enrolledCourses,
     fetchEnrollments,
 
-    // domain
+    // Class domain tags
     studentDomain,
     studentDomainLabel,
 
-    // linguistic profile
+    // Evaluation profiles vectors
     linguisticProfile,
     loadingLinguisticProfile,
     linguisticProfileError,
@@ -823,7 +846,7 @@ async function fetchEnrollments() {
     assessmentStageLabel,
     fetchLinguisticProfile,
 
-    // workouts
+    // Training Workout objects routines
     currentWorkout,
     workoutHistory,
     loadingWorkout,
@@ -838,7 +861,7 @@ async function fetchEnrollments() {
     updateWorkout,
     archiveWorkout,
 
-    // verb usage
+    // Verb logging structures tracking
     verbUsage,
     tierStats,
     tenseStats,
@@ -846,10 +869,10 @@ async function fetchEnrollments() {
     verbUsageError,
     fetchVerbUsageDashboardData,
 
-    // conjugator
+    // Active Recall conjugator tools
     fetchSmartConjVerbPool,
 
-    // vocab
+    // Notebook items repository
     vocab,
     loadingVocab,
     vocabError,

@@ -45,6 +45,8 @@ const routes = [
   { path: '/teacher/manage-feedback', name: 'manage-feedback', component: () => import('@/views/ManageFeedback.vue'), meta: { requiresAuth: true, requiresAdmin: true } },
   { path: '/teacher/manage-error-data', name: 'manage-error-data', component: () => import('@/views/ManageErrorData.vue'), meta: { requiresAuth: true, requiresAdmin: true } },
   { path: '/teacher/manage-achievement-data', name: 'manage-achievement-data', component: () => import('@/views/ManageAchievementData.vue'), meta: { requiresAuth: true, requiresAdmin: true } },
+  { path: '/teacher/conjugator-data', name: 'manage-conjugator-data', component: () => import('@/views/ManageConjugatorData.vue'), meta: { requiresAuth: true, requiresAdmin: true } },
+  { path: '/teacher/other-games-data', name: 'manage-other-games-data', component: () => import('@/views/ManageOtherGamesData.vue'), meta: { requiresAuth: true, requiresAdmin: true } },
 ]
 
 const router = createRouter({

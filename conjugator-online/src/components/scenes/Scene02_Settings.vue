@@ -27,7 +27,7 @@
                     variant="tonal"
                     :color="colors[index % colors.length]"
                     height="44"
-                    class="quick-pill-btn rounded-lg text-none font-weight-bold"
+                    class="quick-pill-btn rounded-lg text-none font-weight-bold text-wrap"
                     @click="startGame(btn.settings)"
                   >
                     <span class="text-truncate px-1" :title="btn.label">{{ btn.label }}</span>
@@ -156,7 +156,7 @@
                   variant="tonal"
                   :color="colors[index % colors.length]"
                   height="40"
-                  class="quick-pill-btn rounded-lg text-none font-weight-bold"
+                  class="quick-pill-btn rounded-lg text-none font-weight-bold text-wrap"
                   @click="startGame(btn.settings)"
                 >
                   <span class="text-truncate text-caption px-1" :title="btn.label">{{ btn.label }}</span>

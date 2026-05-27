@@ -1,6 +1,5 @@
 <template>
   <v-container fluid class="pa-6">
-    <!-- Header -->
     <v-card class="pa-6 mb-6 feedback-header" elevation="4" rounded="xl">
       <div class="d-flex align-center justify-space-between">
         <div>
@@ -13,57 +12,86 @@
       </div>
     </v-card>
 
-    <!-- Student Selection -->
     <v-card class="pa-6 mb-6" elevation="2" rounded="lg">
-      <div class="text-h6 mb-4">Select Student</div>
+      <div class="text-h6 mb-2">Select Student</div>
+      <p class="text-caption text-medium-emphasis mb-4">Click below to search and assign feedback to a student profile from your cohort.</p>
+      
       <v-row>
         <v-col cols="12" md="6">
-          <v-text-field
-            v-model="searchQuery"
-            label="Search students"
-            prepend-inner-icon="mdi-magnify"
-            variant="outlined"
-            clearable
-            @input="filterStudents"
-          />
+          <v-menu
+            v-model="dropdownOpen"
+            :close-on-content-click="false"
+            location="bottom start"
+            max-width="500"
+            offset="8"
+          >
+            <template v-slot:activator="{ props }">
+              <v-text-field
+                v-bind="props"
+                v-model="searchQuery"
+                label="Search students..."
+                prepend-inner-icon="mdi-account-search"
+                append-inner-icon="mdi-chevron-down"
+                variant="outlined"
+                clearable
+                hide-details
+                @input="onSearchInput"
+                @click:clear="clearSelection"
+              >
+                <template v-slot:prepend-inner v-if="selectedStudent">
+                  <v-chip
+                    color="primary"
+                    size="small"
+                    class="mr-2"
+                    closable
+                    @click:close="clearSelection"
+                  >
+                    {{ selectedStudent.initials }}
+                  </v-chip>
+                </template>
+              </v-text-field>
+            </template>
+
+            <v-card elevation="8" rounded="lg" border>
+              <v-list v-if="filteredStudents.length > 0" max-height="300" class="overflow-y-auto custom-scrollbar">
+                <v-list-item
+                  v-for="student in filteredStudents"
+                  :key="student.id"
+                  @click="handleStudentSelect(student)"
+                  :active="selectedStudent?.id === student.id"
+                  color="primary"
+                  class="mx-2 my-1 rounded-lg"
+                >
+                  <template v-slot:prepend>
+                    <v-avatar color="primary-lighten-1" size="36">
+                      <span class="text-white font-weight-bold text-subtitle-2">{{ student.initials }}</span>
+                    </v-avatar>
+                  </template>
+                  <v-list-item-title class="font-weight-bold">{{ student.initials }}</v-list-item-title>
+                  <v-list-item-subtitle class="font-monospace text-caption">{{ student.web_id }}</v-list-item-subtitle>
+                </v-list-item>
+              </v-list>
+
+              <div v-else class="text-center pa-6 text-medium-emphasis">
+                <v-icon size="28" color="disabled" class="mb-2">mdi-account-off</v-icon>
+                <div class="text-body-2">No students match your query</div>
+              </div>
+            </v-card>
+          </v-menu>
         </v-col>
       </v-row>
-      
-      <v-list v-if="filteredStudents.length > 0" max-height="300" class="overflow-y-auto">
-        <v-list-item
-          v-for="student in filteredStudents"
-          :key="student.id"
-          @click="selectStudent(student)"
-          :active="selectedStudent?.id === student.id"
-        >
-          <template v-slot:prepend>
-            <v-avatar color="primary" size="40">
-              <span class="text-white font-weight-bold">{{ student.initials }}</span>
-            </v-avatar>
-          </template>
-          <v-list-item-title>{{ student.initials }}</v-list-item-title>
-          <v-list-item-subtitle>{{ student.web_id }}</v-list-item-subtitle>
-        </v-list-item>
-      </v-list>
-
-      <div v-else-if="searchQuery" class="text-center pa-4 text-medium-emphasis">
-        No students found
-      </div>
     </v-card>
 
-    <!-- Feedback Form (shows after student selected) -->
-    <v-card v-if="selectedStudent" class="pa-6 mb-6" elevation="2" rounded="lg">
+    <v-card v-if="selectedStudent" class="pa-6 mb-6 animate-fade-in" elevation="2" rounded="lg">
       <div class="text-h6 mb-4">
         Create Feedback for {{ selectedStudent.initials }} ({{ selectedStudent.web_id }})
       </div>
 
-      <!-- Feedback Type Selection -->
       <v-radio-group v-model="feedbackType" inline>
-        <v-radio label="Presentation" value="presentation" />
-        <v-radio label="Exercises" value="exercises" />
+        <v-radio label="Presentation" value="presentation" color="primary" />
+        <v-radio label="Exercises" value="exercises" color="primary" />
       </v-radio-group>
 
-      <!-- Course Selection -->
       <v-select
         v-model="selectedCourse"
         :items="studentCourses"
@@ -74,7 +102,6 @@
         class="mb-4"
       />
 
-      <!-- Presentation-specific fields -->
       <div v-if="feedbackType === 'presentation'" class="mb-6">
         <v-text-field
           v-model="presentationDate"
@@ -98,6 +125,7 @@
           v-model="selectedPositiveComments"
           :label="comment"
           :value="comment"
+          color="primary"
           density="compact"
           hide-details
         />
@@ -123,10 +151,12 @@
           <v-radio
             label="All requirements successfully fulfilled"
             value="complete"
+            color="success"
           />
           <v-radio
             label="Some requirements missing"
             value="incomplete"
+            color="warning"
           />
         </v-radio-group>
 
@@ -140,7 +170,6 @@
         />
       </div>
 
-      <!-- Exercises-specific fields -->
       <div v-if="feedbackType === 'exercises'" class="mb-6">
         <v-text-field
           v-model="exerciseNames"
@@ -163,6 +192,7 @@
           v-model="selectedPositiveComments"
           :label="comment"
           :value="comment"
+          color="primary"
           density="compact"
           hide-details
         />
@@ -184,7 +214,6 @@
         />
       </div>
 
-      <!-- Error Entries (Common to both types) -->
       <v-divider class="my-6" />
       
       <div class="d-flex align-center justify-space-between mb-4">
@@ -200,112 +229,94 @@
       </div>
 
       <v-row
-  v-for="(error, index) in errors"
-  :key="index"
-  dense
-  class="mb-2"
->
-  <v-col cols="12" md="4">
-    <v-select
-      v-model="error.code"
-      :items="errorCodes"
-      label="Error Code"
-      variant="outlined"
-      density="compact"
-    />
-  </v-col>
-  <v-col cols="12" md="7">
-    <v-textarea
-      v-model="error.evidence"
-      @input="updateErrorCount(index)"
-      label="Evidence (separate with semicolons)"
-      variant="outlined"
-      rows="2"
-      density="compact"
-    />
-  </v-col>
-  <v-col cols="12" md="1" class="d-flex flex-column align-center justify-center">
-    <!-- Auto Count Display (prominent) -->
-    <v-tooltip location="top">
-      <template v-slot:activator="{ props }">
-        <div v-bind="props" class="auto-count-display">
-          <div class="text-h6 font-weight-bold" :class="error.manualOverride ? 'text-warning' : 'text-primary'">
-            {{ error.times }}
-          </div>
-          <div class="text-caption text-medium-emphasis">
-            {{ error.manualOverride ? 'Manual' : 'Auto' }}
-          </div>
-        </div>
-      </template>
-      <span v-if="error.manualOverride">
-        Click to reset to auto-count ({{ error.autoCount }})
-      </span>
-      <span v-else>
-        Click to manually override
-      </span>
-    </v-tooltip>
+        v-for="(error, index) in errors"
+        :key="index"
+        dense
+        class="mb-2 align-center"
+      >
+        <v-col cols="12" md="4">
+          <v-select
+            v-model="error.code"
+            :items="errorCodes"
+            label="Error Code"
+            variant="outlined"
+            density="compact"
+            hide-details
+          />
+        </v-col>
+        <v-col cols="12" md="6">
+          <v-textarea
+            v-model="error.evidence"
+            @input="updateErrorCount(index)"
+            label="Evidence (separate with semicolons)"
+            variant="outlined"
+            rows="1"
+            auto-grow
+            density="compact"
+            hide-details
+          />
+        </v-col>
+        <v-col cols="6" md="1" class="d-flex align-center justify-center">
+          <v-tooltip location="top">
+            <template v-slot:activator="{ props: tooltipProps }">
+              <div v-bind="tooltipProps" class="auto-count-display">
+                <div class="text-h6 font-weight-bold" :class="error.manualOverride ? 'text-warning' : 'text-primary'">
+                  {{ error.times }}
+                </div>
+                <div class="text-caption text-medium-emphasis" style="font-size: 0.65rem !important;">
+                  {{ error.manualOverride ? 'Manual' : 'Auto' }}
+                </div>
+              </div>
+            </template>
+            <span v-if="error.manualOverride">Click pencil to modify or reset to auto ({{ error.autoCount }})</span>
+            <span v-else>Auto count matches evidence strings.</span>
+          </v-tooltip>
 
-    <!-- Manual Override Button (only visible when hovering or active) -->
-<v-menu v-model="error.showMenu" location="bottom" :close-on-content-click="false">
-  <template v-slot:activator="{ props: menuProps }">
-    <v-btn
-      v-bind="menuProps"
-      icon
-      size="x-small"
-      variant="text"
-      class="manual-override-btn"
-    >
-      <v-icon size="16">{{ error.manualOverride ? 'mdi-lock' : 'mdi-pencil' }}</v-icon>
-    </v-btn>
-  </template>
+          <v-menu v-model="error.showMenu" location="bottom" :close-on-content-click="false">
+            <template v-slot:activator="{ props: menuProps }">
+              <v-btn
+                v-bind="menuProps"
+                icon
+                size="x-small"
+                variant="text"
+                class="manual-override-btn ml-1"
+              >
+                <v-icon size="16">{{ error.manualOverride ? 'mdi-lock-open-edit' : 'mdi-pencil' }}</v-icon>
+              </v-btn>
+            </template>
 
-  <!-- Manual input popup -->
-  <v-card min-width="150">
-    <v-card-text class="pa-3">
-      <div class="text-caption mb-2">Manual Count</div>
-      <v-text-field
-        v-model.number="error.times"
-        type="number"
-        variant="outlined"
-        density="compact"
-        min="1"
-        hide-details
-        autofocus
-        @keyup.enter="confirmManualOverride(index)"
-      />
-      <div class="d-flex gap-2 mt-2">
-        <v-btn
-          size="small"
-          color="primary"
-          variant="flat"
-          @click="confirmManualOverride(index)"
-        >
-          Set
-        </v-btn>
-        <v-btn
-          size="small"
-          variant="text"
-          @click="resetToAutoCount(index)"
-        >
-          Reset to Auto
-        </v-btn>
-      </div>
-    </v-card-text>
-  </v-card>
-</v-menu>
-  </v-col>
-  <v-col cols="12" md="12" class="d-flex align-center justify-end">
-    <v-btn
-      icon="mdi-delete"
-      size="small"
-      color="error"
-      variant="text"
-      @click="removeErrorRow(index)"
-    />
-  </v-col>
-</v-row>
+            <v-card min-width="180" rounded="lg">
+              <v-card-text class="pa-3">
+                <div class="text-caption mb-2 font-weight-bold">Override Counter</div>
+                <v-text-field
+                  v-model.number="error.times"
+                  type="number"
+                  variant="outlined"
+                  density="compact"
+                  min="1"
+                  hide-details
+                  autofocus
+                  @keyup.enter="confirmManualOverride(index)"
+                />
+                <div class="d-flex gap-2 mt-3">
+                  <v-btn size="x-small" color="primary" variant="flat" @click="confirmManualOverride(index)">Set</v-btn>
+                  <v-btn size="x-small" variant="text" @click="resetToAutoCount(index)">Reset Auto</v-btn>
+                </div>
+              </v-card-text>
+            </v-card>
+          </v-menu>
+        </v-col>
+        <v-col cols="6" md="1" class="d-flex align-center justify-center">
+          <v-btn
+            icon="mdi-delete"
+            size="small"
+            color="error"
+            variant="text"
+            @click="removeErrorRow(index)"
+          />
+        </v-col>
+      </v-row>
 
-      <!-- Vocabulary Entries (Common to both types) -->
       <v-divider class="my-6" />
       
       <div class="d-flex align-center justify-space-between mb-4">
@@ -324,175 +335,59 @@
         v-for="(vocab, index) in vocabulary"
         :key="index"
         dense
-        class="mb-2"
+        class="mb-2 align-center"
       >
         <v-col cols="12" md="3">
-          <v-textarea
-            v-model="vocab.correct"
-            label="Correct"
-            variant="outlined"
-            rows="2"
-            density="compact"
-          />
+          <v-textarea v-model="vocab.correct" label="Correct" variant="outlined" rows="1" auto-grow density="compact" hide-details />
         </v-col>
         <v-col cols="12" md="3">
-          <v-textarea
-            v-model="vocab.incorrect"
-            label="Incorrect"
-            variant="outlined"
-            rows="2"
-            density="compact"
-          />
+          <v-textarea v-model="vocab.incorrect" label="Incorrect" variant="outlined" rows="1" auto-grow density="compact" hide-details />
         </v-col>
         <v-col cols="12" md="1">
-          <v-text-field
-            v-model.number="vocab.times"
-            label="#"
-            type="number"
-            variant="outlined"
-            density="compact"
-            min="1"
-          />
+          <v-text-field v-model.number="vocab.times" label="#" type="number" variant="outlined" density="compact" min="1" hide-details />
         </v-col>
         <v-col cols="12" md="4">
-          <v-textarea
-            v-model="vocab.comment"
-            label="Comment"
-            variant="outlined"
-            rows="2"
-            density="compact"
-          />
+          <v-textarea v-model="vocab.comment" label="Comment" variant="outlined" rows="1" auto-grow density="compact" hide-details />
         </v-col>
-        <v-col cols="12" md="1" class="d-flex align-center">
-          <v-btn
-            icon="mdi-delete"
-            size="small"
-            color="error"
-            variant="text"
-            @click="removeVocabRow(index)"
-          />
+        <v-col cols="12" md="1" class="d-flex justify-center">
+          <v-btn icon="mdi-delete" size="small" color="error" variant="text" @click="removeVocabRow(index)" />
         </v-col>
       </v-row>
 
-      <!-- Additional Fields (Common) -->
       <v-divider class="my-6" />
+      <v-textarea v-model="additionalComments" label="Additional Comments" variant="outlined" rows="3" class="mb-4" />
+      <v-textarea v-model="summary" label="Summary" variant="outlined" rows="3" class="mb-4" />
+      <v-text-field v-model="grade" label="Grade (optional)" variant="outlined" class="mb-4" />
 
-      <v-textarea
-        v-model="additionalComments"
-        label="Additional Comments"
-        variant="outlined"
-        rows="3"
-        class="mb-4"
-      />
-
-      <v-textarea
-        v-model="summary"
-        label="Summary"
-        variant="outlined"
-        rows="3"
-        class="mb-4"
-      />
-
-      <v-text-field
-        v-model="grade"
-        label="Grade (optional)"
-        variant="outlined"
-        class="mb-4"
-      />
-
-      <!-- Action Buttons -->
-      <div class="d-flex gap-3 mt-6">
-        <v-btn
-          color="primary"
-          size="large"
-          :loading="submitting"
-          @click="submitFeedback"
-          prepend-icon="mdi-send"
-        >
-          Submit Feedback
-        </v-btn>
-        
-        <v-btn
-          color="secondary"
-          size="large"
-          variant="outlined"
-          @click="previewPDF"
-          prepend-icon="mdi-eye"
-        >
-          Preview PDF
-        </v-btn>
-
-        <v-btn
-          color="error"
-          size="large"
-          variant="outlined"
-          @click="resetForm"
-          prepend-icon="mdi-refresh"
-        >
-          Reset
-        </v-btn>
+      <div class="d-flex gap-3 mt-6 flex-wrap">
+        <v-btn color="primary" size="large" :loading="submitting" @click="submitFeedback" prepend-icon="mdi-send">Submit Feedback</v-btn>
+        <v-btn color="secondary" size="large" variant="outlined" @click="previewPDF" prepend-icon="mdi-eye">Preview PDF</v-btn>
+        <v-btn color="error" size="large" variant="outlined" @click="resetForm" prepend-icon="mdi-refresh">Reset</v-btn>
       </div>
     </v-card>
 
-    <!-- Success/Error Snackbar -->
     <v-snackbar v-model="snackbar" :color="snackbarColor" :timeout="3000">
       {{ snackbarMessage }}
     </v-snackbar>
-
-    <!-- PDF Preview Dialog -->
-    <v-dialog v-model="pdfPreviewDialog" max-width="900">
-      <v-card>
-        <v-card-title class="d-flex justify-space-between align-center">
-          <span>PDF Preview</span>
-          <v-btn icon="mdi-close" variant="text" @click="pdfPreviewDialog = false" />
-        </v-card-title>
-        <v-card-text>
-          <iframe
-            v-if="pdfPreviewUrl"
-            :src="pdfPreviewUrl"
-            width="100%"
-            height="600"
-            style="border: none;"
-          />
-        </v-card-text>
-      </v-card>
-    </v-dialog>
   </v-container>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import api from '@/axios';
+import { useUserStore } from '@/stores/user';
 
 // Types
-interface Student {
-  id: number;
-  initials: string;
-  web_id: string;
-}
+interface Student { id: number; initials: string; web_id: string; }
+interface Course { slug: string; name: string; }
+interface ErrorEntry { code: string; evidence: string; times: number; autoCount: number; manualOverride: boolean; showMenu?: boolean; }
+interface VocabEntry { correct: string; incorrect: string; times: number; comment: string; }
 
-interface Course {
-  slug: string;
-  name: string;
-}
+// Stores
+const userStore = useUserStore();
 
-interface ErrorEntry {
-  code: string;
-  evidence: string;
-  times: number;
-  autoCount: number; // Always track auto count
-  manualOverride: boolean; // Flag for manual override
-  showMenu?: boolean; // For popup menu
-}
-
-interface VocabEntry {
-  correct: string;
-  incorrect: string;
-  times: number;
-  comment: string;
-}
-
-// State
+// UI Dropdown Search Mechanics state
+const dropdownOpen = ref(false);
 const students = ref<Student[]>([]);
 const searchQuery = ref('');
 const filteredStudents = ref<Student[]>([]);
@@ -502,76 +397,22 @@ const studentCourses = ref<Course[]>([]);
 const feedbackType = ref<'presentation' | 'exercises'>('exercises');
 const selectedCourse = ref('');
 
-// Presentation fields
+// Form state parameters
 const presentationDate = ref('');
 const presentationTopic = ref('');
-const presentationTopics = [
-  'A professional project',
-  'Documentary report',
-  'A startup and their pitch deck',
-  'A corporate annual report',
-  'A recent financial episode',
-  'Run a workshop',
-  'Learning project',
-  'A research paper',
-  'Bridge collapse case study',
-  'Analyze a sustainability concept',
-  'Meeting simulation',
-];
-
-const presentationPositiveOptions = [
-  'Thank you for your presentation/exam.',
-  'Thank you for your well-prepared presentation/exam. It was very interesting.',
-  'Your illustrations and visual support were very helpful.',
-  'I appreciated the fact that you followed my instructions carefully.',
-  'I noticed an effort to use the vocabulary we have studied in class.',
-  'You demonstrated good accuracy in your conjugations.',
-  'You did a good job with pronunciation.',
-];
-
-// Exercises fields
 const exerciseNames = ref('');
 const timePeriod = ref('');
-
-const exercisesPositiveOptions = [
-  'You have a good level of fluency.',
-  'You have good communication skills.',
-  'You use a wide range of general vocabulary.',
-  'I also noticed your efforts to apply the vocabulary and grammar we are learning in class.',
-  'In general, your verb conjugations are accurate. You have good conjugation mechanics.',
-  'In general, your pronunciation of the English language is quite good.',
-  'I would also like to thank you for the positive energy with which you approach our activities.',
-];
-
-// Common fields
 const selectedPositiveComments = ref<string[]>([]);
 const additionalPositive = ref('');
 const improvementComments = ref('');
 const requirementsFulfilled = ref('complete');
 const missingRequirements = ref('');
-
-// Initialize with 8 error rows and 4 vocab rows
-const errors = ref<ErrorEntry[]>([
-  { code: '', evidence: '', times: 0, autoCount: 0, manualOverride: false },
-  { code: '', evidence: '', times: 0, autoCount: 0, manualOverride: false },
-  { code: '', evidence: '', times: 0, autoCount: 0, manualOverride: false },
-  { code: '', evidence: '', times: 0, autoCount: 0, manualOverride: false },
-  { code: '', evidence: '', times: 0, autoCount: 0, manualOverride: false },
-  { code: '', evidence: '', times: 0, autoCount: 0, manualOverride: false },
-  { code: '', evidence: '', times: 0, autoCount: 0, manualOverride: false },
-  { code: '', evidence: '', times: 0, autoCount: 0, manualOverride: false },
-]);
-
-const vocabulary = ref<VocabEntry[]>([
-  { correct: '', incorrect: '', times: 1, comment: '' },
-  { correct: '', incorrect: '', times: 1, comment: '' },
-  { correct: '', incorrect: '', times: 1, comment: '' },
-  { correct: '', incorrect: '', times: 1, comment: '' },
-]);
-
 const additionalComments = ref('');
 const summary = ref('');
 const grade = ref('');
+
+const errors = ref<ErrorEntry[]>(Array.from({ length: 8 }, () => ({ code: '', evidence: '', times: 0, autoCount: 0, manualOverride: false })));
+const vocabulary = ref<VocabEntry[]>(Array.from({ length: 4 }, () => ({ correct: '', incorrect: '', times: 1, comment: '' })));
 
 const errorCodes = ref<string[]>([]);
 const submitting = ref(false);
@@ -579,17 +420,21 @@ const snackbar = ref(false);
 const snackbarMessage = ref('');
 const snackbarColor = ref('success');
 
-const pdfPreviewDialog = ref(false);
-const pdfPreviewUrl = ref('');
+const presentationTopics = ['A professional project', 'Documentary report', 'A startup and their pitch deck', 'A corporate annual report', 'A recent financial episode', 'Run a workshop', 'Learning project', 'A research paper', 'Bridge collapse case study', 'Analyze a sustainability concept', 'Meeting simulation'];
+const presentationPositiveOptions = ['Thank you for your presentation/exam.', 'Thank you for your well-prepared presentation/exam. It was very interesting.', 'Your illustrations and visual support were very helpful.', 'I appreciated the fact that you followed my instructions carefully.', 'I noticed an effort to use the vocabulary we have studied in class.', 'You demonstrated good accuracy in your conjugations.', 'You did a job with pronunciation.'];
+const exercisesPositiveOptions = ['You have a good level of fluency.', 'You have good communication skills.', 'You use a wide range of general vocabulary.', 'I also noticed your efforts to apply the vocabulary and grammar we are learning in class.', 'In general, your verb conjugations are accurate. You have good conjugation mechanics.', 'In general, your pronunciation of the English language is quite good.', 'I would also like to thank you for the positive energy with which you approach our activities.'];
 
-// Methods
+// Fetch Methods
 async function fetchStudents() {
   try {
-    const response = await api.get('/students/');
-    students.value = response.data;
-    filteredStudents.value = response.data;
+    if (userStore.isStaff && userStore.teacherRoster.length === 0) {
+      await userStore.fetchTeacherRoster();
+    }
+    const secureSource = userStore.isStaff ? userStore.teacherRoster : [];
+    students.value = secureSource.map(s => ({ id: s.id, initials: s.initials, web_id: s.web_id }));
+    filteredStudents.value = [...students.value];
   } catch (error) {
-    console.error('Failed to fetch students:', error);
+    console.error('Failed to isolate student select bounds roster:', error);
   }
 }
 
@@ -597,61 +442,62 @@ async function fetchErrorCodes() {
   try {
     const response = await api.get('/static/data/errors.json');
     const errorsData = response.data;
-    errorCodes.value = Object.keys(errorsData).map(key => 
-      `${key} ${errorsData[key].short_slug}`
-    );
+    errorCodes.value = Object.keys(errorsData).map(key => `${key} ${errorsData[key].short_slug}`);
   } catch (error) {
     console.error('Failed to fetch error codes:', error);
   }
 }
 
-function filterStudents() {
+// 🌟 Dropdown Control Functions
+function onSearchInput() {
+  dropdownOpen.value = true;
   if (!searchQuery.value) {
     filteredStudents.value = students.value;
     return;
   }
-
   const query = searchQuery.value.toLowerCase();
   filteredStudents.value = students.value.filter(s => 
-    s.initials.toLowerCase().includes(query) ||
-    s.web_id.toLowerCase().includes(query)
+    s.initials.toLowerCase().includes(query) || s.web_id.toLowerCase().includes(query)
   );
 }
 
-async function selectStudent(student: Student) {
+async function handleStudentSelect(student: Student) {
   selectedStudent.value = student;
-  
-  // Fetch student's courses
+  searchQuery.value = student.initials; 
+  dropdownOpen.value = false; // ✨ Closes dropdown smoothly on choice
+
   try {
-    const response = await api.get('/enrollment/', {
-      params: { student: student.id }
-    });
+    const response = await api.get('/enrollment/', { params: { student: student.id } });
     studentCourses.value = response.data.map((e: any) => ({
-      slug: e.course.slug || e.course,
-      name: e.course.slug || e.course,
+      slug: e.course?.slug || e.course,
+      name: e.course?.slug || e.course,
     }));
   } catch (error) {
     console.error('Failed to fetch student courses:', error);
   }
 }
 
-/**
- * Count semicolon-separated items in evidence string
- */
-function countEvidenceItems(evidence: string): number {
-  if (!evidence || !evidence.trim()) return 0;
-  
-  const items = evidence
-    .split(';')
-    .map(item => item.trim())
-    .filter(item => item.length > 0);
-  
-  return items.length;
+function clearSelection() {
+  selectedStudent.value = null;
+  searchQuery.value = '';
+  filteredStudents.value = [...students.value];
+  studentCourses.value = [];
+  selectedCourse.value = '';
 }
 
-/**
- * Reset to auto count
- */
+// Calculations Logic 
+function countEvidenceItems(evidence: string): number {
+  if (!evidence || !evidence.trim()) return 0;
+  return evidence.split(';').map(item => item.trim()).filter(item => item.length > 0).length;
+}
+
+function updateErrorCount(index: number) {
+  const error = errors.value[index];
+  const autoCount = countEvidenceItems(error.evidence);
+  error.autoCount = autoCount;
+  if (!error.manualOverride) error.times = autoCount;
+}
+
 function resetToAutoCount(index: number) {
   const error = errors.value[index];
   error.times = error.autoCount;
@@ -659,58 +505,17 @@ function resetToAutoCount(index: number) {
   error.showMenu = false;
 }
 
-/**
- * Update error count based on semicolon-separated evidence
- */
-function updateErrorCount(index: number) {
-  const error = errors.value[index];
-  const autoCount = countEvidenceItems(error.evidence);
-  
-  error.autoCount = autoCount;
-  
-  // Only update times if not manually overridden
-  if (!error.manualOverride) {
-    error.times = autoCount;
-  }
-}
-
-function addErrorRow() {
-  errors.value.push({
-    code: '',
-    evidence: '',
-    times: 0,
-    autoCount: 0,
-    manualOverride: false,
-  });
-}
-
-function removeErrorRow(index: number) {
-  errors.value.splice(index, 1);
-}
-
-/**
- * Confirm manual override
- */
 function confirmManualOverride(index: number) {
-  const error = errors.value[index];
-  error.manualOverride = true;
-  error.showMenu = false;
+  errors.value[index].manualOverride = true;
+  errors.value[index].showMenu = false;
 }
 
+function addErrorRow() { errors.value.push({ code: '', evidence: '', times: 0, autoCount: 0, manualOverride: false }); }
+function removeErrorRow(index: number) { errors.value.splice(index, 1); }
+function addVocabRow() { vocabulary.value.push({ correct: '', incorrect: '', times: 1, comment: '' }); }
+function removeVocabRow(index: number) { vocabulary.value.splice(index, 1); }
 
-function addVocabRow() {
-  vocabulary.value.push({
-    correct: '',
-    incorrect: '',
-    times: 1,
-    comment: '',
-  });
-}
-
-function removeVocabRow(index: number) {
-  vocabulary.value.splice(index, 1);
-}
-
+// Submit Action
 async function submitFeedback() {
   if (!selectedStudent.value || !selectedCourse.value) {
     showSnackbar('Please select a student and course', 'error');
@@ -721,9 +526,10 @@ async function submitFeedback() {
 
   try {
     const payload = {
+      teacher: userStore.user?.id, 
       feedback_type: feedbackType.value,
       student_web_id: selectedStudent.value.web_id,
-      student_initials: selectedStudent.value.initials, // Use initials instead of name
+      student_initials: selectedStudent.value.initials, 
       course_slug: selectedCourse.value,
       errors: errors.value.filter(e => e.code && e.evidence),
       vocabulary: vocabulary.value.filter(v => v.correct && v.incorrect),
@@ -732,7 +538,6 @@ async function submitFeedback() {
       grade: grade.value,
     };
 
-    // Add type-specific fields
     if (feedbackType.value === 'presentation') {
       Object.assign(payload, {
         presentation_date: presentationDate.value,
@@ -755,29 +560,22 @@ async function submitFeedback() {
     }
 
     const response = await api.post('/feedback/create/', payload);
-    
     showSnackbar('Feedback created successfully!', 'success');
+    clearSelection();
     resetForm();
     
-    // Optionally download PDF
-    if (response.data.pdf_url) {
-      window.open(response.data.pdf_url, '_blank');
-    }
+    if (response.data.pdf_url) window.open(response.data.pdf_url, '_blank');
   } catch (error: any) {
-    console.error('Failed to submit feedback:', error);
     showSnackbar(error.response?.data?.error || 'Failed to submit feedback', 'error');
   } finally {
     submitting.value = false;
   }
 }
 
-async function previewPDF() {
-  showSnackbar('PDF preview coming soon', 'info');
-}
+function previewPDF() { showSnackbar('PDF live preview coming soon', 'info'); }
 
 function resetForm() {
   feedbackType.value = 'exercises';
-  selectedCourse.value = '';
   presentationDate.value = '';
   presentationTopic.value = '';
   exerciseNames.value = '';
@@ -787,29 +585,11 @@ function resetForm() {
   improvementComments.value = '';
   requirementsFulfilled.value = 'complete';
   missingRequirements.value = '';
-  
-  // Reset to 8 error rows and 4 vocab rows
-    errors.value = [
-    { code: '', evidence: '', times: 0, autoCount: 0, manualOverride: false },
-    { code: '', evidence: '', times: 0, autoCount: 0, manualOverride: false },
-    { code: '', evidence: '', times: 0, autoCount: 0, manualOverride: false },
-    { code: '', evidence: '', times: 0, autoCount: 0, manualOverride: false },
-    { code: '', evidence: '', times: 0, autoCount: 0, manualOverride: false },
-    { code: '', evidence: '', times: 0, autoCount: 0, manualOverride: false },
-    { code: '', evidence: '', times: 0, autoCount: 0, manualOverride: false },
-    { code: '', evidence: '', times: 0, autoCount: 0, manualOverride: false },
-  ];
-  
-  vocabulary.value = [
-    { correct: '', incorrect: '', times: 1, comment: '' },
-    { correct: '', incorrect: '', times: 1, comment: '' },
-    { correct: '', incorrect: '', times: 1, comment: '' },
-    { correct: '', incorrect: '', times: 1, comment: '' },
-  ];
-  
   additionalComments.value = '';
   summary.value = '';
   grade.value = '';
+  errors.value = Array.from({ length: 8 }, () => ({ code: '', evidence: '', times: 0, autoCount: 0, manualOverride: false }));
+  vocabulary.value = Array.from({ length: 4 }, () => ({ correct: '', incorrect: '', times: 1, comment: '' }));
 }
 
 function showSnackbar(message: string, color: string) {
@@ -830,7 +610,6 @@ onMounted(() => {
   position: relative;
   overflow: hidden;
 }
-
 .feedback-header::before {
   content: "";
   position: absolute;
@@ -841,53 +620,21 @@ onMounted(() => {
   transform: rotate(-10deg);
   pointer-events: none;
 }
-
-.feedback-header > * {
-  position: relative;
-}
-
-.feedback-header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  position: relative;
-  overflow: hidden;
-}
-
-.feedback-header::before {
-  content: "";
-  position: absolute;
-  inset: -45%;
-  background:
-    radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.35) 0%, rgba(255, 255, 255, 0) 45%),
-    radial-gradient(circle at 85% 25%, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0) 55%);
-  transform: rotate(-10deg);
-  pointer-events: none;
-}
-
-
+.feedback-header > * { position: relative; }
 .auto-count-display {
   text-align: center;
-  padding: 8px;
-  border-radius: 8px;
-  background: rgba(0, 0, 0, 0.02);
-  min-width: 50px;
-  cursor: pointer;
-  transition: all 0.2s;
+  padding: 4px;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.03);
+  min-width: 48px;
+  border: 1px solid rgba(0,0,0,0.05);
 }
-
-.auto-count-display:hover {
-  background: rgba(0, 0, 0, 0.05);
-}
-
-.manual-override-btn {
-  opacity: 0;
-  transition: opacity 0.2s;
-}
-
-.v-col:hover .manual-override-btn {
-  opacity: 1;
-}
-
-.manual-override-btn:focus {
-  opacity: 1;
-}
+.manual-override-btn { opacity: 0.4; transition: opacity 0.2s; }
+.v-row:hover .manual-override-btn { opacity: 1; }
+.custom-scrollbar::-webkit-scrollbar { width: 5px; }
+.custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+.animate-fade-in { animation: fadeIn 0.3s ease-out forwards; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+.gap-2 { gap: 8px; }
+.gap-3 { gap: 12px; }
 </style>

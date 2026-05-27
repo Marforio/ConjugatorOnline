@@ -14,7 +14,7 @@
         persistent
       >
         <v-progress-circular indeterminate size="52" width="5" color="primary" />
-        <div class="mt-4 text-subtitle-2 font-weight-bold text-white tracking-wide">Syncing data profiles...</div>
+        <div class="mt-4 text-subtitle-2 font-weight-bold text-white tracking-wide">Logging you in...</div>
       </v-overlay>
 
       <v-overlay
@@ -28,7 +28,7 @@
           <v-icon color="success" size="56">mdi-check-circle</v-icon>
         </v-avatar>
         <div class="text-h6 font-weight-black text-white leading-none">Authentication Passed</div>
-        <div class="text-caption text-slate-300 mt-1 font-weight-medium">Configuring runtime parameters...</div>
+        <div class="text-caption text-slate-300 mt-1 font-weight-medium">Loading your data...</div>
       </v-overlay>
 
       <v-overlay
@@ -46,9 +46,14 @@
       </v-overlay>
 
       <div class="text-center mb-8">
-        <v-avatar color="primary-lighten-5" size="52" class="mb-3 border">
-          <v-icon color="primary" size="26">mdi-book-education-outline</v-icon>
-        </v-avatar>
+        <v-avatar color="blue-lighten-5" size="80" class="mb-4">
+        <v-img
+          src="/icons/logo1.png"
+          alt="Logo"
+          cover
+          class="rounded-circle"
+        />
+      </v-avatar>
         <v-card-title class="pa-0 text-h5 font-weight-black text-slate-900 tracking-tight leading-none mb-1">
           Welcome Back
         </v-card-title>

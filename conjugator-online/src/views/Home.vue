@@ -17,7 +17,7 @@
         Language Labs
       </h1>
       <p class="text-body-1 text-slate-500 max-width-text mx-auto mb-8">
-        Language tools and games for students.
+        Custom language tools for students.
       </p>
 
       <!-- Dynamic Entry Actions Core -->

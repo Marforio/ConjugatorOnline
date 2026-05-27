@@ -25,13 +25,13 @@
             label="Filter by Course"
             prepend-icon="mdi-book-open-variant"
             variant="outlined"
-            @update:model-value="fetchAllData"
+            @update:model-value="fetchAchievements"
           />
         </v-col>
         <v-col cols="12" md="4">
           <v-autocomplete
             v-model="selectedStudent"
-            :items="students"
+            :items="filteredStudentsDropdown"
             item-title="display_name"
             item-value="id"
             label="Filter by Student"
@@ -61,7 +61,7 @@
             label="Date Range"
             prepend-icon="mdi-calendar-range"
             variant="outlined"
-            @update:model-value="fetchAllData"
+            @update:model-value="fetchAchievements"
           />
         </v-col>
       </v-row>
@@ -111,7 +111,7 @@
                     <div class="d-flex align-items-center w-100">
                       <v-avatar color="primary" size="32" class="mr-3">
                         <span class="text-white text-caption">
-                          {{ studentData.initials }}
+                          {{ studentData.student_initials || studentData.initials.charAt(0) }}
                         </span>
                       </v-avatar>
                       <div class="flex-grow-1">
@@ -251,6 +251,8 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import api from '@/axios';
+// ✨ FIX 1: Import user store to secure roster access boundaries
+import { useUserStore } from '@/stores/user'; 
 
 interface Course {
   slug: string;
@@ -290,9 +292,10 @@ interface StudentWithAchievement {
   manually_created: boolean;
 }
 
-const loadingAchievements = ref(false);
+// Instantiate secure store coordinates tracking references
+const userStore = useUserStore();
 
-const students = ref<Student[]>([]);
+const loadingAchievements = ref(false);
 const courseOptions = ref<{ id: string; name: string }[]>([]);
 const selectedCourse = ref<string>('all');
 const selectedStudent = ref<number | null>(null);
@@ -307,6 +310,17 @@ const dateRangeOptions = [
 const achievements = ref<Achievement[]>([]);
 const achievementView = ref<'by-student' | 'by-achievement'>('by-student');
 const selectedAchievementType = ref<string | null>(null);
+
+// ✨ FIX 2: Compute students dropdown options cleanly from the teacher's secure roster state
+const filteredStudentsDropdown = computed<Student[]>(() => {
+  const sourceList = userStore.isStaff ? userStore.teacherRoster : [];
+  return sourceList.map(s => ({
+    id: s.id,
+    initials: s.initials,
+    web_id: s.web_id,
+    display_name: `${s.initials} (${s.web_id})`
+  }));
+});
 
 const selectedCourseName = computed(() => {
   if (selectedCourse.value === 'all') return 'All Courses';
@@ -343,7 +357,7 @@ const achievementsByStudent = computed(() => {
 
 const achievementTypeOptions = computed(() => {
   const types = new Set<string>();
-  filteredAchievements.value.forEach(a => { types.add(a.description); });
+  filteredAchievements.value.forEach(a => { if (a.description) types.add(a.description); });
   return Array.from(types).sort().map(t => ({ title: t, value: t }));
 });
 
@@ -367,20 +381,9 @@ const studentsWithSelectedAchievement = computed(() => {
 const totalAchievements = computed(() => filteredAchievements.value.length);
 const activeStudentCount = computed(() => achievementsByStudent.value.length);
 
-async function fetchStudents() {
-  try {
-    const response = await api.get<Student[]>('/students/');
-    students.value = response.data.map(s => ({
-      ...s,
-      display_name: `${s.initials} (${s.web_id})`,
-    }));
-  } catch (error) {
-    console.error('Failed to fetch students:', error);
-  }
-}
-
 async function fetchCourses() {
   try {
+    // Let the custom backend viewset filter out only managed courses matching the teacher
     const response = await api.get<Course[]>('/courses/');
     courseOptions.value = [
       { id: 'all', name: 'All Courses' },
@@ -394,63 +397,40 @@ async function fetchCourses() {
 async function fetchAchievements() {
   loadingAchievements.value = true;
   try {
+    // ✨ FIX 3: Pass clean, filtered query params directly to the backend viewset
     const params: any = { limit: 1000 };
-    let studentIds: number[] = [];
     
-    if (selectedCourse.value !== 'all') {
-      const enrollmentResponse = await api.get('/enrollment/', {
-        params: { course: selectedCourse.value }
-      });
-      studentIds = enrollmentResponse.data.map((e: any) => e.student?.id || e.student);
+    if (selectedStudent.value) {
+      params.student = selectedStudent.value;
+    } else if (selectedCourse.value !== 'all') {
+      params.course = selectedCourse.value;
     }
 
     const response = await api.get('/achievements/', { params });
     const responseData: any = response.data;
-    let data = responseData.results || response.data;
+    const data = responseData.results || responseData;
     
     if (Array.isArray(data)) {
-      if (selectedCourse.value !== 'all' && studentIds.length > 0) {
-        data = data.filter((ach: any) => studentIds.includes(ach.student));
-      }
-      if (selectedStudent.value) {
-        data = data.filter((ach: any) => ach.student === selectedStudent.value);
-      }
-      
-      const studentsResponse = await api.get('/students/');
-      const studentsMap = new Map<number, { initials: string; web_id: string }>();
-      studentsResponse.data.forEach((s: any) => {
-        studentsMap.set(s.id, { initials: s.initials || '', web_id: s.web_id || '' });
-      });
-      
-      const enrichedAchievements: Achievement[] = data.map((ach: any) => {
-        const studentInfo = studentsMap.get(ach.student);
-        return {
-          id: ach.id,
-          student: ach.student,
-          student_initials: studentInfo ? studentInfo.initials : `Student ${ach.student}`,
-          student_web_id: studentInfo ? studentInfo.web_id : '',
-          description: ach.description,
-          achieved_on: ach.achieved_on,
-          manually_created: ach.manually_created,
-          criteria_key: ach.criteria_key,
-        };
-      });
-
-      achievements.value = enrichedAchievements.sort(
-        (a, b) => new Date(b.achieved_on).getTime() - new Date(a.achieved_on).getTime()
-      );
+      achievements.value = data.map((ach: any) => ({
+        id: ach.id,
+        student: ach.student,
+        // Utilize the direct data bindings fallback properties straight from serialization loops
+        student_initials: ach.student_initials || `Student ${ach.student}`,
+        student_web_id: ach.student_web_id || '',
+        description: ach.description,
+        achieved_on: ach.achieved_on,
+        manually_created: ach.manually_created,
+        criteria_key: ach.criteria_key,
+      })).sort((a, b) => new Date(b.achieved_on).getTime() - new Date(a.achieved_on).getTime());
     } else {
       achievements.value = [];
     }
   } catch (error) {
     console.error('Failed to fetch achievements:', error);
+    achievements.value = [];
   } finally {
     loadingAchievements.value = false;
   }
-}
-
-async function fetchAllData() {
-  await fetchAchievements();
 }
 
 async function onStudentFilterChange() {
@@ -471,7 +451,10 @@ function formatDate(dateString: string): string {
 }
 
 onMounted(async () => {
-  await fetchStudents();
+  // Rely on global initialization chains to keep multi-tenant state accurate
+  if (userStore.isStaff && userStore.teacherRoster.length === 0) {
+    await userStore.fetchTeacherRoster();
+  }
   await fetchCourses();
   await fetchAchievements();
 });

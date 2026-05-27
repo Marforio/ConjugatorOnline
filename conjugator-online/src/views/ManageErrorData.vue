@@ -44,7 +44,7 @@
         <v-col cols="12" md="4">
           <v-autocomplete
             v-model="selectedStudent"
-            :items="students"
+            :items="secureStudentsDropdown"
             item-title="display_name"
             item-value="id"
             label="Filter by Student"
@@ -337,7 +337,6 @@ const snackbar = ref(false);
 const snackbarMessage = ref('');
 const snackbarColor = ref('success');
 
-const students = ref<Student[]>([]);
 const courseOptions = ref<{ id: string; name: string }[]>([]);
 const selectedCourse = ref<string>('all');
 const selectedStudent = ref<number | null>(null);
@@ -357,12 +356,21 @@ const activities = ref<Activity[]>([]);
 const selectedErrorCode = ref<string | null>(null);
 
 /* =========================================================
-   📊 COMPUTED VIEW TITLE LABELS (UX TARGET REFURBISH)
+   ✨ FIX 1: Securely compute drop-down items from roster
    ========================================================= */
+const secureStudentsDropdown = computed<Student[]>(() => {
+  return userStore.teacherRoster.map(s => ({
+    id: s.id,
+    initials: s.initials,
+    web_id: s.web_id,
+    display_name: `${s.initials} (${s.web_id})`
+  }));
+});
+
 const dynamicChartTitle = computed(() => {
   if (errorViewMode.value === 'STUDENTS') {
     if (!selectedStudent.value) return 'Errors (No Student Selected)';
-    const foundStudent = students.value.find(s => s.id === selectedStudent.value);
+    const foundStudent = userStore.teacherRoster.find(s => s.id === selectedStudent.value);
     return `Errors (Student: ${foundStudent ? foundStudent.initials : 'Active Profile'})`;
   }
   return `Errors (${selectedCourseName.value})`;
@@ -434,18 +442,6 @@ const activityBreakdown = computed(() => {
   return breakdown;
 });
 
-async function fetchStudents() {
-  try {
-    const response = await api.get<Student[]>('/students/');
-    students.value = response.data.map(s => ({
-      ...s,
-      display_name: `${s.initials} (${s.web_id})`,
-    }));
-  } catch (error) {
-    console.error('Failed to fetch students:', error);
-  }
-}
-
 async function fetchCourses() {
   try {
     const response = await api.get<Course[]>('/courses/');
@@ -502,8 +498,6 @@ async function fetchErrorData() {
   loadingErrors.value = true;
   try {
     const params: any = {};
-    
-    // UX Split Safeguards: Ignore parameters that don't belong to the active mode
     if (errorViewMode.value === 'COURSES' && selectedCourse.value !== 'all') {
       params.course = selectedCourse.value;
     }
@@ -555,19 +549,20 @@ async function fetchErrorData() {
 async function fetchAchievementsFallbackContext() {
   try {
     const params: any = { limit: 1000 };
-    let studentIds: number[] = [];
-    if (errorViewMode.value === 'COURSES' && selectedCourse.value !== 'all') {
-      const enrollmentResponse = await api.get('/enrollment/', { params: { course: selectedCourse.value } });
-      studentIds = enrollmentResponse.data.map((e: any) => e.student?.id || e.student);
+    if (errorViewMode.value === 'STUDENTS' && selectedStudent.value) {
+      params.student = selectedStudent.value;
+    } else if (errorViewMode.value === 'COURSES' && selectedCourse.value !== 'all') {
+      params.course = selectedCourse.value;
     }
+
     const response = await api.get('/achievements/', { params });
-    let data = response.data.results || response.data;
+    const data = response.data.results || response.data;
     if (Array.isArray(data)) {
-      if (errorViewMode.value === 'COURSES' && selectedCourse.value !== 'all' && studentIds.length > 0) data = data.filter((ach: any) => studentIds.includes(ach.student));
-      if (errorViewMode.value === 'STUDENTS' && selectedStudent.value) data = data.filter((ach: any) => ach.student === selectedStudent.value);
       achievements.value = data;
     }
-  } catch (e) { console.error(e); }
+  } catch (e) { 
+    console.error(e); 
+  }
 }
 
 async function fetchActivityData() {
@@ -600,33 +595,43 @@ async function onStudentFilterChange() {
   await fetchAllData();
 }
 
+// Custom handler hook for manual component sync triggers
+async function onCourseFilterChange() {
+  await fetchAllData();
+}
+
 function openErrorTutorFromChart(payload: any) {
   showSnackbar(`Tutor routing called for code segment: ${payload.error_code || 'General'}`, 'info');
 }
 
+/* =========================================================
+   📄 REWORKED CLIENT-SIDE PDF SNAPSHOT REPORT GENERATOR
+   ========================================================= */
 async function generateStudentPdfReport() {
   if (!selectedStudent.value) return;
   pdfLoading.value = true;
+  
   try {
-    // 🛡️ RE-ALIGNED METHOD PAYLOAD STRUCTURING
-    // Wrap selectedStudent.value into an object payload matching the new store signature
+    // ✨ FIX 2: Set store coordinates before triggering nested fetches
+    userStore.selectedStudentId = selectedStudent.value;
+    
+    // Fetch individual profiles from student specific context parameters cleanly
+    await userStore.fetchStudentData();
     await Promise.all([
       userStore.fetchLinguisticProfile(),
-      userStore.fetchCurrentWorkout({ user_id: selectedStudent.value })
+      userStore.fetchCurrentWorkout()
     ]);
     
-    // Extract audited student metadata properties accurately from the components local reactive tracking cache
-    const targetStudent = students.value.find(s => s.id === selectedStudent.value);
-    const initials = targetStudent ? targetStudent.initials : 'ST';
-    
-    // Fall back to target student properties dynamically if store states are clearing for teachers
-    const studentScore = targetStudent && 'health_score' in targetStudent 
-      ? (targetStudent as any).health_score 
-      : (userStore.student?.health_score ?? 0);
+    const sProfile = userStore.student;
+    if (!sProfile) throw new Error("Student data synchronization returned null");
 
-    const studentPrompts = targetStudent && 'total_correct_prompts' in targetStudent 
-      ? (targetStudent as any).total_correct_prompts 
-      : (userStore.student?.total_correct_prompts ?? 0);
+    const initials = sProfile.initials || 'ST';
+    const studentScore = sProfile.health_score ?? 0;
+    const studentPrompts = sProfile.total_correct_prompts ?? 0;
+    
+    // ⏱️ Expose the newly added speaking length stats onto the summary sheet
+    const periodMinutes = userStore.currentPeriodSpeakingMinutes ?? 0;
+    const lifecycleMinutes = userStore.grandTotalSpeakingMinutes ?? 0;
     
     const doc = new jsPDF({ orientation: 'portrait', unit: 'pt', format: 'a4' });
     const pageWidth = doc.internal.pageSize.getWidth();
@@ -655,9 +660,11 @@ async function generateStudentPdfReport() {
       margin: { left: margin, right: margin },
       head: [['Your Key Stats', 'Current Standing']],
       body: [
-        ['Language Focus Area', (targetStudent as any)?.domain || userStore.studentDomainLabel || 'General Practice'],
+        ['Language Focus Area', sProfile.domain || userStore.studentDomainLabel || 'General Practice'],
         ['Correct Answers Added', `${studentPrompts} sentences`],
         ['Overall Accuracy Score', `${studentScore}% Precision`],
+        ['Spoken Volume (Semester)', `${periodMinutes} minutes tracked`],
+        ['Spoken Volume (Lifetime)', `${lifecycleMinutes} minutes accumulated`],
         ['Practice Rounds Completed', `${totalSessions.value} sessions`]
       ],
       theme: 'striped',
@@ -692,8 +699,8 @@ async function generateStudentPdfReport() {
               labels: topErrors.value.map(e => e.error_code),
               datasets: [{
                 data: topErrors.value.map(e => e.total_times),
-                backgroundColor: 'rgba(255, 87, 34, 0.65)', 
-                borderColor: 'rgba(255, 87, 34, 1)',
+                backgroundColor: 'rgba(0, 150, 136, 0.75)', // Swapped out ugly bright red for custom primary theme match
+                borderColor: 'rgba(0, 150, 136, 1)',
                 borderWidth: 1.5
               }]
             },
@@ -702,7 +709,7 @@ async function generateStudentPdfReport() {
               animation: false,
               plugins: { legend: { display: false } },
               scales: {
-                x: { ticks: { font: { size: 14, weight: 'bold' }, color: '#4C3E50' } },
+                x: { ticks: { font: { size: 14, weight: 'bold' }, color: '#2C3E50' } },
                 y: { beginAtZero: true, ticks: { stepSize: 1, color: '#888888' } }
               }
             }
@@ -882,7 +889,6 @@ async function generateStudentPdfReport() {
 }
 
 async function handleErrorViewToggle(mode: 'COURSES' | 'STUDENTS') {
-  // Clear the contextual parameter of the opposing hidden field to maintain data sanitization
   if (mode === 'COURSES') {
     selectedStudent.value = null;
   } else {
@@ -898,7 +904,10 @@ function showSnackbar(message: string, color: string = 'success') {
 }
 
 onMounted(async () => {
-  await fetchStudents();
+  // ✨ FIX 3: Initialize the assigned teacher roster at mount lifecycle phase 
+  if (userStore.isStaff && userStore.teacherRoster.length === 0) {
+    await userStore.fetchTeacherRoster();
+  }
   await fetchCourses();
   await fetchAllData();
 });
