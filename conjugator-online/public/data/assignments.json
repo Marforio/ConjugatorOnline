@@ -1,0 +1,327 @@
+{
+  "_all": {
+    "name": "Core Requirements",
+    "achievements": [
+      {
+        "criteria_key": "10_correct_prompts",
+        "name": "Conjugation Explorer",
+        "description": "Answer 10 conjugation prompts correctly."
+      },
+      {
+        "criteria_key": "200_correct_prompts",
+        "name": "Conjugation MVP",
+        "description": "Answer 200 conjugation prompts correctly."
+      },
+      {
+        "criteria_key": "500_correct_prompts",
+        "name": "Conjugation Champion",
+        "description": "Answer 500 conjugation prompts correctly."
+      },
+      {
+        "criteria_key": "750_correct_prompts",
+        "name": "Conjugation Master",
+        "description": "Answer 750 conjugation prompts correctly."
+      },
+      {
+        "criteria_key": "1000_correct_prompts",
+        "name": "Conjugation Expert",
+        "description": "Answer 1000 conjugation prompts correctly."
+      },
+      {
+        "criteria_key": "1250_correct_prompts",
+        "name": "Conjugation Wizard",
+        "description": "Answer 1250 conjugation prompts correctly."
+      },
+      {
+        "criteria_key": "1500_correct_prompts",
+        "name": "Conjugation Legend",
+        "description": "Answer 1500 conjugation prompts correctly."
+      },
+      {
+        "criteria_key": "2000_correct_prompts",
+        "name": "Conjugation GOAT",
+        "description": "Answer 2000 conjugation prompts correctly."
+      },
+      {
+        "criteria_key": "health_tier_Warming up",
+        "name": "Conjugation Health Tier: Warming Up",
+        "description": "Reach warming up tier of 10 in conjugation health."
+      },
+      {
+        "criteria_key": "health_tier_Jeune espoir",
+        "name": "Conjugation Health Tier: Jeune Espoir",
+        "description": "Reach jeune espoir tier of 20 in conjugation health."
+      },
+      {
+        "criteria_key": "health_tier_Haut potentiel",
+        "name": "Conjugation Health Tier: Haut Potentiel",
+        "description": "Reach haut potentiel tier of 30 in conjugation health."
+      },
+      {
+        "criteria_key": "health_tier_Super_League",
+        "name": "Conjugation Health Tier: Super League",
+        "description": "Reach super league tier of 50 in conjugation health."
+      },
+      {
+        "criteria_key": "health_tier_Professional",
+        "name": "Conjugation Health Tier: Professional",
+        "description": "Reach professional tier of 40 in conjugation health."
+      },
+      {
+        "criteria_key": "health_tier_National Team",
+        "name": "Conjugation Health Tier: National Team",
+        "description": "Reach national team tier of 60 in conjugation health."
+      },
+      {
+        "criteria_key": "health_tier_World Cup",
+        "name": "Conjugation Health Tier: World Cup",
+        "description": "Reach world cup tier of 80 in conjugation health."
+      },
+      {
+        "criteria_key": "health_tier_Champions League",
+        "name": "Conjugation Health Tier: Champions League",
+        "description": "Reach champions league tier of 70 in conjugation health."
+      },
+      {
+        "criteria_key": "health_tier_Ballon d'Or",
+        "name": "Conjugation Health Tier: Ballon d'Or",
+        "description": "Reach Ballon d'Or tier of 90 in conjugation health."
+      },
+      {
+        "criteria_key": "health_tier_Conjugation Messi",
+        "name": "Conjugation Health Tier: Messi",
+        "description": "Reach Messi tier of 100 in conjugation health."
+      },
+      {
+        "criteria_key": "basic75_discovery_past_simple",
+        "name": "Basic 75 Discovery (Past Simple)",
+        "description": "Discover all Basic 75 irregular verbs in past simple."
+      },
+      {
+        "criteria_key": "basic75_mastery_past_simple",
+        "name": "Basic 75 Mastery (Past Simple)",
+        "description": "Master all Basic 75 irregular verbs in past simple."
+      },
+      {
+        "criteria_key": "basic75_discovery_present_perfect",
+        "name": "Basic 75 Discovery (Present Perfect)",
+        "description": "Discover all Basic 75 irregular verbs in present perfect."
+      },
+      {
+        "criteria_key": "basic75_mastery_present_perfect",
+        "name": "Basic 75 Mastery (Present Perfect)",
+        "description": "Master all Basic 75 irregular verbs in present perfect."
+      },
+      {
+        "criteria_key": "master110_discovery_past_simple",
+        "name": "Master 110 Discovery (Past Simple)",
+        "description": "Discover all Master 110 irregular verbs in past simple."
+      },
+      {
+        "criteria_key": "master110_mastery_past_simple",
+        "name": "Master 110 Mastery (Past Simple)",
+        "description": "Master all Master 110 irregular verbs in past simple."
+      },
+      {
+        "criteria_key": "master110_discovery_present_perfect",
+        "name": "Master 110 Discovery (Present Perfect)",
+        "description": "Discover all Master 110 irregular verbs in present perfect."
+      },
+      {
+        "criteria_key": "master110_mastery_present_perfect",
+        "name": "Master 110 Mastery (Present Perfect)",
+        "description": "Master all Master 110 irregular verbs in present perfect."
+      },
+      {
+        "criteria_key": "all_discovery_past_simple",
+        "name": "All Irregular Verbs Discovery (Past Simple)",
+        "description": "Discover all irregular verbs in past simple."
+      },
+      {
+        "criteria_key": "all_mastery_past_simple",
+        "name": "All Irregular Verbs Mastery (Past Simple)",
+        "description": "Master all irregular verbs in past simple."
+      },
+      {
+        "criteria_key": "all_discovery_present_perfect",
+        "name": "All Irregular Verbs Discovery (Present Perfect)",
+        "description": "Discover all irregular verbs in present perfect."
+      },
+      {
+        "criteria_key": "all_mastery_present_perfect",
+        "name": "All Irregular Verbs Mastery (Present Perfect)",
+        "description": "Master all irregular verbs in present perfect."
+      },
+      {
+        "criteria_key": "pronoun_practice_perfect",
+        "name": "Pronoun Practice Excellence",
+        "description": "Complete Pronoun Practice with 100% accuracy."
+      },
+      {
+        "criteria_key": "passive_party_perfect",
+        "name": "Passive Party Excellence",
+        "description": "Complete Passive Party with 95%+ accuracy."
+      },
+      {
+        "criteria_key": "quantifier_quest_all_perfect",
+        "name": "Quantifier Quest Excellence (All Nouns)",
+        "description": "Complete Quantifier Quest (All Nouns) with 100% accuracy."
+      },
+      {
+        "criteria_key": "quantifier_quest_all_perfect_Mastery_3_Times",
+        "name": "Quantifier Quest Mastery × 3",
+        "description": "Complete Quantifier Quest (All Nouns) successfully three times."
+      },
+      {
+        "criteria_key": "comparison_perfect",
+        "name": "Comparison Excellence",
+        "description": "Complete Comparison Challenge with 100% accuracy."
+      },
+      {
+        "criteria_key": "comparison_perfect_Mastery_3_Times",
+        "name": "Comparison Mastery × 3",
+        "description": "Complete Comparison Challenge successfully three times."
+      },
+      {
+        "criteria_key": "prove_it_essential_past_simple",
+        "name": "Proven it! (Essential – Past Simple)",
+        "description": "Score 95%+ in Prove it! (Essential – Past Simple)."
+      },
+      {
+        "criteria_key": "prove_it_essential_past_simple_Mastery_3_Times",
+        "name": "Proven it! (Essential – Past Simple) × 3",
+        "description": "Complete Prove it! (Essential – Past Simple) successfully three times."
+      },
+      {
+        "criteria_key": "prove_it_essential_present_perfect",
+        "name": "Proven it! (Essential – Present Perfect)",
+        "description": "Score 92%+ in Prove it! (Essential – Present Perfect)."
+      },
+      {
+        "criteria_key": "prove_it_essential_present_perfect_Mastery_3_Times",
+        "name": "Proven it! (Essential – Present Perfect) × 3",
+        "description": "Complete Prove it! (Essential – Present Perfect) successfully three times."
+      },
+      {
+        "criteria_key": "pronunciation_challenge_perfect",
+        "name": "Pronunciation Challenge Excellence",
+        "description": "Complete Pronunciation Challenge with 100% accuracy."
+      },
+      {
+        "criteria_key": "tricky_translator_perfect",
+        "name": "Tricky Translator Excellence",
+        "description": "Complete Tricky Translator with 100% accuracy."
+      },
+      {
+        "criteria_key": "word_families_perfect",
+        "name": "Word Families Excellence",
+        "description": "Complete Word Families with 100% accuracy."
+      },
+      {
+        "criteria_key": "year_2040_perfect",
+        "name": "Year 2040 Excellence",
+        "description": "Complete Year 2040 with 100% accuracy."
+      },
+      {
+        "criteria_key": "regret_machine_perfect",
+        "name": "Regret Machine Excellence",
+        "description": "Complete Regret Machine with 100% accuracy."
+      },
+      {
+        "criteria_key": "idea_linker_perfect",
+        "name": "Idea Linker Excellence",
+        "description": "Complete Idea Linker with 100% accuracy."
+      },
+      {
+        "criteria_key": "verb_mixer_perfect",
+        "name": "Verb Mixer Excellence",
+        "description": "Complete Verb Mixer with 100% accuracy."
+      },
+      {
+        "criteria_key": "reported_speech_perfect",
+        "name": "Reported Speech Excellence",
+        "description": "Complete Reported Speech with 100% accuracy."
+      },
+      {
+        "criteria_key": "uses_of_auxiliaries_all_perfect",
+        "name": "Uses of Auxiliaries Excellence (All Modes)",
+        "description": "Complete Uses of Auxiliaries (All Modes) with 100% accuracy."
+      },
+      {
+        "criteria_key": "uses_of_auxiliaries_all_perfect_Mastery_3_Times",
+        "name": "Uses of Auxiliaries Mastery × 3",
+        "description": "Complete Uses of Auxiliaries (All Modes) successfully three times."
+      }
+    ]
+  },
+  "architecture": {
+    "name": "Architecture",
+    "achievements": [
+      {
+        "criteria_key": "vw_write_complete_house_elements_none_to_term",
+        "name": "Vocab mastered: house_elements (All)",
+        "description": "Complete Architecture Basic 01 vocabulary list in writing mode."
+      }
+    ]
+  },
+  "business_2": {
+    "name": "Business 2",
+    "achievements": [
+      {
+        "criteria_key": "vw_write_complete_product_marketing_none_to_term",
+        "name": "Vocab mastered: product_marketing (All)",
+        "description": "Complete Product Marketing vocabulary list in writing mode."
+      },
+      {
+        "criteria_key": "vw_write_complete_promotion_and_business_development_none_to_term",
+        "name": "Vocab mastered: promotion_and_business_development (All)",
+        "description": "Complete Promotion & Business Development vocabulary list in writing mode."
+      },
+      {
+        "criteria_key": "vw_write_complete_startups_none_to_term",
+        "name": "Vocab mastered: startups (All)",
+        "description": "Complete Startups vocabulary list in writing mode."
+      },
+      {
+        "criteria_key": "vw_write_complete_product_marketing_3x_none_to_term",
+        "name": "Vocab mastered: product_marketing (All) x 3",
+        "description": "Complete Product Marketing vocabulary list in writing mode three times."
+      },
+      {
+        "criteria_key": "vw_write_complete_promotion_and_business_development_3x_none_to_term",
+        "name": "Vocab mastered: promotion_and_business_development (All) x 3",
+        "description": "Complete Promotion & Business Development vocabulary list in writing mode three times."
+      },
+      {
+        "criteria_key": "vw_write_complete_3x_startups_none_to_term",
+        "name": "Vocab mastered: startups (All) x 3",
+        "description": "Complete Startups vocabulary list in writing mode three times."
+      }
+    ]
+  },
+  "business_4": {
+    "name": "Business 4",
+    "achievements": [
+      {
+        "criteria_key": "vw_write_complete_sustainability_none_to_term",
+        "name": "Vocab mastered: sustainability (All)",
+        "description": "Complete Sustainability vocabulary list in writing mode."
+      },
+      {
+        "criteria_key": "vw_write_complete_business_ethics_none_to_term",
+        "name": "Vocab mastered: business_ethics (All)",
+        "description": "Complete Business Ethics vocabulary list in writing mode."
+      },
+      {
+        "criteria_key": "vw_write_complete_sustainability_3x_none_to_term",
+        "name": "Vocab mastered: sustainability (All) x 3",
+        "description": "Complete Sustainability vocabulary list in writing mode three times."
+      },
+      {
+        "criteria_key": "vw_write_complete_business_ethics_3x_none_to_term",
+        "name": "Vocab mastered: business_ethics (All) x 3",
+        "description": "Complete Business Ethics vocabulary list in writing mode three times."
+      }
+    ]
+  }
+}

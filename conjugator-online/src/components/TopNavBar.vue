@@ -12,7 +12,7 @@
 
       <v-toolbar-title class="text-body-1 font-weight-bold text-slate-700 d-none d-sm-flex align-center">
         <!--<v-icon size="18" class="mr-2" color="slate-400">mdi-school</v-icon>-->
-        Teacher Dashboard
+        Teacher Account
       </v-toolbar-title>
     </div>
 

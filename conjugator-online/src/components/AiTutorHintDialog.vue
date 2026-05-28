@@ -2,10 +2,9 @@
   <div>
     <slot name="activator" :open="openDialog" />
 
-    <v-dialog v-model="isOpen" max-width="650" scrollable>
+    <v-dialog v-model="isOpen" max-width="650" scrollable :persistent="isLoading">
       <v-card rounded="xl" class="text-slate-800 bg-white border">
         
-        <!-- Header -->
         <v-card-title class="pa-4 d-flex align-center justify-space-between border-b bg-slate-50">
           <div class="d-flex align-center">
             <v-avatar color="blue-lighten-5" size="36" class="mr-3">
@@ -13,7 +12,7 @@
             </v-avatar>
             <div>
               <div class="text-subtitle-1 font-weight-black line-height-tight">{{ title }}</div>
-              <div class="text-caption text-slate-500">Cross-linguistic translation matrix</div>
+              <div class="text-caption text-slate-500">Translations</div>
             </div>
           </div>
           
@@ -21,17 +20,15 @@
             <v-btn size="small" variant="tonal" color="slate-600" class="rounded-lg text-none font-weight-bold" @click="reload" :disabled="isLoading">
               Refresh
             </v-btn>
-            <v-btn size="small" variant="text" color="slate-500" class="text-none font-weight-bold" @click="closeDialog" :disabled="isLoading">
-              Close
+            <v-btn size="small" :variant="isLoading ? 'tonal' : 'text'" :color="isLoading ? 'error' : 'slate-500'" class="text-none font-weight-bold" @click="closeDialog">
+              {{ isLoading ? 'Cancel' : 'Close' }}
             </v-btn>
           </div>
         </v-card-title>
 
         <v-card-text class="pa-4">
-          <!-- 🚀 REWORKED PROMPT PROFILE GRAPHICS BLOCK -->
           <div class="mb-5 bg-slate-50 rounded-xl border pa-4">
             
-            <!-- Base Verb Dictionary Header Line -->
             <div class="text-subtitle-1 font-weight-bold text-slate-900 d-flex align-center flex-wrap mb-4" style="gap: 8px;">
               The verb <span class="text-primary text-uppercase font-weight-black decoration-underline">{{ ctx.verb }}</span> means:
               <div class="d-inline-flex ga-1 ml-auto">
@@ -43,7 +40,6 @@
 
             <v-divider class="mb-4 border-opacity-40"></v-divider>
 
-            <!-- 2x2 Metadata Alignment Grid -->
             <v-row no-gutters class="bg-white border rounded-xl pa-2 text-center shadow-sm">
               <v-col cols="6" class="border-r border-b pb-2 mb-2">
                 <div class="text-caption font-weight-medium text-slate-400">Verb Anchor</div>
@@ -58,7 +54,6 @@
                 <div class="text-body-2 font-weight-bold text-slate-700">{{ ctx.sentence_type }}</div>
               </v-col>
               <v-col cols="6" class="pt-1 px-1 text-truncate">
-                <!-- Smart Header Swap: Captures if context payload contains a formatted keyword string -->
                 <div class="text-caption font-weight-medium text-slate-400">
                   {{ ctx.showing_keyword_mode ? 'Time Reference' : 'Target Tense' }}
                 </div>
@@ -70,13 +65,15 @@
             
           </div>
 
-          <!-- Output Content States Interface -->
           <v-alert v-if="errorMessage" type="error" variant="tonal" density="compact" class="mb-4 rounded-xl">
             {{ errorMessage }}
           </v-alert>
 
-          <div v-if="isLoading" class="d-flex align-center justify-center py-10">
+          <div v-if="isLoading" class="d-flex flex-column align-center justify-center py-10 ga-3">
             <v-progress-circular indeterminate color="primary" size="36" />
+            <v-btn size="x-small" color="error" variant="text" class="font-weight-bold" @click="abortCurrentRequest">
+              Stop Translation Request
+            </v-btn>
           </div>
 
           <div v-else class="ga-3 d-flex flex-column">
@@ -114,7 +111,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, reactive, ref, watch } from "vue";
+import { computed, nextTick, reactive, ref, watch, onBeforeUnmount } from "vue";
 import api from "@/axios";
 
 type HintCtx = {
@@ -133,12 +130,10 @@ type HintCtx = {
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
   title: { type: String, default: "Translation hint" },
-
   apiUrl: { type: String, default: "/llm/chat/" },
   model: { type: String, default: "google/gemma-4-31B-turbo-TEE" },
   temperature: { type: Number, default: 0.2 },
   maxTokens: { type: Number, default: 300 },
-
   context: { type: Object as () => HintCtx, default: () => ({}) },
   autoRunOnOpen: { type: Boolean, default: true },
 });
@@ -154,6 +149,9 @@ const isOpen = computed({
 
 const isLoading = ref(false);
 const errorMessage = ref("");
+
+// Reference tracker for the current network connection
+const currentAbortController = ref<AbortController | null>(null);
 
 const translations = reactive<{ fr: string; de: string; it: string }>({
   fr: "",
@@ -183,14 +181,30 @@ const correctAnswer = computed(() => {
 watch(
   () => isOpen.value,
   async (open) => {
-    if (!open) return;
+    if (!open) {
+      abortCurrentRequest();
+      return;
+    }
     if (props.autoRunOnOpen) await reload();
     await nextTick();
   }
 );
 
 function openDialog() { isOpen.value = true; }
-function closeDialog() { isOpen.value = false; }
+
+function closeDialog() { 
+  if (isLoading.value) {
+    abortCurrentRequest();
+  }
+  isOpen.value = false; 
+}
+
+function abortCurrentRequest() {
+  if (currentAbortController.value) {
+    currentAbortController.value.abort();
+    currentAbortController.value = null;
+  }
+}
 
 function resetOutput() {
   verbTranslations.fr = ""; verbTranslations.de = ""; verbTranslations.it = "";
@@ -199,7 +213,6 @@ function resetOutput() {
 }
 
 function buildPrompt(): string {
-  // 🚀 Determine exactly what context language constraint the student is looking at on screen
   const dynamicTimeContext = ctx.value.showing_keyword_mode && ctx.value.displayed_keyword
     ? `The student is seeing the time reference keyword "${ctx.value.displayed_keyword}" instead of a generic tense name.`
     : `The student is looking directly at the tense name "${ctx.value.tense}".`;
@@ -239,6 +252,7 @@ async function reload() {
   }
 
   isLoading.value = true;
+  currentAbortController.value = new AbortController();
 
   try {
     const userPrompt = buildPrompt();
@@ -252,6 +266,7 @@ async function reload() {
 
     const res = await api.post(props.apiUrl, payload, {
       headers: { "Content-Type": "application/json" },
+      signal: currentAbortController.value.signal
     });
 
     const out: string = res.data?.content ?? "";
@@ -276,16 +291,26 @@ async function reload() {
       throw new Error(`LLM JSON missing keys. Raw output: ${out}`);
     }
   } catch (e: any) {
-    const data = e?.response?.data;
-    if (data) {
-      errorMessage.value = `LLM error (${e?.response?.status}): ${typeof data === "string" ? data : JSON.stringify(data)}`;
+    // Approach 1 Applied: Strict validation intercept against user cancellation exceptions
+    if (e.code === 'ERR_CANCELED' || e.name === 'AbortError' || e.message === 'canceled') {
+      errorMessage.value = "Translation hint generation stopped by user.";
     } else {
-      errorMessage.value = e?.message || String(e);
+      const data = e?.response?.data;
+      if (data) {
+        errorMessage.value = `LLM error (${e?.response?.status}): ${typeof data === "string" ? data : JSON.stringify(data)}`;
+      } else {
+        errorMessage.value = e?.message || String(e);
+      }
     }
   } finally {
     isLoading.value = false;
+    currentAbortController.value = null;
   }
 }
+
+onBeforeUnmount(() => {
+  abortCurrentRequest();
+});
 </script>
 
 <style scoped>

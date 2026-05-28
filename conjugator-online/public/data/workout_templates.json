@@ -1,0 +1,45 @@
+{
+  "templates": [
+    {
+      "template_code": "fluency_flow_v1",
+      "focus_area": "Fluency Flow",
+      "notes": "Focus on natural sentence transitions. Avoid stopping to correct individual minor grammar slips during the execution phase.",
+      "drills": [
+        {
+          "type": "fluency",
+          "name": "2-Minute Uninterrupted Monologue",
+          "description": "Student speaks on a spontaneous topic chosen by the teacher. Focus entirely on continuous speech delivery without pauses.",
+          "target_reps": 1,
+          "target_sessions": 2,
+          "completed_sessions": 0,
+          "notes": "Note filler words usage."
+        },
+        {
+          "type": "pronunciation",
+          "name": "Intonation Copycat Repeat",
+          "description": "Listen to a native conversational audio clip and mirror the pitch rhythm structure exactly.",
+          "target_reps": 5,
+          "target_sessions": 1,
+          "completed_sessions": 0,
+          "notes": "Watch for word endings stress patterns."
+        }
+      ]
+    },
+    {
+      "template_code": "past_tense_conjugator",
+      "focus_area": "Conjugation Mastery",
+      "notes": "Targeted immediate corrective feedback on irregular structural transformations.",
+      "drills": [
+        {
+          "type": "conjugation",
+          "name": "Irregular Rapid-Fire Blitz",
+          "description": "Teacher calls out root verbs, student instantly returns the past participle form within 2 seconds.",
+          "target_reps": 15,
+          "target_sessions": 3,
+          "completed_sessions": 0,
+          "notes": "Track accuracy degradation over fatigue cycles."
+        }
+      ]
+    }
+  ]
+}

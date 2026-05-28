@@ -1,6 +1,6 @@
 <template>
   <div>
-    <v-dialog v-model="isOpen" max-width="900">
+    <v-dialog v-model="isOpen" max-width="900" :persistent="isLoading">
       <v-card rounded="lg">
         <v-card-title class="d-flex align-center justify-space-between">
           <div class="text-h6">{{ title }}</div>
@@ -9,8 +9,13 @@
             <v-btn size="small" variant="text" @click="resetChat" :disabled="isLoading">
               Reset
             </v-btn>
-            <v-btn size="small" variant="text" @click="closeDialog" :disabled="isLoading">
-              Close
+            <v-btn 
+              size="small" 
+              :color="isLoading ? 'error' : 'default'" 
+              variant="text" 
+              @click="closeDialog"
+            >
+              {{ isLoading ? 'Cancel & Close' : 'Close' }}
             </v-btn>
           </div>
         </v-card-title>
@@ -46,9 +51,12 @@
             </div>
 
             <div v-if="isLoading" class="chat-row assistant">
-              <div class="bubble">
-                <div class="role-label">Tutor</div>
-                <div class="content">Thinking…</div>
+              <div class="bubble border-error-subtle">
+                <div class="role-label text-error d-flex align-center justify-space-between w-100">
+                  <span>Tutor</span>
+
+                </div>
+                <div class="content font-italic text-muted mt-1">Thinking...</div>
               </div>
             </div>
           </div>
@@ -59,6 +67,8 @@
             variant="tonal"
             density="compact"
             class="mt-4"
+            closable
+            @click:close="errorMessage = ''"
           >
             {{ errorMessage }}
           </v-alert>
@@ -92,7 +102,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, ref, watch } from "vue";
+import { computed, nextTick, ref, watch, onBeforeUnmount } from "vue";
 import api from "@/axios";
 
 type ChatMsg = {
@@ -104,37 +114,20 @@ type ChatMsg = {
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
   title: { type: String, default: "AI Tutor" },
-
-  // IMPORTANT: with your axios baseURL likely ending in /api,
-  // this should be "/llm/chat/" not "/api/llm/chat/"
   apiUrl: { type: String, default: "/llm/chat/" },
-
   model: { type: String, default: "google/gemma-4-31B-turbo-TEE" },
   temperature: { type: Number, default: 0.4 },
   maxTokens: { type: Number, default: 400 },
-
   context: { type: Object, default: () => ({}) },
-
-  buildInitialUserMessage: {
-    type: Function,
-    required: true,
-  },
-
+  buildInitialUserMessage: { type: Function, required: true },
   systemMessage: {
     type: String,
-    default:
-      "Be brief, friendly, and specific. Focus on grammar. Always illustrate and give examples. Avoid long essays.",
+    default: "Be brief, friendly, and specific. Focus on grammar. Always illustrate and give examples. Avoid long essays.",
   },
-
   autoSendOnOpen: { type: Boolean, default: true },
-
-  // show the alert with the initial prompt (debugging)
   showContextPreview: { type: Boolean, default: false },
-
-  // NEW: hide system / initial prompt in transcript
   hideSystemMessage: { type: Boolean, default: true },
   hideInitialUserMessage: { type: Boolean, default: true },
-
   resetOnContextChange: { type: Boolean, default: true },
 });
 
@@ -154,8 +147,10 @@ const errorMessage = ref("");
 const didSendInitial = ref(false);
 const chatWindowRef = ref<HTMLElement | null>(null);
 
-const initialUserMessage = computed(() => props.buildInitialUserMessage(props.context || {}));
+// 🌟 NEW: Reference pointer to track active controller requests
+const currentAbortController = ref<AbortController | null>(null);
 
+const initialUserMessage = computed(() => props.buildInitialUserMessage(props.context || {}));
 const shouldShowContextPreview = computed(() => {
   const ctx = props.context || {};
   return props.showContextPreview && Object.keys(ctx).length > 0;
@@ -173,6 +168,7 @@ watch(
   () => isOpen.value,
   async (open) => {
     if (open) await onOpen();
+    else abortCurrentRequest(); // Auto-cancel if closed externally
   }
 );
 
@@ -194,8 +190,21 @@ watch(contextSignature, async (newSig, oldSig) => {
 function openDialog() {
   isOpen.value = true;
 }
+
+// 🌟 MODIFIED: Cancel execution explicitly if closed mid-request
 function closeDialog() {
+  if (isLoading.value) {
+    abortCurrentRequest();
+  }
   isOpen.value = false;
+}
+
+// 🌟 NEW: Extraction logic to kill request execution pipelines cleanly
+function abortCurrentRequest() {
+  if (currentAbortController.value) {
+    currentAbortController.value.abort();
+    currentAbortController.value = null;
+  }
 }
 
 function scrollToBottom() {
@@ -210,7 +219,7 @@ function initTranscriptIfNeeded() {
       {
         role: "system",
         content: props.systemMessage,
-        hidden: props.hideSystemMessage, // FIX: actually hide system message
+        hidden: props.hideSystemMessage,
       },
     ];
     didSendInitial.value = false;
@@ -229,11 +238,12 @@ async function onOpen() {
 }
 
 function resetChat() {
+  abortCurrentRequest(); // Prevent trailing actions from populating after resets
   messages.value = [
     {
       role: "system",
       content: props.systemMessage,
-      hidden: props.hideSystemMessage, // FIX: also hide on reset
+      hidden: props.hideSystemMessage,
     },
   ];
   draft.value = "";
@@ -241,7 +251,6 @@ function resetChat() {
   didSendInitial.value = false;
 
   if (isOpen.value && props.autoSendOnOpen) {
-    // fire-and-forget is OK, but keeping consistent with onOpen
     sendInitialMessage();
   }
 }
@@ -262,7 +271,7 @@ async function sendInitialMessage() {
 
 async function sendUserMessage() {
   const text = draft.value.trim();
-  if (!text) return;
+  if (!text || isLoading.value) return;
 
   errorMessage.value = "";
   messages.value.push({ role: "user", content: text });
@@ -278,6 +287,9 @@ async function callLlm() {
   isLoading.value = true;
   errorMessage.value = "";
 
+  // 🌟 NEW: Initialize fresh AbortController per call context invocation
+  currentAbortController.value = new AbortController();
+
   try {
     const payload = {
       model: props.model,
@@ -287,8 +299,10 @@ async function callLlm() {
       stream: false,
     };
 
+    // Passed down current signal block to Axios configuration map options
     const res = await api.post(props.apiUrl, payload, {
       headers: { "Content-Type": "application/json" },
+      signal: currentAbortController.value.signal
     });
 
     const out = res.data?.content ?? "";
@@ -296,6 +310,10 @@ async function callLlm() {
 
     messages.value.push({ role: "assistant", content: out });
   } catch (e: any) {
+  // 🌟 FIX: Check standard Axios cancellation codes and native DOM abort exceptions
+  if (e.code === 'ERR_CANCELED' || e.name === 'AbortError' || e.message === 'canceled') {
+    errorMessage.value = "Tutor response request canceled by user suggestion.";
+  } else {
     const data = e?.response?.data;
     if (data) {
       errorMessage.value = `LLM error (${e?.response?.status}): ${
@@ -304,12 +322,19 @@ async function callLlm() {
     } else {
       errorMessage.value = e?.message || String(e);
     }
-  } finally {
+  }
+} finally {
     isLoading.value = false;
+    currentAbortController.value = null; // Clean up memory reference traces
     await nextTick();
     scrollToBottom();
   }
 }
+
+// Clean unmount cycles hooks tracking logs
+onBeforeUnmount(() => {
+  abortCurrentRequest();
+});
 </script>
 
 <style scoped>

@@ -1,143 +1,62 @@
 <template>
-  <v-container fluid class="pa-6" :class="userStore.isStaff ? 'mt-0' : 'mt-4'">
-    <!-- Welcome Banner -->
-    <v-card class="pa-6 mb-6 welcome-hero" elevation="4" rounded="xl">
-      <div class="d-flex align-items-center justify-center">
+  <v-container fluid class="pa-6 dashboard-bg" :class="userStore.isStaff ? 'mt-0' : 'mt-4'">
+    
+    <!-- Welcome Banner with a calm, soft gradient -->
+    <v-card class="pa-6 mb-6 welcome-banner" elevation="1" rounded="xl">
+      <div class="d-flex align-center justify-space-between flex-wrap ga-4">
         <div>
-          <div class="text-h4 font-weight-bold text-white">
+          <div class="text-h4 font-weight-bold text-slate-900">
             Welcome back, {{ userStore.student?.initials || 'Student' }}!
           </div>
+          <div class="text-subtitle-1 text-slate-600 mt-1">
+            Here is a look at your recent progress and what you can practice today.
+          </div>
         </div>
-        <v-icon size="40" class="ms-8 text-white welcome-hero__icon">
-          mdi-human-greeting-variant
-        </v-icon>
+        <v-avatar color="indigo-lighten-5" size="56">
+          <v-icon size="32" color="indigo-darken-1">mdi-hand-wave-outline</v-icon>
+        </v-avatar>
       </div>
     </v-card>
 
-    <!-- 2-Column Grid Layout -->
-    <v-row dense>
-      <!-- LEFT COLUMN: Latest Activity (full height) -->
-      <v-col cols="12" md="5">
-        <v-card class="activity-card" elevation="2" rounded="lg">
-          <!-- Header with Stats Integrated -->
-          <div class="card-header pa-5">
-            <div class="d-flex align-center justify-space-between">
-              <div>
-                <div class="text-h5 font-weight-bold">
-                  <v-icon class="mr-2">mdi-history</v-icon>
-                  Latest Activity
-                </div>
-                <div class="text-caption text-medium-emphasis mt-1">
-                  Your recent actions and updates
-                </div>
-              </div>
+    <!-- Main 2-Column Desktop Grid -->
+    <v-row>
+      
+      <!-- LEFT COLUMN: Recent Progress Timeline (Unchanged feature, styled softly) -->
+      <v-col cols="12" md="4">
+        <v-card class="display-card pb-4" elevation="1" rounded="lg">
+          <div class="pa-5 border-b bg-slate-50">
+            <div class="text-h6 font-weight-bold text-slate-800 d-flex align-center">
+              <v-icon class="mr-2" color="slate-500">mdi-text-time</v-icon>
+              Latest Activity
             </div>
           </div>
-          <!-- Activity Feed -->
-          <div class="activity-list pa-4">
-            <!-- Loading State -->
+          
+          <div class="pa-4 activity-scroll-area">
             <div v-if="loadingActivity" class="text-center pa-8">
-              <v-progress-circular indeterminate color="primary" />
-              <div class="text-body-2 mt-2">Loading activity...</div>
+              <v-progress-circular indeterminate color="indigo-lighten-1" />
+              <div class="text-caption text-slate-500 mt-2">Updating your history...</div>
             </div>
 
-            <!-- Activity Filter & Timeline -->
             <template v-else-if="activityFeed.length > 0">
-              <!-- Activity Filter -->
-              <div class="mb-4">
-                <v-chip-group
-                  v-model="activityFilter"
-                  column
-                  @update:model-value="fetchActivityFeed"
-                >
-                  <v-chip
-                    size="small"
-                    filter
-                    variant="outlined"
-                    value="all"
-                  >
-                    All
-                  </v-chip>
-                  <v-chip
-                    size="small"
-                    filter
-                    variant="outlined"
-                    value="conjugation"
-                    :prepend-icon="getActivityIcon('conjugation')"
-                  >
-                    Conjugation
-                  </v-chip>
-                  <v-chip
-                    size="small"
-                    filter
-                    variant="outlined"
-                    value="other_game"
-                    :prepend-icon="getActivityIcon('other_game')"
-                  >
-                    Games
-                  </v-chip>
-                  <v-chip
-                    size="small"
-                    filter
-                    variant="outlined"
-                    value="exercise"
-                    :prepend-icon="getActivityIcon('exercise')"
-                  >
-                    Exercises
-                  </v-chip>
-                  <v-chip
-                    size="small"
-                    filter
-                    variant="outlined"
-                    value="vocab_workout"
-                    :prepend-icon="getActivityIcon('vocab_workout')"
-                  >
-                    Vocab
-                  </v-chip>
-                  <v-chip
-                    size="small"
-                    filter
-                    variant="outlined"
-                    value="achievement"
-                    :prepend-icon="getActivityIcon('achievement')"
-                  >
-                    Achievements
-                  </v-chip>
-                </v-chip-group>
-              </div>
+              <!-- Filter chips styled with softer default borders -->
+              <v-chip-group v-model="activityFilter" column class="mb-4" @update:model-value="fetchActivityFeed">
+                <v-chip size="small" variant="text" class="border" value="all">All</v-chip>
+                <v-chip size="small" variant="text" class="border" value="conjugation" :prepend-icon="getActivityIcon('conjugation')">Verbs</v-chip>
+                <v-chip size="small" variant="text" class="border" value="other_game" :prepend-icon="getActivityIcon('other_game')">Games</v-chip>
+                <v-chip size="small" variant="text" class="border" value="exercise" :prepend-icon="getActivityIcon('exercise')">Exercises</v-chip>
+              </v-chip-group>
 
-              <!-- Timeline -->
-              <v-timeline density="compact" align="start">
+              <v-timeline density="compact" align="start" class="pl-2">
                 <v-timeline-item
                   v-for="(activity, index) in activityFeed"
                   :key="index"
                   :dot-color="getActivityColor(activity.type)"
-                  size="small"
+                  size="x-small"
                 >
-                  <template v-slot:icon>
-                    <v-icon size="16">{{ getActivityIcon(activity.type) }}</v-icon>
-                  </template>
-
-                  <div class="activity-item pa-3">
-                    <div class="d-flex align-items-start justify-space-between">
-                      <div class="flex-grow-1">
-                        <div class="text-body-2 font-weight-medium">
-                          {{ activity.title }}
-                        </div>
-                        <div class="text-caption text-medium-emphasis mt-1">
-                          {{ activity.description }}
-                        </div>
-                      </div>
-                      <v-chip 
-                        size="x-small" 
-                        :color="getActivityColor(activity.type)"
-                        variant="tonal"
-                        class="ml-2"
-                      >
-                        {{ getActivityLabel(activity.type) }}
-                      </v-chip>
-                    </div>
-                    <div class="text-caption text-medium-emphasis mt-2">
+                  <div class="activity-box pa-3 rounded-lg border bg-white">
+                    <div class="text-body-2 font-weight-bold text-slate-800">{{ activity.title }}</div>
+                    <div class="text-caption text-slate-600 mt-1">{{ activity.description }}</div>
+                    <div class="text-caption text-slate-400 mt-2 d-flex align-center">
                       <v-icon size="12" class="mr-1">mdi-clock-outline</v-icon>
                       {{ formatActivityTime(activity.timestamp) }}
                     </div>
@@ -146,734 +65,213 @@
               </v-timeline>
             </template>
 
-            <!-- Empty State -->
-            <div v-else class="text-center pa-8">
-              <v-icon size="64" color="grey-lighten-1">mdi-inbox</v-icon>
-              <div class="text-h6 mt-4 text-medium-emphasis">No activity yet</div>
-              <div class="text-body-2 text-medium-emphasis">
-                Start practicing to see your activity here!
-              </div>
+            <div v-else class="text-center pa-8 text-slate-400">
+              <v-icon size="48" class="mb-2">mdi-calendar-blank</v-icon>
+              <div class="text-body-2">No practice logs found this week.</div>
             </div>
           </div>
         </v-card>
       </v-col>
 
-      <!-- RIGHT COLUMN: Two action cards stacked -->
-      <v-col cols="12" md="7">
-        <!-- Top: What Should I Work On? -->
-        <v-card 
-          class="action-card clickable-card mb-7" 
-          elevation="3" 
-          rounded="lg"
-          color="amber-lighten-5"
-          hover
-          @click="scrollToAssignments"
-        >
-          <div class="pa-4 text-center">
-            <div class="d-flex justify-space-between">
-                          <div class="d-flex justify-start align-center ms-4 p-2">
-              <v-icon size="60" color="amber-darken-4" class="mb-2 me-6">
-                mdi-account-hard-hat
-              </v-icon>
-              <div class="text-h5 font-weight-bold">
-                What are you working on?
-              </div>
-            </div>
-              <v-btn
-              color="amber-darken-4"
-              size="default"
-              variant="elevated"
-              class="mt-5"
-              append-icon="mdi-arrow-down"
-            >
-              My Assignments
-            </v-btn>
-
-            </div>
-
-            
-            <div class="text-body-2 text-medium-emphasis my-4">
-              See your assignments and recommended activities
-            </div>
-            
-            <!-- Quick Stats -->
-            <div class="d-flex justify-center gap-4 mt-4">
-              <v-chip color="warning" variant="tonal">
-                <v-icon start>mdi-alert-circle</v-icon>
-                {{ pendingCount }} pending
-              </v-chip>
-              <v-chip color="success" variant="tonal">
-                <v-icon start>mdi-check-circle</v-icon>
-                {{ completedCount }} completed
-              </v-chip>
-            </div>
-
-
-          </div>
-        </v-card>
-
-        <!-- Bottom: My Linguistic Profile -->
-        <v-card 
-          class="action-card clickable-card profile-card-preview" 
-          elevation="3" 
-          rounded="lg"
-          hover
-          @click="scrollToProfile"
-        >
-          <div class="pa-4 text-center">
-            <div class="d-flex justify-space-between">
-              <div class="d-flex justify-start align-center ms-4 p-2">
-              <v-icon size="60" color="purple" class="mb-2 me-6">
-                mdi-account-voice
-              </v-icon>
-              <div class="text-h5 font-weight-bold mb-2">
-                My Linguistic Profile
-              </div>
-            </div>
-              <v-btn
-              color="purple"
-              size="default"
-              variant="elevated"
-              class="mt-4"
-              append-icon="mdi-arrow-down"
-            >
-              Full Profile
-            </v-btn>
-            </div>
-            
-            <!-- Profile Preview (if exists) -->
-            <div v-if="userStore.hasLinguisticProfile" class="profile-preview">
-              <div class="d-flex justify-center gap-3 mb-2">
-                <div class="profile-mini-stat">
-                  <div class="stat-value" :style="{ color: getScoreColor(userStore.linguisticProfile?.linguistic_precision) }">
-                    {{ userStore.linguisticProfile?.linguistic_precision || '—' }}
-                  </div>
-                  <div class="stat-label">Precision</div>
-                </div>
-                <div class="profile-mini-stat">
-                  <div class="stat-value" :style="{ color: getScoreColor(userStore.linguisticProfile?.phonetic_clarity) }">
-                    {{ userStore.linguisticProfile?.phonetic_clarity || '—' }}
-                  </div>
-                  <div class="stat-label">Clarity</div>
-                </div>
-                <div class="profile-mini-stat">
-                  <div class="stat-value" :style="{ color: getScoreColor(userStore.linguisticProfile?.communicative_flow) }">
-                    {{ userStore.linguisticProfile?.communicative_flow || '—' }}
-                  </div>
-                  <div class="stat-label">Flow</div>
-                </div>
-                <div class="profile-mini-stat">
-                  <div class="stat-value" :style="{ color: getScoreColor(userStore.linguisticProfile?.expressive_range) }">
-                    {{ userStore.linguisticProfile?.expressive_range || '—' }}
-                  </div>
-                  <div class="stat-label">Range</div>
-                </div>
-              </div>
-
-              <v-chip 
-                v-if="userStore.linguisticProfile?.profile_type"
-                color="purple"
-                variant="tonal"
-                size="small"
-              >
-                {{ userStore.linguisticProfile.profile_type.emoji }}
-                {{ userStore.linguisticProfile.profile_type.type }}
-              </v-chip>
-            </div>
-            <div v-else class="text-caption text-medium-emphasis">
-              Profile not yet assessed
-            </div>
-          </div>
-        </v-card>
-      </v-col>
-    </v-row>
-
-    <!-- Assignments Section -->
-    <div ref="assignmentsSection" style="margin-top: 10%;">
-      <v-card class="pa-6 mb-4 assignments-header" elevation="4" rounded="xl">
-        <div class="d-flex justify-space-between">
-              
-          <div>
-            <div class="text-h4 font-weight-bold">What should I work on today?</div>
-            <div class="text-subtitle-1 text-medium-emphasis mt-1">
-              Choose an activity to keep making progress
-            </div>
-          </div>
-            <v-icon size="56" class="text-white welcome-hero__icon">
-              mdi-weather-sunny
-            </v-icon>
-          </div>
-
-
-      </v-card>
-
-      <!-- Loading state -->
-      <v-row v-if="loading" dense>
-        <v-col cols="12">
-          <v-card class="pa-8 text-center" elevation="2" rounded="lg">
-            <v-progress-circular indeterminate color="primary" size="48" />
-            <div class="text-body-1 mt-4">Loading your assignments...</div>
-          </v-card>
-        </v-col>
-      </v-row>
-
-      <!-- Error state -->
-      <v-row v-else-if="error" dense>
-        <v-col cols="12">
-          <v-card class="pa-6" elevation="2" rounded="lg" color="error" variant="tonal">
-            <div class="d-flex align-center">
-              <v-icon size="32" class="mr-4">mdi-alert-circle</v-icon>
+      <!-- RIGHT COLUMN: Active Hub (Tabs replace the aggressive scroll jumps) -->
+      <v-col cols="12" md="8">
+        
+        <!-- Summary Quick-Launch Banner Status Controls -->
+        <v-row class="mb-4" dense>
+          <v-col cols="12" sm="6">
+            <v-card variant="flat" class="pa-4 bg-sage border rounded-xl d-flex align-center ga-3" @click="activeTab = 0" style="cursor: pointer;">
+              <v-avatar color="teal-lighten-5" size="40">
+                <v-icon color="teal-darken-1">mdi-clipboard-text-clock</v-icon>
+              </v-avatar>
               <div>
-                <div class="text-h6">Error loading assignments</div>
-                <div class="text-body-2">{{ error }}</div>
-              </div>
-            </div>
-          </v-card>
-        </v-col>
-      </v-row>
-
-      <!-- Assignment Cards (existing content) -->
-      <v-row v-else dense>
-
-        <!-- Workout Drills Section -->
-        <v-col cols="12" md="6">
-          <v-card class="assignment-card" elevation="2" rounded="lg">
-            <div class="card-header pa-5">
-              <div class="d-flex align-center justify-space-between mb-2">
-                <div class="text-h6 font-weight-medium">
-                  Practice Drills
+                <div class="text-caption text-slate-500 font-weight-medium">Your work</div>
+                <div class="text-body-1 font-weight-black text-slate-800">
+                  You have {{ pendingCount }} assignments • {{ completedCount }} finished
                 </div>
-                <v-icon size="28">mdi-clipboard-text</v-icon>
               </div>
-              <div class="text-body-2 text-medium-emphasis">
-                Complete assigned practice drills with your teacher.
-              </div>
-              <div v-if="currentWorkout" class="mt-2">
-                <v-chip size="small" color="primary" variant="tonal" class="mr-2">
-                  {{ currentWorkout.focus_area }}
-                </v-chip>
-                <v-chip size="small" :color="workoutProgressColor" variant="tonal">
-                  {{ workoutCompletionPercentage }}% complete
-                </v-chip>
-              </div>
-            </div>
-
-            <v-divider />
-
-            <div class="assignment-list pa-4">
-              <template v-if="currentWorkout && currentWorkout.drills.length > 0">
-                <!-- Completed Drills -->
-                <div v-if="completedDrills.length > 0" class="mb-4">
-                  <div class="text-caption font-weight-bold text-success mb-2">
-                    COMPLETED ({{ completedDrills.length }})
-                  </div>
-                  <v-list density="compact" class="pa-0">
-                    <v-list-item
-                      v-for="drill in completedDrills"
-                      :key="drill.id"
-                      class="assignment-item mb-2 completed"
-                      rounded="lg"
-                    >
-                      <template v-slot:prepend>
-                        <v-icon color="success" size="20">mdi-check-circle</v-icon>
-                      </template>
-                      <v-list-item-title class="text-body-2">
-                        {{ drill.name }}
-                      </v-list-item-title>
-                      <v-list-item-subtitle class="text-caption">
-                        <v-chip
-                          :color="getDrillTypeColor(drill.type)"
-                          size="x-small"
-                          variant="tonal"
-                          class="mr-2"
-                        >
-                          {{ drill.type }}
-                        </v-chip>
-                        {{ drill.completed_sessions }}/{{ drill.target_sessions }} sessions
-                      </v-list-item-subtitle>
-                    </v-list-item>
-                  </v-list>
+            </v-card>
+          </v-col>
+          
+          <v-col cols="12" sm="6">
+            <v-card variant="flat" class="pa-4 bg-sand border rounded-xl d-flex align-center ga-3" @click="activeTab = 2" style="cursor: pointer;">
+              <v-avatar color="amber-lighten-5" size="40">
+                <v-icon color="amber-darken-2">mdi-account-circle-outline</v-icon>
+              </v-avatar>
+              <div>
+                <div class="text-caption text-slate-500 font-weight-medium">Linguistic Profile</div>
+                <div class="text-body-1 font-weight-black text-slate-800">
+                  {{ userStore.hasLinguisticProfile ? 'View Your Profile' : 'Awaiting Assessment' }}
                 </div>
-
-                <!-- In Progress Drills -->
-                <div v-if="inProgressDrills.length > 0" class="mb-4">
-                  <div class="text-caption font-weight-bold text-warning mb-2">
-                    IN PROGRESS ({{ inProgressDrills.length }})
-                  </div>
-                  <v-list density="compact" class="pa-0">
-                    <v-list-item
-                      v-for="drill in inProgressDrills"
-                      :key="drill.id"
-                      class="assignment-item mb-2"
-                      rounded="lg"
-                    >
-                      <template v-slot:prepend>
-                        <v-icon color="warning" size="20">mdi-clock-outline</v-icon>
-                      </template>
-                      <v-list-item-title class="text-body-2">
-                        {{ drill.name }}
-                      </v-list-item-title>
-                      <v-list-item-subtitle class="text-caption">
-                        <v-chip
-                          :color="getDrillTypeColor(drill.type)"
-                          size="x-small"
-                          variant="tonal"
-                          class="mr-2"
-                        >
-                          {{ drill.type }}
-                        </v-chip>
-                        {{ drill.completed_sessions }}/{{ drill.target_sessions }} sessions
-                        <span v-if="drill.notes" class="ml-2 text-medium-emphasis">
-                          • {{ drill.notes.substring(0, 50) }}{{ drill.notes.length > 50 ? '...' : '' }}
-                        </span>
-                      </v-list-item-subtitle>
-                      <template v-slot:append>
-                        <v-progress-linear
-                          :model-value="(drill.completed_sessions / (drill.target_sessions || 1)) * 100"
-                          :color="getDrillProgressColor(drill)"
-                          height="4"
-                          rounded
-                          class="mt-1"
-                          style="width: 60px;"
-                        />
-                      </template>
-                    </v-list-item>
-                  </v-list>
-                </div>
-
-                <!-- Not Started Drills -->
-                <div v-if="notStartedDrills.length > 0">
-                  <div class="text-caption font-weight-bold text-grey mb-2">
-                    NOT STARTED ({{ notStartedDrills.length }})
-                  </div>
-                  <v-list density="compact" class="pa-0">
-                    <v-list-item
-                      v-for="drill in notStartedDrills"
-                      :key="drill.id"
-                      class="assignment-item mb-2"
-                      rounded="lg"
-                    >
-                      <template v-slot:prepend>
-                        <v-icon color="grey" size="20">mdi-circle-outline</v-icon>
-                      </template>
-                      <v-list-item-title class="text-body-2">
-                        {{ drill.name }}
-                      </v-list-item-title>
-                      <v-list-item-subtitle class="text-caption">
-                        <v-chip
-                          :color="getDrillTypeColor(drill.type)"
-                          size="x-small"
-                          variant="tonal"
-                          class="mr-2"
-                        >
-                          {{ drill.type }}
-                        </v-chip>
-                        {{ drill.target_sessions }} sessions to complete
-                      </v-list-item-subtitle>
-                    </v-list-item>
-                  </v-list>
-                </div>
-
-                <!-- Workout Notes -->
-                <v-alert
-                  v-if="currentWorkout.notes"
-                  type="info"
-                  variant="tonal"
-                  density="compact"
-                  class="mt-4"
-                  rounded="lg"
-                >
-                  <template v-slot:prepend>
-                    <v-icon size="20">mdi-information</v-icon>
-                  </template>
-                  <div class="text-caption">
-                    <strong>Teacher's notes:</strong> {{ currentWorkout.notes }}
-                  </div>
-                </v-alert>
-              </template>
-
-              <!-- No Workout State -->
-              <div v-else class="text-caption text-medium-emphasis text-center pa-4">
-                <v-icon size="40" color="grey-lighten-1" class="mb-2">mdi-clipboard-text-outline</v-icon>
-                <div>No practice drills assigned yet.</div>
-                <div class="mt-1">Your teacher will create a workout for you.</div>
               </div>
-            </div>
-          </v-card>
-        </v-col>
+            </v-card>
+          </v-col>
+        </v-row>
 
+                <!-- Dynamic Control Area -->
+        <v-card class="display-card" elevation="1" rounded="lg">
+          <v-tabs v-model="activeTab" color="indigo-darken-1" align-tabs="start" class="border-b bg-slate-50">
+            <v-tab :value="0" class="text-none font-weight-bold">
+              <v-icon start>mdi-account-clock</v-icon>
+              Pending
+            </v-tab>
+            <v-tab :value="1" class="text-none font-weight-bold">
+              <v-icon start>mdi-check-all</v-icon>
+              Completed
+            </v-tab>
+            <v-tab :value="2" class="text-none font-weight-bold">
+              <v-icon start>mdi-badge-account-outline</v-icon>
+              My Language Profile
+            </v-tab>
+          </v-tabs>
 
-        <!-- Vocab Lists Section -->
-        <v-col cols="6">
-          <v-card class="assignment-card" elevation="2" rounded="lg">
-            <div class="card-header pa-5">
-              <div class="d-flex align-center justify-space-between mb-2">
-                <div
-                  class="text-h6 font-weight-medium linkish"
-                  role="button"
-                  tabindex="0"
-                  @click="goToVocabWorkout"
-                  @keyup.enter="goToVocabWorkout"
-                >
-                  Vocab Lists
+          <v-window v-model="activeTab" class="pa-5">
+            
+            <!-- TAB 0: Pending Homework & Practice Workouts -->
+            <v-window-item :value="0">
+              <div v-if="loading" class="text-center py-10">
+                <v-progress-circular indeterminate color="indigo" />
+                <div class="text-body-2 text-slate-500 mt-2">Syncing...</div>
+              </div>
+
+              <!-- Suggestion layout state if no assignments are pending -->
+              <div v-else-if="pendingCount === 0" class="text-center py-8 px-4 border rounded-xl bg-slate-50">
+                <v-avatar color="indigo-lighten-5" size="64" class="mb-3">
+                  <v-icon color="indigo-darken-2" size="36">mdi-creation-outline</v-icon>
+                </v-avatar>
+                <div class="text-h6 font-weight-bold text-slate-800">You have no assignments</div>
+                <div class="text-body-2 text-slate-600 max-w-sm mx-auto mt-1 mb-5">
+                  There are no assignments for you at the moment.
                 </div>
-                <v-icon size="28">mdi-format-list-checks</v-icon>
-              </div>
-              <div class="text-body-2 text-medium-emphasis">
-                Complete your assigned vocab lists.
-              </div>
-              <div class="mt-2">
-                <v-chip size="small" color="success" variant="tonal" class="mr-2">
-                  {{ vocabCompletedCount }} completed
-                </v-chip>
-                <v-chip size="small" color="warning" variant="tonal">
-                  {{ vocabPendingCount }} pending
-                </v-chip>
-              </div>
-            </div>
-
-            <v-divider />
-
-            <div class="assignment-list pa-4">
-              <template v-if="vocabAssignments.length > 0">
-                <div v-if="vocabCompletedAssignments.length > 0">
-                  <div class="text-caption font-weight-bold text-success mb-2">
-                    COMPLETED ({{ vocabCompletedAssignments.length }})
-                  </div>
-                  <v-list density="compact" class="pa-0">
-                    <v-list-item
-                      v-for="assignment in vocabCompletedAssignments"
-                      :key="assignment.assignment_id"
-                      class="assignment-item mb-2 completed"
-                      rounded="lg"
-                    >
-                      <template v-slot:prepend>
-                        <v-icon color="success" size="20">mdi-check-circle</v-icon>
-                      </template>
-                      <v-list-item-title class="text-body-2">
-                        {{ assignment.description }}
-                      </v-list-item-title>
-                      <v-list-item-subtitle class="text-caption">
-                        Completed {{ formatDate(assignment.completed_at) }}
-                      </v-list-item-subtitle>
-                    </v-list-item>
-                  </v-list>
+                <div class="d-flex justify-center flex-wrap ga-3">
+                  <v-btn color="indigo-darken-1" variant="flat" rounded="lg" class="text-none font-weight-bold" @click="goToGamesHub">
+                    Play Grammar Games
+                  </v-btn>
+                  <v-btn color="slate-700" variant="outlined" rounded="lg" class="text-none font-weight-bold" @click="goToVocabWorkout">
+                    Review Vocabulary
+                  </v-btn>
                 </div>
+              </div>
+
+              <!-- Standard View if tasks are pending -->
+              <div v-else class="ga-5 d-flex flex-column">
                 
-                <div v-if="vocabPendingAssignments.length > 0" class="mb-4">
-                  <div class="text-caption font-weight-bold text-warning mb-2">
-                    PENDING ({{ vocabPendingAssignments.length }})
+                <!-- Section 1: Teacher's Workout Drills -->
+                <div v-if="currentWorkout" class="border rounded-xl pa-4 bg-white">
+                  <div class="d-flex align-center justify-space-between flex-wrap ga-2 mb-3">
+                    <div>
+                      <div class="text-subtitle-1 font-weight-bold text-slate-900">Current Assigned Practice Drill</div>
+                      <div class="text-caption text-slate-500">Focus: {{ currentWorkout.focus_area || 'General Practice' }}</div>
+                    </div>
+                    <v-chip size="small" :color="workoutProgressColor" variant="flat" class="text-white font-weight-bold">
+                      {{ workoutCompletionPercentage }}% Done
+                    </v-chip>
                   </div>
-                  <v-list density="compact" class="pa-0">
-                    <v-list-item
-                      v-for="assignment in vocabPendingAssignments"
-                      :key="assignment.assignment_id"
-                      class="assignment-item mb-2"
-                      rounded="lg"
+
+                  <v-alert v-if="currentWorkout.notes" type="info" variant="tonal" density="compact" class="mb-4 rounded-lg bg-blue-lighten-5 border-0">
+                    <span class="text-caption text-slate-700"><strong>Teacher Message:</strong> {{ currentWorkout.notes }}</span>
+                  </v-alert>
+
+                  <!-- Grouping Pending Drills compactly -->
+                  <div class="ga-2 d-flex flex-column">
+                    <div v-for="drill in [...inProgressDrills, ...notStartedDrills]" :key="drill.id" class="d-flex align-center justify-space-between pa-3 rounded-lg border bg-slate-50">
+                      <div class="d-flex align-center ga-3 min-width-0">
+                        <v-icon size="18" :color="drill.completed_sessions > 0 ? 'warning' : 'slate-400'">
+                          {{ drill.completed_sessions > 0 ? 'mdi-clock-outline' : 'mdi-circle-outline' }}
+                        </v-icon>
+                        <div class="text-truncate">
+                          <div class="text-body-2 font-weight-bold text-slate-800 text-truncate">{{ drill.name }}</div>
+                          <div class="text-caption text-slate-500">{{ drill.completed_sessions }} of {{ drill.target_sessions || 1 }} sessions checked off</div>
+                        </div>
+                      </div>
+                      <v-chip size="x-small" variant="outlined" class="ml-2 font-weight-medium text-slate-600">{{ drill.type }}</v-chip>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Section 2: Unified Homework List -->
+                <div>
+                  <div class="text-subtitle-2 font-weight-bold text-slate-500 uppercase tracking-wider mb-2">What you can work on right now <v-icon size="18" color="slate-400">mdi-arrow-down-right-bold</v-icon></div>
+                  <v-list density="compact" class="pa-0 border rounded-xl overflow-hidden bg-white">
+                    
+                    <!-- Vocabulary entries loop -->
+                    <v-list-item v-for="item in vocabPendingAssignments" :key="item.assignment_id" class="border-b py-2 pr-4" @click="goToVocabWorkout">
+                      <template v-slot:prepend><v-icon color="teal-lighten-2" class="mr-1">mdi-cards-outline</v-icon></template>
+                      <v-list-item-title class="text-body-2 font-weight-medium text-slate-800">{{ item.description }}</v-list-item-title>
+                      <v-list-item-subtitle class="text-caption text-slate-400">Assigned {{ formatDate(item.created_at) }}</v-list-item-subtitle>
+                      <template v-slot:append><v-chip size="x-small" color="teal-lighten-4" variant="flat" class="text-teal-darken-3 font-weight-bold">Vocab</v-chip></template>
+                    </v-list-item>
+
+                    <!-- Conjugation entries loop -->
+                    <v-list-item v-for="item in conjugationPendingAssignments" :key="item.assignment_id" class="border-b py-2 pr-4" @click="goToConjugator">
+                      <template v-slot:prepend><v-icon color="indigo-lighten-2" class="mr-1">mdi-controller-classic</v-icon></template>
+                      <v-list-item-title class="text-body-2 font-weight-medium text-slate-800">{{ item.description }}</v-list-item-title>
+                      <v-list-item-subtitle class="text-caption text-slate-400">Assigned {{ formatDate(item.created_at) }}</v-list-item-subtitle>
+                      <template v-slot:append><v-chip size="x-small" color="indigo-lighten-4" variant="flat" class="text-indigo-darken-3 font-weight-bold">Verbs</v-chip></template>
+                    </v-list-item>
+
+                    <!-- Mini Games entries loop -->
+                    <v-list-item v-for="item in gamesPendingAssignments" :key="item.assignment_id" class="border-b py-2 pr-4" @click="goToGameFromAssignment(item)">
+                      <template v-slot:prepend><v-icon color="purple-lighten-2" class="mr-1">mdi-gamepad-circle</v-icon></template>
+                      <v-list-item-title class="text-body-2 font-weight-medium text-slate-800">{{ item.description }}</v-list-item-title>
+                      <v-list-item-subtitle class="text-caption text-slate-400">Assigned {{ formatDate(item.created_at) }}</v-list-item-subtitle>
+                      <template v-slot:append><v-chip size="x-small" color="purple-lighten-4" variant="flat" class="text-purple-darken-3 font-weight-bold">Game</v-chip></template>
+                    </v-list-item>
+
+                    <!-- Understand Errors entries loop -->
+                    <v-list-item v-for="item in exercisePendingAssignments" :key="item.assignment_id" class="border-b py-2 pr-4" @click="goToExerciseDetail(item.trigger_key)">
+                      <template v-slot:prepend><v-icon color="orange-lighten-2" class="mr-1">mdi-book-weight-lifter</v-icon></template>
+                      <v-list-item-title class="text-body-2 font-weight-medium text-slate-800">{{ item.description }}</v-list-item-title>
+                      <v-list-item-subtitle class="text-caption text-slate-400">Error profile review link: {{ item.trigger_key }}</v-list-item-subtitle>
+                      <template v-slot:append><v-chip size="x-small" color="orange-lighten-4" variant="flat" class="text-orange-darken-3 font-weight-bold">Review</v-chip></template>
+                    </v-list-item>
+                  </v-list>
+                </div>
+              </div>
+            </v-window-item>
+
+            <!-- TAB 1: Completed Tasks & Workouts History (Suggesion Applied: Always visible here) -->
+            <v-window-item :value="1">
+              <div v-if="completedCount === 0" class="text-center py-10 text-slate-400">
+                <v-icon size="48" class="mb-2">mdi-check-circle-outline</v-icon>
+                <div class="text-body-2">You haven't completed any tasks yet this term.</div>
+                <div class="text-caption">Finish an item from your pending list to see it here!</div>
+              </div>
+              
+              <div v-else class="ga-4 d-flex flex-column">
+                <div>
+                  <div class="text-subtitle-2 font-weight-bold text-slate-500 uppercase tracking-wider mb-2">Your completed assignements: Nice work!</div>
+                  <v-list density="compact" class="pa-0 border rounded-xl overflow-hidden bg-white">
+                    <v-list-item 
+                      v-for="item in [...vocabCompletedAssignments, ...conjugationCompletedAssignments, ...gamesCompletedAssignments, ...exerciseCompletedAssignments]" 
+                      :key="item.assignment_id"
+                      class="border-b py-3 px-4 bg-slate-50"
                     >
                       <template v-slot:prepend>
-                        <v-icon color="grey" size="20">mdi-circle-outline</v-icon>
+                        <v-icon color="success" class="mr-2">mdi-checkbox-marked-circle</v-icon>
                       </template>
-                      <v-list-item-title class="text-body-2">
-                        {{ assignment.description }}
+                      <v-list-item-title class="text-body-2 font-weight-medium text-slate-700 text-decoration-line-through">
+                        {{ item.description }}
                       </v-list-item-title>
-                      <v-list-item-subtitle class="text-caption">
-                        Created {{ formatDate(assignment.created_at) }}
+                      <v-list-item-subtitle class="text-caption text-slate-400 mt-0.5">
+                        Completed successfully {{ formatDate(item.completed_at) }}
                       </v-list-item-subtitle>
                     </v-list-item>
                   </v-list>
                 </div>
-              </template>
-              <div v-else class="text-caption text-medium-emphasis text-center pa-4">
-                No vocab assignments yet.
               </div>
-            </div>
-          </v-card>
-        </v-col>
+            </v-window-item>
 
-        <!-- Conjugation Section -->
-        <v-col cols="6">
-          <v-card class="assignment-card" elevation="2" rounded="lg">
-            <div class="card-header pa-5">
-              <div class="d-flex align-center justify-space-between mb-2">
-                <div
-                  class="text-h6 font-weight-medium linkish"
-                  role="button"
-                  tabindex="0"
-                  @click="goToConjugator"
-                  @keyup.enter="goToConjugator"
-                >
-                  Verb Conjugation
-                </div>
-                <v-icon size="28">mdi-format-text</v-icon>
+            <!-- TAB 2: Main Linguistic Profile Window -->
+            <v-window-item :value="2">
+              <div class="py-2">
+                <LinguisticProfileEmbedded />
               </div>
-              <div class="text-body-2 text-medium-emphasis">
-                Reach higher levels in the Conjugator game.
-              </div>
-              <div class="mt-2">
-                <v-chip size="small" color="success" variant="tonal" class="mr-2">
-                  {{ conjugationCompletedCount }} completed
-                </v-chip>
-                <v-chip size="small" color="warning" variant="tonal">
-                  {{ conjugationPendingCount }} pending
-                </v-chip>
-              </div>
-            </div>
+            </v-window-item>
+          </v-window>
+        </v-card>
+      </v-col>
 
-            <v-divider />
-
-            <div class="assignment-list pa-4">
-              <template v-if="conjugationAssignments.length > 0">
-                <div v-if="conjugationCompletedAssignments.length > 0">
-                  <div class="text-caption font-weight-bold text-success mb-2">
-                    COMPLETED ({{ conjugationCompletedAssignments.length }})
-                  </div>
-                  <v-list density="compact" class="pa-0">
-                    <v-list-item
-                      v-for="assignment in conjugationCompletedAssignments"
-                      :key="assignment.assignment_id"
-                      class="assignment-item mb-2 completed"
-                      rounded="lg"
-                    >
-                      <template v-slot:prepend>
-                        <v-icon color="success" size="20">mdi-check-circle</v-icon>
-                      </template>
-                      <v-list-item-title class="text-body-2">
-                        {{ assignment.description }}
-                      </v-list-item-title>
-                      <v-list-item-subtitle class="text-caption">
-                        Completed {{ formatDate(assignment.completed_at) }}
-                      </v-list-item-subtitle>
-                    </v-list-item>
-                  </v-list>
-                </div>
-                
-                <div v-if="conjugationPendingAssignments.length > 0" class="mb-4">
-                  <div class="text-caption font-weight-bold text-warning mb-2">
-                    PENDING ({{ conjugationPendingAssignments.length }})
-                  </div>
-                  <v-list density="compact" class="pa-0">
-                    <v-list-item
-                      v-for="assignment in conjugationPendingAssignments"
-                      :key="assignment.assignment_id"
-                      class="assignment-item mb-2"
-                      rounded="lg"
-                    >
-                      <template v-slot:prepend>
-                        <v-icon color="grey" size="20">mdi-circle-outline</v-icon>
-                      </template>
-                      <v-list-item-title class="text-body-2">
-                        {{ assignment.description }}
-                      </v-list-item-title>
-                      <v-list-item-subtitle class="text-caption">
-                        Created {{ formatDate(assignment.created_at) }}
-                      </v-list-item-subtitle>
-                    </v-list-item>
-                  </v-list>
-                </div>
-              </template>
-              <div v-else class="text-caption text-medium-emphasis text-center pa-4">
-                No conjugation assignments yet.
-              </div>
-            </div>
-          </v-card>
-        </v-col>
-
-        <!-- Games Section -->
-        <v-col cols="6">
-          <v-card class="assignment-card" elevation="2" rounded="lg">
-            <div class="card-header pa-5">
-              <div class="d-flex align-center justify-space-between mb-2">
-                <div
-                  class="text-h6 font-weight-medium linkish"
-                  role="button"
-                  tabindex="0"
-                  @click="goToGamesHub"
-                  @keyup.enter="goToGamesHub"
-                >
-                  Other Grammar Games
-                </div>
-                <v-icon size="28">mdi-controller-classic</v-icon>
-              </div>
-              <div class="text-body-2 text-medium-emphasis">
-                Complete mini-games with perfect scores.
-              </div>
-              <div class="mt-2">
-                <v-chip size="small" color="success" variant="tonal" class="mr-2">
-                  {{ gamesCompletedCount }} completed
-                </v-chip>
-                <v-chip size="small" color="warning" variant="tonal">
-                  {{ gamesPendingCount }} pending
-                </v-chip>
-              </div>
-            </div>
-
-            <v-divider />
-
-            <div class="assignment-list pa-4">
-              <template v-if="gamesAssignments.length > 0">
-                <div v-if="gamesCompletedAssignments.length > 0">
-                  <div class="text-caption font-weight-bold text-success mb-2">
-                    COMPLETED ({{ gamesCompletedAssignments.length }})
-                  </div>
-                  <v-list density="compact" class="pa-0">
-                    <v-list-item
-                      v-for="assignment in gamesCompletedAssignments"
-                      :key="assignment.assignment_id"
-                      class="assignment-item mb-2 completed"
-                      rounded="lg"
-                    >
-                      <template v-slot:prepend>
-                        <v-icon color="success" size="20">mdi-check-circle</v-icon>
-                      </template>
-                      <v-list-item-title class="text-body-2">
-                        {{ assignment.description }}
-                      </v-list-item-title>
-                      <v-list-item-subtitle class="text-caption">
-                        Completed {{ formatDate(assignment.completed_at) }}
-                      </v-list-item-subtitle>
-                    </v-list-item>
-                  </v-list>
-                </div>
-                
-                <div v-if="gamesPendingAssignments.length > 0" class="mb-4">
-                  <div class="text-caption font-weight-bold text-warning mb-2">
-                    PENDING ({{ gamesPendingAssignments.length }})
-                  </div>
-                  <v-list density="compact" class="pa-0">
-                    <v-list-item
-                      v-for="assignment in gamesPendingAssignments"
-                      :key="assignment.assignment_id"
-                      class="assignment-item mb-2"
-                      rounded="lg"
-                      role="button"
-                      tabindex="0"
-                      @click="goToGameFromAssignment(assignment)"
-                      @keyup.enter="goToGameFromAssignment(assignment)"
-                    >
-                      <template v-slot:prepend>
-                        <v-icon color="grey" size="20">mdi-circle-outline</v-icon>
-                      </template>
-                      <v-list-item-title class="text-body-2">
-                        {{ assignment.description }}
-                      </v-list-item-title>
-                      <v-list-item-subtitle class="text-caption">
-                        Created {{ formatDate(assignment.created_at) }}
-                      </v-list-item-subtitle>
-                    </v-list-item>
-                  </v-list>
-                </div>
-              </template>
-              <div v-else class="text-caption text-medium-emphasis text-center pa-4">
-                No game assignments yet.
-              </div>
-            </div>
-          </v-card>
-        </v-col>
-
-        <!-- Exercises Section -->
-        <v-col cols="6">
-          <v-card class="assignment-card" elevation="2" rounded="lg">
-            <div class="card-header pa-5">
-              <div class="d-flex align-center justify-space-between mb-2">
-                <div
-                  class="text-h6 font-weight-medium linkish"
-                  role="button"
-                  tabindex="0"
-                  @click="goToExercisesIndex"
-                  @keyup.enter="goToExercisesIndex"
-                >
-                  Understand Your Errors
-                </div>
-                <v-icon size="28">mdi-book-open-variant</v-icon>
-              </div>
-              <div class="text-body-2 text-medium-emphasis">
-                Do specific exercises for errors in your feedback.
-              </div>
-              <div class="mt-2">
-                <v-chip size="small" color="success" variant="tonal" class="mr-2">
-                  {{ exerciseCompletedCount }} completed
-                </v-chip>
-                <v-chip size="small" color="warning" variant="tonal">
-                  {{ exercisePendingCount }} pending
-                </v-chip>
-              </div>
-            </div>
-
-            <v-divider />
-
-            <div class="assignment-list pa-4">
-              <template v-if="exerciseAssignments.length > 0">
-                <div v-if="exerciseCompletedAssignments.length > 0">
-                  <div class="text-caption font-weight-bold text-success mb-2">
-                    COMPLETED ({{ exerciseCompletedAssignments.length }})
-                  </div>
-                  <v-list density="compact" class="pa-0">
-                    <v-list-item
-                      v-for="assignment in exerciseCompletedAssignments"
-                      :key="assignment.assignment_id"
-                      class="assignment-item mb-2 completed"
-                      rounded="lg"
-                    >
-                      <template v-slot:prepend>
-                        <v-icon color="success" size="20">mdi-check-circle</v-icon>
-                      </template>
-                      <v-list-item-title class="text-body-2">
-                        {{ assignment.description }}
-                      </v-list-item-title>
-                      <v-list-item-subtitle class="text-caption">
-                        Completed {{ formatDate(assignment.completed_at) }}
-                      </v-list-item-subtitle>
-                    </v-list-item>
-                  </v-list>
-                </div>
-                
-                <div v-if="exercisePendingAssignments.length > 0" class="mb-4">
-                  <div class="text-caption font-weight-bold text-warning mb-2">
-                    PENDING ({{ exercisePendingAssignments.length }})
-                  </div>
-                  <v-list density="compact" class="pa-0">
-                    <v-list-item
-                      v-for="assignment in exercisePendingAssignments"
-                      :key="assignment.assignment_id"
-                      class="assignment-item mb-2"
-                      rounded="lg"
-                      role="button"
-                      tabindex="0"
-                      @click="goToExerciseDetail(assignment.trigger_key)"
-                      @keyup.enter="goToExerciseDetail(assignment.trigger_key)"
-                    >
-                      <template v-slot:prepend>
-                        <v-icon color="grey" size="20">mdi-circle-outline</v-icon>
-                      </template>
-                      <v-list-item-title class="text-body-2">
-                        {{ assignment.description }}
-                      </v-list-item-title>
-                      <v-list-item-subtitle class="text-caption">
-                        Error code: {{ assignment.trigger_key }}
-                      </v-list-item-subtitle>
-                      <template v-slot:append v-if="assignment.spaced_required > 1">
-                        <v-chip size="x-small" color="primary" variant="tonal">
-                          {{ assignment.spaced_progress }}/{{ assignment.spaced_required }}
-                        </v-chip>
-                      </template>
-                    </v-list-item>
-                  </v-list>
-                </div>
-              </template>
-              <div v-else class="text-caption text-medium-emphasis text-center pa-4">
-                No exercise assignments yet. Keep practicing!
-              </div>
-            </div>
-          </v-card>
-        </v-col>
-      </v-row>
-    </div>
-
-    <!-- Linguistic Profile Section -->
-    <div ref="profileSection" style="margin-top: 10%;">
-      <LinguisticProfileEmbedded />
-    </div>
+    </v-row>
   </v-container>
 </template>
 
@@ -887,11 +285,18 @@ import LinguisticProfileEmbedded from '@/components/LinguisticProfileEmbedded.vu
 const userStore = useUserStore();
 const router = useRouter();
 
-// Refs for scroll targets
-const assignmentsSection = ref<HTMLElement | null>(null);
-const profileSection = ref<HTMLElement | null>(null);
+// Tab selector logic pointer (0 = Tasks list view, 1 = Embedded profile breakdown view)
+const activeTab = ref(0);
 
-// Types
+// Existing state declarations preserved
+const loading = ref(true);
+const error = ref<string | null>(null);
+const allAssignments = ref<Assignment[]>([]);
+const loadingActivity = ref(true);
+const activityFeed = ref<ActivityItem[]>([]);
+const currentWorkout = ref<Workout | null>(null);
+const activityFilter = ref<string>('all');
+
 interface Assignment {
   assignment_id: string;
   task_type: 'achievement' | 'exercise';
@@ -936,34 +341,7 @@ interface Workout {
   is_current: boolean;
   focus_area: string;
   notes: string;
-   drills: WorkoutDrill[];
-}
-
-// State
-const loading = ref(true);
-const error = ref<string | null>(null);
-const allAssignments = ref<Assignment[]>([]);
-const loadingActivity = ref(true);
-const activityFeed = ref<ActivityItem[]>([]);
-const currentWorkout = ref<Workout | null>(null);
-
-// Scroll functions with better offset
-function scrollToAssignments() {
-  if (assignmentsSection.value) {
-    const element = assignmentsSection.value;
-    const yOffset = -40; 
-    const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
-    window.scrollTo({ top: y, behavior: 'smooth' });
-  }
-}
-
-function scrollToProfile() {
-  if (profileSection.value) {
-    const element = profileSection.value;
-    const yOffset = -40; 
-    const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
-    window.scrollTo({ top: y, behavior: 'smooth' });
-  }
+  drills: WorkoutDrill[];
 }
 
 function getActivityIcon(type: string): string {
@@ -982,16 +360,13 @@ function getActivityIcon(type: string): string {
 
 function getActivityColor(type: string): string {
   const colors: Record<string, string> = {
-    'conjugation': 'blue',
-    'other_game': 'purple',
-    'exercise': 'orange',
-    'vocab_workout': 'teal',
-    'achievement': 'amber',
-    'workout_drill': 'green',
-    'feedback': 'red',
-    'profile_update': 'indigo',
+    'conjugation': 'blue-lighten-2',
+    'other_game': 'purple-lighten-2',
+    'exercise': 'orange-lighten-2',
+    'vocab_workout': 'teal-lighten-2',
+    'achievement': 'amber-lighten-1',
   };
-  return colors[type] || 'grey';
+  return colors[type] || 'slate-300';
 }
 
 function getActivityLabel(type: string): string {
@@ -1017,65 +392,30 @@ function formatActivityTime(timestamp: string): string {
   const diffDays = Math.floor(diffHours / 24);
 
   if (diffMins < 1) return 'Just now';
-  if (diffMins < 60) return `${diffMins} min${diffMins > 1 ? 's' : ''} ago`;
-  if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
-  if (diffDays < 7) return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+  if (diffMins < 60) return `${diffMins} mins ago`;
+  if (diffHours < 24) return `${diffHours} hours ago`;
+  if (diffDays < 7) return `${diffDays} days ago`;
   
   return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 }
 
-const weeklyActivityCount = computed(() => {
-  const oneWeekAgo = new Date();
-  oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-  
-  return activityFeed.value.filter(a => {
-    const activityDate = new Date(a.timestamp);
-    return activityDate >= oneWeekAgo && 
-           ['conjugation', 'other_game', 'exercise', 'vocab_workout'].includes(a.type);
-  }).length;
-});
-
-const weeklyAchievementCount = computed(() => {
-  const oneWeekAgo = new Date();
-  oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-  
-  return activityFeed.value.filter(a => {
-    const activityDate = new Date(a.timestamp);
-    return activityDate >= oneWeekAgo && a.type === 'achievement';
-  }).length;
-});
-
-const activityFilter = ref<string>('all');
-
-
-// ==========================================
-// CORRECTED: fetchActivityFeed
-// ==========================================
 async function fetchActivityFeed() {
   loadingActivity.value = true;
   try {
     const params: any = { days: 90 };
-
     if (userStore.isStaff) {
-      // ✨ FIXED: Target your verified shadow student record index ID (119)
-      // instead of your raw User account ID (82)
       params.student = userStore.studentId; 
     }
-
     if (activityFilter.value && activityFilter.value !== 'all') {
       params.type = activityFilter.value;
     }
 
     const response = await api.get('/student-activities/', { params });
-
     const rawData = response.data && typeof response.data === 'object' && 'results' in response.data 
       ? response.data.results 
       : response.data;
 
     if (Array.isArray(rawData)) {
-      // ✨ ADDED CRITICAL FRONTEND FILTER INSURANCE:
-      // If the backend view ignores parameters and still leaks a wider dataset, 
-      // this client-side block will filter it out, showing ONLY records that match your profile initials.
       const targetFeed = userStore.isStaff && userStore.student
         ? rawData.filter((act: any) => act.student === userStore.studentId || act.student_initials === userStore.student?.initials)
         : rawData;
@@ -1089,7 +429,6 @@ async function fetchActivityFeed() {
     } else {
       activityFeed.value = [];
     }
-
   } catch (err) {
     console.error('Error fetching activity feed:', err);
     activityFeed.value = [];
@@ -1098,29 +437,18 @@ async function fetchActivityFeed() {
   }
 }
 
-// ==========================================
-//  fetchAssignments
-// ==========================================
 async function fetchAssignments() {
   loading.value = true;
   try {
     const params: any = {};
-    
-    // The backend now listens to this parameter explicitly, 
-    // even if you are logged in as an Admin/Staff!
     if (userStore.isStaff) {
       params.student = userStore.studentId; 
     }
-
     const response = await api.get('/assignment/', { params });
-    
-    // Handle paginated vs flat arrays cleanly
     const dataPayload = response.data && typeof response.data === 'object' && 'results' in response.data
       ? response.data.results
       : response.data;
 
-    // ✨ CLEANED UP: No more slow client-side filtering loops! 
-    // You can trust that the backend sent ONLY your 119 sandbox rows.
     allAssignments.value = Array.isArray(dataPayload) ? dataPayload : [];
   } catch (err) {
     console.error('Assignments fetch failure:', err);
@@ -1130,21 +458,8 @@ async function fetchAssignments() {
   }
 }
 
-function getScoreColor(score: number | null | undefined): string {
-  if (score === null || score === undefined) return 'grey';
-  if (score >= 9) return '#4caf50';
-  if (score >= 7) return '#2196f3';
-  if (score >= 4) return '#ff9800';
-  return '#f44336';
-}
-
-// Navigation functions
 function goToRouteName(name: string, params?: Record<string, any>) {
   router.push({ name, params }).catch(() => {});
-}
-
-function goToExercisesIndex() {
-  goToRouteName("exercises");
 }
 
 function goToExerciseDetail(errorCode: string) {
@@ -1152,19 +467,11 @@ function goToExerciseDetail(errorCode: string) {
   goToRouteName("exercise-detail", { errorCode });
 }
 
-function goToVocabWorkout() {
-  goToRouteName("vocabworkout");
-}
+function goToVocabWorkout() { goToRouteName("vocabworkout"); }
+function goToConjugator() { goToRouteName("conjugator"); }
+function goToGamesHub() { goToRouteName("games"); }
 
-function goToConjugator() {
-  goToRouteName("conjugator");
-}
-
-function goToGamesHub() {
-  goToRouteName("games");
-}
-
-const GAME_ROUTE_HINTS: { routeName: string; keywords: string[] }[] = [
+const GAME_ROUTE_HINTS = [
   { routeName: "pronounpractice", keywords: ["pronoun practice", "pronouns"] },
   { routeName: "comparison", keywords: ["comparison", "comparatives", "superlatives"] },
   { routeName: "idealinker", keywords: ["idea linker", "idea-linker"] },
@@ -1183,7 +490,6 @@ const GAME_ROUTE_HINTS: { routeName: string; keywords: string[] }[] = [
 function inferGameRouteNameFromText(text: string | null | undefined): string | null {
   const t = String(text ?? "").toLowerCase();
   if (!t) return null;
-
   for (const entry of GAME_ROUTE_HINTS) {
     if (entry.keywords.some((k) => t.includes(k))) return entry.routeName;
   }
@@ -1192,11 +498,8 @@ function inferGameRouteNameFromText(text: string | null | undefined): string | n
 
 function goToGameFromAssignment(assignment: any) {
   const routeName = inferGameRouteNameFromText(assignment?.description);
-  if (routeName) {
-    goToRouteName(routeName);
-  } else {
-    goToGamesHub();
-  }
+  if (routeName) goToRouteName(routeName);
+  else goToGamesHub();
 }
 
 const formatDate = (dateString: string | null) => {
@@ -1204,153 +507,148 @@ const formatDate = (dateString: string | null) => {
   const date = new Date(dateString);
   const now = new Date();
   const diffDays = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
-  
   if (diffDays === 0) return 'today';
   if (diffDays === 1) return 'yesterday';
-  if (diffDays < 7) return `${diffDays} days ago`;
-  if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
-  
-  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 };
 
-// Computed properties for assignments
-const vocabAssignments = computed(() => {
-  return allAssignments.value.filter(a => 
-    a.task_type === 'achievement' && 
-    a.trigger_key.includes('vw_write_complete')
-  );
-});
+// Computeds for matching types and categories mapping filters cleanly
+const vocabAssignments = computed(() => allAssignments.value.filter(a => a.task_type === 'achievement' && a.trigger_key.includes('vw_write_complete')));
 const vocabPendingAssignments = computed(() => vocabAssignments.value.filter(a => a.status === 'pending'));
 const vocabCompletedAssignments = computed(() => vocabAssignments.value.filter(a => a.status === 'completed'));
-const vocabCompletedCount = computed(() => vocabCompletedAssignments.value.length);
-const vocabPendingCount = computed(() => vocabPendingAssignments.value.length);
 
-const exerciseAssignments = computed(() => {
-  return allAssignments.value.filter(a => a.task_type === 'exercise');
-});
+const exerciseAssignments = computed(() => allAssignments.value.filter(a => a.task_type === 'exercise'));
 const exercisePendingAssignments = computed(() => exerciseAssignments.value.filter(a => a.status === 'pending'));
 const exerciseCompletedAssignments = computed(() => exerciseAssignments.value.filter(a => a.status === 'completed'));
-const exerciseCompletedCount = computed(() => exerciseCompletedAssignments.value.length);
-const exercisePendingCount = computed(() => exercisePendingAssignments.value.length);
 
-const conjugationAssignments = computed(() => {
-  return allAssignments.value.filter(a => 
-    a.task_type === 'achievement' && 
-    (a.trigger_key.includes('correct_prompts') || 
-     a.trigger_key.includes('health_tier') ||
-     a.trigger_key.includes('discovery') ||
-     a.trigger_key.includes('mastery'))
-  );
+const conjugationAssignments = computed(() => allAssignments.value.filter(a => a.task_type === 'achievement' && (a.trigger_key.includes('correct_prompts') || a.trigger_key.includes('health_tier') || a.trigger_key.includes('discovery') || a.trigger_key.includes('mastery'))));
+// Helper function to extract numeric targets from text labels (e.g., "500", "750")
+function extractNumberFromText(text: string): number {
+  const match = text.match(/\d+/);
+  return match ? parseInt(match[0], 10) : 0;
+}
+
+// 🌟 REWORKED: Smart "Next-In-Line" Pending Conjugation Assignments
+const conjugationPendingAssignments = computed(() => {
+  const rawPending = conjugationAssignments.value.filter(a => a.status === 'pending');
+  
+  // Group related milestones by checking common phrases in their text descriptions
+  const groups: Record<string, Assignment[]> = {
+    prompts: [],   // For "Answer X conjugation prompts..."
+    basic75: [],   // For "all Basic 75 irregular verbs..."
+    master110: [], // For "all Master 110 irregular verbs..."
+    allIrreg: [],  // For "all irregular verbs..."
+    health: []     // For "Reach X tier... in conjugation health"
+  };
+
+  rawPending.forEach(a => {
+    const desc = a.description.toLowerCase();
+    if (desc.includes('prompts')) groups.prompts.push(a);
+    else if (desc.includes('basic 75')) groups.basic75.push(a);
+    else if (desc.includes('master 110')) groups.master110.push(a);
+    else if (desc.includes('all irregular verbs')) groups.allIrreg.push(a);
+    else if (desc.includes('health')) groups.health.push(a);
+    else groups.prompts.push(a); // Fallback bucket
+  });
+
+  const nextInLine: Assignment[] = [];
+
+  // 1. Sort prompts by the lowest target number (500 -> 750 -> 1000) and pick the first one
+  if (groups.prompts.length) {
+    groups.prompts.sort((a, b) => extractNumberFromText(a.description) - extractNumberFromText(b.description));
+    nextInLine.push(groups.prompts[0]);
+  }
+
+  // 2. Conjugation Health Tiers: Sort by target values (30 -> 40 -> 50) and pick the first one
+  if (groups.health.length) {
+    groups.health.sort((a, b) => extractNumberFromText(a.description) - extractNumberFromText(b.description));
+    nextInLine.push(groups.health[0]);
+  }
+
+  // 3. Verb Lists Progression (Discover must happen before Master)
+  const processVerbListGroup = (list: Assignment[]) => {
+    if (!list.length) return;
+    const discoverTasks = list.filter(a => a.description.toLowerCase().includes('discover'));
+    const masterTasks = list.filter(a => a.description.toLowerCase().includes('master'));
+
+    // If there is an unfinished "Discover" task for a tense, show that first. Otherwise show "Master".
+    if (discoverTasks.length) {
+      nextInLine.push(discoverTasks[0]); 
+    } else if (masterTasks.length) {
+      nextInLine.push(masterTasks[0]);
+    }
+  };
+
+  processVerbListGroup(groups.basic75);
+  processVerbListGroup(groups.master110);
+  processVerbListGroup(groups.allIrreg);
+
+  return nextInLine;
 });
-const conjugationPendingAssignments = computed(() => conjugationAssignments.value.filter(a => a.status === 'pending'));
 const conjugationCompletedAssignments = computed(() => conjugationAssignments.value.filter(a => a.status === 'completed'));
-const conjugationCompletedCount = computed(() => conjugationCompletedAssignments.value.length);
-const conjugationPendingCount = computed(() => conjugationPendingAssignments.value.length);
 
-const gamesAssignments = computed(() => {
-  return allAssignments.value.filter(a => 
-    a.task_type === 'achievement' && 
-    !a.trigger_key.includes('vw_write_complete') &&
-    !a.trigger_key.includes('correct_prompts') &&
-    !a.trigger_key.includes('health_tier') &&
-    !a.trigger_key.includes('discovery') &&
-    !a.trigger_key.includes('mastery')
-  );
+const gamesAssignments = computed(() => allAssignments.value.filter(a => a.task_type === 'achievement' && !a.trigger_key.includes('vw_write_complete') && !a.trigger_key.includes('correct_prompts') && !a.trigger_key.includes('health_tier') && !a.trigger_key.includes('discovery') && !a.trigger_key.includes('mastery')));
+const gamesPendingAssignments = computed(() => {
+  const rawPending = gamesAssignments.value.filter(a => a.status === 'pending');
+  
+  // Group matching milestones together by looking at common words
+  const grouped: Record<string, Assignment[]> = {};
+  rawPending.forEach(a => {
+    // Uses the first three words of the task description as a unique key structure
+    const baseGroupKey = a.description.split(' ').slice(0, 3).join('_').toLowerCase();
+    if (!grouped[baseGroupKey]) grouped[baseGroupKey] = [];
+    grouped[baseGroupKey].push(a);
+  });
+
+  const nextInLine: Assignment[] = [];
+  Object.values(grouped).forEach(group => {
+    // Sort milestones with numbers ascendingly and pick only the closest target step
+    group.sort((a, b) => extractNumberFromText(a.description) - extractNumberFromText(b.description));
+    nextInLine.push(group[0]);
+  });
+
+  return nextInLine;
 });
-const gamesPendingAssignments = computed(() => gamesAssignments.value.filter(a => a.status === 'pending'));
 const gamesCompletedAssignments = computed(() => gamesAssignments.value.filter(a => a.status === 'completed'));
-const gamesCompletedCount = computed(() => gamesCompletedAssignments.value.length);
-const gamesPendingCount = computed(() => gamesPendingAssignments.value.length);
 
-const completedCount = computed(() => {
-  return allAssignments.value.filter(a => a.status === 'completed').length;
-});
+const completedCount = computed(() => allAssignments.value.filter(a => a.status === 'completed').length);
+const pendingCount = computed(() => allAssignments.value.filter(a => a.status === 'pending').length);
 
-const pendingCount = computed(() => {
-  return allAssignments.value.filter(a => a.status === 'pending').length;
-});
-
-
-// Computed properties for current workout
 const completedDrills = computed(() => {
   if (!currentWorkout.value?.drills) return [];
-  return currentWorkout.value.drills.filter(
-    drill => drill.completed_sessions >= (drill.target_sessions ?? 0) && (drill.target_sessions ?? 0) > 0
-  );
+  return currentWorkout.value.drills.filter(d => d.completed_sessions >= (d.target_sessions ?? 0) && (d.target_sessions ?? 0) > 0);
 });
-
 const inProgressDrills = computed(() => {
   if (!currentWorkout.value?.drills) return [];
-  return currentWorkout.value.drills.filter(
-    drill => drill.completed_sessions > 0 && drill.completed_sessions < (drill.target_sessions ?? 0)
-  );
+  return currentWorkout.value.drills.filter(d => d.completed_sessions > 0 && d.completed_sessions < (d.target_sessions ?? 0));
 });
-
 const notStartedDrills = computed(() => {
   if (!currentWorkout.value?.drills) return [];
-  return currentWorkout.value.drills.filter(
-    drill => drill.completed_sessions === 0
-  );
+  return currentWorkout.value.drills.filter(d => d.completed_sessions === 0);
 });
 
 const workoutCompletionPercentage = computed(() => {
   if (!currentWorkout.value?.drills?.length) return 0;
-  
-  const totalSessions = currentWorkout.value.drills.reduce(
-    (sum, drill) => sum + (drill.target_sessions || 0),
-    0
-  );
-  
+  const totalSessions = currentWorkout.value.drills.reduce((sum, d) => sum + (d.target_sessions || 0), 0);
   if (totalSessions === 0) return 0;
-  
-  const completedSessions = currentWorkout.value.drills.reduce(
-    (sum, drill) => sum + drill.completed_sessions,
-    0
-  );
-  
+  const completedSessions = currentWorkout.value.drills.reduce((sum, d) => sum + d.completed_sessions, 0);
   return Math.round((completedSessions / totalSessions) * 100);
 });
 
 const workoutProgressColor = computed(() => {
-  const percentage = workoutCompletionPercentage.value;
-  if (percentage >= 75) return 'success';
-  if (percentage >= 50) return 'warning';
-  if (percentage >= 25) return 'orange';
-  return 'error';
+  const p = workoutCompletionPercentage.value;
+  if (p >= 75) return 'teal-lighten-1';
+  if (p >= 40) return 'amber-lighten-1';
+  return 'blue-grey-lighten-2';
 });
-
-// Helper functions for drills
-function getDrillTypeColor(type: string): string {
-  const colors: Record<string, string> = {
-    'pronunciation': 'blue',
-    'conjugation': 'purple',
-    'vocabulary': 'green',
-    'grammar': 'orange',
-    'fluency': 'teal',
-    'listening': 'pink',
-    'other': 'grey',
-  };
-  return colors[type] || 'grey';
-}
-
-function getDrillProgressColor(drill: any): string {
-  if (!drill.target_sessions) return 'grey';
-  const percentage = (drill.completed_sessions / drill.target_sessions) * 100;
-  if (percentage >= 75) return 'success';
-  if (percentage >= 50) return 'warning';
-  return 'orange';
-}
 
 async function fetchCurrentWorkout() {
   try {
     if (userStore.isStaff) {
-      await userStore.fetchCurrentWorkout({ 
-        user_id: userStore.user?.id 
-      });
+      await userStore.fetchCurrentWorkout({ user_id: userStore.user?.id });
     } else {
       await userStore.fetchCurrentWorkout();
     }
-    
     currentWorkout.value = userStore.currentWorkout;
   } catch (error) {
     console.error('Failed to fetch workout:', error);
@@ -1366,201 +664,52 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-/* Welcome Hero */
-.welcome-hero {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  position: relative;
-  overflow: hidden;
+.dashboard-bg {
+  background-color: #fdfdfd;
 }
 
-.welcome-hero::before {
-  content: "";
-  position: absolute;
-  inset: -45%;
-  background:
-    radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.35) 0%, rgba(255, 255, 255, 0) 45%),
-    radial-gradient(circle at 85% 25%, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0) 55%);
-  transform: rotate(-10deg);
-  pointer-events: none;
+/* Softer welcome message layout card background */
+.welcome-banner {
+  background: linear-gradient(135deg, #f1f4f9 0%, #e5ecf6 100%);
+  border: 1px solid rgba(226, 232, 240, 0.8);
 }
 
-.welcome-hero > * {
-  position: relative;
-  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.18);
+.display-card {
+  border: 1px solid #e2e8f0;
+  background-color: #ffffff;
 }
 
-.welcome-hero__icon {
-  filter: drop-shadow(0 2px 10px rgba(0, 0, 0, 0.2));
-  opacity: 0.95;
-}
-
-/* Activity Card - Full height on left */
-.activity-card {
-  min-height: 550px;
-  max-height: 550px;
-  display: flex;
-  flex-direction: column;
-}
-
-.activity-list {
-  flex: 1;
+/* natural scroll limits for history without jumping elements */
+.activity-scroll-area {
+  max-height: 600px;
   overflow-y: auto;
-  min-height: 0;
 }
 
-.activity-list::-webkit-scrollbar {
-  width: 8px;
+.activity-box {
+  background-color: #ffffff;
+  border-color: #f1f5f9 !important;
+  transition: background-color 0.2s;
 }
 
-.activity-list::-webkit-scrollbar-track {
-  background: transparent;
+.activity-box:hover {
+  background-color: #f8fafc;
 }
 
-.activity-list::-webkit-scrollbar-thumb {
-  background: rgba(0, 0, 0, 0.2);
-  border-radius: 4px;
+/* Softer card blocks replacing old purple/yellow layouts */
+.bg-sage {
+  background-color: #f2f8f6 !important;
+  border-color: #e2f0ec !important;
+}
+.bg-sand {
+  background-color: #fbf8f3 !important;
+  border-color: #f4ece1 !important;
 }
 
-.activity-list::-webkit-scrollbar-thumb:hover {
-  background: rgba(0, 0, 0, 0.3);
-}
-
-.activity-item {
-  background: rgba(0, 0, 0, 0.02);
-  border-radius: 8px;
-  transition: background 0.2s;
-}
-
-.activity-item:hover {
-  background: rgba(0, 0, 0, 0.04);
-}
-
-/* Action Cards - Stacked on right */
-.action-card {
-  min-height: 260px;
-  transition: all 0.3s;
-}
-
-.clickable-card {
-  cursor: pointer;
-}
-
-.clickable-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15) !important;
-}
-
-.profile-card-preview {
-  background: linear-gradient(to bottom right, rgba(156, 39, 176, 0.05), rgba(103, 58, 183, 0.05));
-}
-
-/* Profile Mini Stats */
-.profile-preview {
-  background: rgba(0, 0, 0, 0.03);
-  padding: 16px;
-  border-radius: 12px;
-}
-
-.profile-mini-stat {
-  text-align: center;
-}
-
-.stat-value {
-  font-size: 1.5rem;
-  font-weight: 700;
-}
-
-.stat-label {
-  font-size: 0.75rem;
-  color: rgba(0, 0, 0, 0.6);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-/* Assignments Header */
-.assignments-header {
-  background: linear-gradient(135deg, #ffb300 0%, #ffd54f 40%, #ff7043 100%);
-  color: white;
-  position: relative;
-  overflow: hidden;
-}
-
-.assignments-header::before {
-  content: "";
-  position: absolute;
-  inset: -45%;
-  background:
-    radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.35) 0%, rgba(255, 255, 255, 0) 45%),
-    radial-gradient(circle at 85% 25%, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0) 55%);
-  transform: rotate(-10deg);
-  pointer-events: none;
-}
-
-.assignments-header > * {
-  position: relative;
-}
-
-/* Assignment cards */
-.assignment-card {
-  height: 500px;
-  display: flex;
-  flex-direction: column;
-}
-
-.card-header {
-  flex-shrink: 0;
-}
-
-.assignment-list {
-  flex: 1;
-  overflow-y: auto;
-  min-height: 0;
-}
-
-.assignment-item {
-  background: rgba(0, 0, 0, 0.02);
-  border: 1px solid rgba(0, 0, 0, 0.05);
-  transition: all 0.2s;
-}
-
-.assignment-item:hover {
-  background: rgba(0, 0, 0, 0.04);
-  transform: translateX(2px);
-}
-
-.assignment-item.completed {
-  opacity: 0.7;
-}
-
-.assignment-item.completed:hover {
-  opacity: 0.85;
-}
-
-.linkish {
-  cursor: pointer;
-  text-decoration: underline;
-  text-decoration-thickness: 0.7px;
-  text-underline-offset: 4px;
-}
-
-.linkish:focus {
-  outline: 2px solid rgba(102, 126, 234, 0.5);
-  outline-offset: 4px;
-  border-radius: 6px;
-}
-
-@media (max-width: 960px) {
-  .activity-card {
-    min-height: 400px;
-    max-height: 400px;
-  }
-
-  .action-card {
-    min-height: 250px;
-  }
-
-  .assignment-card {
-    height: 450px;
-  }
-}
+.text-slate-900 { color: #0f172a; }
+.text-slate-800 { color: #1e293b; }
+.text-slate-600 { color: #475569; }
+.text-slate-500 { color: #64748b; }
+.text-slate-400 { color: #94a3b8; }
+.bg-slate-50 { background-color: #f8fafc !important; }
+.border-b { border-bottom: 1px solid #e2e8f0 !important; }
 </style>

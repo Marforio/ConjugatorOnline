@@ -47,7 +47,7 @@
     </v-row>
     <!-- Back Button -->
     <div class="d-flex justify-center mt-6">
-      <RouterLink :to="{ name: 'home' }">
+      <RouterLink :to="{ name: 'student-home' }">
         <v-btn icon elevation="0" size="x-large" style="margin-top: 50px;">
           <v-icon size="x-large" color="black">mdi-arrow-left-circle</v-icon>
         </v-btn>

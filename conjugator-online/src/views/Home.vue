@@ -17,7 +17,7 @@
         Language Labs
       </h1>
       <p class="text-body-1 text-slate-500 max-width-text mx-auto mb-8">
-        Custom language-learning tools
+        Custom tools for language-learning
       </p>
 
       <!-- Dynamic Entry Actions Core -->

@@ -1,10 +1,8 @@
-<!-- VocabDashboard.vue -->
 <template>
   <v-container fluid class="vocab-room pa-4 pa-sm-6 max-w-container">
     
-    <!-- Top Segment Control Navigation View Toggles -->
     <v-row justify="center" class="mb-6">
-      <v-col cols="12" md="10" lg="8" class="d-flex justify-space-between align-center gap-4 flex-wrap flex-sm-nowrap">
+      <v-col cols="12" md="11" lg="9" class="d-flex justify-space-between align-center gap-3 flex-wrap flex-sm-nowrap">
         <v-btn
           :variant="activePanel === 0 ? 'elevated' : 'tonal'"
           :color="activePanel === 0 ? 'primary' : 'grey-darken-1'"
@@ -13,6 +11,7 @@
           @click="activePanel = 0"
         >
           Notebook
+          <v-icon end class="ms-1">mdi-notebook-outline</v-icon>
         </v-btn>
 
         <v-btn
@@ -22,20 +21,28 @@
           class="flex-grow-1 rounded-xl text-subtitle-1 font-weight-medium tracking-wide panel-toggle-btn"
           @click="activePanel = 1"
         >
-          Vocab Workout Data
+          Vocab Workout
+          <v-icon end class="ms-1">mdi-sword-cross</v-icon>
+        </v-btn>
+
+        <v-btn
+          :variant="activePanel === 2 ? 'elevated' : 'tonal'"
+          :color="activePanel === 2 ? 'primary' : 'grey-darken-1'"
+          size="large"
+          class="flex-grow-1 rounded-xl text-subtitle-1 font-weight-medium tracking-wide panel-toggle-btn"
+          @click="activePanel = 2"
+        >
+          List Analytics
           <v-icon end class="ms-1">mdi-chart-timeline-variant-outline</v-icon>
         </v-btn>
       </v-col>
     </v-row>
 
-    <!-- Master Dashboard Interface Panels Window -->
     <v-window v-model="activePanel" class="mt-2" :touch="false">
       
-      <!-- PANEL 1: Feedback / Notebook Interface -->
       <v-window-item :value="0">
         <v-row class="align-stretch">
           
-          <!-- Primary Vocabulary Notebook Collection Table Block -->
           <v-col cols="12" md="8" class="d-flex">
             <v-card class="pa-4 w-100 rounded-xl border border-light shadow-sm flex-column" elevation="0">
               <v-card-title class="text-h5 font-weight-black text-grey-darken-3 pb-1 d-flex align-center">
@@ -57,7 +64,6 @@
                     loading-text="Syncing current notebook entries..."
                     item-value="vocab_id"
                   >
-                    <!-- Custom AI Row Action Column -->
                     <template #item.ai="{ item }">
                       <v-tooltip text="Ask AI tutor" location="top">
                         <template #activator="{ props }">
@@ -76,7 +82,6 @@
                       </v-tooltip>
                     </template>
 
-                    <!-- Spruced Up Sub-Column Custom Formatters -->
                     <template #item.incorrect="{ item }">
                       <span class="text-error font-weight-bold font-code">{{ item.incorrect || '—' }}</span>
                     </template>
@@ -96,7 +101,6 @@
             </v-card>
           </v-col>
 
-          <!-- Input Block Column: Dynamic Manual Entry Form -->
           <v-col cols="12" md="4" class="d-flex">
             <v-card class="pa-4 w-100 rounded-xl border border-light shadow-sm flex-column bg-slate-fluid" elevation="0">
               <v-card-title class="text-h5 font-weight-black text-grey-darken-3 pb-1 d-flex align-center">
@@ -166,7 +170,6 @@
 
         <v-divider class="custom-divider-break" />
 
-        <!-- Flashcard Spatial Dynamic Retention Module -->
         <v-row justify="center" class="mb-12">
           <v-col cols="12" sm="10" md="8" lg="6" xl="5">
             <div class="text-center mb-6">
@@ -178,18 +181,14 @@
               </p>
             </div>
 
-            <!-- CSS Perspective Animation Outer View Frame -->
             <div class="flip-container-wrapper">
               <div class="flip-container" :class="{ flipped: isFlipped }" @click="flipCard">
                 <div class="flipper">
                   
-                  <!-- FLIP FRONT: Error Detection Target Mode -->
                   <v-card
                     class="front pa-5 d-flex flex-column justify-space-between bg-cyan-panel rounded-xl border-cyan shadow-md"
                     elevation="0"
                   >
-
-
                     <v-card-text v-if="currentVocabItem" class="d-flex flex-column align-center justify-center text-center py-6 flex-grow-1">
                       <div class="text-body-2 font-weight-bold text-cyan-subtitle mb-4">What is a better way to say this?</div>
                       <div class="text-h3 font-weight-black text-cyan-header font-code tracking-tight line-clamp-3 px-2 break-word">
@@ -218,12 +217,10 @@
                     </div>
                   </v-card>
 
-                  <!-- FLIP BACK: Verified Structural Native Targets Form -->
                   <v-card
                     class="back pa-5 d-flex flex-column justify-space-between bg-emerald-panel rounded-xl border-emerald shadow-md"
                     elevation="0"
                   >
-
                     <v-card-text v-if="currentVocabItem" class="d-flex flex-column align-center justify-center text-center py-6 flex-grow-1">
                       <div class="text-h3 font-weight-black text-emerald-header font-code tracking-tight line-clamp-3 px-2 break-word">
                         {{ currentVocabItem.correct }}
@@ -258,7 +255,6 @@
         </v-row>
       </v-window-item>
 
-      <!-- PANEL 2: Interactive Workout Activity Grid Telemetry -->
       <v-window-item :value="1">
         <VWMyProgressPanel
           :completionTarget="COMPLETION_TARGET"
@@ -269,12 +265,18 @@
           class="mt-2 fade-in"
         />
       </v-window-item>
+
+      <v-window-item :value="2">
+        <div class="fade-in mt-1">
+          <VocabWorkoutDataTab />
+        </div>
+      </v-window-item>
+
     </v-window>
 
-    <!-- Isolated AI Context Explanation Dialog Wrapper Modal -->
     <AiTutorChatDialog
       v-model="tutorOpen"
-      title="AI Tutor — Vocabulary Analysis Engine"
+      title="AI Tutor — Explain my Vocabulary Error"
       :context="tutorContext"
       :build-initial-user-message="buildVocabErrorInitialUserMessage"
       :system-message="vocabTutorSystemMessage"
@@ -293,6 +295,7 @@ import api from "@/axios";
 import { useUserStore } from "@/stores/user";
 import AiTutorChatDialog from "@/components/AiTutorChatDialog.vue";
 import VWMyProgressPanel from "@/components/vocab_workout_scenes/VWMyProgressPanel.vue";
+import VocabWorkoutDataTab from "@/components/VocabWorkoutDataTab.vue";
 
 const router = useRouter();
 const userStore = useUserStore();

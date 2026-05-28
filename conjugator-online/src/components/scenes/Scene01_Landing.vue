@@ -39,7 +39,7 @@
         size="large" 
         color="slate-600" 
         class="bg-white border rounded-xl elevation-1" 
-        :to="{ name: 'student-data' }" 
+        :to="{ name: 'student-home' }" 
       />
     </v-row>
   </v-container>

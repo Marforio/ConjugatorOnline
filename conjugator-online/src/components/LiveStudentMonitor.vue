@@ -132,7 +132,7 @@
           </v-avatar>
           <div class="text-subtitle-1 font-weight-black text-slate-700 leading-none mb-1">No Students Online</div>
           <div class="text-caption text-slate-400 max-w-280 mx-auto font-weight-medium">
-            Active tracking monograms show here automatically as soon as students initiate vocabulary exercises.
+            Active tracking starts automatically as soon as students are active.
           </div>
         </div>
       </v-col>
@@ -181,7 +181,7 @@
 
       <!-- Fallback micro screen state block -->
       <div v-else class="text-center pa-6 rounded-xl border border-dashed bg-slate-50 text-caption font-weight-bold text-slate-400">
-        <v-icon size="16" class="mr-1">mdi-history-off</v-icon> No matching log updates available.
+        <v-icon size="16" class="mr-1">mdi-history-off</v-icon> No logs available.
       </div>
       </v-col>
 

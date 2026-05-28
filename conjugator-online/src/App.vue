@@ -57,13 +57,14 @@
           />
 
           <v-list-item :to="{ name: 'manage-students' }" prepend-icon="mdi-account-cog" title="Manage Students" rounded="lg" color="primary" @click="closeDrawerBelowLg" />
+          <v-list-item :to="{ name: 'manage-work' }" prepend-icon="mdi-tray-full" title="Give Work" rounded="lg" color="primary" @click="closeDrawerBelowLg" />
           <v-list-item :to="{ name: 'manage-feedback' }" prepend-icon="mdi-comment-quote" title="Give Feedback" rounded="lg" color="primary" @click="closeDrawerBelowLg" />
           <v-list-item :to="{ name: 'manage-achievement-data' }" prepend-icon="mdi-trophy" title="Achievements" rounded="lg" color="primary" @click="closeDrawerBelowLg" />
-          <v-list-item :to="{ name: 'manage-workouts' }" prepend-icon="mdi-gymnastics" title="Workouts" rounded="lg" color="primary" @click="closeDrawerBelowLg" />
           <v-list-item :to="{ name: 'teacher-tools' }" prepend-icon="mdi-human-male-board" title="Classroom Tools" rounded="lg" color="primary" @click="closeDrawerBelowLg" />
           <v-list-item :to="{ name: 'manage-error-data' }" prepend-icon="mdi-chart-line" title="Error Data" rounded="lg" color="primary" @click="closeDrawerBelowLg" />
           <v-list-item :to="{ name: 'manage-conjugator-data' }" prepend-icon="mdi-chart-arc" title="Conjugator Data" rounded="lg" color="primary" @click="closeDrawerBelowLg" />
           <v-list-item :to="{ name: 'manage-other-games-data' }" prepend-icon="mdi-chart-timeline" title="Other Games Data" rounded="lg" color="primary" @click="closeDrawerBelowLg" />
+          <v-list-item :to="{ name: 'manage-vocab-data' }" prepend-icon="mdi-chart-timeline-variant-shimmer" title="Vocabulary Data" rounded="lg" color="primary" @click="closeDrawerBelowLg" />
 
           <v-divider class="my-4 border-opacity-60" />
 

@@ -532,7 +532,7 @@
 
     <AiTutorChatDialog
       v-model="tutorOpen"
-      title="AI Tutor — Conjugation Error Analysis"
+      title="AI Tutor — Why is this conjugation wrong?"
       :context="tutorContext"
       :system-message="conjTutorSystemMessage"
       :build-initial-user-message="buildConjTutorInitialUserMessage"

@@ -135,7 +135,7 @@
 
     <!-- Back Button -->
     <div class="d-flex justify-center mt-6">
-      <RouterLink :to="{ name: 'home' }">
+      <RouterLink :to="{ name: 'teacher' }">
         <v-btn icon elevation="0" size="x-large">
           <v-icon size="x-large" color="black">
             mdi-arrow-left-circle

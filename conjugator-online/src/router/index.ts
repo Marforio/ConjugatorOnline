@@ -41,12 +41,13 @@ const routes = [
   { path: '/teacher-tools/classroom-challenges', name: 'classroom-challenges', component: () => import('@/views/ClassroomChallenges.vue'), meta: { requiresAuth: true, requiresAdmin: true }, props: (route: RouteLocationNormalized) => ({ game: route.query.game as string, student: route.query.student as string }) },
   { path: '/teacher', name: 'teacher', component: () => import('@/views/Teacher.vue'), meta: { requiresAuth: true, requiresAdmin: true } },
   { path: '/teacher/manage-students', name: 'manage-students', component: () => import('@/views/ManageStudents.vue'), meta: { requiresAuth: true, requiresAdmin: true } },
-  { path: '/teacher/manage-workouts', name: 'manage-workouts', component: () => import('@/views/ManageWorkouts.vue'), meta: { requiresAuth: true, requiresAdmin: true } },
+  { path: '/teacher/manage-work', name: 'manage-work', component: () => import('@/views/ManageWork.vue'), meta: { requiresAuth: true, requiresAdmin: true } },
   { path: '/teacher/manage-feedback', name: 'manage-feedback', component: () => import('@/views/ManageFeedback.vue'), meta: { requiresAuth: true, requiresAdmin: true } },
   { path: '/teacher/manage-error-data', name: 'manage-error-data', component: () => import('@/views/ManageErrorData.vue'), meta: { requiresAuth: true, requiresAdmin: true } },
   { path: '/teacher/manage-achievement-data', name: 'manage-achievement-data', component: () => import('@/views/ManageAchievementData.vue'), meta: { requiresAuth: true, requiresAdmin: true } },
   { path: '/teacher/conjugator-data', name: 'manage-conjugator-data', component: () => import('@/views/ManageConjugatorData.vue'), meta: { requiresAuth: true, requiresAdmin: true } },
   { path: '/teacher/other-games-data', name: 'manage-other-games-data', component: () => import('@/views/ManageOtherGamesData.vue'), meta: { requiresAuth: true, requiresAdmin: true } },
+  { path: '/teacher/vocab-data', name: 'manage-vocab-data', component: () => import('@/views/ManageVocabData.vue'), meta: { requiresAuth: true, requiresAdmin: true } },
 ]
 
 const router = createRouter({
