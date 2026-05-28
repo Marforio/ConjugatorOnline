@@ -11,7 +11,6 @@
           @click="activePanel = 0"
         >
           Notebook
-          <v-icon end class="ms-1">mdi-notebook-outline</v-icon>
         </v-btn>
 
         <v-btn
@@ -21,8 +20,7 @@
           class="flex-grow-1 rounded-xl text-subtitle-1 font-weight-medium tracking-wide panel-toggle-btn"
           @click="activePanel = 1"
         >
-          Vocab Workout
-          <v-icon end class="ms-1">mdi-sword-cross</v-icon>
+          Vocab Workout Progress
         </v-btn>
 
         <v-btn
@@ -32,8 +30,7 @@
           class="flex-grow-1 rounded-xl text-subtitle-1 font-weight-medium tracking-wide panel-toggle-btn"
           @click="activePanel = 2"
         >
-          List Analytics
-          <v-icon end class="ms-1">mdi-chart-timeline-variant-outline</v-icon>
+          Vocab Workout Analytics
         </v-btn>
       </v-col>
     </v-row>

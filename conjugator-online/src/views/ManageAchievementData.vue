@@ -3,9 +3,9 @@
     <v-card class="pa-6 mb-6 data-header text-white shadow-sm" rounded="xl">
       <div class="d-flex align-center justify-space-between flex-wrap ga-4">
         <div>
-          <div class="text-h4 font-weight-bold text-white">Student Achievements Workspace</div>
+          <div class="text-h4 font-weight-bold text-white">Student Achievements</div>
           <div class="text-subtitle-1 opacity-90 mt-1">
-            Audit obtained competence milestones, monitor classroom cohorts, and review cross-session vocabulary retention tallies.
+            Confirm student achievements
           </div>
         </div>
         <v-avatar color="white" variant="tonal" size="56">
@@ -64,10 +64,10 @@
         <v-card class="border bg-white" rounded="lg" elevation="0">
           <v-tabs v-model="achievementView" color="teal-darken-1" align-tabs="start" class="border-b bg-slate-50">
             <v-tab value="by-student" class="text-none font-weight-bold">
-              <v-icon start>mdi-account-search-outline</v-icon> Inspection Hub (Per Student)
+              <v-icon start>mdi-account-search-outline</v-icon> Sort by Student
             </v-tab>
             <v-tab value="by-achievement" class="text-none font-weight-bold">
-              <v-icon start>mdi-medal-outline</v-icon> Competence Matrix Lookup (Per Achievement)
+              <v-icon start>mdi-medal-outline</v-icon> Sort by Achievement
             </v-tab>
           </v-tabs>
 

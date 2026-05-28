@@ -82,7 +82,7 @@
             <div class="bg-slate-50 rounded-xl pa-1 mt-1 border border-dashed">
               <v-list-item :to="{ name: 'student-home' }" prepend-icon="mdi-home-account" title="Home View" rounded="lg" color="primary" @click="closeDrawerBelowLg" />
               <v-list-item href="https://book.language-labs.ch" target="_blank" prepend-icon="mdi-book-open-page-variant" title="Grammar Book" rounded="lg" color="primary" @click="closeDrawerBelowLg" />
-              <v-list-item :to="{ name: 'vocabworkout' }" prepend-icon="mdi-cards-outline" title="Vocabulary" rounded="lg" color="primary" @click="closeDrawerBelowLg" />
+              <v-list-item :to="{ name: 'vocabworkout' }" prepend-icon="mdi-cards-outline" title="Vocab Workout" rounded="lg" color="primary" @click="closeDrawerBelowLg" />
               <v-list-item :to="{ name: 'exercises' }" prepend-icon="mdi-weight-lifter" title="Exercises" rounded="lg" color="primary" @click="closeDrawerBelowLg" />
               <v-list-item :to="{ name: 'conjugator' }" prepend-icon="mdi-controller" title="Conjugator Game" rounded="lg" color="primary" @click="closeDrawerBelowLg" />
               <v-list-item :to="{ name: 'games' }" prepend-icon="mdi-gamepad-circle" title="Other Games" rounded="lg" color="primary" @click="closeDrawerBelowLg" />
@@ -97,7 +97,7 @@
           <v-list-item :to="{ name: 'student-home' }" prepend-icon="mdi-home-account" title="Home" rounded="lg" color="primary" @click="closeDrawerBelowLg" />
           <v-list-item href="https://book.language-labs.ch" target="_blank" prepend-icon="mdi-book-open-page-variant" title="Grammar Book" rounded="lg" color="primary" @click="closeDrawerBelowLg" />
           <v-list-item :to="{ name: 'exercises' }" prepend-icon="mdi-weight-lifter" title="Exercises" rounded="lg" color="primary" @click="closeDrawerBelowLg" />
-          <v-list-item :to="{ name: 'vocabworkout' }" prepend-icon="mdi-cards-outline" title="Vocabulary" rounded="lg" color="primary" @click="closeDrawerBelowLg" />
+          <v-list-item :to="{ name: 'vocabworkout' }" prepend-icon="mdi-cards-outline" title="Vocab Workout" rounded="lg" color="primary" @click="closeDrawerBelowLg" />
           <v-list-item :to="{ name: 'conjugator' }" prepend-icon="mdi-controller" title="Conjugator Game" rounded="lg" color="primary" @click="closeDrawerBelowLg" />
           <v-list-item :to="{ name: 'games' }" prepend-icon="mdi-gamepad-circle" title="Other Games" rounded="lg" color="primary" @click="closeDrawerBelowLg" />
           <v-list-item :to="{ name: 'tools' }" prepend-icon="mdi-tools" title="Tools" rounded="lg" color="primary" @click="closeDrawerBelowLg" />

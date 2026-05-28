@@ -145,55 +145,74 @@
 
         <v-col cols="12" md="8" class="pl-md-4 mt-4 mt-md-0">
           <div class="text-caption font-weight-bold text-slate-500 uppercase tracking-wider mb-2">
-            Vocabulary Diagnostics
+            Vocab Workout Data
           </div>
 
           <div v-if="focusedListKey">
-            <div class="bg-indigo-lighten-5 border border-indigo-lighten-4 rounded-xl pa-4 mb-4">
-              <div class="text-subtitle-2 font-weight-bold text-indigo-darken-4">
-                Vocab List: <span class="font-weight-black underline">{{ focusedListKey }}</span>
-              </div>
-              <div class="text-caption text-indigo-darken-3 mt-0.5">
-                Displaying terminal number of errors and accuracy rate by term.
-              </div>
+  <div class="bg-indigo-lighten-5 border border-indigo-lighten-4 rounded-xl pa-4 mb-4 d-flex align-center justify-space-between flex-wrap ga-3">
+    <div>
+      <div class="text-subtitle-2 font-weight-bold text-indigo-darken-4">
+        Vocab List: <span class="font-weight-black underline">{{ focusedListKey }}</span>
+      </div>
+      <div class="text-caption text-indigo-darken-3 mt-0.5">
+        Displaying vocabulary performance and typical mistake patterns across student sessions.
+      </div>
+    </div>
+    
+    <v-chip color="indigo-darken-2" variant="flat" class="text-white font-weight-bold">
+      <v-icon start size="16">mdi-checkbox-multiple-marked-circle-outline</v-icon>
+      Total Completions: {{ listMetadataWrapper.total_completions }}
+    </v-chip>
+  </div>
+
+  <v-table density="comfortable" class="bg-white border rounded-xl overflow-hidden shadow-xs">
+    <thead class="bg-slate-50">
+      <tr>
+        <th class="font-weight-bold text-slate-700">Vocabulary Term</th>
+        <th class="font-weight-bold text-slate-700 text-center" style="width: 140px;">Total errors</th>
+        <th class="font-weight-bold text-slate-700 text-center" style="width: 140px;">Success rate</th>
+      </tr>
+    </thead>
+    <tbody>
+      <template v-for="item in listMetadataWrapper.terms" :key="item.item_key">
+        <tr class="matrix-tr">
+          <td class="font-weight-bold text-slate-900 pb-1">
+            <v-icon start size="16" color="red-lighten-1">mdi-close-circle-outline</v-icon>
+            {{ item.term_readable }}
+            
+            <div v-if="item.wrong_submissions && item.wrong_submissions.length > 0" class="mt-1 ps-5 block-errors-tray">
+              <span class="text-slate-400 font-weight-medium uppercase mr-1" style="font-size: 9px; letter-spacing: 0.5px;">Submitted Errors:</span>
+              <v-chip 
+                v-for="(sub, idx) in item.wrong_submissions" 
+                :key="idx" 
+                size="x-small" 
+                color="red-darken-1" 
+                variant="tonal" 
+                class="font-weight-bold mr-1 mb-1 bg-red-lighten-5 font-mono"
+              >
+                "{{ sub }}"
+              </v-chip>
             </div>
-
-            <v-table density="comfortable" class="bg-white border rounded-xl overflow-hidden shadow-xs">
-              <thead class="bg-slate-50">
-                <tr>
-                  <th class="font-weight-bold text-slate-700">Vocabulary Term</th>
-                  <th class="font-weight-bold text-slate-700 text-center" style="width: 140px;">Total errors</th>
-                  <th class="font-weight-bold text-slate-700 text-center" style="width: 140px;">Success rate</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="item in computedHighErrorTermsForSelectedList" :key="item.item_key" class="matrix-tr">
-                  <td class="font-weight-bold text-slate-900">
-                    <v-icon start size="16" color="red-lighten-1">mdi-close-circle-outline</v-icon>
-                    {{ item.term_readable }}
-                  </td>
-                  <td class="text-center font-weight-bold text-red-darken-4 bg-red-tight">
-                    {{ item.wrong_count }}
-                  </td>
-                  <td class="text-center font-weight-black">
-                    <span :class="item.accuracy_pct >= 65 ? 'text-green-darken-2' : (item.accuracy_pct >= 45 ? 'text-orange-darken-2' : 'text-red-darken-2')">
-                      {{ item.accuracy_pct }}%
-                    </span>
-                  </td>
-                </tr>
-                <tr v-if="computedHighErrorTermsForSelectedList.length === 0">
-                  <td colspan="3" class="text-center text-slate-400 py-8">
-                    No failed entry attempts recorded on this module word list structure yet.
-                  </td>
-                </tr>
-              </tbody>
-            </v-table>
-          </div>
-
-          <div v-else class="text-center text-slate-400 py-12 border border-dashed rounded-xl bg-white fill-height d-flex flex-column align-center justify-center">
-            <v-icon size="48" class="text-slate-200 mb-2">mdi-gesture-tap</v-icon>
-            <div class="text-body-2">Select a vocabulary list key directory node from the left panel to execute terminal diagnostic traces.</div>
-          </div>
+          </td>
+          <td class="text-center font-weight-bold text-red-darken-4 bg-red-tight vertical-middle">
+            {{ item.wrong_count }}
+          </td>
+          <td class="text-center font-weight-black vertical-middle">
+            <span :class="item.accuracy_pct >= 65 ? 'text-green-darken-2' : (item.accuracy_pct >= 45 ? 'text-orange-darken-2' : 'text-red-darken-2')">
+              {{ item.accuracy_pct }}%
+            </span>
+          </td>
+        </tr>
+      </template>
+      
+      <tr v-if="!listMetadataWrapper.terms || listMetadataWrapper.terms.length === 0">
+        <td colspan="3" class="text-center text-slate-400 py-8">
+          No failed entry attempts recorded on this list yet.
+        </td>
+      </tr>
+    </tbody>
+  </v-table>
+</div>
         </v-col>
       </v-row>
     </div>
@@ -281,6 +300,12 @@ const studentProgressByCourse = computed<StudentProgressNode[]>(() => {
   });
 });
 
+
+const listMetadataWrapper = ref<{ total_completions: number; terms: any[] }>({
+  total_completions: 0,
+  terms: []
+});
+
 // PANEL B ENGINE: Searchable Vocabulary List Directory
 //  Sorts vocabulary keys alphabetically
 const directoryMasterListKeys = computed<string[]>(() => {
@@ -300,24 +325,21 @@ const filteredListKeysDirectory = computed<string[]>(() => {
 // 2. Watcher hits the dedicated endpoint whenever a list key node is selected
 watch(focusedListKey, async (newKey) => {
   if (!newKey) {
-    computedHighErrorTermsForSelectedList.value = [];
+    listMetadataWrapper.value = { total_completions: 0, terms: [] };
     return;
   }
 
   loading.value = true;
-  console.log(`%c--- 📡 FETCHING BACKEND AGGREGATED ERRORS FOR LIST: [${newKey}] ---`, "color: #10b981; font-weight: bold;");
-  
   try {
-    // Single request directly targeted at our optimized endpoint!
     const response = await api.get('/vocab-workout-sessions/list-errors/', {
       params: { list_key: newKey }
     });
     
-    // Save the array payload directly to the view state
-    computedHighErrorTermsForSelectedList.value = response.data || [];
+    // 🌟 Assign object format safely directly
+    listMetadataWrapper.value = response.data || { total_completions: 0, terms: [] };
   } catch (err) {
-    console.error("Failed to fetch optimized list metrics summary logs:", err);
-    computedHighErrorTermsForSelectedList.value = [];
+    console.error("Failed to fetch custom aggregated error maps summary data strings:", err);
+    listMetadataWrapper.value = { total_completions: 0, terms: [] };
   } finally {
     loading.value = false;
   }
@@ -338,7 +360,7 @@ async function initializeDashboardContextData() {
     // Forces alphabetical sorting directly during initialization mapping
       const coursesPayload = coursesRes.data?.results || coursesRes.data || [];
       courseOptions.value = coursesPayload
-        .map((c: any) => ({ slug: c.slug, name: `Course Cohort: ${c.slug}` }))
+        .map((c: any) => ({ slug: c.slug, name: `Course: ${c.slug}` }))
         .sort((a: any, b: any) => a.slug.localeCompare(b.slug)); // Alphabetical Sort Pass
 
       if (courseOptions.value.length > 0) {
@@ -407,4 +429,14 @@ onMounted(async () => {
 .min-vh-60 { min-height: 60vh; }
 .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .table-fixed { table-layout: fixed; width: 100%; }
+.block-errors-tray {
+  display: block;
+  line-height: 1.6;
+}
+.font-mono {
+  font-family: monospace !important;
+}
+.vertical-middle {
+  vertical-align: middle !important;
+}
 </style>

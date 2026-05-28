@@ -3,9 +3,9 @@
     <v-card class="pa-6 mb-6 student-vocab-header text-white shadow-sm" rounded="xl">
       <div class="d-flex align-center justify-space-between flex-wrap ga-4">
         <div>
-          <div class="text-h4 font-weight-bold">My Vocabulary Analytics</div>
+          <div class="text-h4 font-weight-bold">My Vocab Workout Analytics</div>
           <div class="text-subtitle-1 opacity-90 mt-1">
-            Track your list mastery goals, review session progress stats, and pin down words causing frequent mistakes.
+            See which terms are giving you the most trouble.
           </div>
         </div>
         <v-avatar color="white" variant="tonal" size="56">
@@ -20,19 +20,8 @@
       <v-col cols="12" md="6">
         <v-card class="pa-4 border bg-white fill-height d-flex flex-column" rounded="lg" elevation="0">
           <div class="text-caption font-weight-bold text-slate-500 uppercase tracking-wider mb-3">
-            My Vocabulary Training Lists
+            My Vocabulary Lists
           </div>
-
-          <v-text-field
-            v-model="searchListQuery"
-            placeholder="Filter lists by title..."
-            prepend-inner-icon="mdi-magnify"
-            variant="outlined"
-            density="compact"
-            class="mb-3"
-            clearable
-            hide-details
-          />
 
           <div class="scroll-box flex-grow-1 pr-1">
             <v-card
@@ -78,7 +67,7 @@
 
             <div v-if="filteredProgressList.length === 0 && !loading" class="text-center text-slate-400 py-12">
               <v-icon size="40" class="mb-2 text-slate-300">mdi-text-box-remove-outline</v-icon>
-              <div class="text-body-2">No vocabulary progress matches found under your current filter rules.</div>
+              <div class="text-body-2">No matches under your current filter.</div>
             </div>
           </div>
         </v-card>
@@ -87,16 +76,16 @@
       <v-col cols="12" md="6">
         <v-card class="pa-4 border bg-white fill-height d-flex flex-column" rounded="lg" elevation="0">
           <div class="text-caption font-weight-bold text-slate-500 uppercase tracking-wider mb-3">
-            My Focus Words (Error Analysis)
+            The most difficult terms (Error Analysis)
           </div>
 
           <div v-if="focusedListKey" class="flex-grow-1 d-flex flex-column">
             <div class="bg-teal-light border border-teal-soft rounded-xl pa-4 mb-4">
               <div class="text-subtitle-2 font-weight-bold text-teal-darken-4">
-                List Target: <span class="font-weight-black underline">{{ focusedListKey.replace(/_/g, ' ') }}</span>
+                List: <span class="font-weight-black underline">{{ focusedListKey.replace(/_/g, ' ') }}</span>
               </div>
               <div class="text-caption text-teal-darken-3 mt-0.5">
-                These words represent entry values where you missed prompts during spelling/writing loops. Lower success rates require closer practice attention!
+                These are the terms you answered incorrectly most frequently.
               </div>
             </div>
 
@@ -110,23 +99,40 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <tr v-for="item in highErrorTerms" :key="item.item_key" class="item-tr">
-                    <td class="font-weight-bold text-slate-900">
-                      <v-icon start size="16" :color="item.accuracy_pct >= 75 ? 'success' : 'red-lighten-1'">
-                        {{ item.accuracy_pct >= 75 ? 'mdi-check-circle-outline' : 'mdi-alert-circle-outline' }}
-                      </v-icon>
-                      {{ item.term_readable }}
-                    </td>
-                    <td class="text-center font-weight-bold text-red-darken-3 bg-red-tight">
-                      {{ item.wrong_count }}
-                    </td>
-                    <td class="text-center font-weight-black">
-                      <span :class="item.accuracy_pct >= 75 ? 'text-green-darken-2' : (item.accuracy_pct >= 50 ? 'text-orange-darken-2' : 'text-red-darken-2')">
-                        {{ item.accuracy_pct }}%
-                      </span>
-                    </td>
-                  </tr>
-                  <tr v-if="highErrorTerms.length === 0">
+                  <template v-for="item in highErrorTerms.terms" :key="item.item_key">
+                    <tr class="item-tr">
+                      <td class="font-weight-bold text-slate-900 pb-2">
+                        <v-icon start size="16" :color="item.accuracy_pct >= 75 ? 'success' : 'red-lighten-1'">
+                          {{ item.accuracy_pct >= 75 ? 'mdi-check-circle-outline' : 'mdi-alert-circle-outline' }}
+                        </v-icon>
+                        {{ item.term_readable }}
+
+                        <div v-if="item.wrong_submissions && item.wrong_submissions.length > 0" class="mt-1 ps-5 d-block text-caption">
+                          <span class="text-slate-400 font-weight-medium uppercase mr-1" style="font-size: 9px; letter-spacing: 0.5px;">My Typos / Mistakes:</span>
+                          <v-chip 
+                            v-for="(myMistake, idx) in item.wrong_submissions" 
+                            :key="idx" 
+                            size="x-small" 
+                            color="red-darken-1" 
+                            variant="tonal" 
+                            class="font-weight-bold mr-1 mb-1 bg-red-lighten-5 font-mono"
+                          >
+                            "{{ myMistake }}"
+                          </v-chip>
+                        </div>
+                      </td>
+                      <td class="text-center font-weight-bold text-red-darken-3 bg-red-tight vertical-middle">
+                        {{ item.wrong_count }}
+                      </td>
+                      <td class="text-center font-weight-black vertical-middle">
+                        <span :class="item.accuracy_pct >= 75 ? 'text-green-darken-2' : (item.accuracy_pct >= 50 ? 'text-orange-darken-2' : 'text-red-darken-2')">
+                          {{ item.accuracy_pct }}%
+                        </span>
+                      </td>
+                    </tr>
+                  </template>
+                  
+                  <tr v-if="!highErrorTerms.terms || highErrorTerms.terms.length === 0">
                     <td colspan="3" class="text-center text-slate-400 py-8">
                       Great job! No spelling mistake history recorded on this list yet.
                     </td>
@@ -138,7 +144,7 @@
 
           <div v-else class="text-center text-slate-400 py-12 border border-dashed rounded-xl bg-white fill-height d-flex flex-column align-center justify-center flex-grow-1">
             <v-icon size="48" class="text-slate-200 mb-2">mdi-gesture-tap-button</v-icon>
-            <div class="text-body-2">Select any vocabulary list from the left panel to execute an automatic diagnosis of your common writing mistakes.</div>
+            <div class="text-body-2">Select a vocabulary list from the left panel.</div>
           </div>
         </v-card>
       </v-col>
@@ -175,14 +181,18 @@ const searchListQuery = ref('');
 // Dynamic Data Store Arrays
 const progressRecordsPool = ref<any[]>([]);
 const activeSessionsPool = ref<any[]>([]);
-const highErrorTerms = ref<any[]>([]);
 
-// 🌟 PILLAR A & C: Aggregate native my-work elements into UI presentation blocks
+// 🌟 UPDATED STATE: Dictionary structure maps total metrics and array rows together cleanly
+const highErrorTerms = ref<{ total_completions: number; terms: any[] }>({
+  total_completions: 0,
+  terms: []
+});
+
+// Aggregate native my-work elements into UI presentation blocks
 const filteredProgressList = computed<ProgressListRecord[]>(() => {
   const query = searchListQuery.value?.trim().toLowerCase();
   
   const formattedList = progressRecordsPool.value.map(p => {
-    // Cross-reference matching active/cached training session to parse deep item count metrics
     const matchSession = activeSessionsPool.value.find(s => s.list_key === p.list_key && s.level === p.level && s.track_key === p.track_key);
     
     const masteredCount = matchSession ? (matchSession.mastered_item_ids?.length || 0) : (p.correct_count || 0);
@@ -207,45 +217,42 @@ const filteredProgressList = computed<ProgressListRecord[]>(() => {
     };
   });
 
-  // Filter out lists based on search string and sort alphabetically
   return formattedList
     .filter(l => !query || l.list_key.toLowerCase().includes(query))
     .sort((a, b) => a.list_key.localeCompare(b.list_key, undefined, { numeric: true, sensitivity: 'base' }));
 });
 
-// 🌟 PILLAR B: Reach out down backend list-errors query string engine action mapping
+// Reactively fetch new aggregated data blocks whenever list focuses change
 watch(focusedListKey, async (newKey) => {
   if (!newKey) {
-    highErrorTerms.value = [];
+    highErrorTerms.value = { total_completions: 0, terms: [] };
     return;
   }
 
   loading.value = true;
   try {
-    // Leverages the identical backend SQL aggregation logic we deployed for the teacher view!
     const response = await api.get('/vocab-workout-sessions/list-errors/', {
       params: { list_key: newKey }
     });
-    highErrorTerms.value = response.data || [];
+    // Unpack object formatted wrapper data matching the custom SQL aggregation endpoint paths
+    highErrorTerms.value = response.data || { total_completions: 0, terms: [] };
   } catch (err) {
     console.error("Failed to fetch custom aggregated error breakdown metrics for student:", err);
-    highErrorTerms.value = [];
+    highErrorTerms.value = { total_completions: 0, terms: [] };
   } finally {
     loading.value = false;
   }
 });
 
-// Primary network boot loop loader
+// Primary dataset setup loop initialization loader
 async function fetchStudentWorkoutDataProfile() {
   loading.value = true;
   try {
-    // Execute a fast single network transaction onto the built-in action signature
     const response = await api.get('/vocab-workout-sessions/my-work/');
     
     progressRecordsPool.value = response.data?.progress || [];
     activeSessionsPool.value = response.data?.active_sessions || [];
     
-    // Auto-focus the top sorted list record if available to maximize screen footprint
     if (filteredProgressList.value.length > 0) {
       focusedListKey.value = filteredProgressList.value[0].list_key;
     }
@@ -310,8 +317,11 @@ onMounted(() => {
 .border-b {
   border-bottom: 1px solid #f1f5f9 !important;
 }
-.italic {
-  font-style: italic;
+.vertical-middle {
+  vertical-align: middle !important;
+}
+.font-mono {
+  font-family: monospace, monospace !important;
 }
 .underline {
   text-decoration: underline;
