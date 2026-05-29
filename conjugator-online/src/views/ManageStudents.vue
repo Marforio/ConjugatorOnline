@@ -307,19 +307,59 @@
     </v-dialog>
 
     <v-dialog v-model="successDialog" max-width="500px" persistent>
-      <v-card rounded="lg">
-        <v-card-title class="pa-4 bg-success text-white font-weight-bold">Student Registered Successfully</v-card-title>
-        <v-card-text class="pt-6">
-          <v-text-field v-model="registeredSummary.webId" label="Username (Web ID)" variant="plain" bg-color="grey-lighten-4" readonly class="mb-2">
-            <template v-slot:append-inner><v-btn icon variant="text" size="small" color="primary" @click="copyToClipboard(registeredSummary.webId)"><v-icon>mdi-content-copy</v-icon></v-btn></template>
-          </v-text-field>
-          <v-text-field v-model="registeredSummary.password" label="Password" variant="plain" bg-color="grey-lighten-4" readonly>
-            <template v-slot:append-inner><v-btn icon variant="text" size="small" color="primary" @click="copyToClipboard(registeredSummary.password)"><v-icon>mdi-content-copy</v-icon></v-btn></template>
-          </v-text-field>
-        </v-card-text>
-        <v-card-actions class="pa-4"><v-btn color="success" variant="elevated" block size="large" @click="successDialog = false">Close Window</v-btn></v-card-actions>
-      </v-card>
-    </v-dialog>
+  <v-card rounded="lg">
+    <v-card-title class="pa-4 bg-success text-white font-weight-bold">
+      Student Registered Successfully
+    </v-card-title>
+    
+    <v-card-text class="pt-4">
+      <v-alert
+        type="warning"
+        variant="tonal"
+        density="comfortable"
+        icon="mdi-alert-circle-outline"
+        class="mb-4 rounded-xl text-caption font-weight-bold"
+      >
+        Copy now! This is the only time you will see the password.
+      </v-alert>
+
+      <v-text-field 
+        v-model="registeredSummary.webId" 
+        label="Username (Web ID)" 
+        variant="plain" 
+        bg-color="grey-lighten-4" 
+        readonly 
+        class="mb-3 px-2 rounded-lg"
+      />
+      <v-text-field 
+        v-model="registeredSummary.password" 
+        label="Password" 
+        variant="plain" 
+        bg-color="grey-lighten-4" 
+        readonly 
+        class="mb-4 px-2 rounded-lg"
+      />
+
+      <v-btn
+        color="primary"
+        variant="tonal"
+        block
+        size="large"
+        class="text-none font-weight-bold mb-2 rounded-xl"
+        prepend-icon="mdi-content-copy"
+        @click="copyCombinedCredentials"
+      >
+        Copy Credentials Combo String
+      </v-btn>
+    </v-card-text>
+    
+    <v-card-actions class="pa-4 pt-0">
+      <v-btn color="success" variant="elevated" block size="large" class="rounded-xl font-weight-bold" @click="successDialog = false">
+        Close Window
+      </v-btn>
+    </v-card-actions>
+  </v-card>
+</v-dialog>
 
     <v-dialog v-model="assessmentDialog" max-width="1200px" scrollable>
       <v-card rounded="lg" class="elevation-24">
@@ -597,6 +637,17 @@ const generateProportionalPassword = (): string => {
   // Constructs standard password layout output (e.g., "RunNiNg-PlAnEtS-7@4#")
   return `${cleanWord1}-${cleanWord2}-${d1}${s1}${d2}${s2}`;
 };
+
+function copyCombinedCredentials() {
+  const username = registeredSummary.value?.webId || '';
+  const password = registeredSummary.value?.password || '';
+  
+  // Assembles the string precisely as requested
+  const combinedString = `user name = ${username}  password = ${password}`;
+  
+  // Utilizes your existing custom copyToClipboard function runner mapping
+  copyToClipboard(combinedString);
+}
 
 const previewGeneratedWebID = computed(() => {
   if (!newStudent.value.initialCourse) return ''

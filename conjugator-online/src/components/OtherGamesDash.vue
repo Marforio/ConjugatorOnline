@@ -30,7 +30,7 @@
               <v-select
                 v-model="selectedGame"
                 :items="availableGames"
-                label="Select Alternative Game Module"
+                label="Select Game"
                 variant="outlined"
                 density="comfortable"
                 hide-details

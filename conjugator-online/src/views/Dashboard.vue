@@ -521,6 +521,10 @@
       <v-window-item value="other-games">
         <OtherGamesDash class="fade-in" />
       </v-window-item>
+
+      <v-window-item value="exercises">
+        <ExerciseDataTab class="fade-in" />
+      </v-window-item>
     </v-window>
 
     <v-snackbar v-model="snackbar.show" :color="snackbar.color" timeout="3000" location="top right" elevation="4">
@@ -577,6 +581,7 @@ import ErrorsDataTab from "@/components/ErrorsDataTab.vue";
 import OtherGamesDash from "@/components/OtherGamesDash.vue";
 import VocabDataTab from "@/components/VocabDataTab.vue";
 import GoalsDataTab from "@/components/GoalsDataTab.vue";
+import ExerciseDataTab from "@/components/ExerciseDataTab.vue";
 import Gauge from "@/components/Gauge.vue";
 import AiTutorChatDialog from "@/components/AiTutorChatDialog.vue";
 
@@ -670,6 +675,7 @@ const tabItems = [
   { value: "vocabulary", label: "Vocab" },
   { value: "conjugation-game", label: "Conjugator" },
   { value: "other-games", label: "Other Games" },
+  { value: "exercises", label: "Exercises" },
   { value: "goals", label: "Trophies" }
 ];
 

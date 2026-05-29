@@ -1,88 +1,157 @@
 <template>
-  <v-container class="mt-6">
-    <div class="mb-6">
-      <h1 class="text-h3 my-3">Grammar exercises</h1>
+  <v-container class="py-8 max-w-container text-slate-800">
+    
+    <!-- Top Header Workspace Section -->
+    <v-card class="pa-6 mb-8 exercises-hero text-slate-900 border" rounded="xl" elevation="0">
+      <div class="d-flex align-center justify-space-between flex-wrap ga-4">
+        <div>
+          <h1 class="text-h4 font-weight-black tracking-tight text-slate-900">Grammar Exercises</h1>
+          <p class="text-body-1 text-slate-600 mt-2 max-w-prose">
+            Practice for specific language errors organized by codes. 
+            For complete explanations, use the 
+            <a :href="grammarBookUrl" target="_blank" rel="noopener noreferrer" class="font-weight-bold text-teal-darken-2 link-underlined">
+              Grammar Book <v-icon size="14" class="ms-0.5">mdi-open-in-new</v-icon>
+            </a>.
+          </p>
+        </div>
+        <v-avatar color="teal-lighten-5" class="text-teal-darken-2" size="64" variant="flat">
+          <v-icon size="32">mdi-weight-lifter</v-icon>
+        </v-avatar>
+      </div>
+    </v-card>
 
-      <h2 class="text-h6 font-weight-regular mb-4">
-        Grammar exercises for specific errors, organized by error code. See the
-        <a :href="grammarBookUrl" target="_blank" rel="noopener noreferrer">Grammar Book</a>
-        for full explanations.
-      </h2>
-
-      <!-- Search box (does NOT filter panels; only provides a quick link) -->
-      <v-card
-        variant="tonal"
-        color="primary"
-        class="px-4 py-3 my-8"
-      >
-        <div class="d-flex flex-wrap justify-center align-center ga-4">
-          <div class="text-body-1">
-            Search by error code:
+    <!-- Search Code Dynamic Quick Router Interface -->
+    <v-card
+      class="pa-4 mb-8 border rounded-xl d-flex align-center bg-white shadow-xs"
+      elevation="0"
+    >
+      <div class="d-flex flex-wrap align-center w-100 justify-space-between ga-4">
+        <div class="d-flex align-center ga-3 flex-grow-1" style="min-width: 280px;">
+          <v-avatar color="indigo-lighten-5" size="40" class="text-indigo-darken-2">
+            <v-icon size="20">mdi-text-search</v-icon>
+          </v-avatar>
+          <div>
+            <div class="text-body-2 font-weight-bold text-slate-800">Browse by chapter or do a direct search</div>
+            <div class="text-caption text-slate-500">Find the chapter below or enter a 4-digit error code to locate the exercise unit directly</div>
           </div>
+        </div>
 
+        <div class="d-flex align-center flex-wrap ga-3 justify-sm-end flex-grow-1">
+          <!-- Text Field input tracker wrapper -->
           <v-text-field
             v-model="searchCode"
-            label="Enter a 4-digit code"
+            placeholder="e.g. 0110"
             variant="outlined"
-            density="comfortable"
+            density="compact"
             clearable
             hide-details
-            class="my-0"
-            style="max-width: 180px"
+            style="max-width: 160px; min-width: 120px;"
             inputmode="numeric"
             maxlength="4"
+            class="font-mono font-weight-bold"
+            bg-color="slate-50"
           />
 
-          <div class="text-body-1">
+          <!-- Live Dynamic Feedback Pill Box -->
+          <div class="text-body-2 min-w-status">
             <template v-if="searchCode.trim().length === 0">
-              <!-- nothing -->
+              <span class="text-slate-400 font-weight-medium">Search by error code</span>
             </template>
 
             <template v-else-if="!isValidSearchCode">
-              <span class="text-medium-emphasis">Enter 4 digits (e.g. 0110)</span>
+              <v-chip size="small" color="orange" variant="tonal" class="font-weight-medium">
+                <v-icon start size="14">mdi-alert-circle-outline</v-icon> Requires 4 digits
+              </v-chip>
             </template>
 
             <template v-else-if="!hasErrorCode">
-              <span class="text-medium-emphasis">No exercise found for {{ searchCode }}</span>
+              <v-chip size="small" color="red" variant="tonal" class="font-weight-medium">
+                <v-icon start size="14">mdi-close-circle-outline</v-icon> Code not found
+              </v-chip>
             </template>
 
             <template v-else>
-              <RouterLink :to="`/exercises/${searchCode}`" class="text-primary font-weight-medium">
-                Open exercise {{ searchCode }}
-              </RouterLink>
+              <v-btn
+                :to="`/exercises/${searchCode.trim()}`"
+                color="teal"
+                variant="flat"
+                size="small"
+                class="text-none font-weight-bold text-white rounded-lg px-4"
+                append-icon="mdi-arrow-right"
+              >
+                Launch Exercise {{ searchCode }}
+              </v-btn>
             </template>
           </div>
         </div>
-      </v-card>
-    </div>
+      </div>
+    </v-card>
 
-    <v-expansion-panels variant="accordion" multiple>
+    <!-- Master Interactive Accordion Expansion Layout -->
+    <v-expansion-panels variant="popout" multiple class="ga-3">
       <v-expansion-panel
         v-for="group in groupedErrors"
         :key="group.chapterId"
+        class="border rounded-xl bg-white overflow-hidden panel-card shadow-xs"
+        elevation="0"
       >
-        <v-expansion-panel-title>
-          {{ group.panelTitle }}
+        <v-expansion-panel-title class="py-4 px-5 text-subtitle-1 font-weight-bold text-slate-800">
+          <template v-slot:default="{ expanded }">
+            <div class="d-flex align-center justify-space-between w-100 pr-4">
+              <div class="d-flex align-center ga-3">
+                <v-avatar 
+                  :color="expanded ? 'teal' : 'slate-100'" 
+                  :class="expanded ? 'text-white' : 'text-slate-500'"
+                  size="32" 
+                  class="font-weight-black text-caption font-mono transition-all"
+                >
+                  {{ String(group.chapterNumber).padStart(2, '0') }}
+                </v-avatar>
+                <span :class="expanded ? 'text-teal-darken-3 font-weight-black' : 'text-slate-800'">
+                  {{ stripChapterPrefix(chapterNameById.get(group.chapterId) || '') }}
+                </span>
+              </div>
+              <v-chip size="small" variant="tonal" color="slate-500" class="font-weight-bold hidden-xs">
+                Errors starting with {{ String(group.chapterNumber).padStart(2, '0') }} _ _
+              </v-chip>
+            </div>
+          </template>
         </v-expansion-panel-title>
 
-        <v-expansion-panel-text>
-          <v-table>
-            <thead>
+        <v-expansion-panel-text class="pa-0 border-t bg-slate-50-fluid">
+          <v-table density="comfortable" class="bg-transparent text-body-2 table-fixed">
+            <thead class="bg-slate-100-header">
               <tr>
-                <th>Error Code</th>
-                <th>Description</th>
-                <th>Exercise Link</th>
+                <th class="font-weight-bold text-slate-600 font-mono" style="width: 120px; padding-left: 20px;">Code</th>
+                <th class="font-weight-bold text-slate-600">Grammar Core Objective / Description</th>
+                <th class="font-weight-bold text-slate-600 text-center" style="width: 160px; padding-right: 20px;">Action</th>
               </tr>
             </thead>
 
             <tbody>
-              <tr v-for="item in group.items" :key="item.code">
-                <td>{{ item.code }}</td>
-                <td>{{ item.entry.description }}</td>
-                <td>
-                  <RouterLink :to="`/exercises/${item.code}`" class="text-primary">
-                    Go to exercise
-                  </RouterLink>
+              <tr v-for="item in group.items" :key="item.code" class="exercise-tr transition-all">
+                <td class="font-weight-bold font-mono text-teal-darken-2" style="padding-left: 20px;">
+                  {{ item.code }}
+                </td>
+                <td class="text-slate-700 font-weight-medium py-3 pr-4">
+                  {{ item.entry.description }}
+                </td>
+                <td class="text-center" style="padding-right: 20px;">
+                  <v-btn
+                    :to="`/exercises/${item.code}`"
+                    variant="tonal"
+                    color="teal"
+                    size="small"
+                    class="text-none font-weight-black rounded-lg w-100 bg-teal-tight"
+                    append-icon="mdi-play"
+                  >
+                    Start Unit
+                  </v-btn>
+                </td>
+              </tr>
+              <tr v-if="group.items.length === 0">
+                <td colspan="3" class="text-center text-slate-400 py-6 bg-white border-none italic">
+                  No execution segments loaded into this node block context.
                 </td>
               </tr>
             </tbody>
@@ -90,6 +159,7 @@
         </v-expansion-panel-text>
       </v-expansion-panel>
     </v-expansion-panels>
+
   </v-container>
 </template>
 
@@ -103,12 +173,9 @@ defineOptions({
   components: { TopNavBar },
 });
 
-// TODO: replace with the URL you will provide
 const grammarBookUrl = "https://book.language-labs.ch";
-
 const searchCode = ref("");
 
-// Hard-coded chapters inside this component:
 const chapters = [
   { id: "ch1", name: "1. Nouns and determiners" },
   { id: "ch2", name: "2. Adjectives and adverbs" },
@@ -127,7 +194,6 @@ const chapters = [
   { id: "ch15", name: "15. Vocabulary" },
 ] as const;
 
-// Your requested change:
 const chapterNameById = new Map<string, string>(chapters.map((c) => [c.id, c.name]));
 
 function chapterFromErrorCode(code: string): { chapterNumber: number; chapterId: string } | null {
@@ -151,7 +217,6 @@ const hasErrorCode = computed(() => {
   return Object.prototype.hasOwnProperty.call(errorsData, searchCode.value.trim());
 });
 
-// Grouping for expansion panels (NOT affected by search)
 const groupedErrors = computed(() => {
   const groups = new Map<
     string,
@@ -163,7 +228,6 @@ const groupedErrors = computed(() => {
     }
   >();
 
-  // Initialize all panels (always show all chapters)
   for (const ch of chapters) {
     const chapterNumber = Number(ch.id.replace(/^ch/, ""));
     const chapterPrettyName = stripChapterPrefix(ch.name);
@@ -177,7 +241,6 @@ const groupedErrors = computed(() => {
     });
   }
 
-  // Put each error into its chapter
   for (const [code, entry] of Object.entries(errorsData)) {
     const ch = chapterFromErrorCode(code);
     if (!ch) continue;
@@ -188,7 +251,6 @@ const groupedErrors = computed(() => {
     group.items.push({ code, entry });
   }
 
-  // Sort items in each chapter
   for (const g of groups.values()) {
     g.items.sort((a, b) => Number(a.code) - Number(b.code));
   }
@@ -196,3 +258,87 @@ const groupedErrors = computed(() => {
   return Array.from(groups.values()).sort((a, b) => a.chapterNumber - b.chapterNumber);
 });
 </script>
+
+<style scoped>
+.max-w-container {
+  max-width: 1120px;
+  margin: 0 auto;
+}
+
+.exercises-hero {
+  background: linear-gradient(135deg, #f8fafc 0%, #f0fdfa 100%);
+  border-color: #e2e8f0 !important;
+}
+
+.link-underlined {
+  text-decoration: none;
+}
+.link-underlined:hover {
+  text-decoration: underline;
+}
+
+.shadow-xs {
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04) !important;
+}
+
+.font-mono {
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace !important;
+}
+
+.min-w-status {
+  min-width: 160px;
+  text-align: right;
+}
+
+.bg-slate-50-fluid {
+  background-color: #fafafa !important;
+}
+
+.bg-slate-100-header {
+  background-color: #f1f5f9 !important;
+}
+
+.exercise-tr:hover {
+  background-color: #ffffff !important;
+}
+
+.bg-teal-tight {
+  background-color: #f0fdfa !important;
+}
+
+.panel-card {
+  border: 1px solid #e2e8f0 !important;
+  transition: all 0.2s ease-in-out;
+}
+.panel-card:hover {
+  border-color: #cbd5e1 !important;
+}
+
+.transition-all {
+  transition: all 0.15s ease-in-out;
+}
+
+.vertical-middle {
+  vertical-align: middle !important;
+}
+
+.table-fixed {
+  table-layout: fixed;
+  width: 100%;
+}
+
+.border-t {
+  border-top: 1px solid #e2e8f0 !important;
+}
+
+@media (max-width: 600px) {
+  .hidden-xs {
+    display: none !important;
+  }
+  .min-w-status {
+    min-width: 100%;
+    text-align: left;
+    margin-top: 4px;
+  }
+}
+</style>

@@ -1,14 +1,15 @@
 <template>
   <v-container fluid class="pa-6 text-slate-800">
+    
     <v-card class="pa-6 mb-6 data-header" elevation="4" rounded="xl">
-      <div class="d-flex align-center justify-space-between">
+      <div class="d-flex align-center justify-space-between flex-wrap ga-4">
         <div>
-          <div class="text-h4 font-weight-black text-white tracking-tight">Student Error Dashboard</div>
+          <div class="text-h4 font-weight-black text-white tracking-tight">Student Grammar Data</div>
           <div class="text-subtitle-1 text-white text-opacity-90 mt-1 font-weight-medium">
-            View errors, breakdown statistics, and generate progress reports by class or individual student profiles
+            View student errors signaled in feedback, and data from grammar exercises
           </div>
         </div>
-        <div class="d-flex align-center gap-4">
+        <div class="d-flex align-center ga-4 flex-wrap">
           <v-btn
             color="white"
             variant="elevated"
@@ -18,254 +19,238 @@
           >
             Give Feedback
           </v-btn>
-          <v-icon size="56" class="text-white">mdi-chart-box</v-icon>
+          <v-icon size="56" class="text-white hidden-sm-and-down">mdi-chart-box</v-icon>
         </div>
       </div>
     </v-card>
 
-    <v-card class="pa-6 mb-6 border bg-white" flat rounded="lg">
-      <v-row>
-        <v-col cols="12" md="4">
-          <v-select
-            v-model="selectedCourse"
-            :items="courseOptions"
-            item-title="name"
-            item-value="id"
-            label="Filter by Course"
-            prepend-icon="mdi-book-open-variant"
-            variant="outlined"
-            :disabled="errorViewMode === 'STUDENTS'"
-            :persistent-placeholder="errorViewMode === 'STUDENTS'"
-            :placeholder="errorViewMode === 'STUDENTS' ? 'Not applicable in Student Mode' : ''"
-            @update:model-value="fetchAllData"
-          />
-        </v-col>
-        
-        <v-col cols="12" md="4">
-          <v-autocomplete
-            v-model="selectedStudent"
-            :items="secureStudentsDropdown"
-            item-title="display_name"
-            item-value="id"
-            label="Filter by Student"
-            prepend-icon="mdi-account"
-            variant="outlined"
-            clearable
-            :disabled="errorViewMode === 'COURSES'"
-            :persistent-placeholder="errorViewMode === 'COURSES'"
-            :placeholder="errorViewMode === 'COURSES' ? 'Not applicable in Class Mode' : ''"
-            @update:model-value="onStudentFilterChange"
-          >
-            <template v-slot:item="{ props, item }">
-              <v-list-item v-bind="props">
-                <template v-slot:prepend>
-                  <v-avatar color="primary" size="32" class="mr-2">
-                    <span class="text-white text-caption font-weight-bold">{{ item.raw.initials }}</span>
-                  </v-avatar>
-                </template>
-                <template v-slot:subtitle>
-                  <span class="text-caption font-mono">{{ item.raw.web_id }}</span>
-                </template>
-              </v-list-item>
-            </template>
-          </v-autocomplete>
-        </v-col>
+  <v-tabs
+        v-model="activeMasterTab"
+        class="rounded-xl elevation-1 bg-grey-lighten-4 mb-6 custom-dashboard-tabs"
+        grow
+        color="primary"
+      >
+        <v-tab 
+          v-for="item in tabItems" 
+          :key="item.value" 
+          :value="item.value"
+          class="dashboard-pill-tab tracking-wider"
+        >
+          {{ item.label }}
+        </v-tab>
+      </v-tabs>
 
-        <v-col cols="12" md="4">
-          <v-select
-            v-model="dateRange"
-            :items="dateRangeOptions"
-            label="Date Range"
-            prepend-icon="mdi-calendar-range"
-            variant="outlined"
-            @update:model-value="fetchAllData"
-          />
-        </v-col>
-      </v-row>
-    </v-card>
+    <v-window v-model="activeMasterTab" :touch="false">
+      
+      <v-window-item value="errors" class="fade-in">
+      
 
-    <v-row>
-      <v-col cols="12">
         <v-card class="pa-6 mb-6 border bg-white" flat rounded="lg">
-          <div class="d-flex align-center justify-space-between mb-4">
-            <div class="text-h5 font-weight-black text-slate-900 tracking-tight">
-              {{ dynamicChartTitle }}
-            </div>
-            <div class="d-flex align-center gap-2">
-              <v-btn
-                :disabled="!selectedStudent || errorViewMode !== 'STUDENTS'"
-                :loading="pdfLoading"
-                color="secondary"
-                variant="elevated"
-                prepend-icon="mdi-file-pdf-box"
-                class="rounded-lg text-none font-weight-bold"
-                size="small"
-                @click="generateStudentPdfReport"
-              >
-                PDF Report
-              </v-btn>
-            </div>
-          </div>
-
-          <v-btn-toggle
-            v-model="errorViewMode"
-            mandatory
-            variant="outlined"
-            color="primary"
-            class="mb-6 w-100 rounded-lg overflow-hidden"
-            @update:model-value="handleErrorViewToggle"
-          >
-            <v-btn value="COURSES" class="flex-grow-1 font-weight-bold text-none" size="small">
-              <v-icon start>mdi-google-classroom</v-icon>
-              Consolidated Class Data
-            </v-btn>
-            <v-btn value="STUDENTS" class="flex-grow-1 font-weight-bold text-none" size="small">
-              <v-icon start>mdi-account</v-icon>
-              Individual Student Profiles
-            </v-btn>
-          </v-btn-toggle>
-
-          <v-progress-linear v-if="loadingErrors" indeterminate color="primary" class="mb-4" />
-
-          <div v-else-if="hasChartData" class="mb-4">
-            <TeacherErrorFrequencyChart 
-              :errorData="topErrors" 
-              :viewMode="errorViewMode"
-              @open-ai-tutor="openErrorTutorFromChart" 
-            />
-          </div>
-
-          <div v-else class="text-center text-slate-400 font-weight-medium border border-dashed rounded-xl pa-8 bg-slate-50">
-            <v-icon size="36" class="mb-2" color="slate-300">mdi-chart-line-variant</v-icon>
-            <div>
-              <span v-if="errorViewMode === 'STUDENTS' && !selectedStudent">
-                Please pick a student from the active filter filters above to see their analytics summary trace metrics.
-              </span>
-              <span v-else>
-                No telemetry logging errors match your specified criteria window.
-              </span>
-            </div>
-          </div>
-
-          <div v-if="errorViewMode === 'COURSES'">
-            <v-divider class="my-6" />
-            <div class="text-overline font-weight-black text-slate-400 tracking-wider mb-2">Error Breakdown Inspector</div>
-            <v-select
-              v-model="selectedErrorCode"
-              :items="errorDropdownItems"
-              label="Select a logged error pattern code to view specific class samples"
-              variant="outlined"
-              clearable
-            />
-
-            <v-card v-if="selectedErrorObj" variant="outlined" class="pa-4 mt-4 rounded-xl bg-slate-50 border-slate-200">
-              <div class="text-subtitle-1 font-weight-black text-slate-900 mb-2">
-                {{ selectedErrorObj.error_code }} — 
-                <span class="text-slate-600 font-weight-medium font-italic">
-                  {{ errorsData[selectedErrorObj.error_code]?.description || 'No description available' }}
-                </span>
-              </div>
-              <div class="text-body-2 mb-3 font-weight-bold text-slate-700">
-                Total Class Occurrences: <v-chip size="x-small" color="error" class="font-weight-black font-mono ml-1">{{ selectedErrorObj.total_times }}</v-chip>
-              </div>
-              <div class="text-caption font-weight-black text-slate-400 text-uppercase tracking-wider mb-2">
-                Evidence Log Snippets
-              </div>
-              <v-list density="compact" class="evidence-list rounded-lg border bg-white">
-                <v-list-item
-                  v-for="(sample, i) in selectedErrorObj.evidence_samples.slice(0, 10)"
-                  :key="i"
-                  class="border-b last-no-border"
-                >
-                  <template v-slot:prepend>
-                    <v-icon size="small" class="mr-2 text-slate-400">mdi-chevron-right</v-icon>
-                  </template>
-                  <span v-html="sample" class="text-body-2 text-slate-700 font-mono"></span>
-                </v-list-item>
-              </v-list>
-            </v-card>
-
-            <div v-else-if="selectedErrorCode" class="text-center text-slate-400 text-caption font-weight-bold pa-4">
-              Error data signature entry could not be computed.
-            </div>
-          </div>
-        </v-card>
-      </v-col>
-    </v-row>
-
-    <v-row>
-      <v-col cols="12" sm="6" md="4">
-        <v-card class="pa-4 border bg-white" flat rounded="lg">
-          <div class="d-flex align-center justify-space-between">
-            <div>
-              <div class="text-caption text-slate-400 font-weight-bold text-uppercase tracking-wider">Total Errors</div>
-              <div class="text-h4 font-weight-black text-slate-900 mt-1">{{ totalErrorOccurrences }}</div>
-            </div>
-            <v-avatar color="red-lighten-5" rounded="lg" size="44">
-              <v-icon size="24" color="error">mdi-alert-circle</v-icon>
-            </v-avatar>
-          </div>
-        </v-card>
-      </v-col>
-      <v-col cols="12" sm="6" md="4">
-        <v-card class="pa-4 border bg-white" flat rounded="lg">
-          <div class="d-flex align-center justify-space-between">
-            <div>
-              <div class="text-caption text-slate-400 font-weight-bold text-uppercase tracking-wider">Unique Errors Flagged</div>
-              <div class="text-h4 font-weight-black text-slate-900 mt-1">{{ uniqueErrorCount }}</div>
-            </div>
-            <v-avatar color="amber-lighten-5" rounded="lg" size="44">
-              <v-icon size="24" color="warning">mdi-gavel</v-icon>
-            </v-avatar>
-          </div>
-        </v-card>
-      </v-col>
-    </v-row>
-
-    <v-row class="mt-4">
-      <v-col cols="12">
-        <v-card class="pa-6 border bg-white" flat rounded="lg">
-          <div class="text-overline font-weight-black text-slate-400 tracking-wider mb-4">Activity</div>
           <v-row>
-            <v-col cols="6" sm="4" md="2.4">
-              <div class="text-center pa-3 bg-slate-50 border rounded-xl">
-                <v-icon size="28" color="blue">mdi-controller</v-icon>
-                <div class="text-h5 font-weight-black text-slate-900 mt-2">{{ activityBreakdown.conjugation }}</div>
-                <div class="text-caption text-slate-500 font-weight-bold mt-0.5">Conjugation</div>
-              </div>
+            <v-col cols="12" md="4">
+              <v-select
+                v-model="selectedCourse"
+                :items="courseOptions"
+                item-title="name"
+                item-value="id"
+                label="Filter by Course"
+                prepend-icon="mdi-book-open-variant"
+                variant="outlined"
+                :disabled="errorViewMode === 'STUDENTS'"
+                :persistent-placeholder="errorViewMode === 'STUDENTS'"
+                :placeholder="errorViewMode === 'STUDENTS' ? 'Not applicable in Student Mode' : ''"
+                @update:model-value="fetchAllData"
+              />
             </v-col>
-            <v-col cols="6" sm="4" md="2.4">
-              <div class="text-center pa-3 bg-slate-50 border rounded-xl">
-                <v-icon size="28" color="purple">mdi-gamepad-variant</v-icon>
-                <div class="text-h5 font-weight-black text-slate-900 mt-2">{{ activityBreakdown.other_game }}</div>
-                <div class="text-caption text-slate-500 font-weight-bold mt-0.5">Other Games</div>
-              </div>
+            
+            <v-col cols="12" md="4">
+              <v-autocomplete
+                v-model="selectedStudent"
+                :items="secureStudentsDropdown"
+                item-title="display_name"
+                item-value="id"
+                label="Filter by Student"
+                prepend-icon="mdi-account"
+                variant="outlined"
+                clearable
+                :disabled="errorViewMode === 'COURSES'"
+                :persistent-placeholder="errorViewMode === 'COURSES'"
+                :placeholder="errorViewMode === 'COURSES' ? 'Not applicable in Class Mode' : ''"
+                @update:model-value="onStudentFilterChange"
+              >
+                <template v-slot:item="{ props, item }">
+                  <v-list-item v-bind="props">
+                    <template v-slot:prepend>
+                      <v-avatar color="primary" size="32" class="mr-2">
+                        <span class="text-white text-caption font-weight-bold">{{ item.raw.initials }}</span>
+                      </v-avatar>
+                    </template>
+                    <template v-slot:subtitle>
+                      <span class="text-caption font-mono">{{ item.raw.web_id }}</span>
+                    </template>
+                  </v-list-item>
+                </template>
+              </v-autocomplete>
             </v-col>
-            <v-col cols="6" sm="4" md="2.4">
-              <div class="text-center pa-3 bg-slate-50 border rounded-xl">
-                <v-icon size="28" color="orange">mdi-weight-lifter</v-icon>
-                <div class="text-h5 font-weight-black text-slate-900 mt-2">{{ activityBreakdown.exercise }}</div>
-                <div class="text-caption text-slate-500 font-weight-bold mt-0.5">Exercises</div>
-              </div>
-            </v-col>
-            <v-col cols="6" sm="4" md="2.4">
-              <div class="text-center pa-3 bg-slate-50 border rounded-xl">
-                <v-icon size="28" color="green">mdi-card-text</v-icon>
-                <div class="text-h5 font-weight-black text-slate-900 mt-2">{{ activityBreakdown.vocab_workout }}</div>
-                <div class="text-caption text-slate-500 font-weight-bold mt-0.5">Vocab Labs</div>
-              </div>
-            </v-col>
-            <v-col cols="6" sm="4" md="2.4">
-              <div class="text-center pa-3 bg-slate-50 border rounded-xl">
-                <v-icon size="28" color="teal">mdi-clipboard-check</v-icon>
-                <div class="text-h5 font-weight-black text-slate-900 mt-2">{{ activityBreakdown.workout_drill }}</div>
-                <div class="text-caption text-slate-500 font-weight-bold mt-0.5">Drills</div>
-              </div>
+
+            <v-col cols="12" md="4">
+              <v-select
+                v-model="dateRange"
+                :items="dateRangeOptions"
+                label="Date Range"
+                prepend-icon="mdi-calendar-range"
+                variant="outlined"
+                @update:model-value="fetchAllData"
+              />
             </v-col>
           </v-row>
         </v-card>
-      </v-col>
-    </v-row>
+
+        <v-row>
+          <v-col cols="12">
+            <v-card class="pa-6 mb-6 border bg-white" flat rounded="lg">
+              <div class="d-flex align-center justify-space-between mb-4">
+                <div class="text-h5 font-weight-black text-slate-900 tracking-tight">
+                  {{ dynamicChartTitle }}
+                </div>
+                <div class="d-flex align-center gap-2">
+                  <v-btn
+                    :disabled="!selectedStudent || errorViewMode !== 'STUDENTS'"
+                    :loading="pdfLoading"
+                    color="secondary"
+                    variant="elevated"
+                    prepend-icon="mdi-file-pdf-box"
+                    class="rounded-lg text-none font-weight-bold"
+                    size="small"
+                    @click="generateStudentPdfReport"
+                  >
+                    PDF Report
+                  </v-btn>
+                </div>
+              </div>
+
+              <v-btn-toggle
+                v-model="errorViewMode"
+                mandatory
+                variant="outlined"
+                color="primary"
+                class="mb-6 w-100 rounded-lg overflow-hidden"
+                @update:model-value="handleErrorViewToggle"
+              >
+                <v-btn value="COURSES" class="flex-grow-1 font-weight-bold text-none" size="small">
+                  <v-icon start>mdi-google-classroom</v-icon>
+                  By course
+                </v-btn>
+                <v-btn value="STUDENTS" class="flex-grow-1 font-weight-bold text-none" size="small">
+                  <v-icon start>mdi-account</v-icon>
+                  By student
+                </v-btn>
+              </v-btn-toggle>
+
+              <v-progress-linear v-if="loadingErrors" indeterminate color="primary" class="mb-4" />
+
+              <div v-else-if="hasChartData" class="mb-4">
+                <TeacherErrorFrequencyChart 
+                  :errorData="topErrors" 
+                  :viewMode="errorViewMode"
+                  @open-ai-tutor="openErrorTutorFromChart" 
+                />
+              </div>
+
+              <div v-else class="text-center text-slate-400 font-weight-medium border border-dashed rounded-xl pa-8 bg-slate-50">
+                <v-icon size="36" class="mb-2" color="slate-300">mdi-chart-line-variant</v-icon>
+                <div>
+                  <span v-if="errorViewMode === 'STUDENTS' && !selectedStudent">
+                    Please pick a student from the active filters above to see their analytics summary trace metrics.
+                  </span>
+                  <span v-else>
+                    No telemetry logging errors match your specified criteria window.
+                  </span>
+                </div>
+              </div>
+
+              <div v-if="errorViewMode === 'COURSES'">
+                <v-divider class="my-6" />
+                <div class="text-overline font-weight-black text-slate-400 tracking-wider mb-2">Error Inspector</div>
+                <v-select
+                  v-model="selectedErrorCode"
+                  :items="errorDropdownItems"
+                  label="Select a logged error pattern code to view specific class samples"
+                  variant="outlined"
+                  clearable
+                />
+
+                <v-card v-if="selectedErrorObj" variant="outlined" class="pa-4 mt-4 rounded-xl bg-slate-50 border-slate-200">
+                  <div class="text-subtitle-1 font-weight-black text-slate-900 mb-2">
+                    {{ selectedErrorObj.error_code }} — 
+                    <span class="text-slate-600 font-weight-medium font-italic">
+                      {{ errorsData[selectedErrorObj.error_code]?.description || 'No description available' }}
+                    </span>
+                  </div>
+                  <div class="text-body-2 mb-3 font-weight-bold text-slate-700">
+                    Total Class Occurrences: <v-chip size="x-small" color="error" class="font-weight-black font-mono ml-1">{{ selectedErrorObj.total_times }}</v-chip>
+                  </div>
+                  <div class="text-caption font-weight-black text-slate-400 text-uppercase tracking-wider mb-2">
+                    Evidence Log Snippets
+                  </div>
+                  <v-list density="compact" class="evidence-list rounded-lg border bg-white">
+                    <v-list-item
+                      v-for="(sample, i) in selectedErrorObj.evidence_samples.slice(0, 10)"
+                      :key="i"
+                      class="border-b last-no-border"
+                    >
+                      <template v-slot:prepend>
+                        <v-icon size="small" class="mr-2 text-slate-400">mdi-chevron-right</v-icon>
+                      </template>
+                      <span v-html="sample" class="text-body-2 text-slate-700 font-mono"></span>
+                    </v-list-item>
+                  </v-list>
+                </v-card>
+
+                <div v-else-if="selectedErrorCode" class="text-center text-slate-400 text-caption font-weight-bold pa-4">
+                  Error data signature entry could not be computed.
+                </div>
+              </div>
+            </v-card>
+          </v-col>
+        </v-row>
+
+        <v-row>
+          <v-col cols="12" sm="6" md="4">
+            <v-card class="pa-4 border bg-white" flat rounded="lg">
+              <div class="d-flex align-center justify-space-between">
+                <div>
+                  <div class="text-caption text-slate-400 font-weight-bold text-uppercase tracking-wider">Total Errors</div>
+                  <div class="text-h4 font-weight-black text-slate-900 mt-1">{{ totalErrorOccurrences }}</div>
+                </div>
+                <v-avatar color="red-lighten-5" rounded="lg" size="44">
+                  <v-icon size="24" color="error">mdi-alert-circle</v-icon>
+                </v-avatar>
+              </div>
+            </v-card>
+          </v-col>
+          <v-col cols="12" sm="6" md="4">
+            <v-card class="pa-4 border bg-white" flat rounded="lg">
+              <div class="d-flex align-center justify-space-between">
+                <div>
+                  <div class="text-caption text-slate-400 font-weight-bold text-uppercase tracking-wider">Unique Errors Flagged</div>
+                  <div class="text-h4 font-weight-black text-slate-900 mt-1">{{ uniqueErrorCount }}</div>
+                </div>
+                <v-avatar color="amber-lighten-5" rounded="lg" size="44">
+                  <v-icon size="24" color="warning">mdi-gavel</v-icon>
+                </v-avatar>
+              </div>
+            </v-card>
+          </v-col>
+        </v-row>
+
+      </v-window-item>
+
+      <v-window-item value="exercises" class="fade-in">
+        <ManageExerciseData />
+      </v-window-item>
+      
+    </v-window>
 
     <v-snackbar v-model="snackbar" :color="snackbarColor" :timeout="3000" rounded="lg">
       {{ snackbarMessage }}
@@ -273,11 +258,14 @@
   </v-container>
 </template>
 
+
+
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import api from '@/axios';
 import { errorsData } from "@/assets/scripts/errorsData";
 import TeacherErrorFrequencyChart from '@/components/charts/TeacherErrorFrequencyChart.vue';
+import ManageExerciseData from '@/components/ManageExerciseData.vue';
 import { useUserStore } from '@/stores/user';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
@@ -347,6 +335,10 @@ const dateRangeOptions = [
   { title: 'Last 30 Days', value: '30days' },
   { title: 'Last 90 Days', value: '90days' },
 ];
+const tabItems = [
+  { label: 'Errors (Teacher feeedback)', value: 'errors', icon: 'mdi-alert-circle-outline' },
+  { label: 'Grammar Exercises', value: 'exercises', icon: 'mdi-notebook-check-outline' }
+];
 
 const errorData = ref<ErrorData[]>([]);
 const studentErrorData = ref<ErrorData[]>([]); 
@@ -354,6 +346,7 @@ const errorViewMode = ref<'COURSES' | 'STUDENTS'>('COURSES');
 const achievements = ref<Achievement[]>([]);
 const activities = ref<Activity[]>([]);
 const selectedErrorCode = ref<string | null>(null);
+const activeMasterTab = ref('errors');
 
 /* =========================================================
    ✨ FIX 1: Securely compute drop-down items from roster
@@ -948,4 +941,33 @@ onMounted(async () => {
 .text-xxs { font-size: 0.75rem; }
 .leading-none { line-height: 1 !important; }
 .last-no-border:last-child { border-bottom: 0 !important; }
+
+
+/* Style hooks ensuring the custom window slider handles tab pill adjustments smoothly */
+.custom-dashboard-tabs {
+  padding: 6px !important;
+  background-color: #f1f5f9 !important;
+  height: 56px !important; /* Forces uniform height limits */
+}
+
+/* Target overrides to elevate text layout alignment and force uppercase */
+.custom-dashboard-tabs :deep(.dashboard-pill-tab) {
+  text-transform: uppercase !important; /* Forces uppercase transformation rule */
+  font-size: 0.825rem !important;        /* Crisp sizing label alignment */
+  font-weight: 600 !important;           /* Prominent black weights */
+  letter-spacing: 0.05em !important;     /* Clean tracking spread */
+  height: 44px !important;               /* Inner button normalization bounds */
+  display: flex !important;
+  align-items: center !important;        /* Forces precise vertical center alignments */
+  justify-content: center !important;
+}
+
+.fade-in {
+  animation: tabChangeSlideUp 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes tabChangeSlideUp {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
 </style>

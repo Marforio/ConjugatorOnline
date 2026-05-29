@@ -61,7 +61,7 @@
           <v-list-item :to="{ name: 'manage-feedback' }" prepend-icon="mdi-comment-quote" title="Give Feedback" rounded="lg" color="primary" @click="closeDrawerBelowLg" />
           <v-list-item :to="{ name: 'manage-achievement-data' }" prepend-icon="mdi-trophy" title="Achievements" rounded="lg" color="primary" @click="closeDrawerBelowLg" />
           <v-list-item :to="{ name: 'teacher-tools' }" prepend-icon="mdi-human-male-board" title="Classroom Tools" rounded="lg" color="primary" @click="closeDrawerBelowLg" />
-          <v-list-item :to="{ name: 'manage-error-data' }" prepend-icon="mdi-chart-line" title="Error Data" rounded="lg" color="primary" @click="closeDrawerBelowLg" />
+          <v-list-item :to="{ name: 'manage-error-data' }" prepend-icon="mdi-chart-line" title="Errors & Exercises" rounded="lg" color="primary" @click="closeDrawerBelowLg" />
           <v-list-item :to="{ name: 'manage-conjugator-data' }" prepend-icon="mdi-chart-arc" title="Conjugator Data" rounded="lg" color="primary" @click="closeDrawerBelowLg" />
           <v-list-item :to="{ name: 'manage-other-games-data' }" prepend-icon="mdi-chart-timeline" title="Other Games Data" rounded="lg" color="primary" @click="closeDrawerBelowLg" />
           <v-list-item :to="{ name: 'manage-vocab-data' }" prepend-icon="mdi-chart-timeline-variant-shimmer" title="Vocabulary Data" rounded="lg" color="primary" @click="closeDrawerBelowLg" />
@@ -84,7 +84,7 @@
               <v-list-item href="https://book.language-labs.ch" target="_blank" prepend-icon="mdi-book-open-page-variant" title="Grammar Book" rounded="lg" color="primary" @click="closeDrawerBelowLg" />
               <v-list-item :to="{ name: 'vocabworkout' }" prepend-icon="mdi-cards-outline" title="Vocab Workout" rounded="lg" color="primary" @click="closeDrawerBelowLg" />
               <v-list-item :to="{ name: 'exercises' }" prepend-icon="mdi-weight-lifter" title="Exercises" rounded="lg" color="primary" @click="closeDrawerBelowLg" />
-              <v-list-item :to="{ name: 'conjugator' }" prepend-icon="mdi-controller" title="Conjugator Game" rounded="lg" color="primary" @click="closeDrawerBelowLg" />
+              <v-list-item :to="{ name: 'conjugator' }" prepend-icon="mdi-controller" title="Conjugator" rounded="lg" color="primary" @click="closeDrawerBelowLg" />
               <v-list-item :to="{ name: 'games' }" prepend-icon="mdi-gamepad-circle" title="Other Games" rounded="lg" color="primary" @click="closeDrawerBelowLg" />
               <v-list-item :to="{ name: 'tools' }" prepend-icon="mdi-tools" title="Tools" rounded="lg" color="primary" @click="closeDrawerBelowLg" />
               <v-list-item :to="{ name: 'student-data' }" prepend-icon="mdi-chart-bar" title="My Data" rounded="lg" color="primary" @click="closeDrawerBelowLg" />
@@ -94,15 +94,84 @@
         </template>
 
         <template v-else>
-          <v-list-item :to="{ name: 'student-home' }" prepend-icon="mdi-home-account" title="Home" rounded="lg" color="primary" @click="closeDrawerBelowLg" />
-          <v-list-item href="https://book.language-labs.ch" target="_blank" prepend-icon="mdi-book-open-page-variant" title="Grammar Book" rounded="lg" color="primary" @click="closeDrawerBelowLg" />
-          <v-list-item :to="{ name: 'exercises' }" prepend-icon="mdi-weight-lifter" title="Exercises" rounded="lg" color="primary" @click="closeDrawerBelowLg" />
-          <v-list-item :to="{ name: 'vocabworkout' }" prepend-icon="mdi-cards-outline" title="Vocab Workout" rounded="lg" color="primary" @click="closeDrawerBelowLg" />
-          <v-list-item :to="{ name: 'conjugator' }" prepend-icon="mdi-controller" title="Conjugator Game" rounded="lg" color="primary" @click="closeDrawerBelowLg" />
-          <v-list-item :to="{ name: 'games' }" prepend-icon="mdi-gamepad-circle" title="Other Games" rounded="lg" color="primary" @click="closeDrawerBelowLg" />
-          <v-list-item :to="{ name: 'tools' }" prepend-icon="mdi-tools" title="Tools" rounded="lg" color="primary" @click="closeDrawerBelowLg" />
-          <v-list-item :to="{ name: 'student-data' }" prepend-icon="mdi-chart-bar" title="My Data" rounded="lg" color="primary" @click="closeDrawerBelowLg" />
-          
+          <v-list-item
+            :to="{ name: 'student-home' }"
+            prepend-icon="mdi-home-account"
+            title="Home"
+            rounded="lg"
+            color="primary"
+            @click="closeDrawerBelowLg"
+            class="mb-6"
+          />
+
+          <v-sheet border rounded="lg" class="group-sheet position-relative mb-3 pt-3 px-2 pb-2">
+            <div class="text-caption">Theory</div>
+            <v-list-item
+              href="https://book.language-labs.ch"
+              target="_blank"
+              prepend-icon="mdi-book-open-page-variant"
+              title="Grammar Book"
+              rounded="lg"
+              color="primary"
+              @click="closeDrawerBelowLg"
+            />
+          </v-sheet>
+
+          <v-sheet border rounded="lg" class="group-sheet position-relative mb-3 pt-3 px-2 pb-2">
+            <div class="text-caption">Activities</div>
+            <v-list-item
+              :to="{ name: 'exercises' }"
+              prepend-icon="mdi-weight-lifter"
+              title="Exercises"
+              rounded="lg"
+              color="primary"
+              @click="closeDrawerBelowLg"
+            />
+            <v-list-item
+              :to="{ name: 'vocabworkout' }"
+              prepend-icon="mdi-cards-outline"
+              title="Vocab Workout"
+              rounded="lg"
+              color="primary"
+              @click="closeDrawerBelowLg"
+            />
+            <v-list-item
+              :to="{ name: 'conjugator' }"
+              prepend-icon="mdi-controller"
+              title="Conjugator"
+              rounded="lg"
+              color="primary"
+              @click="closeDrawerBelowLg"
+            />
+            <v-list-item
+              :to="{ name: 'games' }"
+              prepend-icon="mdi-gamepad-circle"
+              title="Other Games"
+              rounded="lg"
+              color="primary"
+              @click="closeDrawerBelowLg"
+            />
+            <v-list-item
+              :to="{ name: 'tools' }"
+              prepend-icon="mdi-tools"
+              title="Tools"
+              rounded="lg"
+              color="primary"
+              @click="closeDrawerBelowLg"
+            />
+          </v-sheet>
+
+          <v-sheet border rounded="lg" class="group-sheet position-relative mb-2 pt-3 px-2 pb-2">
+            <div class="text-caption">Reflect</div>
+            <v-list-item
+              :to="{ name: 'student-data' }"
+              prepend-icon="mdi-chart-bar"
+              title="My Data"
+              rounded="lg"
+              color="primary"
+              @click="closeDrawerBelowLg"
+            />
+          </v-sheet>
         </template>
 
       </v-list>
