@@ -38,6 +38,7 @@ const routes = [
   { path: '/tools/essay-creator', name: 'essay-creator', component: () => import('@/views/EssayCreator.vue'), meta: { requiresAuth: false }},
   { path: '/tools/word-stats', name: 'word-stats', component: () => import('@/views/WordStats.vue'), meta: { requiresAuth: false }},
   { path: '/tools/graph-generator', name: 'graph-generator', component: () => import('@/views/GraphGenerator.vue'), meta: { requiresAuth: false }},
+  { path: '/tools/numbers-workout', name: 'numbers-workout', component: () => import('@/views/NumbersWorkout.vue'), meta: { requiresAuth: false }},
   { path: '/teacher-tools', name: 'teacher-tools', component: () => import('@/views/TeacherTools.vue'), meta: { requiresAuth: true, requiresAdmin: true } },
   { path: '/teacher-tools/classroom-challenges', name: 'classroom-challenges', component: () => import('@/views/ClassroomChallenges.vue'), meta: { requiresAuth: true, requiresAdmin: true }, props: (route: RouteLocationNormalized) => ({ game: route.query.game as string, student: route.query.student as string }) },
   { path: '/teacher-tools/graph-generator', name: 'graph-generator-teacher', component: () => import('@/views/GraphGeneratorTeacher.vue'), meta: { requiresAuth: true } },

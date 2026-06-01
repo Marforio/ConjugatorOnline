@@ -334,7 +334,7 @@ import { ref, reactive, computed } from "vue"
 import api from "@/axios"
 
 const props = defineProps<{
-  game: "Spelling bee" | "Pronunciation Challenge" | "Prove it!" | "Be Polite!" | "Balanced Opinions" | "Unfinished Business" | "Verb Mixer Classroom Edition"
+  game: "Spelling bee" | "Pronunciation Challenge" | "Prove it!" | "Be Polite!" | "Balanced Opinions" | "Unfinished Business" | "Verb Mixer Classroom Edition" | "Numbers Workout",
   student: string
 }>()
 
@@ -349,6 +349,7 @@ const BANNERS = {
   "Balanced Opinions": "/images/banners/BalancedOpinions.png",
   "Unfinished Business": "/images/banners/UnfinishedBusiness.png",
   "Verb Mixer Classroom Edition": "/images/banners/VerbMixer.png",
+  "Numbers Workout": "/images/banners/NumbersWorkout.png"
 }
 
 const selectedCategory = ref<string>("") 
@@ -389,7 +390,308 @@ const score = computed(() => rightCount.value !== 0 ? ((rightCount.value / total
 // GAME DATA 
 // --------------------------
 
-const gameData: Record<string, { description: string; instructions: string; prompts: Record<string, string[]> }> = {
+type PromptGroup =
+  | string[] // simple list of prompts
+  | {
+      weight: number
+      prompts: Record<string, string>
+    }
+
+const gameData: Record<
+  string,
+  {
+    description: string
+    instructions: string
+    prompts: Record<string, PromptGroup>
+  }
+> =  { 
+  "Numbers Workout": {
+    description: "Practice number-related vocabulary and expressions",
+    instructions: "A card will show a number-related question. Answer the question aloud. The teacher will validate the response.",
+    prompts: {     
+  "times": {
+    weight: 2,
+    prompts: {
+      "11:30": "eleven thirty or half past eleven",
+      "12:45": "twelve forty-five or quarter to one",
+      "3:15": "three fifteen or quarter past three",
+      "7:20": "seven twenty",
+      "9:05": "nine oh five",
+      "4:50": "four fifty",
+      "6:40": "six forty",
+      "2:10": "two ten",
+      "2:00": "two o'clock",
+      "5:00": "five o'clock",
+      "8:55": "eight fifty-five or five to nine",
+      "10:25": "ten twenty-five",
+      "1:45": "one forty-five or quarter to two",
+      "5:35": "five thirty-five",
+      "11:05": "eleven oh five or five past eleven",
+      "12:10": "twelve ten or ten past twelve",
+      "3:40": "three forty",
+      "7:55": "seven fifty-five or five to eight",
+      "9:30": "nine thirty or half past nine",
+      "4:15": "four fifteen or quarter past four",
+      "6:05": "six oh five or five past six",
+      "12:00 AM": "twelve o'clock or twelve midnight",
+      "12:00 PM": "twelve o'clock or twelve noon",
+    }
+  },
+
+  "dates": {
+    weight: 2,
+    prompts: {
+      "25 Dec": "December 25th, 2022",
+      "1 Jan": "January 1st",
+      "4 Jul": "July 4th",
+      "14 Feb": "February 14th",
+      "31 Oct": "October 31st",
+      "21 Jun": "June 21st",
+      "5 May": "May 5th",
+      "11 Nov": "November 11th",
+      "2 Mar": "March 2nd",
+      "9 Sep": "September 9th",
+      "17 Aug": "August 17th",
+      "30 Apr": "April 30th",
+      "22 Dec": "December 22nd",
+      "7 Jan": "January 7th",
+      "19 Jul": "July 19th"
+    }
+  },
+
+  "ordinals": {
+    weight: 2,
+    prompts: {
+      "1st": "first",
+      "22nd": "twenty-second",
+      "3rd": "third",
+      "24th": "twenty-fourth",
+      "5th": "fifth",
+      "36th": "thirty-sixth",
+      "7th": "seventh",
+      "8th": "eighth",
+      "9th": "ninth",
+      "10th": "tenth",
+      "11th": "eleventh",
+      "12th": "twelfth",
+      "13th": "thirteenth",
+      "14th": "fourteenth",
+      "15th": "fifteenth",
+      "19th": "nineteenth",
+      "21st": "twenty-first",
+      "31st": "thirty-first",
+      "25th anniversary": "twenty-fifth anniversary",
+      "50th anniversary": "fiftieth anniversary",
+      "100th anniversary": "one hundredth anniversary",
+      "20th day of the month": "twentieth day of the month",
+      "50th": "fiftieth",
+       "100th": "one hundredth",
+    }
+  },
+
+  "percentages": {
+    weight: 1,
+    prompts: {
+      "25%": "twenty-five percent",
+      "50%": "fifty percent",
+      "75%": "seventy-five percent",
+      "10%": "ten percent",
+      "15%": "fifteen percent",
+      "20%": "twenty percent",
+      "30%": "thirty percent",
+      "40%": "forty percent",
+      "60%": "sixty percent",
+      "80%": "eighty percent",
+      "90%": "ninety percent",
+      "5%": "five percent",
+      "12%": "twelve percent",
+      "33%": "thirty-three percent",
+      "99%": "ninety-nine percent"
+    }
+  },
+
+  "fractions": {
+    weight: 2,
+    prompts: {
+      "1/2": "one half",
+      "3/4": "three quarters",
+      "2/3": "two thirds",
+      "1/3": "one third",
+      "1/20": "one twentieth",
+      "1/5": "one fifth",
+      "1/10": "one tenth",
+      "1/50": "one fiftieth",
+      "1/4": "one quarter",
+      "2/5": "two fifths",
+      "3/5": "three fifths",
+      "4/5": "four fifths",
+      "5/6": "five sixths",
+      "1/8": "one eighth",
+      "3/8": "three eighths",
+      "7/8": "seven eighths",
+      "5/12": "five twelfths",
+      "11/16": "eleven sixteenths",
+      "9/10": "nine tenths",
+      "3/10 s": "three tenths of a second",
+      "7/10 s": "seven tenths of a second",
+    }
+  },
+
+  "decimals": {
+    weight: 3,
+    prompts: {
+      "0.5": "zero point five",
+      "1.25": "one point two five",
+      "3.14": "three point one four",
+      "0.75": "zero point seven five",
+      "2.5": "two point five",
+      "4.99": "four point nine nine",
+      "6.01": "six point zero one",
+      "7.33": "seven point three three",
+      "8.125": "eight point one two five",
+      "9.9": "nine point nine",
+      "1.01": "one point zero one",
+      "2.75": "two point seven five",
+      "5.555": "five point five five five",
+      "0.33": "zero point three three",
+      "12.04": "twelve point zero four"
+    }
+  },
+
+  "one_numbers": {
+    weight: 2,
+    prompts: {
+      "100": "one hundred",
+      "1'000": "one thousand",
+      "1'000'000": "one million",
+      "1'000'000'000": "one billion",
+      "100th": "one hundredth",
+      "1/1000 s": "one one thousandth of a second",
+      "1/100 s": "one one hundredth of a second",
+      "5/100 s": "five one hundredths of a second",
+      "9/1000 s": "nine one thousandths of a second",
+
+    }
+  },
+
+  "middle_numbers": {
+    weight: 3,
+    prompts: {
+      "1'500": "one thousand five hundred",
+      "250'000": "two hundred fifty thousand",
+      "750'000": "seven hundred fifty thousand",
+      "3'200": "three thousand two hundred",
+      "4'800": "four thousand eight hundred",
+      "125'000": "one hundred twenty-five thousand",
+      "640'000": "six hundred forty thousand",
+      "890'000": "eight hundred ninety thousand",
+      "129'000": "one hundred twenty-nine thousand",
+      "34'500": "thirty-four thousand five hundred",
+      "56'800": "fifty-six thousand eight hundred",
+      "22'900": "twenty-two thousand nine hundred",
+      "66'950": "sixty-six thousand nine hundred fifty",
+      "91'020": "ninety-one thousand twenty",
+      "220'000": "two hundred twenty thousand",
+      "430'000": "four hundred thirty thousand",
+      "670'000": "six hundred seventy thousand",
+
+    }
+  },
+
+  "large_numbers": {
+    weight: 4,
+    prompts: {
+      "3'500'000'000": "three point five billion",
+      "1'800'000'000": "one point eight billion",
+      "2'700'000": "two point seven million",
+      "4'200'000'000": "four point two billion",
+      "6'750'000'000": "six point seven five billion",
+      "9'100'000'000": "nine point one billion",
+      "5'500'000'000": "five point five billion",
+      "7'300'000'000": "seven point three billion",
+      "8'900'000'000": "eight point nine billion",
+      "12'400'000": "twelve point four million",
+      "33'000'000": "thirty-three million",
+      "98'500'000": "ninety-eight point five million",
+      "450'000'000": "four hundred fifty million",
+      "2'900'000'000": "two point nine billion",
+      "1'300'000'000": "one point three billion",
+      "3'600'000": "three point six million",
+      "71'900'000": "seventy-one point nine million",
+      "123'800'000": "one hundred twenty-three point eight million",
+      "5'600'000'000": "five point six billion",
+    "520'700'000": "five hundred twenty point seven million"
+    }
+  },
+
+  "money": {
+    weight: 4,
+    prompts: {
+      "$10.50": "ten dollars (and) fifty (cents)",
+      "€20.00": "twenty euros",
+      "£5.75": "five pounds (and) seventy-five (pence)",
+      "$3.99": "three dollars (and) ninety-nine (cents)",
+      "$12.30": "twelve dollars (and) thirty (cents)",
+      "€8.40": "eight euros (and) forty (cents)",
+      "€55.10": "fifty-five euros (and) ten (cents)",
+      "£2.20": "two pounds (and) twenty (pence)",
+      "£19.95": "nineteen pounds (and) ninety-five (pence)",
+      "$79.95": "seventy-nine dollars (and) ninety-five (cents)",
+      "$250.75": "two hundred fifty dollars (and) seventy-five (cents)",
+      "€300.50": "three hundred euros (and) fifty (cents)",
+      "£120.00": "one hundred twenty pounds",
+      "$999.99": "nine hundred ninety-nine dollars (and) ninety-nine (cents)",
+      "€1.25": "one euro (and) twenty-five (cents)"
+    }
+  },
+
+  "decades": {
+    weight: 2,
+    prompts: {
+      "90s": "the nineteen nineties",
+      "2000s": "the two thousands",
+      "2010s": "the twenty tens",
+      "80s": "the nineteen eighties",
+      "70s": "the nineteen seventies",
+      "60s": "the nineteen sixties",
+      "50s": "the nineteen fifties",
+      "20s": "the twenty twenties",
+      "30s": "the nineteen thirties",
+      "1920s": "the nineteen twenties",
+      "1910s": "the nineteen tens",
+      "1890s": "the eighteen nineties",
+      "1880s": "the eighteen eighties",
+      "1870s": "the eighteen seventies",
+      "1860s": "the eighteen sixties"
+    }
+  },
+
+  "years": {
+    weight: 3,
+    prompts: {
+      "2020": "two thousand twenty",
+      "1999": "nineteen ninety-nine",
+      "2001": "two thousand one",
+      "1984": "nineteen eighty-four",
+      "1975": "nineteen seventy-five",
+      "1963": "nineteen sixty-three",
+      "1988": "nineteen eighty-eight",
+      "1576": "fifteen seventy-six",
+      "1950": "nineteen fifty",
+      "2015": "two thousand fifteen",
+      "2012": "two thousand twelve",
+      "2008": "two thousand eight",
+      "1995": "nineteen ninety-five",
+      "1990": "nineteen ninety",
+      "1888": "eighteen eighty-eight",
+      "1776": "seventeen seventy-six",
+      "1492": "fourteen ninety-two"
+    }
+  }
+}
+
+  },
+  
   "Pronunciation Challenge": {
     description: "Practice pronunciation with feedback from the teacher",
     instructions: "A card will appear with a word or phrase. Read the card aloud. The teacher will confirm if your pronunciation was correct.",
@@ -1206,77 +1508,161 @@ function startGame() {
 }
 
 function buildPromptQueue() {
-  const dataset = props.game === "Prove it!" ? gameData[selectedCategory.value] : gameData[props.game]
+  const dataset =
+    props.game === "Prove it!"
+      ? gameData[selectedCategory.value]
+      : gameData[props.game]
+
   if (!dataset) return
 
+  // -----------------------------
+  // SPECIAL CASE: Unfinished Business
+  // -----------------------------
   if (props.game === "Unfinished Business") {
     const essentials = gameData["Essential irregulars past simple"]
     if (!essentials?.prompts) return
+
     const verbs = shuffle(Object.keys(essentials.prompts))
-    const timeRefs = dataset.prompts.time_references as string[]
+    const timeRefs = essentials.prompts.time_references as string[]
     const queue: typeof promptQueue.value = []
     const rounds = Math.min(totalRounds.value, verbs.length)
 
     for (let i = 0; i < rounds; i++) {
       const verb = verbs[i]
       const timeRef = timeRefs[Math.floor(Math.random() * timeRefs.length)]
-      queue.push({ question: `${verb}`, verb, correctAnswers: [], category: `${timeRef}` })
+      queue.push({
+        question: verb,
+        verb,
+        correctAnswers: [],
+        category: timeRef
+      })
     }
+
     promptQueue.value = queue
     return
   }
 
+  // -----------------------------
+  // SPECIAL CASE: Balanced Opinions
+  // -----------------------------
   if (props.game === "Balanced Opinions") {
-    const linkingWords = shuffle(dataset.prompts.linking_words)
-    const topics = shuffle(dataset.prompts.topics)
+    const linkingWords = shuffle(dataset.prompts.linking_words as string[])
+    const topics = shuffle(dataset.prompts.topics as string[])
     const rounds = totalRounds.value
     const queue: typeof promptQueue.value = []
+
     for (let i = 0; i < rounds; i++) {
-      const link = linkingWords[i]
-      const topic = topics[i]
-      queue.push({ question: `${topic}`, verb: topic, correctAnswers: [], category: link })
+      queue.push({
+        question: topics[i],
+        verb: topics[i],
+        correctAnswers: [],
+        category: linkingWords[i]
+      })
     }
+
     promptQueue.value = queue
     return
   }
 
+  // -----------------------------
+  // SPECIAL CASE: Verb Mixer Classroom Edition
+  // -----------------------------
   if (props.game === "Verb Mixer Classroom Edition") {
     const queue: typeof promptQueue.value = []
     const distribution: Record<string, number> = {
-      "infinitive_verb": 6, "adjective": 2, "bare_infinitive": 3, "-ing_verb": 6,
-      "special_expression": 4, "preposition": 3, "change_in_meaning": 3, "subject": 1,
+      infinitive_verb: 6,
+      adjective: 2,
+      bare_infinitive: 3,
+      "-ing_verb": 6,
+      special_expression: 4,
+      preposition: 3,
+      change_in_meaning: 3,
+      subject: 1
     }
 
     for (const [category, count] of Object.entries(distribution)) {
-      const values = (dataset.prompts as Record<string, string[]>)[category]
-      if (!Array.isArray(values) || values.length === 0) continue
+      const values = dataset.prompts[category]
+
+      if (!Array.isArray(values)) continue // skip weighted groups
+
       const shuffled = shuffle(values)
       for (let i = 0; i < count; i++) {
         const q = shuffled[i % shuffled.length]
-        queue.push({ question: q, verb: category, correctAnswers: [], category: category })
+        queue.push({
+          question: q,
+          verb: category,
+          correctAnswers: [],
+          category
+        })
       }
     }
+
     promptQueue.value = shuffle(queue).slice(0, totalRounds.value)
     return
   }
 
+  // -----------------------------
+  // DEFAULT CASE (most games)
+  // Handles BOTH:
+  //   - string[] groups
+  //   - weighted groups { weight, prompts }
+  // -----------------------------
   const queue: typeof promptQueue.value = []
-  Object.entries(dataset.prompts).forEach(([key, values]) => {
-    if (selectedCategory.value.includes("present perfect")) {
-      queue.push({ question: values[1], verb: key, correctAnswers: [values[0]], category: key })
+
+  Object.entries(dataset.prompts).forEach(([key, group]) => {
+    // CASE 1: weighted group
+    if (!Array.isArray(group)) {
+      const entries = Object.entries(group.prompts)
+
+      entries.forEach(([prompt, answer]) => {
+        queue.push({
+          question: prompt,
+          verb: key,
+          correctAnswers: [answer],
+          category: key
+        })
+      })
+
       return
     }
+
+    // CASE 2: simple string[] group
+    const values = group
+
+    if (selectedCategory.value.includes("present perfect")) {
+      queue.push({
+        question: values[1],
+        verb: key,
+        correctAnswers: [values[0]],
+        category: key
+      })
+      return
+    }
+
     if (selectedCategory.value.includes("past simple")) {
       const q = values[Math.floor(Math.random() * values.length)]
-      queue.push({ question: q, verb: key, correctAnswers: [key], category: key })
+      queue.push({
+        question: q,
+        verb: key,
+        correctAnswers: [key],
+        category: key
+      })
       return
     }
+
     values.forEach(v => {
-      queue.push({ question: v, verb: key, correctAnswers: [v], category: key })
+      queue.push({
+        question: v,
+        verb: key,
+        correctAnswers: [v],
+        category: key
+      })
     })
   })
+
   promptQueue.value = shuffle(queue).slice(0, totalRounds.value)
 }
+
 
 function animateSlide() {
   animationClass.value = "slide-out-left"

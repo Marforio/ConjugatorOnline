@@ -63,6 +63,20 @@
         </RouterLink>
       </v-col>
 
+      <!-- Numbers Workout -->
+      <v-col cols="12" sm="6" md="4" class="d-flex justify-center">
+        <RouterLink :to="{ name: 'numbers-workout' }" class="image-tile">
+          <div class="tile-frame">
+            <v-img
+              src="/images/banners/NumbersWorkout.png"
+              alt="Numbers Workout"
+              cover
+              class="tile-image"
+            />
+          </div>
+        </RouterLink>
+      </v-col>
+
     </v-row>
     <!-- Back Button -->
     <div class="d-flex justify-center mt-6">

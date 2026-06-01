@@ -18,7 +18,10 @@ export const STRUCTURAL_VERBS = {
     ],
     hard: [
       { inf: "shoot up", ps: "shot up", pp: "shot up" },
-      { inf: "skyrocket", ps: "skyrocketed", pp: "skyrocketed" }
+      { inf: "skyrocket", ps: "skyrocketed", pp: "skyrocketed" },
+      { inf: "rise", ps: "rose", pp: "risen" },
+      { inf: "grow", ps: "grew", pp: "grown" },
+      { inf: "go up", ps: "went up", pp: "gone up" },
     ]
   },
   verbs_down: {
@@ -32,7 +35,9 @@ export const STRUCTURAL_VERBS = {
     ],
     hard: [
       { inf: "shrink", ps: "shrank", pp: "shrunk" },
-      { inf: "slide", ps: "slid", pp: "slid" }
+      { inf: "slide", ps: "slid", pp: "slid" },
+      { inf: "fall", ps: "fell", pp: "fallen" },
+      { inf: "go down", ps: "went down", pp: "gone down" },
     ]
   },
   verbs_flat: {
