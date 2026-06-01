@@ -251,7 +251,7 @@ function launchGame() {
   // Check if we are launching the Graph Generator or a standard challenge
   if (selectedGame.value === 'Graph Generator') {
     router.push({
-      name: 'graph-generator',
+      name: 'graph-generator-teacher',
       query: {
         student: selectedStudent.value,
       },

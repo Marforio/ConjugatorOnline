@@ -4,38 +4,18 @@
     <div v-if="!gameStarted && !gameComplete" class="text-center w-100" style="max-width: 680px;">
       <v-card variant="flat" border class="pa-6 rounded-xl bg-slate-50 border-slate-200">
         <div class="d-flex justify-center mb-4">
-          <v-img
-            src="/images/banners/GraphGenerator.png"
-            class="tile-image"
-            cover
-            max-width="400"
-          />
+          <v-img src="/images/banners/GraphGenerator.png" class="tile-image" cover max-width="400" />
         </div>
-        <p class="text-body-2 font-weight-bold text-indigo mb-2">
-          Classroom Challenge
-        </p>
-        
-        <div v-if="!isStudentMode" class="text-caption text-slate-500 line-height-md mb-6">
-          Student: 
-          <span class="font-monospace bg-white px-2 py-1 rounded border font-weight-bold text-slate-700 ml-1">
-            {{ activeStudentWebId || 'No Student Loaded' }}
-          </span>
-        </div>
+        <p class="text-body-2 font-weight-bold text-indigo mb-2">Graph Generator Challenge</p>
+        <span class="text-caption text-slate-400 d-block mb-6">Self-Guided Practice</span>
 
         <v-divider class="mb-6 border-slate-200" />
 
         <div class="text-left mb-6">
-          <label class="text-overline font-weight-black text-slate-400 d-block mb-2 tracking-wider">
-            Select Challenge Tier
-          </label>
+          <label class="text-overline font-weight-black text-slate-400 d-block mb-2 tracking-wider">Select a verb set</label>
           <v-row dense>
             <v-col cols="12" sm="6">
-              <v-card 
-                variant="flat" border 
-                :class="selectedLevel === 'easy' ? 'border-indigo-600 bg-indigo-50/50' : 'border-slate-200 bg-white'"
-                class="pa-3 rounded-lg cursor-pointer transition-all d-flex align-center"
-                @click="selectedLevel = 'easy'"
-              >
+              <v-card variant="flat" border :class="selectedLevel === 'easy' ? 'border-indigo-600 bg-indigo-50/50' : 'border-slate-200 bg-white'" class="pa-3 rounded-lg cursor-pointer transition-all d-flex align-center" @click="selectedLevel = 'easy'">
                 <v-icon :color="selectedLevel === 'easy' ? 'indigo' : 'slate-400'" class="mr-2">
                   {{ selectedLevel === 'easy' ? 'mdi-radiobox-marked' : 'mdi-radiobox-blank' }}
                 </v-icon>
@@ -43,12 +23,7 @@
               </v-card>
             </v-col>
             <v-col cols="12" sm="6">
-              <v-card 
-                variant="flat" border 
-                :class="selectedLevel === 'hard' ? 'border-indigo-600 bg-indigo-50/50' : 'border-slate-200 bg-white'"
-                class="pa-3 rounded-lg cursor-pointer transition-all d-flex align-center"
-                @click="selectedLevel = 'hard'"
-              >
+              <v-card variant="flat" border :class="selectedLevel === 'hard' ? 'border-indigo-600 bg-indigo-50/50' : 'border-slate-200 bg-white'" class="pa-3 rounded-lg cursor-pointer transition-all d-flex align-center" @click="selectedLevel = 'hard'">
                 <v-icon :color="selectedLevel === 'hard' ? 'indigo' : 'slate-400'" class="mr-2">
                   {{ selectedLevel === 'hard' ? 'mdi-radiobox-marked' : 'mdi-radiobox-blank' }}
                 </v-icon>
@@ -68,38 +43,15 @@
           </div>
         </v-card>
 
-        <div class="d-flex justify-space-between ga-3">
-          <v-btn variant="outlined" color="grey-darken-2" size="large" class="font-weight-black rounded-xl text-none" :to="{ name: 'teacher-tools' }">
-            Cancel
-          </v-btn>
-          <v-btn 
-            color="indigo-darken-1" 
-            size="large" 
-            elevation="1" 
-            class="text-white font-weight-black rounded-xl text-none" 
-            @click="startGame"
-          >
-            Launch Challenge
-          </v-btn>
-        </div>
+        <v-btn block color="indigo-darken-1" size="large" elevation="1" class="text-white font-weight-black rounded-xl text-none" @click="startGame">
+          Launch Practice
+        </v-btn>
       </v-card>
     </div>
 
-    <div v-else-if="gameStarted" class="w-100 py-4" style="max-width: 850px;">
+    <div v-else-if="gameStarted" class="w-100 py-2" style="max-width: 850px;">
       
-      <div class="d-flex flex-column sm-flex-row align-start sm-align-center justify-space-between mb-4 px-2 ga-2">
-        <div class="d-flex align-center text-caption font-weight-bold text-slate-500">
-          <v-icon icon="mdi-account-circle" size="small" class="mr-1" />
-          <span v-if="!isStudentMode">Student: <span class="text-indigo ml-1 font-monospace">{{ activeStudentWebId }}</span></span>
-          <span v-else class="text-indigo">Self-Practice Session</span>
-          <span class="text-slate-300 mx-2">|</span>
-          <span class="text-xxs font-weight-bold text-slate-400 uppercase">Tier: {{ selectedLevel === 'easy' ? 'Int' : 'Adv' }}</span>
-        </div>
-
-        <div v-if="isStudentMode" class="bg-indigo-50 border border-indigo-100 rounded-lg pa-2 text-xxs text-indigo-900 font-weight-medium line-height-tight max-width-checklist">
-          📌 <strong>Task Checklist:</strong> Spoken X/Y axes titles parameters verification + requested verb modified cleanly to match temporal constraint rules.
-        </div>
-        
+      <div class="d-flex flex-column sm-flex-row align-start sm-align-center justify-space-between mb-3 px-2 ga-2">
         <div v-if="useTimer" class="d-flex align-center">
           <v-progress-circular :model-value="timerProgress" :size="40" :width="4" :color="timeLeft <= 4 ? 'error' : 'indigo'" class="font-weight-black font-monospace text-caption">
             {{ timeLeft }}
@@ -107,289 +59,121 @@
         </div>
       </div>
 
-      <v-card class="mx-auto rounded-2xl border border-slate-200 mb-6 overflow-hidden" elevation="3">
-        <v-row no-gutters>
-          <v-col cols="12" md="7" class="pa-6 bg-white d-flex align-center justify-center position-relative" style="min-height: 380px;">
-            <div v-show="!isFlipped || !isStudentMode" class="w-100 position-relative" style="height: 320px;">
-              <canvas ref="chartCanvasRef"></canvas>
-            </div>
-
-            <div v-if="isStudentMode && isFlipped" class="w-100 d-flex flex-column justify-center align-center text-center pa-6 bg-slate-50 absolute-fill-container animate-fade-in">
-              <v-avatar color="indigo-lighten-5" size="56" class="mb-3">
-                <v-icon icon="mdi-school" color="indigo" size="28" />
-              </v-avatar>
-              <h4 class="text-subtitle-2 font-weight-black text-slate-800 mb-2">Target Conjugation Guide</h4>
-              <v-card variant="flat" border class="pa-4 bg-white rounded-xl border-slate-200 w-100 text-left mb-4">
-                <div class="d-flex justify-space-between mb-1"><span class="text-caption text-slate-400">Infinitive base:</span><span class="font-monospace text-body-2 font-weight-bold text-slate-800">{{ prompt?.verbMetadata.inf }}</span></div>
-                <div class="d-flex justify-space-between mb-1"><span class="text-caption text-slate-400">Past simple frame:</span><span class="font-monospace text-body-2 font-weight-bold text-indigo-darken-1">{{ prompt?.verbMetadata.ps }}</span></div>
-                <div class="d-flex justify-space-between"><span class="text-caption text-slate-400">Past participle frame:</span><span class="font-monospace text-body-2 font-weight-bold text-amber-darken-3">{{ prompt?.verbMetadata.pp }}</span></div>
-              </v-card>
-              <span class="text-xxs font-weight-medium text-slate-400">Ensure your spoken trend description accurately integrated these parameter values.</span>
-            </div>
-          </v-col>
-
-          <v-col cols="12" md="5" class="pa-6 bg-slate-50 border-s border-slate-100 d-flex flex-column justify-center position-relative">
-            <div class="text-overline font-weight-bold text-slate-400 tracking-widest mb-1">Target Language</div>
-            
-            <div class="mb-4">
-              <span class="text-xxs font-weight-black text-slate-400 uppercase d-block mb-1">Verb</span>
-              <v-chip color="indigo-darken-1" size="large" class="text-white font-weight-black px-4 shadow-sm text-uppercase font-monospace">
-                {{ prompt?.verb }}
-              </v-chip>
-            </div>
-
-            <div class="mb-4">
-              <span class="text-xxs font-weight-black text-slate-400 uppercase d-block mb-1">Time Frame</span>
-              <v-chip color="amber-darken-2" size="large" class="text-white font-weight-black px-4 shadow-sm text-uppercase">
-                {{ prompt?.category }}
-              </v-chip>
-            </div>
-
-            <v-divider class="my-2 border-slate-200" />
-            
-            <div v-if="isStudentMode" class="mt-2 w-100">
-              <v-btn 
-                block size="large" :color="isFlipped ? 'grey-darken-1' : 'indigo-darken-1'" class="text-white font-weight-black rounded-xl text-none"
-                :prepend-icon="isFlipped ? 'mdi-chart-line' : 'mdi-eye'" @click="isFlipped = !isFlipped"
-              >
-                {{ isFlipped ? 'Show Chart graph' : 'Reveal Answer verification' }}
-              </v-btn>
-              <v-btn v-if="isFlipped" block size="large" variant="outlined" color="indigo" class="font-weight-black rounded-xl text-none mt-3" append-icon="mdi-arrow-right" @click="advanceStudentPractice">
-                Next Graph
-              </v-btn>
-            </div>
-            
-            <div v-else class="text-xxs text-slate-400 font-weight-medium leading-normal">
-              ℹ️ Evaluate student performance parameters manually using the console board dashboard below.
-            </div>
-          </v-col>
-        </v-row>
-      </v-card>
-
-      <div class="px-2 mb-6">
-        <div class="d-flex justify-space-between align-center text-caption font-weight-bold text-slate-400 mb-1 tracking-wider">
-          <span>PROGRESS</span>
-          <span class="font-monospace text-slate-600">{{ promptCounter }} / {{ totalRounds }} GRAPHS</span>
-        </div>
-        <v-progress-linear :model-value="progressValue" height="8" color="indigo" bg-color="slate-100" rounded />
+      <div class="d-flex justify-center mb-3">
+        <v-chip
+          link
+          color="indigo-darken-1"
+          variant="tonal"
+          class="font-weight-black px-4 py-2 text-none rounded-xl tracking-wide tap-hint-badge animate-pulse"
+          prepend-icon="mdi-rotate-3d-variant"
+          @click="isFlipped = !isFlipped"
+        >
+          {{ isFlipped ? 'Click card to view chart graph' : 'Click card to flip & check solution' }}
+        </v-chip>
       </div>
 
-      <v-card v-if="!isStudentMode" variant="flat" border class="pa-4 bg-slate-50 border-slate-200 rounded-xl">
-        <div class="text-overline text-center font-weight-black text-slate-400 tracking-widest d-block mb-3">Teacher Controls</div>
-        <div class="d-flex justify-center flex-wrap ga-3">
-          <v-btn color="success" variant="elevated" size="large" min-width="140" class="font-weight-black rounded-lg text-none" prepend-icon="mdi-check-circle" @click="evaluate('right')">Correct</v-btn>
-          <v-btn color="error" variant="elevated" size="large" min-width="140" class="font-weight-black rounded-lg text-none" prepend-icon="mdi-close-circle" @click="evaluate('wrong')">Incorrect</v-btn>
-          <v-btn color="grey-darken-2" variant="flat" size="large" min-width="140" class="text-white font-weight-black rounded-lg text-none" prepend-icon="mdi-help-circle-outline" @click="evaluate('unclear')">Unsure</v-btn>
-        </div>
-      </v-card>
-    </div>
-
-    <div v-else class="text-center w-100" style="max-width: 600px;">
-      <v-card variant="flat" border class="pa-6 rounded-xl border-slate-200 bg-white">
-        <div class="text-overline font-weight-black text-slate-400 tracking-widest mb-1">Session Complete</div>
-        <h2 class="text-h4 font-weight-black text-slate-800 mb-6">Evaluation Results</h2>
-
-        <v-row dense class="mb-6">
-          <v-col cols="12">
-            <v-card variant="flat" class="pa-4 rounded-xl bg-slate-50 border d-flex align-center justify-space-between">
-              <span class="text-subtitle-2 font-weight-bold text-slate-500">Overall Accuracy Rate</span>
-              <span class="text-h4 font-weight-black font-monospace text-slate-900">{{ score }}%</span>
-            </v-card>
-          </v-col>
-          <v-col cols="4">
-            <v-card variant="flat" border class="pa-3 rounded-lg border-emerald-100 bg-emerald-50/30 text-center">
-              <div class="text-emerald-700 font-weight-black text-h5">{{ rightCount }}</div>
-              <div class="text-xs font-weight-bold text-emerald-600 uppercase tracking-wide">Correct</div>
-            </v-card>
-          </v-col>
-          <v-col cols="4">
-            <v-card variant="flat" border class="pa-3 rounded-lg border-rose-100 bg-rose-50/30 text-center">
-              <div class="text-rose-700 font-weight-black text-h5">{{ wrongCount }}</div>
-              <div class="text-xs font-weight-bold text-rose-600 uppercase tracking-wide">Incorrect</div>
-            </v-card>
-          </v-col>
-          <v-col cols="4">
-            <v-card variant="flat" border class="pa-3 rounded-lg border-slate-200 bg-slate-50 text-center">
-              <div class="text-slate-700 font-weight-black text-h5">{{ unclearCount }}</div>
-              <div class="text-xs font-weight-bold text-slate-500 uppercase tracking-wide">Unsure</div>
-            </v-card>
-          </v-col>
-        </v-row>
-
-        <div v-if="flaggedPrompts.length && !isStudentMode" class="text-left mb-6">
-          <div class="text-overline font-weight-black text-rose-500 tracking-wider mb-2 d-flex align-center">
-            <v-icon icon="mdi-alert-circle-outline" size="small" class="mr-1" />
-            Flagged Items for Immediate Review
+      <div class="flashcard-scene" @click="isFlipped = !isFlipped">
+        <div class="flashcard-card" :class="{ 'is-card-flipped': isFlipped }">
+          
+          <div class="flashcard-face flashcard-front mx-auto rounded-2xl border border-slate-200 overflow-hidden elevation-4 bg-white">
+            <v-row no-gutters class="fill-height">
+              <v-col cols="12" md="9" class="pa-6 bg-white d-flex flex-column justify-center align-center position-relative" style="min-height: 380px;">
+                <div class="w-100 position-relative" style="height: 280px;">
+                  <canvas ref="chartCanvasRef"></canvas>
+                </div>
+                <div class="w-100 mt-2 bg-slate-900 text-white py-2 px-4 rounded-xl d-flex align-center justify-between shadow-sm">
+                  <span class="text-xxs font-weight-black uppercase tracking-wider text-slate-400">Time frame:</span>
+                  <span class="font-monospace font-weight-black text-body-2 text-amber-lighten-2 tracking-wide uppercase">{{ activeTimelineLabel }}</span>
+                </div>
+              </v-col>
+              
+              <v-col cols="12" md="3" class="pa-6 bg-slate-50 border-s border-slate-100 d-flex flex-column justify-center">
+                <div class="text-overline font-weight-bold text-slate-400 tracking-widest mb-2">Prompt</div>
+                <div class="mb-5">
+                  <span class="text-xxs font-weight-black text-slate-400 uppercase d-block mb-2">Verb</span>
+                  <v-chip color="indigo-darken-1" size="large" class="text-white font-weight-black px-4 shadow-sm font-monospace">{{ prompt?.verb }}</v-chip>
+                </div>
+                <div class="mb-5">
+                  <span class="text-xxs font-weight-black text-slate-400 uppercase d-block mb-2">Time frame</span>
+                  <v-chip color="amber-darken-2" size="large" class="text-white font-weight-black px-4 shadow-sm">{{ prompt?.category }}</v-chip>
+                </div>
+              </v-col>
+            </v-row>
           </div>
-          <v-card variant="flat" border max-height="180" class="overflow-y-auto rounded-lg border-slate-200 bg-slate-50 pa-1">
-            <v-list density="compact" bg-color="transparent">
-              <v-list-item v-for="(p, i) in flaggedPrompts" :key="i" class="px-3 min-height-dense">
-                <template v-slot:prepend>
-                  <v-icon icon="mdi-close" color="rose-500" size="14" class="mr-2" />
-                </template>
-                <span class="text-caption font-weight-bold text-slate-700">
-                  {{ p.question }} <span class="text-slate-400 font-weight-regular">({{ p.verb }} - {{ p.category }})</span>
-                </span>
-              </v-list-item>
-            </v-list>
-          </v-card>
-        </div>
 
-        <v-divider class="mb-6 border-slate-200" />
+          <div class="flashcard-face flashcard-back mx-auto rounded-2xl border border-slate-200 overflow-hidden elevation-4 bg-slate-50 pa-6 d-flex flex-column justify-center">
+            <div class="text-center w-100" style="max-width: 600px; margin: 0 auto;">
+              <h4 class="text-subtitle-1 font-weight-black text-slate-900 mb-1">Target Sentence</h4>
+              <p class="text-caption text-slate-400 mb-3">Compare your answer to this example:</p>
 
-        <div class="d-flex flex-column sm-flex-row ga-3 justify-center">
-          <v-btn color="indigo-darken-1" size="large" class="text-white font-weight-black rounded-xl text-none" prepend-icon="mdi-refresh" @click="resetGame">Replay Session</v-btn>
-          <v-btn variant="outlined" color="grey-darken-2" size="large" block class="font-weight-black rounded-xl text-none" prepend-icon="mdi-account-switch" :to="{ name: 'teacher-tools' }">Back to Tools</v-btn>
+              <v-card variant="flat" border class="pa-4 bg-indigo-50 border-indigo-200 rounded-xl text-left mb-3" @click.stop>
+                <span class="text-xxs font-weight-black text-indigo-700 uppercase tracking-wider d-block mb-1">Target answer</span>
+                <p class="text-body-1 font-weight-bold text-slate-900 font-monospace leading-normal mb-0">"{{ structuredRemediationSentence }}"</p>
+              </v-card>
+
+              <v-card variant="flat" border class="pa-3 bg-white rounded-lg border-slate-200 text-left mb-1" @click.stop>
+                <div class="d-flex justify-space-between mb-1"><span class="text-caption text-slate-400">Infinitive:</span><span class="font-monospace text-body-2 font-weight-bold text-slate-800">{{ prompt?.verbMetadata.inf }}</span></div>
+                <div v-if="prompt?.category === 'FINISHED'" class="d-flex justify-space-between"><span class="text-caption text-slate-400">Correct conjugation:</span><span class="font-monospace text-body-2 font-weight-bold text-indigo-darken-1">{{ prompt?.verbMetadata.ps }} (Past Simple)</span></div>
+                <div v-else class="d-flex justify-space-between"><span class="text-caption text-slate-400">Correct conjugation:</span><span class="font-monospace text-body-2 font-weight-bold text-amber-darken-3">has/have {{ prompt?.verbMetadata.pp }} (Present Perfect)</span></div>
+              </v-card>
+            </div>
+          </div>
+
         </div>
-      </v-card>
+      </div>
+
+      <v-row class="mt-4 align-center px-1" dense>
+        <v-col cols="4" class="text-left">
+          <div class="text-caption font-weight-bold text-slate-400 tracking-wider uppercase">
+            Progress: <span class="font-monospace text-slate-700 font-weight-black ml-1">{{ promptCounter }} / {{ totalRounds }}</span>
+          </div>
+        </v-col>
+        
+        <v-col cols="8" class="text-right d-flex justify-end ga-2">
+          <v-btn variant="outlined" color="indigo" class="rounded-xl font-weight-black text-none" size="large" :prepend-icon="'mdi-rotate-3d-variant'" @click.stop="isFlipped = !isFlipped">
+            {{ 'Flip Card' }}
+          </v-btn>
+          
+          <v-btn color="indigo" size="large" class="text-white font-weight-black rounded-xl text-none px-6" append-icon="mdi-arrow-right" @click.stop="advanceStudentPractice">
+            Next Card
+          </v-btn>
+        </v-col>
+
+        <v-col cols="12" class="mt-2">
+          <v-progress-linear :model-value="progressValue" height="6" color="indigo" bg-color="slate-100" rounded />
+        </v-col>
+      </v-row>
     </div>
 
+    <div v-node v-else class="text-center w-100" style="max-width: 500px; margin-top: 10vh;">
+      <v-card variant="flat" border class="pa-6 rounded-xl border-slate-200 bg-white">
+        <v-avatar color="indigo-lighten-5" size="64" class="mb-4"><v-icon icon="mdi-emoticon-happy-outline" color="indigo" size="32" /></v-avatar>
+        <h2 class="text-h5 font-weight-black text-slate-800 mb-2">Practice Session Finished!</h2>
+        <p class="text-caption text-slate-400 mb-6">Remember that reviewing irregular verb forms is a key part of mastering this exercise!</p>
+        <v-divider class="mb-6" />
+        <v-btn block color="indigo" size="large" class="text-white font-weight-black rounded-xl text-none" @click="resetGame">Practice Again</v-btn>
+      </v-card>
+    </div>
   </v-container>
-
-  <v-snackbar v-model="snackbar.show" :color="snackbar.color" timeout="1000" class="text-center">
-    <span class="font-weight-black tracking-widest uppercase text-caption">{{ snackbar.message }}</span>
-  </v-snackbar>
-
-  <v-dialog v-model="saving" persistent width="160">
-    <v-card class="d-flex justify-center align-center pa-6 rounded-xl bg-white">
-      <v-progress-circular indeterminate size="44" width="4" color="indigo" />
-      <span class="text-xxs font-weight-black tracking-widest text-slate-400 mt-3 uppercase">Saving Log</span>
-    </v-card>
-  </v-dialog>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, nextTick, onMounted, onBeforeUnmount } from "vue"
-import { useRoute } from "vue-router"
-import { useUserStore } from "@/stores/user"
-import api from "@/axios"
+import { ref, computed, nextTick, onBeforeUnmount } from "vue"
 import Chart from "chart.js/auto"
-
-const route = useRoute()
-const userStore = useUserStore()
-const props = defineProps<{
-  studentMode?: boolean
-  student?: string
-}>()
-
-const isStudentMode = computed(() => {
-  // 1. Check if the prop was passed (for direct embedding)
-  if (props.studentMode === true) return true;
-
-  // 2. Check the URL query string (Defensive check for string "true")
-  if (route.query.studentMode === "true") return true;
-
-  // 3. Check the UserStore role
-  return userStore.isStudentAccount; 
-});
-
-const activeStudentWebId = computed(() => {
-  if (props.student) return props.student
-  return (route.query.student as string) || ""
-})
+import { TIME_FRAMES, STRUCTURAL_VERBS, CHART_THEMES } from "@/assets/data/graphGameData"
 
 const selectedLevel = ref<"easy" | "hard">("easy")
-const isFlipped = ref(false)
-
-// Precise Control Tense Dictionaries Mappings Schema
-const TIME_FRAMES = {
-  finished: ["in 2022", "from 2014 to 2018", "last year"],
-  unfinished: ["so far this year", "since 2022", "in the last 5 years"]
-}
-
-// Full Irregular Forms Vocabulary Matrix
-const STRUCTURAL_VERBS = {
-  verbs_up: {
-    easy: [
-      { inf: "increase", ps: "increased", pp: "increased" },
-      { inf: "go up", ps: "went up", pp: "gone up" },
-      { inf: "climb", ps: "climbed", pp: "climbed" },
-      { inf: "explode", ps: "exploded", pp: "exploded" },
-      { inf: "rise", ps: "rose", pp: "risen" },
-      { inf: "grow", ps: "grew", pp: "grown" },
-      { inf: "jump", ps: "jumped", pp: "jumped" }
-    ],
-    hard: [
-      { inf: "shoot up", ps: "shot up", pp: "shot up" },
-      { inf: "skyrocket", ps: "skyrocketed", pp: "skyrocketed" }
-    ]
-  },
-  verbs_down: {
-    easy: [
-      { inf: "go down", ps: "went down", pp: "gone down" },
-      { inf: "drop", ps: "dropped", pp: "dropped" },
-      { inf: "plunge", ps: "plunged", pp: "plunged" },
-      { inf: "collapse", ps: "collapsed", pp: "collapsed" },
-      { inf: "fall", ps: "fell", pp: "fallen" },
-      { inf: "decrease", ps: "decreased", pp: "decreased" }
-    ],
-    hard: [
-      { inf: "shrink", ps: "shrank", pp: "shrunk" },
-      { inf: "slide", ps: "slid", pp: "slid" }
-    ]
-  },
-  verbs_flat: {
-    easy: [
-      { inf: "fluctuate", ps: "fluctuated", pp: "fluctuated" },
-      { inf: "remain steady", ps: "remained steady", pp: "remained steady" },
-      { inf: "stay the same", ps: "stayed the same", pp: "stayed the same" }
-    ],
-    hard: [
-      { inf: "range", ps: "ranged", pp: "ranged" }
-    ]
-  }
-}
-
-// 20-Theme Expanded Presentation Array Configuration
-const CHART_THEMES = [
-  { title: "Corporate Net Revenue Metrics", yAxis: "Revenue (in USD)", vector: "verbs_up" },
-  { title: "Quarterly Overhead Expenditure Run-rates", yAxis: "Expenses (in EUR)", vector: "verbs_down" },
-  { title: "Aggregated Gross Steel Output", yAxis: "Volume (in Tons)", vector: "verbs_flat" },
-  { title: "Weekly Commercial Cargo Shipping Weights", yAxis: "Mass (in Metric Tons)", vector: "verbs_up" },
-  { title: "Monthly Software License Delivery Assets", yAxis: "Volume (in Units)", vector: "verbs_up" },
-  { title: "Global Supply Chain Grain Storage Inventory", yAxis: "Weight (in Tons)", vector: "verbs_down" },
-  { title: "Crude Petroleum Daily Transport Yields", yAxis: "Volume (in Barrels)", vector: "verbs_flat" },
-  { title: "Raw Automotive Manufacturing Unit Assemblies", yAxis: "Output (in Units)", vector: "verbs_up" },
-  { title: "International Coffee Bean Bulk Freightage", yAxis: "Weight (in Kilograms)", vector: "verbs_down" },
-  { title: "Aggregated Regional Cloud Cluster Transactions", yAxis: "Operations (in Units)", vector: "verbs_flat" },
-  { title: "Biomedical Vaccine Shipment Loadings", yAxis: "Volume (in Vials)", vector: "verbs_up" },
-  { title: "Retail E-Commerce Finished Product Deliveries", yAxis: "Packages (in Units)", vector: "verbs_up" },
-  { title: "Industrial Aluminum Extrusion Foundry Run", yAxis: "Weight (in Tons)", vector: "verbs_down" },
-  { title: "Renewable Hydropower Station Current Inflow", yAxis: "Volume (in Liters)", vector: "verbs_flat" },
-  { title: "Continental Consumer Electronics Distribution", yAxis: "Value (in CHF)", vector: "verbs_up" },
-  { title: "Textile Spinning Cotton Raw Materials Consumption", yAxis: "Weight (in Bales)", vector: "verbs_down" },
-  { title: "Urban Residential Scrap Recycling Collections", yAxis: "Mass (in Tons)", vector: "verbs_flat" },
-  { title: "High-Performance Compute Server Component Batches", yAxis: "Hardware (in Units)", vector: "verbs_up" },
-  { title: "Aviation Liquid Kerosene Engine Fuel Imports", yAxis: "Volume (in Gallons)", vector: "verbs_down" },
-  { title: "Global Microchip Wafer Foundry Allocations", yAxis: "Silicon (in Units)", vector: "verbs_flat" }
-]
-
 const gameStarted = ref(false)
 const gameComplete = ref(false)
-const saving = ref(false)
 const promptCounter = ref(0)
 const totalRounds = ref(15)
 const remainingCount = ref(totalRounds.value)
-
-const rightCount = ref(0)
-const wrongCount = ref(0)
-const unclearCount = ref(0)
-const hasAnyAnswer = ref(false)
+const isFlipped = ref(false)
 
 const chartCanvasRef = ref<HTMLCanvasElement | null>(null)
 let activeChartInstance: Chart | null = null
-
-const prompt = ref<{ 
-  question: string; 
-  verb: string; 
-  correctAnswers: string[]; 
-  category: string;
-  verbMetadata: { inf: string; ps: string; pp: string };
-  themeMetadata: any
-} | null>(null)
-
+const prompt = ref<any>(null)
 const promptQueue = ref<any[]>([])
-const shownPrompts = ref<any[]>([])
 
 const useTimer = ref(false)
 const timeLeft = ref(25)
@@ -397,114 +181,84 @@ let timerInterval: ReturnType<typeof setInterval> | null = null
 
 const timerProgress = computed(() => (timeLeft.value / 25) * 100)
 const progressValue = computed(() => (promptCounter.value / totalRounds.value) * 100)
-const score = computed(() => rightCount.value !== 0 ? ((rightCount.value / totalRounds.value) * 100).toFixed(1) : 0)
-const flaggedPrompts = computed(() => shownPrompts.value.filter(p => p.is_correct !== true))
-const snackbar = reactive({ show: false, message: "", color: "success" })
+const activeTimelineLabel = computed(() => prompt.value?.correctAnswers[1] || "")
 
-function generateChartData(vectorType: string) {
-  const pointsCount = 6
-  const data: number[] = []
-  let currentVal = Math.floor(Math.random() * 60) + 30
+const structuredRemediationSentence = computed(() => {
+  if (!prompt.value) return ""
+  const subject = prompt.value.themeMetadata.subject || "the values"
+  const v = prompt.value.verbMetadata
+  const val1 = prompt.value.plottedValues.initial
+  const val2 = prompt.value.plottedValues.terminal
+  const timeline = activeTimelineLabel.value
 
-  for (let i = 0; i < pointsCount; i++) {
-    data.push(currentVal)
-    if (vectorType === "verbs_up") {
-      currentVal += Math.floor(Math.random() * 15) + 3
-    } else if (vectorType === "verbs_down") {
-      currentVal -= Math.floor(Math.random() * 15) + 3
-    } else {
-      currentVal += Math.floor(Math.random() * 24) - 12
-    }
-    if (currentVal < 5) currentVal = 10
+  if (prompt.value.category === "FINISHED") {
+    return `${capitalize(subject)} ${v.ps} from ${val1} to ${val2} ${timeline}.`
+  } else {
+    const finalVerb = v.inf === "go up" ? "gone up" : v.inf === "go down" ? "gone down" : (v.inf === "rise" ? "risen" : `${v.inf === "shoot up" ? "shot up" : (v.inf === "shrink" ? "shrunk" : (v.inf === "slide" ? "slid" : v.pp))}`)
+    const verbPhrase = ["increase","go up","climb","explode","rise","grow","jump","shoot up","skyrocket"].includes(v.inf) && v.inf !== "go up" && v.inf !== "rise" && v.inf !== "grow" ? `${v.ps}` : finalVerb
+    const perfectInflection = v.inf.includes("remain") || v.inf.includes("stay") || v.inf.includes("fluctuate") || v.inf.includes("range") || v.inf.includes("drop") || v.inf.includes("plunge") || v.inf.includes("collapse") || v.inf.includes("decrease") || v.inf.includes("fall") ? v.pp : verbPhrase
+    return `${capitalize(subject)} has ${perfectInflection} from ${val1} to ${val2} ${timeline}.`
   }
-  return data
+})
+
+function capitalize(s: string) { return s.charAt(0).toUpperCase() + s.slice(1) }
+
+function generateIsolatedChartData(vectorType: string) {
+  const data = Array(6).fill(null)
+  let val1 = Math.floor(Math.random() * 40) + 45, val2 = val1
+  if (vectorType === "verbs_up") val2 = val1 + Math.floor(Math.random() * 25) + 15
+  else if (vectorType === "verbs_down") val2 = val1 - Math.floor(Math.random() * 25) - 15
+  else val2 = val1 + (Math.floor(Math.random() * 10) - 5)
+  if (val2 < 5) val2 = 12
+  data[1] = val1; data[4] = val2
+  return { dataset: data, initial: val1, terminal: val2 }
 }
 
-async function renderDynamicGraph(theme: any, verb: string) {
-  await nextTick()
-  if (!chartCanvasRef.value) return
+async function renderDynamicGraph(theme: any, verb: string, chartType: 'line' | 'bar') {
+  await nextTick(); if (!chartCanvasRef.value) return
+  if (activeChartInstance) { activeChartInstance.destroy(); activeChartInstance = null }
+  const ctx = chartCanvasRef.value.getContext("2d"); if (!ctx) return
 
-  if (activeChartInstance) {
-    activeChartInstance.destroy()
-    activeChartInstance = null
-  }
-
-  const ctx = chartCanvasRef.value.getContext("2d")
-  if (!ctx) return
-
-  const datasetValues = generateChartData(theme.vector)
-  const chartType = Math.random() > 0.5 ? "line" : "bar"
+  const backgroundColors = theme.generatedPoints.map((v: any) => v !== null ? "#f43f5e" : "rgba(99, 102, 241, 0.15)")
+  const borderColors = theme.generatedPoints.map((v: any) => v !== null ? "#e11d48" : "#6366f1")
 
   activeChartInstance = new Chart(ctx, {
     type: chartType,
     data: {
       labels: theme.xAxisLabels,
       datasets: [{
-        label: theme.yAxis,
-        data: datasetValues,
-        backgroundColor: chartType === "bar" ? "rgba(79, 70, 229, 0.75)" : "transparent",
-        borderColor: "#4f46e5",
-        borderWidth: 4,
-        tension: 0.35,
-        pointBackgroundColor: "#e11d48",
-        pointRadius: 5
+        label: theme.yAxis, data: theme.generatedPoints.map((v: any) => v === null && chartType === 'bar' ? 0 : v),
+        borderColor: chartType === 'line' ? "#6366f1" : borderColors, backgroundColor: chartType === 'line' ? "transparent" : backgroundColors,
+        borderWidth: 4, tension: 0, spanGaps: chartType === 'line', pointBackgroundColor: "#f43f5e", pointRadius: chartType === 'line' ? 9 : 0
       }]
     },
     options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        title: { display: true, text: theme.title, font: { size: 15, weight: "bold" }, color: "#0f172a" },
-        legend: { display: false }
-      },
-      scales: {
-        y: { grid: { color: "#f1f5f9" }, ticks: { color: "#64748b" }, beginAtZero: true },
-        x: { grid: { display: false }, ticks: { color: "#64748b", font: { size: 10 } } }
-      }
+      responsive: true, maintainAspectRatio: false,
+      plugins: { title: { display: true, text: theme.title, font: { size: 15, weight: "bold" }, color: "#0f172a" }, legend: { display: false } },
+      scales: { y: { grid: { color: "#f1f5f9" }, ticks: { color: "#64748b" }, beginAtZero: true }, x: { grid: { display: false }, ticks: { display: false } } }
     }
   })
 }
 
-function startGame() {
-
-  gameStarted.value = true
-  gameComplete.value = false
-  buildPromptQueue()
-  loadNextPrompt()
-}
+function startGame() { gameStarted.value = true; gameComplete.value = false; buildPromptQueue(); loadNextPrompt() }
 
 function buildPromptQueue() {
-  const queue = []
-  const randomizedThemes = shuffle([...CHART_THEMES])
-  
+  const queue = []; const randomizedThemes = shuffle([...CHART_THEMES])
   for (let i = 0; i < totalRounds.value; i++) {
     const theme = randomizedThemes[i % randomizedThemes.length]
-    
     const vectorGroup = (STRUCTURAL_VERBS as any)[theme.vector]
     const list = vectorGroup[selectedLevel.value] || vectorGroup["easy"]
     const verbObj = list[Math.floor(Math.random() * list.length)]
-    
     const isFinishedTime = Math.random() > 0.5
     const categoryKey = isFinishedTime ? "finished" : "unfinished"
-    const timeFrameStrings = TIME_FRAMES[categoryKey]
-    const chosenTimeFrameLabel = timeFrameStrings[Math.floor(Math.random() * timeFrameStrings.length)]
+    const chosenTimeFrameLabel = TIME_FRAMES[categoryKey][Math.floor(Math.random() * TIME_FRAMES[categoryKey].length)]
+    const chartCalculations = generateIsolatedChartData(theme.vector)
+    const targetedChartType = Math.random() > 0.5 ? 'line' : 'bar'
 
-    const targetXLabels = isFinishedTime 
-      ? ["Jan", "Mar", "Jun", "Sep", "Nov", chosenTimeFrameLabel]
-      : ["Wk 1", "Wk 2", "Wk 3", "Wk 4", "Wk 5", chosenTimeFrameLabel]
-
-    const augmentedTheme = {
-      ...theme,
-      xAxisLabels: targetXLabels
-    }
-    
     queue.push({
-      question: augmentedTheme.title,
-      verb: verbObj.inf,
-      correctAnswers: [augmentedTheme.yAxis, chosenTimeFrameLabel],
-      category: categoryKey.toUpperCase(),
-      verbMetadata: verbObj,
-      themeMetadata: augmentedTheme
+      question: theme.title, verb: verbObj.inf, correctAnswers: [theme.yAxis, chosenTimeFrameLabel], category: categoryKey.toUpperCase(),
+      verbMetadata: verbObj, themeMetadata: { ...theme, xAxisLabels: ["A", "Initial", "C", "D", "Current", "F"], generatedPoints: chartCalculations.dataset },
+      plottedValues: { initial: chartCalculations.initial, terminal: chartCalculations.terminal }, chartType: targetedChartType
     })
   }
   promptQueue.value = queue
@@ -512,193 +266,76 @@ function buildPromptQueue() {
 
 function loadNextPrompt() {
   isFlipped.value = false
-  if (!promptQueue.value.length || promptCounter.value >= totalRounds.value) {
-    endGame()
-    return
-  }
-
+  if (!promptQueue.value.length || promptCounter.value >= totalRounds.value) { gameComplete.value = true; gameStarted.value = false; return }
   prompt.value = promptQueue.value.shift() || null
-  promptCounter.value++
-  remainingCount.value--
-
-  if (prompt.value) {
-    renderDynamicGraph(prompt.value.themeMetadata, prompt.value.verb)
-  }
-
+  promptCounter.value++; remainingCount.value--
+  if (prompt.value) renderDynamicGraph(prompt.value.themeMetadata, prompt.value.verb, prompt.value.chartType)
   if (useTimer.value) startTimer()
 }
 
-function advanceStudentPractice() {
-  rightCount.value++ 
-  loadNextPrompt()
-}
+function advanceStudentPractice() { loadNextPrompt() }
 
 function startTimer() {
-  stopTimer()
-  timeLeft.value = 25
-  timerInterval = setInterval(() => {
-    timeLeft.value--
-    if (timeLeft.value <= 0) {
-      stopTimer()
-      if (isStudentMode.value) loadNextPrompt()
-      else evaluate('unclear')
-    }
-  }, 1000)
+  stopTimer(); timeLeft.value = 25
+  timerInterval = setInterval(() => { timeLeft.value--; if (timeLeft.value <= 0) { stopTimer(); isFlipped.value = true } }, 1000)
 }
+function stopTimer() { if (timerInterval) { clearInterval(timerInterval); timerInterval = null } }
+function resetGame() { gameStarted.value = false; gameComplete.value = false; promptCounter.value = 0; }
+// Knuth shuffle alignment sequence
+function shuffle<T>(array: T[]): T[] { const a = [...array]; for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]] }; return a }
 
-function stopTimer() {
-  if (timerInterval) {
-    clearInterval(timerInterval)
-    timerInterval = null
-  }
-}
-
-function evaluate(type: "right" | "wrong" | "unclear") {
-  stopTimer()
-  hasAnyAnswer.value = true
-  if (!prompt.value) return
-
-  shownPrompts.value.push({
-    question: prompt.value.question,
-    verb: prompt.value.verb,
-    correctAnswers: prompt.value.correctAnswers,
-    category: prompt.value.category,
-    is_correct: type === "right" ? true : type === "wrong" ? false : null,
-  })
-
-  if (type === "right") rightCount.value++
-  else if (type === "wrong") wrongCount.value++
-  else unclearCount.value++
-
-  snackbar.message = type === "right" ? "Correct" : type === "wrong" ? "Incorrect" : "Passed"
-  snackbar.color = type === "right" ? "success" : type === "wrong" ? "error" : "grey-darken-2"
-  snackbar.show = true
-  loadNextPrompt()
-}
-
-function resetCounts() {
-  promptCounter.value = 0
-  remainingCount.value = totalRounds.value
-  rightCount.value = 0
-  wrongCount.value = 0
-  unclearCount.value = 0
-  shownPrompts.value = []
-}
-
-function resetGame() {
-  gameStarted.value = false
-  gameComplete.value = false
-  resetCounts()
-}
-
-function shuffle<T>(array: T[]): T[] {
-  const a = [...array]
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1))
-    ;[a[i], a[j]] = [a[j], a[i]]
-  }
-  return a
-}
-
-async function endGame() {
-  stopTimer()
-  if (activeChartInstance) {
-    activeChartInstance.destroy()
-    activeChartInstance = null
-  }
-
-  if (isStudentMode.value) {
-    gameComplete.value = true
-    gameStarted.value = false
-    return
-  }
-
-  if (!hasAnyAnswer.value) {
-    gameComplete.value = false
-    gameStarted.value = false
-    return
-  }
-  
-  gameComplete.value = true
-  saving.value = true
-
-  const rounds = shownPrompts.value.map((r, index) => ({
-    question: `Describe Trend: ${r.question}`,
-    pronoun: null, image: null, label: r.verb, correct_answer: r.correctAnswers, prompt_number: index + 1,
-    user_answer: null, is_correct: r.is_correct, out_of_time: false, elapsed_time: null, typo: false, typo_requested: false, typo_accepted: null,
-  }))
-
-  const tierSuffix = selectedLevel.value === "easy" ? "Int" : "Adv"
-  const payload = {
-    game_name: `Graph Generator Challenge - ${tierSuffix}`,
-    student_web_id: activeStudentWebId.value,
-    total_rounds: totalRounds.value,
-    correct_count: rightCount.value,
-    wrong_count: wrongCount.value,
-    started_at: new Date().toISOString(),
-    finished_at: new Date().toISOString(),
-    total_time: 0, avg_time_per_prompt: 0,
-    rounds,
-  }
-
-  try {
-    await api.post("/other-games-sessions/", payload, { headers: { "Content-Type": "application/json" } })
-  } catch (err) {
-    console.error("Session sync transaction failed:", err)
-  }
-  saving.value = false
-  gameStarted.value = false
-}
-
-onMounted(async () => {
-  // Wait for user to be loaded if the store is empty
-  if (!userStore.userLoaded) {
-    await userStore.ensureUserLoaded();
-  }
-  console.log("Verified Student Mode:", isStudentMode.value);
-});
-
-onBeforeUnmount(() => {
-  stopTimer()
-  if (activeChartInstance) {
-    activeChartInstance.destroy()
-  }
-})
+onBeforeUnmount(() => { stopTimer(); if (activeChartInstance) activeChartInstance.destroy() })
 </script>
 
 <style scoped>
-.max-width-game-container {
-  max-width: 1200px;
-  margin: 0 auto;
+.max-width-game-container { max-width: 1200px; margin: 0 auto; }
+.max-width-checklist { max-width: 440px; }
+
+/* 🌟 EXTENDED 3D FLIP ARENA PLATFORM INTERFACES */
+.flashcard-scene { 
+  width: 100%; 
+  perspective: 2000px; 
+  cursor: pointer;
 }
-.max-width-checklist {
-  max-width: 440px;
+.flashcard-card { 
+  width: 100%; 
+  height: 460px;
+  position: relative; 
+  transform-style: preserve-3d; 
+  transition: transform 0.75s cubic-bezier(0.19, 1, 0.22, 1); 
 }
-.absolute-fill-container {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 10;
+.flashcard-card.is-card-flipped { 
+  transform: rotateY(180deg); 
 }
-.animate-fade-in {
-  animation: fadeIn 0.2s ease-in-out forwards;
+.flashcard-face { 
+  width: 100%; 
+  height: 460px;
+  backface-visibility: hidden; 
+  -webkit-backface-visibility: hidden; 
 }
-@keyframes fadeIn {
-  from { opacity: 0; transform: scale(0.98); }
-  to { opacity: 1; transform: scale(1); }
+.flashcard-back { 
+  position: absolute; 
+  top: 0; 
+  left: 0; 
+  right: 0; 
+  bottom: 0; 
+  z-index: 2; 
+  transform: rotateY(180deg); 
 }
-.line-height-md {
-  line-height: 1.5 !important;
+
+/* UI Micro Animations */
+.tap-hint-badge {
+  transition: transform 0.2s ease;
 }
-.min-height-dense {
-  min-height: 32px !important;
+.tap-hint-badge:hover {
+  transform: scale(1.04);
 }
-.text-xxs {
-  font-size: 0.7rem !important;
+.animate-pulse {
+  animation: pulse 2.5s infinite ease-in-out;
 }
-.min-vh-100 {
-  min-height: 100vh !important;
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.85; }
 }
+.text-xxs { font-size: 0.7rem !important; }
 </style>

@@ -49,7 +49,6 @@
         <RouterLink 
           :to="{ 
             name: 'graph-generator', 
-            query: { studentMode: 'true' } 
           }" 
           class="image-tile"
         >
