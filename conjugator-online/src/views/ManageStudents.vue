@@ -361,33 +361,50 @@
   </v-card>
 </v-dialog>
 
-    <v-dialog v-model="assessmentDialog" max-width="1200px" scrollable>
-      <v-card rounded="lg" class="elevation-24">
-        <v-card-title class="pa-4 bg-teal-lighten-1 text-white d-flex align-center justify-space-between">
+<v-dialog v-model="assessmentDialog" max-width="1200px" scrollable>
+      <v-card rounded="lg" elevation="4" class="d-flex flex-column" style="max-height: 90vh;">
+        
+        <v-card-title class="pa-4 bg-teal-lighten-1 text-white d-flex align-center justify-space-between flex-none">
           <div class="d-flex align-center">
             <v-icon icon="mdi-account-voice" class="mr-2"></v-icon>
-            Linguistic Diagnostic Matrix: 
+            Linguistic Assessment: 
             <span class="mx-2 font-weight-black text-amber-lighten-3">{{ activeAssessmentStudent?.initials }}</span> 
             <v-chip size="small" variant="outlined" color="white" class="ml-2 font-monospace">{{ activeAssessmentStudent?.web_id }}</v-chip>
           </div>
           <v-btn icon="mdi-close" variant="text" color="white" @click="assessmentDialog = false"></v-btn>
         </v-card-title>
         
-        <v-card-text class="pa-0 bg-grey-lighten-4">
-          <v-row no-gutters>
+        <v-card-text class="pa-0 bg-grey-lighten-4 flex-grow-1 overflow-y-auto" style="height: 600px;">
+          <v-row no-gutters class="fill-height">
             
-            <v-col cols="12" md="8" class="pa-4 bg-white overflow-y-auto" style="max-height: 680px;">
+            <v-col cols="12" md="8" class="pa-4 bg-white overflow-y-auto fill-height">
               <v-form ref="assessmentFormRef">
+                
                 <div class="row g-2 mb-2">
                   <div class="col-sm-7">
-                    <v-select v-model="assessmentForm.latest_assessment" :items="assessmentStageItems" label="Assessment Stage" variant="outlined" density="compact" hide-details color="purple"></v-select>
+                    <v-select 
+                      v-model="assessmentForm.latest_assessment" 
+                      :items="assessmentStageItems" 
+                      label="Assessment Stage" 
+                      variant="outlined" 
+                      density="compact" 
+                      hide-details 
+                      color="purple"
+                    />
                   </div>
                   <div class="col-sm-5">
-                    <v-checkbox v-model="assessmentForm.create_snapshot" label="Take snapshot of last assessment" color="warning" hide-details density="compact" class="px-2 border rounded border-orange-lighten-3 bg-orange-lighten-5 text-caption font-weight-medium"></v-checkbox>
+                    <v-checkbox 
+                      v-model="assessmentForm.create_snapshot" 
+                      label="Take snapshot of last assessment" 
+                      color="warning" 
+                      hide-details 
+                      density="compact" 
+                      class="px-2 border rounded border-orange-lighten-3 bg-orange-lighten-5 text-caption font-weight-medium"
+                    />
                   </div>
                 </div>
                 
-                <v-divider class="my-3"></v-divider>
+                <v-divider class="my-3" />
 
                 <div v-for="metric in metricSchema" :key="metric.field" class="mb-4 pa-3 rounded border bg-grey-lighten-5">
                   <div class="d-flex justify-space-between align-center mb-1">
@@ -403,35 +420,62 @@
                   </div>
 
                   <div class="d-flex px-1 mb-2 align-center justify-space-between text-center font-weight-black text-uppercase" style="font-size: 0.65rem; gap: 4px;">
-                    <div class="flex-grow-1 pa-1 border rounded bg-amber-lighten-5 text-amber-darken-4" 
-                        :class="{'border-amber-darken-2 elevation-2 font-weight-black': assessmentForm[metric.field] >= 1 && assessmentForm[metric.field] <= 3}">
+                    <div 
+                      class="flex-grow-1 pa-1 border rounded bg-amber-lighten-5 text-amber-darken-4" 
+                      :class="{'border-amber-darken-2 elevation-2 font-weight-black': assessmentForm[metric.field] >= 1 && assessmentForm[metric.field] <= 3}"
+                    >
                       Beginner (1-3)
                     </div>
-                    <div class="flex-grow-1 pa-1 border rounded bg-blue-lighten-5 text-blue-darken-4" 
-                        :class="{'border-blue-darken-2 elevation-2 font-weight-black': assessmentForm[metric.field] >= 4 && assessmentForm[metric.field] <= 6}">
+                    <div 
+                      class="flex-grow-1 pa-1 border rounded bg-blue-lighten-5 text-blue-darken-4" 
+                      :class="{'border-blue-darken-2 elevation-2 font-weight-black': assessmentForm[metric.field] >= 4 && assessmentForm[metric.field] <= 6}"
+                    >
                       Intermediate (4-6)
                     </div>
-                    <div class="flex-grow-1 pa-1 border rounded bg-purple-lighten-5 text-purple-darken-4" 
-                        :class="{'border-purple-darken-2 elevation-2 font-weight-black': assessmentForm[metric.field] >= 7 && assessmentForm[metric.field] <= 8}">
+                    <div 
+                      class="flex-grow-1 pa-1 border rounded bg-purple-lighten-5 text-purple-darken-4" 
+                      :class="{'border-purple-darken-2 elevation-2 font-weight-black': assessmentForm[metric.field] >= 7 && assessmentForm[metric.field] <= 8}"
+                    >
                       Upper-Int (7-8)
                     </div>
-                    <div class="flex-grow-1 pa-1 border rounded bg-green-lighten-5 text-green-darken-4" 
-                        :class="{'border-green-darken-2 elevation-2 font-weight-black': assessmentForm[metric.field] >= 9 && assessmentForm[metric.field] <= 10}">
+                    <div 
+                      class="flex-grow-1 pa-1 border rounded bg-green-lighten-5 text-green-darken-4" 
+                      :class="{'border-green-darken-2 elevation-2 font-weight-black': assessmentForm[metric.field] >= 9 && assessmentForm[metric.field] <= 10}"
+                    >
                       Advanced (9-10)
                     </div>
                   </div>
                   
-                  <v-slider v-model="assessmentForm[metric.field]" min="1" max="10" step="1" thumb-label="always" show-ticks="always" tick-size="3" color="teal-lighten-1" hide-details class="px-1 mt-1"></v-slider>
+                  <v-slider 
+                    v-model="assessmentForm[metric.field]" 
+                    min="1" 
+                    max="10" 
+                    step="1" 
+                    thumb-label="always" 
+                    show-ticks="always" 
+                    tick-size="3" 
+                    color="teal-lighten-1" 
+                    hide-details 
+                    class="px-1 mt-1"
+                  />
                   
-                  <v-textarea v-model="assessmentForm[metric.commentField]" label="Observational justification & error logs..." variant="outlined" rows="2" density="compact" hide-details class="mt-3 text-caption bg-white"></v-textarea>
+                  <v-textarea 
+                    v-model="assessmentForm[metric.commentField]" 
+                    label="Justification and description..." 
+                    variant="outlined" 
+                    rows="2" 
+                    density="compact" 
+                    hide-details 
+                    class="mt-3 text-caption bg-white"
+                  />
                 </div>
               </v-form>
             </v-col>
 
-            <v-col cols="12" md="4" class="pa-4 border-s bg-grey-lighten-5 overflow-y-auto" style="max-height: 680px;">
+            <v-col cols="12" md="4" class="pa-4 border-s bg-grey-lighten-5 overflow-y-auto fill-height">
               <div class="sticky-top" style="top: 0;">
                 <div class="text-overline font-weight-bold text-grey-darken-2 mb-2 tracking-wide">
-                  <v-icon icon="mdi-chart-box-outline" class="mr-1" size="small"></v-icon>Projected profile
+                  <v-icon icon="mdi-chart-box-outline" class="mr-1" size="small" />Projected profile
                 </div>
                 
                 <v-card variant="flat" color="white" border rounded="lg" class="pa-3 shadow-sm border-grey-lighten-2 mb-3">
@@ -458,13 +502,17 @@
                     <div class="col-6">
                       <div class="border rounded py-1.5 bg-grey-lighten-5">
                         <span class="text-grey text-xs d-block">Content Avg</span>
-                        <strong class="text-body-2 font-monospace text-dark">{{ ((Number(assessmentForm.linguistic_precision || 1) + Number(assessmentForm.expressive_range || 1)) / 2).toFixed(1) }}</strong>
+                        <strong class="text-body-2 font-monospace text-dark">
+                          {{ ((Number(assessmentForm.linguistic_precision || 1) + Number(assessmentForm.expressive_range || 1)) / 2).toFixed(1) }}
+                        </strong>
                       </div>
                     </div>
                     <div class="col-6">
                       <div class="border rounded py-1.5 bg-grey-lighten-5">
                         <span class="text-grey text-xs d-block">Form Avg</span>
-                        <strong class="text-body-2 font-monospace text-dark">{{ ((Number(assessmentForm.communicative_flow || 1) + Number(assessmentForm.phonetic_clarity || 1)) / 2).toFixed(1) }}</strong>
+                        <strong class="text-body-2 font-monospace text-dark">
+                          {{ ((Number(assessmentForm.communicative_flow || 1) + Number(assessmentForm.phonetic_clarity || 1)) / 2).toFixed(1) }}
+                        </strong>
                       </div>
                     </div>
                   </div>
@@ -475,13 +523,22 @@
           </v-row>
         </v-card-text>
         
-        <v-card-actions class="pa-4 bg-grey-lighten-3 justify-end border-t">
-          <v-btn variant="text" color="grey-darken-2" class="px-4 font-weight-bold" @click="assessmentDialog = false">Cancel</v-btn>
-          <v-btn color="teal-lighten-1" variant="elevated" class="px-6 font-weight-bold shadow-sm" :loading="loading" @click="submitLinguisticAssessment">
-            <v-icon icon="mdi-content-save-check" start></v-icon>
+        <v-card-actions class="pa-4 bg-grey-lighten-3 justify-end border-t flex-none" style="position: relative; z-index: 10;">
+          <v-btn variant="text" color="grey-darken-2" class="px-4 font-weight-bold" @click="assessmentDialog = false">
+            Cancel
+          </v-btn>
+          <v-btn 
+            color="teal-lighten-1" 
+            variant="elevated" 
+            class="px-6 font-weight-bold shadow-sm" 
+            :disabled="loading"
+            @click="submitLinguisticAssessment"
+          >
+            <v-icon icon="mdi-content-save-check" start />
             Save Assessment
           </v-btn>
         </v-card-actions>
+        
       </v-card>
     </v-dialog>
 
@@ -531,6 +588,7 @@ const toast = ref({ show: false, message: '', color: 'success' })
 
 // Linguistic profiles states
 const assessmentDialog = ref(false)
+const assessmentSaving = ref(false) // 👈 Dedicated to submit process
 const assessmentFormRef = ref()
 const matrixSearch = ref('')
 const matrixAssessmentFilter = ref<string | null>(null)
@@ -866,61 +924,91 @@ const getScoreBadgeColor = (score?: number) => {
     LINGUISTIC PROFILEs ASSESSMENT 
    ========================================================= */
 const openAssessmentPanel = (student: any) => {
+  console.log("📥 [Debug] Opening Assessment Panel for student object:", student);
   activeAssessmentStudent.value = student;
-  const profile = student.linguistic_profile || {};
   
-  // Pre-populate reactive form parameters gracefully with current dataset state
+  // 🌟 FIX: Pull fields directly from the student object, not an imaginary sub-profile!
   assessmentForm.value = {
-    latest_assessment: profile.latest_assessment || '',
-    create_snapshot: !!profile.latest_assessment,
-    linguistic_precision: profile.linguistic_precision || 5,
-    linguistic_precision_comment: profile.linguistic_precision_comment || '',
-    phonetic_clarity: profile.phonetic_clarity || 5,
-    phonetic_clarity_comment: profile.phonetic_clarity_comment || '',
-    communicative_flow: profile.communicative_flow || 5,
-    communicative_flow_comment: profile.communicative_flow_comment || '',
-    expressive_range: profile.expressive_range || 5,
-    expressive_range_comment: profile.expressive_range_comment || ''
+    latest_assessment: student.latest_assessment || '',
+    create_snapshot: !!student.latest_assessment,
+    linguistic_precision: student.linguistic_precision ?? 5,
+    linguistic_precision_comment: student.linguistic_precision_comment || '',
+    phonetic_clarity: student.phonetic_clarity ?? 5,
+    phonetic_clarity_comment: student.phonetic_clarity_comment || '',
+    communicative_flow: student.communicative_flow ?? 5,
+    communicative_flow_comment: student.communicative_flow_comment || '',
+    expressive_range: student.expressive_range ?? 5,
+    expressive_range_comment: student.expressive_range_comment || ''
   };
+  
+  console.log("📋 [Debug] Form state fully populated:", assessmentForm.value);
   assessmentDialog.value = true;
 };
 
 const submitLinguisticAssessment = async () => {
-  if (!activeAssessmentStudent.value) return;
+  console.log("⚡ [Button Click] submitLinguisticAssessment triggered!");
+  console.log("🆔 Target Student state context:", activeAssessmentStudent.value);
+
+  if (!activeAssessmentStudent.value) {
+    console.error("❌ Guard Failed: activeAssessmentStudent is null or undefined!");
+    return;
+  }
+
   loading.value = true;
-  
   try {
     const studentId = activeAssessmentStudent.value.id;
+    console.log("📝 Preparing to submit linguistic assessment for student ID:", studentId);
     
-    // 🌟 If snapshot checkbox is flagged, execute backend snapshot generation hook sequence first
-    if (assessmentForm.value.create_snapshot && activeAssessmentStudent.value.linguistic_profile?.latest_assessment) {
-      // Matches your custom django view conditional trace path action: student.snapshot_linguistic_profile()
-      await api.post(`/students/${studentId}/snapshot_profile/`);
-    }
-
-    // Prepare matching payload data structure 
+    // 🌟 FIX 1: Flatten the payload completely. No 'linguistic_profile' object wrapper!
+    // This maps directly to your StudentLinguisticProfileUpdateSerializer fields.
     const payload = {
-      linguistic_profile: {
-        latest_assessment: assessmentForm.value.latest_assessment,
-        linguistic_precision: parseInt(assessmentForm.value.linguistic_precision, 10),
-        linguistic_precision_comment: assessmentForm.value.linguistic_precision_comment,
-        phonetic_clarity: parseInt(assessmentForm.value.phonetic_clarity, 10),
-        phonetic_clarity_comment: assessmentForm.value.phonetic_clarity_comment,
-        communicative_flow: parseInt(assessmentForm.value.communicative_flow, 10),
-        communicative_flow_comment: assessmentForm.value.communicative_flow_comment,
-        expressive_range: parseInt(assessmentForm.value.expressive_range, 10),
-        expressive_range_comment: assessmentForm.value.expressive_range_comment
-      }
+      latest_assessment: assessmentForm.value.latest_assessment || '',
+      
+      // Inject your write_only snapshot boolean flag directly into the payload 
+      // instead of hitting a separate endpoint first! Your update method handles this.
+      snapshot: !!assessmentForm.value.create_snapshot,
+
+      linguistic_precision: Number(assessmentForm.value['linguistic_precision'] ?? 5),
+      linguistic_precision_comment: assessmentForm.value['linguistic_precision_comment'] || '',
+      
+      phonetic_clarity: Number(assessmentForm.value['phonetic_clarity'] ?? 5),
+      phonetic_clarity_comment: assessmentForm.value['phonetic_clarity_comment'] || '',
+      
+      communicative_flow: Number(assessmentForm.value['communicative_flow'] ?? 5),
+      communicative_flow_comment: assessmentForm.value['communicative_flow_comment'] || '',
+      
+      expressive_range: Number(assessmentForm.value['expressive_range'] ?? 5),
+      expressive_range_comment: assessmentForm.value['expressive_range_comment'] || ''
     };
 
-    // Commit parameters updates straight into backend views API models viewsets paths
-    await api.patch(`/students/${studentId}/`, payload);
-    showToast(`Linguistic matrix score locked down for ${activeAssessmentStudent.value.web_id}`);
+    console.log("🚀 Dispatching Flat Data Payload:", payload);
+
+    const endpointRouteKey = 'linguistic-profiles';
+    
+    const response = await api.patch(`/${endpointRouteKey}/${studentId}/`, payload, {
+      headers: { 'Content-Type': 'application/json' }
+    });
+
+    console.log("🎯 Database sync successful:", response.data);
+
+    showToast(`Linguistic metrics successfully locked down for ${activeAssessmentStudent.value.web_id}`);
     assessmentDialog.value = false;
-    await fetchData(); // Pull fresh dataset records variables down the pipe
+    await fetchData(); 
+    
   } catch (err: any) {
-    console.error("Assessment patch sync rejected:", err);
-    showToast('Failed to write and synchronize evaluation parameters matrix.', 'error');
+    console.error("❌ Assessment sync completely rejected:", {
+      status: err.response?.status,
+      data: err.response?.data
+    });
+    
+    const errorDetails = err.response?.data;
+    if (errorDetails && typeof errorDetails === 'object') {
+      // Pick out explicit validation failures from individual metrics rules if caught
+      const firstErrorMessage = Object.values(errorDetails)[0];
+      showToast(`Validation Failure: ${firstErrorMessage}`, 'error');
+    } else {
+      showToast('Failed to serialize and write evaluation criteria matrix.', 'error');
+    }
   } finally {
     loading.value = false;
   }
@@ -954,11 +1042,17 @@ watch(
 
 // 🌟 ADD THIS: Reactive mirror engine of the Student model categorization flow
 const liveCalculatedProfileType = computed(() => {
-  // Extract scores or default to 1 matching form min constraints
-  const precision = Number(assessmentForm.value.linguistic_precision || 1);
-  const clarity = Number(assessmentForm.value.phonetic_clarity || 1);
-  const flow = Number(assessmentForm.value.communicative_flow || 1);
-  const range_score = Number(assessmentForm.value.expressive_range || 1);
+  // Defensive check: if the form hasn't been initialized yet, return a safe default
+  if (!assessmentForm.value) {
+    return { type: 'Initializing...', emoji: '⏳', advice: '', description: '' };
+  }
+
+  console.log("🧮 [Debug] Re-calculating personality type from form parameters...");
+
+  const precision = Number(assessmentForm.value.linguistic_precision ?? 5);
+  const clarity = Number(assessmentForm.value.phonetic_clarity ?? 5);
+  const flow = Number(assessmentForm.value.communicative_flow ?? 5);
+  const range_score = Number(assessmentForm.value.expressive_range ?? 5);
 
   const scores = [precision, clarity, flow, range_score];
   

@@ -1,255 +1,333 @@
 <template>
-  <v-container fluid class="pa-5 d-flex justify-center" style="min-height: 100vh;">
-    <!-- PRE-GAME -->
-    <div v-if="!gameStarted && !gameComplete" class="text-center" style="max-width: 800px;">
-      <div>
+  <v-container fluid class="pa-6 max-width-game-container d-flex justify-center align-center">
+    
+    <div v-if="!gameStarted && !gameComplete" class="text-center w-100" style="max-width: 680px;">
+      <v-card variant="flat" border class="pa-6 rounded-xl bg-slate-50 border-slate-200">
         <v-img
           :src="BANNERS[props.game]"
-          max-width="600"
-          class="mx-auto my-6"
-          contain
+          max-width="480"
+          max-height="180"
+          class="mx-auto mb-6 rounded-lg elevation-1"
+          cover
         />
-      </div>
-      <p class="text-body-1 font-weight-medium mb-4" >
-        {{ gameData[props.game]?.description }}
-      </p>
-      <p class="text-body-1 mb-6" >
-        {{ gameData[props.game]?.instructions }}
-      </p>
+        
+        <h2 class="text-h5 font-weight-black text-slate-900 mb-2">{{ props.game }}</h2>
+        <p class="text-body-2 font-weight-bold text-indigo mb-2">
+          {{ gameData[props.game]?.description }}
+        </p>
+        <p class="text-caption text-slate-500 line-height-md mb-6">
+          {{ gameData[props.game]?.instructions }}
+        </p>
 
-      <!-- Radio buttons for Prove it! -->
-      <v-radio-group
-        v-if="props.game === 'Prove it!'"
-        v-model="selectedCategory"
-        row
-        class="mb-6"
-      >
-        <v-radio
-          label="Essential irregulars past simple"
-          value="Essential irregulars past simple"
-        />
-        <v-radio
-          label="Advanced irregulars past simple"
-          value="Advanced irregulars past simple"
-        />
-        <v-radio
-          label="Essential irregulars present perfect"
-          value="Essential irregulars present perfect"
-        />
-        <v-radio
-          label="Advanced irregulars present perfect"
-          value="Advanced irregulars present perfect"
-        />
-      </v-radio-group>
+        <v-divider class="mb-6 border-slate-200" />
 
+        <div v-if="props.game === 'Prove it!'" class="text-left mb-6">
+          <label class="text-overline font-weight-black text-slate-400 d-block mb-2 tracking-wider">
+            Select Verb Set
+          </label>
+          <v-radio-group
+            v-model="selectedCategory"
+            hide-details
+            class="custom-pill-radio-group"
+          >
+            <v-row dense>
+              <v-col cols="12" sm="6" v-for="cat in ['Essential irregulars past simple', 'Advanced irregulars past simple', 'Essential irregulars present perfect', 'Advanced irregulars present perfect']" :key="cat">
+                <v-card 
+                  variant="flat" 
+                  border 
+                  :class="selectedCategory === cat ? 'border-indigo-600 bg-indigo-50/50' : 'border-slate-200 bg-white'"
+                  class="pa-3 rounded-lg cursor-pointer transition-all d-flex align-center"
+                  @click="selectedCategory = cat"
+                >
+                  <v-radio :value="cat" color="indigo-darken-2" hide-details density="compact" />
+                  <span class="text-caption font-weight-bold text-slate-700 ml-2 leading-tight">{{ cat }}</span>
+                </v-card>
+              </v-col>
+            </v-row>
+          </v-radio-group>
+        </div>
 
-      <!-- Time pressure toggle -->
-      <div class="d-flex justify-center">
-              <v-switch
-        v-model="useTimer"
-        label="Enable time pressure (10s per card)"
-        inset
-        class="mb-6"
-        color="info"
+        <v-card variant="flat" border class="pa-4 bg-white border-slate-200 rounded-lg text-left mb-6">
+          <div class="d-flex align-center justify-space-between">
+            <div>
+              <div class="text-subtitle-2 font-weight-bold text-slate-800">Time Pressure</div>
+              <div class="text-caption text-slate-400">You must answer under 10s!</div>
+            </div>
+            <v-switch
+              v-model="useTimer"
+              inset
+              hide-details
+              color="indigo"
+              density="compact"
+            />
+          </div>
+        </v-card>
 
-      />
-      </div>
-
-
-      <v-btn color="success" size="x-large" @click="startGame">
-        START
-      </v-btn>
-    </div>
-
-    <!-- ACTIVE GAME -->
-    <div v-else-if="gameStarted" class="text-center py-10">
-      <!-- Timer -->
-      <div v-if="useTimer" class="my-6 d-flex justify-end">
-        <v-progress-circular
-          :model-value="timerProgress"
-          :size="80"
-          :width="8"
-          color="primary"
+        <v-btn 
+          color="indigo-darken-1" 
+          size="large" 
+          block
+          class="text-white font-weight-black rounded-xl"
+          elevation="1"
+          @click="startGame"
         >
-          {{ timeLeft }}
-        </v-progress-circular>
-      </div>
-      <!-- Flashcard -->
-      <v-card v-if="props.game !== 'Balanced Opinions' && props.game !== 'Unfinished Business'"
-        class="mx-auto mb-8 pa-10 text-center slide-card"
-        elevation="4"
-        :class="animationClass"
-        style="width: 600px; height: 300px; display: flex; flex-direction: column; align-items: center; justify-content: center;"
-      >
-        <v-card-title
-          class="text-center text-uppercase text-high-emphasis"
-          v-if="selectedCategory == 'Essential irregulars present perfect' || selectedCategory == 'Advanced irregulars present perfect'"
-        >
-          <span>
-            <v-chip
-              color="primary"
-              size="x-large"
-              class="text-black"
-              variant="flat"
-            >
-              {{ prompt?.category }}
-            </v-chip>
-          </span>
-
-
-        </v-card-title>
-
-        <v-card-text class="text-wrap mt-5" style="font-size: 2.5rem;">
-          {{ prompt?.question }}
-        </v-card-text>
+          Launch Challenge
+        </v-btn>
       </v-card>
-
-      <v-card v-else-if="props.game === 'Balanced Opinions'"
-        class="mx-auto mb-8 pa-10 text-center slide-card"
-        elevation="4"
-        :class="animationClass"
-        style="width: 600px; height: 400px; display: flex; flex-direction: column; align-items: center; justify-content: center;"
-      >
-        <v-card-title
-          class="text-center" style="margin-bottom: 2rem;"> What is your <span class="text-high-emphasis">balanced opinion</span> on...? </v-card-title>
-
-        <v-card-text class="text-wrap mt-5" style="font-size: 2.5rem; ">
-          {{ prompt?.question }}
-        </v-card-text>
-
-        <v-card-title
-          class="text-uppercase text-high-emphasis" style="margin-top: 3rem;"
-        > <span class="text-subtitle-1 me-8">Linking word:</span>
-          <span>  
-            <v-chip
-              color="primary"
-              size="x-large"
-              class="text-black"
-              variant="flat"
-            >
-              {{ prompt?.category }}
-            </v-chip>
-          </span>
-        </v-card-title>
-      </v-card>
-
-      <v-card v-else-if="props.game === 'Unfinished Business'"
-        class="mx-auto mb-8 pa-10 text-center slide-card"
-        elevation="4"
-        :class="animationClass"
-        style="width: 600px; height: 400px; display: flex; flex-direction: column; align-items: center; justify-content: center;"
-      >
-        <v-card-title
-          class="text-center" style="margin-bottom: 2rem;"> Use this verb in the given time frame </v-card-title>
-
-        <v-card-text class="text-wrap mt-5 text-uppercase" style="font-size: 3rem; ">
-          {{ prompt?.question }}
-        </v-card-text>
-
-        <v-card-title
-          class="text-uppercase text-high-emphasis" style="margin-top: 3rem;"
-        > <span class="text-subtitle-1 me-8">Time frame:</span>
-          <span>  
-            <v-chip
-              color="primary"
-              size="x-large"
-              class="text-black"
-              variant="flat"
-            >
-              {{ prompt?.category }}
-            </v-chip>
-          </span>
-        </v-card-title>
-      </v-card>
-
-      <v-card v-else-if="props.game === 'Verb Mixer Classroom Edition'"
-        class="mx-auto mb-8 pa-10 text-center slide-card"
-        elevation="4"
-        :class="animationClass"
-        style="width: 600px; height: 400px; display: flex; flex-direction: column; align-items: center; justify-content: center;"
-      >
-        <v-card-title
-          class="text-center" style="margin-bottom: 2rem;"> Answer the question using the correct verb form (infinitive or -ing) as a verb complement. </v-card-title>
-
-        <v-card-text class="text-wrap mt-5 text-uppercase" style="font-size: 2.5rem; ">
-          {{ prompt?.question }}
-        </v-card-text>
-      </v-card>
-
-
-      <div class="my-6">
-    <!-- Progress bar -->
-    <v-progress-linear
-        :model-value="progressValue"
-        height="20"
-        color="blue"
-        rounded
-        striped
-      >
-        <template v-slot:default>
-          <strong>{{ promptCounter }} / {{ totalRounds }}</strong>
-        </template>
-      </v-progress-linear>
     </div>
 
-
-      <!-- Evaluation buttons -->
-      <div class="d-flex justify-center ga-6 mt-4">
-        <v-btn color="success" size="x-large" @click="evaluate('right')">
-          YES
-        </v-btn>
-        <v-btn color="error" size="x-large" @click="evaluate('wrong')">
-          NO
-        </v-btn>
-        <v-btn color="grey-darken-1" size="x-large" @click="evaluate('unclear')">
-          UNSURE
-        </v-btn>
-      </div>
-    </div>
-
-    <!-- GAME COMPLETE -->
-    <div v-else class="text-center">
-      <h2 class="text-h4 mb-4">Results</h2>
-
-      <p class="text-h5 m-3">Score = {{ score }}%</p>
-      <p class="text-success mb-2">✔ Correct: {{ rightCount }}</p>
-      <p class="text-error mb-2">✖ Incorrect: {{ wrongCount }}</p>
-      <p class="mb-4">❓ Unsure: {{ unclearCount }}</p>
-
-      <div v-if="flaggedPrompts.length" class="mb-6">
-        <h3 class="text-h6 mb-2">Needs Review</h3>
-        <ul class="">
-          <li v-for="(p, i) in flaggedPrompts" :key="i">
-            {{ props.game === "Balanced Opinions" ? `${p.category}: ${p.question}` : p.question }}
-          </li>
-        </ul>
-      </div>
-
-      <v-btn color="primary" size="x-large" @click="resetGame" class="me-5">
-        PLAY AGAIN (SAME PLAYER)
-      </v-btn>
-      <RouterLink :to="{ name: 'teacher-tools' }">
-        <v-btn color="info" size="x-large">
-        PLAY WITH OTHER PLAYER
-      </v-btn>
-      </RouterLink>
+    <div v-else-if="gameStarted" class="w-100 py-4" style="max-width: 800px;">
       
+      <div class="d-flex align-center justify-space-between mb-4 px-2">
+        <div class="d-flex align-center text-caption font-weight-bold text-slate-500">
+          <v-icon icon="mdi-account-circle" size="small" class="mr-1" />
+          Student: <span class="text-indigo ml-1 font-monospace">{{ props.student }}</span>
+        </div>
+        
+        <div v-if="useTimer" class="d-flex align-center">
+          <v-progress-circular
+            :model-value="timerProgress"
+            :size="40"
+            :width="4"
+            :color="timeLeft <= 3 ? 'error' : 'indigo'"
+            class="font-weight-black font-monospace text-caption"
+          >
+            {{ timeLeft }}
+          </v-progress-circular>
+        </div>
+      </div>
+
+      <div class="game-viewport-card-wrapper mb-6">
+        
+        <v-card 
+          v-if="props.game !== 'Balanced Opinions' && props.game !== 'Unfinished Business' && props.game !== 'Verb Mixer Classroom Edition'"
+          class="mx-auto rounded-2xl border border-slate-200 slide-card layout-flex-center"
+          elevation="3"
+          :class="animationClass"
+        >
+          <div v-if="selectedCategory.includes('present perfect')" class="card-pill-badge-header">
+            <v-chip color="indigo-lighten-2" text-color="indigo-darken-4" size="large" class="font-weight-black uppercase">
+              {{ prompt?.category }}
+            </v-chip>
+          </div>
+          <div class="flashcard-main-display-text text-slate-800 font-weight-bold">
+            {{ prompt?.question }}
+          </div>
+        </v-card>
+
+        <v-card 
+          v-else-if="props.game === 'Balanced Opinions'"
+          class="mx-auto rounded-2xl border border-slate-200 slide-card layout-flex-center pa-6"
+          elevation="3"
+          :class="animationClass"
+        >
+          <div class="text-overline font-weight-bold text-slate-400 tracking-widest mb-2">Balanced Opinion Challenge</div>
+          <div class="flashcard-sub-display-text text-slate-500 mb-4">What is your balanced perspective on...?</div>
+          <div class="flashcard-main-display-text text-slate-900 font-weight-black line-height-tight mb-6">
+            {{ prompt?.question }}
+          </div>
+          <div class="card-footer-pill border-t pt-4 w-100 text-center border-slate-100">
+            <span class="text-caption font-weight-bold text-slate-400 uppercase mr-2 tracking-wider">Linking Word:</span>
+            <v-chip color="indigo-darken-1" size="large" class="text-white font-weight-black px-4 shadow-sm">
+              {{ prompt?.category }}
+            </v-chip>
+          </div>
+        </v-card>
+
+        <v-card 
+          v-else-if="props.game === 'Unfinished Business'"
+          class="mx-auto rounded-2xl border border-slate-200 slide-card layout-flex-center pa-6"
+          elevation="3"
+          :class="animationClass"
+        >
+          <div class="text-overline font-weight-bold text-slate-400 tracking-widest mb-2">Finished vs Unfinished Past</div>
+          <div class="flashcard-sub-display-text text-slate-500 mb-4">Conjugate the following verb:</div>
+          <div class="flashcard-main-display-text text-deep-purple font-weight-black uppercase tracking-wide mb-6">
+            {{ prompt?.question }}
+          </div>
+          <div class="card-footer-pill border-t pt-4 w-100 text-center border-slate-100">
+            <span class="text-caption font-weight-bold text-slate-400 uppercase mr-2 tracking-wider">under this time frame:</span>
+            <v-chip color="amber-darken-2" size="large" class="text-white font-weight-black px-4 shadow-sm">
+              {{ prompt?.category }}
+            </v-chip>
+          </div>
+        </v-card>
+
+        <v-card 
+          v-else-if="props.game === 'Verb Mixer Classroom Edition'"
+          class="mx-auto rounded-2xl border border-slate-200 slide-card layout-flex-center pa-8"
+          elevation="3"
+          :class="animationClass"
+        >
+          <div class="text-overline font-weight-bold text-slate-400 tracking-widest mb-4">Verb Complement Challenge (Infinitive vs Gerund)</div>
+          <div class="flashcard-main-display-text text-slate-800 font-weight-bold line-height-sm mb-4">
+            {{ prompt?.question }}
+          </div>
+          <div class="text-caption font-weight-medium text-slate-400">
+            Choose between <code class="font-weight-black text-slate-600">to + verb</code> or <code class="font-weight-black text-slate-600">verb + -ing</code> verb complements.
+          </div>
+        </v-card>
+      </div>
+
+      <div class="px-2 mb-6">
+        <div class="d-flex justify-space-between align-center text-caption font-weight-bold text-slate-400 mb-1 tracking-wider">
+          <span>PROGRESS</span>
+          <span class="font-monospace text-slate-600">{{ promptCounter }} / {{ totalRounds }} CARDS</span>
+        </div>
+        <v-progress-linear
+          :model-value="progressValue"
+          height="8"
+          color="indigo"
+          bg-color="slate-100"
+          rounded
+        />
+      </div>
+
+      <v-card variant="flat" border class="pa-4 bg-slate-50 border-slate-200 rounded-xl">
+        <div class="text-overline text-center font-weight-black text-slate-400 tracking-widest d-block mb-3">
+          Teacher Controls
+        </div>
+        <div class="d-flex justify-center flex-wrap ga-3">
+          <v-btn 
+            color="success" 
+            variant="elevated" 
+            size="large" 
+            min-width="140"
+            class="font-weight-black rounded-lg text-none"
+            prepend-icon="mdi-check-circle"
+            @click="evaluate('right')"
+          >
+            Correct
+          </v-btn>
+          
+          <v-btn 
+            color="error" 
+            variant="elevated" 
+            size="large" 
+            min-width="140"
+            class="font-weight-black rounded-lg text-none"
+            prepend-icon="mdi-close-circle"
+            @click="evaluate('wrong')"
+          >
+            Incorrect
+          </v-btn>
+          
+          <v-btn 
+            color="grey-darken-2" 
+            variant="flat" 
+            size="large" 
+            min-width="140"
+            class="text-white font-weight-black rounded-lg text-none"
+            prepend-icon="mdi-help-circle-outline"
+            @click="evaluate('unclear')"
+          >
+            Unsure
+          </v-btn>
+        </div>
+      </v-card>
+      
+      <div class="d-flex justify-center mt-6">
+        <v-btn icon elevation="0" size="x-large" :to="{ name: 'teacher-tools' }">
+          <v-icon size="x-large" color="black">
+            mdi-arrow-left-circle
+          </v-icon>
+        </v-btn>
+      </div>
     </div>
+
+    <div v-else class="text-center w-100" style="max-width: 600px;">
+      <v-card variant="flat" border class="pa-6 rounded-xl border-slate-200 bg-white">
+        <div class="text-overline font-weight-black text-slate-400 tracking-widest mb-1">Session Complete</div>
+        <h2 class="text-h4 font-weight-black text-grey mb-6">Evaluation Results</h2>
+
+        <v-row dense class="mb-6">
+          <v-col cols="12">
+            <v-card variant="flat" class="pa-4 rounded-xl bg-slate-50 border d-flex align-center justify-space-between">
+              <span class="text-subtitle-2 font-weight-bold text-slate-500">Accuracy</span>
+              <span class="text-h4 font-weight-black font-monospace text-slate-900">{{ score }}%</span>
+            </v-card>
+          </v-col>
+          <v-col cols="4">
+            <v-card variant="flat" border class="pa-3 rounded-lg border-emerald-100 bg-emerald-50/30 text-center">
+              <div class="text-emerald-700 font-weight-black text-h5">{{ rightCount }}</div>
+              <div class="text-xs font-weight-bold text-emerald-600 uppercase tracking-wide">Correct</div>
+            </v-card>
+          </v-col>
+          <v-col cols="4">
+            <v-card variant="flat" border class="pa-3 rounded-lg border-rose-100 bg-rose-50/30 text-center">
+              <div class="text-rose-700 font-weight-black text-h5">{{ wrongCount }}</div>
+              <div class="text-xs font-weight-bold text-rose-600 uppercase tracking-wide">Incorrect</div>
+            </v-card>
+          </v-col>
+          <v-col cols="4">
+            <v-card variant="flat" border class="pa-3 rounded-lg border-slate-200 bg-slate-50 text-center">
+              <div class="text-slate-700 font-weight-black text-h5">{{ unclearCount }}</div>
+              <div class="text-xs font-weight-bold text-slate-500 uppercase tracking-wide">Unsure</div>
+            </v-card>
+          </v-col>
+        </v-row>
+
+        <div v-if="flaggedPrompts.length" class="text-left mb-6">
+          <div class="text-overline font-weight-black text-rose-500 tracking-wider mb-2 d-flex align-center">
+            <v-icon icon="mdi-alert-circle-outline" size="small" class="mr-1" />
+            Wrong answers (Needs Review)
+          </div>
+          <v-card variant="flat" border max-height="200" class="overflow-y-auto rounded-lg border-slate-200 bg-slate-50 pa-1">
+            <v-card-text class="pa-0">
+              <v-list density="compact" bg-color="transparent">
+                <v-list-item v-for="(p, i) in flaggedPrompts" :key="i" class="px-3 min-height-dense">
+                  <template v-slot:prepend>
+                    <v-icon icon="mdi-close" color="rose-500" size="14" class="mr-2" />
+                  </template>
+                  <span class="text-caption font-weight-medium text-slate-700">
+                    {{ props.game === "Balanced Opinions" ? `${p.category}: ${p.question}` : p.question }}
+                  </span>
+                </v-list-item>
+              </v-list>
+            </v-card-text>
+          </v-card>
+        </div>
+
+        <v-divider class="mb-6 border-slate-200" />
+
+        <div class="d-flex flex-column sm-flex-row ga-3 justify-center">
+          <v-btn 
+            color="indigo-darken-1" 
+            size="large" 
+            class="text-white font-weight-black rounded-xl text-none"
+            prepend-icon="mdi-refresh"
+            @click="resetGame"
+          >
+            Replay Same Student
+          </v-btn>
+          <v-btn 
+            variant="outlined" 
+            color="grey-darken-2" 
+            size="large" 
+            block
+            class="font-weight-black rounded-xl text-none"
+            prepend-icon="mdi-account-switch"
+            :to="{ name: 'teacher-tools' }"
+          >
+            Back to Teacher Tools
+          </v-btn>
+        </div>
+      </v-card>
+    </div>
+
   </v-container>
 
-  <!-- Snackbar -->
-  <v-snackbar v-model="snackbar.show" :color="snackbar.color" timeout="1200">
-    {{ snackbar.message }}
+  <v-snackbar v-model="snackbar.show" :color="snackbar.color" timeout="1000" min-width="120" class="text-center">
+    <span class="font-weight-black font-monospace text-subtitle-2 tracking-widest uppercase">{{ snackbar.message }}</span>
   </v-snackbar>
 
-  <!-- Saving dialog -->
-  <v-dialog v-model="saving" persistent width="200">
-    <v-card class="d-flex justify-center align-center pa-6">
-      <v-progress-circular indeterminate size="64" color="primary" />
+  <v-dialog v-model="saving" persistent width="160">
+    <v-card class="d-flex justify-center align-center pa-6 rounded-xl border border-slate-100 shadow-xl bg-white">
+      <v-progress-circular indeterminate size="44" width="4" color="indigo" />
+      <span class="text-xxs font-weight-black tracking-widest text-slate-400 mt-3 uppercase">Saving Log</span>
     </v-card>
   </v-dialog>
 </template>
-
 
 <script setup lang="ts">
 import { ref, reactive, computed } from "vue"
@@ -260,13 +338,11 @@ const props = defineProps<{
   student: string
 }>()
 
-
-
 // --------------------------
-// STATE
+// STATE MANAGEMENT & DATA DEFINITIONS KEYS
 // --------------------------
 const BANNERS = {
-  "Spelling bee": "/images/banners/SpellingBee-png",
+  "Spelling bee": "/images/banners/SpellingBee.png",
   "Pronunciation Challenge": "/images/banners/PronunciationChallenge.png",
   "Prove it!": "/images/banners/ProveIt.png",
   "Be Polite!": "/images/banners/BePolite.png",
@@ -275,64 +351,42 @@ const BANNERS = {
   "Verb Mixer Classroom Edition": "/images/banners/VerbMixer.png",
 }
 
-const selectedCategory = ref<string>("")    // for Prove it!
-
+const selectedCategory = ref<string>("") 
 const prompt = ref<{ question: string; verb: string; correctAnswers: string[]; category: string } | null>(null)
 const gameStarted = ref(false)
 const gameComplete = ref(false)
 
 const rightCount = ref(0)
 const wrongCount = ref(0)
-const score = computed(() => rightCount.value !== 0 ? (rightCount.value / totalRounds.value * 100).toFixed(1) : 0)
-const hasAnyAnswer = ref(false)
 const unclearCount = ref(0)
-const wrongPrompts = ref<string[]>([])
-const promptQueue = ref<{
-  question: string
-  verb: string
-  correctAnswers: string[]
-  category: string
-}[]>([])
-
-
-const shownPrompts = ref<{
-  question: string
-  verb: string
-  correctAnswers: string[]
-  category: string
-  is_correct: boolean | null
-}[]>([])
-
-const totalRounds = computed(() =>
-  props.game === "Balanced Opinions"
-    ? 12
-    : props.game === "Unfinished Business"
-    ? 24
-    : props.game === "Verb Mixer Classroom Edition"
-    ? 28
-    : 30
-)
-const remainingCount = ref(totalRounds.value)
+const hasAnyAnswer = ref(false)
+const saving = ref(false)
 const promptCounter = ref(0)
 
-const snackbar = reactive({ show: false, message: "", color: "success" })
-const saving = ref(false)
+const wrongPrompts = ref<string[]>([])
+const promptQueue = ref<{ question: string; verb: string; correctAnswers: string[]; category: string }[]>([])
+const shownPrompts = ref<{ question: string; verb: string; correctAnswers: string[]; category: string; is_correct: boolean | null }[]>([])
 
-// Slide animation
+const totalRounds = computed(() =>
+  props.game === "Balanced Opinions" ? 12 : props.game === "Unfinished Business" ? 24 : props.game === "Verb Mixer Classroom Edition" ? 28 : 30
+)
+const remainingCount = ref(totalRounds.value)
+const snackbar = reactive({ show: false, message: "", color: "success" })
+
+// Animations configurations variables
 const animationClass = ref("")
 let slideTimeout: ReturnType<typeof setTimeout> | null = null
-
 const progressValue = computed(() => (promptCounter.value / totalRounds.value) * 100)
 
-
+// Countdown timer configurations mapping parameters
 const useTimer = ref(false)
 const timeLeft = ref(10)
 let timerInterval: ReturnType<typeof setInterval> | null = null
-
 const timerProgress = computed(() => (timeLeft.value / 10) * 100)
+const score = computed(() => rightCount.value !== 0 ? ((rightCount.value / totalRounds.value) * 100).toFixed(1) : 0)
 
 // --------------------------
-// GAME DATA (extendable by game name)
+// GAME DATA 
 // --------------------------
 
 const gameData: Record<string, { description: string; instructions: string; prompts: Record<string, string[]> }> = {
@@ -1136,189 +1190,93 @@ const gameData: Record<string, { description: string; instructions: string; prom
 }
 
 // --------------------------
-// GAME LOGIC
+// GAME PROCESSING CORE LOGIC
 // --------------------------
 function startGame() {
-  gameStarted.value = true
-  gameComplete.value = false
-
   if (props.game === "Prove it!" && !selectedCategory.value) {
-    snackbar.message = "Please select a category first"
+    snackbar.message = "Please select a target vocabulary matrix category first"
     snackbar.color = "error"
     snackbar.show = true
     return
   }
+  gameStarted.value = true
+  gameComplete.value = false
   buildPromptQueue()
   loadNextPrompt()
 }
 
 function buildPromptQueue() {
-  const dataset =
-    props.game === "Prove it!"
-      ? gameData[selectedCategory.value]
-      : gameData[props.game]
-
+  const dataset = props.game === "Prove it!" ? gameData[selectedCategory.value] : gameData[props.game]
   if (!dataset) return
-    // SPECIAL: Unfinished Business => unique verbs from Essential irregulars past simple keys
 
-    if (props.game === "Unfinished Business") {
-      const essentials = gameData["Essential irregulars past simple"]
-      if (!essentials?.prompts) return
+  if (props.game === "Unfinished Business") {
+    const essentials = gameData["Essential irregulars past simple"]
+    if (!essentials?.prompts) return
+    const verbs = shuffle(Object.keys(essentials.prompts))
+    const timeRefs = dataset.prompts.time_references as string[]
+    const queue: typeof promptQueue.value = []
+    const rounds = Math.min(totalRounds.value, verbs.length)
 
-      const verbs = shuffle(Object.keys(essentials.prompts))
-      const timeRefs = dataset.prompts.time_references as string[]
+    for (let i = 0; i < rounds; i++) {
+      const verb = verbs[i]
+      const timeRef = timeRefs[Math.floor(Math.random() * timeRefs.length)]
+      queue.push({ question: `${verb}`, verb, correctAnswers: [], category: `${timeRef}` })
+    }
+    promptQueue.value = queue
+    return
+  }
 
-      const queue: typeof promptQueue.value = []
+  if (props.game === "Balanced Opinions") {
+    const linkingWords = shuffle(dataset.prompts.linking_words)
+    const topics = shuffle(dataset.prompts.topics)
+    const rounds = totalRounds.value
+    const queue: typeof promptQueue.value = []
+    for (let i = 0; i < rounds; i++) {
+      const link = linkingWords[i]
+      const topic = topics[i]
+      queue.push({ question: `${topic}`, verb: topic, correctAnswers: [], category: link })
+    }
+    promptQueue.value = queue
+    return
+  }
 
-      // Ensure we never repeat a verb: take first N shuffled verbs
-      const rounds = Math.min(totalRounds.value, verbs.length)
-
-      for (let i = 0; i < rounds; i++) {
-        const verb = verbs[i]
-        const timeRef = timeRefs[Math.floor(Math.random() * timeRefs.length)]
-
-        queue.push({
-          question: `${verb}`,
-          verb,                 // stored as label in backend rounds[].label
-          correctAnswers: [],   // teacher validates orally; no hard-coded answers
-          category: `${timeRef}`
-        })
-      }
-
-      promptQueue.value = queue
-      return
+  if (props.game === "Verb Mixer Classroom Edition") {
+    const queue: typeof promptQueue.value = []
+    const distribution: Record<string, number> = {
+      "infinitive_verb": 6, "adjective": 2, "bare_infinitive": 3, "-ing_verb": 6,
+      "special_expression": 4, "preposition": 3, "change_in_meaning": 3, "subject": 1,
     }
 
-    // SPECIAL: Balanced Opinions => 12 unique (linking_word + topic) pairs, no repeats
-    if (props.game === "Balanced Opinions") {
-      const linkingWords = shuffle(dataset.prompts.linking_words)
-      const topics = shuffle(dataset.prompts.topics)
-
-      const rounds = totalRounds.value // 12
-
-      // Defensive: ensure we can make unique pairs
-      if (linkingWords.length < rounds || topics.length < rounds) {
-        console.warn("Balanced Opinions: not enough unique linking words or topics for", rounds, "rounds")
+    for (const [category, count] of Object.entries(distribution)) {
+      const values = (dataset.prompts as Record<string, string[]>)[category]
+      if (!Array.isArray(values) || values.length === 0) continue
+      const shuffled = shuffle(values)
+      for (let i = 0; i < count; i++) {
+        const q = shuffled[i % shuffled.length]
+        queue.push({ question: q, verb: category, correctAnswers: [], category: category })
       }
-
-      const queue: typeof promptQueue.value = []
-      for (let i = 0; i < rounds; i++) {
-        const link = linkingWords[i]
-        const topic = topics[i]
-
-        queue.push({
-          question: `${topic}`,
-          verb: topic,                // label in backend (you can swap this if you prefer linking word)
-          correctAnswers: [],         // not needed; teacher validates orally
-          category: link              // optional; available if you ever want to show it separately
-        })
-      }
-
-      promptQueue.value = queue
-      return
     }
-
-    // SPECIAL: Verb Mixer Classroom Edition => fixed distribution sampling across categories
-    if (props.game === "Verb Mixer Classroom Edition") {
-      const queue: typeof promptQueue.value = []
-
-      // category -> number of prompts to sample
-      const distribution: Record<string, number> = {
-        "infinitive_verb": 6,
-        "adjective": 2,
-        "bare_infinitive": 3,
-        "-ing_verb": 6,
-        "special_expression": 4,
-        "preposition": 3,
-        "change_in_meaning": 3,
-        "subject": 1,
-      }
-
-      // (Optional) sanity check total rounds match what you want / what totalRounds computes
-      const expectedTotal = Object.values(distribution).reduce((a, b) => a + b, 0) // 28
-      if (totalRounds.value !== expectedTotal) {
-        console.warn(
-          `Verb Mixer distribution totals ${expectedTotal} but totalRounds is ${totalRounds.value}.`
-        )
-      }
-
-      for (const [category, count] of Object.entries(distribution)) {
-        const values = (dataset.prompts as Record<string, string[]>)[category]
-        if (!Array.isArray(values) || values.length === 0) {
-          console.warn(`Verb Mixer: missing/empty category "${category}"`)
-          continue
-        }
-
-        // Prefer no repeats within a category: shuffle then take first N.
-        // If count > values.length, we’ll cycle (allow repeats) so the game can still run.
-        const shuffled = shuffle(values)
-        for (let i = 0; i < count; i++) {
-          const q = shuffled[i % shuffled.length]
-
-          queue.push({
-            question: q,
-            verb: category,          // saves as rounds[].label (category is useful for later analysis)
-            correctAnswers: [],      // teacher validates orally
-            category: category,      // shown in UI only if you decide to show it later
-          })
-        }
-      }
-
-      // Shuffle final mixed deck + enforce length
-      promptQueue.value = shuffle(queue).slice(0, totalRounds.value)
-      return
-    }
-
-
-    //////////////  Prove it!  ///////////////
+    promptQueue.value = shuffle(queue).slice(0, totalRounds.value)
+    return
+  }
 
   const queue: typeof promptQueue.value = []
-
   Object.entries(dataset.prompts).forEach(([key, values]) => {
-    // PRESENT PERFECT → always index [1]
-    if (
-      selectedCategory.value === "Essential irregulars present perfect" ||
-      selectedCategory.value === "Advanced irregulars present perfect"
-    ) {
-      queue.push({
-        question: values[1],
-        verb: key,
-        correctAnswers: [values[0]],
-        category: key,
-      })
+    if (selectedCategory.value.includes("present perfect")) {
+      queue.push({ question: values[1], verb: key, correctAnswers: [values[0]], category: key })
       return
     }
-
-    // PAST SIMPLE → random question from values
-    if (
-      selectedCategory.value === "Advanced irregulars past simple" ||
-      selectedCategory.value === "Essential irregulars past simple"
-    ) {
+    if (selectedCategory.value.includes("past simple")) {
       const q = values[Math.floor(Math.random() * values.length)]
-      queue.push({
-        question: q,
-        verb: key,
-        correctAnswers: [key],
-        category: key,
-      })
+      queue.push({ question: q, verb: key, correctAnswers: [key], category: key })
       return
     }
-
-    // DEFAULT (Pronunciation etc.)
     values.forEach(v => {
-      queue.push({
-        question: v,
-        verb: key,
-        correctAnswers: [v],
-        category: key,
-      })
+      queue.push({ question: v, verb: key, correctAnswers: [v], category: key })
     })
   })
-
-  // Shuffle
   promptQueue.value = shuffle(queue).slice(0, totalRounds.value)
 }
-
 
 function animateSlide() {
   animationClass.value = "slide-out-left"
@@ -1327,21 +1285,19 @@ function animateSlide() {
     animationClass.value = "slide-in-right"
     setTimeout(() => {
       animationClass.value = "slide-in-final"
-      setTimeout(() => (animationClass.value = ""), 400)
-    }, 40)
-  }, 350)
+      setTimeout(() => (animationClass.value = ""), 250)
+    }, 30)
+  }, 200)
 }
 
 function loadNextPrompt() {
-    if (!promptQueue.value.length || promptCounter.value >= totalRounds.value) {
+  if (!promptQueue.value.length || promptCounter.value >= totalRounds.value) {
     endGame()
     return
   }
-
   prompt.value = promptQueue.value.shift() || null
   promptCounter.value++
   remainingCount.value--
-
   animateSlide()
   if (useTimer.value) startTimer()
 }
@@ -1349,10 +1305,8 @@ function loadNextPrompt() {
 function startTimer() {
   stopTimer()
   timeLeft.value = 10
-
   timerInterval = setInterval(() => {
     timeLeft.value--
-
     if (timeLeft.value <= 0) {
       stopTimer()
       evaluate('unclear')
@@ -1370,50 +1324,30 @@ function stopTimer() {
 function evaluate(type: "right" | "wrong" | "unclear") {
   stopTimer()
   hasAnyAnswer.value = true
-
   if (!prompt.value) return
 
-  const shouldAppendCategory =
-    props.game === "Prove it!" &&
-    selectedCategory.value.includes("present perfect")
-
-  const finalQuestion = shouldAppendCategory
-    ? `${prompt.value.question} (${prompt.value.category})`
-    : prompt.value.question
+  const shouldAppendCategory = props.game === "Prove it!" && selectedCategory.value.includes("present perfect")
+  const finalQuestion = shouldAppendCategory ? `${prompt.value.question} (${prompt.value.category})` : prompt.value.question
 
   shownPrompts.value.push({
     question: finalQuestion,
     verb: prompt.value.verb,
     correctAnswers: prompt.value.correctAnswers,
     category: prompt.value.category,
-    is_correct: type === "right"
-      ? true
-      : type === "wrong"
-      ? false
-      : null,
+    is_correct: type === "right" ? true : type === "wrong" ? false : null,
   })
 
   if (type === "right") rightCount.value++
   else if (type === "wrong") wrongCount.value++
   else unclearCount.value++
 
-  snackbar.message = type.toUpperCase()
-  snackbar.color =
-    type === "right"
-      ? "success"
-      : type === "wrong"
-      ? "error"
-      : "grey-darken-2"
-
+  snackbar.message = type === "right" ? "Correct" : type === "wrong" ? "Incorrect" : "Passed"
+  snackbar.color = type === "right" ? "success" : type === "wrong" ? "error" : "slate-600"
   snackbar.show = true
   loadNextPrompt()
 }
 
-
-const flaggedPrompts = computed(() =>
-  shownPrompts.value.filter(p => p.is_correct !== true)
-)
-
+const flaggedPrompts = computed(() => shownPrompts.value.filter(p => p.is_correct !== true))
 
 function resetCounts() {
   promptCounter.value = 0
@@ -1439,10 +1373,6 @@ function shuffle<T>(array: T[]): T[] {
   return a
 }
 
-
-// --------------------------
-// END GAME → SEND TO BACKEND
-// --------------------------
 const gameNameAbbreviations: Record<string, string> = {
   "Essential irregulars past simple": "EssPS",
   "Advanced irregulars past simple": "AdvPS",
@@ -1453,102 +1383,130 @@ const gameNameAbbreviations: Record<string, string> = {
 const updatedGameName = computed(() => {
   if (props.game === "Prove it!" && selectedCategory.value) {
     const abbreviation = gameNameAbbreviations[selectedCategory.value as keyof typeof gameNameAbbreviations]
-    return `Prove it! >> ${abbreviation  || selectedCategory.value }`
+    return `Prove it! >> ${abbreviation || selectedCategory.value}`
   }
   return props.game
 })
 
 async function endGame() {
   stopTimer()
-
-  // Do NOT save empty or aborted games
   if (!hasAnyAnswer.value) {
     gameComplete.value = false
     gameStarted.value = false
     return
   }
-  
   gameComplete.value = true
   saving.value = true
 
-const rounds = shownPrompts.value.map((r, index) => ({
-  question: props.game === "Balanced Opinions" ? `${r.category}: ${r.question}` :  r.question,
-  pronoun: null,
-  image: null,
-  label: r.verb,
-  correct_answer: r.correctAnswers,
-  prompt_number: index + 1,
-  user_answer: null,
-  is_correct: r.is_correct, 
-  out_of_time: false,
-  elapsed_time: null,
-  typo: false,
-  typo_requested: false,
-  typo_accepted: null,
-}))
-
+  const rounds = shownPrompts.value.map((r, index) => ({
+    question: props.game === "Balanced Opinions" ? `${r.category}: ${r.question}` : r.question,
+    pronoun: null, image: null, label: r.verb, correct_answer: r.correctAnswers, prompt_number: index + 1,
+    user_answer: null, is_correct: r.is_correct, out_of_time: false, elapsed_time: null, typo: false, typo_requested: false, typo_accepted: null,
+  }))
 
   const payload = {
-    game_name: updatedGameName.value,
-    student_web_id: props.student,
-    total_rounds: totalRounds.value,
-    correct_count: rightCount.value,
-    wrong_count: wrongCount.value,
-    started_at: new Date().toISOString(),
-    finished_at: new Date().toISOString(),
-    total_time: 0,
-    avg_time_per_prompt: 0,
-    rounds,
+    game_name: updatedGameName.value, student_web_id: props.student, total_rounds: totalRounds.value,
+    correct_count: rightCount.value, wrong_count: wrongCount.value, started_at: new Date().toISOString(),
+    finished_at: new Date().toISOString(), total_time: 0, avg_time_per_prompt: 0, rounds,
   }
 
   try {
-    await api.post("/other-games-sessions/", payload, {
-      headers: { "Content-Type": "application/json" },
-    })
+    await api.post("/other-games-sessions/", payload, { headers: { "Content-Type": "application/json" } })
   } catch (err) {
     console.error("Saving failed:", err)
   }
-
   saving.value = false
   gameStarted.value = false
-}
-
-function quitGame() {
-  saving.value = false
-  gameStarted.value = false
-
-  prompt.value = null
-  shownPrompts.value = []
-
-  rightCount.value = 0
-  wrongCount.value = 0
-  unclearCount.value = 0
-  remainingCount.value = totalRounds.value
-  promptCounter.value = 0
-  wrongPrompts.value = []
 }
 </script>
 
 <style scoped>
+/* Max width box constraint balancing viewport sizes */
+.max-width-game-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* 🌟 The Polished Flashcard Presentation Layer Rules */
+.game-viewport-card-wrapper {
+  position: relative;
+  width: 100%;
+  perspective: 1000px; /* Enables 3D canvas depths for translation swiping */
+}
+
 .slide-card {
-  transition: transform 0.4s ease, opacity 0.4s ease;
+  width: 100%;
+  max-width: 720px;
+  height: 340px;
+  background-color: #ffffff !important;
+  border-color: #e2e8f0 !important;
+  transition: transform 0.25s cubic-bezier(0.25, 0.8, 0.25, 1), opacity 0.25s ease;
+  will-change: transform, opacity;
 }
 
-/* left → vanish */
+/* Reusable layout centering utilities */
+.layout-flex-center {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+/* Typography Scales Overrides for Visibility from Back rows */
+.flashcard-main-display-text {
+  font-size: 2.75rem !important;
+  line-height: 1.25 !important;
+  padding: 0 24px;
+  text-align: center;
+  word-break: break-word;
+}
+
+.flashcard-sub-display-text {
+  font-size: 1rem !important;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.card-pill-badge-header {
+  position: absolute;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+/* Softened Motion Animation Frames Curves */
 .slide-out-left {
-  transform: translateX(-120%);
+  transform: translateX(-100%) rotate(-4s);
   opacity: 0;
 }
 
-/* right → enter */
 .slide-in-right {
-  transform: translateX(120%);
+  transform: translateX(100%) rotate(4s);
   opacity: 0;
 }
 
-/* center → visible */
 .slide-in-final {
-  transform: translateX(0);
+  transform: translateX(0) rotate(0deg);
   opacity: 1;
+}
+
+/* Custom CSS layout formatting for pill selection grids */
+.custom-pill-radio-group :deep(.v-selection-control) {
+  margin-inline-end: 0 !important;
+}
+.custom-pill-radio-group :deep(.v-label) {
+  display: none !important; /* Hide native layout label tokens */
+}
+
+/* Utility layout resets */
+.min-height-dense {
+  min-height: 32px !important;
+}
+.leading-tight {
+  line-height: 1.25 !important;
+}
+.line-height-sm {
+  line-height: 1.4 !important;
 }
 </style>

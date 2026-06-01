@@ -129,20 +129,25 @@
   </div>
 </v-col>
 
+<v-col cols="12" sm="6" md="4" class="d-flex justify-center">
+  <div
+    class="image-tile"
+    @click="openDialog('Graph Generator')"
+  >
+    <div class="tile-frame">
+      <v-img
+        src="/images/banners/GraphGenerator.png"
+        class="tile-image"
+        cover
+      />
+    </div>
+  </div>
+</v-col>
+
 </v-row>
 
 
 
-    <!-- Back Button -->
-    <div class="d-flex justify-center mt-6">
-      <RouterLink :to="{ name: 'teacher' }">
-        <v-btn icon elevation="0" size="x-large">
-          <v-icon size="x-large" color="black">
-            mdi-arrow-left-circle
-          </v-icon>
-        </v-btn>
-      </RouterLink>
-    </div>
 
     <!-- STUDENT SELECTION DIALOG -->
     <v-dialog v-model="showDialog" max-width="400">
@@ -243,13 +248,24 @@ function closeDialog() {
 function launchGame() {
   if (!selectedGame.value || !selectedStudent.value) return
 
-  router.push({
-    name: 'classroom-challenges',
-    query: {
-      game: selectedGame.value,
-      student: selectedStudent.value,
-    },
-  })
+  // Check if we are launching the Graph Generator or a standard challenge
+  if (selectedGame.value === 'Graph Generator') {
+    router.push({
+      name: 'graph-generator',
+      query: {
+        student: selectedStudent.value,
+      },
+    })
+  } else {
+    // Keep your standard route for the other games
+    router.push({
+      name: 'classroom-challenges',
+      query: {
+        game: selectedGame.value,
+        student: selectedStudent.value,
+      },
+    })
+  }
 
   showDialog.value = false
 }

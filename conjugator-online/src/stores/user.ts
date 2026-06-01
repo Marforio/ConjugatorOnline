@@ -188,6 +188,7 @@ export const useUserStore = defineStore("user", () => {
   const isStaff = computed(() => user.value?.is_staff ?? false);
   const isSuperuser = computed(() => user.value?.is_superuser ?? false);
   const teacherProfileId = computed(() => teacherId.value);
+  const isStudentAccount = computed(() => user.value !== null && !user.value.is_staff);
   
   // ✨ FIX 1: Make studentId context-aware. 
   // If staff is viewing a targeted student, return that selected student ID instead of their own.
@@ -802,6 +803,7 @@ async function fetchEnrollments() {
     fetchUserData,
     isStaff,
     isSuperuser,
+    isStudentAccount,
     
     // Teacher workspace elements controls
     teacherRoster,

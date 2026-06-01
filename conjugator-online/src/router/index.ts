@@ -39,6 +39,7 @@ const routes = [
   { path: '/tools/word-stats', name: 'word-stats', component: () => import('@/views/WordStats.vue'), meta: { requiresAuth: false }},
   { path: '/teacher-tools', name: 'teacher-tools', component: () => import('@/views/TeacherTools.vue'), meta: { requiresAuth: true, requiresAdmin: true } },
   { path: '/teacher-tools/classroom-challenges', name: 'classroom-challenges', component: () => import('@/views/ClassroomChallenges.vue'), meta: { requiresAuth: true, requiresAdmin: true }, props: (route: RouteLocationNormalized) => ({ game: route.query.game as string, student: route.query.student as string }) },
+  { path: '/teacher-tools/graph-generator', name: 'graph-generator', component: () => import('@/views/GraphGenerator.vue'), meta: { requiresAuth: true } },
   { path: '/teacher', name: 'teacher', component: () => import('@/views/Teacher.vue'), meta: { requiresAuth: true, requiresAdmin: true } },
   { path: '/teacher/manage-students', name: 'manage-students', component: () => import('@/views/ManageStudents.vue'), meta: { requiresAuth: true, requiresAdmin: true } },
   { path: '/teacher/manage-work', name: 'manage-work', component: () => import('@/views/ManageWork.vue'), meta: { requiresAuth: true, requiresAdmin: true } },
