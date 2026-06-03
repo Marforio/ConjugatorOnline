@@ -43,7 +43,7 @@
                 {{ onlineStudents.length }} Student{{ onlineStudents.length !== 1 ? 's' : '' }} Online
               </div>
               <div class="text-xxs opacity-80 font-weight-medium">
-                Active within the last 5 minutes
+                Active within the last 5 minutes (only gameplay, exercises, and checking 'My data' are counted).
               </div>
             </div>
           </div>
@@ -276,7 +276,6 @@ async function fetchOnlineStudents() {
     onlineStudents.value = response.data.students;
     lastUpdate.value = new Date();
     
-    console.log(`[Polling] ${onlineStudents.value.length} secure roster students online`);
   } catch (error) {
     console.error('Failed to fetch online students:', error);
   }

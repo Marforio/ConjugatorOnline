@@ -14,7 +14,7 @@
 
     <v-card class="pa-6 mb-6" elevation="2" rounded="lg">
       <div class="text-h6 mb-2">Select Student</div>
-      <p class="text-caption text-medium-emphasis mb-4">Click below to search and assign feedback to a student profile from your cohort.</p>
+      <p class="text-caption text-medium-emphasis mb-4">Find a student to give feedback to.</p>
       
       <v-row>
         <v-col cols="12" md="6">

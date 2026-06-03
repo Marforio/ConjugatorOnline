@@ -22,7 +22,7 @@
             :items="filteredStudentsDropdown"
             item-title="display_name"
             item-value="id"
-            label="Focus Singular Student"
+            label="Find a Student"
             prepend-inner-icon="mdi-account"
             variant="outlined"
             density="comfortable"
@@ -48,7 +48,7 @@
           <v-select
             v-model="dateRange"
             :items="dateRangeOptions"
-            label="Temporal Date Range"
+            label="Date Range"
             prepend-inner-icon="mdi-calendar-range"
             variant="outlined"
             density="comfortable"
@@ -77,7 +77,7 @@
             
             <v-window-item value="by-student">
               <div class="text-caption font-weight-bold text-slate-500 uppercase tracking-wider mb-2">
-                Search or Select Student to View Profile Achievements
+                Search or Select Student to View Their Achievements
               </div>
               <v-row class="mb-4" dense>
                 <v-col cols="12" md="6" lg="4">
@@ -119,14 +119,14 @@
                         Vocabulary 3x Run Mastery: {{ targetedStudentProfile.vocab3xCount }}
                       </v-chip>
                       <v-chip size="small" color="amber-darken-3" variant="flat" class="text-white font-weight-black px-3">
-                        Total Earned Milestones: {{ targetedStudentProfile.totalCount }}
+                        Total Achievements Earned: {{ targetedStudentProfile.totalCount }}
                       </v-chip>
                     </div>
                   </div>
 
                   <div class="pa-4">
                     <div class="text-caption font-weight-bold text-slate-500 uppercase tracking-wider mb-3">
-                      Chronological Milestone Activity Stream Log
+                      Timeline
                     </div>
                     
                     <v-list density="compact" class="bg-transparent py-0 ga-2 d-flex flex-column item-scroll-container">
@@ -148,7 +148,7 @@
                         <v-list-item-subtitle class="text-caption text-slate-400 mt-0.5">
                           Obtained: {{ formatDate(achievement.achieved_on) }}
                           <v-chip v-if="achievement.manually_created" size="x-small" color="info" variant="flat" class="text-white ml-2">
-                            Manual Override
+                            Manual
                           </v-chip>
                         </v-list-item-subtitle>
                       </v-list-item>
@@ -159,14 +159,14 @@
 
               <div v-else class="text-center text-slate-400 py-12 border border-dashed rounded-xl bg-white mt-4">
                 <v-icon size="48" class="text-slate-200 mb-2">mdi-account-question-outline</v-icon>
-                <div class="text-body-2">Please select an individual student profile using the search bar above to audit earned accomplishments.</div>
+                <div class="text-body-2">Please select a student using the search bar above.</div>
               </div>
             </v-window-item>
 
             <v-window-item value="by-achievement">
               <v-row class="fill-height min-vh-50" dense>
                 <v-col cols="12" md="5" class="border-r pr-md-4">
-                  <div class="text-caption font-weight-bold text-slate-500 uppercase tracking-wider mb-2">Available Class Milestones</div>
+                  <div class="text-caption font-weight-bold text-slate-500 uppercase tracking-wider mb-2">1. Select an Achievement</div>
                   <v-list class="bg-transparent py-0 ga-1 d-flex flex-column list-scroll-box">
                     <v-list-item
                       v-for="opt in achievementTypeOptions"
@@ -186,7 +186,7 @@
                 </v-col>
 
                 <v-col cols="12" md="7" class="pl-md-4 mt-4 mt-md-0">
-                  <div class="text-caption font-weight-bold text-slate-500 uppercase tracking-wider mb-2">Awarded Students Roster</div>
+                  <div class="text-caption font-weight-bold text-slate-500 uppercase tracking-wider mb-2">2. See the Students with this Achievement</div>
                   
                   <div v-if="selectedAchievementType">
                     <div class="bg-slate-50 border rounded-xl pa-4 mb-3 shadow-xs">
@@ -247,7 +247,7 @@
       <v-col cols="12" sm="6">
         <v-card class="pa-4 border bg-white shadow-xs d-flex align-center justify-space-between" rounded="lg" elevation="0">
           <div>
-            <div class="text-caption text-slate-500 font-weight-bold uppercase tracking-wider">Total Aggregated System Milestones</div>
+            <div class="text-caption text-slate-500 font-weight-bold uppercase tracking-wider">Total Achievements Earned (all students)</div>
             <div class="text-h4 font-weight-black text-slate-900 mt-1">{{ totalAchievements }}</div>
           </div>
           <v-avatar color="amber-lighten-5" size="48">
@@ -258,7 +258,7 @@
       <v-col cols="12" sm="6">
         <v-card class="pa-4 border bg-white shadow-xs d-flex align-center justify-space-between" rounded="lg" elevation="0">
           <div>
-            <div class="text-caption text-slate-500 font-weight-bold uppercase tracking-wider">Active Certified Roster Footprint</div>
+            <div class="text-caption text-slate-500 font-weight-bold uppercase tracking-wider">Your Active Students (with > 1 Achievement)</div>
             <div class="text-h4 font-weight-black text-slate-900 mt-1">{{ activeStudentCount }}</div>
           </div>
           <v-avatar color="teal-lighten-5" size="48">

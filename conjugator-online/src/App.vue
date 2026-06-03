@@ -6,9 +6,9 @@
       v-model="drawer"
       elevation="0"
       location="left"
-      :permanent="lgAndUp"
-      :temporary="!lgAndUp"
-      :scrim="!lgAndUp"
+      :permanent="mdAndUp"
+      :temporary="!mdAndUp"
+      :scrim="!mdAndUp"
       class="border-r border-slate-200 bg-white"
     >
       <div
@@ -57,6 +57,7 @@
           />
 
           <v-list-item :to="{ name: 'manage-students' }" prepend-icon="mdi-account-cog" title="Manage Students" rounded="lg" color="primary" @click="closeDrawerBelowLg" />
+          <v-list-item :to="{ name: 'manage-vocab-lists' }" prepend-icon="mdi-bookshelf" title="Manage Vocab Lists" rounded="lg" color="primary" @click="closeDrawerBelowLg" />
           <v-list-item :to="{ name: 'manage-work' }" prepend-icon="mdi-tray-full" title="Give Work" rounded="lg" color="primary" @click="closeDrawerBelowLg" />
           <v-list-item :to="{ name: 'manage-feedback' }" prepend-icon="mdi-comment-quote" title="Give Feedback" rounded="lg" color="primary" @click="closeDrawerBelowLg" />
           <v-list-item :to="{ name: 'manage-achievement-data' }" prepend-icon="mdi-trophy" title="Achievements" rounded="lg" color="primary" @click="closeDrawerBelowLg" />
@@ -65,6 +66,7 @@
           <v-list-item :to="{ name: 'manage-conjugator-data' }" prepend-icon="mdi-chart-arc" title="Conjugator Data" rounded="lg" color="primary" @click="closeDrawerBelowLg" />
           <v-list-item :to="{ name: 'manage-other-games-data' }" prepend-icon="mdi-chart-timeline" title="Other Games Data" rounded="lg" color="primary" @click="closeDrawerBelowLg" />
           <v-list-item :to="{ name: 'manage-vocab-data' }" prepend-icon="mdi-chart-timeline-variant-shimmer" title="Vocabulary Data" rounded="lg" color="primary" @click="closeDrawerBelowLg" />
+          
 
           <v-divider class="my-4 border-opacity-60" />
 
@@ -176,7 +178,7 @@
 
       </v-list>
 
-      <template #append>
+      <template v-if="!userStore.isStaff" #append>
         <div class="pa-4 border-t d-flex align-center justify-space-between bg-white">
           <div class="d-flex align-center overflow-hidden">
             <v-avatar
