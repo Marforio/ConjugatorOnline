@@ -1,16 +1,16 @@
 <template>
-  <v-container fluid class="pa-6">
-    <v-card class="pa-6 mb-6 feedback-header" elevation="4" rounded="xl">
-      <div class="d-flex align-center justify-space-between">
-        <div>
-          <div class="text-h4 font-weight-bold text-white">Feedback Manager</div>
-          <div class="text-subtitle-1 text-white text-opacity-90 mt-1">
-            Create and manage student feedback
-          </div>
-        </div>
-        <v-icon size="56" class="text-white">mdi-comment-edit</v-icon>
-      </div>
-    </v-card>
+  <v-container fluid class="mt-5 pa-4 px-6">
+    <v-row class="mb-6 align-center">
+      <v-col cols="12">
+        <h1 class="text-h4 font-weight-black text-slate-900 d-flex align-center">
+          <v-icon icon="mdi-comment-quote" color="indigo" class="mr-5" />
+          Give Feedback
+        </h1>
+        <p class="text-caption text-slate-500 mt-1">
+          Give feedback on student presentations/exams or exercises. Define custom feedback templates for your projects and evaluations.
+        </p>
+      </v-col>
+    </v-row>
 
     <v-card class="pa-6 mb-6" elevation="2" rounded="lg">
       <div class="text-h6 mb-2">Select Student</div>

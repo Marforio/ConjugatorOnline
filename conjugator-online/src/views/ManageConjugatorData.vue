@@ -1,18 +1,33 @@
 <template>
-  <div class="container-fluid py-4" style="max-width: 1600px;">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-      <div>
-        <h1 class="h2 mb-1 text-dark fw-bold">
-          <i class="bi bi-graph-up-arrow me-2 text-primary"></i>
-          Conjugator Performance
-        </h1>
-        <p class="text-muted mb-0">Conjugation statistics, leaderboards, and error data.</p>
+  <div class="mt-5 pa-4 px-6 container-fluid" style="max-width: 1600px;">
+    <v-card class="pa-6 mb-6 conjugator-header text-white shadow-sm" rounded="xl">
+      <div class="d-flex align-center justify-space-between flex-wrap ga-4">
+        <div>
+          <div class="text-h4 font-weight-bold">Conjugator Game Data</div>
+          <div class="text-subtitle-1 opacity-90 mt-1">
+            Inspect statistics and student performance in the Conjugator Game 
+          </div>
+        </div>
+        <div class="d-flex justify-center align-center gap-4">
+          <v-btn
+            color="white"
+            variant="flat"
+            class="text-grey-darken-4"
+            :disabled="loading"
+            @click="loadDashboardData"
+            :prepend-icon="loading ? 'mdi-timer-sand' : 'mdi-refresh'"
+          >
+            {{ loading ? 'Loading...' : 'Refresh' }}
+          </v-btn>
+
+          <v-avatar color="white" variant="tonal" size="70" class="ms-6">
+            <v-icon size="48">mdi-chart-arc</v-icon>
+          </v-avatar>
+        </div>
+
       </div>
-      <button @click="loadDashboardData" class="btn btn-outline-primary d-flex align-items-center gap-2" :disabled="loading">
-        <i class="bi" :class="loading ? 'bi-arrow-repeat spin' : 'bi-arrow-clockwise'"></i>
-        {{ loading ? 'Updating...' : 'Refresh' }}
-      </button>
-    </div>
+    </v-card>
+
 
     <div v-if="error" class="alert alert-danger mb-4" role="alert">
       <i class="bi bi-exclamation-triangle-fill me-2"></i>{{ error }}
@@ -304,20 +319,20 @@
           <v-card variant="outlined" class="border-grey-lighten-2 rounded-lg">
             <v-card-title class="bg-red-darken-4 text-white font-weight-bold text-subtitle-1 py-3">
               <v-icon icon="mdi-alert-octagon-outline" class="mr-2"></v-icon>
-              ⚠️ Most Difficult Prompt Structural Combinations (Top 25 Ranked)
+              ⚠️ Most Difficult Prompt Combinations
             </v-card-title>
             <v-card-text class="pa-0">
               <v-table hover>
                 <thead class="bg-grey-lighten-4">
                   <tr>
                     <th style="width: 60px;">Rank</th>
-                    <th>Infinitive Verb</th>
-                    <th>Target Tense</th>
-                    <th>Grammar Person</th>
-                    <th>Sentence Structure</th>
+                    <th>Verb</th>
+                    <th>Tense</th>
+                    <th>Subject Person</th>
+                    <th>Sentence Type</th>
                     <th class="text-center">Failed Counts</th>
                     <th class="text-center">Total Attempts</th>
-                    <th class="text-center">Error Rate Ratio</th>
+                    <th class="text-center">Error Rate</th>
                     <th class="text-center" style="width: 160px;">Trace Elements</th>
                   </tr>
                 </thead>
@@ -603,7 +618,7 @@ function renderChartGraphics() {
       type: 'line',
       data: {
         labels: dashboard.value.timeline_labels,
-        datasets: [{ label: 'Rounds Played', data: dashboard.value.timeline_counts, borderColor: '#4f46e5', backgroundColor: 'rgba(79, 70, 229, 0.06)', fill: true, tension: 0.2, borderWidth: 2.5 }]
+        datasets: [{ label: 'Rounds Played', data: dashboard.value.timeline_counts, borderColor: '#da3316', backgroundColor: 'rgba(218, 51, 22, 0.06)', fill: true, tension: 0.2, borderWidth: 2.5 }]
       },
       options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
     });
@@ -697,4 +712,30 @@ onMounted(() => {
 .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
 .animate-fade-in { animation: fadeIn 0.35s ease-out; }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+
+.conjugator-header {
+  background: linear-gradient(
+    135deg,
+    #da3316 0%,     /* terracotta */
+    #d89a7a 45%,    /* warm clay highlight */
+    #da3316 100%    /* terracotta again */
+  );
+  position: relative;
+  overflow: hidden;
+}
+
+.conjugator-header::before {
+  content: "";
+  position: absolute;
+  inset: -45%;
+  background:
+    radial-gradient(circle at 25% 30%, rgba(255, 255, 255, 0.18) 0%, rgba(255, 255, 255, 0) 45%),
+    radial-gradient(circle at 75% 25%, rgba(255, 255, 255, 0.10) 0%, rgba(255, 255, 255, 0) 55%),
+    radial-gradient(circle at 60% 80%, rgba(255, 255, 255, 0.07) 0%, rgba(255, 255, 255, 0) 50%);
+  transform: rotate(-6deg);
+  pointer-events: none;
+}
+
+
 </style>

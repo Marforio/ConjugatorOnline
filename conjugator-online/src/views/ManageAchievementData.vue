@@ -1,63 +1,16 @@
 <template>
-  <v-container fluid class="pa-6 text-slate-800 bg-slate-50 min-vh-100">
-    <v-card class="pa-6 mb-6 data-header text-white shadow-sm" rounded="xl">
-      <div class="d-flex align-center justify-space-between flex-wrap ga-4">
-        <div>
-          <div class="text-h4 font-weight-bold text-white">Student Achievements</div>
-          <div class="text-subtitle-1 opacity-90 mt-1">
-            Confirm student achievements
-          </div>
-        </div>
-        <v-avatar color="white" variant="tonal" size="56">
-          <v-icon size="32">mdi-trophy-variant-outline</v-icon>
-        </v-avatar>
-      </div>
-    </v-card>
-
-    <v-card class="pa-5 mb-6 border bg-white shadow-xs" rounded="lg" elevation="0">
-      <v-row dense>
-        <v-col cols="12" md="6">
-          <v-autocomplete
-            v-model="selectedStudent"
-            :items="filteredStudentsDropdown"
-            item-title="display_name"
-            item-value="id"
-            label="Find a Student"
-            prepend-inner-icon="mdi-account"
-            variant="outlined"
-            density="comfortable"
-            hide-details
-            clearable
-            @update:model-value="onStudentFilterChange"
-          >
-            <template v-slot:item="{ props, item }">
-              <v-list-item v-bind="props">
-                <template v-slot:prepend>
-                  <v-avatar color="teal-lighten-5" size="32" class="mr-2 text-teal-darken-3 text-caption font-weight-black">
-                    {{ item.raw.initials }}
-                  </v-avatar>
-                </template>
-                <template v-slot:subtitle>
-                  <span class="text-caption text-slate-400">{{ item.raw.web_id }}</span>
-                </template>
-              </v-list-item>
-            </template>
-          </v-autocomplete>
-        </v-col>
-        <v-col cols="12" md="6">
-          <v-select
-            v-model="dateRange"
-            :items="dateRangeOptions"
-            label="Date Range"
-            prepend-inner-icon="mdi-calendar-range"
-            variant="outlined"
-            density="comfortable"
-            hide-details
-            @update:model-value="fetchAchievements"
-          />
-        </v-col>
-      </v-row>
-    </v-card>
+  <v-container fluid class="mt-5 pa-4 px-6 text-slate-800 min-vh-100">
+    <v-row class="mb-6 align-center">
+      <v-col cols="12" sm="6">
+        <h1 class="text-h4 font-weight-black text-slate-900 d-flex align-center">
+          <v-icon icon="mdi-trophy" color="indigo" class="mr-5" />
+          Manage Trophies
+        </h1>
+        <p class="text-caption text-slate-500 mt-1">
+          Define trophies that students can earn, and track which students have earned which trophies.
+        </p>
+      </v-col>
+    </v-row>
 
     <v-row>
       <v-col cols="12">
@@ -89,9 +42,21 @@
                     placeholder="Type student name or Web ID..."
                     prepend-inner-icon="mdi-account-search"
                     variant="outlined"
-                    density="compact"
+                    density="comfortable"
                     clearable
                     hide-details
+                  />
+                </v-col>
+                <v-col cols="12" md="6" lg="4">
+                            <v-select
+                    v-model="dateRange"
+                    :items="dateRangeOptions"
+                    label="Date Range"
+                    prepend-inner-icon="mdi-calendar-range"
+                    variant="outlined"
+                    density="comfortable"
+                    hide-details
+                    @update:model-value="fetchAchievements"
                   />
                 </v-col>
               </v-row>
@@ -186,7 +151,18 @@
                 </v-col>
 
                 <v-col cols="12" md="7" class="pl-md-4 mt-4 mt-md-0">
-                  <div class="text-caption font-weight-bold text-slate-500 uppercase tracking-wider mb-2">2. See the Students with this Achievement</div>
+                  <div class="text-caption font-weight-bold text-slate-500 uppercase tracking-wider mb-2">2. Select a Date Range</div>
+                  <v-select
+                    v-model="dateRange"
+                    :items="dateRangeOptions"
+                    label="Date Range"
+                    prepend-inner-icon="mdi-calendar-range"
+                    variant="outlined"
+                    density="comfortable"
+                    hide-details
+                    @update:model-value="fetchAchievements"
+                  />
+                  <div class="text-caption font-weight-bold text-slate-500 uppercase tracking-wider mt-6 mb-2">3. See the Students with this Achievement</div>
                   
                   <div v-if="selectedAchievementType">
                     <div class="bg-slate-50 border rounded-xl pa-4 mb-3 shadow-xs">
@@ -269,6 +245,7 @@
     </v-row>
   </v-container>
 </template>
+
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue';
 import api from '@/axios';
@@ -318,7 +295,6 @@ interface StudentWithAchievement {
 const userStore = useUserStore();
 
 const loadingAchievements = ref(false);
-const courseOptions = ref<{ id: string; name: string }[]>([]);
 const selectedCourse = ref<string>('all');
 const selectedStudent = ref<number | null>(null);
 
@@ -347,8 +323,38 @@ watch(searchStudentQueryId, (newVal) => {
   if (newVal) fetchAchievements();
 });
 
+// 🌟 REWRITTEN SELECTOR: Derive options cleanly straight from store memory allocations
+const courseOptions = computed(() => {
+  return [
+    { id: 'all', name: 'All Class Courses' },
+    ...userStore.availableTeacherCourses.map(c => ({ id: c.slug, name: c.title }))
+  ];
+});
+
+// Helper to compile a highly efficient set of student web_ids matching the chosen course
+const studentWebIdsInSelectedCourse = computed<Set<string> | null>(() => {
+  if (!selectedCourse.value || selectedCourse.value === 'all') return null;
+  
+  const targetIds = new Set<string>();
+  userStore.enrollments.forEach(e => {
+    const enrollmentCourseSlug = e.course?.slug || String(e.course);
+    if (enrollmentCourseSlug.trim().toLowerCase() === selectedCourse.value.trim().toLowerCase()) {
+      const webId = e.student && typeof e.student === 'object' ? e.student.web_id : String(e.student);
+      if (webId) targetIds.add(webId);
+    }
+  });
+  return targetIds;
+});
+
+// 🌟 REWRITTEN DROPDOWN: Filters dropdown contents reactively by selected course mapping sets
 const filteredStudentsDropdown = computed<Student[]>(() => {
-  const sourceList = userStore.isStaff ? userStore.teacherRoster : [];
+  let sourceList = userStore.isStaff ? userStore.teacherRoster : [];
+  
+  // If a specific course is targeted, filter down to its roster set using our Set index
+  if (studentWebIdsInSelectedCourse.value) {
+    sourceList = sourceList.filter(s => s.web_id && studentWebIdsInSelectedCourse.value!.has(s.web_id));
+  }
+
   return sourceList.map(s => ({
     id: s.id,
     initials: s.initials,
@@ -357,15 +363,31 @@ const filteredStudentsDropdown = computed<Student[]>(() => {
   }));
 });
 
+// 🌟 OPTIMIZED FILTER ENGINE: Applies date constraints AND course restrictions simultaneously
 const filteredAchievements = computed(() => {
   let filtered = [...achievements.value];
+  
+  // 1. Course Filter Pass (performed completely on the frontend)
+  if (studentWebIdsInSelectedCourse.value) {
+    filtered = filtered.filter(a => a.student_web_id && studentWebIdsInSelectedCourse.value!.has(a.student_web_id));
+  }
+
+  // 2. Date Range Filter Pass
   if (dateRange.value !== 'all') {
     const now = new Date();
     const daysAgo = dateRange.value === '7days' ? 7 : dateRange.value === '30days' ? 30 : 90;
     const cutoffDate = new Date(now.getTime() - daysAgo * 24 * 60 * 60 * 1000);
     filtered = filtered.filter(a => new Date(a.achieved_on) >= cutoffDate);
   }
+  
   return filtered;
+});
+
+// Reactively trigger a logs refresh if the course bounding box updates
+watch(selectedCourse, () => {
+  // Clear isolated student locks when switching courses to prevent out-of-bounds cross-selection errors
+  selectedStudent.value = null;
+  fetchAchievements();
 });
 
 function checkIsVocab3x(ach: Achievement): boolean {
@@ -383,7 +405,6 @@ function checkIsVocab1x(ach: Achievement): boolean {
   return isVocab && !checkIsVocab3x(ach);
 }
 
-// 🌟 REWORKED: High-Fidelity Focused Inspection Compute (No bulk mapping array bloat)
 const targetedStudentProfile = computed<StudentAchievements | null>(() => {
   if (!searchStudentQueryId.value) return null;
   
@@ -401,7 +422,7 @@ const targetedStudentProfile = computed<StudentAchievements | null>(() => {
     };
   }
 
-  const base = {
+  return {
     student_id: studentRecords[0].student,
     initials: studentRecords[0].student_initials || 'ST',
     web_id: studentRecords[0].student_web_id || '',
@@ -410,15 +431,12 @@ const targetedStudentProfile = computed<StudentAchievements | null>(() => {
     vocab1xCount: studentRecords.filter(checkIsVocab1x).length,
     vocab3xCount: studentRecords.filter(checkIsVocab3x).length
   };
-
-  return base;
 });
 
-// Structural helper configuration mapping used exclusively for general overview counters layout references
 const achievementsByStudent = computed(() => {
-  const grouped: Record<number, any> = {};
+  const grouped: Record<number, boolean> = {};
   filteredAchievements.value.forEach(ach => {
-    if (!grouped[ach.student]) grouped[ach.student] = true;
+    if (ach.student) grouped[ach.student] = true;
   });
   return Object.keys(grouped);
 });
@@ -435,7 +453,6 @@ const achievementTypeOptions = computed(() => {
   }));
 });
 
-// 🌟 REWORKED: Pull holders checking against inner search string query criteria parameters sets
 const studentsWithSelectedAchievement = computed(() => {
   if (!selectedAchievementType.value) return [];
   const query = searchInternalHoldersQuery.value?.trim().toLowerCase();
@@ -467,18 +484,10 @@ const studentsWithSelectedAchievement = computed(() => {
 const totalAchievements = computed(() => filteredAchievements.value.length);
 const activeStudentCount = computed(() => achievementsByStudent.value.length);
 
-async function fetchCourses() {
-  try {
-    const response = await api.get<Course[]>('/courses/');
-    courseOptions.value = [
-      { id: 'all', name: 'All Class Courses' },
-      ...response.data.map(c => ({ id: c.slug, name: c.slug })),
-    ];
-  } catch (error) {
-    console.error('Failed to fetch courses:', error);
-  }
-}
-
+/**
+ * 🌟 HIGH FREQUENCY FETCH CONSOLE:
+ * Limits bulk scanning requests down to parameters matching active selections
+ */
 async function fetchAchievements() {
   loadingAchievements.value = true;
   try {
@@ -486,6 +495,7 @@ async function fetchAchievements() {
     if (selectedStudent.value) {
       params.student = selectedStudent.value;
     }
+    
     const response = await api.get('/achievements/', { params });
     const responseData: any = response.data;
     const data = responseData.results || responseData;
@@ -530,11 +540,21 @@ function formatDate(dateString: string): string {
 }
 
 onMounted(async () => {
-  if (userStore.isStaff && userStore.teacherRoster.length === 0) {
-    await userStore.fetchTeacherRoster();
+  loadingAchievements.value = true;
+  try {
+    // Coalesce store context allocations prior to processing calculations
+    await userStore.ensureUserLoaded();
+    
+    if (!userStore.enrollments.length) {
+      await userStore.fetchEnrollments();
+    }
+    
+    await fetchAchievements();
+  } catch (err) {
+    console.error("Dashboard mount transaction failed:", err);
+  } finally {
+    loadingAchievements.value = false;
   }
-  await fetchCourses();
-  await fetchAchievements();
 });
 </script>
 

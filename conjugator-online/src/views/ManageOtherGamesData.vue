@@ -1,18 +1,33 @@
 <template>
-  <div class="container-fluid py-4" style="max-width: 1600px;">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-      <div>
-        <h1 class="h2 mb-1 text-dark fw-bold">
-          <i class="bi bi-controller me-2 text-success"></i>
-          Other Games Analytics
-        </h1>
-        <p class="text-muted mb-0">Track participation and performance for all non-conjugator mini-games.</p>
+  <div class="container-fluid mt-5 pa-4 px-6" style="max-width: 1600px;">
+    <v-card class="pa-6 mb-6 data-header text-white shadow-sm" rounded="xl">
+      <div class="d-flex align-center justify-space-between flex-wrap ga-4">
+        <div>
+          <div class="text-h4 font-weight-bold">Other Games Data</div>
+          <div class="text-subtitle-1 opacity-90 mt-1">
+            View statistics and student performance in grammar mini-games 
+          </div>
+        </div>
+        <div class="d-flex justify-center align-center gap-4">
+          <v-btn
+            color="white"
+            variant="flat"
+            class="text-grey-darken-4 me-6"
+            :disabled="loading"
+            @click="loadDashboardData"
+            :prepend-icon="loading ? 'mdi-timer-sand' : 'mdi-refresh'"
+          >
+            {{ loading ? 'Syncing...' : 'Refresh' }}
+          </v-btn>
+
+          <v-avatar color="white" variant="tonal" size="70">
+            <v-icon size="42">mdi-chart-timeline</v-icon>
+          </v-avatar>
+        </div>
+
+
       </div>
-      <button @click="loadDashboardData" class="btn btn-outline-success d-flex align-items-center gap-2" :disabled="loading">
-        <i class="bi" :class="loading ? 'bi-arrow-repeat spin' : 'bi-arrow-clockwise'"></i>
-        {{ loading ? 'Syncing...' : 'Refresh Statistics' }}
-      </button>
-    </div>
+    </v-card>
 
     <div v-if="error" class="alert alert-danger d-flex align-items-center gap-2 mb-4" role="alert">
       <i class="bi bi-exclamation-triangle-fill"></i>
@@ -21,7 +36,7 @@
 
     <div v-if="loading && !dashboard" class="text-center py-5">
       <div class="spinner-border text-success mb-3" style="width: 3rem; height: 3rem;" role="status"></div>
-      <p class="text-muted fw-semibold">Parsing module telemetry fields...</p>
+      <p class="text-muted fw-semibold">Loading...</p>
     </div>
 
     <div v-else-if="dashboard" class="animate-fade-in">
@@ -327,4 +342,29 @@ onMounted(() => {
   letter-spacing: 0.03em;
   text-transform: uppercase;
 }
+
+.data-header {
+  background: linear-gradient(
+    135deg,
+    #135a01 0%,     /* deep navy */
+    #718f65 45%,    /* soft sky-blue center */
+    #135a01 100%    /* deep navy again */
+  );
+  position: relative;
+  overflow: hidden;
+}
+
+.data-header::before {
+  content: "";
+  position: absolute;
+  inset: -45%;
+  background:
+    radial-gradient(circle at 25% 30%, rgba(255, 255, 255, 0.18) 0%, rgba(255, 255, 255, 0) 45%),
+    radial-gradient(circle at 75% 25%, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0) 55%),
+    radial-gradient(circle at 60% 80%, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0) 50%);
+  transform: rotate(-6deg);
+  pointer-events: none;
+}
+
+
 </style>

@@ -5,7 +5,7 @@
       <v-window-controls v-model="activePanel" length="2" />
     </div>
 
-    <div class="d-flex align-center justify-space-between max-width-hub mx-auto">
+    <div class="d-flex align-center justify-space-between max-width-hub mx-auto mb-3" style="margin-top: 5%;">
       <v-btn
         variant="tonal"
         color="slate-600"
@@ -14,15 +14,8 @@
         class="rounded-lg text-none font-weight-bold px-4"
         prepend-icon="mdi-chevron-left"
       >
-        New Workout Session
+        New Training Session
       </v-btn>
-
-      <v-img
-        src="/images/banners/VocabWorkout1.png"
-        max-width="200px"
-        class="mx-4 d-none d-sm-flex"
-        contain
-      />
 
       <v-btn
         variant="tonal"
@@ -41,10 +34,11 @@
       <v-window-item :value="0">
         <v-card class="border rounded-xl bg-white" flat max-width="1200">
           
-          <div class="px-4 px-md-5 py-3 border-b bg-slate-50 rounded-t-xl d-flex flex-column flex-sm-row align-start align-sm-center justify-space-between ga-4">
+          <div class="px-4 px-md-5 py-3 border-b bg-slate-50 rounded-t-xl d-flex flex-column flex-sm-row align-start align-sm-center justify-start ga-4">
+            <v-icon size="x-large" class="mx-2">mdi-cards-outline</v-icon>
             <div>
-              <div class="text-h6 font-weight-black text-slate-900 leading-none mb-1">Workout Settings</div>
-              <div class="text-caption text-slate-500">Choose a list and study mode</div>
+              <div class="text-h6 font-weight-black text-slate-900 leading-none">Vocab Training - Settings</div>
+              <div class="text-caption text-slate-500">Choose a list and training mode</div>
             </div>
             
             <div v-if="selectedListKey" class="d-flex align-center ga-2 w-100 w-sm-auto justify-end flex-wrap">
@@ -73,7 +67,7 @@
                 prepend-icon="mdi-play-circle"
                 @click="start"
               >
-                Launch Workout
+                Launch Training
               </v-btn>
             </div>
           </div>
@@ -86,7 +80,7 @@
               :class="selectedListKey ? 'pr-md-4' : 'px-0 text-center mx-auto max-width-initial-picker'"
             >
               <div class="border rounded-xl pa-4 bg-slate-50 h-100">
-                <div class="d-flex align-center mb-3">
+                <div class="d-flex align-center mb-2">
                   <v-avatar color="primary" size="22" class="text-caption font-weight-black text-white mr-2">1</v-avatar>
                   <span class="text-subtitle-2 font-weight-black text-slate-900 uppercase tracking-wide">Select Vocab List</span>
                 </div>
@@ -227,7 +221,7 @@
                     prepend-icon="mdi-play-circle"
                     @click="start"
                   >
-                    Launch Workout
+                    Launch Training
                   </v-btn>
                 </div>
 

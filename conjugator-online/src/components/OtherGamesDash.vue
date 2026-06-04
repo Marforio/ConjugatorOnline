@@ -182,11 +182,11 @@
               class="chart-card pa-4 w-100 rounded-xl border flex-column justify-space-between bg-emerald-panel"
               elevation="2"
             >
-              <v-card-title class="text-h5 font-weight-bold text-emerald-header d-flex align-center pb-2">
+              <v-card-title class="text-h5 font-weight-bold text-emerald-header d-flex align-center pb-1">
                 <v-icon class="me-3 text-emerald-icon" size="28">mdi-lightbulb-on-outline</v-icon>
                 Explain your errors
               </v-card-title>
-              <v-divider class="mb-3 border-emerald alpha-divider" />
+              <v-divider class="mb-1 border-emerald alpha-divider" />
               
               <v-card-subtitle class="text-center font-weight-medium text-emerald-subtitle mb-2">
                 You have <strong>{{ groupedGames[selectedGame].totalIncorrect }}</strong> wrong answers
@@ -207,12 +207,12 @@
                       alt="Prompt semantic evaluation visual asset"
                       class="rounded-lg border-md elevation-1"
                       max-width="120"
-                      height="120"
+                      height="100"
                       cover
                     />
                   </div>
 
-                  <v-sheet color="white" class="pa-4 rounded-xl border border-dashed mb-3 elevation-sm">
+                  <v-sheet color="white" class="pa-2 rounded-xl border border-dashed mb-3 elevation-sm">
                     <div class="text-subtitle-1 font-weight-bold text-grey-darken-4 line-height-md italic-quote">
                       "{{ currentError(selectedGame)?.question || currentError(selectedGame)?.question_text }}"
                     </div>

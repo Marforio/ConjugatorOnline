@@ -1,23 +1,21 @@
 <template>
-  <v-container fluid class="pa-6 text-slate-800 bg-slate-50 min-vh-100">
-    <v-card class="pa-6 mb-6 manage-work-header text-white shadow-sm" rounded="xl">
-      <div class="d-flex align-center justify-space-between flex-wrap ga-4">
-        <div>
-          <div class="text-h4 font-weight-bold">Manage Student Work</div>
-          <div class="text-subtitle-1 opacity-90 mt-1">
-            Assign app challenges or in-class workouts to individual students or entire courses. Track progress and completion.
-          </div>
-        </div>
-        <v-avatar color="white" variant="tonal" size="56">
-          <v-icon size="32">mdi-tray-full</v-icon>
-        </v-avatar>
-      </div>
-    </v-card>
+  <v-container fluid class="mt-5 pa-4 px-6 text-slate-800 bg-slate-50 min-vh-100">
+    <v-row class="mb-2 align-center">
+      <v-col cols="12">
+        <h1 class="text-h4 font-weight-black text-slate-900 d-flex align-center">
+          <v-icon icon="mdi-tray-full" color="indigo" class="mr-5" />
+          Manage Student Tasks
+        </h1>
+        <p class="text-caption text-slate-500 mt-1">
+          Create assignments (app challenges) or workouts (in-class routines) for individual students or entire courses. Track progress and completion.
+        </p>
+      </v-col>
+    </v-row>
 
     <v-row>
       <v-col cols="12" md="4">
         <v-card class="pa-5 mb-6 border bg-white" rounded="lg" elevation="0">
-          <div class="text-subtitle-2 font-weight-bold mb-3 text-slate-500 uppercase tracking-wider">Target</div>
+          <div class="text-subtitle-2 font-weight-bold mb-3 text-slate-500 uppercase tracking-wider">Give work to:</div>
           
           <v-btn-toggle
             v-model="targetScope"
@@ -27,7 +25,7 @@
             class="w-100 mb-4"
           >
             <v-btn value="student" class="flex-grow-1 text-none font-weight-medium">
-              <v-icon start>mdi-account</v-icon> Individual
+              <v-icon start>mdi-account</v-icon> Single Student
             </v-btn>
             <v-btn value="course" class="flex-grow-1 text-none font-weight-medium">
               <v-icon start>mdi-school</v-icon> Entire Course
@@ -52,7 +50,7 @@
             v-else
             v-model="selectedCourseId"
             :items="uniqueCourses"
-            item-title="title"  item-value="value"  label="Select course class"
+            item-title="title"  item-value="value"  label="Select course"
             prepend-inner-icon="mdi-book-open-variant"
             variant="outlined"
             density="comfortable"
@@ -110,7 +108,7 @@
           <div class="d-flex align-center justify-space-between mb-2">
             <div class="text-subtitle-1 font-weight-bold text-slate-900">
               <v-icon start size="20" color="teal">mdi-clipboard-text</v-icon>
-              In-Class Workouts
+              Workouts (in-class routines)
             </div>
             <v-chip size="x-small" color="teal" variant="flat" class="text-white font-weight-bold">Live Drills</v-chip>
           </div>
@@ -474,7 +472,13 @@ const statusFilterMode = ref<'all' | 'pending' | 'completed'>('all');
 const templateDialog = ref(false);
 
 // Core Reactive Arrays Data Pools
-const studentsList = ref<Student[]>([]);
+const studentsList = computed(() => userStore.teacherRoster.map(s => ({
+  id: s.id, 
+  initials: s.initials, 
+  web_id: s.web_id, 
+  domain: s.domain,
+  display_name: `${s.initials} (${s.web_id}) [${s.domain || 'No Class'}]`
+})));
 const activeAssignments = ref<Assignment[]>([]);
 const activeWorkout = ref<Workout | null>(null);
 const matrixRosterData = ref<RosterMatrixRow[]>([]);
@@ -507,13 +511,7 @@ function getCleanWorkoutState() {
 // Form dynamic property re-assignment tracker initial state
 const newWorkout = ref(getCleanWorkoutState());
 
-const uniqueCourses = computed(() => {
-  if (!courses.value || courses.value.length === 0) return [];
-  return courses.value.map(c => ({
-    title: c.slug,  
-    value: c.slug   
-  })).sort((a, b) => a.title.localeCompare(b.title));
-});
+const uniqueCourses = computed(() => userStore.availableTeacherCourses);
 
 const assignmentTemplates = computed(() => {
   const data = rawAchievementsJson.value;
@@ -521,12 +519,8 @@ const assignmentTemplates = computed(() => {
   const universalList = data._all?.achievements || [];
   
   let activeDomain = '';
-  
   if (targetScope.value === 'student' && selectedStudentId.value) {
-    activeDomain = studentsList.value.find(s => s.id === selectedStudentId.value)?.domain || '';
-  } else if (targetScope.value === 'course' && selectedCourseId.value) {
-    const matchCourse = courses.value.find(c => c.slug === selectedCourseId.value);
-    activeDomain = matchCourse?.domain || ''; 
+    activeDomain = userStore.teacherRoster.find(s => s.id === selectedStudentId.value)?.domain || '';
   }
 
   const domainSpecificList = (activeDomain && data[activeDomain]) ? data[activeDomain].achievements : [];
@@ -534,24 +528,22 @@ const assignmentTemplates = computed(() => {
     const key = ach.criteria_key;
     const isConjugatorGame = key.includes('_correct_prompts') || key.startsWith('health_tier_');
     const inferredType = key.startsWith('vw_write_complete') || isConjugatorGame ? 'achievement' : 'exercise';
-    
-    let inferredRequiredSessions = 1;
-    if (!isConjugatorGame) {
-      inferredRequiredSessions = ach.description.toLowerCase().includes('three times') || ach.description.toLowerCase().includes('x 3') ? 3 : 1;
-    }
-
-    return { trigger_key: key, description: ach.description, task_type: inferredType, required_sessions: inferredRequiredSessions };
+    return { 
+      trigger_key: key, 
+      description: ach.description, 
+      task_type: inferredType, 
+      required_sessions: (!isConjugatorGame && ach.description.match(/(three times|x 3)/i)) ? 3 : 1 
+    };
   });
 });
 
-const canCreateWorkout = computed(() => newWorkout.value.focus_area.trim().length > 0 && newWorkout.value.drills.length > 0);
-
 const filteredActiveAssignments = computed(() => {
-  if (statusFilterMode.value === 'all') {
-    return activeAssignments.value;
-  }
-  return activeAssignments.value.filter(item => item.status === statusFilterMode.value);
+  return statusFilterMode.value === 'all' 
+    ? activeAssignments.value 
+    : activeAssignments.value.filter(item => item.status === statusFilterMode.value);
 });
+
+const canCreateWorkout = computed(() => newWorkout.value.focus_area.trim().length > 0 && newWorkout.value.drills.length > 0);
 
 watch(targetScope, (currentScope) => {
   selectedStudentId.value = null;
@@ -565,33 +557,21 @@ watch(targetScope, (currentScope) => {
 onMounted(async () => {
   loadingData.value = true;
   try {
-    const [coursesRes, enrollmentsRes] = await Promise.all([
-      api.get('/courses/'),
-      api.get('/enrollment/'),
-      userStore.teacherRoster.length === 0 ? userStore.fetchTeacherRoster() : Promise.resolve()
-    ]);
-
-    courses.value = Array.isArray(coursesRes.data) ? coursesRes.data : (coursesRes.data?.results || []);
-    enrollments.value = Array.isArray(enrollmentsRes.data) ? enrollmentsRes.data : (enrollmentsRes.data?.results || []);
+    // Ensure store is hydrated via the new centralized boot sequence
+    await userStore.ensureUserLoaded();
     
+    // Fetch external non-API assets
     const res = await fetch('/data/assignments.json');
     rawAchievementsJson.value = await res.json();
-  } catch (err) {
-    console.error('Synchronization transaction error encountered:', err);
-    triggerAlert('Failed to synchronize explicit courses data chains.', 'error');
-  } finally {
-    loadingData.value = false;
-  }
-
-  try {
+    
     const tplResponse = await fetch('/data/workout_templates.json');
     const parsedTemplates = await tplResponse.json();
     availableWorkoutTemplates.value = parsedTemplates.templates || [];
   } catch (err) {
-    console.error("Failed to parse workout blueprints profile file logs:", err);
+    console.error('Initialization error:', err);
+  } finally {
+    loadingData.value = false;
   }
-  
-  buildStudentsOptions();
 });
 
 function openTemplateDialog() {
@@ -619,13 +599,6 @@ function addNewWorkoutDrill() {
   });
 }
 
-function buildStudentsOptions() {
-  studentsList.value = userStore.teacherRoster.map(s => ({
-    id: s.id, initials: s.initials, web_id: s.web_id, domain: s.domain,
-    display_name: `${s.initials} (${s.web_id}) [${s.domain || 'No Class'}]`,
-  }));
-}
-
 function getStudentIdsInSelectedCourse(): string[] {
   if (!selectedCourseId.value) return [];
   return enrollments.value
@@ -642,27 +615,20 @@ async function refreshAssignmentLogs() {
 
   loadingData.value = true;
   try {
-    const params = { student: selectedStudentId.value };
+    const [workoutRes, assignRes] = await Promise.all([
+      api.get(`/workouts/current/${selectedStudentId.value}/`).catch(() => ({ data: null })),
+      api.get('/assignment/', { params: { student: selectedStudentId.value } })
+    ]);
     
-    try {
-      const workoutRes = await api.get(`/workouts/current/${selectedStudentId.value}/`);
-      activeWorkout.value = workoutRes.data;
-    } catch (err: any) {
-      if (err?.response?.status === 404) activeWorkout.value = null;
-    }
-
-    const response = await api.get('/assignment/', { params });
-    const payload = response.data?.results || response.data;
-    
-    if (Array.isArray(payload)) {
-      activeAssignments.value = payload;
-    }
-  } catch (err) {
-    triggerAlert('Failed to update tracking loops logs map.', 'error');
+    activeWorkout.value = workoutRes.data;
+    activeAssignments.value = assignRes.data?.results || assignRes.data || [];
+  } catch {
+    triggerAlert('Failed to refresh student logs.', 'error');
   } finally {
     loadingData.value = false;
   }
 }
+
 
 async function saveActiveWorkoutProgressState() {
   if (!activeWorkout.value) return;
@@ -788,46 +754,57 @@ async function loadGlobalClassMatrix() {
   loadingMatrix.value = true;
   
   try {
+    // 🌟 FIX: Query assignments and workouts globally, or filter specifically by this course slug slug 
     const [assignmentsResponse, workoutsResponse] = await Promise.all([
       api.get('/assignment/'),
-      api.get('/workouts/', { params: { user: userStore.user?.id || userStore.user } }).catch(() => ({ data: [] }))
+      // Passing no user parameters enables teachers to fetch the active workout state
+      // matrix layout across their entire student population track footprints!
+      api.get('/workouts/', { params: { is_current: true } }).catch(() => ({ data: [] }))
     ]);
 
-    const assignmentsPool: Assignment[] = assignmentsResponse.data?.results || assignmentsResponse.data || [];
-    const workoutsPool: any[] = workoutsResponse.data?.results || workoutsResponse.data || [];
+    const assignmentsPool = assignmentsResponse.data?.results || assignmentsResponse.data || [];
+    const workoutsPool = workoutsResponse.data?.results || workoutsResponse.data || [];
 
-    const courseStudentWebIds = getStudentIdsInSelectedCourse();
+    // Filter students using store data
+    const courseStudentWebIds = userStore.enrollments
+      .filter(e => {
+        const cSlug = e.course?.slug || String(e.course);
+        return cSlug.trim().toLowerCase() === selectedCourseId.value!.trim().toLowerCase();
+      })
+      .map(e => String(typeof e.student === 'object' ? e.student?.web_id : e.student));
 
-    const filteredRoster = studentsList.value.filter(student => 
-      student.web_id && courseStudentWebIds.includes(String(student.web_id))
-    );
+    matrixRosterData.value = userStore.teacherRoster
+      .filter(s => s.web_id && courseStudentWebIds.includes(String(s.web_id)))
+      .map(student => {
+        const personalSet = assignmentsPool.filter((a: any) => {
+          const assignStudentId = a.student && typeof a.student === 'object' ? a.student.id : Number(a.student);
+          return assignStudentId === student.id;
+        });
 
-    matrixRosterData.value = filteredRoster.map(student => {
-      const personalSet = assignmentsPool.filter(a => Number(a.student) === Number(student.id));
-      
-      const activeWk = workoutsPool.find(w => {
-        const checkId = typeof w.student === 'object' && w.student !== null ? w.student.id : w.student;
-        return Number(checkId) === Number(student.id) && w.is_current === true;
+        // 🌟 FIX: Look up using a robust validation mapping sequence that handles nested relations cleanly
+        const activeWk = workoutsPool.find((w: any) => {
+          const workoutStudentId = w.student && typeof w.student === 'object' ? w.student.id : Number(w.student);
+          return workoutStudentId === student.id && w.is_current;
+        });
+
+        return {
+          student_id: student.id,
+          initials: student.initials,
+          web_id: student.web_id,
+          domain: student.domain,
+          pending_count: personalSet.filter((a: any) => a.status === 'pending').length,
+          completed_count: personalSet.filter((a: any) => a.status === 'completed').length,
+          has_active_workout: !!activeWk
+        };
       });
-
-      return {
-        student_id: student.id,
-        initials: student.initials,
-        web_id: student.web_id,
-        domain: student.domain,
-        pending_count: personalSet.filter(a => a.status === 'pending').length,
-        completed_count: personalSet.filter(a => a.status === 'completed').length,
-        has_active_workout: !!activeWk
-      };
-    });
-
   } catch (err) {
-    console.error(err);
-    triggerAlert('Could not build overview metrics charts map.', 'error');
+    console.error("Matrix compilation crashed:", err);
+    triggerAlert('Could not build overview metrics charts.', 'error');
   } finally {
     loadingMatrix.value = false;
   }
 }
+
 
 function formatDisplayDate(dateStr: string): string {
   if (!dateStr) return '';

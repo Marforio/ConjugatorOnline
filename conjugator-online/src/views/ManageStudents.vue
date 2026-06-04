@@ -1,22 +1,28 @@
 <template>
-  <v-container fluid class="mt-5 pa-4 max-width-container">
-    <v-row class="mb-2 align-center">
-      <v-col cols="12" sm="6">
-        <h1 class="text-h4 font-weight-bold primary--text">Manage Students</h1>
+  <v-container fluid class="mt-5 pa-4 px-6 max-width-container">
+    <v-row class="mb-6 align-center">
+      <v-col cols="12" sm="8" class="d-flex flex-column gap-1">
+        <h1 class="text-h4 font-weight-black text-slate-900 d-flex align-center">
+          <v-icon icon="mdi-account-cog" color="indigo" class="mr-5" />
+          Manage Students and Courses
+        </h1>
+        <p class="text-caption text-slate-500 mt-1">
+          Register students and courses, manage enrollments, and assess linguistic profiles.
+        </p>
       </v-col>
-      <v-col cols="12" sm="6" class="d-flex justify-sm-end gap-2 flex-wrap align-center">
-        <v-btn color="grey-darken-3" variant="outlined" prepend-icon="mdi-refresh" :loading="loading" @click="fetchData">
+      <v-col cols="12" sm="4" class="d-flex justify-sm-end gap-2 flex-wrap align-center">
+        <v-btn color="grey-darken-3" variant="outlined" prepend-icon="mdi-refresh" width="180px" :loading="loading" @click="fetchData">
           Refresh
         </v-btn>
-        <v-btn color="primary" prepend-icon="mdi-plus" @click="courseDialog = true">Create Course</v-btn>
-        <v-btn color="secondary" prepend-icon="mdi-account-plus" @click="openRegisterStudentDialog">Register Student</v-btn>
-        <v-btn color="success" prepend-icon="mdi-link-variant" @click="enrollmentDialog = true">Assign to Course</v-btn>
+        <v-btn color="primary" prepend-icon="mdi-plus" width="180px" @click="courseDialog = true">New Course</v-btn>
+        <v-btn color="secondary" prepend-icon="mdi-account-plus" width="180px" @click="openRegisterStudentDialog">New Student</v-btn>
+        <v-btn color="success" prepend-icon="mdi-link-variant" width="180px" @click="enrollmentDialog = true">Enroll Student</v-btn>
       </v-col>
     </v-row>
 
     <v-tabs v-model="activeTab" color="primary" class="mb-6 border-b">
-      <v-tab value="courses"><v-icon start>mdi-google-classroom</v-icon>Courses</v-tab>
-      <v-tab value="directory"><v-icon start>mdi-account-multiple</v-icon>Students</v-tab>
+      <v-tab value="courses"><v-icon start>mdi-google-classroom</v-icon>My Courses</v-tab>
+      <v-tab value="directory"><v-icon start>mdi-account-multiple</v-icon>My Students</v-tab>
       <v-tab value="linguistic"><v-icon start>mdi-account-voice</v-icon>Linguistic Profiles</v-tab>
     </v-tabs>
 
@@ -569,7 +575,6 @@ const currentEditStudentId = ref<number | null>(null)
 const deleteTargetType = ref<'course' | 'student' | 'unenroll' | null>(null)
 const deleteTargetId = ref<any>(null)
 const deleteTargetLabel = ref('')
-const unenrollMetadata = ref({ studentWebId: '', courseSlug: '' })
 
 const courses = ref<any[]>([])
 const enrollments = ref<any[]>([])
@@ -588,7 +593,6 @@ const toast = ref({ show: false, message: '', color: 'success' })
 
 // Linguistic profiles states
 const assessmentDialog = ref(false)
-const assessmentSaving = ref(false) // 👈 Dedicated to submit process
 const assessmentFormRef = ref()
 const matrixSearch = ref('')
 const matrixAssessmentFilter = ref<string | null>(null)
@@ -632,12 +636,10 @@ const assessmentForm = ref<Record<string, any>>({
 const formatDomain = (v: string) => domainOptions.find(d => d.value === v)?.label || v
 const showToast = (m: string, c = 'success') => { toast.value = { show: true, message: m, color: c } }
 
-// --- Refs for password generation ---
 const wordData = ref<[string, string[]][]>([]);
 const activeList = ref<[string, string[]][]>([]);
 const passwordSymbols = ['!', '@', '#', '$', '%', '^', '&', '*', '?', '-', '_', '=', '+'];
 
-// Helper to randomly alternate the text casing of characters inside a string
 const randomizeWordCasing = (word: string): string => {
   return word
     .split('')
@@ -645,13 +647,23 @@ const randomizeWordCasing = (word: string): string => {
     .join('');
 };
 
-const fetchData = async () => {
+/**
+ * 🌟 CACHED SYNC PIPELINE
+ * Pulls relational structures only if state memory fields are empty.
+ * Passing force=true bypasses the cache filter for explicit refresh triggers.
+ */
+const fetchData = async (force = false) => {
+  // If data is already cached and we aren't forcing a refresh, skip the network hit
+  if (!force && courses.value.length > 0 && enrollments.value.length > 0 && userStore.teacherRoster.length > 0) {
+    return
+  }
+
   loading.value = true
   try {
     const [coursesRes, enrollmentsRes] = await Promise.all([
       api.get('/courses/'),
       api.get('/enrollment/'),
-      userStore.fetchTeacherRoster()
+      userStore.fetchTeacherRoster() // Synchronizes your global store collection
     ])
     courses.value = coursesRes.data
     enrollments.value = enrollmentsRes.data
@@ -663,7 +675,6 @@ const fetchData = async () => {
 }
 
 const generateProportionalPassword = (): string => {
-  // Fallback anchor safety check if the external lemmas text file asset hasn't resolved yet
   if (!activeList.value || activeList.value.length === 0) {
     const safetyWords = ['quantum', 'matrix', 'cipher', 'vector', 'vertex', 'nexus'];
     const fallbackW1 = safetyWords[Math.floor(Math.random() * safetyWords.length)];
@@ -671,73 +682,54 @@ const generateProportionalPassword = (): string => {
     return `${randomizeWordCasing(fallbackW1)}-${randomizeWordCasing(fallbackW2)}-${Math.floor(Math.random() * 90 + 10)}!!99`;
   }
 
-  // 1. Extract two random tuple entries from your active parsed text list
   const entry1 = activeList.value[Math.floor(Math.random() * activeList.value.length)];
   const entry2 = activeList.value[Math.floor(Math.random() * activeList.value.length)];
 
-  // 2. Drill down into their variant variants string arrays safely
   const variants1 = entry1[1];
   const variants2 = entry2[1];
 
   const rawWord1 = variants1[Math.floor(Math.random() * variants1.length)] || entry1[0];
   const rawWord2 = variants2[Math.floor(Math.random() * variants2.length)] || entry2[0];
 
-  // 3. Clean string properties and randomize character text case configurations
   const cleanWord1 = randomizeWordCasing(rawWord1.trim().replace(/[^a-zA-Z]/g, ''));
   const cleanWord2 = randomizeWordCasing(rawWord2.trim().replace(/[^a-zA-Z]/g, ''));
 
-  // 4. Gather 2 random digits and 2 random symbols criteria bounds
   const d1 = Math.floor(Math.random() * 10).toString();
   const d2 = Math.floor(Math.random() * 10).toString();
   const s1 = passwordSymbols[Math.floor(Math.random() * passwordSymbols.length)];
   const s2 = passwordSymbols[Math.floor(Math.random() * passwordSymbols.length)];
 
-  // Constructs standard password layout output (e.g., "RunNiNg-PlAnEtS-7@4#")
   return `${cleanWord1}-${cleanWord2}-${d1}${s1}${d2}${s2}`;
 };
 
 function copyCombinedCredentials() {
   const username = registeredSummary.value?.webId || '';
   const password = registeredSummary.value?.password || '';
-  
-  // Assembles the string precisely as requested
   const combinedString = `user name = ${username}  password = ${password}`;
-  
-  // Utilizes your existing custom copyToClipboard function runner mapping
   copyToClipboard(combinedString);
 }
 
-const previewGeneratedWebID = computed(() => {
-  if (!newStudent.value.initialCourse) return ''
-  const base = newStudent.value.initialCourse
-  const matches = userStore.teacherRoster.filter(s => s.web_id?.startsWith(`${base}-`))
-  let maxNum = 0
-  matches.forEach(s => {
-    const num = parseInt(s.web_id.split('-').pop() || '', 10)
-    if (!isNaN(num) && num > maxNum) maxNum = num
-  })
-  return `${base}-${maxNum + 1}`
-})
-
 const groupedData = computed(() => {
   return courses.value.map(c => {
-    const ids = enrollments.value.filter(e => normalizeCourseSlug(e.course) === c.slug).map(e => normalizeWebId(e.student))
+    const ids = enrollments.value
+      .filter(e => normalizeCourseSlug(e.course) === c.slug)
+      .map(e => normalizeWebId(e.student))
+    
+    // 🌟 Read straight from the global store cache layer
     return { ...c, students: userStore.teacherRoster.filter(s => ids.includes(s.web_id)) }
   })
 })
 
-// Submissions Engines
 const submitCreateCourse = async () => {
   const { valid } = await courseFormRef.value.validate()
   if (!valid) return
   loading.value = true
   try {
-    // 🌟 Teacher profile injection automatically managed securely backend layer now!
     await api.post('/courses/', { slug: newCourse.value.slug.toLowerCase().trim().replace(/\s+/g, '_') })
     showToast('Course creation confirmed.')
     courseDialog.value = false
     newCourse.value.slug = ''
-    await fetchData()
+    await fetchData(true) // Force sync to refresh the course lists
   } catch {
     showToast('Failed to instantiate course space object.', 'error')
   } finally { loading.value = false }
@@ -753,24 +745,19 @@ const submitRegisterStudent = async () => {
 
   loading.value = true
   try {
-    // Use the user-reviewed input field value instead of the calculated read-only value!
     const finalWebId = newStudent.value.usernameSlug.toLowerCase().trim().replace(/\s+/g, '_');
-    
     if (!finalWebId) {
       showToast('A valid unique username identifier slug is required.', 'error');
       return;
     }
 
     const pwd = generateProportionalPassword();
-    
-    // 1. Commit the auth User profile
     const userRes = await api.post('/users/', { 
       username: finalWebId, 
       email: `${finalWebId}@schoolsystem.com`, 
       password: pwd 
     });
     
-    // 2. Commit the Student row link mapping
     await api.post('/students/', { 
       web_id: finalWebId, 
       initials: newStudent.value.initials.toUpperCase().trim(), 
@@ -778,7 +765,6 @@ const submitRegisterStudent = async () => {
       user: userRes.data.id 
     });
     
-    // 3. Process the initial course room pairing allocation row
     await api.post('/enrollment/', { 
       student: finalWebId, 
       course: newStudent.value.initialCourse 
@@ -787,11 +773,9 @@ const submitRegisterStudent = async () => {
     registeredSummary.value = { webId: finalWebId, password: pwd };
     studentDialog.value = false;
     successDialog.value = true;
-    await fetchData();
+    await fetchData(true); // Force sync to update state
   } catch (err: any) { 
     console.error("Payload rejection details:", err.response?.data);
-    
-    // Render specific field errors clearly on screen if it hits another collision
     if (err.response?.data?.username) {
       showToast(`Username Error: ${err.response.data.username[0]} Try modifying the suggested suffix field.`, 'error');
     } else {
@@ -807,7 +791,8 @@ const executeEditStudent = async () => {
   try {
     await api.patch(`/students/${currentEditStudentId.value}/`, { initials: newStudent.value.initials.toUpperCase().trim(), domain: newStudent.value.domain })
     showToast('Student details updated.')
-    studentDialog.value = false; await fetchData()
+    studentDialog.value = false; 
+    await fetchData(true) // Force sync to populate everywhere smoothly
   } catch { showToast('Profile editing failed.', 'error') } finally { loading.value = false }
 }
 
@@ -818,13 +803,11 @@ const submitAssignCourse = async () => {
   try {
     await api.post('/enrollment/', { student: newEnrollment.value.studentWebId, course: newEnrollment.value.courseSlug })
     showToast('Student assigned successfully.')
-    enrollmentDialog.value = false; await fetchData()
+    enrollmentDialog.value = false; 
+    await fetchData(true)
   } catch { showToast('Enrollment assignment dropped.', 'error') } finally { loading.value = false }
 }
 
-/* =========================================================
-   🗑️ REORGANIZED CRUD: Safe Deletion & Un-enrollment Hooks
-   ========================================================= */
 const confirmDeleteCourse = (course: any) => {
   deleteTargetType.value = 'course'
   deleteTargetId.value = course.slug
@@ -839,9 +822,7 @@ const confirmDeleteStudent = (student: any) => {
   deleteConfirmDialog.value = true
 }
 
-// 🌟 NEW: Safe un-enrollment hook mapping to individual record bindings
 const confirmUnenrollStudent = (student: any, courseSlug: string) => {
-  // Find exact linking entry ID matching parameters constraints matrix
   const match = enrollments.value.find(e => normalizeWebId(e.student) === student.web_id && normalizeCourseSlug(e.course) === courseSlug)
   if (!match) {
     showToast('Failed to resolve database link reference pairing for un-enrollment.', 'error')
@@ -863,12 +844,11 @@ const executeConfirmedDestruction = async () => {
       await api.delete(`/students/${deleteTargetId.value}/`)
       showToast('Student global master profile deleted.')
     } else if (deleteTargetType.value === 'unenroll') {
-      // 🌟 Un-enroll hits StudentCourseViewSet endpoint cleanly without dropping the student object model!
       await api.delete(`/enrollment/${deleteTargetId.value}/`)
       showToast('Student successfully removed from course roster layout track.')
     }
     deleteConfirmDialog.value = false
-    await fetchData()
+    await fetchData(true)
   } catch {
     showToast('Operational rejection reported by system views endpoints configuration rules.', 'error')
   } finally {
@@ -876,7 +856,6 @@ const executeConfirmedDestruction = async () => {
   }
 }
 
-// Passwords & Normalizers helpers blocks 
 const openResetPasswordDialog = (s: any) => { selectedStudent.value = s; newPasswordForStudent.value = generateProportionalPassword(); passwordResetDialog.value = true }
 const submitPasswordReset = async () => {
   try {
@@ -890,10 +869,8 @@ const normalizeWebId = (f: any) => f && typeof f === 'object' ? f.web_id : Strin
 const normalizeCourseSlug = (f: any) => f && typeof f === 'object' ? f.slug : String(f)
 const copyToClipboard = async (t: string) => { if (t) await navigator.clipboard.writeText(t); showToast('Copied!') }
 
-/* =========================================================
-   LINGUISTIC PROFILE COMPUTED FILTERS & BADGE FORMATTERS
-   ========================================================= */
 const filteredMatrixData = computed(() => {
+  // 🌟 Read straight from the global store cache layer
   return userStore.teacherRoster.filter(s => {
     const matchesSearch = !matrixSearch.value || 
       s.web_id?.toLowerCase().includes(matrixSearch.value.toLowerCase()) ||
@@ -920,90 +897,60 @@ const getScoreBadgeColor = (score?: number) => {
   return 'error';
 };
 
-/* =========================================================
-    LINGUISTIC PROFILEs ASSESSMENT 
-   ========================================================= */
 const openAssessmentPanel = (student: any) => {
-  console.log("📥 [Debug] Opening Assessment Panel for student object:", student);
   activeAssessmentStudent.value = student;
   
-  // 🌟 FIX: Pull fields directly from the student object, not an imaginary sub-profile!
+  // Extract data from the store-nested linguistic profile parameters
+  const profile = student.linguistic_profile || {};
+  
   assessmentForm.value = {
-    latest_assessment: student.latest_assessment || '',
-    create_snapshot: !!student.latest_assessment,
-    linguistic_precision: student.linguistic_precision ?? 5,
-    linguistic_precision_comment: student.linguistic_precision_comment || '',
-    phonetic_clarity: student.phonetic_clarity ?? 5,
-    phonetic_clarity_comment: student.phonetic_clarity_comment || '',
-    communicative_flow: student.communicative_flow ?? 5,
-    communicative_flow_comment: student.communicative_flow_comment || '',
-    expressive_range: student.expressive_range ?? 5,
-    expressive_range_comment: student.expressive_range_comment || ''
+    latest_assessment: profile.latest_assessment || '',
+    create_snapshot: !!profile.latest_assessment,
+    linguistic_precision: profile.linguistic_precision ?? 5,
+    linguistic_precision_comment: profile.linguistic_precision_comment || '',
+    phonetic_clarity: profile.phonetic_clarity ?? 5,
+    phonetic_clarity_comment: profile.phonetic_clarity_comment || '',
+    communicative_flow: profile.communicative_flow ?? 5,
+    communicative_flow_comment: profile.communicative_flow_comment || '',
+    expressive_range: profile.expressive_range ?? 5,
+    expressive_range_comment: profile.expressive_range_comment || ''
   };
   
-  console.log("📋 [Debug] Form state fully populated:", assessmentForm.value);
   assessmentDialog.value = true;
 };
 
 const submitLinguisticAssessment = async () => {
-  console.log("⚡ [Button Click] submitLinguisticAssessment triggered!");
-  console.log("🆔 Target Student state context:", activeAssessmentStudent.value);
-
-  if (!activeAssessmentStudent.value) {
-    console.error("❌ Guard Failed: activeAssessmentStudent is null or undefined!");
-    return;
-  }
+  if (!activeAssessmentStudent.value) return;
 
   loading.value = true;
   try {
     const studentId = activeAssessmentStudent.value.id;
-    console.log("📝 Preparing to submit linguistic assessment for student ID:", studentId);
-    
-    // 🌟 FIX 1: Flatten the payload completely. No 'linguistic_profile' object wrapper!
-    // This maps directly to your StudentLinguisticProfileUpdateSerializer fields.
     const payload = {
       latest_assessment: assessmentForm.value.latest_assessment || '',
-      
-      // Inject your write_only snapshot boolean flag directly into the payload 
-      // instead of hitting a separate endpoint first! Your update method handles this.
       snapshot: !!assessmentForm.value.create_snapshot,
-
       linguistic_precision: Number(assessmentForm.value['linguistic_precision'] ?? 5),
       linguistic_precision_comment: assessmentForm.value['linguistic_precision_comment'] || '',
-      
       phonetic_clarity: Number(assessmentForm.value['phonetic_clarity'] ?? 5),
       phonetic_clarity_comment: assessmentForm.value['phonetic_clarity_comment'] || '',
-      
       communicative_flow: Number(assessmentForm.value['communicative_flow'] ?? 5),
       communicative_flow_comment: assessmentForm.value['communicative_flow_comment'] || '',
-      
       expressive_range: Number(assessmentForm.value['expressive_range'] ?? 5),
       expressive_range_comment: assessmentForm.value['expressive_range_comment'] || ''
     };
 
-    console.log("🚀 Dispatching Flat Data Payload:", payload);
-
     const endpointRouteKey = 'linguistic-profiles';
-    
-    const response = await api.patch(`/${endpointRouteKey}/${studentId}/`, payload, {
+    await api.patch(`/${endpointRouteKey}/${studentId}/`, payload, {
       headers: { 'Content-Type': 'application/json' }
     });
 
-    console.log("🎯 Database sync successful:", response.data);
-
     showToast(`Linguistic metrics successfully locked down for ${activeAssessmentStudent.value.web_id}`);
     assessmentDialog.value = false;
-    await fetchData(); 
+    await fetchData(true); // Force clear the store caches to force a sync display update
     
   } catch (err: any) {
-    console.error("❌ Assessment sync completely rejected:", {
-      status: err.response?.status,
-      data: err.response?.data
-    });
-    
+    console.error("❌ Assessment sync completely rejected:", err);
     const errorDetails = err.response?.data;
     if (errorDetails && typeof errorDetails === 'object') {
-      // Pick out explicit validation failures from individual metrics rules if caught
       const firstErrorMessage = Object.values(errorDetails)[0];
       showToast(`Validation Failure: ${firstErrorMessage}`, 'error');
     } else {
@@ -1016,10 +963,8 @@ const submitLinguisticAssessment = async () => {
 
 watch(
   () => [newStudent.value.initialCourse, newStudent.value.initials],
-  ([newCourseVal, newInitialsVal]) => {
-    // If editing a student, do not overwrite their existing login identity
+  ([newCourseVal]) => {
     if (isEditingStudent.value) return;
-    
     if (!newCourseVal) {
       newStudent.value.usernameSlug = '';
       return;
@@ -1035,19 +980,14 @@ watch(
       if (!isNaN(num) && num > maxNum) maxNum = num;
     });
     
-    // Suggest the calculated value, but leave it fully editable in the field!
     newStudent.value.usernameSlug = `${base}-${maxNum + 1}`;
   }
 )
 
-// 🌟 ADD THIS: Reactive mirror engine of the Student model categorization flow
 const liveCalculatedProfileType = computed(() => {
-  // Defensive check: if the form hasn't been initialized yet, return a safe default
   if (!assessmentForm.value) {
     return { type: 'Initializing...', emoji: '⏳', advice: '', description: '' };
   }
-
-  console.log("🧮 [Debug] Re-calculating personality type from form parameters...");
 
   const precision = Number(assessmentForm.value.linguistic_precision ?? 5);
   const clarity = Number(assessmentForm.value.phonetic_clarity ?? 5);
@@ -1055,8 +995,6 @@ const liveCalculatedProfileType = computed(() => {
   const range_score = Number(assessmentForm.value.expressive_range ?? 5);
 
   const scores = [precision, clarity, flow, range_score];
-  
-  // Logical helpers mirroring Python model boundaries
   const is_very_high = (s: number) => s >= 8;
   const is_high = (s: number) => s >= 6;
   const is_medium = (s: number) => s >= 4 && s < 6;
@@ -1067,47 +1005,35 @@ const liveCalculatedProfileType = computed(() => {
   const communication_avg = (flow + clarity) / 2;
   const overall_avg = scores.reduce((a, b) => a + b, 0) / scores.length;
 
-  // PRIORITY 1: The Developing Talent
   if (scores.every(is_low)) {
     return {
       type: 'The Developing Talent', emoji: '🌱', color: 'secondary',
       description: "Early stages of English learning progression.",
-      advice: "Focus on basic mechanics, fundamental syntactic blocks, and core high-frequency words.",
-      strengths: ['Fresh start tracking state', 'Optimal raw potential'],
-      focus_areas: ['Basic syntax syntax parsing', 'Core basic lexical strings']
+      advice: "Focus on basic mechanics, fundamental syntactic blocks, and core high-frequency words."
     };
   }
 
-  // PRIORITY 2: The Advanced Learner
   if (scores.every(is_very_high)) {
     return {
       type: 'The Advanced Learner', emoji: '🏆', color: 'success',
       description: "Demonstrating command across structural and spontaneous competencies.",
-      advice: "Maintain refinement tracks using nuance training models or field-specialized lexical domains.",
-      strengths: ['Syntactic accuracy', 'Phonetic baseline clarity', 'Fluency processing flow'],
-      focus_areas: ['Continuous long-term mastery maintenance']
+      advice: "Maintain refinement tracks using nuance training models or field-specialized lexical domains."
     };
   }
 
-  // PRIORITY 3: The Efficient Speaker (Balanced)
   if (is_balanced && overall_avg >= 6.5) {
     return {
       type: 'The Efficient Speaker', emoji: '🎓', color: 'success',
       description: "Approaching target advanced proficiencies with harmonious skill parameters balance.",
-      advice: "Isolate a singular focal area to deliberately push beyond the advanced milestone envelope.",
-      strengths: ['Balanced multi-track development', 'Solid infrastructure baseline'],
-      focus_areas: ['Targeted skill isolation optimization']
+      advice: "Isolate a singular focal area to deliberately push beyond the advanced milestone envelope."
     };
   }
 
-  // PRIORITY 4: Grammar-dominant profiles (Scholar variants)
   if (grammar_avg >= 7 && communication_avg < 6 && (grammar_avg - communication_avg) >= 2) {
     return {
       type: 'The Scholar', emoji: '📚', color: 'info',
       description: "High explicit grammar accuracy paired with lower spontaneous speech confidence rates.",
-      advice: "Prompt student into unfiltered real-time speech exercises—mistakes accepted to unlock output flow.",
-      strengths: ['Grammatical correctness', 'Broad static lexical index'],
-      focus_areas: ['Spontaneous conversational velocity']
+      advice: "Prompt student into unfiltered real-time speech exercises—mistakes accepted to unlock output flow."
     };
   }
 
@@ -1115,20 +1041,15 @@ const liveCalculatedProfileType = computed(() => {
     return {
       type: 'The Careful Speaker', emoji: '🤔', color: 'info',
       description: "Possesses strong passive mechanics but experiences conversational latency due to real-time self-monitoring.",
-      advice: "Introduce rapid string exercises under time constraints to restrict active validation loops.",
-      strengths: ['Structural awareness', 'High calculation precision when pre-planned'],
-      focus_areas: ['Real-time execution speed and fluid output']
+      advice: "Introduce rapid string exercises under time constraints to restrict active validation loops."
     };
   }
 
-  // PRIORITY 5: Communication-dominant profiles (Natural variants)
   if (communication_avg >= 7 && grammar_avg < 6 && (communication_avg - grammar_avg) >= 2) {
     return {
       type: 'The Natural', emoji: '🌟', color: 'warning',
       description: "Fluid conversational output tracking with variable syntax stability and narrower lexical varieties.",
-      advice: "Begin clean-up tasks targeting repeating errors alongside training structural sentence trees.",
-      strengths: ['Unimpeded native flow rate', 'Strong communicative intuition'],
-      focus_areas: ['Grammatical structure cleanup', 'Lexical index expansion']
+      advice: "Begin clean-up tasks targeting repeating errors alongside training structural sentence trees."
     };
   }
 
@@ -1136,71 +1057,32 @@ const liveCalculatedProfileType = computed(() => {
     return {
       type: 'The Confident Communicator', emoji: '💬', color: 'warning',
       description: "Communicates comfortably with high comprehension markers but low granular output precision.",
-      advice: "Shift focus toward structural accuracy. Introduce single custom systemic checks per cycle block.",
-      strengths: ['Speaking situational comfort', 'Proactive communication approach'],
-      focus_areas: ['Fine-tuning mechanical syntax errors']
+      advice: "Shift focus toward structural accuracy. Introduce single custom systemic checks per cycle block."
     };
   }
 
-  // PRIORITY 6: The Perfectionist
   if (precision >= 7 && range_score < 5 && (precision - range_score) >= 2) {
     return {
       type: 'The Perfectionist', emoji: '🎯', color: 'info',
       description: "Produces flawless structural strings but relies heavily on highly restricted safe zones.",
-      advice: "Push interaction targets into unfamiliar, complex contextual situations.",
-      strengths: ['Error-free construction profiles', 'Highly methodical accuracy execution'],
-      focus_areas: ['Lexical variation expansion', 'Complex clauses implementation']
+      advice: "Push interaction targets into unfamiliar, complex contextual situations."
     };
   }
 
-  // PRIORITY 7: The Intermediate Student (Balanced)
   if (is_balanced && overall_avg >= 4.5 && overall_avg < 6.5) {
     return {
       type: 'The Intermediate Student', emoji: '⚖️', color: 'primary',
       description: "Solid, even performance thresholds anchored squarely inside core functional domains.",
-      advice: "Pick a single category to over-index temporarily to disrupt plateaus.",
-      strengths: ['Uniform cross-skill development', 'Stably structured foundation matrix'],
-      focus_areas: ['Temporary asymmetric focus to clear performance plateaus']
+      advice: "Pick a single category to over-index temporarily to disrupt plateaus."
     };
   }
 
-  // PRIORITY 8: Emerging Patterns
-  if (overall_avg < 5 && grammar_avg > communication_avg && (grammar_avg - communication_avg) >= 1) {
-    return {
-      type: 'The Emerging Scholar', emoji: '📖', color: 'secondary',
-      description: "Developing good base structural rules parsing, requiring immediate production volume exercises.",
-      advice: "Allocate 50% of processing blocks to real-time interaction drills.",
-      strengths: ['Structural rule assimilation models'],
-      focus_areas: ['Verbal production volume', 'Auditory decoding tracks']
-    };
-  }
-
-  if (overall_avg < 5 && communication_avg > grammar_avg && (communication_avg - grammar_avg) >= 1) {
-    return {
-      type: 'The Emerging Natural', emoji: '🌱', color: 'primary',
-      description: "Strong baseline attempts to convey intent alongside notable morpho-syntactic constraints.",
-      advice: "Introduce high-frequency grammar drills to lock in foundational patterns.",
-      strengths: ['Active target interaction intent drives'],
-      focus_areas: ['Base grammar paradigms', 'Production accuracy rules']
-    };
-  }
-
-  // DEFAULT
   return {
     type: 'Unique Profile', emoji: '✨', color: 'primary',
     description: "Highly unique individualized language profile balancing custom combinations.",
-    advice: "Synthesize target exercises focused directly on custom matrix tracking metrics.",
-    strengths: ['Custom individual learning parameters matrix'],
-    focus_areas: ['Custom personalized structural calibration paths']
+    advice: "Synthesize target exercises focused directly on custom matrix tracking metrics."
   };
 });
-
-// Helper color-map engine for slider feedback context indicators
-function getLiveBandMetadata(score: number) {
-  if (score >= 8) return { label: 'Advanced', color: 'success', description: 'Consistently precise execution parameters.' };
-  if (score >= 5) return { label: 'Intermediate', color: 'blue-darken-1', description: 'Functional operational capabilities.' };
-  return { label: 'Developing', color: 'amber-darken-2', description: 'Emerging skill states requiring support structures.' };
-}
 
 onMounted(async () => {
   try {
@@ -1216,11 +1098,11 @@ onMounted(async () => {
     
     activeList.value = [...wordData.value];
     
-    // Call your primary data fetch engine 
-    await fetchData();
+    // Pass false to prioritize internal store memory on mount cycles
+    await fetchData(false);
   } catch (error) {
-    console.error("Critical: Failed to read external text vocabulary lemmas mapping file:", error);
-    await fetchData(); // Fetch data anyway so table states resolve even if text parsing drops
+    console.error("Critical error resolving lemmas asset file:", error);
+    await fetchData(false);
   }
 });
 </script>

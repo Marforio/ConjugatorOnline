@@ -1,20 +1,20 @@
 <template>
-  <v-container fluid class="pa-6 max-width-management-container">
-    <v-row class="mb-6 align-center">
-      <v-col cols="12" sm="6">
+  <v-container fluid class="mt-5 pa-4 px-6 max-width-management-container">
+<v-row class="mb-6 d-flex align-center">
+      <v-col cols="12" sm="8">
         <h1 class="text-h4 font-weight-black text-slate-900 d-flex align-center">
-          <v-icon icon="mdi-bookshelf" color="indigo" class="mr-2" />
-          Vocabulary Manager
+          <v-icon icon="mdi-bookshelf" color="indigo" class="mr-5" />
+          Manage Vocab Lists
         </h1>
         <p class="text-caption text-slate-500 mt-1">
-          Create, review, and manage your custom vocabulary lists.
+          Create, edit, and publish your vocab lists.
         </p>
       </v-col>
-      <v-col cols="12" sm="6" class="text-sm-right">
+      <v-col cols="12" sm="4" class="text-sm-right d-flex justify-end align-center gap-2 flex-wrap">
         <v-btn
           color="indigo-darken-1"
           size="large"
-          class="text-white font-weight-black rounded-xl text-none px-5"
+          class="text-white font-weight-black rounded-xl text-none px-5 me-8"
           prepend-icon="mdi-plus"
           @click="openCreateDialog"
         >
@@ -47,128 +47,212 @@
       </v-col>
     </v-row>
 
+    <!-- MAIN INTERFACE START -->
     <v-row v-else>
       <v-col cols="12">
-        <v-expansion-panels multiple variant="accordion">
-          <v-expansion-panel
-            v-for="group in groupedVocabLists"
-            :key="group.category"
-            class="mb-3 rounded-xl overflow-hidden"
-          >
-            <v-expansion-panel-title class="bg-slate-50">
-              <div class="d-flex align-center justify-space-between w-100 pr-4">
-                <div class="d-flex align-center">
-                  <v-icon icon="mdi-folder-multiple-outline" color="indigo" class="mr-3" />
-                  <div>
-                    <div class="font-weight-black text-slate-800">
-                      {{ group.category }}
-                    </div>
-                    <div class="text-caption text-slate-500">
-                      {{ group.items.length }} list{{ group.items.length === 1 ? '' : 's' }}
+        <v-tabs v-model="activeManagementTab" color="indigo" class="mb-6 border-b border-slate-200">
+          <v-tab value="categories" class="font-weight-black text-none">
+            <v-icon icon="mdi-folder-multiple-outline" class="mr-2" />
+            By Category
+          </v-tab>
+          <v-tab value="courses" class="font-weight-black text-none">
+            <v-icon icon="mdi-school-outline" class="mr-2" />
+            By Course
+          </v-tab>
+        </v-tabs>
+
+        <v-window v-model="activeManagementTab">
+          
+          <v-window-item value="categories">
+            <v-expansion-panels multiple variant="accordion">
+              <v-expansion-panel
+                v-for="group in groupedVocabLists"
+                :key="group.category"
+                class="mb-3 rounded-xl overflow-hidden"
+              >
+                <v-expansion-panel-title class="bg-slate-50">
+                  <div class="d-flex align-center justify-space-between w-100 pr-4">
+                    <div class="d-flex align-center">
+                      <v-icon icon="mdi-folder-multiple-outline" color="indigo" class="mr-3" />
+                      <div>
+                        <div class="font-weight-black text-slate-800">
+                          {{ group.category }}
+                        </div>
+                        <div class="text-caption text-slate-500">
+                          {{ group.items.length }} list{{ group.items.length === 1 ? '' : 's' }}
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </div>
-            </v-expansion-panel-title>
+                </v-expansion-panel-title>
 
-            <v-expansion-panel-text class="bg-white">
-              <v-table class="text-left font-sans text-body-2">
-                <thead class="bg-slate-50 border-b border-slate-200 text-overline font-weight-bold text-slate-400 tracking-wider">
-                  <tr>
-                    <th class="pa-4">List Name</th>
-                    <th class="pa-4">Category</th>
-                    <th class="pa-4 text-center">Total Terms</th>
-                    <th class="pa-4">Created</th>
-                    <th class="pa-4 text-right"><span class="me-3">Actions</span></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr
-                    v-for="list in group.items"
-                    :key="list.id"
-                    class="hover-row border-b border-slate-100"
-                  >
-                    <td class="pa-4 font-weight-bold text-slate-800">
-                      {{ list.name }}
-                      <span class="text-xxs text-slate-400 font-weight-regular block mt-0.5 font-monospace">
-                        {{ list.id }}
-                      </span>
-                    </td>
-
-                    <td class="pa-4">
-                      <v-chip
-                        size="small"
-                        color="indigo-lighten-5"
-                        class="font-weight-bold font-monospace text-indigo-darken-3"
+                <v-expansion-panel-text class="bg-white">
+                  <v-table class="text-left font-sans text-body-2">
+                    <thead class="bg-slate-50 border-b border-slate-200 text-overline font-weight-bold text-slate-400 tracking-wider">
+                      <tr>
+                        <th class="pa-4">List Name</th>
+                        <th class="pa-4">Category</th>
+                        <th class="pa-4 text-center">Total Terms</th>
+                        <th class="pa-4 text-center">Available To</th>
+                        <th class="pa-4 text-right"><span class="me-3">Actions</span></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr
+                        v-for="list in group.items"
+                        :key="list.id"
+                        class="hover-row border-b border-slate-100"
                       >
-                        {{ list.domain || 'UNASSIGNED' }}
-                      </v-chip>
-                    </td>
+                        <td class="pa-4 font-weight-bold text-slate-800">
+                          {{ list.name }}
+                          <span class="text-xxs text-slate-400 font-weight-regular block mt-0.5 font-monospace">
+                            {{ list.id }}
+                          </span>
+                        </td>
 
-                    <td class="pa-4 text-center font-weight-black font-monospace text-slate-700">
-                      {{ list.item_count }}
-                    </td>
+                        <td class="pa-4">
+                          <v-chip
+                            size="small"
+                            color="indigo-lighten-5"
+                            class="font-weight-bold font-monospace text-indigo-darken-3"
+                          >
+                            {{ list.domain || 'UNASSIGNED' }}
+                          </v-chip>
+                        </td>
 
-                    <td class="pa-4 text-slate-400 font-monospace">
-                      {{ formatDate(list.created_at) }}
-                    </td>
+                        <td class="pa-4 text-center font-weight-black font-monospace text-slate-700">
+                          {{ list.item_count }}
+                        </td>
 
-                    <td class="pa-4 text-right">
-                      <v-btn
-                        icon
-                        variant="elevated"
-                        size="small"
-                        color="grey-lighten-2"
-                        class="text-black-lighten-2 mr-2"
-                        @click="openViewListDialog(list)"
-                        title="View List"
-                      >
-                        <v-icon icon="mdi-eye" size="small" />
-                      </v-btn>
+                        <td class="pa-4 text-center">
+                          <v-btn
+                            size="small"
+                            variant="tonal"
+                            color="indigo"
+                            class="rounded-lg font-weight-bold text-none text-xs px-3"
+                            prepend-icon="mdi-account-group-outline"
+                            @click="openAvailabilityConsole(list)"
+                          >
+                            {{ list.availabilities?.length || 0 }} Target(s)
+                          </v-btn>
+                        </td>
 
-                      <v-btn
-                        icon
-                        variant="elevated"
-                        size="small"
-                        color="deep-purple-darken-2"
-                        class="text-white mr-2"
-                        :loading="pdfLoadingListId === list.id"
-                        @click="downloadListPdf(list)"
-                        title="Download PDF"
-                      >
-                        <v-icon icon="mdi-file-pdf-box" size="small" />
-                      </v-btn>
+                        <td class="pa-4 text-right">
+                          <v-btn
+                            icon="mdi-eye"
+                            variant="elevated"
+                            size="small"
+                            color="grey-lighten-2"
+                            class="text-black-lighten-2 mr-2"
+                            @click="openViewListDialog(list)"
+                            title="View List"
+                          />
+                          <v-btn
+                            icon="mdi-file-pdf-box"
+                            variant="elevated"
+                            size="small"
+                            color="deep-purple-darken-2"
+                            class="text-white mr-2"
+                            :loading="pdfLoadingListId === list.id"
+                            @click="downloadListPdf(list)"
+                            title="Download PDF"
+                          />
+                          <v-btn
+                            icon="mdi-pencil"
+                            variant="elevated"
+                            size="small"
+                            color="amber-darken-2"
+                            class="text-white mr-2"
+                            @click="openEditListDialog(list)"
+                            title="Edit List Content"
+                          />
+                          <v-btn
+                            icon="mdi-trash-can-outline"
+                            variant="elevated"
+                            size="small"
+                            color="error"
+                            class="me-3"
+                            @click="confirmDeleteList(list)"
+                            title="Delete List"
+                          />
+                        </td>
+                      </tr>
+                    </tbody>
+                  </v-table>
+                </v-expansion-panel-text>
+              </v-expansion-panel>
+            </v-expansion-panels>
+          </v-window-item>
 
-                      <v-btn
-                        icon
-                        variant="elevated"
-                        size="small"
-                        color="amber-darken-2"
-                        class="text-white mr-2"
-                        @click="openEditListDialog(list)"
-                        title="Edit List Content"
-                      >
-                        <v-icon icon="mdi-pencil" size="small" />
-                      </v-btn>
+          <v-window-item value="courses">
+            <v-expansion-panels multiple variant="accordion">
+              <v-expansion-panel
+                v-for="courseGroup in vocabListsByCourse"
+                :key="courseGroup.slug"
+                class="mb-3 rounded-xl overflow-hidden"
+              >
+                <v-expansion-panel-title class="bg-slate-50">
+                  <div class="d-flex align-center justify-space-between w-100 pr-4">
+                    <div class="d-flex align-center">
+                      <v-icon icon="mdi-school" color="indigo" class="mr-3" />
+                      <div>
+                        <div class="font-weight-black text-slate-800">
+                          Course: {{ courseGroup.slug.toUpperCase() }}
+                        </div>
+                        <div class="text-caption text-slate-500">
+                          {{ courseGroup.items.length }} list{{ courseGroup.items.length === 1 ? '' : 's' }} made available
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </v-expansion-panel-title>
 
-                      <v-btn
-                        icon
-                        variant="elevated"
-                        size="small"
-                        color="error"
-                        class="me-3"
-                        @click="confirmDeleteList(list)"
-                        title="Delete List"
-                      >
-                        <v-icon icon="mdi-trash-can-outline" size="small" />
-                      </v-btn>
-                    </td>
-                  </tr>
-                </tbody>
-              </v-table>
-            </v-expansion-panel-text>
-          </v-expansion-panel>
-        </v-expansion-panels>
+                <v-expansion-panel-text class="bg-white">
+                  <v-table v-if="courseGroup.items.length" class="text-left font-sans text-body-2">
+                    <thead class="bg-slate-50 border-b border-slate-200 text-overline font-weight-bold text-slate-400 tracking-wider">
+                      <tr>
+                        <th class="pa-4">List Name</th>
+                        <th class="pa-4">Original Category</th>
+                        <th class="pa-4 text-center">Total Terms</th>
+                        <th class="pa-4 text-right"><span class="me-3">Actions</span></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr v-for="list in courseGroup.items" :key="list.id" class="hover-row border-b border-slate-100">
+                        <td class="pa-4 font-weight-bold text-slate-800">{{ list.name }}</td>
+                        <td class="pa-4">
+                          <v-chip size="small" color="indigo-lighten-5" class="font-weight-bold font-monospace text-indigo-darken-3">
+                            {{ list.domain || 'UNASSIGNED' }}
+                          </v-chip>
+                        </td>
+                        <td class="pa-4 text-center font-weight-black font-monospace text-slate-700">
+                          {{ list.item_count }}
+                        </td>
+                        <td class="pa-4 text-right">
+                          <v-btn
+                            size="small"
+                            variant="tonal"
+                            color="indigo"
+                            class="rounded-lg font-weight-bold text-none text-xs px-3 me-3"
+                            prepend-icon="mdi-account-group-outline"
+                            @click="openAvailabilityConsole(list)"
+                          >
+                            Manage Access
+                          </v-btn>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </v-table>
+                  <div v-else class="pa-10 text-center text-slate-400 text-caption">
+                    <v-icon icon="mdi-shield-lock-outline" class="mb-2 text-slate-300 block mx-auto" size="24" />
+                    No vocabulary lists have been published to this course track yet.
+                  </div>
+                </v-expansion-panel-text>
+              </v-expansion-panel>
+            </v-expansion-panels>
+          </v-window-item>
+
+        </v-window>
       </v-col>
     </v-row>
 
@@ -891,6 +975,123 @@ camshaft,a shaft in an engine that controls valve timing,noun,The mechanic repla
         </div>
       </v-card>
     </v-dialog>
+
+    <v-dialog v-model="availabilityConsoleDialog" max-width="640" persistent scrollable>
+      <v-card class="rounded-xl bg-surface text-left overflow-hidden">
+        <v-toolbar color="indigo" dark class="px-4 py-2">
+          <v-toolbar-title class="text-white font-weight-black d-flex flex-column">
+            <span class="text-h6 font-weight-black tracking-tight">
+              Publish a list: {{ selectedListForAvailability?.name || 'Loading...' }}
+            </span>
+          </v-toolbar-title>
+          
+          <v-spacer />
+          
+          <v-btn 
+            icon="mdi-close" 
+            variant="text" 
+            color="white" 
+            @click="closeAvailabilityConsole" 
+          />
+        </v-toolbar>
+
+        <v-card-text class="pa-6 bg-slate-50" style="max-height: 60vh;">
+          <h3 class="text-overline font-weight-black text-indigo tracking-wider mb-3">Make "{{ selectedListForAvailability?.name || 'Loading...' }}" visible to students</h3>
+          <v-row dense class="align-center mb-6">
+            <v-col cols="12" sm="5">
+              <v-select
+                v-model="newAvailabilityScopeType"
+                :items="[{title: 'Entire Course', value: 'course'}, {title: 'Individual Student', value: 'student'}]"
+                label="Target"
+                variant="outlined"
+                density="compact"
+                hide-details
+                class="bg-white rounded-lg"
+              />
+            </v-col>
+            <v-col cols="12" sm="5">
+              <v-select
+                v-if="newAvailabilityScopeType === 'course'"
+                v-model="newAvailabilityTargetId"
+                :items="availableCourses"
+                item-title="slug"
+                item-value="slug"
+                label="Select Course"
+                variant="outlined"
+                density="compact"
+                hide-details
+                class="bg-white rounded-lg"
+              />
+              <v-select
+                v-else
+                v-model="newAvailabilityTargetId"
+                :items="availableStudents"
+                :item-title="s => `${s.initials} (${s.web_id})`"
+                item-value="id"
+                label="Select Student"
+                variant="outlined"
+                density="compact"
+                hide-details
+                class="bg-white rounded-lg"
+              />
+            </v-col>
+            <v-col cols="12" sm="2" class="text-sm-right">
+              <v-btn
+                color="indigo"
+                block
+                height="40"
+                class="text-white font-weight-black rounded-lg text-none"
+                prepend-icon="mdi-plus"
+                :disabled="!newAvailabilityTargetId"
+                :loading="availabilityActionLoading"
+                @click="submitNewAvailabilityRule"
+              >
+                Grant
+              </v-btn>
+            </v-col>
+          </v-row>
+
+          <v-divider class="my-4 border-slate-200" />
+
+          <h3 class="text-overline font-weight-black text-slate-500 tracking-wider mb-3">"{{ selectedListForAvailability?.name || 'Loading...' }}" is available to:</h3>
+          
+          <v-row v-if="availabilityListLoading" class="justify-center py-6">
+            <v-progress-circular indeterminate color="indigo" size="24" />
+          </v-row>
+
+          <div v-else-if="!currentAvailabilities.length" class="text-center py-8 text-slate-400 text-caption bg-white border border-dashed rounded-xl border-slate-300">
+            <v-icon icon="mdi-shield-lock-outline" size="28" class="mb-2 text-slate-300 block mx-auto" />
+            This list is completely unassigned. Only you can view this custom dataset.
+          </div>
+
+          <div v-else class="d-flex flex-column ga-2">
+            <v-card v-for="rule in currentAvailabilities" :key="rule.id" variant="flat" border class="pa-3 rounded-xl bg-white border-slate-200 shadow-sm">
+              <div class="d-flex align-center justify-space-between w-100">
+                <div class="d-flex align-center">
+                  <v-avatar :color="rule.course ? 'indigo-lighten-5' : 'emerald-lighten-5'" size="36" class="me-3">
+                    <v-icon :icon="rule.course ? 'mdi-school' : 'mdi-account'" :color="rule.course ? 'indigo' : 'emerald'" size="18" />
+                  </v-avatar>
+                  <div>
+                    <div class="font-weight-bold text-slate-800 text-sm">
+                      {{ rule.course ? `Course Track: ${rule.course}` : `Student: ${rule.student_initials} (${rule.student_web_id})` }}
+                    </div>
+                    <div class="text-xxs text-slate-400 font-monospace">Vocab list successfully made available!</div>
+                  </div>
+                </div>
+                <v-btn
+                  icon="mdi-delete-outline"
+                  variant="text"
+                  color="error"
+                  size="small"
+                  :loading="availabilityActionLoading"
+                  @click="removeAvailabilityRule(rule.id)"
+                />
+              </div>
+            </v-card>
+          </div>
+        </v-card-text>
+      </v-card>
+    </v-dialog>
   </v-container>
 </template>
 
@@ -898,6 +1099,9 @@ camshaft,a shaft in an engine that controls valve timing,noun,The mechanic repla
 import { ref, reactive, onMounted, computed } from "vue"
 import api from "@/axios"
 import { exportVocabListPdf } from "@/utils/vocabListPdf"
+import { useUserStore } from "@/stores/user"
+
+const userStore = useUserStore()
 
 const vocabLists = ref<any[]>([])
 const loading = ref(false)
@@ -907,6 +1111,18 @@ const createDialog = ref(false)
 const deleteDialog = ref(false)
 const wizardDialog = ref(false)
 const viewDialog = ref(false)
+
+const availabilityConsoleDialog = ref(false)
+const availabilityListLoading = ref(false)
+const availabilityActionLoading = ref(false)
+const selectedListForAvailability = ref<any>(null)
+
+const currentAvailabilities = ref<any[]>([])
+const availableCourses = computed(() => userStore.availableTeacherCourses)
+const availableStudents = computed(() => userStore.availableTeacherStudents)
+
+const newAvailabilityScopeType = ref<"course" | "student">("course")
+const newAvailabilityTargetId = ref<string | null>(null)
 
 const dragActive = ref(false)
 const activeIngestTab = ref("manual")
@@ -933,6 +1149,9 @@ const formMetadata = reactive({ name: "", domain: "" })
 
 const pdfLoadingListId = ref<string | null>(null)
 
+// SEARCH FOR YOUR TOP-LEVEL COMPONENT STATE VARIABLES, AND ADD:
+const activeManagementTab = ref("categories")
+  
 interface ManualVocabRow {
   id?: string
   term: string
@@ -985,6 +1204,131 @@ const groupedVocabLists = computed(() => {
       items: items.sort((a, b) => a.name.localeCompare(b.name))
     }))
 })
+
+/**
+ *  Re-maps vocab list assets 
+ * straight into their matching assigned course deployment rows.
+ */
+const vocabListsByCourse = computed(() => {
+  const courseMap: Record<string, any[]> = {}
+  
+  // 1. Initialize empty arrays for the true structural courses loaded from your store
+  if (userStore.availableTeacherCourses && Array.isArray(userStore.availableTeacherCourses)) {
+    userStore.availableTeacherCourses.forEach((course: any) => {
+      if (course && course.slug) {
+        // Enforce lowercase lookups for matching safety across the mapping table
+        courseMap[course.slug.trim().toLowerCase()] = []
+      }
+    })
+  }
+
+  // 2. Distribute vocabulary datasets by evaluating their VocabListAvailability rules
+  vocabLists.value.forEach(list => {
+    if (list.availabilities && Array.isArray(list.availabilities)) {
+      list.availabilities.forEach((availability: any) => {
+        if (availability.course) {
+          const targetSlug = availability.course.trim().toLowerCase()
+          
+          // Verify that this course bucket actually exists in the teacher's current scope
+          if (courseMap[targetSlug] !== undefined) {
+            // Deduplicate lists so we don't accidentally display duplicates in a single course panel
+            if (!courseMap[targetSlug].some(item => item.id === list.id)) {
+              courseMap[targetSlug].push(list)
+            }
+          }
+        }
+      })
+    }
+  })
+
+  // 3. Output standard structured objects designed for reactive UI table rendering
+  return Object.entries(courseMap)
+    .map(([slug, items]) => ({
+      slug: slug,
+      items: items.sort((a, b) => a.name.localeCompare(b.name))
+    }))
+    .sort((a, b) => a.slug.localeCompare(b.slug))
+})
+
+
+async function openAvailabilityConsole(list: any) {
+  selectedListForAvailability.value = list
+  availabilityConsoleDialog.value = true
+  newAvailabilityTargetId.value = null
+  
+  // The store already holds your course and student lists,
+  // so we only need to fetch the access records for this specific list.
+  await fetchAvailabilitiesForList(list.id)
+}
+// 1. UPDATE THE FETCH CALL
+async function fetchAvailabilitiesForList(listId: string) {
+  availabilityListLoading.value = true
+  try {
+    // 🌟 Changed endpoint to singular 'vocab-list-availability'
+    const res = await api.get('/vocab-list-availability/', {
+      params: { vocab_list: listId }
+    })
+    currentAvailabilities.value = res.data || []
+  } catch (err) {
+    console.error("Failed loading list permission logs:", err)
+  } finally {
+    availabilityListLoading.value = false
+  }
+}
+
+// 2. UPDATE THE POST CALL
+async function submitNewAvailabilityRule() {
+  if (!selectedListForAvailability.value || !newAvailabilityTargetId.value) return
+  
+  availabilityActionLoading.value = true
+  try {
+    const payload: Record<string, any> = {
+      vocab_list: selectedListForAvailability.value.id
+    }
+    
+    if (newAvailabilityScopeType.value === 'course') {
+      payload.course = newAvailabilityTargetId.value
+    } else {
+      payload.student = newAvailabilityTargetId.value
+    }
+
+    // 🌟 Changed endpoint to singular 'vocab-list-availability'
+    await api.post("/vocab-list-availability/", payload)
+    newAvailabilityTargetId.value = null
+    
+    await fetchAvailabilitiesForList(selectedListForAvailability.value.id)
+    await fetchVocabLists() 
+  } catch (err: any) {
+    console.error("Failed executing permission rule insertion:", err)
+    alert(err.response?.data?.detail || "Could not authorize this permission.")
+  } finally {
+    availabilityActionLoading.value = false
+  }
+}
+
+// 3. UPDATE THE DELETE CALL
+async function removeAvailabilityRule(ruleId: string) {
+  if (!selectedListForAvailability.value) return
+  
+  availabilityActionLoading.value = true
+  try {
+    // 🌟 Changed endpoint to singular 'vocab-list-availability'
+    await api.delete(`/vocab-list-availability/${ruleId}/`)
+    await fetchAvailabilitiesForList(selectedListForAvailability.value.id)
+    await fetchVocabLists()
+  } catch (err) {
+    console.error("Failed wiping selected list visibility parameters:", err)
+  } finally {
+    availabilityActionLoading.value = false
+  }
+}
+
+function closeAvailabilityConsole() {
+  availabilityConsoleDialog.value = false
+  selectedListForAvailability.value = null
+  currentAvailabilities.value = []
+}
+
 
 const imageCount = computed(() =>
   manualRows.value.filter(row => row.imageFile || row.image_url).length

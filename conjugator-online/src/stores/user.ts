@@ -162,10 +162,12 @@ export const useUserStore = defineStore("user", () => {
   const student = ref<Student | null>(null);
   const teacherId = ref<number | null>(null);
   
-  // ✨ NEW TEACHER MODULE STATE: Track assigned students roster cleanly
+  // ✨TEACHER  STATE: Track assigned students roster cleanly
   const teacherRoster = ref<Student[]>([]);
   const selectedStudentId = ref<number | null>(null);
   const loadingRoster = ref(false);
+  const managedCourses = ref<Course[]>([]);
+  const loadingCourses = ref(false);
 
   // Linguistic Profile state
   const linguisticProfile = ref<LinguisticProfile | null>(null);
@@ -190,7 +192,27 @@ export const useUserStore = defineStore("user", () => {
   const teacherProfileId = computed(() => teacherId.value);
   const isStudentAccount = computed(() => user.value !== null && !user.value.is_staff);
   
-  // ✨ FIX 1: Make studentId context-aware. 
+//  Teacher's courses
+const availableTeacherCourses = computed(() => {
+    return [...managedCourses.value]
+      .sort((a, b) => a.slug.localeCompare(b.slug))
+      .map(course => ({
+        slug: course.slug,
+        title: course.slug.toUpperCase()
+      }));
+  });
+
+  /**
+   * Accessible pointer exposing the standard alpha-sorted raw student array
+   */
+  const availableTeacherStudents = computed(() => {
+    return [...teacherRoster.value].sort((a, b) => 
+      a.initials.localeCompare(b.initials)
+    );
+  });
+
+  
+  // Make studentId context-aware. 
   // If staff is viewing a targeted student, return that selected student ID instead of their own.
   const studentId = computed(() => {
     if (isStaff.value && selectedStudentId.value) {
@@ -202,7 +224,7 @@ export const useUserStore = defineStore("user", () => {
   const totalCorrect = computed(() => student.value?.total_correct_prompts ?? 0);
   const healthScore = computed(() => student.value?.health_score ?? 0);
 
-  // ⏱️ NEW COMPUTED FIELDS: Human-readable speaking metrics calculations (Minutes representation)
+  // Human-readable speaking metrics calculations (Minutes representation)
   const currentPeriodSpeakingMinutes = computed(() => {
     const seconds = student.value?.current_period_speaking_seconds ?? 0;
     return parseFloat((seconds / 60).toFixed(1));
@@ -281,11 +303,14 @@ async function ensureUserLoaded() {
     user.value = res.data;
     
     if (user.value.is_staff) {
-      // 🌟 Extract and save the teacher profile ID right here:
+      // Extract and save the teacher profile ID right here:
       teacherId.value = user.value.teacher_profile?.id ?? null;
 
       // 1. Synchronize the teacher's classroom cohort array roster
-      await fetchTeacherRoster();
+      await Promise.all([
+          fetchTeacherRoster(),
+          fetchManagedCourses() 
+        ]);
       
       // 2. Clear out any selection garbage leftover in memory snapshots
       selectedStudentId.value = null;
@@ -428,6 +453,23 @@ async function ensureUserLoaded() {
     }
   }
 
+
+ async function fetchManagedCourses() {
+    if (!hasAccessToken() || !isStaff.value) return;
+    loadingCourses.value = true;
+    try {
+      const res = await api.get<Course[]>("/courses/", {
+        params: { managed_only: "true" }
+      });
+      managedCourses.value = Array.isArray(res.data) ? res.data : [];
+      console.log("🏫 Synchronized live teacher course entities:", managedCourses.value.length);
+    } catch (err) {
+      console.error("Failed to load managed courses list directly from API:", err);
+      managedCourses.value = [];
+    } finally {
+      loadingCourses.value = false;
+    }
+  } 
 
   async function fetchLinguisticProfile() {
     if (!hasAccessToken()) return;
@@ -807,9 +849,13 @@ async function fetchEnrollments() {
     
     // Teacher workspace elements controls
     teacherRoster,
+    managedCourses,
+    availableTeacherCourses,     
+    availableTeacherStudents,
     selectedStudentId,
     loadingRoster,
     fetchTeacherRoster,
+    fetchManagedCourses,
 
     // Student coordinates
     student,

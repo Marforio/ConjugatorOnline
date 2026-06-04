@@ -1,5 +1,5 @@
 <template>
-  <v-container fluid class="pa-6 text-slate-800">
+  <v-container fluid class="mt-5 pa-4 px-6 text-slate-800">
     
     <v-card class="pa-6 mb-6 data-header" elevation="4" rounded="xl">
       <div class="d-flex align-center justify-space-between flex-wrap ga-4">
@@ -10,16 +10,9 @@
           </div>
         </div>
         <div class="d-flex align-center ga-4 flex-wrap">
-          <v-btn
-            color="white"
-            variant="elevated"
-            class="text-primary font-weight-black text-none rounded-lg"
-            prepend-icon="mdi-comment-text-multiple"
-            :to="{ name: 'manage-feedback' }"
-          >
-            Give Feedback
-          </v-btn>
-          <v-icon size="56" class="text-white hidden-sm-and-down">mdi-chart-box</v-icon>
+          <v-avatar color="white" variant="tonal" size="70">
+          <v-icon size="48">mdi-google-analytics</v-icon>
+        </v-avatar>
         </div>
       </div>
     </v-card>
@@ -259,9 +252,8 @@
 </template>
 
 
-
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import api from '@/axios';
 import { errorsData } from "@/assets/scripts/errorsData";
 import TeacherErrorFrequencyChart from '@/components/charts/TeacherErrorFrequencyChart.vue';
@@ -270,11 +262,6 @@ import { useUserStore } from '@/stores/user';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import Chart from 'chart.js/auto';
-
-interface Course {
-  slug: string;
-  name?: string;
-}
 
 interface Student {
   id: number;
@@ -325,18 +312,19 @@ const snackbar = ref(false);
 const snackbarMessage = ref('');
 const snackbarColor = ref('success');
 
-const courseOptions = ref<{ id: string; name: string }[]>([]);
 const selectedCourse = ref<string>('all');
 const selectedStudent = ref<number | null>(null);
 const dateRange = ref('all');
+
 const dateRangeOptions = [
   { title: 'All Time', value: 'all' },
   { title: 'Last 7 Days', value: '7days' },
   { title: 'Last 30 Days', value: '30days' },
   { title: 'Last 90 Days', value: '90days' },
 ];
+
 const tabItems = [
-  { label: 'Errors (Teacher feeedback)', value: 'errors', icon: 'mdi-alert-circle-outline' },
+  { label: 'Errors (Teacher feedback)', value: 'errors', icon: 'mdi-alert-circle-outline' },
   { label: 'Grammar Exercises', value: 'exercises', icon: 'mdi-notebook-check-outline' }
 ];
 
@@ -348,9 +336,27 @@ const activities = ref<Activity[]>([]);
 const selectedErrorCode = ref<string | null>(null);
 const activeMasterTab = ref('errors');
 
-/* =========================================================
-   ✨ FIX 1: Securely compute drop-down items from roster
-   ========================================================= */
+const searchStudentQueryId = ref<number | null>(null);
+const searchListQuery = ref(''); // Added missing matching search container reference
+
+// 🌟 OPTIMIZED SELECTOR: Directly read mapping keys from store profiles
+const courseOptions = computed(() => [
+  { id: 'all', name: 'All Courses' },
+  ...userStore.availableTeacherCourses.map(c => ({ id: c.slug, name: c.title }))
+]);
+
+const selectedCourseName = computed(() => {
+  if (selectedCourse.value === 'all') return 'All Courses';
+  const found = userStore.availableTeacherCourses.find(c => c.slug === selectedCourse.value);
+  return found ? found.title : 'Unknown Course';
+});
+
+// Clean unified watcher sequence to prevent recursive loops
+watch(selectedStudent, (newVal) => {
+  searchStudentQueryId.value = newVal;
+  if (newVal) fetchAllData();
+});
+
 const secureStudentsDropdown = computed<Student[]>(() => {
   return userStore.teacherRoster.map(s => ({
     id: s.id,
@@ -367,12 +373,6 @@ const dynamicChartTitle = computed(() => {
     return `Errors (Student: ${foundStudent ? foundStudent.initials : 'Active Profile'})`;
   }
   return `Errors (${selectedCourseName.value})`;
-});
-
-const selectedCourseName = computed(() => {
-  if (selectedCourse.value === 'all') return 'All Courses';
-  const found = courseOptions.value.find(c => c.id === selectedCourse.value);
-  return found ? found.name : 'Unknown Course';
 });
 
 const currentActiveErrors = computed(() => {
@@ -421,31 +421,13 @@ const totalSessions = computed(() => {
 
 const activityBreakdown = computed(() => {
   const breakdown: Record<string, number> = {
-    conjugation: 0,
-    other_game: 0,
-    exercise: 0,
-    vocab_workout: 0,
-    workout_drill: 0,
+    conjugation: 0, other_game: 0, exercise: 0, vocab_workout: 0, workout_drill: 0,
   };
   activities.value.forEach(a => {
-    if (breakdown.hasOwnProperty(a.activity_type)) {
-      breakdown[a.activity_type]++;
-    }
+    if (breakdown.hasOwnProperty(a.activity_type)) breakdown[a.activity_type]++;
   });
   return breakdown;
 });
-
-async function fetchCourses() {
-  try {
-    const response = await api.get<Course[]>('/courses/');
-    courseOptions.value = [
-      { id: 'all', name: 'All Courses' },
-      ...response.data.map(c => ({ id: c.slug, name: c.slug })),
-    ];
-  } catch (error) {
-    console.error('Failed to fetch courses:', error);
-  }
-}
 
 function enrichRawErrorResponsePayload(arr: any[]): ErrorData[] {
   return arr.map(e => {
@@ -480,9 +462,7 @@ function enrichRawErrorResponsePayload(arr: any[]): ErrorData[] {
       total_times: e.total_times || e.times || 0,
       evidence_samples: e.evidence_samples || (e.evidence ? [e.evidence] : []),
       course: e.course,
-      feedbackId,
-      feedbackDate,
-      feedbackLabel
+      feedbackId, feedbackDate, feedbackLabel
     };
   });
 }
@@ -494,7 +474,6 @@ async function fetchErrorData() {
     if (errorViewMode.value === 'COURSES' && selectedCourse.value !== 'all') {
       params.course = selectedCourse.value;
     }
-
     if (errorViewMode.value === 'STUDENTS') {
       if (!selectedStudent.value) {
         studentErrorData.value = [];
@@ -514,17 +493,12 @@ async function fetchErrorData() {
         rawEnriched.forEach(e => {
           if (!grouped[e.error_code]) {
             grouped[e.error_code] = {
-              error_code: e.error_code,
-              total_times: 0,
-              evidence_samples: [],
-              feedbackId: 'Combined Overview',
-              feedbackLabel: 'All Classes Consolidated'
+              error_code: e.error_code, total_times: 0, evidence_samples: [],
+              feedbackId: 'Combined Overview', feedbackLabel: 'All Classes Consolidated'
             };
           }
           grouped[e.error_code].total_times += e.total_times;
-          if (e.evidence_samples) {
-            grouped[e.error_code].evidence_samples.push(...e.evidence_samples);
-          }
+          if (e.evidence_samples) grouped[e.error_code].evidence_samples.push(...e.evidence_samples);
         });
         errorData.value = Object.values(grouped);
       } else {
@@ -547,14 +521,11 @@ async function fetchAchievementsFallbackContext() {
     } else if (errorViewMode.value === 'COURSES' && selectedCourse.value !== 'all') {
       params.course = selectedCourse.value;
     }
-
     const response = await api.get('/achievements/', { params });
     const data = response.data.results || response.data;
-    if (Array.isArray(data)) {
-      achievements.value = data;
-    }
-  } catch (e) { 
-    console.error(e); 
+    if (Array.isArray(data)) achievements.value = data;
+  } catch (e) {
+    console.error(e);
   }
 }
 
@@ -584,31 +555,20 @@ async function fetchAllData() {
   ]);
 }
 
-async function onStudentFilterChange() {
-  await fetchAllData();
-}
-
-// Custom handler hook for manual component sync triggers
-async function onCourseFilterChange() {
-  await fetchAllData();
-}
-
+const onStudentFilterChange = async () => { await fetchAllData(); };
+const onCourseFilterChange = async () => { await fetchAllData(); };
 function openErrorTutorFromChart(payload: any) {
   showSnackbar(`Tutor routing called for code segment: ${payload.error_code || 'General'}`, 'info');
 }
 
-/* =========================================================
-   📄 REWORKED CLIENT-SIDE PDF SNAPSHOT REPORT GENERATOR
-   ========================================================= */
 async function generateStudentPdfReport() {
   if (!selectedStudent.value) return;
   pdfLoading.value = true;
   
   try {
-    // ✨ FIX 2: Set store coordinates before triggering nested fetches
     userStore.selectedStudentId = selectedStudent.value;
     
-    // Fetch individual profiles from student specific context parameters cleanly
+    // Centralize user data operations inside the store context
     await userStore.fetchStudentData();
     await Promise.all([
       userStore.fetchLinguisticProfile(),
@@ -622,7 +582,6 @@ async function generateStudentPdfReport() {
     const studentScore = sProfile.health_score ?? 0;
     const studentPrompts = sProfile.total_correct_prompts ?? 0;
     
-    // ⏱️ Expose the newly added speaking length stats onto the summary sheet
     const periodMinutes = userStore.currentPeriodSpeakingMinutes ?? 0;
     const lifecycleMinutes = userStore.grandTotalSpeakingMinutes ?? 0;
     
@@ -692,14 +651,13 @@ async function generateStudentPdfReport() {
               labels: topErrors.value.map(e => e.error_code),
               datasets: [{
                 data: topErrors.value.map(e => e.total_times),
-                backgroundColor: 'rgba(0, 150, 136, 0.75)', // Swapped out ugly bright red for custom primary theme match
+                backgroundColor: 'rgba(0, 150, 136, 0.75)',
                 borderColor: 'rgba(0, 150, 136, 1)',
                 borderWidth: 1.5
               }]
             },
             options: {
-              responsive: false,
-              animation: false,
+              responsive: false, animation: false,
               plugins: { legend: { display: false } },
               scales: {
                 x: { ticks: { font: { size: 14, weight: 'bold' }, color: '#2C3E50' } },
@@ -715,7 +673,7 @@ async function generateStudentPdfReport() {
           offscreenCtxInstance.destroy();
         }
       } catch (canvasErr) {
-        console.error('Offscreen canvas mapping error:', canvasErr);
+        console.error('Offscreen canvas rendering failure:', canvasErr);
         currentY += 15;
       }
     }
@@ -740,40 +698,29 @@ async function generateStudentPdfReport() {
           : 'No direct examples saved.';
 
         return [
-          e.error_code,
-          String(e.total_times),
+          e.error_code, String(e.total_times),
           `${descriptionText}${cleanReference ? '\n\nTip: ' + cleanReference : ''}`,
           samples
         ];
       });
 
       autoTable(doc, {
-        startY: currentY,
-        margin: { left: margin, right: margin },
+        startY: currentY, margin: { left: margin, right: margin },
         head: [['Code', 'Count', 'What to watch out for', 'Your Examples']],
-        body: errorRows,
-        theme: 'grid',
+        body: errorRows, theme: 'grid',
         headStyles: { fillColor: [239, 83, 80], textColor: 255 }, 
         styles: { fontSize: 8, cellPadding: 5, overflow: 'linebreak', valign: 'top' },
-        columnStyles: {
-          0: { cellWidth: 50, fontStyle: 'bold' },
-          1: { cellWidth: 40, halign: 'center' },
-          2: { cellWidth: 235 },
-          3: { cellWidth: 190, fontStyle: 'italic' }
-        }
+        columnStyles: { 0: { cellWidth: 50, fontStyle: 'bold' }, 1: { cellWidth: 40, halign: 'center' }, 2: { cellWidth: 235 }, 3: { cellWidth: 190, fontStyle: 'italic' } }
       });
 
       currentY = (doc as any).lastAutoTable.finalY + 15;
 
       if (remainingErrors.length > 0) {
         if (currentY > doc.internal.pageSize.getHeight() - 60) { doc.addPage(); currentY = 40; }
-        doc.setFontSize(9);
-        doc.setFont('helvetica', 'bold');
-        doc.setTextColor(100, 110, 120);
+        doc.setFontSize(9); doc.setFont('helvetica', 'bold'); doc.setTextColor(100, 110, 120);
         doc.text('Other minor items to keep an eye on:', margin, currentY);
         currentY += 12;
-        doc.setFont('helvetica', 'normal');
-        doc.setTextColor(110, 110, 110);
+        doc.setFont('helvetica', 'normal'); doc.setTextColor(110, 110, 110);
         
         remainingErrors.forEach(e => {
           const metadata = errorsData[e.error_code];
@@ -793,15 +740,12 @@ async function generateStudentPdfReport() {
     if (userStore.linguisticProfile) {
       const p = userStore.linguisticProfile;
       if (currentY > doc.internal.pageSize.getHeight() - 140) { doc.addPage(); currentY = 40; }
-      doc.setFontSize(11);
-      doc.setFont('helvetica', 'bold');
-      doc.setTextColor(44, 62, 80);
+      doc.setFontSize(11); doc.setFont('helvetica', 'bold'); doc.setTextColor(44, 62, 80);
       doc.text(`Your Core Communication Skills (${userStore.assessmentStageLabel || 'Latest Review'})`, margin, currentY);
       currentY += 12;
 
       autoTable(doc, {
-        startY: currentY,
-        margin: { left: margin, right: margin },
+        startY: currentY, margin: { left: margin, right: margin },
         head: [['Skill Area', 'Score', 'Teacher Feedback & Notes']],
         body: [
           ['Grammar & Structural Precision', p.linguistic_precision ? `${p.linguistic_precision}/10` : '—', p.linguistic_precision_comment || 'Keep going!'],
@@ -809,8 +753,7 @@ async function generateStudentPdfReport() {
           ['Communication Flow & Speed', p.communicative_flow ? `${p.communicative_flow}/10` : '—', p.communicative_flow_comment || 'Nicely paced.'],
           ['Vocabulary Range', p.expressive_range ? `${p.expressive_range}/10` : '—', p.expressive_range_comment || 'Great choice of words.']
         ],
-        theme: 'grid',
-        headStyles: { fillColor: [120, 135, 150] }, 
+        theme: 'grid', headStyles: { fillColor: [120, 135, 150] }, 
         styles: { fontSize: 8.5, cellPadding: 5, overflow: 'linebreak' },
         columnStyles: { 0: { cellWidth: 140 }, 1: { cellWidth: 55 }, 2: { cellWidth: 320 } }
       });
@@ -819,26 +762,19 @@ async function generateStudentPdfReport() {
 
     if (userStore.currentWorkout) {
       if (currentY > doc.internal.pageSize.getHeight() - 120) { doc.addPage(); currentY = 40; }
-      doc.setFontSize(11);
-      doc.setFont('helvetica', 'bold');
-      doc.setTextColor(44, 62, 80);
+      doc.setFontSize(11); doc.setFont('helvetica', 'bold'); doc.setTextColor(44, 62, 80);
       doc.text(`Active Study Plan: ${userStore.currentWorkout.focus_area}`, margin, currentY);
       currentY += 12;
 
       const drillRows = (userStore.currentWorkout.drills || []).map(d => [
-        d.name,
-        d.type.toUpperCase(),
-        `${d.completed_sessions} / ${d.target_sessions || '∞'}`,
-        d.notes || '—'
+        d.name, d.type.toUpperCase(), `${d.completed_sessions} / ${d.target_sessions || '∞'}`, d.notes || '—'
       ]);
 
       autoTable(doc, {
-        startY: currentY,
-        margin: { left: margin, right: margin },
+        startY: currentY, margin: { left: margin, right: margin },
         head: [['Practice Activity Name', 'Type', 'Sessions Done', 'Goal Details']],
         body: drillRows.length > 0 ? drillRows : [['No current practice drills assigned yet.', '', '', '']],
-        theme: 'striped',
-        headStyles: { fillColor: [41, 128, 185] }, 
+        theme: 'striped', headStyles: { fillColor: [41, 128, 185] }, 
         styles: { fontSize: 8.5, cellPadding: 4 }
       });
       currentY = (doc as any).lastAutoTable.finalY + 25;
@@ -847,25 +783,18 @@ async function generateStudentPdfReport() {
     const studentAchievements = achievements.value.filter(a => a.student === selectedStudent.value);
     if (studentAchievements.length > 0) {
       if (currentY > doc.internal.pageSize.getHeight() - 100) { doc.addPage(); currentY = 40; }
-      doc.setFontSize(11);
-      doc.setFont('helvetica', 'bold');
-      doc.setTextColor(44, 62, 80);
+      doc.setFontSize(11); doc.setFont('helvetica', 'bold'); doc.setTextColor(44, 62, 80);
       doc.text('Unlocked Achievements & Badges!', margin, currentY);
       currentY += 12;
 
       const achievementRows = studentAchievements.map(a => [
-        new Date(a.achieved_on).toLocaleDateString(),
-        a.description,
-        a.manually_created ? 'Awarded by Teacher' : 'System Milestone'
+        new Date(a.achieved_on).toLocaleDateString(), a.description, a.manually_created ? 'Awarded by Teacher' : 'System Milestone'
       ]);
 
       autoTable(doc, {
-        startY: currentY,
-        margin: { left: margin, right: margin },
+        startY: currentY, margin: { left: margin, right: margin },
         head: [['Date Earned', 'What You Accomplished', 'Award Type']],
-        body: achievementRows,
-        theme: 'striped',
-        headStyles: { fillColor: [241, 196, 15] }, 
+        body: achievementRows, theme: 'striped', headStyles: { fillColor: [41, 128, 185] }, 
         styles: { fontSize: 8.5, cellPadding: 4 }
       });
     }
@@ -874,7 +803,7 @@ async function generateStudentPdfReport() {
     doc.save(sanitizedFilename);
     showSnackbar('Your custom progress report has been saved!', 'success');
   } catch (err) {
-    console.error('PDF export crashed:', err);
+    console.error('PDF export failure:', err);
     showSnackbar('Could not build the PDF report.', 'error');
   } finally {
     pdfLoading.value = false;
@@ -891,40 +820,52 @@ async function handleErrorViewToggle(mode: 'COURSES' | 'STUDENTS') {
 }
 
 function showSnackbar(message: string, color: string = 'success') {
-  snackbarMessage.value = message;
-  snackbarColor.value = color;
-  snackbar.value = true;
+  snackbarMessage.value = message; snackbarColor.value = color; snackbar.value = true;
 }
 
 onMounted(async () => {
-  // ✨ FIX 3: Initialize the assigned teacher roster at mount lifecycle phase 
-  if (userStore.isStaff && userStore.teacherRoster.length === 0) {
-    await userStore.fetchTeacherRoster();
+  loadingErrors.value = true;
+  try {
+    // Standardize centralized application bootstrap hydration
+    await userStore.ensureUserLoaded();
+    
+    if (!userStore.enrollments.length) {
+      await userStore.fetchEnrollments();
+    }
+    
+    await fetchAllData();
+  } catch (err) {
+    console.error("Dashboard mount execution failed:", err);
+  } finally {
+    loadingErrors.value = false;
   }
-  await fetchCourses();
-  await fetchAllData();
 });
 </script>
 
 <style scoped>
 .data-header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(
+    135deg,
+    #0f2a45 0%,     /* deep navy */
+    #5c8fbf 45%,    /* soft sky-blue center */
+    #0f2a45 100%    /* deep navy again */
+  );
   position: relative;
   overflow: hidden;
 }
+
 .data-header::before {
   content: "";
   position: absolute;
   inset: -45%;
   background:
-    radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.35) 0%, rgba(255, 255, 255, 0) 45%),
-    radial-gradient(circle at 85% 25%, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0) 55%);
-  transform: rotate(-10deg);
+    radial-gradient(circle at 25% 30%, rgba(255, 255, 255, 0.18) 0%, rgba(255, 255, 255, 0) 45%),
+    radial-gradient(circle at 75% 25%, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0) 55%),
+    radial-gradient(circle at 60% 80%, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0) 50%);
+  transform: rotate(-6deg);
   pointer-events: none;
 }
-.data-header > * {
-  position: relative;
-}
+
 .evidence-list {
   max-height: 300px;
   overflow-y: auto;

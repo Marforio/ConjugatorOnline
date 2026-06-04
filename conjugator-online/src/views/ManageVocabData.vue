@@ -1,5 +1,5 @@
 <template>
-  <v-container fluid class="pa-6 text-slate-800 bg-slate-50 min-vh-100">
+  <v-container fluid class="mt-5 pa-4 px-6 text-slate-800 bg-slate-50 min-vh-100">
     <v-card class="pa-6 mb-6 vocab-header text-white shadow-sm" rounded="xl">
       <div class="d-flex align-center justify-space-between flex-wrap ga-4">
         <div>
@@ -8,8 +8,8 @@
             Inspect student performance in Vocab Workout
           </div>
         </div>
-        <v-avatar color="white" variant="tonal" size="56">
-          <v-icon size="32">mdi-google-analytics</v-icon>
+        <v-avatar color="white" variant="tonal" size="70">
+          <v-icon size="48">mdi-chart-timeline-variant-shimmer</v-icon>
         </v-avatar>
       </div>
     </v-card>
@@ -239,81 +239,118 @@ interface StudentProgressNode {
 
 const userStore = useUserStore();
 
-// Isolated Panel Controller State
+// View Management Toggle States
 const panelViewMode = ref<'course' | 'list'>('course');
 
-// Functional Properties
+// Reactive Functional Modifiers
 const loading = ref(false);
 const courseModeSlug = ref<string | null>(null);
 const focusedListKey = ref<string | null>(null);
 const searchListQuery = ref('');
 
-const courseOptions = ref<{ slug: string; name: string }[]>([]);
 const rawSessionsPool = ref<any[]>([]);
 const rawProgressPool = ref<any[]>([]);
-const enrollments = ref<any[]>([]);
-const computedHighErrorTermsForSelectedList = ref<any[]>([]);
+const listMetadataWrapper = ref<{ total_completions: number; terms: any[] }>({
+  total_completions: 0,
+  terms: []
+});
 
-// 🌟 PANEL A ENGINE: Course List Completion Percentage Tracker Matrix
+// 🌟 REWRITTEN SELECTOR: Derive options cleanly straight from store memory allocations
+const courseOptions = computed(() => userStore.availableTeacherCourses);
+
+// Automatically keep selection anchor synchronized with the store array sequences
+watch(courseOptions, (newOptions) => {
+  if (newOptions.length > 0 && !courseModeSlug.value) {
+    courseModeSlug.value = newOptions[0].slug;
+  }
+}, { immediate: true });
+
+/**
+ * 🌟 HIGHLY OPTIMIZED PROGRESS MATRIX ENGINE
+ * Strips out loop lookups using an indexed lookup map strategy
+ */
 const studentProgressByCourse = computed<StudentProgressNode[]>(() => {
-  if (!courseModeSlug.value || courseModeSlug.value === 'all') return [];
+  const activeCourse = courseModeSlug.value;
+  if (!activeCourse || activeCourse === 'all' || !userStore.teacherRoster.length) return [];
 
-  // Filter out students enrolled in this course via the web_id links table
-  const enrolledStudentWebIds = enrollments.value
-    .filter(e => e.course === courseModeSlug.value)
-    .map(e => String(e.student || e.student_id));
+  // 1. Create an indexed set of students enrolled in this course from userStore enrollments
+  const targetStudentWebIds = new Set<string>();
+  userStore.enrollments.forEach(e => {
+    const enrollmentCourseSlug = e.course?.slug || String(e.course);
+    if (enrollmentCourseSlug.trim().toLowerCase() === activeCourse.trim().toLowerCase()) {
+      const webId = e.student && typeof e.student === 'object' ? e.student.web_id : String(e.student);
+      if (webId) targetStudentWebIds.add(webId);
+    }
+  });
 
+  // Filter students based on our indexed lookup set
   const targetCourseStudents = userStore.teacherRoster.filter(s => 
-    s.web_id && enrolledStudentWebIds.includes(String(s.web_id))
+    s.web_id && targetStudentWebIds.has(String(s.web_id))
   );
 
+  // 2. Pre-index raw session data by student ID to eliminate O(N) array filtering within loops
+  const sessionsByStudentMap = new Map<number, any[]>();
+  rawSessionsPool.value.forEach(session => {
+    if (session.student) {
+      if (!sessionsByStudentMap.has(session.student)) {
+        sessionsByStudentMap.set(session.student, []);
+      }
+      sessionsByStudentMap.get(session.student)!.push(session);
+    }
+  });
+
+  // 3. Map progress snapshots with O(1) lookups
   return targetCourseStudents.map(student => {
-    // Cross-examine matching session master metrics for this student
-    const studentSessions = rawSessionsPool.value.filter(s => s.student === student.id);
-    const listMap: Record<string, number> = {};
+    const studentSessions = sessionsByStudentMap.get(student.id) || [];
+    const maxProgressMap = new Map<string, number>();
 
     studentSessions.forEach(s => {
-      const tCount = s.total_count || s.all_item_ids?.length || 0;
-      const mCount = s.mastered_count || s.mastered_item_ids?.length || 0;
+      if (!s.list_key) return;
+      const totalCount = s.total_count || s.all_item_ids?.length || 0;
+      const masteredCount = s.mastered_count || s.mastered_item_ids?.length || 0;
       
-      if (tCount > 0) {
-        const pct = Math.round((mCount * 100) / tCount);
-        // Retain the highest recorded completion metric block pass
-        listMap[s.list_key] = Math.max(listMap[s.list_key] || 0, pct);
+      if (totalCount > 0) {
+        const percentage = Math.round((masteredCount * 100) / totalCount);
+        const currentMax = maxProgressMap.get(s.list_key) || 0;
+        if (percentage > currentMax) {
+          maxProgressMap.set(s.list_key, percentage);
+        }
       }
     });
 
-    const completedLists = Object.keys(listMap)
-      .filter(k => listMap[k] > 0) // Requirement: Only show percentages above 0%
-      .map(k => ({
-        list_key: k,
-        pct: listMap[k]
+    // Format maps smoothly back into layout schemas
+    const completedLists = Array.from(maxProgressMap.entries())
+      .filter(([_, percentage]) => percentage > 0) // Hide lists with 0% progress
+      .map(([listKey, percentage]) => ({
+        list_key: listKey,
+        pct: percentage
       }));
 
     return {
       id: student.id,
       initials: student.initials,
       web_id: student.web_id,
-      course_slugs: (student as any).courses ? (student as any).courses.map((c: any) => c.slug || c) : [],
+      // Fallback safely to current enrollments data references
+      course_slugs: userStore.enrollments
+        .filter(e => {
+          const webId = e.student && typeof e.student === 'object' ? e.student.web_id : String(e.student);
+          return webId === student.web_id;
+        })
+        .map(e => e.course?.slug || String(e.course)),
       completedLists
     };
   });
 });
 
-
-const listMetadataWrapper = ref<{ total_completions: number; terms: any[] }>({
-  total_completions: 0,
-  terms: []
-});
-
-// PANEL B ENGINE: Searchable Vocabulary List Directory
-//  Sorts vocabulary keys alphabetically
+// PANEL B DIRECTORY ENGINE
 const directoryMasterListKeys = computed<string[]>(() => {
   const keysSet = new Set<string>();
   rawSessionsPool.value.forEach(s => { if (s.list_key) keysSet.add(s.list_key); });
   rawProgressPool.value.forEach(p => { if (p.list_key) keysSet.add(p.list_key); });
   
-  return Array.from(keysSet).sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }));
+  return Array.from(keysSet).sort((a, b) => 
+    a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' })
+  );
 });
 
 const filteredListKeysDirectory = computed<string[]>(() => {
@@ -322,7 +359,7 @@ const filteredListKeysDirectory = computed<string[]>(() => {
   return directoryMasterListKeys.value.filter(k => k.toLowerCase().includes(query));
 });
 
-// 2. Watcher hits the dedicated endpoint whenever a list key node is selected
+// Fetch detailed error analytics when a list row is clicked
 watch(focusedListKey, async (newKey) => {
   if (!newKey) {
     listMetadataWrapper.value = { total_completions: 0, terms: [] };
@@ -334,47 +371,34 @@ watch(focusedListKey, async (newKey) => {
     const response = await api.get('/vocab-workout-sessions/list-errors/', {
       params: { list_key: newKey }
     });
-    
-    // 🌟 Assign object format safely directly
     listMetadataWrapper.value = response.data || { total_completions: 0, terms: [] };
   } catch (err) {
-    console.error("Failed to fetch custom aggregated error maps summary data strings:", err);
+    console.error("Failed to fetch custom aggregated error maps summary data:", err);
     listMetadataWrapper.value = { total_completions: 0, terms: [] };
   } finally {
     loading.value = false;
   }
 });
 
-
-// Core API Aggregator Request Handlers
+/**
+ * 🌟 OPTIMIZED CORE REQUEST CONTEXT HANDLER
+ * Removed redundant courses API calls, falling back entirely to userStore cache profiles.
+ */
 async function initializeDashboardContextData() {
   loading.value = true;
   try {
-    const [coursesRes, enrollmentsRes, sessionsRes, progressRes] = await Promise.all([
-      api.get('/courses/'),
-      api.get('/enrollment/'),
+    // 🚀 Fetch game states in parallel, omitting redundant endpoints
+    const [sessionsRes, progressRes] = await Promise.all([
       api.get('/vocab-workout-sessions/'),
       api.get('/vocab-workout-sessions/my-work/').catch(() => ({ data: { progress: [] } }))
     ]);
 
-    // Forces alphabetical sorting directly during initialization mapping
-      const coursesPayload = coursesRes.data?.results || coursesRes.data || [];
-      courseOptions.value = coursesPayload
-        .map((c: any) => ({ slug: c.slug, name: `Course: ${c.slug}` }))
-        .sort((a: any, b: any) => a.slug.localeCompare(b.slug)); // Alphabetical Sort Pass
-
-      if (courseOptions.value.length > 0) {
-        courseModeSlug.value = courseOptions.value[0].slug;
-      }
-
-    enrollments.value = enrollmentsRes.data?.results || enrollmentsRes.data || [];
     rawSessionsPool.value = sessionsRes.data?.results || sessionsRes.data || [];
     rawProgressPool.value = progressRes.data?.progress || [];
 
-    console.log("📊 API Loading Complete. Data shapes initialized:", {
-      coursesCount: courseOptions.value.length,
-      enrollmentsCount: enrollments.value.length,
-      sessionsPoolCount: rawSessionsPool.value.length
+    console.log("📊 Vocab Analytics Engine initialized successfully:", {
+      sessionsPoolCount: rawSessionsPool.value.length,
+      progressNodesTracked: rawProgressPool.value.length
     });
 
   } catch (err) {
@@ -385,29 +409,51 @@ async function initializeDashboardContextData() {
 }
 
 onMounted(async () => {
-  if (userStore.isStaff && userStore.teacherRoster.length === 0) {
-    await userStore.fetchTeacherRoster();
+  loading.value = true;
+  try {
+    // Coordinate store hydration sequences smoothly before processing analytics
+    await userStore.ensureUserLoaded();
+    
+    // Supplement fallback if enrollments array metadata isn't completely resolved
+    if (!userStore.enrollments.length) {
+      await userStore.fetchEnrollments();
+    }
+    
+    await initializeDashboardContextData();
+  } catch (err) {
+    console.error("Dashboard mount execution sequence caught:", err);
+  } finally {
+    loading.value = false;
   }
-  await initializeDashboardContextData();
 });
 </script>
 
 <style scoped>
 .vocab-header {
-  background: linear-gradient(135deg, #0f172a 0%, #115e59 100%);
+  background: linear-gradient(
+    135deg,
+    #1a4f55 0%,    /* deep teal */
+    #3c9ea3 45%,   /* lighter teal highlight */
+    #1a4f55 100%   /* deep teal again */
+  );
   position: relative;
   overflow: hidden;
 }
+
 .vocab-header::before {
   content: "";
   position: absolute;
   inset: -45%;
   background:
-    radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0) 45%),
-    radial-gradient(circle at 85% 25%, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0) 55%);
+    radial-gradient(circle at 25% 30%, rgba(255, 255, 255, 0.18) 0%, rgba(255, 255, 255, 0) 45%),
+    radial-gradient(circle at 75% 25%, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0) 55%),
+    radial-gradient(circle at 60% 80%, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0) 50%);
   transform: rotate(-6deg);
   pointer-events: none;
 }
+
+
+
 .list-scroll-box {
   max-height: 520px;
   overflow-y: auto;
