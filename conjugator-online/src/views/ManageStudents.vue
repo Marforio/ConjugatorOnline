@@ -1,7 +1,7 @@
 <template>
   <v-container fluid class="mt-5 pa-4 px-6 max-width-container">
-    <v-row class="mb-6 align-center">
-      <v-col cols="12" sm="8" class="d-flex flex-column gap-1">
+    <v-row class="align-center">
+      <v-col cols="12" class="d-flex flex-column gap-1">
         <h1 class="text-h4 font-weight-black text-slate-900 d-flex align-center">
           <v-icon icon="mdi-account-cog" color="indigo" class="mr-5" />
           Manage Students and Courses
@@ -10,7 +10,9 @@
           Register students and courses, manage enrollments, and assess linguistic profiles.
         </p>
       </v-col>
-      <v-col cols="12" sm="4" class="d-flex justify-sm-end gap-2 flex-wrap align-center">
+    </v-row>
+    <v-row class="mb-4">
+      <v-col cols="12" class="d-flex justify-sm-end gap-2 align-center">
         <v-btn color="grey-darken-3" variant="outlined" prepend-icon="mdi-refresh" width="180px" :loading="loading" @click="fetchData">
           Refresh
         </v-btn>

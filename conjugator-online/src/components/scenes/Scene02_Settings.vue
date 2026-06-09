@@ -17,7 +17,7 @@
               <v-icon color="primary" size="18" class="mr-2">mdi-lightning-bolt</v-icon>
               <h2 class="text-subtitle-1 font-weight-black text-slate-900">Quick Play</h2>
             </div>
-            <p class="text-caption text-slate-500 mb-4">Jump straight into a predefined gameplay package</p>
+            <p class="text-caption text-slate-500 mb-4">Jump straight into a predefined game</p>
 
             <v-row dense>
               <!-- 🖥️ DESKTOP QUICK PLAY LOOP MODIFICATION -->
@@ -44,7 +44,7 @@
               <v-icon color="slate-600" size="18" class="mr-2">mdi-tune-variant</v-icon>
               <h2 class="text-subtitle-1 font-weight-black text-slate-900">Custom Settings</h2>
             </div>
-            <p class="text-caption text-slate-500 mb-4">Tailor targeted configuration properties manually</p>
+            <p class="text-caption text-slate-500 mb-2">Design your own game</p>
 
             <!-- Parameters Module A: Verb Set -->
             <div class="mb-4">

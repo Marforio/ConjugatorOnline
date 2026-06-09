@@ -875,6 +875,46 @@ camshaft,a shaft in an engine that controls valve timing,noun,The mechanic repla
               <v-card class="rounded-xl bg-white border border-slate-200" flat>
                 <v-card-text class="pa-5">
                   <div class="text-overline font-weight-black text-slate-400 tracking-wider mb-4">
+                    Synonyms (Optional)
+                  </div>
+
+                  <v-text-field
+                    v-model="wizardRowData.synonyms"
+                    label="Synonyms"
+                    placeholder="Enter synonyms separated by commas (these words will be considered correct alternative answers in assessments)"
+                    variant="outlined"
+                    density="comfortable"
+                    class="bg-white rounded-lg"
+                    prepend-inner-icon="mdi-layers-triple-outline"
+                  />
+                </v-card-text>
+              </v-card>
+            </v-col>
+            
+            <v-col cols="12" md="4">
+            <v-card class="rounded-xl bg-white border border-slate-200" flat>
+                <v-card-text class="pa-5">
+                  <div class="text-overline font-weight-black text-slate-400 tracking-wider mb-4">
+                    Comment on Usage (Optional)
+                  </div>
+
+                  <v-text-field
+                    v-model="wizardRowData.comment"
+                    label="Comment"
+                    placeholder="Enter a comment on usage (optional)"
+                    variant="outlined"
+                    density="comfortable"
+                    class="bg-white rounded-lg"
+                    prepend-inner-icon="mdi-layers-triple-outline"
+                  />
+                </v-card-text>
+              </v-card>
+            </v-col>
+
+            <v-col cols="12" md="4">
+              <v-card class="rounded-xl bg-white border border-slate-200" flat>
+                <v-card-text class="pa-5">
+                  <div class="text-overline font-weight-black text-slate-400 tracking-wider mb-4">
                     Multiple Choice Decoys
                   </div>
 
@@ -1161,7 +1201,9 @@ interface ManualVocabRow {
   French: string
   German: string
   Italian: string
-  multiple_choice: string
+  multiple_choice: string   
+  synonyms?: string | null
+  comment?: string | null
   imageFile: File | null
   imagePreview: string
   image_url?: string

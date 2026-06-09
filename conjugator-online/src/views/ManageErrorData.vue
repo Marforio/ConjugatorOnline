@@ -18,116 +18,38 @@
     </v-card>
 
   <v-tabs
-        v-model="activeMasterTab"
-        class="rounded-xl elevation-1 bg-grey-lighten-4 mb-6 custom-dashboard-tabs"
-        grow
-        color="primary"
-      >
-        <v-tab 
-          v-for="item in tabItems" 
-          :key="item.value" 
-          :value="item.value"
-          class="dashboard-pill-tab tracking-wider"
-        >
-          {{ item.label }}
-        </v-tab>
-      </v-tabs>
+    v-model="activeMasterTab"
+    class="rounded-xl mb-6 custom-dashboard-tabs"
+    grow
+    color="white"
+    background-color="grey-darken-4"
+  >
+    <v-tab
+      v-for="item in tabItems"
+      :key="item.value"
+      :value="item.value"
+      class="text-white font-weight-bold px-6"
+    >
+      {{ item.label }}
+    </v-tab>
+</v-tabs>
+
 
     <v-window v-model="activeMasterTab" :touch="false">
       
       <v-window-item value="errors" class="fade-in">
-      
-
-        <v-card class="pa-6 mb-6 border bg-white" flat rounded="lg">
-          <v-row>
-            <v-col cols="12" md="4">
-              <v-select
-                v-model="selectedCourse"
-                :items="courseOptions"
-                item-title="name"
-                item-value="id"
-                label="Filter by Course"
-                prepend-icon="mdi-book-open-variant"
-                variant="outlined"
-                :disabled="errorViewMode === 'STUDENTS'"
-                :persistent-placeholder="errorViewMode === 'STUDENTS'"
-                :placeholder="errorViewMode === 'STUDENTS' ? 'Not applicable in Student Mode' : ''"
-                @update:model-value="fetchAllData"
-              />
-            </v-col>
-            
-            <v-col cols="12" md="4">
-              <v-autocomplete
-                v-model="selectedStudent"
-                :items="secureStudentsDropdown"
-                item-title="display_name"
-                item-value="id"
-                label="Filter by Student"
-                prepend-icon="mdi-account"
-                variant="outlined"
-                clearable
-                :disabled="errorViewMode === 'COURSES'"
-                :persistent-placeholder="errorViewMode === 'COURSES'"
-                :placeholder="errorViewMode === 'COURSES' ? 'Not applicable in Class Mode' : ''"
-                @update:model-value="onStudentFilterChange"
-              >
-                <template v-slot:item="{ props, item }">
-                  <v-list-item v-bind="props">
-                    <template v-slot:prepend>
-                      <v-avatar color="primary" size="32" class="mr-2">
-                        <span class="text-white text-caption font-weight-bold">{{ item.raw.initials }}</span>
-                      </v-avatar>
-                    </template>
-                    <template v-slot:subtitle>
-                      <span class="text-caption font-mono">{{ item.raw.web_id }}</span>
-                    </template>
-                  </v-list-item>
-                </template>
-              </v-autocomplete>
-            </v-col>
-
-            <v-col cols="12" md="4">
-              <v-select
-                v-model="dateRange"
-                :items="dateRangeOptions"
-                label="Date Range"
-                prepend-icon="mdi-calendar-range"
-                variant="outlined"
-                @update:model-value="fetchAllData"
-              />
-            </v-col>
-          </v-row>
-        </v-card>
+        
 
         <v-row>
           <v-col cols="12">
             <v-card class="pa-6 mb-6 border bg-white" flat rounded="lg">
-              <div class="d-flex align-center justify-space-between mb-4">
-                <div class="text-h5 font-weight-black text-slate-900 tracking-tight">
-                  {{ dynamicChartTitle }}
-                </div>
-                <div class="d-flex align-center gap-2">
-                  <v-btn
-                    :disabled="!selectedStudent || errorViewMode !== 'STUDENTS'"
-                    :loading="pdfLoading"
-                    color="secondary"
-                    variant="elevated"
-                    prepend-icon="mdi-file-pdf-box"
-                    class="rounded-lg text-none font-weight-bold"
-                    size="small"
-                    @click="generateStudentPdfReport"
-                  >
-                    PDF Report
-                  </v-btn>
-                </div>
-              </div>
 
               <v-btn-toggle
                 v-model="errorViewMode"
                 mandatory
                 variant="outlined"
                 color="primary"
-                class="mb-6 w-100 rounded-lg overflow-hidden"
+                class="mb-6 w-100 rounded-lg overflow-hidden bg-white"
                 @update:model-value="handleErrorViewToggle"
               >
                 <v-btn value="COURSES" class="flex-grow-1 font-weight-bold text-none" size="small">
@@ -140,9 +62,86 @@
                 </v-btn>
               </v-btn-toggle>
 
+
+              <v-row justify="end" class="align-content-center">
+                <v-col cols="6" md="3" v-if="errorViewMode === 'COURSES'">
+                  <v-select
+                    v-model="selectedCourse"
+                    :items="courseOptions"
+                    item-title="name"
+                    item-value="id"
+                    label="Filter by Course"
+                    prepend-icon="mdi-book-open-variant"
+                    variant="outlined"
+                    density="compact"
+                    @update:model-value="fetchAllData"
+                  />
+                </v-col>
+                
+                <v-col cols="6" md="3" v-if="errorViewMode === 'STUDENTS'">
+                  <v-autocomplete
+                    v-model="selectedStudent"
+                    :items="secureStudentsDropdown"
+                    item-title="display_name"
+                    item-value="id"
+                    label="Filter by Student"
+                    prepend-icon="mdi-account"
+                    variant="outlined"
+                    density="compact"
+                    clearable
+                    @update:model-value="onStudentFilterChange"
+                  >
+                    <template v-slot:item="{ props, item }">
+                      <v-list-item v-bind="props">
+                        <template v-slot:prepend>
+                          <v-avatar color="primary" size="32" class="mr-2">
+                            <span class="text-white text-caption font-weight-bold">{{ item.raw.initials }}</span>
+                          </v-avatar>
+                        </template>
+                        <template v-slot:subtitle>
+                          <span class="text-caption font-mono">{{ item.raw.web_id }}</span>
+                        </template>
+                      </v-list-item>
+                    </template>
+                  </v-autocomplete>
+                </v-col>
+
+                <v-col cols="6" md="3">
+                  <v-select
+                    v-model="dateRange"
+                    :items="dateRangeOptions"
+                    label="Date Range"
+                    prepend-icon="mdi-calendar-range"
+                    variant="outlined"
+                    density="compact"
+                    @update:model-value="fetchAllData"
+                  />
+                </v-col>
+              </v-row>
+              <v-row justify="end">
+                  <v-btn
+                    :disabled="!selectedStudent || errorViewMode !== 'STUDENTS'"
+                    :loading="pdfLoading"
+                    color="secondary"
+                    variant="elevated"
+                    prepend-icon="mdi-file-pdf-box"
+                    class="rounded-lg text-none font-weight-bold"
+                    size="small"
+                    @click="generateStudentPdfReport"
+                  >
+                    PDF Report
+                </v-btn>
+              </v-row>
+
               <v-progress-linear v-if="loadingErrors" indeterminate color="primary" class="mb-4" />
 
+              
               <div v-else-if="hasChartData" class="mb-4">
+                <div class="d-flex align-center justify-space-between mt-4">
+                  <div class="text-h5 font-weight-black text-slate-900 tracking-tight">
+                    {{ dynamicChartTitle }}
+                  </div>
+              </div>
                 <TeacherErrorFrequencyChart 
                   :errorData="topErrors" 
                   :viewMode="errorViewMode"
@@ -154,10 +153,10 @@
                 <v-icon size="36" class="mb-2" color="slate-300">mdi-chart-line-variant</v-icon>
                 <div>
                   <span v-if="errorViewMode === 'STUDENTS' && !selectedStudent">
-                    Please pick a student from the active filters above to see their analytics summary trace metrics.
+                    Please pick a student.
                   </span>
                   <span v-else>
-                    No telemetry logging errors match your specified criteria window.
+                    No errors match your criteria.
                   </span>
                 </div>
               </div>
@@ -184,7 +183,7 @@
                     Total Class Occurrences: <v-chip size="x-small" color="error" class="font-weight-black font-mono ml-1">{{ selectedErrorObj.total_times }}</v-chip>
                   </div>
                   <div class="text-caption font-weight-black text-slate-400 text-uppercase tracking-wider mb-2">
-                    Evidence Log Snippets
+                    Evidence 
                   </div>
                   <v-list density="compact" class="evidence-list rounded-lg border bg-white">
                     <v-list-item
@@ -201,7 +200,7 @@
                 </v-card>
 
                 <div v-else-if="selectedErrorCode" class="text-center text-slate-400 text-caption font-weight-bold pa-4">
-                  Error data signature entry could not be computed.
+                  Error data not found.
                 </div>
               </div>
             </v-card>
@@ -239,7 +238,7 @@
 
       </v-window-item>
 
-      <v-window-item value="exercises" class="fade-in">
+      <v-window-item value="exercises" class="fade-in mt-2">
         <ManageExerciseData />
       </v-window-item>
       
@@ -884,11 +883,16 @@ onMounted(async () => {
 .last-no-border:last-child { border-bottom: 0 !important; }
 
 
-/* Style hooks ensuring the custom window slider handles tab pill adjustments smoothly */
-.custom-dashboard-tabs {
-  padding: 6px !important;
-  background-color: #f1f5f9 !important;
-  height: 56px !important; /* Forces uniform height limits */
+.custom-dashboard-tabs .v-tab {
+  border-radius: 999px;
+  margin: 0 4px;
+  background-color: #9b9a9a; /* light gray for unselected tabs */
+  color: #333333; /* dark text for readability */
+}
+
+.custom-dashboard-tabs .v-tab--selected {
+  background-color: #1e88e5 !important; /* primary blue */
+  color: white !important;
 }
 
 /* Target overrides to elevate text layout alignment and force uppercase */

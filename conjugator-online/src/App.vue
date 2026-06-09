@@ -73,12 +73,13 @@
             <v-list-item :to="{ name: 'manage-other-games-data' }" slim prepend-icon="mdi-chart-timeline" title="Other Games Data" rounded="lg" color="primary" @click="closeDrawerBelowLg" />
           </v-sheet>
 
-          <v-divider class="my-4 border-opacity-60" />
+  
 
           <v-list-group value="studentPreview">
             <template #activator="{ props: groupProps }">
               <v-list-item
                 v-bind="groupProps"
+                slim
                 prepend-icon="mdi-eye-outline"
                 title="Student Pages"
                 rounded="lg"
@@ -87,7 +88,7 @@
             </template>
 
             <div class="bg-slate-50 rounded-xl pa-1 mt-1 border border-dashed">
-              <v-list-item :to="{ name: 'student-home' }" slim prepend-icon="mdi-home-account" title="Home View" rounded="lg" color="primary" @click="closeDrawerBelowLg" />
+              <v-list-item :to="{ name: 'student-home' }" slim prepend-icon="mdi-home-account" title="Home / My Tasks" rounded="lg" color="primary" @click="closeDrawerBelowLg" />
               <v-list-item href="https://book.language-labs.ch" target="_blank" slim prepend-icon="mdi-book-open-page-variant" title="Grammar Book" rounded="lg" color="primary" @click="closeDrawerBelowLg" />
               <v-list-item :to="{ name: 'vocabworkout' }" slim prepend-icon="mdi-cards-outline" title="Vocab Training" rounded="lg" color="primary" @click="closeDrawerBelowLg" />
               <v-list-item :to="{ name: 'exercises' }" slim prepend-icon="mdi-weight-lifter" title="Grammar Exercises" rounded="lg" color="primary" @click="closeDrawerBelowLg" />

@@ -444,7 +444,7 @@ async function ensureUserLoaded() {
         : res.data;
       
       teacherRoster.value = Array.isArray(rawArray) ? rawArray : [];
-      console.log("🎒 Loaded assigned secure teacher student roster:", teacherRoster.value.length, "items");
+      console.log("🎒 Loaded teacher roster:", teacherRoster.value.length, "items");
     } catch (err) {
       console.error("Failed to load secure teacher student list:", err);
       teacherRoster.value = [];
@@ -462,7 +462,7 @@ async function ensureUserLoaded() {
         params: { managed_only: "true" }
       });
       managedCourses.value = Array.isArray(res.data) ? res.data : [];
-      console.log("🏫 Synchronized live teacher course entities:", managedCourses.value.length);
+      console.log("🏫 Loaded teacher courses:", managedCourses.value.length);
     } catch (err) {
       console.error("Failed to load managed courses list directly from API:", err);
       managedCourses.value = [];
