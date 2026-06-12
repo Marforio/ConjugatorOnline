@@ -579,7 +579,7 @@ async function generateStudentPdfReport() {
 
     const initials = sProfile.initials || 'ST';
     const studentScore = sProfile.health_score ?? 0;
-    const studentPrompts = sProfile.total_correct_prompts ?? 0;
+    const studentPrompts = sProfile.current_period_speaking_seconds ?? 0;
     
     const periodMinutes = userStore.currentPeriodSpeakingMinutes ?? 0;
     const lifecycleMinutes = userStore.grandTotalSpeakingMinutes ?? 0;
