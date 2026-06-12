@@ -1,5 +1,5 @@
 {
-    "sentence_types":["Positive", "Negative", "Questions"],
+    "sentence_types":["Positive", "Negative", "Question"],
     "verb_sets": ["Common verbs (Reg + Irreg)", "Regular verbs only", "Basic 75 Irregs", "Master 110 Irregs", "Shakespeare 130 Irregs", "GOAT 50 Hard Irregs Only"],
     "tenses": ["Present simple", "Past simple", "Future simple", "Recommendation", "Present continuous", "Present perfect"]
 }

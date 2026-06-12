@@ -1,4 +1,4 @@
-import { ref, computed } from "vue";
+import { ref, computed, watch } from "vue";
 import { defineStore } from "pinia";
 import { useAuthStore } from "@/stores/auth";
 import api from "@/axios";
@@ -14,24 +14,25 @@ interface User {
 }
 
 interface ScoreSnapshot {
-  total_correct_prompts: number;
+  current_period_correct_prompts: number;
   health_score: number;
-  period_speaking_seconds?: number; // 🕒 Added to track history snapshots cleanly
+  period_speaking_seconds?: number; 
 }
 
 interface Student {
   id: number;
   web_id: string;
   initials: string;
-  total_correct_prompts: number;
+  current_period_correct_prompts: number;
+  grand_total_correct_prompts: number;
   health_score: number;
   domain: string | null;
   user: User | number | null;
   score_history: Record<string, ScoreSnapshot>;
   linguistic_profile?: LinguisticProfile; 
-  // ⏱️ NEW: Speaking Telemetry Fields from Backend API
   current_period_speaking_seconds: number;
   grand_total_speaking_seconds: number;
+  is_active: boolean;
 }
 
 interface ProfileType {
@@ -59,14 +60,23 @@ interface LinguisticProfile {
   profile_type?: ProfileType;
 }
 
+interface CourseObjective {
+  id: string;
+  title: string;
+}
+
 interface Course {
   slug: string;
+  is_active: boolean; 
+  semester: 'FALL' | 'SPRING'; 
+  objectives: CourseObjective[]; 
 }
 
 interface StudentCourse {
   id: number;
   student: Student | number;
   course: Course;
+  objective_fulfillment: Record<string, boolean>;
 }
 
 interface VerbUsage {
@@ -162,12 +172,14 @@ export const useUserStore = defineStore("user", () => {
   const student = ref<Student | null>(null);
   const teacherId = ref<number | null>(null);
   
-  // ✨TEACHER  STATE: Track assigned students roster cleanly
+  // TEACHER: Track students roster cleanly
   const teacherRoster = ref<Student[]>([]);
   const selectedStudentId = ref<number | null>(null);
   const loadingRoster = ref(false);
   const managedCourses = ref<Course[]>([]);
   const loadingCourses = ref(false);
+  const showArchivedInRoster = ref(false);
+  const showArchivedInCourses = ref(false);
 
   // Linguistic Profile state
   const linguisticProfile = ref<LinguisticProfile | null>(null);
@@ -194,23 +206,31 @@ export const useUserStore = defineStore("user", () => {
   
 //  Teacher's courses
 const availableTeacherCourses = computed(() => {
-    return [...managedCourses.value]
+    let list = [...managedCourses.value];
+    if (!showArchivedInCourses.value) {
+      list = list.filter(c => c.is_active);
+    }
+    return list
       .sort((a, b) => a.slug.localeCompare(b.slug))
       .map(course => ({
         slug: course.slug,
-        title: course.slug.toUpperCase()
+        title: `${course.slug.toUpperCase()} (${course.semester})`,
+        is_active: course.is_active,
+        semester: course.semester,
+        objectives: course.objectives || [] // Direct memory access mapping available instantly
       }));
   });
 
   /**
    * Accessible pointer exposing the standard alpha-sorted raw student array
    */
-  const availableTeacherStudents = computed(() => {
-    return [...teacherRoster.value].sort((a, b) => 
-      a.initials.localeCompare(b.initials)
-    );
+const availableTeacherStudents = computed(() => {
+    let list = [...teacherRoster.value];
+    if (!showArchivedInRoster.value) {
+      list = list.filter(s => s.is_active);
+    }
+    return list.sort((a, b) => a.initials.localeCompare(b.initials));
   });
-
   
   // Make studentId context-aware. 
   // If staff is viewing a targeted student, return that selected student ID instead of their own.
@@ -221,7 +241,8 @@ const availableTeacherCourses = computed(() => {
     return student.value?.id ?? null;
   });
   
-  const totalCorrect = computed(() => student.value?.total_correct_prompts ?? 0);
+  const totalCorrectCurrentPeriod = computed(() => student.value?.current_period_correct_prompts ?? 0);
+  const totalCorrectLifetime = computed(() => student.value?.grand_total_correct_prompts ?? 0);
   const healthScore = computed(() => student.value?.health_score ?? 0);
 
   // Human-readable speaking metrics calculations (Minutes representation)
@@ -391,7 +412,7 @@ async function ensureUserLoaded() {
     await ensureUserLoaded();
   }
 
-  // --- Previous Semester History Evaluation Blocks ---
+// --- Previous Semester History Evaluation Blocks ---
   const previousHealthScore = computed(() => {
     if (!student.value?.score_history) return null;
     const entries = Object.entries(student.value.score_history);
@@ -405,7 +426,7 @@ async function ensureUserLoaded() {
     const entries = Object.entries(student.value.score_history);
     if (entries.length === 0) return null;
     const sorted = entries.sort(([a], [b]) => b.localeCompare(a));
-    return sorted[0][1].total_correct_prompts;
+    return sorted[0][1].current_period_correct_prompts ?? (sorted[0][1] as any).total_correct_prompts ?? 0;
   });
 
   const previousSpeakingSeconds = computed(() => {
@@ -470,6 +491,19 @@ async function ensureUserLoaded() {
       loadingCourses.value = false;
     }
   } 
+
+  // ARCHIVING DISPATCHERS: Let UI trigger modifications from user store rows directly
+  async function toggleStudentArchiveStatus(sid: number) {
+    try {
+      await api.post(`/students/${sid}/toggle-archive/`);
+      await fetchTeacherRoster(); // Hot-reload lists across active view canvases
+    } catch (err) {
+      console.error("Archive status change validation rejected by server:", err);
+    }
+  }
+
+  // Reactive dependency trigger: Reload list arrays if teachers flip filter checkboxes on dashboard
+  watch([showArchivedInRoster], () => { fetchTeacherRoster(); });
 
   async function fetchLinguisticProfile() {
     if (!hasAccessToken()) return;
@@ -661,13 +695,14 @@ async function fetchEnrollments() {
       business_1: "Business 1 - Corporations",
       business_2: "Business 2 - Marketing",
       business_3: "Business 3 - Finance",
-      business_4: "Business 4 - Ethics",
+      business_4: "Business 4 - E&S",
       chemistry: "Chemistry",
-      civil: "Civil",
+      civil: "Civil Engineering",
       computer_science: "Computer Science",
-      electrical: "Electrical",
-      mechanical: "Mechanical",
+      electrical: "Electrical Engineering",
+      mechanical: "Mechanical Engineering",
       general: "General",
+      ielts_prep: "IELTS Prep",
     };
     return map[d] ?? d;
   });
@@ -856,11 +891,15 @@ async function fetchEnrollments() {
     loadingRoster,
     fetchTeacherRoster,
     fetchManagedCourses,
+    showArchivedInRoster,
+    showArchivedInCourses,
+    toggleStudentArchiveStatus,
 
     // Student coordinates
     student,
     studentId,
-    totalCorrect,
+    totalCorrectCurrentPeriod,
+    totalCorrectLifetime,
     healthScore,
     currentPeriodSpeakingMinutes,
     grandTotalSpeakingMinutes,

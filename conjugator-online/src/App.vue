@@ -88,7 +88,7 @@
             </template>
 
             <div class="bg-slate-50 rounded-xl pa-1 mt-1 border border-dashed">
-              <v-list-item :to="{ name: 'student-home' }" slim prepend-icon="mdi-home-account" title="Home / My Tasks" rounded="lg" color="primary" @click="closeDrawerBelowLg" />
+              <v-list-item :to="{ name: 'student-home' }" slim prepend-icon="mdi-home-account" title="Home / My Work" rounded="lg" color="primary" @click="closeDrawerBelowLg" />
               <v-list-item href="https://book.language-labs.ch" target="_blank" slim prepend-icon="mdi-book-open-page-variant" title="Grammar Book" rounded="lg" color="primary" @click="closeDrawerBelowLg" />
               <v-list-item :to="{ name: 'vocabworkout' }" slim prepend-icon="mdi-cards-outline" title="Vocab Training" rounded="lg" color="primary" @click="closeDrawerBelowLg" />
               <v-list-item :to="{ name: 'exercises' }" slim prepend-icon="mdi-weight-lifter" title="Grammar Exercises" rounded="lg" color="primary" @click="closeDrawerBelowLg" />
@@ -105,7 +105,7 @@
           <v-list-item
             :to="{ name: 'student-home' }"
             prepend-icon="mdi-home-account"
-            title="Home / My Tasks"
+            title="Home / My Work"
             rounded="lg"
             color="primary"
             @click="closeDrawerBelowLg"

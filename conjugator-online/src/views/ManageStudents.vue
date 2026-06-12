@@ -32,55 +32,232 @@
       <v-progress-circular indeterminate color="primary" size="64"></v-progress-circular>
     </v-row>
 
+    
+
     <v-window v-else v-model="activeTab">
       <v-window-item value="courses" class="animate-fade-in">
+
+        <v-row class="mb-2 px-2">
+          <v-col cols="12">
+            <div class="d-flex justify-end">
+              <v-checkbox
+              v-model="userStore.showArchivedInCourses"
+              label="See my inactive courses"
+              hide-details
+              density="compact"
+              color="slate-700"
+            />
+            </div>
+          </v-col>
+        </v-row>
+
         <v-expansion-panels variant="accordion" multiple>
           <v-expansion-panel v-for="course in groupedData" :key="course.slug">
+            
             <v-expansion-panel-title class="font-weight-bold text-subtitle-1">
-              <v-icon icon="mdi-folder-text-outline" class="mr-3" color="primary"></v-icon>
-              Course Space: <span class="ml-1 text-primary">{{ course.slug }}</span>
-              <v-chip class="ml-4" size="small" color="secondary" variant="flat">{{ course.students.length }} Enrolled</v-chip>
+              <v-icon icon="mdi-folder-text-outline" class="mr-3" :color="course.is_active ? 'primary' : 'grey'"></v-icon>
+              Course <span class="ms-2" :class="course.is_active ? 'text-primary' : 'text-grey text-decoration-line-through'">{{ course.slug }}</span>
+              
+              <v-chip class="ml-4" size="small" :color="course.is_active ? 'secondary' : 'grey-lighten-1'" variant="flat">
+                {{ course.students.length }} Enrolled
+              </v-chip>
+              <v-chip class="ml-2" size="small" :color="course.is_active ? 'success' : 'error'" variant="tonal">
+                {{ course.is_active ? 'Active' : 'Archived' }}
+              </v-chip>
               <v-spacer></v-spacer>
               
-              <v-btn size="x-small" color="error" variant="text" icon="mdi-delete-outline" class="mr-2 stop-propagation" @click.stop="confirmDeleteCourse(course)">
+              <v-btn
+                size="small"
+                :color="course.is_active ? 'orange-darken-1' : 'success'"
+                variant="tonal"
+                class="mr-2 stop-propagation"
+                icon
+                @click.stop="toggleCourseActiveStatus(course)"
+              >
+                <v-icon :icon="course.is_active ? 'mdi-archive-arrow-down-outline' : 'mdi-archive-arrow-up-outline'" />
+                <v-tooltip activator="parent" location="top">
+                  {{ course.is_active ? 'Archive Course' : 'Restore Course' }}
+                </v-tooltip>
+              </v-btn>
+
+              <v-btn
+                size="small"
+                color="info"
+                variant="tonal"
+                class="mr-2 stop-propagation"
+                icon
+                @click.stop="openEditCourseDialog(course)"
+              >
+                <v-icon icon="mdi-cog-outline" />
+                <v-tooltip activator="parent" location="top">Edit Course</v-tooltip>
+              </v-btn>
+
+              <v-btn
+                size="small"
+                color="error"
+                variant="tonal"
+                class="mr-2 stop-propagation"
+                icon
+                @click.stop="confirmDeleteCourse(course)"
+              >
+                <v-icon icon="mdi-delete-outline" />
                 <v-tooltip activator="parent" location="top">Delete Course</v-tooltip>
               </v-btn>
             </v-expansion-panel-title>
-            
-            <v-expansion-panel-text>
-              <v-table v-if="course.students.length > 0" hover dense>
-                <thead>
-                  <tr>
-                    <th>Username</th>
-                    <th>Initials</th>
-                    <th>Domain</th>
-                    <th>Conj. Health</th>
-                    <th class="text-center" style="width: 180px;">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr v-for="student in course.students" :key="student.id">
-                    <td class="font-weight-medium">{{ student.web_id }}</td>
-                    <td><v-chip label size="small" color="teal">{{ student.initials }}</v-chip></td>
-                    <td>{{ formatDomain(student.domain ?? '') }}</td>
-                    <td><v-progress-linear :model-value="student.health_score" color="success" height="6" rounded></v-progress-linear></td>
-                    <td class="text-center">
-                      <v-btn size="small" variant="text" color="orange-darken-2" prepend-icon="mdi-link-off" @click="confirmUnenrollStudent(student, course.slug)">
-                        Remove From Course
-                      </v-btn>
-                    </td>
-                  </tr>
-                </tbody>
-              </v-table>
-              <div class="text-center py-6 text-grey-darken-1" v-else>
-                <p class="text-caption">No students linked to this course yet.</p>
-              </div>
+
+            <v-expansion-panel-text class="pt-2 bg-slate-50/50">
+              <v-row>
+                <!-- Left Column: Unified Course Roster Management -->
+                <v-col cols="12" :md="course.objectives && course.objectives.length > 0 ? '4' : '12'">
+                  <v-card variant="outlined" class="bg-white border-slate-200 rounded-xl">
+                    <v-card-title class="text-subtitle-2 font-weight-bold text-slate-800 d-flex align-center pt-3 px-4">
+                      <v-icon icon="mdi-account-graduation-outline" color="primary" class="mr-2" size="small" />
+                      Enrolled Roster ({{ course.students.length }})
+                    </v-card-title>
+                    
+                    <v-divider />
+                    
+                    <v-table density="comfortable" class="text-caption">
+                      <thead>
+                        <tr>
+                          <th class="font-weight-bold">Student</th>
+                          <th class="font-weight-bold">Domain</th>
+                          <th class="text-center font-weight-bold" style="width: 60px;">Action</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr v-for="student in course.students" :key="student.id">
+                          <td class="font-weight-black text-slate-700">{{ student.web_id }}</td>
+                          <td>
+                            <v-chip size="x-small" variant="tonal" color="slate-600" class="text-uppercase font-weight-bold">
+                              {{ student.domain || 'General' }}
+                            </v-chip>
+                          </td>
+                          <td class="text-center">
+                            <!-- 🔄 Explicit Unenroll Action per Student -->
+                            <v-btn 
+                              prepend-icon="mdi-link-off" 
+                              variant="tonal" 
+                              size="small" 
+                              color="error"
+                              @click="confirmUnenrollStudent(student, course.slug)"
+                            >
+                              <v-tooltip activator="parent" location="top">Unenroll</v-tooltip>
+                            </v-btn>
+                          </td>
+                        </tr>
+                        <tr v-if="course.students.length === 0">
+                          <td colspan="3" class="text-center py-6 text-slate-400 bg-slate-50">
+                            No students currently enrolled.
+                          </td>
+                        </tr>
+                      </tbody>
+                    </v-table>
+                  </v-card>
+                </v-col>
+
+                <v-col cols="12" md="8" v-if="course.objectives && course.objectives.length > 0">
+                  <div class="d-flex flex-column gap-3">
+                    
+                    <div class="text-subtitle-2 font-weight-black text-indigo-darken-3 px-2 d-flex align-center">
+                      <v-icon icon="mdi-bullseye-arrow" color="indigo" class="mr-2" size="small" />
+                      Course Objectives
+                      <v-chip size="x-small" color="indigo" variant="tonal" class="ml-3 font-weight-bold">
+                        {{ course.objectives.length }} Objectives
+                      </v-chip>
+                    </div>
+
+                    <v-expansion-panels variant="popout" class="objectives-accordion mt-1">
+                      <v-expansion-panel 
+                        v-for="(obj, idx) in course.objectives" 
+                        :key="obj.id"
+                        class="border border-slate-200 rounded-xl mb-2 elevation-sm"
+                      >
+                        <v-expansion-panel-title class="py-3 px-4">
+                          <div class="d-flex align-center w-100 pr-4">
+                            <v-avatar size="24" color="indigo-lighten-5" class="text-caption font-weight-black text-indigo mr-3">
+                              {{ Number(idx) + 1 }}
+                            </v-avatar>
+                            
+                            <div class="text-body-2 font-weight-medium text-slate-800 line-height-normal pr-4 flex-grow-1">
+                              {{ obj.title }}
+                            </div>
+                            
+                            <v-chip size="x-small" color="success" variant="flat" class="font-weight-black ml-auto">
+                              {{ getObjectiveCompletionCount(course, obj.id) }} / {{ course.students.length }} 
+                            </v-chip>
+                          </div>
+                        </v-expansion-panel-title>
+
+                        <v-expansion-panel-text class="bg-slate-50/50 pt-3 border-t">
+                          <div class="text-overline font-weight-black text-slate-400 mb-2 tracking-wider">
+                            Objective fulfilled:
+                          </div>
+
+                          <v-row no-gutters class="gap-2">
+                            <v-col 
+                              v-for="student in course.students" 
+                              :key="student.id"
+                              cols="12" 
+                              sm="6" 
+                              md="4"
+                              class="pa-1"
+                            >
+                              <v-card 
+                                variant="flat" 
+                                border 
+                                :class="isObjectiveFulfilled(student.id, course.slug, obj.id) ? 'border-success bg-success-lighten-5' : 'border-slate-200 bg-white'"
+                                class="rounded-xl transition-all clickable-student-node"
+                                @click="toggleStudentObjective(student.id, course.slug, obj.id)"
+                              >
+                                <div class="d-flex align-center justify-space-between pa-3">
+                                  <div class="d-flex align-center">
+                                    <v-icon 
+                                      :icon="isObjectiveFulfilled(student.id, course.slug, obj.id) ? 'mdi-checkbox-marked-circle' : 'mdi-checkbox-blank-circle-outline'"
+                                      :color="isObjectiveFulfilled(student.id, course.slug, obj.id) ? 'success' : 'slate-400'"
+                                      class="mr-3"
+                                    />
+                                    <span class="font-weight-bold font-monospace text-body-2" :class="isObjectiveFulfilled(student.id, course.slug, obj.id) ? 'text-success-darken-2' : 'text-slate-700'">
+                                      {{ student.web_id }}
+                                    </span>
+                                  </div>
+                                  
+                                  <v-chip size="x-small" variant="flat" color="slate-100" class="text-caption font-weight-bold">
+                                    {{ student.initials }}
+                                  </v-chip>
+                                </div>
+                              </v-card>
+                            </v-col>
+                            
+                            <v-col cols="12" v-if="course.students.length === 0" class="text-center py-4 text-slate-400 text-caption">
+                              No active student accounts found to verify for this criteria row tracker.
+                            </v-col>
+                          </v-row>
+                        </v-expansion-panel-text>
+
+                      </v-expansion-panel>
+                    </v-expansion-panels>
+
+                  </div>
+                </v-col>
+              </v-row>
             </v-expansion-panel-text>
           </v-expansion-panel>
         </v-expansion-panels>
       </v-window-item>
 
       <v-window-item value="directory" class="animate-fade-in">
+        <v-row class="mb-2 px-2">
+          <v-col cols="12" class="d-flex align-center">
+            <v-checkbox
+              v-model="userStore.showArchivedInRoster"
+              label="Show Archived/Inactive Students"
+              hide-details
+              density="compact"
+              color="slate-700"
+            />
+          </v-col>
+        </v-row>
         <v-card variant="outlined" class="border-grey-lighten-2 rounded-lg">
           <v-table hover>
             <thead class="bg-grey-lighten-4">
@@ -93,58 +270,38 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="student in userStore.teacherRoster" :key="student.id">
-                <td class="font-weight-bold font-monospace text-primary">{{ student.web_id }}</td>
-                <td><v-avatar color="primary" size="30" class="text-caption font-weight-bold text-white">{{ student.initials }}</v-avatar></td>
-                <td>{{ formatDomain(student.domain ?? '') }}</td>
-                <td class="text-center font-weight-bold font-monospace">{{ student.total_correct_prompts }} correct</td>
+              <tr v-for="student in userStore.availableTeacherStudents" :key="student.id" :class="{'bg-grey-lighten-5 text-muted': !student.is_active}">
+                <td class="font-weight-bold font-monospace" :class="student.is_active ? 'text-primary' : 'text-grey text-decoration-line-through'">
+                  {{ student.web_id }}
+                  <v-chip v-if="!student.is_active" size="x-small" color="error" class="ml-2">Archived</v-chip>
+                </td>
                 <td class="text-center">
-                  <v-btn
-                      size="small"
-                      class="mx-1"
-                      variant="tonal"
-                      color="info"
-                      density="comfortable"
-                      @click="openEditStudentDialog(student)"
-                    >
-                      <v-icon>mdi-pencil</v-icon>
-                      <v-tooltip activator="parent" location="top">
-                        Edit Student Parameters
-                      </v-tooltip>
-                    </v-btn>
+                  <v-btn size="small" class="mx-1" variant="tonal" color="info" density="comfortable" @click="openEditStudentDialog(student)">
+                    <v-icon>mdi-pencil</v-icon>
+                  </v-btn>
 
-                    <v-btn
-                      size="small"
-                      class="mx-1"
-                      variant="tonal"
-                      color="warning-darken-2"
-                      density="comfortable"
-                      @click="openResetPasswordDialog(student)"
-                    >
-                      <v-icon>mdi-lock-reset</v-icon>
-                      <v-tooltip activator="parent" location="top">
-                        Reset Auth Passwords
-                      </v-tooltip>
-                    </v-btn>
+                  <v-btn 
+                    size="small" class="mx-1" variant="tonal" 
+                    :color="student.is_active ? 'orange-darken-1' : 'success'" 
+                    density="comfortable" 
+                    @click="userStore.toggleStudentArchiveStatus(student.id)"
+                  >
+                    <v-icon>{{ student.is_active ? 'mdi-account-minus-outline' : 'mdi-account-check-outline' }}</v-icon>
+                    <v-tooltip activator="parent" location="top">
+                      {{ student.is_active ? 'Soft Archive Student Account' : 'Restore Student to Active' }}
+                    </v-tooltip>
+                  </v-btn>
 
-                    <v-btn
-                      size="small"
-                      class="mx-1"
-                      variant="tonal"
-                      color="error"
-                      density="comfortable"
-                      @click="confirmDeleteStudent(student)"
-                    >
-                      <v-icon>mdi-trash-can</v-icon>
-                      <v-tooltip activator="parent" location="top">
-                        Permanently Delete Account
-                      </v-tooltip>
-                    </v-btn>
-
+                  <v-btn size="small" class="mx-1" variant="tonal" color="warning-darken-2" density="comfortable" @click="openResetPasswordDialog(student)">
+                    <v-icon>mdi-lock-reset</v-icon>
+                  </v-btn>
+                  <v-btn size="small" class="mx-1" variant="tonal" color="error" density="comfortable" @click="confirmDeleteStudent(student)">
+                    <v-icon>mdi-trash-can</v-icon>
+                  </v-btn>
                 </td>
               </tr>
               <tr v-if="userStore.teacherRoster.length === 0">
-                <td colspan="5" class="text-center py-6 text-muted">No student profiles registered under your teacher profile reference context yet.</td>
+                <td colspan="5" class="text-center py-6 text-muted">No student profiles registered yet.</td>
               </tr>
             </tbody>
           </v-table>
@@ -222,20 +379,55 @@
 
     </v-window>
 
-    <v-dialog v-model="courseDialog" max-width="500px">
-      <v-card rounded="lg">
-        <v-card-title class="pa-4 bg-primary text-white font-weight-bold">Create New Course</v-card-title>
-        <v-card-text class="pt-4">
-          <v-form ref="courseFormRef">
-            <v-text-field v-model="newCourse.slug" label="Course Slug (e.g., business_english)" placeholder="Use lower_case_with_underscores" variant="outlined" :rules="[v => !!v || 'Course slug is required']"></v-text-field>
-          </v-form>
-        </v-card-text>
-        <v-card-actions class="pa-4 justify-end">
-          <v-btn variant="text" @click="courseDialog = false">Cancel</v-btn>
-          <v-btn color="primary" variant="elevated" :loading="loading" @click="submitCreateCourse">Create</v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
+<v-dialog v-model="courseDialog" max-width="550px">
+  <v-card rounded="lg">
+    <v-card-title class="pa-4 bg-primary text-white font-weight-bold">
+      {{ isEditingCourse ? 'Course Parameters' : 'Create New Course Module' }}
+    </v-card-title>
+    <v-card-text class="pt-4">
+      <v-form ref="courseFormRef">
+        <v-text-field 
+          v-model="newCourse.slug" 
+          variant="outlined" 
+          density="compact"
+          :disabled="isEditingCourse"
+          :rules="[v => !!v || 'Course slug identifier is required']"
+        />
+
+        <div class="row g-2 mb-3">
+          <div class="col-6">
+            <v-select v-model="newCourse.semester" :items="['FALL', 'SPRING']" label="Active Semester" variant="outlined" density="compact" />
+          </div>
+          <div class="col-6">
+            <v-checkbox v-model="newCourse.is_active" label="Active Course" color="success" class="mt-n1" />
+          </div>
+        </div>
+
+        <v-divider class="my-4" />
+
+        <div class="d-flex justify-space-between align-center mb-8">
+          <span class="text-subtitle-2 font-weight-bold text-slate-800">Course Objectives</span>
+          <v-btn size="small" variant="tonal" color="indigo" prepend-icon="mdi-plus" @click="addGoalToCourseForm">Add Objective</v-btn>
+        </div>
+
+        <div v-if="!newCourse.objectives.length" class="text-caption text-center py-4 border dashed rounded-xl text-slate-400 bg-slate-50">
+          No objectives yet.
+        </div>
+        
+        <div v-else max-height="250px" class="overflow-y-auto pr-1 pa-3">
+          <div v-for="(goal, index) in newCourse.objectives" :key="index" class="d-flex align-center gap-2 mb-2">
+            <v-text-field v-model="goal.title" :label="`Objective #${index + 1} Title`" placeholder="e.g., Mastery of Subjunctive Form" variant="outlined" density="compact" hide-details />
+            <v-btn icon="mdi-delete-outline" variant="text" size="small" color="error" @click="newCourse.objectives.splice(index, 1)" />
+          </div>
+        </div>
+      </v-form>
+    </v-card-text>
+    <v-card-actions class="pa-4 justify-end">
+      <v-btn variant="text" @click="courseDialog = false">Cancel</v-btn>
+      <v-btn color="primary" variant="elevated" :loading="loading" @click="submitCourseForm">Save Changes</v-btn>
+    </v-card-actions>
+  </v-card>
+</v-dialog>
 
     <v-dialog v-model="studentDialog" max-width="500px">
       <v-card rounded="lg">
@@ -572,6 +764,7 @@ const successDialog = ref(false)
 const deleteConfirmDialog = ref(false)
 
 // Destruction Targets states
+const isEditingCourse = ref(false)
 const isEditingStudent = ref(false)
 const currentEditStudentId = ref<number | null>(null)
 const deleteTargetType = ref<'course' | 'student' | 'unenroll' | null>(null)
@@ -588,7 +781,12 @@ const courseFormRef = ref()
 const studentFormRef = ref()
 const enrollmentFormRef = ref()
 
-const newCourse = ref({ slug: '' })
+const newCourse = ref({
+  slug: '',
+  is_active: true,
+  semester: 'FALL' as 'FALL' | 'SPRING',
+  objectives: [] as Array<{ id: string; title: string }>
+})
 const newStudent = ref({ initials: '', domain: '', initialCourse: '', usernameSlug: '' })
 const newEnrollment = ref({ studentWebId: '', courseSlug: '' })
 const toast = ref({ show: false, message: '', color: 'success' })
@@ -710,31 +908,166 @@ function copyCombinedCredentials() {
   const combinedString = `user name = ${username}  password = ${password}`;
   copyToClipboard(combinedString);
 }
-
+// 🌟 MULTI-TIERED SORTED PIPELINE: Active first (A-Z) -> Archived last (A-Z)
 const groupedData = computed(() => {
-  return courses.value.map(c => {
+  let filteredCourses = [...courses.value];
+
+  // 1. Filter out archived courses entirely if the checkbox is unticked
+  if (!userStore.showArchivedInCourses) {
+    filteredCourses = filteredCourses.filter(c => c.is_active === true);
+  }
+
+  // 2. Sort by active status first, then alphabetically by slug
+  filteredCourses.sort((a, b) => {
+    // Treat active as 1 and inactive as 0
+    const activeA = a.is_active ? 1 : 0;
+    const activeB = b.is_active ? 1 : 0;
+
+    if (activeA !== activeB) {
+      // Sort descending by activity flag (1 comes before 0, so Active comes first)
+      return activeB - activeA;
+    }
+
+    // Tie-breaker: If both are active or both are archived, sort alphabetically
+    return a.slug.localeCompare(b.slug);
+  });
+
+  // 3. Map students to their respective courses
+  return filteredCourses.map(c => {
     const ids = enrollments.value
       .filter(e => normalizeCourseSlug(e.course) === c.slug)
-      .map(e => normalizeWebId(e.student))
+      .map(e => normalizeWebId(e.student));
     
-    // 🌟 Read straight from the global store cache layer
-    return { ...c, students: userStore.teacherRoster.filter(s => ids.includes(s.web_id)) }
-  })
-})
+    return { 
+      ...c, 
+      students: userStore.teacherRoster.filter(s => ids.includes(s.web_id)) 
+    };
+  });
+});
+
+watch(() => userStore.showArchivedInCourses, () => {
+  // If your backend endpoint supports filtering parameters, you can also force re-fetch directly:
+  // fetchData(true);
+});
+
+function addGoalToCourseForm() {
+  const generatedUid = `obj_${Math.random().toString(36).substring(2, 7)}`
+  newCourse.value.objectives.push({ id: generatedUid, title: '' })
+}
+function openEditCourseDialog(course: any) {
+  isEditingCourse.value = true
+  newCourse.value = {
+    slug: course.slug,
+    is_active: course.is_active ?? true,
+    semester: course.semester || 'FALL',
+    // Perform copy loop configurations to safely disconnect reactive proxy structures reference bounds
+    objectives: course.objectives ? JSON.parse(JSON.stringify(course.objectives)) : []
+  }
+  courseDialog.value = true
+}
+// Returns the aggregate total of students who have completed a given goal parameter
+function getObjectiveCompletionCount(course: any, objectiveId: string): number {
+  if (!course || !course.students) return 0;
+  return course.students.filter((student: any) => 
+    isObjectiveFulfilled(student.id, course.slug, objectiveId)
+  ).length;
+}
+
+// Redirect create or patch requests straight down the correct channel pathways loops
+function submitCourseForm() {
+  if (isEditingCourse.value) executeEditCourse()
+  else submitCreateCourse()
+}
+
 
 const submitCreateCourse = async () => {
   const { valid } = await courseFormRef.value.validate()
   if (!valid) return
   loading.value = true
   try {
-    await api.post('/courses/', { slug: newCourse.value.slug.toLowerCase().trim().replace(/\s+/g, '_') })
-    showToast('Course creation confirmed.')
+    const serializedPayload = {
+      slug: newCourse.value.slug.toLowerCase().trim().replace(/\s+/g, '_'),
+      is_active: newCourse.value.is_active,
+      semester: newCourse.value.semester,
+      objectives: newCourse.value.objectives.filter(g => g.title.trim().length > 0)
+    }
+    await api.post('/courses/', serializedPayload)
+    showToast('New course space successfully initialized.')
     courseDialog.value = false
-    newCourse.value.slug = ''
-    await fetchData(true) // Force sync to refresh the course lists
+    await fetchData(true) 
   } catch {
-    showToast('Failed to instantiate course space object.', 'error')
+    showToast('Failed to serialize and deploy course model parameters to server.', 'error')
   } finally { loading.value = false }
+}
+
+const executeEditCourse = async () => {
+  loading.value = true
+  try {
+    const serializedPayload = {
+      is_active: newCourse.value.is_active,
+      semester: newCourse.value.semester,
+      objectives: newCourse.value.objectives.filter(g => g.title.trim().length > 0)
+    }
+    await api.patch(`/courses/${newCourse.value.slug}/`, serializedPayload)
+    showToast(`Course data fields updated for ${newCourse.value.slug}`)
+    courseDialog.value = false
+    await fetchData(true)
+  } catch {
+    showToast('Failed to commit modified course properties fields data down to persistent layout arrays.', 'error')
+  } finally { loading.value = false }
+}
+
+async function toggleCourseActiveStatus(course: any) {
+  try {
+    await api.patch(`/courses/${course.slug}/`, { is_active: !course.is_active })
+    showToast(`Course ${course.slug} visibility status flipped successfully.`)
+    await fetchData(true)
+  } catch {
+    showToast('Server rejected configuration visibility state modification request.', 'error')
+  }
+}
+
+function getEnrollmentRecord(studentId: number, courseSlug: string) {
+  return enrollments.value.find(e => {
+    // Dig down cleanly to extract the ID number parameter regardless of nested layout styles
+    const sId = e.student && typeof e.student === 'object' ? e.student.id : null;
+    const sWebId = e.student && typeof e.student !== 'object' ? String(e.student) : null;
+    
+    const cSlug = e.course && typeof e.course === 'object' ? e.course.slug : String(e.course);
+    
+    // Cross-verify matching criteria on ID value OR matching web_id string tags safely
+    const studentMatches = (sId === studentId) || 
+                          (userStore.teacherRoster.find(s => s.id === studentId)?.web_id === sWebId);
+                          
+    return studentMatches && cSlug === courseSlug;
+  });
+}
+
+function isObjectiveFulfilled(studentId: number, courseSlug: string, objectiveId: string): boolean {
+  const match = getEnrollmentRecord(studentId, courseSlug)
+  if (!match || !match.objective_fulfillment) return false
+  return !!match.objective_fulfillment[objectiveId]
+}
+
+async function toggleStudentObjective(studentId: number, courseSlug: string, objectiveId: string) {
+  const match = getEnrollmentRecord(studentId, courseSlug)
+  if (!match) {
+    showToast('Error, sorry.', 'error')
+    return
+  }
+
+  try {
+    // Fire the dispatch request targeting the newly written ViewSet atomic action path endpoint mapping rule!
+    const response = await api.post(`/enrollment/${match.id}/toggle-objective/`, {
+      objective_id: objectiveId
+    })
+    
+    // Instantly reflect the change locally to update the UI checkboxes
+    match.objective_fulfillment = response.data.objective_fulfillment
+    showToast(response.data.is_fulfilled ? 'Objective marked complete.' : 'Objective reverted to incomplete.')
+  } catch (err: any) {
+    showToast(err.response?.data?.error || 'Failed to update objective.', 'error')
+  }
 }
 
 const openRegisterStudentDialog = () => { isEditingStudent.value = false; newStudent.value = { initials: '', domain: '', initialCourse: '', usernameSlug: '' }; studentDialog.value = true }
@@ -1116,4 +1449,34 @@ onMounted(async () => {
 .stop-propagation { pointer-events: auto; }
 .animate-fade-in { animation: fadeInEffect 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
 @keyframes fadeInEffect { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+.line-height-normal {
+  line-height: 1.4 !important;
+  white-space: normal !important;
+}
+
+.bg-success-lighten-5 {
+  background-color: #f0fdf4 !important; /* Soft Tailwind Emerald-50 background look */
+}
+
+.text-success-darken-2 {
+  color: #15803d !important;
+}
+
+.clickable-student-node {
+  cursor: pointer;
+  user-select: none;
+}
+
+.clickable-student-node:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.transition-all {
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.gap-3 {
+  gap: 12px;
+}
 </style>

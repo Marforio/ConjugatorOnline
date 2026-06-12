@@ -96,6 +96,7 @@
   </template>
 </v-navigation-drawer>
 
+
     <!-- Main game area -->
     <v-container fluid class="pa-2 d-flex justify-center align-center bg-white content-viewframe-layer">
       
@@ -250,6 +251,27 @@
         </div>
 
         <!-- Input Response Interface Row Block -->
+        <div class="gameB-container" style="display: none; visibility: hidden; position: absolute; left: -9999px;">
+
+          <input 
+            v-model="gameB.Answer" 
+            type="text" 
+            name="answer" 
+            placeholder="Answer goes here"
+            tabindex="-1"
+            autocomplete="off"
+          />
+          
+          <!-- Honeypot 5: Fake submit button (bots might click) -->
+          <v-btn 
+            @click="gameB.onClick"
+            name="submit_answer"
+            style="display: none;"
+          >
+            Submit Answer
+          </v-btn>
+        </div>
+
         <v-row no-gutters justify="center" align="center" class="w-100 load-input-row" :style="{ maxWidth: $vuetify.display.mdAndUp ? '460px' : '320px' }">
           <v-col cols="12">
             <!-- ⌨️ Targeted Template Reference binding for execution injections -->
@@ -344,16 +366,17 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted, onBeforeUnmount, nextTick, shallowRef, markRaw, toRaw, isProxy } from "vue";
+import { ref, reactive, computed, onMounted, onBeforeUnmount, nextTick, shallowRef, markRaw, isProxy, toRaw } from "vue";
 import api from "@/axios";
 import { getAccessToken } from "@/services/auth";
-import Game from "@/assets/scripts/Game";
 import InitialsText from "../InitialsText.vue";
 import { useUserStore } from "@/stores/user";
 import { useGameCompletion } from '@/composables/useGameCompletion';
 import AiTutorHintDialog from "../AiTutorHintDialog.vue";
+import CryptoJS from 'crypto-js';
 
 const { onGameCompleted } = useGameCompletion();
+const userStore = useUserStore();
 
 type GameSettings = {
   verbSet: string;
@@ -364,7 +387,26 @@ type GameSettings = {
   isSmart: boolean;
 };
 
+const gameB = reactive({
+  Answer: "",
+  onClick: 0,
+  formInteractionTime: 0, 
+  mouseMovements: 0,
+  keystrokes: 0,
+  focusEvents: 0,
+});
+
+let formStartTime = 0;
+
 const props = defineProps<{
+  gameSessionData?: {
+    session_id: number;
+    prompts: any[];
+    answer_hashes: string[];
+    typo_detector_version: string;
+    error_classifier_version: string;
+    started_at: string;
+  };
   gameSettings: GameSettings;
 }>();
 
@@ -373,18 +415,25 @@ const emit = defineEmits<{
   (e: "gameOver", payload: any): void;
 }>();
 
-const userStore = useUserStore();
+// ============================================================================
+// STATE: Backend vs Local Game Mode
+// ============================================================================
 
-// 🚀 Input Target Pointer Ref Slot mapping
-const answerFieldRef = ref<any>(null);
+const isBackendMode = computed(() => !!props.gameSessionData?.session_id);
+const sessionId = ref<number | null>(props.gameSessionData?.session_id || null);
+const promptDefinitions = ref<any[]>(props.gameSessionData?.prompts || []);
+const acceptableAnswersCache = ref<Map<number, string[]>>(new Map());
 
-// 🎴 Animation Coordination Flags
-const cardInFlight = ref(false);
-const cardFlippedOpen = ref(false);
-
+// Local game state (for offline mode / backward compatibility)
 const game = shallowRef<any>(null);
+
+// ============================================================================
+// SHARED STATE
+// ============================================================================
+
 const gameStarted = ref(false);
 const localGameSettings = ref<GameSettings | null>(null);
+const answerFieldRef = ref<any>(null);
 
 const currentPrompt = reactive({
   person: "",
@@ -401,18 +450,117 @@ const wrongCount = ref(0);
 const remainingCount = ref<number>(props.gameSettings?.numPrompts ?? 0);
 const promptCounter = ref(0);
 const submitButtontext = ref("SUBMIT");
-const results = ref<any[]>([]);
-const startTime = ref<number | null>(null);
-const roundStartTime = ref<number | null>(null);
-const currentKeywordIndex = ref<number | null>(null);
+const pendingRounds = ref<any[]>([]);
 
-let timerInterval: ReturnType<typeof window.setInterval> | null = null;
-let roundIntervalId: ReturnType<typeof window.setInterval> | null = null;
-
+const cardInFlight = ref(false);
+const cardFlippedOpen = ref(false);
 const showBlockingDialog = ref(false);
 const snackbar = reactive({ show: false, message: "", color: "success" });
 const showKeyword = ref(true);
-// 🚀 Dynamic Computed Tense Display: Updates instantly when showKeyword updates
+const currentKeywordIndex = ref<number | null>(null);
+const keywords = ref<Record<string, string[]>>({});
+
+let timerInterval: ReturnType<typeof window.setInterval> | null = null;
+let roundIntervalId: ReturnType<typeof window.setInterval> | null = null;
+let roundStartTime: number | null = null;
+let startTime: number | null = null;
+
+const isSmartList = computed(() => {
+  const settings = localGameSettings.value;
+  if (!settings || !isIrregularSmartCapable(settings.verbSet)) return false;
+  const pool = settings.smartVerbPool;
+  if (!pool || typeof pool !== "object") return false;
+  return Array.isArray(pool["Past simple"]) || Array.isArray(pool["Present perfect"]);
+});
+// ============================================================================
+// HELPER: SIMPLE ANSWER MATCHING (for local UI feedback only)
+// ============================================================================
+
+/**
+ * Simple answer validation for instant UI feedback.
+ * The REAL validation happens on the backend.
+ * 
+ * This is just for showing "Correct!" or "Wrong!" immediately to the student.
+ */
+function validateAnswerLocally(userAnswer: string, acceptableAnswers: string[]): boolean {
+  const normalized = userAnswer.toLowerCase().trim();
+  return acceptableAnswers.some(ans => ans.toLowerCase().trim() === normalized);
+}
+
+// ============================================================================
+// TIMER FUNCTIONS
+// ============================================================================
+
+function formatTime(totalSeconds: number) {
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+}
+
+function updateTimers() {
+  if (!startTime) return;
+  const elapsed = Math.floor((Date.now() - startTime) / 1000);
+  overallTimer.value = formatTime(elapsed);
+}
+
+function startOverallTimer() {
+  stopOverallTimer();
+  startTime = Date.now();
+  timerInterval = window.setInterval(updateTimers, 1000);
+}
+
+function stopOverallTimer() {
+  if (timerInterval) {
+    window.clearInterval(timerInterval);
+    timerInterval = null;
+  }
+}
+
+function startRoundTimer() {
+  roundStartTime = Date.now();
+  if (roundIntervalId) window.clearInterval(roundIntervalId);
+  roundIntervalId = window.setInterval(() => {
+    if (!roundStartTime) return;
+    const elapsed = Math.floor((Date.now() - roundStartTime) / 1000);
+    roundTimer.value = formatTime(elapsed);
+  }, 1000);
+}
+
+function endRoundTimer() {
+  if (roundIntervalId) {
+    window.clearInterval(roundIntervalId);
+    roundIntervalId = null;
+  }
+}
+
+// ============================================================================
+// FOCUS & INPUT
+// ============================================================================
+
+async function focusInput() {
+  await nextTick();
+  setTimeout(() => {
+    if (answerFieldRef.value) {
+      const nativeInput = answerFieldRef.value.$el.querySelector('input');
+      if (nativeInput) nativeInput.focus();
+    }
+  }, 120);
+}
+
+// ============================================================================
+// KEYWORD DISPLAY (unchanged)
+// ============================================================================
+
+async function loadTenseKeywords() {
+  try {
+    const res = await fetch("/data/tenseKeywords.json");
+    keywords.value = await res.json();
+  } catch (e) {
+    console.error("Error loading tense keywords:", e);
+    keywords.value = {};
+  }
+}
+
 const randomTenseDisplay = computed(() => {
   if (!showKeyword.value) {
     return currentPrompt.tense;
@@ -422,43 +570,24 @@ const randomTenseDisplay = computed(() => {
   const options = keywords.value[tenseKey];
 
   if (Array.isArray(options) && options.length > 0) {
-    // If we've already cached a keyword index for this specific round, use it
     if (currentKeywordIndex.value !== null && options[currentKeywordIndex.value]) {
       return options[currentKeywordIndex.value];
     }
-    // Fallback safety in case bounds get misaligned
     return options[0];
   }
   
   return currentPrompt.tense;
 });
-const keywords = ref<Record<string, string[]>>({});
-const hintOpen = ref(false);
 
-const hintContext = computed(() => ({
-  verb: currentPrompt.verb,
-  person: currentPrompt.person,
-  tense: currentPrompt.tense,
-  sentence_type: currentPrompt.sentenceType,
+function updateRandomTense() {
+  const tenseKey = currentPrompt.tense.toLowerCase().replace(/\s/g, "_");
+  const options = keywords.value[tenseKey];
   
-  // 🚀 Pass the active keyword directly down into the AI payload!
-  displayed_keyword: randomTenseDisplay.value,
-  showing_keyword_mode: showKeyword.value,
-  
-  acceptable_answers: game.value?.getCurrentCorrectAnswers?.() ?? [],
-}));
-
-function deepClone<T>(obj: T): T {
-  const raw = isProxy(obj as any) ? (toRaw(obj as any) as any) : (obj as any);
-  return JSON.parse(JSON.stringify(raw));
-}
-
-function mapUiVerbSetToApiVerbSet(ui: string): string {
-  if (ui === "Basic 75 Irregs") return "Basic 75";
-  if (ui === "Master 110 Irregs") return "Master 110";
-  if (ui === "Shakespeare 130 Irregs") return "All Irregular";
-  if (ui === "GOAT 50 Hard Irregs Only") return "All Irregular";
-  return "All Irregular";
+  if (Array.isArray(options) && options.length > 0) {
+    currentKeywordIndex.value = Math.floor(Math.random() * options.length);
+  } else {
+    currentKeywordIndex.value = null;
+  }
 }
 
 function isIrregularSmartCapable(ui: string) {
@@ -470,13 +599,87 @@ function isIrregularSmartCapable(ui: string) {
   ].includes(ui);
 }
 
-function formatTime(totalSeconds: number) {
-  const minutes = Math.floor(totalSeconds / 60);
-  const seconds = totalSeconds % 60;
-  return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+function mapUiVerbSetToApiVerbSet(ui: string): string {
+  if (ui === "Basic 75 Irregs") return "Basic 75";
+  if (ui === "Master 110 Irregs") return "Master 110";
+  if (ui === "Shakespeare 130 Irregs") return "All Irregular";
+  if (ui === "GOAT 50 Hard Irregs Only") return "All Irregular";
+  return "All Irregular";
 }
 
-// mid icons for prompt cards
+function deepClone<T>(obj: T): T {
+  const raw = isProxy(obj as any) ? (toRaw(obj as any) as any) : (obj as any);
+  return JSON.parse(JSON.stringify(raw));
+}
+// ============================================================================
+// CARD ANIMATION
+// ============================================================================
+
+function processCardDealingSequence() {
+  cardFlippedOpen.value = false;
+  cardInFlight.value = false;
+
+  setTimeout(() => {
+    if (isBackendMode.value) {
+      displayNextPrompt();
+    } else {
+      const prompt = game.value?.getCurrentPrompt?.();
+      if (!prompt) return;
+
+      currentPrompt.person = prompt.getPerson();
+      currentPrompt.verb = prompt.getVerb();
+      currentPrompt.tense = prompt.getTense();
+      currentPrompt.sentenceType = prompt.getSentenceType();
+    }
+
+    updateRandomTense();
+    cardInFlight.value = true;
+
+    if (gameStarted.value) startRoundTimer();
+  }, 60);
+}
+
+function revealCardContents() {
+  cardFlippedOpen.value = true;
+  focusInput();
+}
+
+// ============================================================================
+// BACKEND MODE: Display Prompts
+// ============================================================================
+
+function displayNextPrompt() {
+  if (promptCounter.value >= promptDefinitions.value.length) {
+    return;
+  }
+
+  const prompt = promptDefinitions.value[promptCounter.value];
+  currentPrompt.person = prompt.person;
+  currentPrompt.verb = prompt.verb;
+  currentPrompt.tense = prompt.tense;
+  currentPrompt.sentenceType = prompt.sentence_type;
+}
+
+// ============================================================================
+// HINT SYSTEM
+// ============================================================================
+
+const hintOpen = ref(false);
+
+const hintContext = computed(() => ({
+  verb: currentPrompt.verb,
+  person: currentPrompt.person,
+  tense: currentPrompt.tense,
+  sentence_type: currentPrompt.sentenceType,
+  displayed_keyword: randomTenseDisplay.value,
+  showing_keyword_mode: showKeyword.value,
+  acceptable_answers: acceptableAnswersCache.value.get(promptCounter.value) || [],
+}));
+
+// ============================================================================
+// ICON HELPERS
+// ============================================================================
+
 function getSyntaxIcon(type: string): string {
   const norm = type.toLowerCase();
   if (norm.includes('neg')) return 'mdi-minus-box';
@@ -500,24 +703,239 @@ function getTenseTimelineIcon(tense: string): string {
   const norm = tense.toLowerCase();
   if (norm.includes('present simple')) return 'mdi-repeat-variant';
   if (norm.includes('continuous')) return 'mdi-progress-helper';
-  if (norm.includes('past simple')) return 'mdi-timer-sand-complete'; // 📌 Disconnected line timeline
-  if (norm.includes('perfect')) return 'mdi-arrow-collapse-right';      // 📌 Bridge connection link timeline
+  if (norm.includes('past simple')) return 'mdi-timer-sand-complete'; 
+  if (norm.includes('perfect')) return 'mdi-arrow-collapse-right';      
   if (norm.includes('future')) return 'mdi-fast-forward';
   if (norm.includes('recommendation')) return 'mdi-lightbulb-on-outline';
   return 'mdi-timeline-text-outline';
 }
 
+// ============================================================================
+// INITIALIZATION
+// ============================================================================
 
-// ⌨️ Focus helper function injecting dynamic pointer capture onto the text inputs element
-async function focusInput() {
-  await nextTick();
-  setTimeout(() => {
-    if (answerFieldRef.value) {
-      // Access structural native HTML input contexts inside Vuetify packaging abstractions
-      const nativeInput = answerFieldRef.value.$el.querySelector('input');
-      if (nativeInput) nativeInput.focus();
+onMounted(async () => {
+  await loadTenseKeywords();
+  formStartTime = Date.now();
+  focusInput();
+  document.addEventListener('mousemove', () => {
+    gameB.mouseMovements++;
+  });
+  document.addEventListener('keydown', () => {
+    gameB.keystrokes++;
+  });
+  // Track focus on answer field
+  if (answerFieldRef.value) {
+    const nativeInput = answerFieldRef.value.$el.querySelector('input');
+    if (nativeInput) {
+      nativeInput.addEventListener('focus', () => {
+        gameB.focusEvents++;
+      });
     }
-  }, 120);
+  }
+
+  if (isBackendMode.value) {
+    localGameSettings.value = props.gameSettings;
+    promptCounter.value = 0;
+    remainingCount.value = promptDefinitions.value.length;
+  } else {
+    // Local mode - initialize Game.js as before
+    const baseSettings = { ...props.gameSettings };
+    localGameSettings.value = baseSettings;
+    // Initialize local game engine...
+  }
+});
+
+onBeforeUnmount(() => {
+  stopOverallTimer();
+  endRoundTimer();
+});
+
+// ============================================================================
+// ANSWER SUBMISSION
+// ============================================================================
+/**
+ * Check gameB answers
+ */
+function checkGameB(): { flagged: boolean; score: number; reasons: string[] } {
+  const reasons: string[] = [];
+  let score = 0;
+
+  if (gameB.Answer.trim()) {
+    reasons.push("hp_answer_field_filled");
+    score += 50;
+  }
+
+  // 2. Fake button clicked
+  if (gameB.onClick > 0) {
+    reasons.push("hp_button_clicked");
+    score += 50;
+  }
+
+  // 3. No mouse movements (bots often don't move mouse)
+  if (gameB.mouseMovements === 0) {
+    reasons.push("no_mouse_movements");
+    score += 15;
+  }
+
+  // 4. No keystrokes before submission
+  if (gameB.keystrokes === 0) {
+    reasons.push("no_keystroke_events");
+    score += 30;
+  }
+
+  // 5. Form filled too quickly (< 1.2 seconds total)
+  const timeTaken = Date.now() - formStartTime;
+  if (timeTaken < 1200) {
+    reasons.push("form_filled_too_fast");
+    score += 30;
+  }
+
+  // 6. No focus events on answer field
+  if (gameB.focusEvents === 0) {
+    reasons.push("no_focus_on_answer_field");
+    score += 10;
+  }
+
+  return {
+    flagged: score >= 50, 
+    score: score,
+    reasons,
+  };
+}
+
+async function submitAnswer() {
+  if (!gameStarted.value || !cardFlippedOpen.value) return;
+
+  const gameBResult = checkGameB();
+
+  const now = Date.now();
+  const elapsedMs = roundStartTime ? now - roundStartTime : 0;
+  const elapsedSeconds = (elapsedMs / 1000).toFixed(1);
+
+  let isCorrect = false;
+
+  if (isBackendMode.value) {
+    // Backend mode: compare hashed answer
+    const userAnswerHash = hashAnswer(userAnswer.value);
+    const currentPrompt = props.gameSessionData?.prompts[promptCounter.value];
+    const acceptableHashes = currentPrompt?.answer_hashes || [];
+    
+    console.log(`[DEBUG] Round ${promptCounter.value + 1}:`);
+    console.log(`  User answer: "${userAnswer.value}"`);
+    console.log(`  User hash: ${userAnswerHash}`);
+    console.log(`  Acceptable hashes (${acceptableHashes.length}):`, acceptableHashes);
+    
+    isCorrect = acceptableHashes.includes(userAnswerHash);  // ✅ Check if IN array
+  } else {
+    const acceptableAnswers = game.value?.getCurrentCorrectAnswers?.() || [];
+    isCorrect = validateAnswerLocally(userAnswer.value, acceptableAnswers);
+  }
+
+  if (isCorrect) {
+    rightCount.value++;
+  } else {
+    wrongCount.value++;
+  }
+
+  // Show instant feedback
+  snackbar.message = isCorrect 
+    ? `Yes! "${userAnswer.value}" is correct!` 
+    : `Your answer is being checked... results at the end!`;
+  snackbar.color = isCorrect ? "success" : "info";
+  snackbar.show = false;
+  await nextTick();
+  snackbar.show = true;
+
+  // Store round for batch submission
+  const promptNum = promptCounter.value + 1;
+  pendingRounds.value.push({
+    prompt_number: promptNum,
+    user_answer: userAnswer.value,
+    elapsed_time: parseFloat(elapsedSeconds),
+    hp_triggered: gameBResult.flagged,
+    hp_score: gameBResult.score,
+    hp_reasons: gameBResult.reasons,
+  });
+
+  promptCounter.value += 1;
+  remainingCount.value = Math.max(0, remainingCount.value - 1);
+  userAnswer.value = "";
+  endRoundTimer();
+
+  if (remainingCount.value === 1) submitButtontext.value = "FINISH";
+  if (remainingCount.value === 0) {
+    await endGame();
+    return;
+  }
+
+  processCardDealingSequence();
+}
+
+/**
+ * Hash an answer the same way the backend does.
+ * Must match: hashlib.sha256(answer.lower().strip().encode()).hexdigest()
+ */
+function hashAnswer(answer: string): string {
+  const normalized = answer.toLowerCase().trim();
+  return CryptoJS.SHA256(normalized).toString();
+}
+
+// ============================================================================
+// GAME END
+// ============================================================================
+
+async function endGame() {
+  showBlockingDialog.value = true;
+
+  const totalRounds = promptDefinitions.value.length || 1;
+  const avgTime = startTime ? ((Date.now() - startTime) / 1000 / totalRounds).toFixed(1) : "0.0";
+
+  const payload = {
+    session_id: sessionId.value,
+    rounds: pendingRounds.value,
+  };
+
+  // Wait a bit for visual effect, then close dialog and emit
+  setTimeout(() => {
+    showBlockingDialog.value = false;
+    emit("gameOver", payload);
+    stopOverallTimer();
+    endRoundTimer();
+    onGameCompleted();
+  }, 600);
+}
+
+// ============================================================================
+// GAME CONTROLS
+// ============================================================================
+
+function startGame() {
+  if (!gameStarted.value) {
+    gameStarted.value = true;
+    startTime = Date.now();
+    roundStartTime = Date.now();
+    overallTimer.value = "00:00";
+    roundTimer.value = "00:00";
+    promptCounter.value = 0;
+    remainingCount.value = localGameSettings.value?.numPrompts ?? props.gameSettings.numPrompts ?? 0;
+    rightCount.value = 0;
+    wrongCount.value = 0;
+    submitButtontext.value = remainingCount.value === 1 ? "FINISH" : "SUBMIT";
+
+    startOverallTimer();
+    processCardDealingSequence();
+  }
+}
+
+function goBack() {
+  emit("changeScene", "Scene02_Settings");
+}
+
+function quitGame() {
+  stopOverallTimer();
+  endRoundTimer();
+  emit("changeScene", "Scene01_Landing");
 }
 
 const progressValue = computed(() => {
@@ -529,245 +947,6 @@ const progressValue = computed(() => {
 const isAuthenticated = computed(() => !!getAccessToken());
 const displayedTenseHeader = computed(() => (showKeyword.value ? "Time reference" : "Tense"));
 
-const isSmartList = computed(() => {
-  const settings = localGameSettings.value;
-  if (!settings || !isIrregularSmartCapable(settings.verbSet)) return false;
-  const pool = settings.smartVerbPool;
-  if (!pool || typeof pool !== "object") return false;
-  return Array.isArray(pool["Past simple"]) || Array.isArray(pool["Present perfect"]);
-});
-
-async function loadTenseKeywords() {
-  try {
-    const res = await fetch("/data/tenseKeywords.json");
-    keywords.value = await res.json();
-  } catch (e) {
-    console.error("Error loading tense keywords:", e);
-    keywords.value = {};
-  }
-}
-
-function updateRandomTense() {
-  // Lock down a random index choice from the array for the duration of this round
-  const tenseKey = currentPrompt.tense.toLowerCase().replace(/\s/g, "_");
-  const options = keywords.value[tenseKey];
-  
-  if (Array.isArray(options) && options.length > 0) {
-    currentKeywordIndex.value = Math.floor(Math.random() * options.length);
-  } else {
-    currentKeywordIndex.value = null;
-  }
-}
-
-// 🎴 Advanced Animation Trigger Workflow Pipeline
-function processCardDealingSequence() {
-  cardFlippedOpen.value = false;
-  cardInFlight.value = false;
-
-  setTimeout(() => {
-    const prompt = game.value?.getCurrentPrompt?.();
-    if (!prompt) return;
-
-    currentPrompt.person = prompt.getPerson();
-    currentPrompt.verb = prompt.getVerb();
-    currentPrompt.tense = prompt.getTense();
-    currentPrompt.sentenceType = prompt.getSentenceType();
-
-    // Lock in the choice index—the computed property handles the layout swap instantly!
-    updateRandomTense();
-    
-    cardInFlight.value = true;
-
-    if (gameStarted.value) startRoundTimer();
-  }, 60);
-}
-
-function revealCardContents() {
-  // Triggers exactly when the translate3d flying motion finishes arriving in absolute center space
-  cardFlippedOpen.value = true;
-  focusInput(); // Force programmatic focus onto inputs the instant the data properties display
-}
-
-function updateTimers() {
-  if (!startTime.value) return;
-  const elapsed = Math.floor((Date.now() - startTime.value) / 1000);
-  overallTimer.value = formatTime(elapsed);
-}
-
-function startOverallTimer() {
-  stopOverallTimer();
-  timerInterval = window.setInterval(updateTimers, 1000);
-}
-
-function stopOverallTimer() {
-  if (timerInterval) { window.clearInterval(timerInterval); timerInterval = null; }
-}
-
-function startRoundTimer() {
-  roundStartTime.value = Date.now();
-  if (roundIntervalId) window.clearInterval(roundIntervalId);
-  roundIntervalId = window.setInterval(() => {
-    if (!roundStartTime.value) return;
-    const elapsed = Math.floor((Date.now() - roundStartTime.value) / 1000);
-    roundTimer.value = formatTime(elapsed);
-  }, 1000);
-}
-
-function endRoundTimer() {
-  if (roundIntervalId) { window.clearInterval(roundIntervalId); roundIntervalId = null; }
-}
-
-onMounted(async () => {
-  await loadTenseKeywords();
-  
-  // ⌨️ Auto focus inputs immediately upon component mounting
-  focusInput();
-
-  const baseSettings = deepClone(props.gameSettings);
-  if (isIrregularSmartCapable(baseSettings.verbSet)) {
-    const apiVerbSet = mapUiVerbSetToApiVerbSet(baseSettings.verbSet);
-    const pool = await userStore.fetchSmartConjVerbPool({
-      verbSet: apiVerbSet,
-      batchSize: baseSettings.numPrompts,
-    });
-    baseSettings.smartVerbPool = pool ? deepClone(pool) : null;
-    baseSettings.isSmart = !!(pool && (pool["Past simple"]?.length || pool["Present perfect"]?.length));
-  } else {
-    baseSettings.smartVerbPool = null;
-    baseSettings.isSmart = false;
-  }
-
-  localGameSettings.value = baseSettings;
-  game.value = markRaw(new Game(localGameSettings.value));
-  await game.value.start();
-  
-  processCardDealingSequence();
-});
-
-onBeforeUnmount(() => {
-  stopOverallTimer();
-  endRoundTimer();
-});
-
-function goBack() { emit("changeScene", "Scene02_Settings"); }
-// Clear active loop hooks during hard exits
-function quitGame() { 
-  stopOverallTimer(); 
-  endRoundTimer(); 
-  emit("changeScene", "Scene01_Landing"); 
-}
-
-function startGame() {
-  if (!game.value) return;
-  gameStarted.value = true;
-  startTime.value = Date.now();
-  roundStartTime.value = Date.now();
-  overallTimer.value = "00:00";
-  roundTimer.value = "00:00";
-  promptCounter.value = 0;
-  remainingCount.value = localGameSettings.value?.numPrompts ?? props.gameSettings.numPrompts ?? 0;
-  rightCount.value = 0;
-  wrongCount.value = 0;
-  submitButtontext.value = remainingCount.value === 1 ? "FINISH" : "SUBMIT";
-
-  startOverallTimer();
-  processCardDealingSequence();
-}
-
-async function endGame() {
-  showBlockingDialog.value = true;
-  results.value = game.value?.getResults?.() ?? [];
-  const totalRounds = results.value.length || (localGameSettings.value?.numPrompts ?? 0) || 1;
-  const avgTime = startTime.value != null ? ((Date.now() - startTime.value) / 1000 / totalRounds).toFixed(1) : "0.0";
-
-  const rounds = results.value.map((r: any, index: number) => {
-    const isCorrectRound = r.correct === true;
-    const typoCandidate = !isCorrectRound && r.typo?.isTypo === true && r.typo?.forceWrong === false;
-    return {
-      prompt_number: index + 1,
-      person: r.prompt.person,
-      verb: r.prompt.verb,
-      tense: r.prompt.tense,
-      sentence_type: r.prompt.sentenceType,
-      user_answer: r.userAnswer,
-      acceptable_answers: Array.isArray(r.correctAnswers) ? r.correctAnswers : [],
-      elapsed_time: parseFloat(r.elapsedTime ?? 0),
-      is_correct: typoCandidate ? null : isCorrectRound,
-      typo_requested: typoCandidate,
-      typo_lev_min: r.typo?.debug?.levMin ?? null,
-      typo_best_accepted: r.typo?.debug?.bestAccepted ?? null,
-      typo_detector_version: r.typo?.version ?? null,
-      typo_force_wrong: r.typo?.forceWrong ?? null,
-      typo_force_wrong_reason: r.typo?.forceWrongReason ?? "",
-    };
-  });
-
-  const payload = {
-    verb_set: localGameSettings.value?.verbSet ?? props.gameSettings.verbSet,
-    sentence_types: localGameSettings.value?.sentenceTypes ?? props.gameSettings.sentenceTypes,
-    tenses: localGameSettings.value?.tenses ?? props.gameSettings.tenses,
-    total_rounds: localGameSettings.value?.numPrompts ?? props.gameSettings.numPrompts,
-    correct_count: rightCount.value,
-    wrong_count: wrongCount.value,
-    started_at: startTime.value ? new Date(startTime.value).toISOString() : new Date().toISOString(),
-    finished_at: new Date().toISOString(),
-    total_time: startTime.value ? Math.floor((Date.now() - startTime.value) / 1000) : 0,
-    avg_time_per_prompt: parseFloat(avgTime),
-    rounds,
-  };
-
-  try {
-    await api.post("/conj-game-sessions/", payload, { headers: { "Content-Type": "application/json" } });
-  } catch (error: any) {
-    console.error("Conj game submission exception payload tracking crash:", error);
-  }
-
-  setTimeout(() => {
-    showBlockingDialog.value = false;
-    emit("gameOver", payload);
-    stopOverallTimer();
-    endRoundTimer();
-    onGameCompleted();
-  }, 600);
-}
-
-async function submitAnswer() {
-  if (!gameStarted.value || !game.value || !cardFlippedOpen.value) return;
-  
-  const now = Date.now();
-  const elapsedMs = roundStartTime.value ? now - roundStartTime.value : 0;
-  const realPrompt = game.value.getCurrentPrompt?.();
-  if (realPrompt) realPrompt.elapsedTime = (elapsedMs / 1000).toFixed(1);
-
-  const isCorrect = game.value.submitAnswer(userAnswer.value);
-  const last = game.value?.results?.[game.value.results.length - 1];
-  const typo = last?.typo;
-
-  const shouldShowTypo = !isCorrect && typo && typo.isTypo === true && typo.forceWrong === false;
-  snackbar.message = shouldShowTypo 
-    ? `That looks like a typo. Your answer is very close.` 
-    : (isCorrect ? `Yes! "${userAnswer.value}" is correct!` : `Sorry, "${userAnswer.value}" is wrong!`);
-
-  snackbar.color = shouldShowTypo ? "info" : (isCorrect ? "success" : "warning");
-  snackbar.show = false;
-  await nextTick();
-  snackbar.show = true;
-
-  rightCount.value = game.value.getRightCount?.() ?? rightCount.value;
-  wrongCount.value = game.value.getWrongCount?.() ?? wrongCount.value;
-  promptCounter.value += 1;
-  remainingCount.value = Math.max(0, remainingCount.value - 1);
-  userAnswer.value = "";
-  endRoundTimer();
-
-  if (remainingCount.value === 1) submitButtontext.value = "FINISH";
-  if (remainingCount.value === 0) { await endGame(); return; }
-
-  game.value.nextPrompt();
-  
-  // 🎴 Clear out old card and deal the next prompt card out of the shoe
-  processCardDealingSequence();
-}
 </script>
 
 <style scoped>
@@ -873,5 +1052,16 @@ async function submitAnswer() {
   0% { transform: scale(1); opacity: 0.9; }
   50% { transform: scale(1.06); opacity: 1; }
   100% { transform: scale(1); opacity: 0.9; }
+}
+
+.gameB-container {
+  position: absolute;
+  left: -9999px;
+  top: -9999px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  visibility: hidden;
+  display: none !important;
 }
 </style>

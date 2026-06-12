@@ -7,7 +7,7 @@
         <div>
           <div class="text-h4 font-weight-bold">My Linguistic Profile</div>
           <div class="text-subtitle-1 text-medium-emphasis mt-1">
-            Track your progress across four key language skills
+            The teacher's view of your progress across four language skills
           </div>
         </div>
         <v-icon size="56" color="white">mdi-account-voice</v-icon>
@@ -603,7 +603,7 @@ function getProfileColor(color: string): string {
 
 <style scoped>
 .profile-header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #b1ebf3 0%, #346ebb 100%);
   color: white;
 }
 

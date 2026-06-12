@@ -131,7 +131,7 @@
                           <v-card-title class="text-caption font-weight-black text-uppercase text-wrap text-grey pa-0">
                             This Semester's Total
                           </v-card-title>
-                          <div class="text-h4 my-2 font-weight-black text-emerald">{{ userStore.totalCorrect ?? 0 }}</div>
+                          <div class="text-h4 my-2 font-weight-black text-emerald">{{ userStore.totalCorrectCurrentPeriod ?? 0 }}</div>
                           <div class="text-caption text-medium-emphasis line-height-xs">
                             Correct answers since semester start
                           </div>
