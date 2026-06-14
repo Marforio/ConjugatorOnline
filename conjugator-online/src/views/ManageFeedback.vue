@@ -8,70 +8,117 @@
           Create a Feedback Template
         </h1>
         <p class="text-caption text-slate-500 mt-1">
-          Select a student, load an evaluation template schema, and generate cross-relational feedback PDF records.
+          Select a student, load a feedback template, and make feedback PDFs.
         </p>
       </v-col>
     </v-row>
-    <v-row class="mt-4 px-3">
-      <v-col cols="12">
+    <v-row class="d-flex justify-end mt-2 mb-4 px-3">
+      <v-col cols="12" md="5">
         <v-btn
           color="indigo-lighten-5" variant="flat" size="large" block
           class="text-indigo-darken-3 font-weight-black rounded-xl text-none"
           prepend-icon="mdi-playlist-plus" @click="showBuilderStudio = true"
         >
-          Open Template Creation Studio & Blueprint Builder Workshop
+          Create a New Feedback Template
         </v-btn>
       </v-col>
     </v-row>
 
-    <v-card class="pa-6 mb-6" elevation="2" rounded="lg">
-      <div class="text-h6 mb-2">Select Student</div>
-      <v-row>
-        <v-col cols="12" md="6">
-          <v-menu v-model="dropdownOpen" :close-on-content-click="false" location="bottom start" max-width="500" offset="8">
-            <template v-slot:activator="{ props }">
-              <v-text-field
-                v-bind="props" v-model="searchQuery" label="Search active student rosters..."
-                prepend-inner-icon="mdi-account-search" append-inner-icon="mdi-chevron-down"
-                variant="outlined" clearable hide-details @input="onSearchInput" @click:clear="clearSelection"
-              >
-                <template v-slot:prepend-inner v-if="selectedStudent">
-                  <v-chip color="primary" size="small" class="mr-2" closable @click:close="clearSelection">
-                    {{ selectedStudent.initials }}
-                  </v-chip>
-                </template>
-              </v-text-field>
-            </template>
-            <v-card elevation="8" rounded="lg" border>
-              <v-list v-if="filteredStudents.length > 0" max-height="300" class="overflow-y-auto">
-                <v-list-item v-for="student in filteredStudents" :key="student.id" @click="handleStudentSelect(student)" :active="selectedStudent?.id === student.id" color="primary" class="mx-2 my-1 rounded-lg">
-                  <v-list-item-title class="font-weight-bold">{{ student.initials }}</v-list-item-title>
-                  <v-list-item-subtitle class="font-monospace text-caption">{{ student.web_id }}</v-list-item-subtitle>
-                </v-list-item>
-              </v-list>
-            </v-card>
-          </v-menu>
-        </v-col>
-      </v-row>
-    </v-card>
+<v-card class="pa-6 mb-6" elevation="2" rounded="lg">
+  <v-row no-gutters class="mb-4">
+    <v-col cols="12" md="6">
+      <div class="text-h6">Select Student</div>
+    </v-col>
+    <v-col cols="12" md="6" class="d-none d-md-block pl-md-4">
+      <div class="text-h6">Feedback Template</div>
+    </v-col>
+  </v-row>
 
-    <v-card v-if="selectedStudent" class="pa-6 mb-6 animate-fade-in" elevation="2" rounded="lg">
-      <div class="text-h6 mb-4">Evaluation Schema Controls</div>
-      <v-row dense>
-        <v-col cols="12" md="6">
-          <v-select
-            v-model="activeTemplateId" :items="availableTemplates" item-title="name" item-value="template_id"
-            label="Load Blueprint Template" variant="outlined" prepend-inner-icon="mdi-file-layers-outline"
-          />
-        </v-col>
-        <v-col cols="12" md="6">
-          <v-select v-model="selectedCourse" :items="studentCourses" item-title="name" item-value="slug" label="Target Course Track" variant="outlined" />
-        </v-col>
-      </v-row>
-    </v-card>
+  <v-row align="center">
+    <v-col cols="12" md="6" class="d-flex flex-column pr-md-4">
+      <div class="text-h6 mb-2 d-md-none">Select Student</div>
+
+      <v-menu
+        v-model="dropdownOpen"
+        :close-on-content-click="false"
+        location="bottom start"
+        max-width="500"
+        offset="8"
+      >
+        <template #activator="{ props }">
+          <v-text-field
+            v-bind="props"
+            v-model="searchQuery"
+            label="Search active student rosters..."
+            prepend-inner-icon="mdi-account-search"
+            append-inner-icon="mdi-chevron-down"
+            variant="outlined"
+            clearable
+            hide-details
+            @input="onSearchInput"
+            @click:clear="clearSelection"
+          >
+            <template #prepend-inner v-if="selectedStudent">
+              <v-chip
+                color="primary"
+                size="small"
+                class="mr-2"
+                closable
+                @click:close="clearSelection"
+              >
+                {{ selectedStudent.initials }}
+              </v-chip>
+            </template>
+          </v-text-field>
+        </template>
+
+        <v-card elevation="8" rounded="lg" border>
+          <v-list
+            v-if="filteredStudents.length > 0"
+            max-height="300"
+            class="overflow-y-auto"
+          >
+            <v-list-item
+              v-for="student in filteredStudents"
+              :key="student.id"
+              @click="handleStudentSelect(student)"
+              :active="selectedStudent?.id === student.id"
+              color="primary"
+              class="mx-2 my-1 rounded-lg"
+            >
+              <v-list-item-title class="font-weight-bold">
+                {{ student.initials }}
+              </v-list-item-title>
+              <v-list-item-subtitle class="font-monospace text-caption">
+                {{ student.web_id }}
+              </v-list-item-subtitle>
+            </v-list-item>
+          </v-list>
+        </v-card>
+      </v-menu>
+    </v-col>
+
+    <v-col cols="12" md="6" class="d-flex flex-column pl-md-4">
+      <div class="text-h6 mb-2 d-md-none">Feedback Template</div>
+
+      <v-select
+        v-model="activeTemplateId"
+        :items="availableTemplates"
+        item-title="name"
+        item-value="template_id"
+        label="Load Template"
+        variant="outlined"
+        prepend-inner-icon="mdi-file-layers-outline"
+        hide-details
+      />
+    </v-col>
+  </v-row>
+</v-card>
+
+
 
     <v-card v-if="selectedStudent && loadedTemplateStructure" class="pa-6 mb-6" elevation="2" rounded="lg">
-      <div class="text-overline font-weight-bold text-primary mb-4 tracking-wider">Dynamic Form Fields</div>
+      <div class="text-overline font-weight-bold text-primary mb-4 tracking-wider">Feedback for {{ selectedStudent.initials }}</div>
       
       <form @submit.prevent>
         <div v-for="comp in loadedTemplateStructure.components" :key="comp.id" class="mb-5">
@@ -94,7 +141,7 @@
 
           <div v-if="comp.type === 'error_matrix'" class="pa-4 border rounded-xl border-amber-lighten-3 bg-amber-lighten-5">
             <div class="d-flex align-center justify-space-between mb-4">
-              <div class="text-subtitle-1 font-weight-bold text-amber-darken-4"><v-icon icon="mdi-alert-circle-outline" class="mr-2"/>Systemic Errors Tracker</div>
+              <div class="text-subtitle-1 font-weight-bold text-amber-darken-4"><v-icon icon="mdi-alert-circle-outline" class="mr-2"/>ERRORS</div>
               <v-btn size="small" color="amber-darken-3" class="text-white font-weight-bold" prepend-icon="mdi-plus" @click="addErrorRow">Add Error Entry</v-btn>
             </div>
             <v-row v-for="(err, eIdx) in errorsList" :key="eIdx" dense class="mb-2 align-center">
@@ -107,7 +154,7 @@
 
           <div v-if="comp.type === 'vocab_notebook'" class="pa-4 border rounded-xl border-indigo-lighten-4 bg-indigo-lighten-5">
             <div class="d-flex align-center justify-space-between mb-4">
-              <div class="text-subtitle-1 font-weight-bold text-indigo-darken-4"><v-icon icon="mdi-notebook-outline" class="mr-2"/>Vocabulary Feedback Feed</div>
+              <div class="text-subtitle-1 font-weight-bold text-indigo-darken-4"><v-icon icon="mdi-notebook-outline" class="mr-2"/>Vocabulary</div>
               <v-btn size="small" color="indigo" class="font-weight-bold" prepend-icon="mdi-plus" @click="addVocabRow">Add Vocabulary Term</v-btn>
             </div>
             <v-row v-for="(vRow, vIdx) in vocabList" :key="vIdx" dense class="mb-2 align-center">
@@ -168,10 +215,10 @@
         <v-divider class="my-6" />
         <div class="d-flex gap-3 flex-wrap">
           <v-btn color="indigo-darken-1" size="large" class="text-white font-weight-bold rounded-xl" :loading="submitting" prepend-icon="mdi-send-check" @click="executeSubmitFeedback">
-            Submit Assessment Record
+            Submit
           </v-btn>
           <v-btn color="indigo" size="large" variant="outlined" class="font-weight-bold rounded-xl" prepend-icon="mdi-file-pdf-box" @click="generateClientSidePdfReport">
-            Compile Progress PDF Report
+            PDF Report
           </v-btn>
         </div>
       </form>
@@ -193,11 +240,17 @@ import { useUserStore } from '@/stores/user'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 import FeedbackTemplateBuilderDialog from '@/components/FeedbackTemplateBuilderDialog.vue'
+import { errorsData } from '@/assets/scripts/errorsData';
 
 // --- Interfaces ---
 interface Student { id: number; initials: string; web_id: string; }
 interface Course { slug: string; name: string; }
 interface TemplateBlueprint { template_id: string; name: string; structure: any; }
+interface ErrorSelectOption {
+  title: string;  // What the user sees in the dropdown list
+  value: string;  // The actual code saved to the backend (e.g., "0110")
+}
+
 
 const userStore = useUserStore()
 
@@ -219,7 +272,7 @@ const selectedCourse = ref('')
 const availableTemplates = ref<TemplateBlueprint[]>([])
 const activeTemplateId = ref<string | null>(null)
 
-const errorCodes = ref<string[]>([])
+const errorCodes = ref<ErrorSelectOption[]>([]);
 
 // Dynamic State Containers
 const formDataValues = ref<Record<string, any>>({})
@@ -520,13 +573,13 @@ function seedMockTemplateBlueprints() {
   availableTemplates.value = [
     {
       template_id: "tpl_presentation_v1",
-      name: "Standard Oral Presentation Diagnostic Review",
+      name: "Standard Oral Presentation",
       structure: {
         components: [
-          { id: "p1", type: "paragraph", text: "This standardized schema targets public speaking presentation metrics, technical fluency parameters, and audience design parameters." },
-          { id: "topic", type: "select", label: "Presentation Evaluation Topic Focus", options: ["Professional Thesis Project", "Corporate Financial Review", "Technical System Pitch"] },
-          { id: "positives", type: "checkbox_group", label: "Demonstrated Proficiencies", options: ["Excellent vocal modulation and baseline delivery speeds.", "Slide designs backed assertions efficiently with clear data.", "Demonstrated command over targeted specialized professional domain language strings."] },
-          { id: "notes", type: "textarea", label: "Teacher Freeform Observational Commentary Notes" },
+          { id: "p1", type: "paragraph", text: "Teacher observations:." },
+          { id: "topic", type: "select", label: "Project Topic", options: ["My professional project", "Story of a startup", "Present a research paper"] },
+          { id: "positives", type: "checkbox_group", label: "Demonstrated Skills", options: ["Excellent use of target vocabulary.", "Good visual support.", "Good use of target grammar."] },
+          { id: "notes", type: "textarea", label: "Comments" },
           { id: "errors", type: "error_matrix" },
           { id: "vocab", type: "vocab_notebook" }
         ]
@@ -534,11 +587,11 @@ function seedMockTemplateBlueprints() {
     },
     {
       template_id: "tpl_midterm_v1",
-      name: "Mid-Semester Performance Evaluation Matrix",
+      name: "Mid-Semester Performance",
       structure: {
         components: [
-          { id: "p1", type: "paragraph", text: "Use this form matrix to issue comprehensive mid-semester workbook checkpoints observations rules." },
-          { id: "overall_assessment", type: "textarea", label: "General Course Standing Summary Analysis", rows: 4 },
+          { id: "p1", type: "paragraph", text: "Use this form matrix to give feedback." },
+          { id: "overall_assessment", type: "textarea", label: "General Summary", rows: 4 },
           { id: "errors", type: "error_matrix" }
         ]
       }
@@ -551,8 +604,15 @@ onMounted(async () => {
   await fetchStudents()
   seedMockTemplateBlueprints()
   
-  // Simulated error codes configuration array bounds mapping elements loading
-  errorCodes.value = ["TNS_1 Past Simple Choice", "PREP_4 Incorrect Spatial Preposition", "COND_2 Conditional Clause Construction Error"]
+  // Transform the Record<string, ErrorEntry> object into an array for Vuetify
+  errorCodes.value = Object.entries(errorsData).map(([code, details]) => {
+    return {
+      // Combines code and description for clear user reading
+      title: `${code} — ${details.description}`, 
+      // The exact numerical key to submit to your Error model
+      value: code                                
+    };
+  });
 })
 
 // Mirror store roster lists directly inside execution variables bounds maps

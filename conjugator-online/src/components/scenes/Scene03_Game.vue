@@ -34,7 +34,8 @@
         <div class="text-overline font-weight-bold text-slate-400 tracking-wider leading-none">Game Length</div>
         <div class="text-body-2 font-weight-bold text-slate-800">{{ remainingCount }} Rounds</div>
       </div>
-      <v-tooltip text="Prioritizes verbs you haven't mastered yet" location="top">
+      
+      <!-- <v-tooltip text="Prioritizes verbs you haven't mastered yet" location="top">
         <template #activator="{ props }">
           <v-chip
             v-bind="props"
@@ -47,7 +48,7 @@
             Smart Pool
           </v-chip>
         </template>
-      </v-tooltip>
+      </v-tooltip>  -->
 
     </div>
 
@@ -367,7 +368,6 @@
 
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted, onBeforeUnmount, nextTick, shallowRef, markRaw, isProxy, toRaw } from "vue";
-import api from "@/axios";
 import { getAccessToken } from "@/services/auth";
 import InitialsText from "../InitialsText.vue";
 import { useUserStore } from "@/stores/user";
@@ -399,15 +399,11 @@ const gameB = reactive({
 let formStartTime = 0;
 
 const props = defineProps<{
-  gameSessionData?: {
+  gameSessionData: {
     session_id: number;
     prompts: any[];
-    answer_hashes: string[];
-    typo_detector_version: string;
-    error_classifier_version: string;
-    started_at: string;
   };
-  gameSettings: GameSettings;
+  gameSettings: any;
 }>();
 
 const emit = defineEmits<{
@@ -419,13 +415,10 @@ const emit = defineEmits<{
 // STATE: Backend vs Local Game Mode
 // ============================================================================
 
-const isBackendMode = computed(() => !!props.gameSessionData?.session_id);
 const sessionId = ref<number | null>(props.gameSessionData?.session_id || null);
 const promptDefinitions = ref<any[]>(props.gameSessionData?.prompts || []);
 const acceptableAnswersCache = ref<Map<number, string[]>>(new Map());
 
-// Local game state (for offline mode / backward compatibility)
-const game = shallowRef<any>(null);
 
 // ============================================================================
 // SHARED STATE
@@ -465,27 +458,7 @@ let roundIntervalId: ReturnType<typeof window.setInterval> | null = null;
 let roundStartTime: number | null = null;
 let startTime: number | null = null;
 
-const isSmartList = computed(() => {
-  const settings = localGameSettings.value;
-  if (!settings || !isIrregularSmartCapable(settings.verbSet)) return false;
-  const pool = settings.smartVerbPool;
-  if (!pool || typeof pool !== "object") return false;
-  return Array.isArray(pool["Past simple"]) || Array.isArray(pool["Present perfect"]);
-});
-// ============================================================================
-// HELPER: SIMPLE ANSWER MATCHING (for local UI feedback only)
-// ============================================================================
 
-/**
- * Simple answer validation for instant UI feedback.
- * The REAL validation happens on the backend.
- * 
- * This is just for showing "Correct!" or "Wrong!" immediately to the student.
- */
-function validateAnswerLocally(userAnswer: string, acceptableAnswers: string[]): boolean {
-  const normalized = userAnswer.toLowerCase().trim();
-  return acceptableAnswers.some(ans => ans.toLowerCase().trim() === normalized);
-}
 
 // ============================================================================
 // TIMER FUNCTIONS
@@ -590,27 +563,8 @@ function updateRandomTense() {
   }
 }
 
-function isIrregularSmartCapable(ui: string) {
-  return [
-    "Basic 75 Irregs",
-    "Master 110 Irregs",
-    "Shakespeare 130 Irregs",
-    "GOAT 50 Hard Irregs Only"
-  ].includes(ui);
-}
 
-function mapUiVerbSetToApiVerbSet(ui: string): string {
-  if (ui === "Basic 75 Irregs") return "Basic 75";
-  if (ui === "Master 110 Irregs") return "Master 110";
-  if (ui === "Shakespeare 130 Irregs") return "All Irregular";
-  if (ui === "GOAT 50 Hard Irregs Only") return "All Irregular";
-  return "All Irregular";
-}
 
-function deepClone<T>(obj: T): T {
-  const raw = isProxy(obj as any) ? (toRaw(obj as any) as any) : (obj as any);
-  return JSON.parse(JSON.stringify(raw));
-}
 // ============================================================================
 // CARD ANIMATION
 // ============================================================================
@@ -620,18 +574,7 @@ function processCardDealingSequence() {
   cardInFlight.value = false;
 
   setTimeout(() => {
-    if (isBackendMode.value) {
-      displayNextPrompt();
-    } else {
-      const prompt = game.value?.getCurrentPrompt?.();
-      if (!prompt) return;
-
-      currentPrompt.person = prompt.getPerson();
-      currentPrompt.verb = prompt.getVerb();
-      currentPrompt.tense = prompt.getTense();
-      currentPrompt.sentenceType = prompt.getSentenceType();
-    }
-
+    displayNextPrompt();
     updateRandomTense();
     cardInFlight.value = true;
 
@@ -703,9 +646,9 @@ function getTenseTimelineIcon(tense: string): string {
   const norm = tense.toLowerCase();
   if (norm.includes('present simple')) return 'mdi-repeat-variant';
   if (norm.includes('continuous')) return 'mdi-progress-helper';
-  if (norm.includes('past simple')) return 'mdi-timer-sand-complete'; 
+  if (norm.includes('past simple')) return 'mdi-keyboard-backspace'; 
   if (norm.includes('perfect')) return 'mdi-arrow-collapse-right';      
-  if (norm.includes('future')) return 'mdi-fast-forward';
+  if (norm.includes('future')) return 'mdi-forward';
   if (norm.includes('recommendation')) return 'mdi-lightbulb-on-outline';
   return 'mdi-timeline-text-outline';
 }
@@ -718,13 +661,14 @@ onMounted(async () => {
   await loadTenseKeywords();
   formStartTime = Date.now();
   focusInput();
+  
   document.addEventListener('mousemove', () => {
     gameB.mouseMovements++;
   });
   document.addEventListener('keydown', () => {
     gameB.keystrokes++;
   });
-  // Track focus on answer field
+  
   if (answerFieldRef.value) {
     const nativeInput = answerFieldRef.value.$el.querySelector('input');
     if (nativeInput) {
@@ -732,17 +676,6 @@ onMounted(async () => {
         gameB.focusEvents++;
       });
     }
-  }
-
-  if (isBackendMode.value) {
-    localGameSettings.value = props.gameSettings;
-    promptCounter.value = 0;
-    remainingCount.value = promptDefinitions.value.length;
-  } else {
-    // Local mode - initialize Game.js as before
-    const baseSettings = { ...props.gameSettings };
-    localGameSettings.value = baseSettings;
-    // Initialize local game engine...
   }
 });
 
@@ -813,24 +746,12 @@ async function submitAnswer() {
   const elapsedMs = roundStartTime ? now - roundStartTime : 0;
   const elapsedSeconds = (elapsedMs / 1000).toFixed(1);
 
-  let isCorrect = false;
-
-  if (isBackendMode.value) {
-    // Backend mode: compare hashed answer
-    const userAnswerHash = hashAnswer(userAnswer.value);
-    const currentPrompt = props.gameSessionData?.prompts[promptCounter.value];
-    const acceptableHashes = currentPrompt?.answer_hashes || [];
-    
-    console.log(`[DEBUG] Round ${promptCounter.value + 1}:`);
-    console.log(`  User answer: "${userAnswer.value}"`);
-    console.log(`  User hash: ${userAnswerHash}`);
-    console.log(`  Acceptable hashes (${acceptableHashes.length}):`, acceptableHashes);
-    
-    isCorrect = acceptableHashes.includes(userAnswerHash);  // ✅ Check if IN array
-  } else {
-    const acceptableAnswers = game.value?.getCurrentCorrectAnswers?.() || [];
-    isCorrect = validateAnswerLocally(userAnswer.value, acceptableAnswers);
-  }
+  // ✅ BACKEND ONLY: Hash validation
+  const userAnswerHash = hashAnswer(userAnswer.value);
+  const currentPromptData = props.gameSessionData.prompts[promptCounter.value];
+  const acceptableHashes = currentPromptData?.answer_hashes || [];
+  
+  const isCorrect = acceptableHashes.includes(userAnswerHash);
 
   if (isCorrect) {
     rightCount.value++;
@@ -847,15 +768,15 @@ async function submitAnswer() {
   await nextTick();
   snackbar.show = true;
 
-  // Store round for batch submission
+  // Store round for submission
   const promptNum = promptCounter.value + 1;
   pendingRounds.value.push({
     prompt_number: promptNum,
     user_answer: userAnswer.value,
     elapsed_time: parseFloat(elapsedSeconds),
-    hp_triggered: gameBResult.flagged,
-    hp_score: gameBResult.score,
-    hp_reasons: gameBResult.reasons,
+    honeypot_triggered: gameBResult.flagged,
+    honeypot_score: gameBResult.score,
+    honeypot_reasons: gameBResult.reasons,
   });
 
   promptCounter.value += 1;
@@ -918,7 +839,7 @@ function startGame() {
     overallTimer.value = "00:00";
     roundTimer.value = "00:00";
     promptCounter.value = 0;
-    remainingCount.value = localGameSettings.value?.numPrompts ?? props.gameSettings.numPrompts ?? 0;
+    remainingCount.value = props.gameSessionData.prompts.length;
     rightCount.value = 0;
     wrongCount.value = 0;
     submitButtontext.value = remainingCount.value === 1 ? "FINISH" : "SUBMIT";

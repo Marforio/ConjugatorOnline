@@ -49,14 +49,14 @@
                 
                 <v-col cols="12" class="mt-4">
                   <v-divider class="mb-3" />
-                  <div class="text-xxs font-weight-bold text-slate-400 text-uppercase tracking-wider mb-2">Core Relational Subtables</div>
+                  <div class="text-xxs font-weight-bold text-slate-400 text-uppercase tracking-wider mb-2">ERROS AND VOCAB FIELDS</div>
                 </v-col>
                 
                 <v-col cols="12">
-                  <v-btn block variant="flat" color="amber-darken-3" prepend-icon="mdi-alert-circle-outline" class="text-white text-none justify-start rounded-lg text-body-2 font-weight-bold" @click="addComponent('error_matrix')">Systemic Error Logs Sub-Matrix</v-btn>
+                  <v-btn block variant="flat" color="amber-darken-3" prepend-icon="mdi-alert-circle-outline" class="text-white text-none justify-start rounded-lg text-body-2 font-weight-bold" @click="addComponent('error_matrix')">Systemic Error Fields</v-btn>
                 </v-col>
                 <v-col cols="12" class="mt-2">
-                  <v-btn block variant="flat" color="indigo-darken-2" prepend-icon="mdi-notebook-outline" class="text-white text-none justify-start rounded-lg text-body-2 font-weight-bold" @click="addComponent('vocab_notebook')">Student Vocab Feed Notebook</v-btn>
+                  <v-btn block variant="flat" color="indigo-darken-2" prepend-icon="mdi-notebook-outline" class="text-white text-none justify-start rounded-lg text-body-2 font-weight-bold" @click="addComponent('vocab_notebook')">Vocab Fields</v-btn>
                 </v-col>
                 <v-col cols="12" class="mt-2">
                   <v-btn block variant="flat" color="emerald-darken-2" class="bg-emerald text-white text-none justify-start rounded-lg text-body-2 font-weight-bold" prepend-icon="mdi-star-circle-outline" @click="addComponent('impressive_matrix')">Impressive Language Tracker</v-btn>

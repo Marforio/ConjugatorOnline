@@ -1,7 +1,30 @@
 <template>
-  <!-- Main layout backdrop matching your unified platform canvas -->
   <v-sheet class="bg-white min-height-view pa-4 pa-md-6 text-slate-800">
     
+    <!-- Error Alert -->
+    <v-alert
+      v-if="startGameError"
+      type="error"
+      variant="tonal"
+      closable
+      class="rounded-xl mb-4"
+      @click:close="startGameError = null"
+    >
+      <div class="font-weight-bold">Failed to Start Game</div>
+      <div class="text-caption mt-1">{{ startGameError }}</div>
+    </v-alert>
+
+    <!-- Loading Overlay -->
+    <v-overlay v-model="isStartingGame" class="align-center justify-center">
+      <v-card class="pa-6 rounded-xl" flat>
+        <div class="text-center">
+          <v-progress-circular indeterminate color="primary" size="48" class="mb-4"></v-progress-circular>
+          <div class="text-body-2 font-weight-bold text-slate-800">Starting Game...</div>
+          <div class="text-caption text-slate-500 mt-1">Connecting to game server</div>
+        </div>
+      </v-card>
+    </v-overlay>
+
     <!-- 🖥️ DESKTOP & TABLET PROFILE VIEWPORT (smAndUp) -->
     <v-container v-if="$vuetify.display.smAndUp" class="pa-0 max-width-wrapper">
       <div class="d-flex align-center mb-4">
@@ -20,19 +43,19 @@
             <p class="text-caption text-slate-500 mb-4">Jump straight into a predefined game</p>
 
             <v-row dense>
-              <!-- 🖥️ DESKTOP QUICK PLAY LOOP MODIFICATION -->
-                <v-col cols="12" sm="6" v-for="(btn, index) in quickPlayButtons" :key="btn.label">
-                  <v-btn
-                    block
-                    variant="tonal"
-                    :color="colors[index % colors.length]"
-                    height="44"
-                    class="quick-pill-btn rounded-lg text-none font-weight-bold"
-                    @click="startGame(btn.settings)"
-                  >
-                    <span class="text-wrap px-1" :title="btn.label">{{ btn.label }}</span>
-                  </v-btn>
-                </v-col>
+              <v-col cols="12" sm="6" v-for="(btn, index) in quickPlayButtons" :key="btn.label">
+                <v-btn
+                  block
+                  variant="tonal"
+                  :color="colors[index % colors.length]"
+                  height="44"
+                  class="quick-pill-btn rounded-lg text-none font-weight-bold"
+                  :disabled="isStartingGame"
+                  @click="handleStartGame(btn.settings)"
+                >
+                  <span class="text-wrap px-1" :title="btn.label">{{ btn.label }}</span>
+                </v-btn>
+              </v-col>
             </v-row>
           </div>
         </v-col>
@@ -125,7 +148,8 @@
               color="primary"
               height="44"
               class="rounded-xl text-none font-weight-bold elevation-1"
-              @click="() => startGame(selections)"
+              :disabled="isStartingGame"
+              @click="handleStartGame(selections)"
             >
               Confirm Custom Formula
             </v-btn>
@@ -141,7 +165,7 @@
         <h1 class="text-subtitle-1 font-weight-black text-slate-900">Game Setup</h1>
       </div>
 
-      <v-expansion-panels accordion variant="separated" class="sleek-panels">
+      <v-expansion-panels accordion variant="accordion" class="sleek-panels">
         <!-- Panel Block A: Quick Play -->
         <v-expansion-panel class="border mb-2 rounded-xl overflow-hidden" elevation="0">
           <v-expansion-panel-title class="bg-slate-50 font-weight-bold text-slate-800 py-3">
@@ -149,7 +173,6 @@
           </v-expansion-panel-title>
           <v-expansion-panel-text class="pa-2">
             <v-row dense>
-              <!-- 📱 MOBILE QUICK PLAY LOOP MODIFICATION -->
               <v-col v-for="(btn, index) in quickPlayButtons" :key="btn.label" cols="6">
                 <v-btn
                   block
@@ -157,7 +180,8 @@
                   :color="colors[index % colors.length]"
                   height="40"
                   class="quick-pill-btn rounded-lg text-none font-weight-bold"
-                  @click="startGame(btn.settings)"
+                  :disabled="isStartingGame"
+                  @click="handleStartGame(btn.settings)"
                 >
                   <span class="text-wrap text-caption px-1" :title="btn.label">{{ btn.label }}</span>
                 </v-btn>
@@ -230,8 +254,8 @@
                 color="success" 
                 height="44"
                 class="mt-2 rounded-xl text-none font-weight-bold" 
-                :disabled="!optionsLoaded || selectedTenses.length === 0 || selectedSentenceTypes.length === 0" 
-                @click="() => startGame(selections)"
+                :disabled="!optionsLoaded || selectedTenses.length === 0 || selectedSentenceTypes.length === 0 || isStartingGame" 
+                @click="handleStartGame(selections)"
               >
                 Launch Custom Lab
               </v-btn>
@@ -243,69 +267,93 @@
   </v-sheet>
 </template>
 
-<script>
-export default {
-  data() {
-    return {
-      options: { sentence_types: [], verb_sets: [], tenses: [] },
-      selectedVerbSet: '',
-      selectedSentenceTypes: [],
-      selectedTenses: [],
-      numPrompts: 20,
-      colors: ["blue lighten-2", "green darken-2", "purple lighten-2", "red lighten-3", "orange lighten-2", "brown lighten-2", "pink lighten-2", "grey darken-2"],
-      optionsLoaded: false,
-    };
-  },
-  computed: {
-    selections() {
-      return {
-        verbSet: this.selectedVerbSet,
-        sentenceTypes: this.selectedSentenceTypes,
-        tenses: this.selectedTenses,
-        numPrompts: this.numPrompts,
-      };
-    },
-    quickPlayButtons() {
-      return [
-        { label: 'Present simple and continuous', color: 'magenta lighten-2', settings: { verbSet: 'Common verbs (Reg + Irreg)', sentenceTypes: ['Positive', 'Negative', 'Question'], tenses: ['Present simple', 'Present continuous'], numPrompts: 20 } },
-        { label: 'Past simple training', color: 'info', settings: { verbSet: 'Common verbs (Reg + Irreg)', sentenceTypes: ['Positive', 'Negative', 'Question'], tenses: ['Past simple'], numPrompts: 20 } },
-        { label: 'Irregs Basic 20x past simple', color: 'blue lighten-2', settings: { verbSet: 'Basic 75 Irregs', sentenceTypes: ['Positive'], tenses: ['Past simple'], numPrompts: 20 } },
-        { label: 'Irregs Basic 20x pres. perf.', color: 'brown lighten-2', settings: { verbSet: 'Basic 75 Irregs', sentenceTypes: ['Positive', 'Negative', 'Question'], tenses: ['Present perfect'], numPrompts: 20 } },
-        { label: 'Irregs Master 20x past simple', color: 'green lighten-2', settings: { verbSet: 'Master 110 Irregs', sentenceTypes: ['Positive'], tenses: ['Past simple'], numPrompts: 20 } },
-        { label: 'Irregs Master 20x pres. perf.', color: 'red lighten-2', settings: { verbSet: 'Master 110 Irregs', sentenceTypes: ['Positive', 'Negative', 'Question'], tenses: ['Present perfect'], numPrompts: 20 } },
-        { label: 'Past simple vs present perfect', color: 'pink', settings: { verbSet: 'Common verbs (Reg + Irreg)', sentenceTypes: ['Positive', 'Negative', 'Question'], tenses: ['Past simple', 'Present perfect'], numPrompts: 20 } },
-        { label: 'All tenses and sentences', color: 'green', settings: { verbSet: 'Common verbs (Reg + Irreg)', sentenceTypes: ['Positive', 'Negative', 'Question'], tenses: ['Present simple','Past simple','Future simple','Recommendation','Present continuous','Present perfect'], numPrompts: 25 } },
-        { label: 'Negatives training', color: 'error', settings: { verbSet: 'Regular verbs only', sentenceTypes: ['Negative'], tenses: ['Present simple','Past simple','Future simple','Recommendation','Present continuous','Present perfect'], numPrompts: 20 } },
-        { label: 'Questions training', color: 'grey', settings: { verbSet: 'Common verbs (Reg + Irreg)', sentenceTypes: ['Question'], tenses: ['Present simple','Past simple','Future simple','Recommendation','Present continuous','Present perfect'], numPrompts: 20 } },
-      ];
-    },
-  },
-  async created() {
-    try {
-      const res = await fetch('/data/set_options.json');
-      const opts = await res.json();
-      this.options = opts;
-      this.selectedVerbSet = opts.verb_sets[0];
-      this.selectedSentenceTypes = [];
-      this.selectedTenses = [];
-      this.optionsLoaded = true;
-    } catch (e) {
-      console.error('Error loading options:', e);
-    }
-  },
-  methods: {
-    goToScene(name) { this.$emit('changeScene', name); },
-    startGame(settings = null) {
-      const selections = settings || this.selections;
-      this.$emit('startGame', selections);
-      this.goToScene('Scene03_Game');
-    },
-    validateNumPrompts() {
-      if (this.numPrompts < 3) this.numPrompts = 3;
-      if (this.numPrompts > 50) this.numPrompts = 50;
-    },
+<script setup lang="ts">
+import { ref, computed, onMounted } from 'vue';
+
+const colors = ["blue lighten-2", "green darken-2", "purple lighten-2", "red lighten-3", "orange lighten-2", "brown lighten-2", "pink lighten-2", "grey darken-2"];
+
+interface GameOptions {
+  sentence_types: string[];
+  verb_sets: string[];
+  tenses: string[];
+}
+
+const options = ref<GameOptions>({ 
+  sentence_types: [], 
+  verb_sets: [], 
+  tenses: [] 
+});
+
+const selectedVerbSet = ref<string>('');
+const selectedSentenceTypes = ref<string[]>([]);
+const selectedTenses = ref<string[]>([]);
+const numPrompts = ref<number>(20);
+const optionsLoaded = ref<boolean>(false);
+const isStartingGame = ref<boolean>(false);
+const startGameError = ref<string | null>(null);
+
+
+const emit = defineEmits<{
+  (e: "changeScene", scene: string): void;
+  (e: "startGame", settings: any): void;
+}>();
+
+const selections = computed(() => ({
+  verbSet: selectedVerbSet.value,
+  sentenceTypes: selectedSentenceTypes.value,
+  tenses: selectedTenses.value,
+  numPrompts: numPrompts.value,
+}));
+
+const quickPlayButtons = computed(() => [
+  { label: 'Present simple and continuous', color: 'magenta lighten-2', settings: { verbSet: 'Common verbs (Reg + Irreg)', sentenceTypes: ['Positive', 'Negative', 'Question'], tenses: ['Present simple', 'Present continuous'], numPrompts: 20 } },
+  { label: 'Past simple training', color: 'info', settings: { verbSet: 'Common verbs (Reg + Irreg)', sentenceTypes: ['Positive', 'Negative', 'Question'], tenses: ['Past simple'], numPrompts: 20 } },
+  { label: 'Irregs Basic 20x past simple', color: 'blue lighten-2', settings: { verbSet: 'Basic 75 Irregs', sentenceTypes: ['Positive'], tenses: ['Past simple'], numPrompts: 20 } },
+  { label: 'Irregs Basic 20x pres. perf.', color: 'brown lighten-2', settings: { verbSet: 'Basic 75 Irregs', sentenceTypes: ['Positive', 'Negative', 'Question'], tenses: ['Present perfect'], numPrompts: 20 } },
+  { label: 'Irregs Master 20x past simple', color: 'green lighten-2', settings: { verbSet: 'Master 110 Irregs', sentenceTypes: ['Positive'], tenses: ['Past simple'], numPrompts: 20 } },
+  { label: 'Irregs Master 20x pres. perf.', color: 'red lighten-2', settings: { verbSet: 'Master 110 Irregs', sentenceTypes: ['Positive', 'Negative', 'Question'], tenses: ['Present perfect'], numPrompts: 20 } },
+  { label: 'Past simple vs present perfect', color: 'pink', settings: { verbSet: 'Common verbs (Reg + Irreg)', sentenceTypes: ['Positive', 'Negative', 'Question'], tenses: ['Past simple', 'Present perfect'], numPrompts: 20 } },
+  { label: 'All tenses and sentences', color: 'green', settings: { verbSet: 'Common verbs (Reg + Irreg)', sentenceTypes: ['Positive', 'Negative', 'Question'], tenses: ['Present simple','Past simple','Future simple','Recommendation','Present continuous','Present perfect'], numPrompts: 25 } },
+  { label: 'Negatives training', color: 'error', settings: { verbSet: 'Regular verbs only', sentenceTypes: ['Negative'], tenses: ['Present simple','Past simple','Future simple','Recommendation','Present continuous','Present perfect'], numPrompts: 20 } },
+  { label: 'Questions training', color: 'grey', settings: { verbSet: 'Common verbs (Reg + Irreg)', sentenceTypes: ['Question'], tenses: ['Present simple','Past simple','Future simple','Recommendation','Present continuous','Present perfect'], numPrompts: 20 } },
+]);
+
+function goToScene(name: string) {
+  emit('changeScene', name);
+}
+
+async function handleStartGame(settings: any) {
+  isStartingGame.value = true;
+  startGameError.value = null;
+
+  try {
+    emit('startGame', settings);
+    // Parent (SceneManager) handles the actual start
+    // If it fails, parent will show error - we just track loading state
+  } catch (error: any) {
+    startGameError.value = error.message || 'Failed to start game. Please try again.';
+    isStartingGame.value = false;
   }
 }
+
+function validateNumPrompts() {
+  if (numPrompts.value < 5) numPrompts.value = 5;
+  if (numPrompts.value > 50) numPrompts.value = 50;
+}
+
+onMounted(async () => {
+  try {
+    const res = await fetch('/data/set_options.json');
+    const opts = await res.json();
+    options.value = opts;
+    selectedVerbSet.value = opts.verb_sets[0];
+    selectedSentenceTypes.value = [];
+    selectedTenses.value = [];
+    optionsLoaded.value = true;
+  } catch (e) {
+    console.error('Error loading options:', e);
+  }
+});
 </script>
 
 <style scoped>
@@ -317,11 +365,7 @@ export default {
   max-width: 1000px;
 }
 
-/* ==========================================
-   ⚡ COMPACT QUICK PLAY BUTTON PILLS (HALF HEIGHT)
-   ========================================== */
 .quick-pill-btn {
-  /* Reduced height by 50% to make the setup screen tighter and sleeker */
   height: 80px !important; 
   background-color: rgba(59, 130, 246, 0.05) !important;
   border: 1px solid rgba(59, 130, 246, 0.12) !important;
@@ -331,7 +375,7 @@ export default {
   transition: all 0.2s cubic-bezier(0.165, 0.84, 0.44, 1);
 }
 
-.quick-pill-btn:hover {
+.quick-pill-btn:hover:not(:disabled) {
   background-color: #3b82f6 !important;
   color: #ffffff !important;
   border-color: #3b82f6 !important;
@@ -339,7 +383,6 @@ export default {
   box-shadow: 0 4px 12px -4px rgba(59, 130, 246, 0.3) !important;
 }
 
-/* Micro sizing setups preventing option layouts from spilling vertical space */
 .compact-radio :deep(.v-selection-control) {
   min-height: 28px !important;
 }
@@ -364,7 +407,6 @@ export default {
   gap: 10px !important;
 }
 
-/* Unified theme color palettes */
 .text-slate-900 { color: #0f172a; }
 .text-slate-800 { color: #1e293b; }
 .text-slate-500 { color: #64748b; }
