@@ -41,7 +41,7 @@
               <div class="text-caption text-slate-500">Choose a list and training mode</div>
             </div>
             
-            <div v-if="selectedListKey" class="d-flex align-center ga-2 w-100 w-sm-auto justify-end flex-wrap">
+            <div v-if="selectedListId" class="d-flex align-center ga-2 w-100 w-sm-auto justify-end flex-wrap">
               
               <v-btn
                 variant="outlined"
@@ -54,7 +54,7 @@
                 :loading="pdfLoading"
               >
                 <span class="text-truncate">
-                  Export PDF: {{ selectedListMeta?.title || selectedListKey }}
+                  Export PDF: {{ selectedListMeta?.name || 'Vocab List' }}
                 </span>
               </v-btn>
 
@@ -76,8 +76,8 @@
             
             <v-col
               cols="12"
-              :md="selectedListKey ? 5 : 12"
-              :class="selectedListKey ? 'pr-md-4' : 'px-0 text-center mx-auto max-width-initial-picker'"
+              :md="selectedListId ? 5 : 12"
+              :class="selectedListId ? 'pr-md-4' : 'px-0 text-center mx-auto max-width-initial-picker'"
             >
               <div class="border rounded-xl pa-4 bg-slate-50 h-100">
                 <div class="d-flex align-center mb-2">
@@ -85,13 +85,17 @@
                   <span class="text-subtitle-2 font-weight-black text-slate-900 uppercase tracking-wide">Select Vocab List</span>
                 </div>
 
-                <v-radio-group v-model="selectedListKey" hide-details density="compact" class="ma-0 pa-0 inline-radio-group">
+                <!-- Loading state -->
+                <v-progress-linear v-if="loadingLists" indeterminate class="mb-4" />
+
+                <v-radio-group v-model="selectedListId" hide-details density="compact" class="ma-0 pa-0 inline-radio-group">
                   
-                  <div v-if="generalVocabItems?.length" class="text-overline font-weight-bold text-slate-400 tracking-wider mb-2 block leading-none">
+                  <!-- General Vocabulary (Hardcoded Irregular Verbs) -->
+                  <div v-if="irregularVerbItems?.length" class="text-overline font-weight-bold text-slate-400 tracking-wider mb-2 block leading-none">
                     General Vocabulary
                   </div>
 
-                  <div v-if="generalVocabItems?.length" class="bg-white border rounded-xl pa-3 mb-4 space-stack-items">
+                  <div v-if="irregularVerbItems?.length" class="bg-white border rounded-xl pa-3 mb-4 space-stack-items">
                     <v-radio
                       v-for="item in irregularVerbItems"
                       :key="item.value"
@@ -100,37 +104,42 @@
                       color="primary"
                       class="compact-pills-radio border-b pb-1.5 mb-1.5"
                     />
-                    <v-radio 
-                      v-for="(item, idx) in generalVocabItems" 
-                      :key="item.value" 
-                      :label="item.title" 
-                      :value="item.value" 
+                    <v-radio
+                      v-for="item in generalVocabItems"
+                      :key="item.value"
+                      :label="item.title"
+                      :value="item.value"
                       color="primary"
-                      :class="{ 'border-b pb-1.5 mb-1.5': idx !== generalVocabItems.length - 1 }"
-                      class="compact-pills-radio" 
+                      class="compact-pills-radio border-b pb-1.5 mb-1.5"
                     />
                   </div>
 
-                  <div class="text-overline font-weight-bold text-slate-400 tracking-wider mb-2 block leading-none">
-                    My Domain (<span class="text-primary text-lowercase font-weight-black">{{ studentDomain }}</span>)
+                  <!-- Custom Vocab Lists from Backend -->
+                  <div v-if="customVocabListItems?.length > 0" class="text-overline font-weight-bold text-slate-400 tracking-wider mb-2 block leading-none">
+                    My Domain: <span class="text-slate-900">{{ user.studentDomainLabel || 'General' }}</span>
                   </div>
 
-                  <div class="bg-white border rounded-xl pa-3 space-stack-items">
-                    <v-radio 
-                      v-for="(item, idx) in domainItems" 
-                      :key="item.value" 
-                      :label="item.title" 
-                      :value="item.value" 
+                  <div v-if="customVocabListItems?.length > 0" class="bg-white border rounded-xl pa-3 space-stack-items">
+                    <v-radio
+                      v-for="(item, idx) in customVocabListItems"
+                      :key="item.id"
+                      :label="item.name"
+                      :value="item.id"
                       color="primary"
-                      :class="{ 'border-b pb-1.5 mb-1.5': idx !== domainItems.length - 1 }"
-                      class="compact-pills-radio" 
+                      :class="{ 'border-b pb-1.5 mb-1.5': idx !== customVocabListItems.length - 1 }"
+                      class="compact-pills-radio"
                     />
+                  </div>
+
+                  <!-- Empty state message -->
+                  <div v-if="!loadingLists && !irregularVerbItems?.length && !customVocabListItems?.length" class="text-caption text-slate-500 pa-4 text-center">
+                    No vocab lists available. Please check with your instructor.
                   </div>
                 </v-radio-group>
               </div>
             </v-col>
 
-            <v-col v-if="selectedListKey" cols="12" md="7" class="pl-md-4 mt-5 mt-md-0">
+            <v-col v-if="selectedListId" cols="12" md="7" class="pl-md-4 mt-5 mt-md-0">
               <div class="border rounded-xl pa-4 bg-white h-100 d-flex flex-column justify-space-between">
                 <div>
                   <div class="d-flex align-center mb-4">
@@ -138,6 +147,7 @@
                     <span class="text-subtitle-2 font-weight-black text-slate-900 uppercase tracking-wide">Define Study Mode</span>
                   </div>
 
+                  <!-- Level selector (for irregular verbs only for now) -->
                   <div v-if="listSupportsLevels" class="mb-4 animate-fade-in">
                     <div class="text-overline font-weight-bold text-slate-400 tracking-wider mb-2">Choose essential or advanced</div>
                     <v-btn-toggle v-model="selectedLevel" mandatory divided color="primary" variant="outlined" class="rounded-xl flex-width-toggle border" height="38">
@@ -181,7 +191,7 @@
                       </v-col>
                     </v-row>
 
-                    <div v-if="selectedListKey && allowedPairs.length === 0" class="text-caption font-weight-bold text-error mt-2 d-flex align-center px-1">
+                    <div v-if="selectedListId && allowedPairs.length === 0" class="text-caption font-weight-bold text-error mt-2 d-flex align-center px-1">
                       <v-icon size="14" class="mr-1">mdi-alert-circle-outline</v-icon>
                       This list has no valid study pairs configured yet.
                     </div>
@@ -190,7 +200,7 @@
                   <div v-if="selectedMode === 'quiz'" class="mb-4 animate-fade-in">
                     <v-text-field
                       v-model.number="selectedQuizCount"
-                      label="Quiz Length Vector (Total Items)"
+                      label="Quiz Length (Total Items)"
                       type="number"
                       min="1"
                       max="200"
@@ -206,7 +216,7 @@
                 <div class="mt-4 pt-2 border-t">
                   <div v-if="!valid" class="text-caption font-weight-bold text-error mb-2 d-flex align-center">
                     <v-icon size="14" class="mr-1">mdi-lock-outline</v-icon>
-                    <template v-if="!selectedListKey">Please choose a vocab list from Step 1.</template>
+                    <template v-if="!selectedListId">Please choose a vocab list from Step 1.</template>
                     <template v-else-if="listSupportsLevels && !selectedLevel">Please choose a level.</template>
                     <template v-else-if="selectedMode === 'write' && !computedTrackKey">Writing progress is only tracked for specific study pairs.</template>
                     <template v-else>Please try different settings.</template>
@@ -248,6 +258,7 @@ import { computed, nextTick, onMounted, ref, watch } from "vue";
 import { useVocabWorkoutStore } from "@/stores/vocabWorkout";
 import { vocabLists } from "@/assets/scripts/vocab_workout/VocabListRegistry";
 import { useUserStore } from "@/stores/user";
+import api from "@/axios";
 
 import VWMyProgressPanel from "@/components/vocab_workout_scenes/VWMyProgressPanel.vue";
 import HomeButton from "../HomeButton.vue";
@@ -255,16 +266,32 @@ import HomeButton from "../HomeButton.vue";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
-/** If you want “Completed 3×” as the mastery target */
 const COMPLETION_TARGET = 3;
 
 type VWMode = "cards" | "write" | "multiple_choice" | "quiz" | "match" | null;
 type VWLevel = "essential" | "advanced" | null;
 
-const props = defineProps<{
-  // from SceneManager
-  availableLists: Record<string, { title: string; value: string; supportsLevels: boolean }[]>;
-}>();
+interface CustomVocabList {
+  id: string;
+  name: string;
+  domain?: string;
+  description?: string;
+  item_count: number;
+  created_at: string;
+  updated_at: string;
+}
+
+interface CustomVocabItem {
+  id: string;
+  vocab_list: string;
+  term: string;
+  definition: string;
+  part_of_speech?: string;
+  context_usage?: string;
+  image_url?: string;
+  additional_data?: Record<string, any>;
+  created_at: string;
+}
 
 const emit = defineEmits<{
   (e: "startGame", payload: any): void;
@@ -274,54 +301,145 @@ const vw = useVocabWorkoutStore();
 const user = useUserStore();
 
 const activePanel = ref(0);
-
 const pdfLoading = ref(false);
+const loadingLists = ref(false);
 
 /* ----------------------------
    SETTINGS STATE
 ---------------------------- */
-const selectedListKey = ref<string | null>(null);
+const selectedListId = ref<string | null>(null); // UUID for custom lists, or special key for hardcoded
 const selectedMode = ref<VWMode>(null);
 const selectedLevel = ref<VWLevel>(null);
 const selectedFrontField = ref<string>("definition");
 const selectedBackField = ref<string>("term");
 const selectedQuizCount = ref<number>(20);
 
-watch(selectedListKey, async (newKey) => {
-  await nextTick();
-  selectedFrontField.value = newKey === "irregular_verbs" ? "term" : "definition";
+/* ----------------------------
+   Custom vocab lists from backend
+---------------------------- */
+const customVocabLists = ref<CustomVocabList[]>([]);
+const customVocabItems = ref<Record<string, CustomVocabItem[]>>({}); // keyed by list ID
+
+/* ----------------------------
+   Load available custom vocab lists on mount
+---------------------------- */
+onMounted(async () => {
+  await loadAvailableVocabLists();
 });
 
-type FieldValue =
-  | "term"
-  | "definition"
-  | "past_simple"
-  | "present_perfect"
-  | "past_forms"
-  | "French"
-  | "German"
-  | "Italian";
-
-type Pair = { front: FieldValue; back: FieldValue; label?: string };
+async function loadAvailableVocabLists() {
+  loadingLists.value = true;
+  try {
+    // Fetch all available custom vocab lists for this student
+    // This endpoint respects VocabListAvailability permissions
+    const response = await api.get<CustomVocabList[]>("/vocab-lists/");
+    const rawData = response.data && typeof response.data === 'object' && 'results' in response.data
+      ? (response.data as any).results
+      : response.data;
+    
+    customVocabLists.value = Array.isArray(rawData) ? rawData : [];
+    console.log("📚 Loaded custom vocab lists:", customVocabLists.value.length);
+  } catch (err: any) {
+    console.error("Failed to load custom vocab lists:", err);
+    customVocabLists.value = [];
+  } finally {
+    loadingLists.value = false;
+  }
+}
 
 /* ----------------------------
-   Available lists (defensive)
+   Load items for selected list
 ---------------------------- */
-const availableListsComputed = computed(() => props.availableLists ?? {});
+watch(selectedListId, async (newId) => {
+  if (!newId || isHardcodedListKey(newId)) {
+    // Hardcoded list, no need to load items
+    return;
+  }
+
+  try {
+    // Fetch items for this custom list
+    const response = await api.get<CustomVocabItem[]>(`/vocab-lists/${newId}/prompts/`);
+    const items = Array.isArray(response.data) ? response.data : [];
+    customVocabItems.value[newId] = items;
+    console.log(`📖 Loaded ${items.length} items for list ${newId}`);
+  } catch (err: any) {
+    console.error(`Failed to load items for list ${newId}:`, err);
+    customVocabItems.value[newId] = [];
+  }
+});
 
 /* ----------------------------
-   List meta helpers (from picker)
+   Hardcoded irregular verbs (from frontend registry)
+---------------------------- */
+const irregularVerbItems = computed(() => {
+  return Object.entries(vocabLists as any)
+    .filter(([key]) => key.startsWith("irregular_verbs"))
+    .map(([key, entry]: [string, any]) => ({
+      title: entry.title || key,
+      value: key,
+      supportsLevels: !!entry.supportsLevels,
+    }));
+});
+const generalVocabItems = computed(() => {
+  return Object.entries(vocabLists as any)
+    .filter(([key]) => key.startsWith("general"))
+    .map(([key, entry]: [string, any]) => ({
+      title: entry.title || key,
+      value: key,
+      supportsLevels: !!entry.supportsLevels,
+    }));
+});
+
+/* ----------------------------
+   Custom vocab lists (from backend)
+---------------------------- */
+const customVocabListItems = computed(() => {
+  return customVocabLists.value.map((list) => ({
+    id: list.id,
+    name: list.name,
+    domain: list.domain,
+  }));
+});
+
+/* ----------------------------
+   Selected list metadata
 ---------------------------- */
 const selectedListMeta = computed(() => {
-  const flat = Object.values(availableListsComputed.value).flat();
-  return flat.find((x) => x.value === selectedListKey.value) ?? null;
+  if (!selectedListId.value) return null;
+
+  // Check if it's a custom list
+  const customList = customVocabLists.value.find((l) => l.id === selectedListId.value);
+  if (customList) return customList;
+
+  // Check if it's a hardcoded list
+  const hardcodedEntry = (vocabLists as any)[selectedListId.value];
+  if (hardcodedEntry) {
+    return {
+      id: selectedListId.value,
+      name: hardcodedEntry.title || selectedListId.value,
+    };
+  }
+
+  return null;
 });
 
-const listSupportsLevels = computed(() => !!selectedListMeta.value?.supportsLevels);
+const listSupportsLevels = computed(() => {
+  if (!selectedListId.value) return false;
+  // Only hardcoded irregular verbs support levels for now
+  return isHardcodedListKey(selectedListId.value) && (vocabLists as any)[selectedListId.value]?.supportsLevels;
+});
 
+function isHardcodedListKey(key: string | null): boolean {
+  if (!key) return false;
+  return key.startsWith("irregular_verbs") || key.startsWith("general");
+}
+
+/* ----------------------------
+   Get term data for PDF/validation
+---------------------------- */
 function getSelectedListTermMap(): Record<string, any> {
-  const key = selectedListKey.value;
-  if (!key) return {};
+  const key = selectedListId.value;
+  if (!key || !isHardcodedListKey(key)) return {};
 
   const entry = (vocabLists as any)[key];
   const termMap = entry?.data;
@@ -330,104 +448,130 @@ function getSelectedListTermMap(): Record<string, any> {
   return termMap as Record<string, any>;
 }
 
+function getSelectedListItems(): CustomVocabItem[] {
+  const key = selectedListId.value;
+  if (!key) return [];
 
+  if (isHardcodedListKey(key)) return [];
+
+  return customVocabItems.value[key] ?? [];
+}
+
+/* ----------------------------
+   PDF Download
+---------------------------- */
 async function downloadListPdf() {
-  if (!selectedListKey.value) return;
+  if (!selectedListId.value) return;
 
   pdfLoading.value = true;
   try {
-    const title = selectedListMeta.value?.title ?? selectedListKey.value;
+    const title = selectedListMeta.value?.name ?? selectedListId.value;
 
-    const termMap = getSelectedListTermMap();
-    let rows = toPdfRowsFromTermMap(termMap)
-      .filter((r) => r.term.length > 0)
-      .sort((a, b) => a.term.localeCompare(b.term, undefined, { sensitivity: "base" }));
+    let rows: PdfRow[] = [];
 
-    // Optional: filter by level for irregular verbs (or any list that provides a `level` per term)
-    if (listSupportsLevels.value && selectedLevel.value) {
-      rows = rows.filter((r) => {
-        const raw = termMap[r.term];
-        return String(raw?.level ?? "").toLowerCase() === String(selectedLevel.value).toLowerCase();
-      });
+    if (isHardcodedListKey(selectedListId.value)) {
+      // Hardcoded list
+      const termMap = getSelectedListTermMap();
+      rows = toPdfRowsFromTermMap(termMap)
+        .filter((r) => r.term.length > 0)
+        .sort((a, b) => a.term.localeCompare(b.term, undefined, { sensitivity: "base" }));
+
+      if (listSupportsLevels.value && selectedLevel.value) {
+        rows = rows.filter((r) => {
+          const raw = termMap[r.term];
+          return String(raw?.level ?? "").toLowerCase() === String(selectedLevel.value).toLowerCase();
+        });
+      }
+    } else {
+      // Custom list from backend
+      const items = getSelectedListItems();
+      rows = items.map((item) => ({
+        term: item.term,
+        definition: item.definition,
+        past_forms: "",
+        French: "",
+        German: "",
+        Italian: "",
+      }));
     }
-    const doc = new jsPDF({ orientation: "landscape", unit: "pt", format: "a4" });
 
+    const doc = new jsPDF({ orientation: "landscape", unit: "pt", format: "a4" });
     doc.setFontSize(14);
     doc.text(`Vocab list: ${title}`, 40, 40);
 
-const marginLeft = 30;
-const marginRight = 30;
+    const marginLeft = 30;
+    const marginRight = 30;
 
-const isIrregular = selectedListKey.value?.startsWith("irregular_verbs");
+    const isIrregular = isHardcodedListKey(selectedListId.value);
 
-const head = isIrregular
-  ? ["Term", "Past forms", "Definition", "French", "German", "Italian"]
-  : ["Term", "Definition", "French", "German", "Italian"];
+    const head = isIrregular
+      ? ["Term", "Past forms", "Definition", "French", "German", "Italian"]
+      : ["Term", "Definition"];
 
-const body = rows.map((r) =>
-  isIrregular
-    ? [r.term, r.past_forms || "", r.definition, r.French, r.German, r.Italian]
-    : [r.term, r.definition, r.French, r.German, r.Italian]
-);
+    const body = rows.map((r) =>
+      isIrregular
+        ? [r.term, r.past_forms || "", r.definition, r.French, r.German, r.Italian]
+        : [r.term, r.definition]
+    );
 
-// Choose “ideal” widths, then auto-scale to fit exactly
-const idealWidths = isIrregular
-  ? [95, 140, 240, 125, 125, 125]
-  : [110, 300, 140, 140, 140];
+    const idealWidths = isIrregular
+      ? [95, 140, 240, 125, 125, 125]
+      : [150, 400];
 
+    function fitColumnWidthsToPage(
+      doc: jsPDF,
+      widths: number[],
+      marginLeft: number,
+      marginRight: number
+    ) {
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const available = pageWidth - marginLeft - marginRight;
 
-  function fitColumnWidthsToPage(doc: jsPDF, widths: number[], marginLeft: number, marginRight: number) {
-  const pageWidth = doc.internal.pageSize.getWidth();
-  const available = pageWidth - marginLeft - marginRight;
+      const sum = widths.reduce((a, b) => a + b, 0);
+      if (sum <= available) return widths;
 
-  const sum = widths.reduce((a, b) => a + b, 0);
-  if (sum <= available) return widths;
-
-  const scale = available / sum;
-  return widths.map((w) => Math.floor(w * scale));
-}
-const fitted = fitColumnWidthsToPage(doc, idealWidths, marginLeft, marginRight);
-
-const columnStyles: any = {};
-for (let i = 0; i < fitted.length; i++) {
-  columnStyles[i] = { cellWidth: fitted[i] };
-}
-
-  autoTable(doc, {
-    startY: 60,
-    margin: { left: marginLeft, right: marginRight },
-
-    // ✅ this helps prevent unexpected stretching
-    tableWidth: "wrap",
-
-    head: [head],
-    body,
-
-    styles: {
-      fontSize: 9,
-      cellPadding: 4,
-      overflow: "linebreak", // keep your existing behavior
-      valign: "top",
-    },
-
-    headStyles: {
-      fillColor: [30, 30, 30],
-      textColor: 255,
-    },
-
-    columnStyles,
-  });
-
-      const safeName = String(title).replace(/[^a-z0-9]+/gi, "_").replace(/^_+|_+$/g, "");
-      const levelSuffix =
-        listSupportsLevels.value && selectedLevel.value ? `_${selectedLevel.value}` : "";
-      doc.save(`${safeName || "vocab_list"}${levelSuffix}.pdf`);
-    } catch (e) {
-      console.error("[VocabWorkoutSettings] PDF export failed:", e);
-    } finally {
-      pdfLoading.value = false;
+      const scale = available / sum;
+      return widths.map((w) => Math.floor(w * scale));
     }
+
+    const fitted = fitColumnWidthsToPage(doc, idealWidths, marginLeft, marginRight);
+
+    const columnStyles: any = {};
+    for (let i = 0; i < fitted.length; i++) {
+      columnStyles[i] = { cellWidth: fitted[i] };
+    }
+
+    autoTable(doc, {
+      startY: 60,
+      margin: { left: marginLeft, right: marginRight },
+      tableWidth: "wrap",
+      head: [head],
+      body,
+      styles: {
+        fontSize: 9,
+        cellPadding: 4,
+        overflow: "linebreak",
+        valign: "top",
+      },
+      headStyles: {
+        fillColor: [30, 30, 30],
+        textColor: 255,
+      },
+      columnStyles,
+    });
+
+    const safeName = String(title)
+      .replace(/[^a-z0-9]+/gi, "_")
+      .replace(/^_+|_+$/g, "");
+    const levelSuffix =
+      listSupportsLevels.value && selectedLevel.value ? `_${selectedLevel.value}` : "";
+    doc.save(`${safeName || "vocab_list"}${levelSuffix}.pdf`);
+  } catch (e) {
+    console.error("[VWSettingsScene] PDF export failed:", e);
+  } finally {
+    pdfLoading.value = false;
   }
+}
 
 type PdfRow = {
   term: string;
@@ -465,122 +609,35 @@ function toPdfRowsFromTermMap(termMap: Record<string, any>): PdfRow[] {
   });
 }
 
-
-
 /* ----------------------------
-   Domain + expected lists
+   Field & Pair Logic (works for both hardcoded and custom)
 ---------------------------- */
-const studentDomain = computed(() => (user.student as any)?.domain ?? null);
+type FieldValue =
+  | "term"
+  | "definition"
+  | "past_simple"
+  | "present_perfect"
+  | "past_forms"
+  | "French"
+  | "German"
+  | "Italian";
 
-const domainModuleKey = computed(() => {
-  const dom = (studentDomain.value ?? "").trim();
-  if (!dom) return null;
+type Pair = { front: FieldValue; back: FieldValue; label?: string };
 
-  const keys = Object.keys(props.availableLists ?? {});
-  const hit = keys.find((k) => k.toLowerCase() === dom.toLowerCase());
-  return hit ?? null;
-});
+watch(selectedListId, async (newKey) => {
+  if (!newKey) return;
 
-const irregularVerbItems = computed(() => {
-  return Object.entries(availableListsComputed.value).flatMap(([moduleName, lists]) =>
-    lists
-      .filter((l) => l.value.startsWith("irregular_verbs"))
-      .map((l) => ({
-        title: l.title,
-        value: l.value,
-        module: moduleName,
-        supportsLevels: l.supportsLevels,
-      }))
-  );
-});
-
-const domainItems = computed(() => {
-  const moduleKey = domainModuleKey.value;
-  if (!moduleKey) return [];
-
-  return (props.availableLists?.[moduleKey] ?? []).map((l) => ({
-    title: l.title,
-    value: l.value,
-    module: moduleKey,
-    supportsLevels: l.supportsLevels,
-  }));
-});
-
-
-const GENERAL_MODULE_NAME = "General Vocabulary";
-
-const generalVocabItems = computed(() => {
-  // Prefer exact key, but be tolerant of casing/spacing differences
-  const keys = Object.keys(availableListsComputed.value);
-  const key =
-    keys.find((k) => k === GENERAL_MODULE_NAME) ??
-    keys.find((k) => k.toLowerCase() === GENERAL_MODULE_NAME.toLowerCase()) ??
-    null;
-
-  if (!key) return [];
-
-  return (availableListsComputed.value[key] ?? []).map((l) => ({
-    title: l.title,
-    value: l.value,
-    module: key,
-    supportsLevels: l.supportsLevels,
-  }));
-});
-
-/* ----------------------------
-   Track key (progress variant) rules
-   - enforce for writing mode
----------------------------- */
-watch(selectedFrontField, (front) => {
-  if (isIrregularListKey(selectedListKey.value) && front === "term") {
-    selectedBackField.value = ""; // clears filter so all back options appear
-  }
-});
-
-function computeTrackKeyFrontend(listKey: string, front: FieldValue, back: FieldValue): string | null {
-  if (!listKey) return null;
-  if (front === back) return null;
-
-  if (isIrregularListKey(listKey)) {
-    if (back === "term" && ["definition", "French", "German", "Italian"].includes(front))
-      return "to_infinitive";
-
-    if (front === "term" && back === "past_simple") return "to_past_simple";
-    if (front === "term" && back === "present_perfect") return "to_past_particple";
-    if (front === "term" && back === "past_forms") return "to_past_forms";
-
-    return null;
+  if (isHardcodedListKey(newKey)) {
+    selectedFrontField.value = "definition";
+    selectedBackField.value = "term";
+  } else {
+    // For custom lists, default to definition -> term
+    selectedFrontField.value = "definition";
+    selectedBackField.value = "term";
   }
 
-  if (back === "term" && ["definition", "French", "German", "Italian"].includes(front)) return "to_term";
-  return null;
-}
-
-function getAllowedPairs(listKey: string): Pair[] {
-  if (isIrregularListKey(listKey)) {
-    return [
-      { front: "definition", back: "term", label: "Definition → Infinitive" },
-      { front: "French", back: "term", label: "French → Infinitive" },
-      { front: "German", back: "term", label: "German → Infinitive" },
-      { front: "Italian", back: "term", label: "Italian → Infinitive" },
-      { front: "term", back: "past_simple", label: "Infinitive → Past simple" },
-      { front: "term", back: "present_perfect", label: "Infinitive → Past participle" },
-      { front: "term", back: "past_forms", label: "Infinitive → Both past forms" },
-    ];
-  }
-
-  return [
-    { front: "definition", back: "term", label: "Definition → Term" },
-    { front: "French", back: "term", label: "French → Term" },
-    { front: "German", back: "term", label: "German → Term" },
-    { front: "Italian", back: "term", label: "Italian → Term" },
-  ];
-}
-
-function isIrregularListKey(listKey: string | null | undefined): boolean {
-  if (!listKey) return false;
-  return listKey === "irregular_verbs" || listKey.startsWith("irregular_verbs");
-}
+  forceValidPair();
+});
 
 const FIELD_LABELS: Record<FieldValue, string> = {
   term: "Term",
@@ -593,20 +650,107 @@ const FIELD_LABELS: Record<FieldValue, string> = {
   Italian: "Italian",
 };
 
+function computeTrackKeyFrontend(
+  listId: string,
+  front: FieldValue,
+  back: FieldValue
+): string | null {
+  if (!listId) return null;
+  if (front === back) return null;
+
+  // Irregular Verbs specialized track mapping
+  if (listId.startsWith("irregular_verbs")) {
+    if (back === "term" && ["definition", "French", "German", "Italian"].includes(front))
+      return "to_infinitive";
+
+    if (front === "term" && back === "past_simple") return "to_past_simple";
+    if (front === "term" && back === "present_perfect") return "to_past_particple";
+    if (front === "term" && back === "past_forms") return "to_past_forms";
+
+    return null;
+  }
+
+  // General vocabulary lists or backend custom lists mapping to standard terms
+  if (back === "term" && ["definition", "French", "German", "Italian"].includes(front)) {
+    return "to_term";
+  }
+  
+  return null;
+}
+
+
+// Add this helper to determine available fields for a list
+function getAvailableFieldsForList(listId: string): FieldValue[] {
+  // Hardcoded lists have predefined fields
+  if (isHardcodedListKey(listId)) {
+    return ["term", "definition", "past_simple", "present_perfect", "past_forms", "French", "German", "Italian"];
+  }
+
+  // For custom lists, inspect the actual items to see what's available
+  const items = getSelectedListItems();
+  if (!items.length) return ["definition", "term"];
+
+  const fields = new Set<FieldValue>(["definition", "term"]);
+
+  items.forEach((item) => {
+    const data = item.additional_data || {};
+    if (data.French) fields.add("French");
+    if (data.German) fields.add("German");
+    if (data.Italian) fields.add("Italian");
+    if (data.past_simple) fields.add("past_simple");
+    if (data.present_perfect) fields.add("present_perfect");
+  });
+
+  return Array.from(fields);
+}
+
+function getAllowedPairs(listId: string): Pair[] {
+  // Irregular verbs have unique conjugation targets
+  if (listId.startsWith("irregular_verbs")) {
+    return [
+      { front: "definition", back: "term", label: "Definition → Infinitive" },
+      { front: "French", back: "term", label: "French → Infinitive" },
+      { front: "German", back: "term", label: "German → Infinitive" },
+      { front: "Italian", back: "term", label: "Italian → Infinitive" },
+      { front: "term", back: "past_simple", label: "Infinitive → Past simple" },
+      { front: "term", back: "present_perfect", label: "Infinitive → Past participle" },
+      { front: "term", back: "past_forms", label: "Infinitive → Both past forms" },
+    ];
+  }
+
+  // Hardcoded general vocab lists or Custom DB lists build their fields dynamically
+  const availableFields = getAvailableFieldsForList(listId);
+  const pairs: Pair[] = [];
+
+  if (availableFields.includes("definition") && availableFields.includes("term")) {
+    pairs.push({ front: "definition", back: "term", label: "Definition → Term" });
+  }
+
+  ["French", "German", "Italian"].forEach((lang) => {
+    if (availableFields.includes(lang as FieldValue) && availableFields.includes("term")) {
+      pairs.push({ front: lang as FieldValue, back: "term", label: `${lang} → Term` });
+    }
+  });
+
+  return pairs;
+}
+
 const computedTrackKey = computed(() => {
-  if (!selectedListKey.value) return null;
+  if (!selectedListId.value) return null;
   if (!selectedFrontField.value || !selectedBackField.value) return null;
   return computeTrackKeyFrontend(
-    selectedListKey.value,
+    selectedListId.value,
     selectedFrontField.value as FieldValue,
     selectedBackField.value as FieldValue
   );
 });
 
 const allowedPairs = computed<Pair[]>(() => {
-  const listKey = selectedListKey.value;
-  if (!listKey) return [];
-  return getAllowedPairs(listKey).filter((p) => !!computeTrackKeyFrontend(listKey, p.front, p.back));
+  const listId = selectedListId.value;
+  if (!listId) return [];
+  return getAllowedPairs(listId).filter(
+    (p) => !!computeTrackKeyFrontend(listId, p.front, p.back)
+  );
 });
 
 const allowedFrontItems = computed(() => {
@@ -614,16 +758,23 @@ const allowedFrontItems = computed(() => {
   const allowedFronts = new Set<FieldValue>();
   for (const p of pairs) allowedFronts.add(p.front);
 
-  return Array.from(allowedFronts).map((v) => ({ title: FIELD_LABELS[v], value: v }));
+  return Array.from(allowedFronts).map((v) => ({
+    title: FIELD_LABELS[v],
+    value: v,
+  }));
 });
 
 const allowedBackItems = computed(() => {
   const pairs = allowedPairs.value;
   const allowedBacks = new Set<FieldValue>();
   for (const p of pairs) {
-    if (!selectedFrontField.value || p.front === selectedFrontField.value) allowedBacks.add(p.back);
+    if (!selectedFrontField.value || p.front === selectedFrontField.value)
+      allowedBacks.add(p.back);
   }
-  return Array.from(allowedBacks).map((v) => ({ title: FIELD_LABELS[v], value: v }));
+  return Array.from(allowedBacks).map((v) => ({
+    title: FIELD_LABELS[v],
+    value: v,
+  }));
 });
 
 const sortedFrontItems = computed(() => {
@@ -634,16 +785,16 @@ const sortedFrontItems = computed(() => {
   });
 });
 
-
-// Auto-fix invalid pair whenever list or selections change.
 function forceValidPair() {
-  if (!selectedListKey.value) return;
+  if (!selectedListId.value) return;
   if (computedTrackKey.value) return;
 
   const pairs = allowedPairs.value;
   if (!pairs.length) return;
 
-  const matchFront = pairs.find((p) => p.front === (selectedFrontField.value as FieldValue));
+  const matchFront = pairs.find(
+    (p) => p.front === (selectedFrontField.value as FieldValue)
+  );
   const first = matchFront ?? pairs[0];
 
   selectedFrontField.value = first.front;
@@ -651,17 +802,17 @@ function forceValidPair() {
 }
 
 watch(selectedFrontField, async (front) => {
-  if (isIrregularListKey(selectedListKey.value) && front === "term") {
+  if (isHardcodedListKey(selectedListId.value) && front === "term") {
     selectedBackField.value = "";
     await nextTick();
     forceValidPair();
   }
 });
 
-watch(selectedListKey, (newKey) => {
-  if (!newKey) return;
+watch(selectedListId, async (newId) => {
+  if (!newId) return;
 
-  if (isIrregularListKey(newKey)) {
+  if (isHardcodedListKey(newId)) {
     selectedFrontField.value = "definition";
     selectedBackField.value = "term";
   }
@@ -690,13 +841,13 @@ function emitStartGame(payload: any) {
     return;
   }
 
-  const listKey = payload?.listKey ?? selectedListKey.value;
-  if (!listKey) {
-    console.error("[VocabWorkoutSettings] Missing listKey.");
+  const listId = payload?.listId ?? selectedListId.value;
+  if (!listId) {
+    console.error("[VWSettingsScene] Missing listId.");
     return;
   }
 
-  emit("startGame", { ...payload, listKey });
+  emit("startGame", { ...payload, listId });
 }
 
 function continueSession(sessionId: number) {
@@ -706,13 +857,13 @@ function continueSession(sessionId: number) {
   });
 }
 
-/**
- * Start new from My Progress panel:
- */
-function startNewSessionForList(listKey: string, level: string | null, trackKey: string | null) {
-  // (kept same behavior as before)
+function startNewSessionForList(
+  listKey: string,
+  level: string | null,
+  trackKey: string | null
+) {
   emitStartGame({
-    listKey,
+    listId: listKey, // Could be either hardcoded key or custom UUID
     level,
     mode: "write",
     frontField: "definition",
@@ -723,26 +874,27 @@ function startNewSessionForList(listKey: string, level: string | null, trackKey:
 }
 
 /* ----------------------------
-   Validations for Start
+   Validations
 ---------------------------- */
 const valid = computed(() => {
-  if (!selectedListKey.value) return false;
+  if (!selectedListId.value) return false;
 
   if (listSupportsLevels.value) {
-    if (selectedLevel.value !== "essential" && selectedLevel.value !== "advanced") return false;
+    if (selectedLevel.value !== "essential" && selectedLevel.value !== "advanced")
+      return false;
   }
 
   return !!computedTrackKey.value;
 });
 
 /* ----------------------------
-   Start from drawer
+   Start game
 ---------------------------- */
 function start() {
   if (!valid.value) return;
 
   emit("startGame", {
-    listKey: selectedListKey.value,
+    listId: selectedListId.value,
     mode: selectedMode.value,
     level: listSupportsLevels.value ? selectedLevel.value : null,
     frontField: selectedFrontField.value,
@@ -752,6 +904,7 @@ function start() {
   });
 }
 </script>
+
 
 <style scoped>
 .min-h-screen {

@@ -345,7 +345,7 @@ import { ref, computed, nextTick, watch, onMounted, onBeforeUnmount, watchEffect
 import type { VocabItem, BackField, FrontField } from "@/assets/scripts/vocab_workout/VocabWorkoutPromptEngine";
 import { getFrontText, getAcceptedAnswers } from "@/assets/scripts/vocab_workout/VocabWorkoutPromptEngine";
 
-import { buildMultipleChoiceOptions, checkUserAnswer } from "@/assets/scripts/vocab_workout/VocabWorkoutGameLogic";
+import { buildMultipleChoiceOptions, checkUserAnswer, checkUserAnswerForCustomItem } from "@/assets/scripts/vocab_workout/VocabWorkoutGameLogic";
 
 import { useVocabWorkoutStore } from "@/stores/vocabWorkout";
 import type { VWAttempt } from "@/stores/vocabWorkout";
@@ -557,9 +557,10 @@ const contextEmptyMessage = ref<string | null>(null);
 const contextCache = ref<Record<string, ContextIndex>>({});
 
 const contextEnabledForThisList = computed(() => {
-  if (mode.value !== "cards") return false; // Discover only
-  const k = String(props.gameSettings?.listKey ?? "").trim();
-  return contextApprovedListKeys.has(k);
+  if (mode.value !== "cards") return false;
+  const id = String(props.gameSettings?.listId ?? "").trim();
+  // Only enable context for hardcoded irregular verb lists
+  return id.startsWith("irregular_verbs");
 });
 
 async function loadContextIndex(listKey: string): Promise<ContextIndex | null> {
@@ -589,6 +590,12 @@ async function loadContextIndex(listKey: string): Promise<ContextIndex | null> {
 async function openContextExamples(term?: string | null) {
   const t = String(term ?? "").trim();
   if (!t) return;
+
+  const id = String(props.gameSettings?.listId ?? "").trim();
+  if (!id.startsWith("irregular_verbs")) {
+    contextError.value = "Context examples only available for irregular verbs list.";
+    return;
+  }
 
   contextDialogOpen.value = true;
   contextTerm.value = t;
@@ -666,6 +673,8 @@ function highlightInSnippet(snippet: string, term: string): string {
 
   return text.replace(re, `<mark class="vw-context-mark">$1</mark>`);
 }
+
+
 /* =========================================================
    Pretty labels
 ========================================================= */
@@ -680,10 +689,15 @@ const resumeIndexDisplay = computed(() => {
 });
 
 const prettyListKey = computed(() => {
-  const k = String(props.gameSettings?.listKey ?? "");
-  if (!k) return "";
-  const withSpaces = k.replace(/_/g, " ");
-  return withSpaces.charAt(0).toUpperCase() + withSpaces.slice(1);
+  const id = String(props.gameSettings?.lis ?? "");
+  if (id.startsWith("irregular_verbs")) {
+    // Hardcoded
+    const withSpaces = id.replace(/_/g, " ");
+    return withSpaces.charAt(0).toUpperCase() + withSpaces.slice(1);
+  }
+  // For custom lists, find the name if available
+  const found = props.gameSettings?.listName ?? null;
+  return found || id.slice(0, 8); // show first 8 chars of UUID
 });
 
 const prettyBackField = computed(() => {
@@ -917,11 +931,11 @@ function applyServerState(state: any) {
   const total =
     Number(session?.total_count ?? 0) ||
     (Array.isArray(session?.all_item_ids) ? session.all_item_ids.length : 0);
-
+  console.log(state)
   const unseen =
-    Number(state?.unseen_count ?? NaN);
+    Number(state?.unseen_item_ids?.length ?? NaN);
   const review =
-    Number(state?.review_count ?? NaN);
+    Number(state?.review_item_ids?.length ?? NaN);
 
   // Fallback to session arrays if wrapper counts missing
   const unseenFallback = Array.isArray(session?.unseen_item_ids) ? session.unseen_item_ids.length : 0;
@@ -1100,24 +1114,81 @@ function toggleSide() {
   shownSide.value = shownSide.value === "front" ? "back" : "front";
 }
 
+function getFieldValueFromItem(item: any, field: string): string[] {
+  if (!item) return [];
+
+  // For standard fields
+  if (field === "term") return [item.term || ""];
+  if (field === "definition") return [item.definition || ""];
+
+  // For language translations and inflections in additional_data
+  const data = item.additional_data || {};
+  const value = data[field];
+
+  if (Array.isArray(value)) {
+    return value.map(String).filter(Boolean);
+  }
+  if (typeof value === "string") {
+    return [value].filter(Boolean);
+  }
+  return [];
+}
+
+function isHardcodedListKey(listId: string | null | undefined): boolean {
+  if (!listId) return false;
+  
+  const id = String(listId).trim();
+  
+  // Hardcoded lists start with "irregular_verbs"
+  if (id.startsWith("irregular_verbs")) return true;
+  
+  // Hardcoded lists are all lowercase with underscores (no hyphens)
+  // UUIDs have hyphens or are 36 chars long
+  if (id.includes("-") && id.length === 36) return false; // UUID format
+  
+  // If it's in the vocabLists registry, it's hardcoded
+  // (This assumes you have access to vocabLists in scope)
+  // import { vocabLists } from "@/assets/scripts/vocab_workout/VocabListRegistry";
+  // return id in vocabLists;
+  
+  // Fallback: hardcoded lists follow pattern like "irregular_verbs", "houseElements", etc
+  // (all lowercase, underscores, no hyphens, no UUIDs)
+  return !id.includes("-") && id.length < 36;
+}
+
 const frontPreview = computed(() => {
   if (!currentItem.value) return "—";
-  return getFrontText(currentItem.value, frontField.value);
+  
+  // For hardcoded lists, use the existing logic
+  if (isHardcodedListKey(props.gameSettings?.listId)) {
+    return getFrontText(currentItem.value, frontField.value);
+  }
+
+  // For custom lists, use the helper
+  const values = getFieldValueFromItem(currentItem.value, frontField.value);
+  return values.join(" / ") || "—";
 });
 
+// Update backPreview
 const backPreview = computed(() => {
   if (!currentItem.value) return "—";
 
-  if (effectiveCardBackField.value === "past_forms") {
-    const ps = getAcceptedAnswers(currentItem.value, "past_simple");
-    const pp = getAcceptedAnswers(currentItem.value, "present_perfect");
-    const psText = ps.length ? ps.join(" / ") : "—";
-    const ppText = pp.length ? pp.join(" / ") : "—";
-    return `${psText} • ${ppText}`;
+  // For hardcoded lists with past_forms special case
+  if (isHardcodedListKey(props.gameSettings?.listId)) {
+    if (effectiveCardBackField.value === "past_forms") {
+      const ps = getAcceptedAnswers(currentItem.value, "past_simple");
+      const pp = getAcceptedAnswers(currentItem.value, "present_perfect");
+      const psText = ps.length ? ps.join(" / ") : "—";
+      const ppText = pp.length ? pp.join(" / ") : "—";
+      return `${psText} • ${ppText}`;
+    }
+    const accepted = getAcceptedAnswers(currentItem.value, effectiveCardBackField.value as any);
+    return accepted.join(" / ") || "—";
   }
 
-  const accepted = getAcceptedAnswers(currentItem.value, effectiveCardBackField.value as any);
-  return accepted.join(" / ") || "—";
+  // For custom lists
+  const values = getFieldValueFromItem(currentItem.value, backField.value);
+  return values.join(" / ") || "—";
 });
 
 /* =========================================================
@@ -1298,10 +1369,14 @@ async function advancePersisted() {
       ? String(state.next_item_id)
       : `${props.gameSettings.listKey}::${state.next_item_id}`;
 
-    const idx = props.planItems.findIndex((it) => it.id === nextId);
+      // Lowercase both strings during comparison to eliminate casing mismatches
+    const idx = props.planItems.findIndex(
+      (it) => String(it.id).toLowerCase() === nextId.toLowerCase()
+    );
 
-    if (idx >= 0) currentIndex.value = idx;
-    else {
+    if (idx >= 0) {
+      currentIndex.value = idx;
+    } else {
       console.error("Next item not found in planItems:", nextId);
       await finishGame();
     }
@@ -1314,7 +1389,6 @@ async function advancePersisted() {
     isAdvancing.value = false;
   }
 }
-
 /* =========================================================
    Cards navigation
 ========================================================= */
@@ -1346,7 +1420,7 @@ function setIndexFromCurrentItemId() {
   const idRaw = props.gameSettings?.currentItemId;
   if (!idRaw) return false;
 
-  const nextId = String(idRaw).includes("::") ? String(idRaw) : `${props.gameSettings.listKey}::${idRaw}`;
+  const nextId = String(idRaw);
   const idx = props.planItems.findIndex((it) => it.id === nextId);
 
   if (idx >= 0) {
@@ -1360,10 +1434,7 @@ function setIndexFromServerState(state: any): boolean {
   const idRaw = state?.session?.current_item_id ?? state?.next_item_id;
   if (!idRaw) return false;
 
-  const nextId = String(idRaw).includes("::")
-    ? String(idRaw)
-    : `${props.gameSettings.listKey}::${idRaw}`;
-
+  const nextId = String(idRaw);
   const idx = props.planItems.findIndex((it) => it.id === nextId);
   if (idx >= 0) {
     currentIndex.value = idx;
@@ -1474,19 +1545,27 @@ async function submitWrite(e?: KeyboardEvent) {
 
   try {
     const user = String(userAnswer.value || "").trim();
-    let acceptedArr;
-    if (backField.value === "past_forms") {
-      const ps = getAcceptedAnswers(it, "past_simple");
-      const pp = getAcceptedAnswers(it, "present_perfect");
-      acceptedArr = [
-        `PS: ${ps.join(" / ") || "—"}`,
-        `PP: ${pp.join(" / ") || "—"}`
-      ];
-    } else {
-      acceptedArr = getAcceptedAnswers(it, backField.value);
-    }
+    let acceptedArr: string[];
+    let correct: boolean;
 
-    const correct = checkUserAnswer(it, backField.value as any, user);
+    if (isHardcodedListKey(props.gameSettings?.listId)) {
+      // Existing hardcoded logic
+      if (backField.value === "past_forms") {
+        const ps = getAcceptedAnswers(it, "past_simple");
+        const pp = getAcceptedAnswers(it, "present_perfect");
+        acceptedArr = [
+          `PS: ${ps.join(" / ") || "—"}`,
+          `PP: ${pp.join(" / ") || "—"}`,
+        ];
+      } else {
+        acceptedArr = getAcceptedAnswers(it, backField.value);
+      }
+      correct = checkUserAnswer(it, backField.value as any, user);
+    } else {
+      // Custom list logic
+      acceptedArr = getFieldValueFromItem(it, backField.value);
+      correct = checkUserAnswerForCustomItem(it, backField.value, user);
+    }
 
     recordRound({
       user_answer: user,
@@ -1506,13 +1585,11 @@ async function submitWrite(e?: KeyboardEvent) {
       return;
     }
 
-    // wrong path
     lastUserAnswer.value = user || "—";
     lastAcceptedAnswers.value = acceptedArr.join(" / ") || "—";
     showWrongDialog.value = true;
     suppressEnter(350);
   } finally {
-    // Keep locked during wrong-dialog until user clicks OK
     if (!showWrongDialog.value) isSubmitting.value = false;
   }
 }
@@ -1525,8 +1602,16 @@ function submitChoice(choice: string) {
   isSubmitting.value = true;
 
   try {
-    const acceptedArr = getAcceptedAnswers(it, backField.value);
-    const correct = checkUserAnswer(it, backField.value as any, choice);
+    let acceptedArr: string[];
+    let correct: boolean;
+
+    if (isHardcodedListKey(props.gameSettings?.listId)) {
+      acceptedArr = getAcceptedAnswers(it, backField.value);
+      correct = checkUserAnswer(it, backField.value as any, choice);
+    } else {
+      acceptedArr = getFieldValueFromItem(it, backField.value);
+      correct = checkUserAnswerForCustomItem(it, backField.value, choice);
+    }
 
     recordRound({
       user_answer: choice,
@@ -1632,7 +1717,7 @@ function recordRound(extra: { user_answer: string; expected?: string; is_correct
     const attempt: VWAttempt = {
       attempt_id: crypto.randomUUID(),
       prompt_number: serverPromptNumber > 0 ? serverPromptNumber : resultsStore.value.length,
-      item_key: it.id, // expects `${listKey}::${term}`
+      item_key: it.id, 
       term: it.term,
       prompt_field: String(frontField.value),
       answer_field: String(backField.value),

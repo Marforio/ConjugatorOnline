@@ -249,13 +249,16 @@
       <v-window-item value="directory" class="animate-fade-in">
         <v-row class="mb-2 px-2">
           <v-col cols="12" class="d-flex align-center">
-            <v-checkbox
+            <div class="d-flex justify-end">
+              <v-checkbox
               v-model="userStore.showArchivedInRoster"
               label="Show Archived/Inactive Students"
               hide-details
               density="compact"
               color="slate-700"
             />
+            </div>
+            
           </v-col>
         </v-row>
         <v-card variant="outlined" class="border-grey-lighten-2 rounded-lg">
@@ -265,8 +268,8 @@
                 <th class="font-weight-bold">Username</th>
                 <th class="font-weight-bold">Initials</th>
                 <th class="font-weight-bold">Domain</th>
-                <th class="text-center font-weight-bold">Conj. Total Correct</th>
-                <th class="text-center font-weight-bold" style="width: 250px;">Actions</th>
+                <th class="text-center font-weight-bold">Tot. Corr. Conj.</th>
+                <th class="text-center font-weight-bold" style="width: 350px;">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -275,9 +278,20 @@
                   {{ student.web_id }}
                   <v-chip v-if="!student.is_active" size="x-small" color="error" class="ml-2">Archived</v-chip>
                 </td>
+                <td>{{ student.initials }}</td>
+                <td>
+                  <v-chip size="x-small" variant="tonal" color="slate-600" class="text-uppercase font-weight-bold">
+                    {{ student.domain || 'None' }}
+                  </v-chip>
+                </td>
+                <td class="text-center">{{ student.grand_total_correct_prompts || 0 }}</td>
+
                 <td class="text-center">
                   <v-btn size="small" class="mx-1" variant="tonal" color="info" density="comfortable" @click="openEditStudentDialog(student)">
                     <v-icon>mdi-pencil</v-icon>
+                    <v-tooltip activator="parent" location="top">
+                      Modify
+                    </v-tooltip>
                   </v-btn>
 
                   <v-btn 
@@ -288,15 +302,21 @@
                   >
                     <v-icon>{{ student.is_active ? 'mdi-account-minus-outline' : 'mdi-account-check-outline' }}</v-icon>
                     <v-tooltip activator="parent" location="top">
-                      {{ student.is_active ? 'Soft Archive Student Account' : 'Restore Student to Active' }}
+                      {{ student.is_active ? 'Archive Student Account' : 'Restore Student to Active' }}
                     </v-tooltip>
                   </v-btn>
 
                   <v-btn size="small" class="mx-1" variant="tonal" color="warning-darken-2" density="comfortable" @click="openResetPasswordDialog(student)">
                     <v-icon>mdi-lock-reset</v-icon>
+                    <v-tooltip activator="parent" location="top">
+                      Reset Student Password
+                    </v-tooltip>
                   </v-btn>
                   <v-btn size="small" class="mx-1" variant="tonal" color="error" density="comfortable" @click="confirmDeleteStudent(student)">
                     <v-icon>mdi-trash-can</v-icon>
+                    <v-tooltip activator="parent" location="top">
+                      Delete Student
+                    </v-tooltip>
                   </v-btn>
                 </td>
               </tr>
@@ -309,9 +329,9 @@
       </v-window-item>
 
       <v-window-item value="linguistic" class="animate-fade-in">
-        <v-row class="mb-4 align-center px-2">
+        <v-row class="mt-1 mb-4 align-center px-2">
           <v-col cols="12" sm="4">
-            <v-text-field v-model="matrixSearch" label="Search Assessments..." variant="outlined" density="compact" hide-details prepend-inner-icon="mdi-magnify"></v-text-field>
+            <v-text-field v-model="matrixSearch" label="Search for Student" variant="outlined" density="compact" hide-details prepend-inner-icon="mdi-magnify"></v-text-field>
           </v-col>
           <v-col cols="12" sm="4">
             <v-select v-model="matrixAssessmentFilter" :items="assessmentStageItems" label="Filter Assessment Stage" variant="outlined" density="compact" hide-details clearable></v-select>

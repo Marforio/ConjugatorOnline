@@ -16,13 +16,13 @@ export const vocabLists = {
     supportsLevels: true,
   },
   ////////////////////////////// GENERAL VOCABULARY /////////////////////////////
-  phrasal_verbs: {
+  general_phrasal_verbs: {
     title: "Phrasal Verbs",
     module: "General Vocabulary",
     data: PhrasalVerbs,
     supportsLevels: false,
   },
-  useful_regular_verbs: {
+  general_useful_regular_verbs: {
     title: "Useful Regular Verbs",
     module: "General Vocabulary",
     data: UsefulRegularVerbs,

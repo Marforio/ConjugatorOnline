@@ -10,48 +10,41 @@ export type StudyField =
   | "Italian";
 
 export type FrontField = "term" | "definition" | "French" | "German" | "Italian";
-export type BackField = "term" | "past_simple" | "present_perfect" | "definition" | "past_forms" | "French" | "German" | "Italian";
+export type BackField =
+  | "term"
+  | "past_simple"
+  | "present_perfect"
+  | "definition"
+  | "past_forms"
+  | "French"
+  | "German"
+  | "Italian";
 
 export type GameMode = "cards" | "write" | "multiple_choice" | "quiz" | "match";
 
-/**
- * UNIVERSAL RAW ITEM:
- * - values can be string OR string[]
- * - multiple_choice can be generic OR field-specific
- */
 export type RawVocabItem = {
   definition?: string;
-  past_simple?: string[];          // irregular verbs list
-  present_perfect?: string[];      // irregular verbs list
+  past_simple?: string[];
+  present_perfect?: string[];
   French?: string;
   German?: string;
   Italian?: string;
   level?: VocabLevel;
   image?: string;
-
-  // houseElements-style
   multiple_choice?: string[];
-
-  // irregularVerbs-style (field-specific)
   multiple_choice_ps?: string[];
   multiple_choice_pp?: string[];
-
-  // future-proof: allow multiple_choice_<field>
   [k: string]: any;
 };
 
 export type RawVocabDataset = Record<string, RawVocabItem>;
 
 export interface VocabItem {
-  id: string;     // stable: term key
+  id: string;
   term: string;
-  level: VocabLevel;   // default "general" if missing
+  level: VocabLevel;
   image?: string;
-
-  // all fields normalized to arrays of strings
   fields: Record<string, string[]>;
-
-  // multiple choice distractors normalized by field
   mc: Record<string, string[]>;
 }
 
@@ -62,11 +55,10 @@ export interface NormalizedVocab {
 
 function arrify(v: any): string[] {
   if (v == null) return [];
-  if (Array.isArray(v)) return v.map(x => String(x).trim()).filter(Boolean);
+  if (Array.isArray(v)) return v.map((x) => String(x).trim()).filter(Boolean);
   return [String(v).trim()].filter(Boolean);
 }
 
-// VocabWorkoutPromptEngine.ts
 export function normalizeVocabDataset(
   raw: RawVocabDataset,
   opts: { listKey: string }
@@ -112,7 +104,7 @@ export function normalizeVocabDataset(
     });
 
     items.push({
-      id: `${listKey}::${term}`,   // ✅ stable & list-scoped
+      id: `${listKey}::${term}`,
       term,
       level,
       image: obj?.image,
@@ -130,7 +122,6 @@ export function normalizeVocabDataset(
   return { items, byLevel };
 }
 
-
 export function normalizeVocabDatasetWithListKey(listKey: string, raw: RawVocabDataset) {
   return normalizeVocabDataset(raw, { listKey });
 }
@@ -143,22 +134,43 @@ function norm(s: any): string {
   return String(s ?? "")
     .trim()
     .toLowerCase()
-    .replace(/['’]/g, "")  // ignore apostrophes
+    .replace(/['']/g, "")
     .replace(/\s+/g, " ");
 }
 
 export function isCorrectAnswer(accepted: string[], user: string): boolean {
   const u = norm(user);
-  return accepted.some(a => norm(a) === u);
+  return accepted.some((a) => norm(a) === u);
 }
 
-export function getFrontText(item: VocabItem, front: FrontField): string {
+export function getFrontText(item: VocabItem | any, front: FrontField): string {
+  // For custom items with additional_data
+  if (item.additional_data) {
+    if (front === "term") return item.term;
+    const data = item.additional_data;
+    const value = data[front];
+    if (Array.isArray(value)) return value[0] || "—";
+    return value ? String(value) : "—";
+  }
+
+  // For hardcoded items with fields
   if (front === "term") return item.term;
   const arr = item.fields?.[front] || [];
   return arr[0] || "—";
 }
 
-export function getAcceptedAnswers(item: VocabItem, field: BackField): string[] {
+export function getAcceptedAnswers(item: VocabItem | any, field: BackField): string[] {
+  // For custom items
+  if (item.additional_data) {
+    if (field === "term") return [item.term];
+    const data = item.additional_data;
+    const value = data[field];
+    if (Array.isArray(value)) return value;
+    if (value) return [String(value)];
+    return [];
+  }
+
+  // For hardcoded items
   if (field === "term") return [item.term];
   const arr = item.fields?.[field] || [];
   return arr;

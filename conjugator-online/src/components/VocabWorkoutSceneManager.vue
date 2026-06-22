@@ -25,6 +25,47 @@ import { buildPool } from "@/assets/scripts/vocab_workout/VocabWorkoutPoolBuilde
 
 import { useVocabWorkoutStore } from "@/stores/vocabWorkout";
 
+import api from "@/axios";
+
+
+interface NormalizedCustomItem {
+  id: string;
+  term: string;
+  definition: string;
+  part_of_speech?: string;
+  context_usage?: string;
+  image?: string;
+  additional_data: Record<string, any>;
+}
+
+async function loadCustomListItems(listId: string): Promise<NormalizedCustomItem[]> {
+  try {
+    const response = await api.get<any[]>(`/vocab-lists/${listId}/prompts/`);
+    const items = Array.isArray(response.data) ? response.data : [];
+    
+    return items.map((item) => ({
+      id: String(item.id), // Ensure string format for structural matching
+      term: item.term,
+      definition: item.definition,
+      part_of_speech: item.part_of_speech,
+      context_usage: item.context_usage,
+      image: item.image_url,
+      additional_data: item.additional_data || {},
+    }));
+  } catch (err) {
+    console.error(`Failed to load custom list ${listId}:`, err);
+    throw err;
+  }
+}
+
+function isHardcodedList(listId: string): boolean {
+  return (
+    listId.startsWith("irregular_verbs") || 
+    listId.startsWith("general") || 
+    !listId.includes("-")
+  );
+}
+
 const vw = useVocabWorkoutStore();
 
 const scenes = {
@@ -71,29 +112,48 @@ const availableLists = computed(() => {
  * Build planItems from a list of ids using normalized dataset lookup.
  * Supports both "listKey::term" ids and plain "term" ids.
  */
-function buildPlanItemsFromIds(listKey: string, ids: string[]) {
+
+function buildPlanItemsFromIds(listKey: string, ids: string[], loadedRawData: any[]): any[] {
+  if (!ids || !ids.length) return [];
+
+  // Branch A: Custom multi-tenant lists fetched from backend DB
+  if (!isHardcodedList(listKey)) {
+    const customMap = new Map(loadedRawData.map((it) => [String(it.id), it]));
+    return ids
+      .map((rawId) => {
+        if (!rawId) return null;
+        
+        // Extract raw database UUID if it is wrapped in composite structure
+        const pureUuid = String(rawId).includes("::") ? String(rawId).split("::")[1] : String(rawId);
+        const match = customMap.get(pureUuid);
+        if (!match) return null;
+
+        // CRITICAL: Proxy the item object to match the compound format synthesized by the game component
+        return {
+          ...match,
+          id: `${listKey}::${pureUuid}`
+        };
+      })
+      .filter(Boolean);
+  }
+
+  // Branch B: Legacy hardcoded client registry mapping
   const listMeta = (vocabLists as any)[listKey];
   if (!listMeta) throw new Error(`Unknown listKey "${listKey}"`);
 
   const normalized = normalizeVocabDatasetWithListKey(listKey, listMeta.data);
-  const map = new Map(normalized.items.map((it: any) => [it.id, it]));
+  const legacyMap = new Map(normalized.items.map((it: any) => [it.id, it]));
 
-  return (ids || [])
+  return ids
     .map((rawId) => {
       if (!rawId) return null;
-
       const id = String(rawId);
       const normalizedId = id.includes("::") ? id : `${listKey}::${id}`;
-      return map.get(normalizedId) || null;
+      return legacyMap.get(normalizedId) || null;
     })
     .filter(Boolean);
 }
 
-/**
- * Extract all_item_ids from state in a tolerant way (new API + fallbacks).
- * New server-driven session stores ids in session.all_item_ids.
- * Legacy fallbacks are kept so old sessions don't brick your UI.
- */
 function getAllItemIdsFromState(state: any): string[] {
   const ids =
     state?.all_item_ids ??
@@ -101,183 +161,162 @@ function getAllItemIdsFromState(state: any): string[] {
     state?.plan_item_ids ??
     state?.session?.plan_item_ids ??
     [];
-
   return Array.isArray(ids) ? ids : [];
 }
 
-/**
- * Extract next_item_id in a tolerant way.
- * New API returns it at top-level: { session, next_item_id, done }
- * But some implementations also mirror it onto session.current_item_id.
- */
 function getNextItemIdFromState(state: any): string | null {
   const v = state?.next_item_id ?? state?.session?.current_item_id ?? null;
   return v != null ? String(v) : null;
 }
-
-
 async function handleStartGame(selections: any) {
   try {
     gameSettings.value = markRaw(selections);
 
-    // ----------------------------------------------------
-    // 1) RESUME PATH FIRST (listKey comes from backend)
-    // ----------------------------------------------------
+    // ==========================================
+    // RESUME ACTION SEQUENCE
+    // ==========================================
     if (selections?.resumeSessionId) {
       const resumeSessionId = Number(selections.resumeSessionId);
-      if (!Number.isFinite(resumeSessionId)) {
-        throw new Error(`Invalid resumeSessionId "${selections.resumeSessionId}"`);
-      }
-
       const state = await vw.continueSession(resumeSessionId);
 
       const listKey = state?.session?.list_key;
       if (!listKey) throw new Error("Continue session: missing state.session.list_key");
 
-      const listMeta = (vocabLists as any)[listKey];
-      if (!listMeta) throw new Error(`Unknown listKey "${listKey}"`);
+      let planItems_data: any[] = [];
+      if (isHardcodedList(listKey)) {
+        const listMeta = (vocabLists as any)[listKey];
+        if (!listMeta) throw new Error(`Unknown hardcoded listKey "${listKey}"`);
+        planItems_data = normalizeVocabDatasetWithListKey(listKey, listMeta.data).items;
+      } else {
+        planItems_data = await loadCustomListItems(listKey);
+      }
 
-      // ✅ Build local lookup table from ALL eligible ids (not just next)
       const allIds = getAllItemIdsFromState(state);
-
-      // If server didn’t return them (should), fall back to "just next"
       const nextId = getNextItemIdFromState(state);
       const idsToUse = allIds.length ? allIds : nextId ? [nextId] : [];
 
-      planItems.value = buildPlanItemsFromIds(listKey, idsToUse);
+      // ✅ Map components using the compound format adapter
+      planItems.value = buildPlanItemsFromIds(listKey, idsToUse, planItems_data);
 
       gameSettings.value = markRaw({
         ...selections,
-
+        listId: listKey,
         listKey,
         mode: state.session.mode,
         level: state.session.level,
         frontField: state.session.front_field,
         backField: state.session.back_field,
-        quizCount: state.session.quiz_count ?? undefined,
-        domain: state.session.domain ?? null,
-
         sessionId: state.session.session_id,
-
-        // server-driven queue info
-        done: Boolean((state as any).done),
         nextItemId: nextId,
-        currentItemId: (state.session as any).current_item_id ?? nextId ?? null,
-        promptNumber: (state.session as any).prompt_number ?? 0,
-
-        // ✅ snake_case on backend, camelCase in gameSettings is fine
-        trackKey: (state.session as any).track_key ?? null,
+        currentItemId: state.session.current_item_id ?? nextId ?? null,
+        promptNumber: state.session.prompt_number ?? 0,
+        trackKey: state.session.track_key ?? null,
       });
 
       changeScene("VocabWorkoutScene01_Game");
       return;
     }
 
-    // ----------------------------------------------------
-    // 2) START-NEW PATH: require listKey
-    // ----------------------------------------------------
-    const listKey = selections?.listKey;
-    if (!listKey) {
-      throw new Error(
-        `Missing listKey in startGame payload. Received keys: ${Object.keys(selections ?? {}).join(", ")}`
-      );
+    // ==========================================
+    // INITIALIZATION ACTION SEQUENCE (START NEW)
+    // ==========================================
+    const listId = selections?.listId;
+    if (!listId) {
+      throw new Error(`Missing listId in startGame payload.`);
     }
 
-    const listMeta = (vocabLists as any)[listKey];
-    if (!listMeta) throw new Error(`Unknown listKey "${listKey}"`);
+    let listMeta: any = null;
+    let isHardcoded = false;
+    let planItems_data: any[] = [];
+
+    if (isHardcodedList(listId)) {
+      isHardcoded = true;
+      listMeta = (vocabLists as any)[listId];
+      if (!listMeta) throw new Error(`Unknown hardcoded listId "${listId}"`);
+      planItems_data = normalizeVocabDatasetWithListKey(listId, listMeta.data).items;
+    } else {
+      planItems_data = await loadCustomListItems(listId);
+      listMeta = { supportsLevels: false };
+    }
 
     const mode: string = selections?.mode ?? "cards";
     const isPersistedMode = mode === "write" || mode === "quiz";
 
-    // enforce irregular verbs: no "all"
-    if (listMeta.supportsLevels) {
+    if (isHardcoded && listMeta.supportsLevels) {
       const lvl = selections?.level;
       if (lvl !== "essential" && lvl !== "advanced") {
-        throw new Error(`Irregular verbs requires level essential/advanced (received "${lvl}")`);
+        throw new Error(`Irregular verbs requires level essential/advanced`);
       }
     }
 
-    // ----------------------------------------------------
-    // 3) PERSISTED MODES → create session on API
-    //    ✅ send all_item_ids (NOT plan_item_ids)
-    //    ✅ send track_key (snake_case) when available
-    // ----------------------------------------------------
     if (isPersistedMode) {
-      // Build local normalized -> pool to determine eligible items (level filtering)
-      const normalized = normalizeVocabDatasetWithListKey(listKey, listMeta.data);
-
-      const pool = buildPool(normalized.items, {
-        level: listMeta.supportsLevels ? selections.level : null,
+      const pool = buildPool(planItems_data, {
+        level: isHardcoded && listMeta.supportsLevels ? selections.level : null,
       });
 
-      // ✅ all items eligible for this session/track
-      const all_item_ids = pool.map((it: any) => it.id);
+      const all_item_ids = pool.map((it: any) => String(it.id));
 
       const state = await vw.startNewSession({
-        listKey,
+        listKey: listId,
         mode,
-        level: listMeta.supportsLevels ? selections.level : null,
+        level: isHardcoded && listMeta.supportsLevels ? selections.level : null,
         frontField: selections.frontField,
         backField: selections.backField,
         quizCount: mode === "quiz" ? selections.quizCount : undefined,
-
-        // ✅ NEW: backend expects snake_case track_key; store wrapper maps it
         trackKey: selections?.trackKey ?? null,
-
-        // ✅ NEW: backend expects all_item_ids
         allItemIds: all_item_ids,
       });
 
-      if (!state?.session || !state?.session?.session_id) {
-        throw new Error("Session created but response did not include session.session_id");
+      if (!state?.session?.session_id) {
+        throw new Error("Session created but no session_id in response");
       }
 
-      // prefer server-normalized ids; fallback to local
       const stateAllIds = getAllItemIdsFromState(state);
       const idsToUse = stateAllIds.length ? stateAllIds : all_item_ids;
 
-      planItems.value = buildPlanItemsFromIds(listKey, idsToUse);
+      // ✅ Dynamically inject proxy formatting matching target layout expectations
+      planItems.value = buildPlanItemsFromIds(listId, idsToUse, planItems_data);
 
       const nextId = getNextItemIdFromState(state);
 
       gameSettings.value = markRaw({
         ...selections,
-
-        listKey,
-        domain: state.session.domain ?? selections?.domain ?? null,
+        listId,
+        listKey: listId,
         sessionId: state.session.session_id,
-
-        done: Boolean((state as any).done),
         nextItemId: nextId,
-        currentItemId: (state.session as any).current_item_id ?? nextId ?? null,
-        promptNumber: (state.session as any).prompt_number ?? 0,
-
-        // carry forward for game scene logic
-        trackKey: (state.session as any).track_key ?? selections?.trackKey ?? null,
+        currentItemId: state.session.current_item_id ?? nextId ?? null,
+        promptNumber: state.session.prompt_number ?? 0,
+        trackKey: state.session.track_key ?? selections?.trackKey ?? null,
       });
 
       changeScene("VocabWorkoutScene01_Game");
       return;
     }
 
-    // ----------------------------------------------------
-    // 4) NON-PERSISTED MODES → local pool only
-    // ----------------------------------------------------
-    const normalized = normalizeVocabDatasetWithListKey(listKey, listMeta.data);
-
-    const pool = buildPool(normalized.items, {
-      level: listMeta.supportsLevels ? selections.level : null,
+    // NON-PERSISTED PATH
+    const pool = buildPool(planItems_data, {
+      level: isHardcoded && listMeta.supportsLevels ? selections.level : null,
     });
 
-    planItems.value = pool ?? [];
+    // Ensure non-persisted custom list tracking works with expected IDs as well
+    if (!isHardcoded) {
+      planItems.value = pool.map((it: any) => ({ ...it, id: `${listId}::${it.id}` }));
+    } else {
+      planItems.value = pool ?? [];
+    }
+
+    gameSettings.value = markRaw({ ...selections, listId, listKey: listId });
     changeScene("VocabWorkoutScene01_Game");
+
   } catch (e) {
     console.error("[VocabWorkout] Failed to start:", e);
-    console.log("Start failed response:", (e as any)?.response?.data);
     planItems.value = [];
+    gameSettings.value = null;
     changeScene("VocabWorkoutScene01_Game");
   }
 }
+
 
 async function handleGameOver(payload: any) {
   results.value = payload;

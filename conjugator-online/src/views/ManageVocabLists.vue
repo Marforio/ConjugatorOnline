@@ -90,11 +90,10 @@
                   <v-table class="text-left font-sans text-body-2">
                     <thead class="bg-slate-50 border-b border-slate-200 text-overline font-weight-bold text-slate-400 tracking-wider">
                       <tr>
-                        <th class="pa-4">List Name</th>
+                        <th class="pa-4" style="max-width: 250px">List Name</th>
                         <th class="pa-4">Category</th>
-                        <th class="pa-4 text-center">Total Terms</th>
-                        <th class="pa-4 text-center">Available To</th>
-                        <th class="pa-4 text-right"><span class="me-3">Actions</span></th>
+                        <th class="pa-4 text-center">Terms</th>
+                        <th class="pa-4 text-center"><span class="me-3">Actions</span></th>
                       </tr>
                     </thead>
                     <tbody>
@@ -105,9 +104,6 @@
                       >
                         <td class="pa-4 font-weight-bold text-slate-800">
                           {{ list.name }}
-                          <span class="text-xxs text-slate-400 font-weight-regular block mt-0.5 font-monospace">
-                            {{ list.id }}
-                          </span>
                         </td>
 
                         <td class="pa-4">
@@ -126,55 +122,59 @@
 
                         <td class="pa-4 text-center">
                           <v-btn
-                            size="small"
-                            variant="tonal"
-                            color="indigo"
-                            class="rounded-lg font-weight-bold text-none text-xs px-3"
-                            prepend-icon="mdi-account-group-outline"
-                            @click="openAvailabilityConsole(list)"
-                          >
-                            {{ list.availabilities?.length || 0 }} Target(s)
-                          </v-btn>
-                        </td>
-
-                        <td class="pa-4 text-right">
-                          <v-btn
-                            icon="mdi-eye"
                             variant="elevated"
                             size="small"
                             color="grey-lighten-2"
-                            class="text-black-lighten-2 mr-2"
+                            class="text-black-lighten-2 mr-3"
                             @click="openViewListDialog(list)"
                             title="View List"
-                          />
+                          >
+                            <v-icon icon="mdi-eye-outline" color="black-lighten-2" />
+                            <v-tooltip activator="parent" location="top">View</v-tooltip>
+                          </v-btn>
                           <v-btn
-                            icon="mdi-file-pdf-box"
-                            variant="elevated"
+                            variant="tonal"
                             size="small"
-                            color="deep-purple-darken-2"
-                            class="text-white mr-2"
+                            color="info"
+                            class="text-white mr-3"
                             :loading="pdfLoadingListId === list.id"
                             @click="downloadListPdf(list)"
-                            title="Download PDF"
-                          />
+                          >
+                            <v-icon icon="mdi-file-pdf-box" />
+                            <v-tooltip activator="parent" location="top">Download PDF</v-tooltip>
+                          </v-btn>
                           <v-btn
-                            icon="mdi-pencil"
+                            size="small"
+                            variant="tonal"
+                            color="indigo"
+                            class="font-weight-bold text-none mr-3"
+                            @click="openAvailabilityConsole(list)"
+                          >
+                            <v-icon icon="mdi-account-group-outline" color="indigo" />
+                            <v-tooltip activator="parent" location="top">Availability</v-tooltip>
+                          </v-btn>
+                          
+                          <v-btn
                             variant="elevated"
                             size="small"
                             color="amber-darken-2"
-                            class="text-white mr-2"
+                            class="text-white mr-3"
                             @click="openEditListDialog(list)"
-                            title="Edit List Content"
-                          />
+                          >
+                            <v-icon icon="mdi-pencil" color="white" />
+                            <v-tooltip activator="parent" location="top">Edit</v-tooltip>
+                          </v-btn>
                           <v-btn
-                            icon="mdi-trash-can-outline"
                             variant="elevated"
                             size="small"
                             color="error"
                             class="me-3"
                             @click="confirmDeleteList(list)"
                             title="Delete List"
-                          />
+                          >
+                            <v-icon icon="mdi-delete-outline" color="white" />
+                            <v-tooltip activator="parent" location="top">Delete</v-tooltip>
+                          </v-btn>
                         </td>
                       </tr>
                     </tbody>
@@ -245,7 +245,7 @@
                   </v-table>
                   <div v-else class="pa-10 text-center text-slate-400 text-caption">
                     <v-icon icon="mdi-shield-lock-outline" class="mb-2 text-slate-300 block mx-auto" size="24" />
-                    No vocabulary lists have been published to this course track yet.
+                    No vocabulary lists have been published to this course yet.
                   </div>
                 </v-expansion-panel-text>
               </v-expansion-panel>
@@ -1021,7 +1021,7 @@ camshaft,a shaft in an engine that controls valve timing,noun,The mechanic repla
         <v-toolbar color="indigo" dark class="px-4 py-2">
           <v-toolbar-title class="text-white font-weight-black d-flex flex-column">
             <span class="text-h6 font-weight-black tracking-tight">
-              Publish a list: {{ selectedListForAvailability?.name || 'Loading...' }}
+              List availability: {{ selectedListForAvailability?.name || 'Loading...' }}
             </span>
           </v-toolbar-title>
           
@@ -1036,7 +1036,7 @@ camshaft,a shaft in an engine that controls valve timing,noun,The mechanic repla
         </v-toolbar>
 
         <v-card-text class="pa-6 bg-slate-50" style="max-height: 60vh;">
-          <h3 class="text-overline font-weight-black text-indigo tracking-wider mb-3">Make "{{ selectedListForAvailability?.name || 'Loading...' }}" visible to students</h3>
+          <h3 class="text-overline font-weight-black text-indigo tracking-wider mb-3">Make "{{ selectedListForAvailability?.name || 'Loading...' }}" available to students</h3>
           <v-row dense class="align-center mb-6">
             <v-col cols="12" sm="5">
               <v-select
@@ -1101,7 +1101,7 @@ camshaft,a shaft in an engine that controls valve timing,noun,The mechanic repla
 
           <div v-else-if="!currentAvailabilities.length" class="text-center py-8 text-slate-400 text-caption bg-white border border-dashed rounded-xl border-slate-300">
             <v-icon icon="mdi-shield-lock-outline" size="28" class="mb-2 text-slate-300 block mx-auto" />
-            This list is completely unassigned. Only you can view this custom dataset.
+            This list is completely unassigned. Only you can view this list.
           </div>
 
           <div v-else class="d-flex flex-column ga-2">
@@ -1113,7 +1113,7 @@ camshaft,a shaft in an engine that controls valve timing,noun,The mechanic repla
                   </v-avatar>
                   <div>
                     <div class="font-weight-bold text-slate-800 text-sm">
-                      {{ rule.course ? `Course Track: ${rule.course}` : `Student: ${rule.student_initials} (${rule.student_web_id})` }}
+                      {{ rule.course ? `Course: ${rule.course}` : `Student: ${rule.student_display_name }` }}
                     </div>
                     <div class="text-xxs text-slate-400 font-monospace">Vocab list successfully made available!</div>
                   </div>
@@ -1301,7 +1301,9 @@ async function openAvailabilityConsole(list: any) {
   // The store already holds your course and student lists,
   // so we only need to fetch the access records for this specific list.
   await fetchAvailabilitiesForList(list.id)
+  console.log("Opened availability console for list:", list.name, "with current availabilities:", currentAvailabilities.value)
 }
+
 // 1. UPDATE THE FETCH CALL
 async function fetchAvailabilitiesForList(listId: string) {
   availabilityListLoading.value = true

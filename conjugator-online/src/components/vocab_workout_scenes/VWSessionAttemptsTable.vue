@@ -177,7 +177,9 @@ const groupedRounds = computed(() => {
   >();
 
   for (const a of attempts.value) {
-    const key = a.item_key || `${a.term}::${a.prompt_text}`;
+    // Extract the core target key context cleanly
+    const rawKey = a.item_key || `${a.term}::${a.prompt_text}`;
+    const key = rawKey.includes("::") ? rawKey.split("::")[1] : rawKey;
 
     if (!map.has(key)) {
       map.set(key, {
@@ -191,7 +193,6 @@ const groupedRounds = computed(() => {
     map.get(key)!.attempts.push(a);
   }
 
-  // Keep a stable order: earliest prompt_number first
   return Array.from(map.values()).sort((x, y) => {
     const ax = x.attempts?.[0]?.prompt_number ?? 0;
     const ay = y.attempts?.[0]?.prompt_number ?? 0;

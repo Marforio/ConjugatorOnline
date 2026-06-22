@@ -223,7 +223,7 @@
       color="transparent"
       absolute
       class="immersive-game-header-overlay"
-      style="z-index: 1005;"
+      style="z-index: 1005; margin-top: 2%;"
     >
       <v-btn
         prepend-icon="mdi-arrow-left"
@@ -273,10 +273,10 @@ const drawer = ref(false)
 
 const isImmersiveMode = computed(() => {
   const deepFocusViews = [
-    'conjugator', 'meeting-machine', 'pronounpractice', 'exercise-detail', 'vocabworkout', 
-    'passiveparty', 'comparison', 'quantifierquest', 'idealinker', 'regretmachine', 
-    'year2040', 'wordfamilies', 'auxiliaryuses', 'verbmixer', 'reportedspeech', 
-    'paralleluniverse', 'trickytranslator'
+    'conjugator', 'market-masters', 'meeting-machine', 'pronoun-practice', 'exercise-detail', 'vocabworkout', 
+    'passive-party', 'comparison', 'quantifier-quest', 'idealinker', 'regret-machine', 
+    'year-2040', 'wordfamilies', 'uses-of-auxiliaries', 'verb-mixer', 'reported-speech', 
+    'parallel-universe', 'trickytranslator'
   ]
   return deepFocusViews.includes(route.name || '')
 })

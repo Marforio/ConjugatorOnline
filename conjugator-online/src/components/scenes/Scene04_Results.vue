@@ -378,7 +378,12 @@ const emit = defineEmits(['changeScene']);
 // Carousel state
 const correctScrollPosition = ref(0);
 const wrongScrollPosition = ref(0);
-const visibleCardsCount = ref(3);
+const visibleCardsCount = computed(() => {
+  if (window.matchMedia('(min-width: 1920px)').matches) return 4;
+  if (window.matchMedia('(min-width: 1440px)').matches) return 3;
+  if (window.matchMedia('(min-width: 960px)').matches) return 2;
+  return 1;
+});
 
 // AI tutor state
 const aiOpen = ref(false);
@@ -657,39 +662,52 @@ onMounted(async () => {
 .carousel-grid {
   display: grid;
   grid-auto-flow: column;
-  grid-auto-columns: minmax(280px, 1fr);
+  grid-auto-columns: 1fr;  /* ✅ Fixed: equal width columns */
   gap: 16px;
   transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  width: 100%;
+  width: calc(100% - 16px);  /* Account for gap */
   padding: 8px 0;
-}
-
-/* Responsive column sizes */
-@media (min-width: 1920px) {
-  .carousel-grid {
-    grid-auto-columns: minmax(300px, 1fr);
-  }
-}
-
-@media (max-width: 960px) {
-  .carousel-grid {
-    grid-auto-columns: minmax(280px, 1fr);
-  }
-}
-
-@media (max-width: 600px) {
-  .carousel-grid {
-    grid-auto-columns: minmax(100%, 1fr);
-  }
 }
 
 .carousel-card {
   min-height: 240px;
   flex-shrink: 0;
   width: 100%;
-  max-width: 300px;
+  min-width: 280px;  /* ✅ Minimum card width */
 }
 
+/* Responsive visible cards count */
+@media (min-width: 1920px) {
+  /* 4 cards visible */
+  .carousel-grid-container {
+    max-width: calc((280px * 4) + (16px * 3) + 32px);
+  }
+}
+
+@media (max-width: 1440px) {
+  /* 3 cards visible */
+  .carousel-grid-container {
+    max-width: calc((280px * 3) + (16px * 2) + 32px);
+  }
+}
+
+@media (max-width: 960px) {
+  /* 2 cards visible */
+  .carousel-grid-container {
+    max-width: calc((280px * 2) + 16px + 32px);
+  }
+}
+
+@media (max-width: 600px) {
+  /* 1 card visible */
+  .carousel-grid {
+    grid-auto-columns: 100%;
+  }
+  
+  .carousel-grid-container {
+    max-width: calc(280px + 32px);
+  }
+}
 /* ==========================================
    RESULTS CARD ACCENT STYLING
    ========================================== */

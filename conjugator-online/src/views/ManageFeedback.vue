@@ -1,26 +1,33 @@
 <template>
   <v-container fluid class="mt-5 pa-4 px-6 max-width-container">
-    <v-row class="mb-6 align-center">
+    <v-row class="mb-2 align-center">
       <v-col cols="12" sm="8">
         <h1 class="text-h4 font-weight-black text-slate-900 d-flex align-center">
           <v-comment-quote icon="mdi-comment-quote" color="indigo" class="mr-5" />
             <v-icon icon="mdi-comment-quote" color="indigo" class="mr-5" />
-          Create a Feedback Template
+          Give Feedback
         </h1>
         <p class="text-caption text-slate-500 mt-1">
           Select a student, load a feedback template, and make feedback PDFs.
         </p>
       </v-col>
     </v-row>
-    <v-row class="d-flex justify-end mt-2 mb-4 px-3">
+    <v-row class="d-flex justify-end px-3">
       <v-col cols="12" md="5">
         <v-btn
           color="indigo-lighten-5" variant="flat" size="large" block
           class="text-indigo-darken-3 font-weight-black rounded-xl text-none"
           prepend-icon="mdi-playlist-plus" @click="showBuilderStudio = true"
         >
-          Create a New Feedback Template
+          Create a New Template
         </v-btn>
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col cols="12">
+      <div class="text-h5 mx-4 mb-4">
+        Give feedback using a template
+      </div>
       </v-col>
     </v-row>
 

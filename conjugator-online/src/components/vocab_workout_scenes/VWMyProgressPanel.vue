@@ -141,34 +141,47 @@ const allowedModules = computed(() => {
   return modules;
 });
 
+
 /** list keys allowed everywhere */
 const allowedListKeys = computed(() => {
   const allowed = new Set<string>();
 
+  // Loop through your local hardcoded registry options
   for (const [listKey, metaRaw] of Object.entries(vocabLists)) {
     const moduleName = (metaRaw as any).module || "General vocab";
-
     if (allowedModules.value.includes(moduleName)) {
       allowed.add(listKey);
     }
   }
 
-  console.log("Allowed lists:", [...allowed]);
+  // Inject any dynamic list tracking keys currently active inside store datasets
+    if (vw.activeSessions) {
+      for (const s of vw.activeSessions as any[]) {
+        if (s.list_key && !(s.list_key in vocabLists)) {
+          allowed.add(s.list_key); // Auto-allow active DB list IDs
+        }
+      }
+    }
+
+    if (vw.progress) {
+      for (const p of vw.progress as any[]) {
+        if (p.list_key && !(p.list_key in vocabLists)) {
+          allowed.add(p.list_key); // Auto-allow recorded progress DB list IDs
+        }
+      }
+    }
 
   return allowed;
 });
 
-/** ordering helper */
+/** safe checker to handle module rank sorting without breaking on UUID lookups */
 function moduleRank(listKey: string): number {
-  const moduleName = (vocabLists as any)[listKey]?.module ?? "";
+  const meta = (vocabLists as any)[listKey];
+  if (!meta) return 2; // Default rank for custom multi-tenant database lists
 
+  const moduleName = meta.module ?? "";
   if (moduleName === IRREGULAR_MODULE_NAME) return 0;
-
-  if (
-    moduleName.toLowerCase() ===
-    (studentDomain.value ?? "").toLowerCase()
-  )
-    return 1;
+  if (moduleName.toLowerCase() === (studentDomain.value ?? "").toLowerCase()) return 1;
 
   return 99;
 }
@@ -192,8 +205,22 @@ function makeTrackKey(listKey: string, mode: string, level: string | null, track
 }
 
 function listTitle(listKey: string): string {
+  // Option A: Hardcoded script metadata lookup
   const meta: any = (vocabLists as any)[listKey];
-  return meta?.title ?? listKey;
+  if (meta?.title) return meta.title;
+
+  // Option B: Multi-tenant backend database list lookup via ongoing session references
+  const matchingSession = (vw.activeSessions || []).find((s: any) => s.list_key === listKey);
+  if (matchingSession && (matchingSession as any).list_name) {
+    return (matchingSession as any).list_name;
+  }
+  
+  // Clean fallback string formatting
+  if (listKey.includes("-")) {
+    return "Custom Vocabulary Collection";
+  }
+
+  return listKey;
 }
 
 function prettyTrack(trackKey: string | null): string {
