@@ -1,15 +1,27 @@
 <!-- VWMyProgressPanel.vue -->
 <template>
   <div class="d-flex flex-column ga-4">
+    
     <!-- Header -->
     <v-row dense>
-      <div class="mx-4">
+      <div class="mx-4 mt-8 mb-2">
         <div class="text-h5 font-weight-medium">{{ title }}</div>
         <div class="text-subtitle-1 text-medium-emphasis">
           {{ subtitle }}
         </div>
       </div>
     </v-row>
+
+        <!-- Top row: active progress only -->
+    <VWActiveSessionsProgressList
+      :rows="activeWorkRows"
+      :loading="vw.loadingMyWork"
+      :error="vw.errorMyWork"
+      :completionTarget="completionTarget"
+      @refresh="reload"
+      @continue="onContinue"
+      @start="onStartFromActiveList"
+    />
 
     <!-- Top row: summary cards -->
     <v-row dense>
@@ -26,17 +38,6 @@
         />
       </v-col>
     </v-row>
-
-    <!-- Bottom row: active progress only -->
-    <VWActiveSessionsProgressList
-      :rows="activeWorkRows"
-      :loading="vw.loadingMyWork"
-      :error="vw.errorMyWork"
-      :completionTarget="completionTarget"
-      @refresh="reload"
-      @continue="onContinue"
-      @start="onStartFromActiveList"
-    />
   </div>
 </template>
 
@@ -81,6 +82,7 @@ type ActiveWorkRow = {
   canContinue: boolean;
   continueSessionId: number | null;
   listKey: string;
+  listName?: string;
   level: string | null;
   trackKey: string | null;
 };
@@ -94,7 +96,7 @@ const props = withDefaults(
   {
     completionTarget: 3,
     title: "My Progress",
-    subtitle: "Continue an ongoing workout or review your progress",
+    subtitle: "Continue an active session and check your progress",
   }
 );
 
@@ -203,20 +205,38 @@ function normLevel(v: any): string | null {
 function makeTrackKey(listKey: string, mode: string, level: string | null, trackKey: string | null) {
   return `${listKey}::${mode}::${level ?? "null"}::${normTrackKey(trackKey)}`;
 }
-
 function listTitle(listKey: string): string {
-  // Option A: Hardcoded script metadata lookup
+  // 1. Check local hardcoded script metadata configuration
   const meta: any = (vocabLists as any)[listKey];
   if (meta?.title) return meta.title;
 
-  // Option B: Multi-tenant backend database list lookup via ongoing session references
+  // 2. Search dynamically through all active sessions fetched from the server
   const matchingSession = (vw.activeSessions || []).find((s: any) => s.list_key === listKey);
-  if (matchingSession && (matchingSession as any).list_name) {
-    return (matchingSession as any).list_name;
+  if (matchingSession) {
+    // 🌟 FIX: Cast to 'any' to bypass strict property checks on the session type
+    const ms = matchingSession as any;
+
+    const titleCandidates = [
+      ms.list_name,
+      ms.list_title,
+      ms.name,
+      ms.title,
+      ms.session?.list_name,
+      ms.session?.list_title,
+      ms.session?.name
+    ];
+
+    const foundTitle = titleCandidates.find(t => typeof t === "string" && t.trim().length > 0);
+    if (foundTitle) return foundTitle.trim();
   }
-  
-  // Clean fallback string formatting
-  if (listKey.includes("-")) {
+
+  // 3. Clean up raw database keys if no backend name is exposed
+  if (listKey && listKey.includes("_") && !listKey.includes("-")) {
+    const clearText = listKey.replace(/_/g, " ");
+    return clearText.charAt(0).toUpperCase() + clearText.slice(1);
+  }
+
+  if (listKey && listKey.includes("-")) {
     return "Custom Vocabulary Collection";
   }
 
@@ -388,7 +408,7 @@ const unstartedTrackRows = computed<UnstartedTrackRow[]>(() => {
 const activeWorkRows = computed<ActiveWorkRow[]>(() => {
   const out: ActiveWorkRow[] = [];
 
-  for (const s of vw.activeSessions ?? []) {
+  for (const s of vw.activeSessions || []) {
     if (s.status !== "active") continue;
     if (!allowedListKeys.value.has(s.list_key)) continue;
 
@@ -405,9 +425,12 @@ const activeWorkRows = computed<ActiveWorkRow[]>(() => {
         ? Math.round((s.mastered_item_ids.length / s.all_item_ids.length) * 100)
         : 0;
 
+    // 🌟 Compute the title using the resilient multi-layer candidate function
+    const resolvedTitle = listTitle(s.list_key);
+
     out.push({
       key,
-      title: listTitle(s.list_key),
+      title: resolvedTitle,
       subtitle: `${prettyLevel(normLevel(s.level))} • ${prettyTrack(s.track_key)}`,
       correct,
       wrong,
@@ -417,6 +440,7 @@ const activeWorkRows = computed<ActiveWorkRow[]>(() => {
       canContinue: true,
       continueSessionId: Number(s.session_id),
       listKey: s.list_key,
+      listName: resolvedTitle, // 🌟 Pass the solved title downstream into the expansion panel
       level: normLevel(s.level),
       trackKey: normTrackKey(s.track_key),
     });
@@ -432,12 +456,11 @@ const activeWorkRows = computed<ActiveWorkRow[]>(() => {
         ?.last_activity_at?.localeCompare(
           activeSessionByTrack.value.get(a.key)?.last_activity_at ?? ""
         ) ?? 0
-    );
+      );
   });
 
   return out;
 });
-
 /* =====================================================
    FETCH
 ===================================================== */

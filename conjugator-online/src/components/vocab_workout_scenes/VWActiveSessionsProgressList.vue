@@ -2,9 +2,9 @@
   <v-card class="pa-4 m-2" rounded="lg" elevation="3">
     <div class="d-flex align-center justify-space-between">
       <div>
-        <div class="text-h6 font-weight-medium">Active sessions in 'write' mode</div>
+        <div class="text-h6 font-weight-medium">Your active vocab sessions in 'write' mode</div>
         <div class="text-caption text-medium-emphasis">
-          Continue where you left off.
+          Continue where you left off!
         </div>
       </div>
 
@@ -121,6 +121,7 @@ export type ActiveWorkRow = {
   canContinue: boolean;
   continueSessionId: number | null;
   listKey: string;
+  listName?: string;
   level: string | null;
   trackKey: string | null;
 };
@@ -155,12 +156,28 @@ const grouped = computed(() => {
     >
   >();
 
-  for (const row of props.rows) {
-    if (!groups.has(row.title)) {
-      groups.set(row.title, new Map());
+for (const row of props.rows) {
+    // If the title is missing, is a raw UUID, or matches the generic fallback string, 
+    // try to use a specific listName attribute if mapped, or clean up the text.
+    let displayTitle = row.title;
+    
+    const isGenericPlaceholder = !row.title || 
+      row.title.toLowerCase() === "custom vocabulary collection" ||
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(row.title);
+
+    if (isGenericPlaceholder && row.listName) {
+      displayTitle = row.listName;
+    } else if (isGenericPlaceholder && row.listKey && !row.listKey.includes("-")) {
+      // For string keys without hyphens, make them pretty (e.g., phrasal_verbs -> Phrasal verbs)
+      const clearText = row.listKey.replace(/_/g, " ");
+      displayTitle = clearText.charAt(0).toUpperCase() + clearText.slice(1);
     }
 
-    const subtitleMap = groups.get(row.title)!;
+    if (!groups.has(displayTitle)) {
+      groups.set(displayTitle, new Map());
+    }
+
+    const subtitleMap = groups.get(displayTitle)!;
 
     if (!subtitleMap.has(row.subtitle)) {
       subtitleMap.set(row.subtitle, {

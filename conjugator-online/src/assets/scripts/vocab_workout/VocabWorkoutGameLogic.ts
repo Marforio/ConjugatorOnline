@@ -149,17 +149,10 @@ export function checkUserAnswerForCustomItem(
   fieldName: string,
   userAnswer: string
 ): boolean {
-  console.group("✨ [ENGINE DEBUG] checkUserAnswerForCustomItem");
-  console.log("Input Item Object :", item);
-  console.log("Target fieldName  :", `"${fieldName}"`);
-  console.log("User Answer Text  :", `"${userAnswer}"`);
 
   const accepted = getFieldValuesFromCustomItem(item, fieldName);
-  console.log("Extracted Accepted Answers Array:", accepted);
 
   const finalResult = isAnswerAccepted(userAnswer, accepted);
-  console.log("isAnswerAccepted Outcome :", finalResult);
-  console.groupEnd();
 
   return finalResult;
 }

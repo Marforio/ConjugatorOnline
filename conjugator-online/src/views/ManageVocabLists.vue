@@ -654,13 +654,14 @@ camshaft,a shaft in an engine that controls valve timing,noun,The mechanic repla
                   <div class="text-h6 font-weight-black text-slate-800">
                     {{ selectedListForView.name }}
                   </div>
+                  <div class="text-caption text-slate-400 mt-1 font-monospace">
+                    {{ selectedListForView.id }}
+                  </div>
                   <div class="text-caption text-slate-500 mt-1">
                     Category:
                     <strong>{{ selectedListForView.domain || 'UNASSIGNED' }}</strong>
                   </div>
-                  <div class="text-caption text-slate-400 mt-1 font-monospace">
-                    {{ selectedListForView.id }}
-                  </div>
+                  
                 </div>
 
                 <div class="text-right">
@@ -713,7 +714,8 @@ camshaft,a shaft in an engine that controls valve timing,noun,The mechanic repla
                       <v-chip
                         v-if="item.additional_data?.French"
                         size="x-small"
-                        color="blue-lighten-5"
+                        variant="tonal"
+                        color="blue"
                         class="font-weight-bold"
                       >
                         FR: {{ item.additional_data.French }}
@@ -721,7 +723,8 @@ camshaft,a shaft in an engine that controls valve timing,noun,The mechanic repla
                       <v-chip
                         v-if="item.additional_data?.German"
                         size="x-small"
-                        color="green-lighten-5"
+                        variant="tonal"
+                        color="green"
                         class="font-weight-bold"
                       >
                         DE: {{ item.additional_data.German }}
@@ -729,7 +732,8 @@ camshaft,a shaft in an engine that controls valve timing,noun,The mechanic repla
                       <v-chip
                         v-if="item.additional_data?.Italian"
                         size="x-small"
-                        color="amber-lighten-5"
+                        variant="tonal"
+                        color="amber"
                         class="font-weight-bold"
                       >
                         IT: {{ item.additional_data.Italian }}

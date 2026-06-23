@@ -1,32 +1,39 @@
 <template>
   <v-container class="pa-1 pa-md-1 bg-white min-h-screen text-slate-800" fluid>
     
-    <div class="d-flex justify-center">
+    <div class="d-flex justify-center mb-4">
       <v-window-controls v-model="activePanel" length="2" />
     </div>
 
-    <div class="d-flex align-center justify-space-between max-width-hub mx-auto mb-3" style="margin-top: 5%;">
-      <v-btn
-        variant="tonal"
-        color="slate-600"
-        @click="activePanel = 0"
-        :disabled="activePanel === 0"
-        class="rounded-lg text-none font-weight-bold px-4"
-        prepend-icon="mdi-chevron-left"
+    <div class="d-flex justify-center mx-auto mb-6" style="margin-top: 2%;">
+      <v-card 
+        class="d-flex pa-1.5 bg-slate-100 rounded-xl border border-slate-200/60 shadow-sm" 
+        flat
+        max-width="550"
+        width="100%"
       >
-        New Training Session
-      </v-btn>
+        <v-btn
+          @click="activePanel = 0"
+          :variant="activePanel === 0 ? 'flat' : 'text'"
+          :color="activePanel === 0 ? 'primary' : 'slate-600'"
+          class="flex-grow-1 rounded-lg text-none font-weight-black text-body-2 py-2"
+          height="44"
+          prepend-icon="mdi-dumbbell"
+        >
+          New Training Session
+        </v-btn>
 
-      <v-btn
-        variant="tonal"
-        color="slate-600"
-        @click="activePanel = 1"
-        :disabled="activePanel === 1"
-        class="rounded-lg text-none font-weight-bold px-4"
-        append-icon="mdi-chevron-right"
-      >
-        Check My Progress
-      </v-btn>
+        <v-btn
+          @click="activePanel = 1"
+          :variant="activePanel === 1 ? 'flat' : 'text'"
+          :color="activePanel === 1 ? 'primary' : 'slate-600'"
+          class="flex-grow-1 rounded-lg text-none font-weight-black text-body-2 py-2"
+          height="44"
+          prepend-icon="mdi-chart-timeline-variant"
+        >
+          Continue A Session
+        </v-btn>
+      </v-card>
     </div>
 
     <v-window v-model="activePanel" class="max-width-hub mx-auto overflow-visible">
@@ -40,6 +47,7 @@
               <div class="text-h6 font-weight-black text-slate-900 leading-none">Vocab Training - Settings</div>
               <div class="text-caption text-slate-500">Choose a list and training mode</div>
             </div>
+            <v-spacer></v-spacer>
             
             <div v-if="selectedListId" class="d-flex align-center ga-2 w-100 w-sm-auto justify-end flex-wrap">
               
@@ -63,7 +71,7 @@
                 :disabled="!valid"
                 size="small"
                 height="36"
-                class="rounded-lg text-none font-weight-black tracking-wide px-4 elevation-1"
+                class="rounded-lg text-none font-weight-black tracking-wide px-4 elevation-1 ms-8"
                 prepend-icon="mdi-play-circle"
                 @click="start"
               >
@@ -105,18 +113,19 @@
                       class="compact-pills-radio border-b pb-1.5 mb-1.5"
                     />
                     <v-radio
-                      v-for="item in generalVocabItems"
+                      v-for="(item, idx) in generalVocabItems"
                       :key="item.value"
                       :label="item.title"
                       :value="item.value"
                       color="primary"
-                      class="compact-pills-radio border-b pb-1.5 mb-1.5"
+                      class="compact-pills-radio"
+                      :class="{ 'border-b pb-1.5 mb-1.5': idx !== generalVocabItems.length - 1 }"
                     />
                   </div>
 
                   <!-- Custom Vocab Lists from Backend -->
                   <div v-if="customVocabListItems?.length > 0" class="text-overline font-weight-bold text-slate-400 tracking-wider mb-2 block leading-none">
-                    My Domain: <span class="text-slate-900">{{ user.studentDomainLabel || 'General' }}</span>
+                    My Domain: <span class="text-primary text-uppercase font-weight-semibold">{{ user.studentDomainLabel || 'General' }}</span>
                   </div>
 
                   <div v-if="customVocabListItems?.length > 0" class="bg-white border rounded-xl pa-3 space-stack-items">
@@ -160,7 +169,7 @@
                     <div class="text-overline font-weight-bold text-slate-400 tracking-wider mb-1">Study Mode</div>
                     <v-chip-group v-model="selectedMode" mandatory color="primary" column class="ma-0 chip-matrix-row">
                       <v-chip value="cards" filter variant="tonal" size="comfortable" class="font-weight-bold rounded-lg px-4 py-1">Cards</v-chip>
-                      <v-chip value="multiple_choice" filter variant="tonal" size="comfortable" disabled class="font-weight-bold rounded-lg px-4 py-1">Multiple Choice</v-chip>
+                      <v-chip value="multiple_choice" filter variant="tonal" size="comfortable" class="font-weight-bold rounded-lg px-4 py-1">Multiple Choice</v-chip>
                       <v-chip value="write" filter variant="tonal" size="comfortable" class="font-weight-bold rounded-lg px-4 py-1">Write</v-chip>
                       <v-chip value="quiz" filter variant="tonal" size="comfortable" disabled class="font-weight-bold rounded-lg px-4 py-1">Quiz</v-chip>
                     </v-chip-group>
@@ -460,6 +469,9 @@ function getSelectedListItems(): CustomVocabItem[] {
 /* ----------------------------
    PDF Download
 ---------------------------- */
+/* ----------------------------
+   PDF Download
+---------------------------- */
 async function downloadListPdf() {
   if (!selectedListId.value) return;
 
@@ -468,8 +480,9 @@ async function downloadListPdf() {
     const title = selectedListMeta.value?.name ?? selectedListId.value;
 
     let rows: PdfRow[] = [];
+    const isIrregular = isHardcodedListKey(selectedListId.value);
 
-    if (isHardcodedListKey(selectedListId.value)) {
+    if (isIrregular) {
       // Hardcoded list
       const termMap = getSelectedListTermMap();
       rows = toPdfRowsFromTermMap(termMap)
@@ -485,14 +498,19 @@ async function downloadListPdf() {
     } else {
       // Custom list from backend
       const items = getSelectedListItems();
-      rows = items.map((item) => ({
-        term: item.term,
-        definition: item.definition,
-        past_forms: "",
-        French: "",
-        German: "",
-        Italian: "",
-      }));
+      rows = items.map((item: any) => {
+        // 🌟 Safe multi-layer extraction matching the game engine architecture
+        const data = item.additional_data || {};
+        
+        return {
+          term: item.term || "",
+          definition: item.definition || "",
+          past_forms: "", // Custom lists typically don't have dual verb strings
+          French: String(data.French || item.French || ""),
+          German: String(data.German || item.German || ""),
+          Italian: String(data.Italian || item.Italian || ""),
+        };
+      }).sort((a, b) => a.term.localeCompare(b.term, undefined, { sensitivity: "base" }));
     }
 
     const doc = new jsPDF({ orientation: "landscape", unit: "pt", format: "a4" });
@@ -502,21 +520,29 @@ async function downloadListPdf() {
     const marginLeft = 30;
     const marginRight = 30;
 
-    const isIrregular = isHardcodedListKey(selectedListId.value);
+    // 🌟 DYNAMIC HEADERS AND WIDTHS
+    // We check if any rows contain translations to determine if the document needs language blocks
+    const hasTranslations = rows.some(r => r.French || r.German || r.Italian);
 
-    const head = isIrregular
-      ? ["Term", "Past forms", "Definition", "French", "German", "Italian"]
-      : ["Term", "Definition"];
+    let head: string[];
+    let body: any[][];
+    let idealWidths: number[];
 
-    const body = rows.map((r) =>
-      isIrregular
-        ? [r.term, r.past_forms || "", r.definition, r.French, r.German, r.Italian]
-        : [r.term, r.definition]
-    );
-
-    const idealWidths = isIrregular
-      ? [95, 140, 240, 125, 125, 125]
-      : [150, 400];
+    if (isIrregular) {
+      head = ["Term", "Past forms", "Definition", "French", "German", "Italian"];
+      body = rows.map(r => [r.term, r.past_forms || "", r.definition, r.French, r.German, r.Italian]);
+      idealWidths = [95, 140, 240, 125, 125, 125];
+    } else if (hasTranslations) {
+      // If custom list has languages, append them to columns cleanly
+      head = ["Term", "Definition", "French", "German", "Italian"];
+      body = rows.map(r => [r.term, r.definition, r.French, r.German, r.Italian]);
+      idealWidths = [120, 280, 125, 125, 125];
+    } else {
+      // True 2-column fallback layout
+      head = ["Term", "Definition"];
+      body = rows.map(r => [r.term, r.definition]);
+      idealWidths = [180, 570];
+    }
 
     function fitColumnWidthsToPage(
       doc: jsPDF,

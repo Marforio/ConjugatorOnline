@@ -88,7 +88,7 @@
             </div>
           </v-card>
 
-          <!-- Extra Server Tracking Progress Metrics -->
+          <!-- Extra Server Tracking Progress -->
           <div v-if="isPersistedMode" class="d-flex justify-end ga-2 max-width-card-hub mx-auto w-100 mt-n4 mb-4 px-2">
             <v-chip size="small" variant="text" color="slate-100" class="text-slate-600 font-weight-bold">Unseen Items: {{ serverUnseenCount }}</v-chip>
             <v-chip size="small" variant="flat" color="orange-lighten-5" class="text-orange-darken-3 font-weight-bold">To Review: {{ serverReviewCount }}</v-chip>
@@ -96,7 +96,7 @@
           </div>
 
           <!-- ==========================================
-               🔄 MIDDLE MAIN STAGE WORKSPACE MATRIX
+               🔄 MIDDLE MAIN STAGE WORKSPACE 
                ========================================== -->
           <div class="game-middle max-width-card-hub mx-auto w-100 px-1">
             
@@ -202,13 +202,19 @@
               <div class="d-flex justify-center my-4 animate-fade-in">
                 <v-card class="border rounded-xl pa-5 bg-white w-100 max-width-card-hub" flat>
                   <div class="d-flex flex-column align-center justify-center bg-slate-50 rounded-xl border pa-4 mb-4" style="height: 240px;">
+                    <div class="d-flex justify-space-between mt-1" style="width: 95%;">
+                    
+                      <v-chip variant="tonal" color="info" size="small" class="font-weight-medium">hint<v-tooltip activator="parent" location="bottom">{{ maskedHint }}</v-tooltip></v-chip>
+
+                      <v-chip v-if="frontField === 'definition'" variant="tonal" color="info" size="small" class="font-weight-medium">tran.<v-tooltip activator="parent" location="bottom">{{ formattedTranslations }}</v-tooltip></v-chip>
+                  </div>
                     <v-img :src="currentItem?.image" cover :eager="true" class="d-none" @load="backImageLoaded = true" @error="backImageLoaded = false" />
                     
                     <template v-if="hasImage && backImageLoaded">
-                      <v-avatar size="130" rounded="xl" class="border shadow-sm bg-white flex-shrink-0 mb-3">
+                      <v-avatar size="110" rounded="xl" class="border shadow-sm bg-white flex-shrink-0 mb-3">
                         <v-img v-if="currentItem" :src="currentItem.image" cover />
                       </v-avatar>
-                      <h5 class="text-subtitle-1 text-center font-weight-black text-slate-900 tracking-tight px-4 leading-tight text-truncate w-100 max-w-500">
+                      <h5 class="text-subtitle-1 text-center font-weight-bold text-slate-900 tracking-tight px-4 leading-tight text-wrap w-100 max-w-500">
                         {{ frontPreview }}
                       </h5>
                     </template>
@@ -238,11 +244,14 @@
             </template>
 
             <template v-else-if="mode === 'multiple_choice'">
-              <v-card class="border rounded-xl pa-5 bg-white text-center" flat>
-                <div class="text-caption font-weight-bold text-slate-400 text-uppercase tracking-wider mb-2">
-                  Identify the proper <span class="text-primary font-weight-black">{{ backLabel }}</span> representation for:
-                </div>
-                <div class="text-h5 font-weight-black text-slate-900 mb-6 px-4">"{{ frontPreview }}"</div>
+              <v-card class="border rounded-xl pa-7 bg-white text-center" flat>
+                <v-img :src="currentItem?.image" cover :eager="true" class="d-none" @load="backImageLoaded = true" @error="backImageLoaded = false" />
+                <template v-if="hasImage && backImageLoaded">
+                      <v-avatar size="120" rounded="xl" class="border shadow-sm bg-white flex-shrink-0 mt-1 mb-6">
+                        <v-img v-if="currentItem" :src="currentItem.image" cover />
+                      </v-avatar>
+                </template>
+                <div class="text-h5 font-weight-semibold text-slate-900 mb-6 px-4">"{{ frontPreview }}"</div>
 
                 <div class="d-flex flex-wrap justify-center mx-auto max-w-500" style="gap: 10px;">
                   <v-chip v-for="opt in mcOptions" :key="opt" filter variant="tonal" color="primary" size="large" class="font-weight-bold px-5 rounded-lg py-4 border cursor-pointer" :disabled="!canSubmitNow()" @click="submitChoice(opt)">
@@ -266,6 +275,24 @@
           </div>
         </template>
       </div>
+
+      <v-snackbar
+        v-model="showTypoSnackbar"
+        timeout="3000"
+        color="amber-darken-3"
+        rounded="lg"
+        elevation="4"
+      >
+        <div class="d-flex align-center ga-2 font-weight-medium text-body-2">
+          <v-icon>mdi-alert-circle-outline</v-icon>
+          <span>{{ typoSnackbarMessage }}</span>
+        </div>
+        <template v-slot:actions>
+          <v-btn variant="text" density="compact" @click="showTypoSnackbar = false">
+            Dismiss
+          </v-btn>
+        </template>
+      </v-snackbar>
 
     <!-- WRONG DIALOG -->
     <v-dialog v-model="showWrongDialog" persistent max-width="520">
@@ -552,6 +579,8 @@ const contextHits = ref<ContextHit[]>([]);
 const contextLoading = ref(false);
 const contextError = ref<string | null>(null);
 const contextEmptyMessage = ref<string | null>(null);
+const showTypoSnackbar = ref(false);
+const typoSnackbarMessage = ref("");
 
 // cache per listKey so we load each JSON once per page visit
 const contextCache = ref<Record<string, ContextIndex>>({});
@@ -1192,7 +1221,7 @@ const backPreview = computed(() => {
 });
 
 /* =========================================================
-   Write / MC helpers
+   Write / Multiple Choice helpers
 ========================================================= */
 const userAnswer = ref("");
 const answerWrap = ref<HTMLElement | null>(null);
@@ -1215,6 +1244,84 @@ function refreshMcOptions() {
   }
   mcOptions.value = buildMultipleChoiceOptions(it, backField.value as any, props.planItems, 4);
 }
+
+/**
+ * Converted target term string to masked format:
+ * "engine" -> "e _ _ _ _ _"
+ * "stroke and bore" -> "s _ _ _ _ _   a _ _   b _ _ _"
+ */
+const maskedHint = computed(() => {
+  const term = currentItem.value?.term;
+  if (!term) return "—";
+
+  // Split into words but preserve hyphens by treating them as distinct non-space splits if needed,
+  // or simply mask letters while skipping non-alphanumeric characters.
+  return term
+    .split(" ")
+    .map((word) => {
+      return word
+        .split("")
+        .map((char, index) => {
+          // Always show the first character of each word, hyphens, or punctuation marks
+          if (index === 0 || char === "-" || !/[a-zA-Z0-9]/.test(char)) {
+            return char;
+          }
+          return "_";
+        })
+        .join(" "); // Separate each masked underscore with a clear space
+    })
+    .join("    "); // Separate words with wider whitespace tracks
+});
+
+/**
+ * Formatted string summarizing translations from first-class fields 
+ * or additional_data blocks safely.
+ */
+/**
+ * Formatted string summarizing translations from additional_data safely.
+ */
+/**
+ * Formatted string summarizing translations from additional_data safely.
+ */
+/**
+ * Formatted string summarizing translations from any active data source safely.
+ */
+const formattedTranslations = computed(() => {
+  const item = currentItem.value as any; 
+  if (!item) return "No translations available.";
+
+  // 1. Check Custom Backend DB format (additional_data dictionary)
+  const data = item.additional_data || {};
+  
+  // 2. Check Hardcoded Normalized format (fields array structure)
+  const fields = (item as any).fields || {};
+
+  // Resolve French
+  const fr = data.French 
+    || (Array.isArray(fields.French) ? fields.French[0] : null) 
+    || (item as any).French 
+    || null;
+
+  // Resolve German
+  const de = data.German 
+    || (Array.isArray(fields.German) ? fields.German[0] : null) 
+    || (item as any).German 
+    || null;
+
+  // Resolve Italian
+  const it = data.Italian 
+    || (Array.isArray(fields.Italian) ? fields.Italian[0] : null) 
+    || (item as any).Italian 
+    || null;
+
+  // Assemble strings cleanly
+  const parts: string[] = [];
+  if (fr) parts.push(`${fr}`);
+  if (de) parts.push(`${de}`);
+  if (it) parts.push(`${it}`);
+
+  return parts.length ? parts.join("  |  ") : "No translations configured for this item.";
+});
 
 /* =========================================================
    📊 COMPUTE RUNTIME TRANSLATION VECTOR LABELS
@@ -1574,6 +1681,19 @@ async function submitWrite(e?: KeyboardEvent) {
     });
 
     if (correct) {
+      // 🌟 TYPO MATCH EVALUATION
+      // Normalize user answer vs accepted options using standard lower-case matching
+      // If it passed validation, but isn't an *exact* match string, it's a typo rescue!
+      const exactCorrect = acceptedArr.some(
+        (a) => a.trim().toLowerCase() === user.toLowerCase()
+      );
+      
+      if (!exactCorrect) {
+        const primaryTarget = acceptedArr[0] || it.term;
+        typoSnackbarMessage.value = `Typo detected! Accepted close answer for: "${primaryTarget}"`;
+        showTypoSnackbar.value = true;
+      }
+
       showFloatingFeedback.value = true;
       setTimeout(() => (showFloatingFeedback.value = false), 800);
 
@@ -1589,6 +1709,8 @@ async function submitWrite(e?: KeyboardEvent) {
     lastAcceptedAnswers.value = acceptedArr.join(" / ") || "—";
     showWrongDialog.value = true;
     suppressEnter(350);
+  } catch {
+    // catch blocks if any...
   } finally {
     if (!showWrongDialog.value) isSubmitting.value = false;
   }

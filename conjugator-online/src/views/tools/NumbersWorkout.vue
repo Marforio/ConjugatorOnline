@@ -15,9 +15,12 @@
         class="pa-6 rounded-xl bg-slate-50 border-slate-200"
       >
         <div class="d-flex justify-center mb-4">
-          <div class="practice-badge">
-            <v-icon color="indigo" size="30">mdi-numeric</v-icon>
-          </div>
+            <v-img
+              src="/images/banners/NumbersWorkout.png"
+              alt="Numbers Workout"
+              cover
+              style="max-width: 350px; max-height: 200px;"
+            />
         </div>
 
         <p class="text-body-2 font-weight-bold text-indigo mb-2">
@@ -121,7 +124,7 @@
                   class="pa-6 pa-md-8 bg-white d-flex flex-column justify-center align-center text-center"
                 >
                   <div class="text-overline font-weight-bold text-slate-400 tracking-widest mb-3">
-                    Read the number
+                    How would you say this number?
                   </div>
 
                   <div class="number-display mb-4">
@@ -129,7 +132,7 @@
                   </div>
 
                   <div class="text-caption text-slate-400">
-                    Tap the card to reveal the answer
+                    Tap the card to reveal the correct reading of the number
                   </div>
                 </v-col>
 
@@ -168,12 +171,6 @@
           <div class="flashcard-face flashcard-back">
             <div class="flashcard-surface mx-auto rounded-2xl border border-slate-200 overflow-hidden elevation-4 bg-slate-50 pa-6 d-flex flex-column justify-center">
               <div class="text-center w-100" style="max-width: 600px; margin: 0 auto;">
-                <h4 class="text-subtitle-1 font-weight-black text-slate-900 mb-1">
-                  Correct Reading
-                </h4>
-                <p class="text-caption text-slate-400 mb-3">
-                  Compare your answer with the example below
-                </p>
 
                 <v-card
                   variant="flat"
@@ -182,7 +179,7 @@
                   @click.stop
                 >
                   <span class="text-xxs font-weight-black text-indigo-700 uppercase tracking-wider d-block mb-2">
-                    Answer
+                    Correct Reading
                   </span>
                   <p class="text-h5 font-weight-bold text-slate-900 font-monospace leading-normal mb-0">
                     {{ prompt?.answer }}
@@ -389,14 +386,14 @@ const DATA: Record<string, PromptCategory> = {
     weight: 2,
     prompts: {
       "1/2": "one half",
-      "3/4": "three quarters",
+      "3/4": "three fourths or three quarters",
       "2/3": "two thirds",
       "1/3": "one third",
       "1/20": "one twentieth",
       "1/5": "one fifth",
       "1/10": "one tenth",
       "1/50": "one fiftieth",
-      "1/4": "one quarter",
+      "1/4": "one fourth or one quarter",
       "2/5": "two fifths",
       "3/5": "three fifths",
       "4/5": "four fifths",
