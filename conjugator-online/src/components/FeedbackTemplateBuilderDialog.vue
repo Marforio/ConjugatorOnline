@@ -16,7 +16,7 @@
           <!-- LEFT UTILITY PANEL: FIELD SELECTION INGREDIENTS -->
           <v-col cols="12" md="3">
             <v-card class="pa-5 mb-4 rounded-xl border" variant="flat" color="white">
-              <div class="text-subtitle-1 font-weight-bold text-slate-800 mb-2">1. Template Blueprint Basics</div>
+              <div class="text-subtitle-1 font-weight-bold text-slate-800 mb-2">1. Template Name</div>
               <v-text-field 
                 v-model="templateName" 
                 label="Template Name (e.g., Final Presentation Review)" 
@@ -28,41 +28,41 @@
               <v-divider class="my-4" />
               
               <div class="text-subtitle-1 font-weight-bold text-slate-800 mb-1">2. Add Component Blocks</div>
-              <p class="text-caption text-slate-400 mb-4">Click an ingredient item to push it down into your interactive form draft layout.</p>
+              <p class="text-caption text-slate-400 mb-4">Click an item to add it to your template.</p>
               
               <v-row dense>
                 <v-col cols="12">
                   <v-btn block variant="tonal" color="slate-700" prepend-icon="mdi-card-text-outline" class="text-none justify-start rounded-lg text-body-2 font-weight-bold" @click="addComponent('paragraph')">Static Instruction Paragraph</v-btn>
                 </v-col>
                 <v-col cols="12" class="mt-2">
-                  <v-btn block variant="tonal" color="indigo" prepend-icon="mdi-form-textbox" class="text-none justify-start rounded-lg text-body-2 font-weight-bold" @click="addComponent('text_input')">Short Text String Entry</v-btn>
+                  <v-btn block variant="tonal" color="indigo" prepend-icon="mdi-form-textbox" class="text-none justify-start rounded-lg text-body-2 font-weight-bold" @click="addComponent('text_input')">Single-line Text Area</v-btn>
                 </v-col>
                 <v-col cols="12" class="mt-2">
-                  <v-btn block variant="tonal" color="indigo" prepend-icon="mdi-form-textarea" class="text-none justify-start rounded-lg text-body-2 font-weight-bold" @click="addComponent('textarea')">Long Text Area Comment Block</v-btn>
+                  <v-btn block variant="tonal" color="indigo" prepend-icon="mdi-form-textarea" class="text-none justify-start rounded-lg text-body-2 font-weight-bold" @click="addComponent('textarea')">Multi-line Text Area</v-btn>
                 </v-col>
                 <v-col cols="12" class="mt-2">
-                  <v-btn block variant="tonal" color="teal" prepend-icon="mdi-form-select" class="text-none justify-start rounded-lg text-body-2 font-weight-bold" @click="addComponent('select')">Dropdown Selector Menu</v-btn>
+                  <v-btn block variant="tonal" color="teal" prepend-icon="mdi-form-select" class="text-none justify-start rounded-lg text-body-2 font-weight-bold" @click="addComponent('select')">Dropdown Selector</v-btn>
                 </v-col>
                 <v-col cols="12" class="mt-2">
-                  <v-btn block variant="tonal" color="purple" prepend-icon="mdi-checkbox-multiple-marked-outline" class="text-none justify-start rounded-lg text-body-2 font-weight-bold" @click="addComponent('checkbox_group')">Multiple Checkbox Group Selection</v-btn>
+                  <v-btn block variant="tonal" color="purple" prepend-icon="mdi-checkbox-multiple-marked-outline" class="text-none justify-start rounded-lg text-body-2 font-weight-bold" @click="addComponent('checkbox_group')">Multiple Checkbox Group</v-btn>
                 </v-col>
                 
                 <v-col cols="12" class="mt-4">
                   <v-divider class="mb-3" />
-                  <div class="text-xxs font-weight-bold text-slate-400 text-uppercase tracking-wider mb-2">ERROS AND VOCAB FIELDS</div>
+                  <div class="text-xxs font-weight-bold text-slate-400 text-uppercase tracking-wider mb-2">ERRORS AND VOCAB FIELDS</div>
                 </v-col>
                 
                 <v-col cols="12">
-                  <v-btn block variant="flat" color="amber-darken-3" prepend-icon="mdi-alert-circle-outline" class="text-white text-none justify-start rounded-lg text-body-2 font-weight-bold" @click="addComponent('error_matrix')">Systemic Error Fields</v-btn>
+                  <v-btn block variant="flat" color="amber-darken-3" prepend-icon="mdi-alert-circle-outline" class="text-white text-none justify-start rounded-lg text-body-2 font-weight-bold" @click="addComponent('error_matrix')">Grammar Errors</v-btn>
                 </v-col>
                 <v-col cols="12" class="mt-2">
-                  <v-btn block variant="flat" color="indigo-darken-2" prepend-icon="mdi-notebook-outline" class="text-white text-none justify-start rounded-lg text-body-2 font-weight-bold" @click="addComponent('vocab_notebook')">Vocab Fields</v-btn>
+                  <v-btn block variant="flat" color="indigo-darken-2" prepend-icon="mdi-notebook-outline" class="text-white text-none justify-start rounded-lg text-body-2 font-weight-bold" @click="addComponent('vocab_notebook')">Vocabulary Feedback</v-btn>
                 </v-col>
                 <v-col cols="12" class="mt-2">
-                  <v-btn block variant="flat" color="emerald-darken-2" class="bg-emerald text-white text-none justify-start rounded-lg text-body-2 font-weight-bold" prepend-icon="mdi-star-circle-outline" @click="addComponent('impressive_matrix')">Impressive Language Tracker</v-btn>
+                  <v-btn block variant="flat" color="pink-darken-2" class="bg-emerald text-white text-none justify-start rounded-lg text-body-2 font-weight-bold" prepend-icon="mdi-star-circle-outline" @click="addComponent('impressive_matrix')">Impressive Language Comment</v-btn>
                 </v-col>
                 <v-col cols="12" class="mt-2">
-                  <v-btn block variant="flat" color="blue-grey-darken-2" class="text-white text-none justify-start rounded-lg text-body-2 font-weight-bold" prepend-icon="mdi-comment-text-multiple-outline" @click="addComponent('comment_block')">Freeform Teacher Remarks</v-btn>
+                  <v-btn block variant="flat" color="blue-grey-darken-2" class="text-white text-none justify-start rounded-lg text-body-2 font-weight-bold" prepend-icon="mdi-comment-text-multiple-outline" @click="addComponent('comment_block')">Freeform Teacher Comments</v-btn>
                 </v-col>
               </v-row>
             </v-card>

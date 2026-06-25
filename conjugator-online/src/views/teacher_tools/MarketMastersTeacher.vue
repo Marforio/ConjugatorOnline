@@ -1,200 +1,370 @@
 <template>
-  <div class="teacher-dashboard-container">
-    <header class="dashboard-header">
-      <h1>Market Masters: Instructor Panel 🎓</h1>
-      <p class="subtitle">Set tournament boundaries, issue start budgets, and track classroom performance metrics.</p>
-    </header>
-
-    <div class="teacher-grid">
-      
-      <section class="control-panel-card">
-        <h2>Launch New Competition 🏆</h2>
-        <p class="panel-instruction">
-          Define explicit guardrails. Setting asset minimums prevents students from placing all their capital into a single volatile cryptocurrency.
+  <v-container fluid class="bg-grey-lighten-4 min-h-screen pa-6">
+    <!-- Header banner block -->
+    <v-row class="mb-6">
+      <v-col cols="12">
+        <h1 class="text-h4 font-weight-black text-slate-800 mb-1">Market Masters: Teacher Panel 🎓</h1>
+        <p class="text-subtitle-1 text-slate-500">
+          Create competitions for your students and monitor their performance.
         </p>
+      </v-col>
+    </v-row>
 
-        <form @submit.prevent="handleCreateCompetition" class="creation-form">
-          <div class="form-group">
-            <label>Tournament Name</label>
-            <input 
-              type="text" 
-              v-model="newComp.name" 
-              placeholder="e.g., Finance 101: Fall Alpha Challenge" 
-              required 
-              class="form-control"
-            />
-          </div>
+    <v-row>
+      <!-- 🏆 LEFT SIDE: TOURNAMENT DEPLOYMENT CONTROLS -->
+      <v-col cols="12" md="5">
+        <v-card variant="flat" class="pa-5 border bg-white rounded-lg">
+          <h2 class="text-h6 font-weight-bold text-slate-800 mb-2">Launch New Competition 🏆</h2>
+          <v-alert type="info" variant="tonal" density="compact" class="text-caption mb-4">
+            Setting minimum asset counts prevents students from placing all their capital into a single volatile asset.
+          </v-alert>
 
-          <div class="form-row">
-            <div class="form-group">
-              <label>Starting Capital ($)</label>
-              <input 
-                type="number" 
-                v-model="newComp.budget" 
-                placeholder="100000" 
-                required 
-                class="form-control"
-              />
-            </div>
-            <div class="form-group">
-              <label>Min Assets Required</label>
-              <input 
-                type="number" 
-                v-model="newComp.min_assets_required" 
-                min="1" 
-                max="10" 
-                required 
-                class="form-control"
-              />
-            </div>
-          </div>
+          <v-form @submit.prevent="handleCreateCompetition">
+            <v-text-field
+              v-model="newComp.name"
+              label="Competition Name"
+              placeholder="e.g., Finance 101: Fall Alpha Challenge"
+              variant="outlined"
+              density="comfortable"
+              required
+              class="mb-3"
+            ></v-text-field>
 
-          <div class="form-group">
-            <label>Registration Window Starts</label>
-            <input 
-              type="datetime-local" 
-              v-model="newComp.join_start_time" 
-              required 
-              class="form-control"
-            />
-          </div>
+            <v-row>
+              <v-col cols="6" class="py-0">
+                <v-text-field
+                  v-model.number="newComp.budget"
+                  label="Starting Capital ($)"
+                  type="number"
+                  variant="outlined"
+                  density="comfortable"
+                  required
+                ></v-text-field>
+              </v-col>
+              <v-col cols="6" class="py-0">
+                <v-text-field
+                  v-model.number="newComp.min_assets_required"
+                  label="Min Assets Required"
+                  type="number"
+                  min="1"
+                  max="10"
+                  variant="outlined"
+                  density="comfortable"
+                  required
+                ></v-text-field>
+              </v-col>
+            </v-row>
 
-          <div class="form-group">
-            <label>Registration Window Closes (Strict Lock)</label>
-            <input 
-              type="datetime-local" 
-              v-model="newComp.join_end_time" 
-              required 
-              class="form-control"
-            />
-          </div>
+            <!-- ⚙️ NEW: COMPETITION COMPLEXITY TOGGLE -->
+            <v-select
+              v-model="newComp.trading_mode"
+              label="Competition Complexity Level"
+              :items="[
+                { title: '🟢 Basic Mode (Cash Only - Buy/Sell)', value: 'BASIC' },
+                { title: '🔥 Advanced Mode (Margin Shorting & Leverage)', value: 'ADVANCED' }
+              ]"
+              variant="outlined"
+              density="comfortable"
+              class="mb-3"
+            ></v-select>
 
-          <button type="submit" class="btn btn-success full-width">
-            Deploy Live Tournament Code
-          </button>
-        </form>
-      </section>
-
-      <section class="control-panel-card">
-        <h2>Active Tournaments & Status Monitoring 📊</h2>
-        
-        <div v-if="competitions.length === 0" class="empty-state">
-          <p>No active competitions created yet. Use the form on the left to spin up your first tournament.</p>
-        </div>
-
-        <div v-else class="competitions-wrapper">
-          <div 
-            v-for="comp in competitions" 
-            :key="comp.id" 
-            class="comp-monitor-row"
-            :class="{ 'selected': selectedCompId === comp.id }"
-          >
-            <div class="comp-summary-info">
-              <h3>{{ comp.name }}</h3>
-              <div class="meta-badges">
-                <span class="badge id-badge">ID: {{ comp.id }}</span>
-                <span class="badge balance-badge">${{ parseFloat(comp.budget).toLocaleString() }}</span>
-                <span :class="['badge', comp.is_joinable ? 'open' : 'closed']">
-                  {{ comp.is_joinable ? 'Open Registration' : 'Locked' }}
-                </span>
+            <!-- 📈 NEW: CONDITIONAL GLOBAL LEVERAGE CAP CONFIGURATION -->
+            <v-expand-transition>
+              <div v-if="newComp.trading_mode === 'ADVANCED'" class="bg-grey-lighten-4 rounded pa-3 mb-4 border">
+                <div class="text-caption font-weight-bold text-slate-700 mb-1 d-flex justify-space-between">
+                  <span>Max Global Portfolio Leverage Cap:</span>
+                  <span class="text-primary font-weight-black">{{ newComp.leverage_setting }}x Multiplier</span>
+                </div>
+                <v-slider
+                  v-model="newComp.leverage_setting"
+                  :min="1"
+                  :max="10"
+                  :step="1"
+                  thumb-label
+                  color="primary"
+                  track-color="grey-lighten-2"
+                  hide-details
+                ></v-slider>
+                <div class="text-slate-400 mt-1" style="font-size: 0.65rem; line-height: 1.2;">
+                  *Applies as a total exposure safety constraint across the entire portfolio balance ($TotalExposure \le NetEquity \times Leverage$).
+                </div>
               </div>
-              <p class="dates-meta">
-                Closes: {{ formatDate(comp.join_end_time) }}
-              </p>
+            </v-expand-transition>
+
+            <v-text-field
+              v-model="newComp.join_start_time"
+              label="Registration Window Starts"
+              type="datetime-local"
+              variant="outlined"
+              density="comfortable"
+              persistent-placeholder
+              required
+              class="mb-3"
+            ></v-text-field>
+
+            <v-text-field
+              v-model="newComp.join_end_time"
+              label="Registration Window Closes (Strict Lock)"
+              type="datetime-local"
+              variant="outlined"
+              density="comfortable"
+              persistent-placeholder
+              required
+              class="mb-4"
+            ></v-text-field>
+
+            <v-btn type="submit" color="success" block size="large" class="font-weight-bold">
+              Deploy Competition / Get Code
+            </v-btn>
+          </v-form>
+        </v-card>
+
+        <v-card variant="flat" class="pa-5 border bg-white rounded-lg mt-6">
+          <h2 class="text-h6 font-weight-bold text-slate-800 mb-2">Add students to competition</h2>
+          <p class="text-caption text-slate-500 mb-4">
+            Create investment portfolios within the competition for your students
+          </p>
+
+          <v-form @submit.prevent="handleEnrollStudent">
+            <v-select
+              v-model="enrollmentForm.competition_id"
+              label="Target Competition Pool"
+              :items="competitions"
+              item-title="name"
+              item-value="id"
+              variant="outlined"
+              density="comfortable"
+              required
+              class="mb-3"
+            ></v-select>
+
+            <v-select
+              v-model="enrollmentForm.student_id"
+              label="Select Student from Roster"
+              :items="userStore.teacherRoster"
+              :item-title="item => `${item.first_name} ${item.last_name} (${item.initials})`"
+              item-value="id"
+              variant="outlined"
+              density="comfortable"
+              required
+              class="mb-3"
+            ></v-select>
+
+            <v-text-field
+              v-model="enrollmentForm.portfolio_name"
+              label="Custom Portfolio Name (Optional)"
+              placeholder="e.g., Alpha Growth Fund"
+              variant="outlined"
+              density="comfortable"
+              class="mb-4"
+              hide-details
+            ></v-text-field>
+
+            <v-btn type="submit" color="primary" block class="font-weight-bold" :loading="isEnrolling">
+              Provision Portfolio Profile
+            </v-btn>
+          </v-form>
+        </v-card>
+      </v-col>
+
+      <!-- 📊 RIGHT SIDE: REAL-TIME TOURNAMENT MONITORING -->
+      <v-col cols="12" md="7">
+        <v-card variant="flat" class="pa-5 border bg-white rounded-lg">
+          <h2 class="text-h6 font-weight-bold text-slate-800 mb-4 border-b pb-2">Active Tournaments & Classroom Status 📊</h2>
+          
+          <v-row v-if="competitions.length === 0">
+            <v-col cols="12" class="text-center py-8 text-slate-400 border border-dashed rounded-lg">
+              <v-icon size="large" class="mb-2">mdi-trophy-outline</v-icon>
+              <div>No active competitions created yet. Use the deployment engine to spin up a session.</div>
+            </v-col>
+          </v-row>
+
+          <v-list v-else variant="outlined" class="pa-0 border rounded-lg mb-6 max-h-60 overflow-y-auto">
+            <v-list-item
+              v-for="comp in competitions"
+              :key="comp.id"
+              :active="selectedCompId === comp.id"
+              active-color="primary"
+              class="border-b last-border-0 pa-4"
+            >
+              <div class="d-flex justify-space-between align-center w-100">
+                <div>
+                  <h3 class="text-subtitle-1 font-weight-bold text-slate-800">{{ comp.name }}</h3>
+                  <div class="d-flex align-center gap-2 mt-1">
+                    <v-chip size="x-small" color="grey-darken-1" variant="flat">ID: {{ comp.id }}</v-chip>
+                    <v-chip size="x-small" color="success" variant="flat">${{ parseFloat(comp.budget).toLocaleString() }}</v-chip>
+                    <v-chip size="x-small" :color="comp.trading_mode === 'ADVANCED' ? 'purple' : 'teal'" variant="flat">
+                      {{ comp.trading_mode || 'BASIC' }}
+                    </v-chip>
+                    <v-chip size="x-small" :color="comp.is_joinable ? 'blue' : 'error'" variant="flat">
+                      {{ comp.is_joinable ? 'Open' : 'Locked' }}
+                    </v-chip>
+                  </div>
+                  <div class="text-caption text-slate-400 mt-1">
+                    Closes: {{ formatDate(comp.join_end_time) }}
+                  </div>
+                </div>
+                <v-btn color="primary" size="small" class="font-weight-bold" @click="fetchCompetitionDetails(comp.id)">
+                  View Metrics
+                </v-btn>
+              </div>
+            </v-list-item>
+          </v-list>
+
+          <!-- CLASS PERFORMANCE DRILL DOWN INSIGHTS -->
+          <v-expand-transition>
+            <div v-if="selectedCompDetails" class="border-t-2 pt-4 mt-4">
+              <div class="d-flex justify-space-between align-center mb-3">
+                <h3 class="text-subtitle-1 font-weight-bold text-slate-800">
+                  Class Performance: {{ selectedCompDetails.name }}
+                </h3>
+                <v-btn variant="text" color="error" size="small" compact @click="selectedCompDetails = null">Clear</v-btn>
+              </div>
+
+              <v-table density="comfortable" class="border rounded text-caption">
+                <thead>
+                  <tr class="bg-grey-lighten-4">
+                    <th class="font-weight-bold">Student Code</th>
+                    <th class="font-weight-bold">Initials</th>
+                    <th class="font-weight-bold">Available Cash</th>
+                    <th class="font-weight-bold">Outstanding Debt</th>
+                    <th class="font-weight-bold text-right">Portfolio Value</th>
+                    <th class="font-weight-bold text-center">Assets Held</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <v-row v-if="!selectedCompDetails.portfolios?.length" class="ma-0">
+                    <v-col class="text-center text-slate-400 py-4">No student records enrolled inside this session.</v-col>
+                  </v-row>
+                  <tr v-for="portfolio in selectedCompDetails.portfolios" :key="portfolio.id">
+                    <td class="font-mono text-primary font-weight-bold">{{ portfolio.student_web_id }}</td>
+                    <td>{{ portfolio.student_initials }}</td>
+                    <td class="font-mono">${{ parseFloat(portfolio.cash_balance).toLocaleString() }}</td>
+                    <td class="font-mono" :class="parseFloat(portfolio.borrowed_funds_balance) > 0 ? 'text-rose-600 font-weight-bold' : 'text-slate-400'">
+                      ${{ parseFloat(portfolio.borrowed_funds_balance || 0).toFixed(2) }}
+                    </td>
+                    <td class="font-mono font-weight-black text-right text-slate-900">${{ calculatePortfolioValue(portfolio) }}</td>
+                    <td class="text-center">
+                      <v-chip 
+                        size="x-small" 
+                        :color="portfolio.assets.length < selectedCompDetails.min_assets_required ? 'warning' : 'success'" 
+                        variant="flat"
+                        class="font-weight-bold"
+                      >
+                        {{ portfolio.assets.length }} / {{ selectedCompDetails.min_assets_required }}
+                      </v-chip>
+                    </td>
+                  </tr>
+                </tbody>
+              </v-table>
             </div>
-            
-            <div class="comp-summary-actions">
-              <button class="btn btn-primary btn-sm" @click="fetchCompetitionDetails(comp.id)">
-                View Classroom Metrics
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <div v-if="selectedCompDetails" class="insights-section">
-          <div class="insights-header">
-            <h3>Class Performance: {{ selectedCompDetails.name }}</h3>
-            <button class="close-text" @click="selectedCompDetails = null">Clear</button>
-          </div>
-
-          <table class="teacher-metrics-table">
-            <thead>
-              <tr>
-                <th>Student Code</th>
-                <th>Initials</th>
-                <th>Available Cash</th>
-                <th>Portfolio Value</th>
-                <th>Assets Held</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="portfolio in selectedCompDetails.portfolios" :key="portfolio.id">
-                <td class="font-mono">{{ portfolio.student_web_id }}</td>
-                <td>{{ portfolio.student_initials }}</td>
-                <td class="font-mono">${{ parseFloat(portfolio.cash_balance).toLocaleString() }}</td>
-                <td class="font-mono font-bold">${{ calculatePortfolioValue(portfolio) }}</td>
-                <td>
-                  <span class="holding-count-indicator" :class="{ 'warning': portfolio.assets.length < selectedCompDetails.min_assets_required }">
-                    {{ portfolio.assets.length }} / {{ selectedCompDetails.min_assets_required }}
-                  </span>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </section>
-
-    </div>
-  </div>
+          </v-expand-transition>
+        </v-card>
+      </v-col>
+    </v-row>
+  </v-container>
 </template>
+
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import axios from 'axios'
+import api from '@/axios';
+import { useUserStore } from '@/stores/user'
+
+const userStore = useUserStore()
 
 const competitions = ref([])
 const selectedCompId = ref(null)
 const selectedCompDetails = ref(null)
+const isEnrolling = ref(false)
+const enrollmentForm = ref({
+  competition_id: null,
+  student_id: null,
+  portfolio_name: ''
+})
 
+// ⚡ Baseline payload fields integrated with tracking rules
 const newComp = ref({
   name: '',
   budget: 100000,
   min_assets_required: 3,
+  trading_mode: 'BASIC', // Baseline setup mode selection option
+  leverage_setting: 1,   // Defaults to 1x (No extra leverage)
   join_start_time: '',
   join_end_time: ''
 })
 
-const fetchTeacherDashboard = async () => {
+onMounted(async () => {
   try {
-    // Expected endpoint back from your custom Django view handles list retrieval
-    const res = await axios.get('/api/teacher/market-masters/competitions/')
+    const res = await api.get('/market-masters/competitions/')
     competitions.value = res.data
+    
+    await userStore.ensureUserLoaded() 
   } catch (err) {
-    console.error("Failed to recover instructor dashboard contexts:", err)
+    console.error("Dashboard initialization exception:", err)
+  }
+})
+
+const handleEnrollStudent = async () => {
+  if (!enrollmentForm.value.competition_id || !enrollmentForm.value.student_id) return
+  
+  isEnrolling.value = true
+  try {
+    // Fire assignment parameters to our single endpoint route target
+    await api.post('/market-masters/teacher/allocate/', enrollmentForm.value)
+    
+    alert("Student successfully assigned to tournament!")
+    
+    // Reset selection targets
+    enrollmentForm.value.student_id = null
+    enrollmentForm.value.portfolio_name = ''
+    
+    // Refresh table stats immediately if a competition is currently open/selected
+    if (selectedCompId.value) {
+      fetchCompetitionDetails(selectedCompId.value)
+    }
+  } catch (err) {
+    console.error("Enrollment error logged:", err.response?.data)
+    alert(err.response?.data?.error || "Unable to complete allocation parameters.")
+  } finally {
+    isEnrolling.value = false
   }
 }
 
-onMounted(() => {
-  fetchTeacherDashboard()
-})
-
 const handleCreateCompetition = async () => {
   try {
-    await axios.post('/api/teacher/market-masters/competitions/', newComp.value)
-    alert("New structural tournament instance launched successfully!")
-    // Reset form fields
-    newComp.value = { name: '', budget: 100000, min_assets_required: 3, join_start_time: '', join_end_time: '' }
+    // TRANSLATION LAYER: Map Vue states cleanly to your backend model attributes
+    const payload = {
+      name: newComp.value.name,
+      budget: newComp.value.budget,
+      min_assets_required: newComp.value.min_assets_required,
+      join_start_time: newComp.value.join_start_time,
+      join_end_time: newComp.value.join_end_time,
+      
+      // Basic mode maps to 'STATIC' portfolios, Advanced maps to 'DYNAMIC'
+      portfolio_type: newComp.value.trading_mode === 'ADVANCED' ? 'DYNAMIC' : 'STATIC',
+      
+      // If basic mode is picked, cap leverage at 1x, otherwise use the slider's value
+      max_leverage_tier: newComp.value.trading_mode === 'ADVANCED' ? parseInt(newComp.value.leverage_setting) : 1
+    }
+
+    await api.post('/market-masters/competitions/', payload)
+    
+    alert("New competition deployed successfully!")
+    
+    // Reset inputs back to baseline configurations
+    newComp.value = { name: '', budget: 100000, min_assets_required: 3, trading_mode: 'BASIC', leverage_setting: 1, join_start_time: '', join_end_time: '' }
     fetchTeacherDashboard()
   } catch (err) {
-    alert("Rejection on model parameters processing. Verify date structures format matches Django timezone validations.")
+    console.error("Backend validation rejection errors:", err.response?.data)
+    alert("Failed to deploy tournament. Check console for field parameters errors.")
   }
 }
 
 const fetchCompetitionDetails = async (id) => {
   selectedCompId.value = id
   try {
-    // Requests extended operational fields, returning sub-array records for portfolios
-    const res = await axios.get(`/api/teacher/market-masters/competitions/${id}/`)
+    const res = await api.get(`/market-masters/competitions/${id}/`)
     selectedCompDetails.value = res.data
   } catch (err) {
     console.error("Failed to load competition metrics payload:", err)
@@ -202,7 +372,6 @@ const fetchCompetitionDetails = async (id) => {
 }
 
 const calculatePortfolioValue = (portfolio) => {
-  // Placeholder logic processing: in real view, cross-reference assets array total values
   return parseFloat(portfolio.cash_balance).toLocaleString()
 }
 
@@ -214,70 +383,14 @@ const formatDate = (dateStr) => {
 </script>
 
 <style scoped>
-.teacher-dashboard-container {
-  padding: 30px 20px;
-  background-color: #f4f6f8;
-  min-height: 100vh;
-  font-family: Arial, sans-serif;
+/* 🧹 Extraneous pure CSS rule properties purged. Styles are now derived directly from Vuetify primitives! */
+.max-h-60 {
+  max-height: 400px;
 }
-.dashboard-header { max-width: 1200px; margin: 0 auto 30px auto; }
-.dashboard-header h1 { color: #2c3e50; font-size: 2rem; margin: 0; }
-.subtitle { color: #7f8c8d; margin-top: 5px; }
-
-.teacher-grid {
-  max-width: 1200px;
-  margin: 0 auto;
-  display: grid;
-  grid-template-columns: 1fr 1.3fr;
-  gap: 30px;
+.gap-2 {
+  gap: 8px;
 }
-.control-panel-card {
-  background: white;
-  padding: 25px;
-  border-radius: 8px;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+.font-mono {
+  font-family: monospace;
 }
-.control-panel-card h2 { margin-top: 0; font-size: 1.3rem; color: #2c3e50; border-bottom: 2px solid #ecf0f1; padding-bottom: 10px; }
-.panel-instruction { background: #e8f4f8; color: #2980b9; padding: 12px; border-radius: 4px; font-size: 0.85rem; line-height: 1.4; margin-bottom: 20px; }
-
-/* REUSABLE FORM GROUP SYSTEM */
-.creation-form { display: flex; flex-direction: column; gap: 15px; }
-.form-group label { display: block; font-size: 0.85rem; font-weight: bold; color: #34495e; margin-bottom: 6px; }
-.form-control { width: 100%; padding: 10px; border: 1px solid #bdc3c7; border-radius: 4px; box-sizing: border-box; font-size: 0.9rem; }
-.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-
-/* COMP DATA DISPLAY ROW */
-.competitions-wrapper { display: flex; flex-direction: column; gap: 12px; max-height: 400px; overflow-y: auto; }
-.comp-monitor-row { display: flex; justify-content: space-between; align-items: center; padding: 15px; background: #fdfefe; border: 1px solid #e2e8f0; border-radius: 6px; transition: all 0.2s; }
-.comp-monitor-row.selected { border-color: #3498db; background: #f4f9fd; }
-.comp-summary-info h3 { margin: 0 0 6px 0; font-size: 1.05rem; color: #2c3e50; }
-.meta-badges { display: flex; gap: 8px; margin-bottom: 6px; }
-.badge { font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; font-weight: bold; color: white; text-transform: uppercase; }
-.id-badge { background: #7f8c8d; }
-.balance-badge { background: #27ae60; }
-.badge.open { background: #3498db; }
-.badge.closed { background: #e74c3c; }
-.dates-meta { margin: 0; font-size: 0.75rem; color: #95a5a6; }
-
-/* LIVE CLASSROOM INSIGHTS TABLE */
-.insights-section { margin-top: 30px; border-top: 2px dashed #bdc3c7; padding-top: 20px; }
-.insights-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-.insights-header h3 { margin: 0; font-size: 1.15rem; color: #2c3e50; }
-.close-text { background: transparent; border: none; color: #e74c3c; cursor: pointer; font-weight: bold; }
-.teacher-metrics-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; text-align: left; }
-.teacher-metrics-table th, .teacher-metrics-table td { padding: 10px; border-bottom: 1px solid #ecf0f1; }
-.teacher-metrics-table th { background: #f8f9fa; color: #7f8c8d; font-weight: bold; }
-
-.font-mono { font-family: monospace; font-size: 0.95rem; }
-.font-bold { font-weight: bold; }
-.holding-count-indicator { font-weight: bold; color: #27ae60; }
-.holding-count-indicator.warning { color: #e67e22; background: #fef5ed; padding: 2px 4px; border-radius: 4px; }
-
-/* CORE ACTION BUTTONS TOOLKIT */
-.btn { padding: 10px 20px; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 0.9rem; transition: background 0.2s; }
-.btn-sm { padding: 6px 12px; font-size: 0.8rem; }
-.btn-primary { background: #3498db; color: white; }
-.btn-success { background: #2ecc71; color: white; }
-.full-width { width: 100%; }
-.empty-state { padding: 30px; text-align: center; border: 2px dashed #cbd5e0; color: #718096; border-radius: 6px; }
 </style>

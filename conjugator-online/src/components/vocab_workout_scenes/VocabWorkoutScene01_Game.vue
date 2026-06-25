@@ -261,6 +261,14 @@
               </v-card>
             </template>
 
+            <template v-else-if="mode === 'asteroidz'">
+              <VWAsteroidzMode 
+                :raw-vocab-items="planItems" 
+                :game-settings="gameSettings"
+                @go-back="goToSettings"
+              />
+            </template>
+
             <template v-else>
               <div class="pa-8 border rounded-xl text-center bg-slate-50 text-caption font-weight-medium text-slate-400">
                 Mode template target string validation signature identity block "{{ mode }}" is currently unassigned in this session view.
@@ -382,6 +390,7 @@ import type { ContextIndex, ContextHit } from "@/assets/scripts/vocab_workout/vo
 import { contextByListKey, normalizeContextKey, contextApprovedListKeys } from "@/assets/scripts/vocab_workout/vocabWorkoutContextRegistry";
 import { useGameCompletion } from '@/composables/useGameCompletion';
 import AiTutorChatDialog from "@/components/AiTutorChatDialog.vue";
+import VWAsteroidzMode from "@/components/vocab_workout_scenes/VWAsteroidzMode.vue";
 
 const tutorOpen = ref(false);
 const tutorTerm = ref<string>("");
@@ -1559,6 +1568,11 @@ async function begin() {
   wrongCount.value = 0;
   resultsStore.value = [];
   pendingAttempts.value = [];
+
+  if (mode.value === "asteroidz") {
+    gameStarted.value = true;
+    return; // Exit early since Asteroidz initializes its own loop internally
+  }
 
   if (isPersistedMode.value && sessionId.value) {
     resumeHydrating.value = true;

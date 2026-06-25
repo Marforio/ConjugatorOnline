@@ -168,6 +168,8 @@ function getNextItemIdFromState(state: any): string | null {
   const v = state?.next_item_id ?? state?.session?.current_item_id ?? null;
   return v != null ? String(v) : null;
 }
+
+
 async function handleStartGame(selections: any) {
   try {
     gameSettings.value = markRaw(selections);
@@ -249,6 +251,36 @@ async function handleStartGame(selections: any) {
       }
     }
 
+    // ==========================================
+    // 🌟 ARCADE INTERCEPT: ASTEROIDZ GAME MODE
+    // ==========================================
+    if (mode === "asteroidz") {
+      // Build dataset pool matching structural level criteria
+      const pool = buildPool(planItems_data, {
+        level: isHardcoded && listMeta.supportsLevels ? selections.level : null,
+      });
+
+      // Normalize unique key formats identical to the non-persisted fallback paths
+      if (!isHardcoded) {
+        planItems.value = pool.map((it: any) => ({ ...it, id: `${listId}::${it.id}` }));
+      } else {
+        planItems.value = pool ?? [];
+      }
+
+      gameSettings.value = markRaw({ 
+        ...selections, 
+        listId, 
+        listKey: listId,
+        mode: "asteroidz"
+      });
+      
+      changeScene("VocabWorkoutScene01_Game");
+      return;
+    }
+
+    // ==========================================
+    // PERSISTED MODE ACTION SEQUENCE (START NEW)
+    // ==========================================
     if (isPersistedMode) {
       const pool = buildPool(planItems_data, {
         level: isHardcoded && listMeta.supportsLevels ? selections.level : null,
@@ -294,7 +326,9 @@ async function handleStartGame(selections: any) {
       return;
     }
 
-    // NON-PERSISTED PATH
+    // ==========================================
+    // STANDARD NON-PERSISTED PATH (Cards / Match)
+    // ==========================================
     const pool = buildPool(planItems_data, {
       level: isHardcoded && listMeta.supportsLevels ? selections.level : null,
     });
@@ -316,7 +350,6 @@ async function handleStartGame(selections: any) {
     changeScene("VocabWorkoutScene01_Game");
   }
 }
-
 
 async function handleGameOver(payload: any) {
   results.value = payload;
