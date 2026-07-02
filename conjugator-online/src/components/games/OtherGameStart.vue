@@ -4,20 +4,20 @@
       [TEMPLATE HUD] gameName: {{ gameName }} | fixedRounds: {{ fixedRounds }} | isValid: {{ isValid }}
     </div>
 
-    <v-card class="mx-auto my-auto px-3 py-1" max-width="720">
+    <v-card class="mx-auto my-auto px-6 py-1 mt-6" max-width="720" elevation="3">
       <v-card-title class="mb-4">
         <div class="w-100">
           <div class="d-flex justify-center mb-4">
-            <v-img :src="bannerSrc" max-width="420" />
+            <v-img :src="bannerSrc" max-width="320" />
           </div>
           <h2 class="text-h4 ms-2 text-wrap">Settings</h2>
-          <div class="text-h6 ms-2 font-weight-light">Configure your practice session</div>
+          <div class="text-h6 ms-2 font-weight-light">Configure your game</div>
         </div>
       </v-card-title>
 
       <v-card-text>
         <v-row>
-          <v-col cols="12" md="6">
+          <v-col cols="12" md="8">
             <v-card-title class="font-weight-medium px-0">Game Mode</v-card-title>
             
             <v-select
@@ -84,16 +84,44 @@
               />
             </div>
 
+            <div v-else-if="gameName === 'Word Families'">
+              <p class="text-body-2 text-grey-darken-3 mb-3">
+                Strengthen your vocabulary by modifying single lemmas across multiple parts of speech.
+              </p>
+              
+              <div class="text-subtitle-2 mb-1 text-grey-darken-1">Assessment Engine Type:</div>
+              <v-radio-group v-model="selections.settings.mode" inline class="mb-1">
+                <v-radio label="Matching Mode (Easy Activation)" value="matching" />
+                <v-radio label="Writing Mode (Memory Challenge)" value="writing" />
+              </v-radio-group>
+
+              <v-select
+                v-model="selections.settings.track"
+                :items="[
+                  { title: 'All Vocab Sets', value: 'all' },
+                  { title: 'Architecture', value: 'architecture' },
+                  { title: 'Business', value: 'business' },
+                  { title: 'Chemistry', value: 'chemistry' },
+                  { title: 'Civil Engineering', value: 'civil' },
+                  { title: 'Computer Science', value: 'computer_science' },
+                  { title: 'Mechanical Engineering', value: 'mechanical' },
+                  { title: 'Electrical Engineering', value: 'electrical' }
+                ]"
+                label="Vocab Focus Domain Set"
+                density="compact"
+                variant="outlined"
+                class="mt-2"
+              />
+            </div>
+
             <div v-else-if="gameName === 'Quantifier Quest'">
-              <div class="text-subtitle-2 mb-1 text-grey-darken-1">Noun Variant Selection Set:</div>
+
               <v-radio-group v-model="selections.settings.variant" class="ms-2">
                 <v-radio label="Countable nouns only — for practice" value="countable" />
                 <v-radio label="Uncountable nouns only — for practice" value="uncountable" />
                 <v-radio label="All nouns (mixed) — the real challenge" value="all" />
               </v-radio-group>
-              <div class="text-caption text-info mt-2 ml-2">
-                💡 Note: Countable nouns need many/few, Uncountable nouns require much/little.
-              </div>
+
             </div>
 
             <div v-else-if="gameName === 'Comparison'">
@@ -111,6 +139,15 @@
                 inset
                 density="compact"
               />
+            </div>
+
+            <div v-else-if="gameName === 'Idea Linker'">
+              <p class="text-body-2 text-grey-darken-3 mb-2">
+                Expand your writing syntax fluency! Connect arguments using varied linking words without repeating identical terms throughout the session.
+              </p>
+              <div class="mt-2 text-caption text-grey-darken-1">
+                ⏱ Round sequence locked to <strong>24 prompts</strong> (60s timer limit).
+              </div>
             </div>
 
             <div v-else-if="gameName === 'Verb Mixer'">
@@ -193,12 +230,49 @@
               </div>
             </div>
 
+            <div v-else-if="gameName === 'Tricky Translator'">
+              <p class="text-body-2 text-grey-darken-3 mb-3">
+                Isolate translation errors by rendering complex conceptual structures across multiple prompt dialects.
+              </p>
+              
+              <div class="text-subtitle-2 mb-1 text-grey-darken-1">Prompt Source Dialect:</div>
+              <v-select
+                v-model="selections.settings.sourceLanguage"
+                :items="[
+                  { title: 'French (Français)', value: 'french' },
+                  { title: 'German (Deutsch)', value: 'german' },
+                  { title: 'Italian (Italiano)', value: 'italian' }
+                ]"
+                item-title="title"
+                item-value="value"
+                label="Active Translation Input"
+                density="compact"
+                variant="outlined"
+                class="mb-2"
+              />
+
+              <div class="text-subtitle-2 mb-1 text-grey-darken-1">Grammar Category:</div>
+              <v-select
+                v-model="selections.settings.categoryFilter"
+                :items="[
+                  { title: 'All Structural Topics Combined', value: 'all' },
+                  { title: 'Past Tense Variations', value: 'past tenses' },
+                  { title: 'Quantifiers and Uncountables', value: 'quantifiers and uncountable words' }
+                ]"
+                item-title="title"
+                item-value="value"
+                label="Target Domain"
+                density="compact"
+                variant="outlined"
+              />
+            </div>
+
             <div v-else-if="gameName === 'Reported Speech'">
               <p class="text-body-2 text-grey-darken-3 mb-3">
                 Practice backshifting by converting direct speech into reported speech.
               </p>
               
-              <div class="text-subtitle-2 mb-1 text-grey-darken-1">Irregular Verb Set Allocation:</div>
+              <div class="text-subtitle-2 mb-1 text-grey-darken-1">Irregular Verb Set:</div>
               <v-radio-group v-model="selections.settings.irregMode" class="ms-2">
                 <v-radio label="Essential irregular verbs mixed setup" value="essential" />
                 <v-radio label="Advanced irregular verbs mixed setup" value="advanced" />
@@ -211,11 +285,12 @@
             </div>
           </v-col>
 
-          <v-col cols="12" md="6">
+          <v-col cols="12" md="4">
             <v-card-title class="font-weight-medium px-0">Rounds</v-card-title>
-            <div class="mt-2 text-body-1">
+            <div class="mt-2 text-body-2">
               Fixed to <strong>{{ fixedRounds }} rounds</strong>
             </div>
+            <div class="mt-2 text-body-2">Be careful with the time limit!</div>
           </v-col>
         </v-row>
       </v-card-text>
@@ -236,11 +311,119 @@
             :disabled="!isValid"
             @click="handleStart"
           >
-            Start Practice
+            Start Game
           </v-btn>
         </div>
       </v-card-actions>
     </v-card>
+
+    <!-- ========================================================================= -->
+    <!-- UNIVERSAL GRAMMAR RULES INTERCEPTOR DIALOG GUARD -->
+    <!-- ========================================================================= -->
+    <v-dialog v-model="showGrammarDialog" max-width="680" persistent scrollable>
+      <v-card class="rounded-xl pa-2">
+        <v-card-title class="text-h5 font-weight-bold d-flex align-center border-b pb-3">
+          <v-icon icon="mdi-book-open-page-variant" color="cyan-darken-2" class="me-2" />
+          Grammar Reference & Rules
+        </v-card-title>
+
+        <v-card-text class="py-4">
+          <!-- CASE A: QUANTIFIER QUEST RULES SHEET -->
+          <div v-if="gameName === 'Quantifier Quest'">
+            <p class="text-body-1 mb-3">
+              <v-icon color="warning" class="me-1">mdi-alert-outline</v-icon>
+              Before playing, make sure you understand these rules:
+            </p>
+            
+            <v-table class="text-center border rounded-lg overflow-hidden mb-4" density="compact">
+              <thead>
+                <tr class="bg-grey-lighten-4">
+                  <th class="text-left font-weight-bold"></th>
+                  <th class="text-center font-weight-bold">Countable Noun</th>
+                  <th class="text-center font-weight-bold">Uncountable Noun</th>
+                </tr>
+              </thead>
+              <tbody style="font-size: 0.85rem;">
+                <tr>
+                  <td class="font-weight-bold text-left">Big quantity</td>
+                  <td>many</td>
+                  <td>a lot of **</td>
+                </tr>
+                <tr>
+                  <td class="text-left"><span class="text-decoration-underline">Impressive</span> big quantity</td>
+                  <td>so many</td>
+                  <td>so much</td>
+                </tr>
+                <tr>
+                  <td class="text-left"><span class="text-decoration-underline">Excessive</span> big quantity</td>
+                  <td>too many</td>
+                  <td>too much</td>
+                </tr>
+                <tr>
+                  <td class="font-weight-bold text-left">Small quantity</td>
+                  <td>a few</td>
+                  <td>a little</td>
+                </tr>
+                <tr>
+                  <td class="text-left"><span class="text-decoration-underline">Impressive</span> small quantity</td>
+                  <td>so few</td>
+                  <td>so little</td>
+                </tr>
+                <tr>
+                  <td class="text-left"><span class="text-decoration-underline">Excessive</span> small quantity</td>
+                  <td>too few</td>
+                  <td>too little</td>
+                </tr>
+              </tbody>
+            </v-table>
+
+            <div class="text-caption text-grey-darken-2 bg-cyan-lighten-5 pa-3 rounded-lg border mb-3">
+              ** <strong>A lot of</strong> is used in declarative sentences only. 
+              <strong>Much</strong> is preferred the rest of the time, especially with 'too' and 'so' 
+              and when the syntax context is negative. Example: <em>"I have a lot of time"</em> vs 
+              <em>"I don't have much time"</em>. This is what the game checks for.
+            </div>
+            
+            <p class="text-caption text-grey mt-2">
+              For further study, see the grammar book: 
+              <a href="https://book.language-labs.ch/ch1#quantifiers" target="_blank" class="text-primary text-decoration-none">Quantifiers</a> and 
+              <a href="https://book.language-labs.ch/ch1#countable-vs-uncountable" target="_blank" class="text-primary text-decoration-none">Countable/Uncountable Rules</a>.
+            </p>
+          </div>
+
+          <!-- CASE B: VERB MIXER RULES SHEET -->
+          <div v-else-if="gameName === 'Verb Mixer'">
+            <p class="text-body-1 font-weight-medium mb-2">Gerund versus Infinitive Complement Rules:</p>
+            <p class="text-body-2 text-grey-darken-3 mb-2">
+              Verbs vary in what pattern follow them. Certain matrix items command a prepositional 
+              split <strong>Infinitive</strong> (e.g., <em>decide to go, refuse to talk</em>), whereas others 
+              demand a participle <strong>Gerund</strong> suffix inflection (e.g., <em>enjoy dancing, avoid crashing</em>).
+            </p>
+            <v-alert type="info" variant="tonal" density="compact" class="text-caption">
+              Type out the complete complement block string expression clearly as required.
+            </v-alert>
+          </div>
+
+          <!-- CASE C: DEFAULT FALLBACK WRAPPER SHEET -->
+          <div v-else>
+            <p class="text-body-1 mb-2 font-weight-medium">Before playing:</p>
+            <p v-if="gameName === 'Passive Party'" class="text-body-2 text-grey-darken-3">
+              Review the rules on how to convert sentences in <a href="https://book.language-labs.ch/ch8" target="_blank" class="text-primary text-decoration-none">active voice to passive voice</a>.
+            </p>
+          </div>
+        </v-card-text>
+
+        <v-card-actions class="pa-4 border-t d-flex justify-space-between">
+          <v-btn color="grey-darken-1" variant="text" size="large" @click="showGrammarDialog = false">
+            Go Back
+          </v-btn>
+          <v-btn color="success" variant="flat" size="large" class="px-6 rounded-pill" @click="executeActualGameLaunch">
+            Launch Game
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
   </v-container>
 </template>
 
@@ -249,7 +432,7 @@ import { ref, computed, watch, onMounted } from "vue";
 import api from "@/axios";
 
 const props = defineProps<{
-  gameName: "Pronoun Practice" | "Regret Machine" | "Passive Party" | "Uses Of Auxiliaries" | "Comparison" | "Parallel Universe" | "Quantifier Quest" | "Verb Mixer" | "Word Families" | "Reported Speech" | "Year 2040";
+  gameName: "Pronoun Practice" | "Regret Machine" | "Passive Party" | "Uses Of Auxiliaries" | "Comparison" | "Parallel Universe" | "Quantifier Quest" | "Verb Mixer" | "Word Families" | "Reported Speech" | "Year 2040" | "Tricky Translator" | "Idea Linker";
 }>();
 
 const emit = defineEmits<{
@@ -276,8 +459,9 @@ const bannerSrc = computed(() => {
   else if (props.gameName === "Word Families") path = "/images/banners/WordFamilies.png";
   else if (props.gameName === "Reported Speech") path = "/images/banners/ReportedSpeech.png";
   else if (props.gameName === "Year 2040") path = "/images/banners/Year2040.png";
-  
-  console.log(`[DEBUG] Computed property [bannerSrc] evaluated to: "${path}"`);
+  else if (props.gameName === "Tricky Translator") path = "/images/banners/TrickyTranslator.png";
+  else if (props.gameName === "Idea Linker") path = "/images/banners/IdeaLinker.png";
+
   return path;
 });
 
@@ -297,6 +481,51 @@ const isValid = computed(() => {
   }
   return true;
 });
+
+// 🚨 Add this state variable near your other refs
+const showGrammarDialog = ref(false);
+
+// 🚨 Modify handleStart to act as the Gateway, and add executeActualGameLaunch
+async function handleStart() {
+  if (!isValid.value) return;
+  
+  // Step 1: Intercept launch to display grammar rules first
+  showGrammarDialog.value = true;
+}
+
+async function executeActualGameLaunch() {
+  // Step 2: Close the dialog, start the loading spinner, and trigger the backend request
+  showGrammarDialog.value = false;
+  loading.value = true;
+
+  const targetSettings = { ...selections.value.settings };
+
+  if (props.gameName === "Verb Mixer" && targetSettings.mode === "mixed") {
+    delete targetSettings.singleCategory; 
+  }
+  
+  const payload = {
+    game_name: props.gameName,
+    num_prompts: selections.value.num_prompts,
+    settings: targetSettings
+  };
+
+  try {
+    const response = await api.post("/other-games/start/", payload);
+    const emitPayload = {
+      session_id: response.data.session_id,
+      prompts: response.data.prompts,
+      settings: targetSettings,
+      game_name: props.gameName
+    };
+    emit("initialized", emitPayload);
+  } catch (error: any) {
+    console.error("Critical Exception caught during API initialization:", error);
+  } finally {
+    loading.value = false;
+  }
+}
+
 
 onMounted(() => {
   console.log("%c[DEBUG] OtherGameStart lifecycle hook: component mounted to DOM.", "background: #1a237e; color: #fff; padding: 2px 4px;");
@@ -332,6 +561,21 @@ watch(
     } else if (newGameName === "Reported Speech") {
       selections.value.num_prompts = 24;
       selections.value.settings = { irregMode: "essential" };
+    } else if (newGameName === "Idea Linker") {
+      selections.value.num_prompts = 24;
+      selections.value.settings = {};
+    } else if (newGameName === "Tricky Translator") {
+        selections.value.num_prompts = 24;
+        selections.value.settings = {
+          sourceLanguage: "french",
+          categoryFilter: "all"
+        };
+      } else if (newGameName === "Word Families") {
+      selections.value.num_prompts = 20; // Override default 24
+      selections.value.settings = {
+        mode: "writing",
+        track: "all"
+      };
     } else if (newGameName === "Verb Mixer") {
       selections.value.num_prompts = 30; // Override default 24
       selections.value.settings = {
@@ -355,61 +599,22 @@ watch(
   { immediate: true }
 );
 
-async function handleStart() {
-  console.log("%c[DEBUG] Action Triggered: handleStart click execution thread open.", "background: #1b5e20; color: #fff; padding: 2px 4px;");
-  console.log("[DEBUG] Checking snapshot validation parameter state (isValid value):", isValid.value);
-  
-  if (!isValid.value) {
-    console.error("[DEBUG] Click execution halted. Form validation parameter state is false!");
-    return;
-  }
-  
-  loading.value = true;
-  
-  const payload = {
-    game_name: props.gameName,
-    num_prompts: selections.value.num_prompts,
-    settings: selections.value.settings
-  };
+// Inside <script setup> in OtherGameStart.vue
 
-  console.log("[DEBUG] Outbound request envelope carefully compiled.");
-  console.log("👉 Destination API Endpoint: POST /api/other-games/start/");
-  console.log("👉 Outbound Payload Object Data Tree Structure:", JSON.stringify(payload, null, 2));
-
-  try {
-    console.log("[DEBUG] Dispatching asynchronous network request thread via Axios instance...");
-    const response = await api.post("/other-games/start/", payload);
-    
-    console.log("%c[DEBUG] Network Transmission Completed Successfully!", "background: #4caf50; color: #000; padding: 2px 4px;");
-    console.log(`[DEBUG] Received HTTP Status Code from Backend Server: ${response.status}`);
-    console.log("[DEBUG] Complete Unwrapped Response Body Data Data-Tree Payload:", JSON.stringify(response.data, null, 2));
-    
-    console.log("[DEBUG] Preparing to emit 'initialized' event with parameters up to Parent container View level...");
-    const emitPayload = {
-      session_id: response.data.session_id,
-      prompts: response.data.prompts,
-      settings: selections.value.settings,
-      game_name: props.gameName
-    };
-    console.log("[DEBUG] Exact payload metadata map structure being dispatched inside emit payload object:", JSON.stringify(emitPayload, null, 2));
-    
-    emit("initialized", emitPayload);
-    console.log("[DEBUG] Event emit function executed successfully.");
-    
-  } catch (error: any) {
-    console.error("%c[DEBUG] Critical Exception caught during API initialization transmission flow!", "background: #b71c1c; color: #fff; padding: 2px 4px;");
-    
-    if (error.response) {
-      console.error(`❌ Django Container Server Rejected Payload with Code: ${error.response.status}`);
-      console.error("❌ Diagnostic Serializer Error Mappings Object List directly from backend environment:", JSON.stringify(error.response.data, null, 2));
-    } else if (error.request) {
-      console.error("❌ Network payload left browser environment, but no response sequence was returned.", error.request);
-    } else {
-      console.error("❌ Axios request pipeline processing error message encountered:", error.message);
+// Monitor changes to the Verb Mixer selection strategy mode toggle
+watch(
+  () => selections.value.settings.mode,
+  (newMode) => {
+    if (props.gameName === "Verb Mixer") {
+      if (newMode === "mixed") {
+        // Clear out the selection modifier so it doesn't leak into the API call
+        selections.value.settings.singleCategory = null; 
+      } else if (newMode === "single") {
+        // Provide a default fallback value ONLY if they explicitly select single-mode
+        selections.value.settings.singleCategory = "infinitive";
+      }
     }
-  } finally {
-    loading.value = false;
-    console.log("[DEBUG] handleStart processing thread closed down. loading.value reset back to false.");
   }
-}
+);
+
 </script>

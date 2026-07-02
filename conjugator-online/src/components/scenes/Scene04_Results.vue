@@ -138,9 +138,6 @@
                       </div>
 
                       <!-- Difficulty Score -->
-                      <div v-if="result.difficulty_score" class="text-xxs text-slate-500 mt-2 pt-2 border-t">
-                        <span class="font-weight-bold">Difficulty:</span> {{ (result.difficulty_score * 100).toFixed(0) }}%
-                      </div>
                     </v-card>
                   </div>
                 </div>
@@ -238,27 +235,41 @@
                       </div>
 
                       <div class="text-xxs text-slate-500 font-weight-medium mb-2">
-                        <span class="font-weight-bold text-slate-700">Acceptable:</span> 
+                        <span class="font-weight-bold text-slate-700 me-2">Acceptable:</span> 
                         <span class="text-success font-weight-bold"><em>{{ result.acceptable_answers.join(', ') }}</em></span>
                       </div>
 
-                      <!-- Error Classification -->
-                      <div v-if="result.error_types && result.error_types.length" class="text-xxs text-slate-500 mb-2 pb-2 border-b">
-                        <span class="font-weight-bold text-slate-700">Errors:</span>
-                        <span v-for="(err, i) in result.error_types" :key="i" class="text-slate-600">
-                          {{ typeof err === 'string' ? err : err.type }} {{ typeof err !== 'string' && err.confidence ? `(${(err.confidence * 100).toFixed(0)}%)` : '' }}{{ (i as number) < result.error_types.length - 1 ? ', ' : '' }}
-                        </span>
+                      <!-- Error Classification with Tooltip Details -->
+                      <div v-if="result.error_details && result.error_details.length" class="text-xxs text-slate-500 mb-2 pb-2 border-b">
+                        <span class="font-weight-bold text-slate-700 me-2">Errors:</span>
+                        <v-tooltip
+                          v-for="(errorDetail, i) in result.error_details"
+                          :key="i"
+                          location="top"
+                          max-width="280"
+                          content-class="bg-slate-800 text-white rounded text-xxs"
+                        >
+                          <template #activator="{ props: tooltipProps }">
+                            <span 
+                              v-bind="tooltipProps"
+                              class="text-slate-600 cursor-help border-slate-300 hover:text-slate-800 hover:border-slate-500 transition-colors duration-150"
+                            >
+                              {{ errorDetail.type }}{{ Number(i) < result.error_details.length - 1 ? ', ' : '' }}
+                            </span>
+                          </template>
+                          
+                          <!-- Tooltip Content -->
+                          <div class="pa-2">
+                            <div class="font-weight-bold mb-1">{{ formatErrorCode(errorDetail.type) }}</div>
+                            <div class="text-xs leading-relaxed">{{ errorDetail.label }}</div>
+                            <div v-if="errorDetail.category" class="text-xxs mt-2 pt-1 border-t border-slate-600 opacity-75">
+                              Category: <span class="font-weight-bold">{{ formatCategory(errorDetail.category) }}</span>
+                            </div>
+                          </div>
+                        </v-tooltip>
                       </div>
 
                       <!-- Difficulty Score -->
-                      <div v-if="result.difficulty_score" class="text-xxs text-slate-500 mb-2">
-                        <span class="font-weight-bold">Difficulty:</span> {{ (result.difficulty_score * 100).toFixed(0) }}%
-                      </div>
-
-                      <!-- Honeypot Status -->
-                      <div v-if="result.honeypot_triggered" class="text-xxs bg-red-lighten-5 border border-error rounded px-2 py-1 mb-2 text-error font-weight-bold">
-                        🚨 Honeypot: {{ result.honeypot_reasons.join(', ') }}
-                      </div>
 
                       <v-btn
                         block
@@ -432,6 +443,61 @@ function scrollWrong(direction: 'left' | 'right') {
     );
   }
 }
+
+
+// Error display helpers
+function formatErrorCode(code: string): string {
+  return code
+    .split('_')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+}
+
+function formatCategory(category: string): string {
+  const categoryLabels: Record<string, string> = {
+    morphology: 'Word Formation',
+    syntax: 'Sentence Structure',
+    semantics: 'Meaning/Agreement',
+    other: 'Other',
+  };
+  return categoryLabels[category] || 'Other';
+}
+
+function getErrorLabel(errType: string): string {
+  // Fallback for string error types (in case error_details isn't available)
+  const errorDescriptions: Record<string, string> = {
+    missing_letter: 'Important missing letter in the root word',
+    inc_be: 'Incorrect conjugation of the be auxiliary',
+    missing_e: 'Forgetting to add an -e- to 3rd person -s',
+    irreg_form: 'Incorrect irregular verb form',
+    irreg_falsepositive: 'Regular verb treated as irregular',
+    missing_s: 'Missing -s ending in 3rd person',
+    unnec_s: 'Adding unnecessary -s ending',
+    missing_ed: 'Missing -ed ending in past/perfect',
+    wrong_question: 'Invalid question form',
+    wrong_negative: 'Invalid negative form',
+    wrong_declarative: 'Invalid declarative form',
+    wrong_pres_simple: 'Invalid present simple form',
+    wrong_present_continuous: 'Invalid present continuous form',
+    wrong_past_simple: 'Invalid past simple form',
+    wrong_pres_perfect: 'Invalid present perfect form',
+    wrong_fut_simple: 'Invalid future simple form',
+    wrong_recommendation: 'Invalid recommendation form',
+    past_in_neg_ques: 'Past form used in negative/question',
+    do_in_pos: 'DO/DID in declarative form',
+    no_double_cons: 'Missing consonant doubling',
+    infinitive_with_aux: 'Infinitive used with auxiliary',
+    gerund_non_be: 'Gerund with non-BE auxiliary',
+    past_form_with_non_past_tense: 'Past form with non-past tense',
+    wrong_person: 'Wrong person/subject',
+    unreq_continuous: 'Unnecessary continuous form',
+    unreq_passive: 'Unnecessary passive form',
+    reading_error: 'Wrong word or misread prompt',
+    no_answer: 'No answer submitted',
+  };
+  return errorDescriptions[errType] || 'Unknown error';
+}
+
 
 function isTypoRound(round: any): boolean {
   if (!round) return false;

@@ -83,7 +83,23 @@
             </div>
 
             <div v-else-if="gameName === 'Quantifier Quest'" class="mb-2">
-              <div class="d-flex justify-center mb-4">
+              <div class="d-flex justify-center my-2">
+                <v-chip
+                  size="small"
+                  color="secondary"
+                  variant="flat"
+                  class="text-uppercase"
+                >
+                  {{ activePrompt.subject }}
+
+                  <v-tooltip activator="parent" location="top">
+                    {{ activePrompt.countable ? 'Countable' : 'Uncountable' }}
+                  </v-tooltip>
+                </v-chip>
+              </div>
+
+              
+              <div class="d-flex justify-center mb-4 my-3">
                 <v-img
                   v-if="activePrompt.image"
                   :src="`/images/quant_pics_resized/${activePrompt.image}`"
@@ -94,7 +110,7 @@
                 />
               </div>
 
-              <div class="d-flex justify-center align-center ga-3 mb-4 flex-wrap">
+              <div class="d-flex justify-center align-center ga-3 mb-6 my-3 flex-wrap">
                 <v-card v-if="activePrompt.displayed_intensifier" variant="tonal" color="purple" class="px-2 py-0">
                   <v-card-title class="text-caption text-uppercase font-weight-bold pa-1">
                     {{ activePrompt.displayed_intensifier }}
@@ -106,34 +122,26 @@
                     {{ activePrompt.displayed_quantity }}
                   </v-card-title>
                 </v-card>
-
-                <v-chip size="small" color="secondary" variant="flat" class="text-uppercase font-weight-black">
-                  {{ activePrompt.subject }}
-                </v-chip>
-
-                <v-chip size="x-small" :color="activePrompt.countable ? 'success' : 'amber-darken-3'" class="text-uppercase">
-                  {{ activePrompt.countable ? 'Countable' : 'Uncountable' }}
-                </v-chip>
               </div>
 
-              <div class="text-center text-h6 font-italic mb-4 text-grey-darken-3 px-3">
+              <div class="text-center text-h6 font-italic mb-4 text-grey-darken-3 px-3 mb-5">
                 " {{ activePrompt.displayed_sentence }} <span class="text-primary font-weight-black">________</span> . "
               </div>
             </div>
 
-            <div v-else-if="gameName === 'Passive Party'">
-              <div class="d-flex justify-space-between align-center mb-1">
+            <div v-else-if="gameName === 'Passive Party'" class="mb-4">
+              <div class="d-flex justify-space-between align-center mb-2 py-5">
                 <div class="text-caption text-grey-darken-1">Convert to Passive Voice:</div>
-                <v-chip color="secondary" size="x-small" variant="flat">⏱ Tense: {{ activePrompt.tense }}</v-chip>
+                <v-chip color="secondary" size="x-small" variant="flat" class="text-caption">⏱ Tense: {{ activePrompt.tense }}</v-chip>
               </div>
               
-              <v-card variant="outlined" class="pa-3 mb-3 bg-white">
-                <div class="text-caption text-uppercase font-weight-bold text-grey">Active Voice:</div>
+              <v-card variant="outlined" class="pa-3 mb-3 bg-white py-5">
+                <div class="text-caption text-uppercase font-weight-bold text-grey">Active</div>
                 <div class="text-body-1 font-italic mb-2" v-html="highlightedPassiveText" />
                 
-                <v-divider class="my-2" />
+                <v-divider class="my-2 my-4" />
                 
-                <div class="text-caption text-uppercase font-weight-bold text-grey">Passive Template Target:</div>
+                <div class="text-caption text-uppercase font-weight-bold text-grey">Passive</div>
                 <div class="text-body-1 font-weight-medium text-blue-darken-3">"{{ activePrompt.passive }}"</div>
               </v-card>
             </div>
@@ -237,6 +245,73 @@
               </v-card>
             </div>
 
+            
+            <!-- 11. TRICKY TRANSLATOR LIVE INTERACTIVE WORKSPACE CARD -->
+            <div v-else-if="gameName === 'Tricky Translator'" class="mb-2 w-100">
+              <div class="d-flex justify-space-between align-center mb-2">
+                <div class="text-caption text-uppercase font-weight-bold text-grey">
+                  📂 Topic focus: {{ activePrompt.category }}
+                </div>
+                <v-chip size="x-small" color="purple" variant="flat" class="text-uppercase font-weight-bold">
+                  {{ activePrompt.source_language }}
+                </v-chip>
+              </div>
+
+              <v-card variant="flat" color="purple-lighten-5" class="pa-4 rounded-lg border text-center mb-4">
+                <div class="text-caption text-purple font-weight-bold mb-1">TRANSLATE THE UNDERLINED PART:</div>
+                <div 
+                  class="text-h5 font-weight-medium text-grey-darken-4"
+                  v-html="highlightTranslationTargetHtml(activePrompt.source_sentence, activePrompt.source_highlight)"
+                ></div>
+              </v-card>
+
+              <v-card variant="outlined" class="pa-4 bg-white rounded-lg text-center mb-2">
+                <div class="text-caption text-grey font-weight-bold mb-1">TARGET SYNTAX STRUCTURE CONTEXT:</div>
+                <div class="text-h6 font-weight-regular text-grey-darken-3 font-italic">
+                  " {{ activePrompt.target_sentence }} "
+                </div>
+              </v-card>
+            </div>
+
+            <!-- 12. IDEA LINKER LIVE INTERACTIVE WORKSPACE CARD -->
+            <div v-else-if="gameName === 'Idea Linker'" class="mb-2 w-100">
+              <div class="d-flex justify-space-between align-center mb-2">
+                <div class="d-flex ga-1 align-center">
+                  <v-chip size="x-small" color="primary" class="font-weight-bold text-uppercase">
+                    ⛓ {{ activePrompt.variant || activePrompt.category }}
+                  </v-chip>
+                  <v-chip size="x-small" :color="getBehaviorColor(activePrompt.behavior)" class="font-weight-bold text-uppercase">
+                    {{ activePrompt.behavior }}
+                  </v-chip>
+                </div>
+                
+                <v-chip v-if="activePrompt.excluded_linkers?.length" size="x-small" color="red-lighten-4" class="text-red-darken-4 font-weight-bold">
+                  🚫 Not Allowed: {{ activePrompt.excluded_linkers.join(', ') }}
+                </v-chip>
+              </div>
+
+              <v-card variant="flat" class="pa-5 bg-grey-lighten-4 border rounded-xl text-center mb-3">
+                <div class="text-h6 font-weight-medium text-grey-darken-4 font-italic line-height-2">
+                  " {{ activePrompt.sentence }} "
+                </div>
+                
+                <div v-if="activePrompt.translations" class="mt-3 d-flex justify-center ga-3 border-t pt-2 text-caption text-grey-darken-1">
+                  <span v-if="activePrompt.translations.French">🇫🇷 {{ activePrompt.translations.French.join(', ') }}</span>
+                  <span v-if="activePrompt.translations.German">🇩🇪 {{ activePrompt.translations.German.join(', ') }}</span>
+                  <span v-if="activePrompt.translations.Italian">🇮🇹 {{ activePrompt.translations.Italian.join(', ') }}</span>
+                </div>
+              </v-card>
+
+              <div v-if="ilUsedWords.length" class="mb-2 transition-all">
+                <div class="text-caption text-grey-darken-1 mb-1">⚠️ Already used linkers (cannot be repeated):</div>
+                <div class="d-flex flex-wrap ga-1 bg-amber-lighten-5 pa-2 rounded-lg border border-amber-lighten-3">
+                  <v-chip v-for="w in ilUsedWords" :key="w" size="x-small" color="amber-darken-3" variant="outlined" class="font-weight-bold">
+                    {{ w }}
+                  </v-chip>
+                </div>
+              </div>
+            </div>
+            
             <!-- 9. REPORTED SPEECH  -->
             <div v-else-if="gameName === 'Reported Speech'" class="mb-2">
               <div class="text-caption text-uppercase font-weight-bold text-grey-darken-1 mb-2">
@@ -340,7 +415,24 @@
               </div>
             </div>
 
-            <div ref="inputWrapper" class="mt-4">
+            <div style="position: absolute; overflow: hidden; width: 0; height: 0; opacity: 0; z-index: -100;" aria-hidden="true">
+              <input 
+                v-model="gameB.Answer" 
+                type="text" 
+                autocomplete="off" 
+                tabindex="-1" 
+                placeholder="Enter your answer..." 
+              />
+              <button 
+                type="button" 
+                tabindex="-1" 
+                @click="gameB.onClick++"
+              >
+                Submit answer here
+              </button>
+            </div>
+
+            <div ref="inputWrapper" class="mt-12">
               <v-text-field
                 v-model="userAnswer"
                 :label="inputPlaceholderLabel"
@@ -352,7 +444,7 @@
               />
             </div>
 
-            <div class="d-flex justify-center mt-4">
+            <div class="d-flex justify-center my-8">
               <v-btn color="primary" @click="handleAnswerSubmission" :disabled="inputLocked">Submit Answer</v-btn>
             </div>
           </v-card>
@@ -373,33 +465,130 @@
         </div>
       </div>
 
-      <div v-else-if="gameState === 'RESULTS'" class="d-flex flex-column justify-space-between h-100 flex-grow-1">
-        <div>
-          <h3 class="text-h4 mb-2 font-weight-bold">Summary</h3>
-          <p class="text-h6 mb-1">
-            Accuracy: <strong class="text-primary">{{ accuracyScore }}%</strong> 
-            ({{ rightCount }} / {{ totalRounds }})
-          </p>
-          <p class="text-caption text-grey-darken-1 mb-4">⏱ Average Response Speed: <strong>{{ avgResponseTime }}s</strong></p>
-          <v-divider class="my-3" />
+      <!-- 10. WORD FAMILIES MULTI-ASPECT WORKSPACE CARD -->
+        <div v-else-if="gameName === 'Word Families'" class="mb-2 w-100">
+          <div class="text-subtitle-2 text-uppercase text-grey-darken-1 font-weight-bold mb-2">
+            🔑 Root Lemma Family: <span class="text-primary font-weight-black">{{ activePrompt.key }}</span>
+          </div>
 
-          <div class="results-scroll pr-1">
-            <div 
-              v-for="(r, i) in roundTelemetryBatch" :key="i" 
-              class="mb-3 pa-3 result-card" 
-              :class="r.is_correct ? 'success-card' : 'error-card'"
-            >
-              <div class="text-body-2"><strong>Round {{ r.prompt_number }}:</strong> {{ r.display_question }}</div>
-              <div class="text-caption mt-1">Your Answer: <strong class="font-mono">{{ r.user_answer || '—' }}</strong></div>
+          <!-- WRITING INTERACTION MODE -->
+          <v-card v-if="gameSettings?.mode === 'writing'" variant="flat" class="pa-2 bg-white">
+            <v-row v-for="it in activePrompt.items" :key="it.pos" class="align-center border-b py-2 ma-0">
+              <v-col cols="12" sm="8" class="pa-1">
+                <v-chip size="x-small" color="secondary" label class="font-weight-black text-uppercase mr-2 mb-1">{{ it.pos }}</v-chip>
+                <span class="text-body-1 text-grey-darken-3 font-italic">{{ it.sentence }}</span>
+              </v-col>
+              <v-col cols="12" sm="4" class="pa-1">
+                <v-text-field
+                  v-model="wfAnswers[it.pos]"
+                  :label="`Type the ${it.pos} variant`"
+                  variant="outlined"
+                  density="compact"
+                  hide-details
+                  :disabled="inputLocked"
+                  @keyup.enter="handleEnter"
+                />
+              </v-col>
+            </v-row>
+          </v-card>
+
+          <!-- MATCHING INTERACTION MODE -->
+          <v-card v-else variant="flat" class="pa-2 bg-white">
+            <div class="d-flex flex-column ga-2 mb-3">
+              <div 
+                v-for="it in activePrompt.items" 
+                :key="it.pos" 
+                class="d-flex align-center justify-space-between pa-2 border rounded-lg cursor-pointer transition-all"
+                :class="{ 'bg-blue-thin border-primary': selectedWfPos === it.pos }"
+                @click="selectedWfPos = it.pos"
+              >
+                <div class="flex-grow-1 pr-3">
+                  <v-chip size="x-small" color="grey" label class="font-weight-bold text-uppercase mb-1">{{ it.pos }}</v-chip>
+                  <div class="font-italic text-body-2">{{ it.sentence }}</div>
+                </div>
+                
+                <div class="min-width-150">
+                  <draggable :list="wfSlots[it.pos]" group="wfGroup" class="border dashed rounded pa-1 d-flex align-center min-height-40">
+                    <template #item="{ element }">
+                      <v-chip color="primary" variant="flat" size="small" closable @click.stop="clearWfSlot(it.pos)">
+                        {{ element.text }}
+                      </v-chip>
+                    </template>
+                  </draggable>
+                </div>
+              </div>
+            </div>
+
+            <!-- Draggable Chip Bank Row Block -->
+            <div class="text-caption text-grey mb-1 text-center">Available options bank:</div>
+            <draggable :list="wfBank" group="wfGroup" class="d-flex justify-center flex-wrap ga-2 border rounded pa-2 bg-grey-lighten-4">
+              <template #item="{ element }">
+                <v-chip variant="outlined" color="secondary" class="cursor-pointer" @click="tapWfChip(element)">
+                  {{ element.text }}
+                </v-chip>
+              </template>
+            </draggable>
+          </v-card>
+        </div>
+
+        <!-- Inside your RESULTS template block in OtherGamePlay.vue -->
+        <div v-else-if="gameState === 'RESULTS'" class="d-flex flex-column justify-space-between h-100 flex-grow-1">
+          <div>
+            <h3 class="text-h4 mb-2 font-weight-bold d-flex align-center">
+              <v-icon icon="mdi-finance" color="primary" class="me-2" />
+              Summary
+            </h3>
+            
+            <p class="text-h6 mb-1">
+              Accuracy: <strong class="text-primary">{{ accuracyScore || 0 }}%</strong> 
+              ({{ rightCount }} / {{ totalRounds }})
+            </p>
+            
+            <p class="text-caption text-grey-darken-1 mb-4">
+              ⏱ Average Response Speed: <strong>{{ avgResponseTime || "0.00" }}s</strong>
+            </p>
+            
+            <v-divider class="my-3" />
+
+            <!-- Corrected Loop using roundTelemetryBatch -->
+            <div class="results-scroll pr-1" style="max-height: 400px; overflow-y: auto;">
+              <div v-for="r in roundTelemetryBatch" :key="r.prompt_number" class="mb-3 border-b pb-2">
+                <div>
+                  <strong>Round {{ r.prompt_number }}:</strong> 
+                  <!-- Binds cleanly to the string built by logRoundMetrics -->
+                  <span class="font-italic text-grey-darken-3">
+                    " {{ r.display_question }} "
+                  </span>
+                </div>
+                
+                <div class="text-caption mt-1">
+                  Your Answer: 
+                  <span :class="r.is_correct ? 'text-success font-weight-bold' : 'text-error font-weight-bold'">
+                    {{ r.user_answer || '—' }}
+                  </span>
+                  <span v-if="!r.is_correct" class="text-grey-darken-1"> 
+                    • Correct: 
+                    <strong class="text-success font-mono">
+                      {{ r.correct_answer_revealed || 'Correct answers available in the dashboard' }}
+                    </strong>
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
 
-        <div class="d-flex justify-center mt-4" style="gap: 12px;">
-          <v-btn variant="outlined" color="primary" @click="$emit('restart')">🔄 Practice Again</v-btn>
-          <RouterLink :to="{ name: 'games' }"><v-btn color="secondary">Dashboard</v-btn></RouterLink>
+          <v-card-actions class="pt-3 border-t mt-4">
+            <v-spacer />
+            <v-btn color="primary" variant="flat" rounded="pill" size="large" @click="$emit('restart')">
+              Play Again
+            </v-btn>
+            <RouterLink :to="{ name: 'student-data' }" class="text-decoration-none">
+              <v-btn color="secondary" variant="flat" rounded="pill" size="large">
+                Dashboard
+              </v-btn>
+            </RouterLink>
+          </v-card-actions>
         </div>
-      </div>
     </v-card>
 
     <v-dialog v-model="showWrongDialog" persistent max-width="480">
@@ -428,7 +617,14 @@
           </div>
           
           <div class="mt-2 text-body-2">
-            Correct: <strong class="text-success">{{ getAcceptedAnswers(activePrompt).join(' / ') }}</strong>
+            Correct Answer: 
+            <strong class="text-success font-mono">
+              {{ 
+                activePrompt?.blueprint?.accepted_pool?.join(' / ') || 
+                activePrompt?.blueprint?.answers?.join(' / ') || 
+                activePrompt?.blueprint?.correct_map ? Object.values(activePrompt.blueprint.correct_map).join(' | ') : 'Available in the dashboard'
+              }}
+            </strong>
           </div>
         </v-card-text>
         
@@ -444,6 +640,7 @@
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount, nextTick, watch } from "vue";
 import api from "@/axios";
+import draggable from "vuedraggable";
 
 const props = defineProps({
   session_id: { type: Number, required: true },
@@ -477,13 +674,74 @@ const wrongOkButton = ref(null);
 
 const roundTelemetryBatch = ref([]);
 
-const SECONDS_PER_ROUND = props.gameName === "Regret Machine" ? 25 : 15;
+const SECONDS_PER_ROUND = props.gameName === "Pronoun Practice" ? 15 : 20;
 const timeLeft = ref(SECONDS_PER_ROUND);
 let timerInterval = null;
 
 const totalRounds = computed(() => props.prompts.length);
 const activePrompt = computed(() => props.prompts[currentRound.value] || {});
 const progressPercentage = computed(() => (currentRound.value / totalRounds.value) * 100);
+
+// ============================================================================
+// HONEYPOT & TELEMETRY TRACKERS
+// ============================================================================
+const roundStartTime = ref(Date.now());
+const formStartTime = ref(Date.now());
+
+// Honeypot interaction telemetry object
+const gameB = ref({
+  Answer: "",           // Bound to an invisible input field
+  onClick: 0,          // Bound to an invisible button click
+  mouseMovements: 0,   // General mouse moving counts
+  keystrokes: 0,       // Keystrokes registered on active answer container
+  focusEvents: 0       // Focus tracking registered on active text fields
+});
+
+// Reset indicators at the exact launch point of every round sequence
+function resetHoneypotMetrics() {
+  roundStartTime.value = Date.now();
+  gameB.value = {
+    Answer: "",
+    onClick: 0,
+    mouseMovements: 0,
+    keystrokes: 0,
+    focusEvents: 0
+  };
+}
+
+// Track movements securely across the primary interface boundaries
+function trackMouseMove() {
+  gameB.value.mouseMovements++;
+}
+
+// Listen to keyboard interaction paths dynamically
+function trackKeystroke() {
+  gameB.value.keystrokes++;
+}
+
+// Track explicit text focus updates
+function trackFocus() {
+  gameB.value.focusEvents++;
+}
+
+// Hook these global listeners up during initialization cycles safely
+onMounted(() => {
+  window.addEventListener("mousemove", trackMouseMove);
+  // Reset timestamps on component launch
+  formStartTime.value = Date.now();
+  resetHoneypotMetrics();
+});
+
+onBeforeUnmount(() => {
+  window.removeEventListener("mousemove", trackMouseMove);
+});
+
+// Trigger a metrics scrub whenever your active round mutations roll over
+watch(currentRound, () => {
+  resetHoneypotMetrics();
+});
+
+
 
 // Reported speech data / helpers
 const REPORTED_SPEECH_SPEAKERS = {
@@ -513,6 +771,88 @@ const computeHighlightedBubbleHtml = (text, highlight) => {
   const after = text.slice(idx + highlight.length);
   
   return `${before}&nbsp;<span class="font-weight-black text-primary">${match}</span>&nbsp;${after}`;
+};
+
+// Word Families 
+// --- REACTIVE STATE DESCRIPTORS ---
+const wfAnswers = ref({ verb: "", noun: "", adjective: "", adverb: "" });
+const selectedWfPos = ref(null);
+const wfBank = ref([]);
+const wfSlots = ref({ verb: [], noun: [], adjective: [], adverb: [] });
+
+// --- DYNAMIC SWITCH SWAP SWEEPERS ---
+const resetWfState = () => {
+  selectedWfPos.value = null;
+  wfAnswers.value = { verb: "", noun: "", adjective: "", adverb: "" };
+  wfSlots.value = { verb: [], noun: [], adjective: [], adverb: [] };
+  
+  if (props.gameName === "Word Families" && activePrompt.value) {
+    wfBank.value = activePrompt.value.items.map((it) => ({
+      id: `${it.pos}-${Math.random()}`,
+      text: it.answer,
+      pos: it.pos
+    }));
+  }
+};
+
+const tapWfChip = (chip) => {
+  if (!selectedWfPos.value) return;
+  const targetPos = selectedWfPos.value;
+  
+  // Splice from target reactive bank wrapper array safely
+  const idx = wfBank.value.findIndex(w => w.id === chip.id);
+  if (idx !== -1) wfBank.value.splice(idx, 1);
+  
+  // If targeted slot array partition is occupied, return element back to base bank
+  if (wfSlots.value[targetPos].length > 0) {
+    const existing = wfSlots.value[targetPos].pop();
+    if (existing) wfBank.value.push(existing);
+  }
+  
+  wfSlots.value[targetPos].push(chip);
+};
+
+const clearWfSlot = (pos) => {
+  const existing = wfSlots.value[pos].pop(); // Fixed: changed from valueOf to value
+  if (existing) wfBank.value.push(existing);  // Fixed: changed from valueOf to value
+};
+
+
+// Tricky Translator
+const highlightTranslationTargetHtml = (sentence, targetSubstr) => {
+  if (!sentence || !targetSubstr) return sentence;
+  
+  // Handle discontinuous ellipses strings if passed from backend configurations safely
+  if (targetSubstr.includes("...")) {
+    let parts = targetSubstr.split("...");
+    let processed = sentence;
+    parts.forEach(part => {
+      const pTrim = part.trim();
+      if (pTrim) {
+        processed = processed.replace(pTrim, `<span class="text-decoration-underline font-weight-black text-purple-darken-3">${pTrim}</span>`);
+      }
+    });
+    return processed;
+  }
+
+  const idx = sentence.toLowerCase().indexOf(targetSubstr.toLowerCase());
+  if (idx === -1) return sentence;
+  
+  const before = sentence.slice(0, idx);
+  const match = sentence.slice(idx, idx + targetSubstr.length);
+  const after = sentence.slice(idx + targetSubstr.length);
+  
+  return `${before}<span class="text-decoration-underline font-weight-black text-purple-darken-3">${match}</span>${after}`;
+};
+
+// Idea Linker
+const ilUsedWords = ref([]);
+const currentIlCorrectTrack = ref([]);
+
+const getBehaviorColor = (b) => {
+  if (b === "sentence modifier") return "error";
+  if (b === "+ noun phrase") return "info";
+  return "success";
 };
 
 // Comparison Engine Layout Computed States
@@ -550,6 +890,8 @@ const inputPlaceholderLabel = computed(() => {
   if (props.gameName === "Verb Mixer") return "Type the verb complement (e.g., to go / going / go)";
   if (props.gameName === "Reported Speech") return "Type correct indirect shifted clause phrase (e.g., had finished)";
   if (props.gameName === "Year 2040") return "Type correct future conjugation (e.g., will have gone / will be sleeping)";
+  if (props.gameName === "Tricky Translator") return "Provide only the missing word(s)...";
+  if (props.gameName === "Idea Linker") return "Type an unused linking word... (e.g., therefore)";
   return "Type your response here...";
 });
 
@@ -604,6 +946,16 @@ watch(showWrongDialog, async (isOpened, wasOpened) => {
     await focusInputField();
   }
 });
+watch(currentRound, async () => {
+  if (activePrompt.value) {
+    if (props.gameName === "Word Families") resetWfState();
+    if (props.gameName === "Idea Linker") {
+      textInputString.value = ""; // clear text field
+    }
+    await nextTick();
+    focusInputField();
+  }
+});
 
 function triggerKeyboardGuardLock(ms) {
   ignoreEnterUntil.value = Date.now() + ms;
@@ -636,6 +988,7 @@ function handleTimeoutGate() {
   showWrongDialog.value = true;
 }
 
+
 // Central Interceptor for Enter key presses across all sub-components
 function handleKeyboardEnterEvent(event) {
   if (checkIsKeyboardLocked()) {
@@ -650,6 +1003,57 @@ function handleKeyboardEnterEvent(event) {
   }
 
   handleAnswerSubmission();
+}
+
+// ============================================================================
+// BOT INTERCEPTION EVALUATORS
+// ============================================================================
+function evaluateHoneypotTelemetry() {
+  const reasons = [];
+  let score = 0;
+
+  // 1. Invisible field value populated
+  if (gameB.value.Answer.trim()) {
+    reasons.push("hp_answer_field_filled");
+    score += 50;
+  }
+
+  // 2. Trapped hidden button triggers
+  if (gameB.value.onClick > 0) {
+    reasons.push("hp_button_clicked");
+    score += 50;
+  }
+
+  // 3. Script-injected posts running bypassing navigation frames
+  if (gameB.value.mouseMovements === 0) {
+    reasons.push("no_mouse_movements");
+    score += 15;
+  }
+
+  // 4. Missing typing interaction chains
+  if (gameB.value.keystrokes === 0) {
+    reasons.push("no_keystroke_events");
+    score += 30;
+  }
+
+  // 5. Speed evaluations (< 1.2s round execution threshold flags)
+  const timeTaken = Date.now() - roundStartTime.value;
+  if (timeTaken < 1200) {
+    reasons.push("form_filled_too_fast");
+    score += 30;
+  }
+
+  // 6. Direct value assignments avoiding standard focus hooks
+  if (gameB.value.focusEvents === 0) {
+    reasons.push("no_focus_on_answer_field");
+    score += 10;
+  }
+
+  return {
+    flagged: score >= 50,
+    score: score,
+    reasons
+  };
 }
 
 async function computeSha256(text) {
@@ -673,10 +1077,65 @@ async function handleAnswerSubmission() {
 
   const rawInput = userAnswer.value;
   const cleanedInput = normalizeString(rawInput);
-  const userHash = await computeSha256(cleanedInput);
+  
+  // Calculate round duration safely using local tracking tickers
+  const elapsedMs = Date.now() - roundStartTime.value;
+  const elapsedSeconds = parseFloat((elapsedMs / 1000).toFixed(1));
+  
+  // Run bot detection scan evaluations
+  const hpResult = evaluateHoneypotTelemetry();
 
-  const isCorrect = activePrompt.value.answer_hashes?.includes(userHash) || false;
-  logRoundMetrics(rawInput, isCorrect, false);
+  let isCorrect = false;
+  let serverAcceptedPool = null;
+
+  // ==========================================
+  // CASE A: IDEA LINKER (Requires State/API)
+  // ==========================================
+  if (props.gameName === "Idea Linker") {
+    try {
+      const response = await api.post("/other-games/verify-answer/", {
+        session_id: props.session_id,
+        prompt_number: activePrompt.value.prompt_number,
+        user_answer: JSON.stringify({
+          answer: rawInput,
+          used: ilUsedWords.value
+        })
+      });
+
+      isCorrect = response.data.is_correct;
+      serverAcceptedPool = response.data.accepted_pool;
+      
+      if (isCorrect) {
+        ilUsedWords.value.push(rawInput.trim().toLowerCase());
+      }
+    } catch (error) {
+      console.error("Idea Linker validation pipeline failed:", error);
+      inputLocked.value = false;
+      startTimer();
+      return;
+    }
+
+  // ==========================================
+  // CASE B: ALL OTHER GAMES (Fast Local Hashes)
+  // ==========================================
+  } else {
+    const userHash = await computeSha256(cleanedInput);
+    isCorrect = activePrompt.value.answer_hashes?.includes(userHash) || false;
+  }
+
+  // ==========================================
+  // TELEMETRY REPLICATOR METRICS COMPILER
+  // ==========================================
+  // Pass the newly captured bot parameters directly into your logging cache matrices
+  logRoundMetrics(
+    rawInput, 
+    isCorrect, 
+    false, 
+    elapsedSeconds, 
+    hpResult.flagged, 
+    hpResult.score, 
+    hpResult.reasons
+  );
 
   if (isCorrect) {
     showFloatingFeedback.value = true;
@@ -685,6 +1144,11 @@ async function handleAnswerSubmission() {
   } else {
     lastRoundTimeout.value = false;
     userAnswerLog.value = rawInput;
+    
+    if (serverAcceptedPool) {
+      currentIlCorrectTrack.value = serverAcceptedPool;
+    }
+    
     showWrongDialog.value = true;
   }
 }
@@ -705,9 +1169,13 @@ function logRoundMetrics(answer, isCorrect, timedOut) {
   questionString = `[${activePrompt.value.tense.toUpperCase()}] Verb: "${activePrompt.value.verb}" || Context: ${activePrompt.value.sentence}`;
   } else if (props.gameName === "Verb Mixer") {
     questionString = `[${activePrompt.value.category.toUpperCase()}] Verb: "${activePrompt.value.answer_verb}" || Target: ${activePrompt.value.sentence}`;
+  } else if (props.gameName === "Tricky Translator") {
+  questionString = `[TRICKY TRANSLATOR - ${activePrompt.value.source_language?.toUpperCase()}] Input: "${activePrompt.value.source_sentence}" || Context: ${activePrompt.value.target_sentence}`;
   } else if (props.gameName === "Parallel Universe") {
-    const focusClause = activePrompt.value.condition ? "IF" : "MAIN";
-    questionString = `[${activePrompt.value.conditional_type.toUpperCase()}] (${focusClause}) || ${activePrompt.value.sentence}`;
+      const focusClause = activePrompt.value.condition ? "IF" : "MAIN";
+      questionString = `[${activePrompt.value.conditional_type.toUpperCase()}] (${focusClause}) || ${activePrompt.value.sentence}`;
+    } else if (props.gameName === "Passive Party") {
+    questionString = `"${activePrompt.value.active}" ➔ "${activePrompt.value.passive}"`;
   }
 
   roundTelemetryBatch.value.push({
@@ -722,7 +1190,7 @@ function logRoundMetrics(answer, isCorrect, timedOut) {
   isCorrect ? rightCount.value++ : wrongCount.value++;
 }
 
-function advanceNextRound() {
+async function advanceNextRound() {
   // Lock entry loop inputs briefly to eliminate double tap events leaking into next prompt
   triggerKeyboardGuardLock(ENTER_GUARD_DELAY_MS);
   
@@ -730,7 +1198,7 @@ function advanceNextRound() {
   userAnswer.value = "";
 
   if (currentRound.value >= totalRounds.value - 1) {
-    commitBulkTelemetryBatch();
+    await commitBulkTelemetryBatch();
   } else {
     currentRound.value++;
     inputLocked.value = false;
@@ -743,6 +1211,7 @@ async function commitBulkTelemetryBatch() {
   gameState.value = "RESULTS";
   const mode = props.gameSettings?.mode ?? 'mixed';
   const finalGameNameHeader = mode === 'mixed' ? 'Verb Mixer' : 'Verb Mixer Practice';
+  
   try {
     const payload = {
       session_id: props.session_id,
@@ -755,7 +1224,21 @@ async function commitBulkTelemetryBatch() {
       }))
     };
     
-    await api.post("/other-games/submit-results/", payload);
+    const response = await api.post("/other-games/submit-results/", payload);
+    
+    // MERGE SERVER CORRECT ANSWERS INTO LOCAL TELEMETRY ROWS
+    if (response.data && Array.isArray(response.data.rounds)) {
+      response.data.rounds.forEach(serverRound => {
+        const localRound = roundTelemetryBatch.value.find(
+          r => r.prompt_number === serverRound.prompt_number
+        );
+        if (localRound) {
+          // Format the array or string coming back from the backend cleanly
+          const ans = serverRound.correct_answer;
+          localRound.correct_answer_revealed = Array.isArray(ans) ? ans.join(' / ') : ans;
+        }
+      });
+    }
   } catch (error) {
     console.error("Telemetry reporting pipeline failure:", error);
   }

@@ -136,7 +136,7 @@
               <template v-slot:activator="{ props: tipProps }">
                 <div v-bind="tipProps" class="w-100">
                   <v-btn block disabled height="44" class="rounded-xl text-none font-weight-bold">
-                    Confirm Custom Settings
+                    Confirm Settings
                   </v-btn>
                 </div>
               </template>
@@ -151,7 +151,7 @@
               :disabled="isStartingGame"
               @click="handleStartGame(selections)"
             >
-              Confirm Custom Formula
+              Confirm Settings
             </v-btn>
           </div>
         </v-col>

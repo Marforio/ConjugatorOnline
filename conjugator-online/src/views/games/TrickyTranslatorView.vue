@@ -1,35 +1,37 @@
-<!-- src/views/games/PassivePartyView.vue -->
+<!-- src/views/games/TrickyTranslatorView.vue -->
 <template>
-  <div class="passive-party-view-container flex-grow-1">
+  <div class="tricky-translator-view-container flex-grow-1">
     
-    <!-- Central configuration settings board launcher -->
     <OtherGameStart 
       v-if="!sessionData" 
-      gameName="Passive Party" 
+      gameName="Tricky Translator" 
       @initialized="handleSessionAllocation" 
     />
     
-    <!-- Central game operation loop panel module -->
     <OtherGamePlay 
       v-else 
       :session_id="sessionData.session_id" 
       :prompts="sessionData.prompts" 
-      gameName="Passive Party"
       :gameSettings="sessionData.settings"
+      gameName="Tricky Translator"
       @restart="sessionData = null" 
     />
 
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup>
 import { ref } from "vue";
 import OtherGameStart from "@/components/games/OtherGameStart.vue";
 import OtherGamePlay from "@/components/games/OtherGamePlay.vue";
 
-const sessionData = ref<{ session_id: number; prompts: any[]; settings?: any } | null>(null);
+const sessionData = ref(null);
 
-function handleSessionAllocation(payload: { session_id: number; prompts: any[] }) {
-  sessionData.value = payload;
+function handleSessionAllocation(payload) {
+  sessionData.value = {
+    session_id: parseInt(payload.session_id, 10) || Date.now(),
+    prompts: payload.prompts || [],
+    settings: payload.settings || {}
+  };
 }
 </script>

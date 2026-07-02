@@ -41,25 +41,12 @@
     <v-progress-linear v-if="loading" indeterminate color="teal" class="mb-6 rounded-pill" />
 
     <div v-if="viewMode === 'course'" class="fade-in">
-      <v-row dense class="mb-4">
-        <v-col cols="12" md="4">
-          <v-select
-            v-model="selectedCourse"
-            :items="courseOptions"
-            label="Select Active Classroom Course"
-            variant="outlined"
-            density="comfortable"
-            prepend-inner-icon="mdi-school-outline"
-            hide-details
-          />
-        </v-col>
-      </v-row>
 
       <v-card variant="outlined" class="rounded-xl bg-white overflow-hidden border-light" elevation="0">
         <v-table density="comfortable" class="table-fixed">
           <thead class="bg-slate-50">
             <tr>
-              <th class="font-weight-bold text-slate-700" style="width: 240px; padding-left: 20px;">Students</th>
+              <th class="font-weight-bold text-slate-700" style="width: 200px; padding-left: 20px;"></th>
               <th class="font-weight-bold text-slate-700">Completed Grammar Units (Best Accuracy Score)</th>
             </tr>
           </thead>

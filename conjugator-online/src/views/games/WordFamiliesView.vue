@@ -1,21 +1,19 @@
-<!-- src/views/games/PassivePartyView.vue -->
+<!-- src/views/games/WordFamiliesView.vue -->
 <template>
-  <div class="passive-party-view-container flex-grow-1">
+  <div class="word-families-view-container flex-grow-1">
     
-    <!-- Central configuration settings board launcher -->
     <OtherGameStart 
       v-if="!sessionData" 
-      gameName="Passive Party" 
+      gameName="Word Families" 
       @initialized="handleSessionAllocation" 
     />
     
-    <!-- Central game operation loop panel module -->
     <OtherGamePlay 
       v-else 
       :session_id="sessionData.session_id" 
       :prompts="sessionData.prompts" 
-      gameName="Passive Party"
       :gameSettings="sessionData.settings"
+      gameName="Word Families"
       @restart="sessionData = null" 
     />
 
@@ -27,9 +25,19 @@ import { ref } from "vue";
 import OtherGameStart from "@/components/games/OtherGameStart.vue";
 import OtherGamePlay from "@/components/games/OtherGamePlay.vue";
 
-const sessionData = ref<{ session_id: number; prompts: any[]; settings?: any } | null>(null);
+interface GameSessionState {
+  session_id: number;
+  prompts: any[];
+  settings: any;
+}
 
-function handleSessionAllocation(payload: { session_id: number; prompts: any[] }) {
-  sessionData.value = payload;
+const sessionData = ref<GameSessionState | null>(null);
+
+function handleSessionAllocation(payload: any) {
+  sessionData.value = {
+    session_id: parseInt(payload.session_id, 10) || Date.now(),
+    prompts: payload.prompts || [],
+    settings: payload.settings || {}
+  };
 }
 </script>

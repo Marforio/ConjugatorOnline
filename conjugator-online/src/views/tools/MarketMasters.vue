@@ -79,14 +79,17 @@
       </div>
       
       <div class="watchlist-grid" v-if="currentWatchlist.length > 0">
-        <v-tooltip 
+        <v-menu 
           v-for="ticker in currentWatchlist" 
-          :key="ticker" 
-          location="top"
-          open-delay="200"
+          :key="ticker"
+          open-on-hover 
+          :close-on-content-click="false" 
+          location="top center" 
+          transition="fade-transition"
+          @update:model-value="(isOpen) => isOpen && handleLoadChartHistory(ticker)"
         >
           <template v-slot:activator="{ props }">
-            <div class="watchlist-tile" v-bind="props">
+            <div class="watchlist-tile cursor-pointer" v-bind="props">
               
               <div class="tile-identity">
                 <span class="tile-ticker">{{ ticker }}</span>
@@ -110,19 +113,38 @@
             </div>
           </template>
 
-          <div class="vuetify-tooltip-content">
-            <div class="tooltip-header">
-              <strong>{{ getAssetName(ticker) }}</strong> ({{ ticker }})
+          <v-card width="340" class="pa-4 bg-slate-900 rounded-lg elevation-16 border border-slate-700" style="background: #0f172a; color: white;">
+            <div class="vuetify-tooltip-content">
+              <div class="tooltip-header d-flex justify-space-between align-center">
+                <div>
+                  <strong class="text-subtitle-2 font-weight-black">{{ getAssetName(ticker) }}</strong> 
+                  <span class="text-caption text-slate-400 ml-1">({{ ticker }})</span>
+                </div>
+              </div>
+              
+              <v-divider class="my-2 border-opacity-30" color="white"></v-divider>
+              
+              <div class="tooltip-body mb-3">
+                <div class="d-flex justify-space-between text-caption align-center">
+                  <span class="text-slate-400 font-weight-bold">48h Performance Delta:</span>
+                  <span class="font-weight-black tracking-tight" :class="getPerformanceColorClass(localTrendMetrics?.performance_pct)">
+                    {{ localTrendMetrics?.performance_pct ? localTrendMetrics.performance_pct + '%' : 'Calculating...' }}
+                  </span>
+                </div>
+              </div>
+
+              <div class="relative-chart-wrapper" style="position: relative; height: 110px; width: 100%;">
+                <div v-if="isChartLoading" class="d-flex justify-center align-center h-100">
+                  <v-progress-circular indeterminate color="sky-lighten-2" size="20"></v-progress-circular>
+                </div>
+                <div v-else-if="!localTrendMetrics?.prices?.length" class="d-flex justify-center align-center h-100 text-slate-500 font-italic text-caption">
+                  Awaiting historical timeline compilation...
+                </div>
+                <canvas v-show="!isChartLoading && localTrendMetrics?.prices?.length" ref="chartCanvasRef"></canvas>
+              </div>
             </div>
-            <v-divider class="my-1 border-opacity-50" color="white"></v-divider>
-            <div class="tooltip-body">
-              <span class="perf-label">48h Trend Model:</span>
-              <span class="perf-value" :class="getDirection(ticker)">
-                {{ getDirection(ticker) === 'up' ? '📈 Bullish Gain Vector' : getDirection(ticker) === 'down' ? '📉 Bearish Loss Vector' : '➡️ Neutral Side Movement' }}
-              </span>
-            </div>
-          </div>
-        </v-tooltip>
+          </v-card>
+        </v-menu>
       </div>
       <p v-else class="empty-msg">Your watchlist is currently empty. Add assets above to monitor their performance.</p>
     </section>
@@ -300,7 +322,7 @@
           <v-form ref="tradeFormRef" @submit.prevent="dispatchOrder">
             <v-row class="mb-2">
               <v-col cols="7">
-                <div class="text-caption text-slate-600 mb-1 font-weight-bold">Search Target Security</div>
+                <div class="text-caption text-slate-600 mb-1 font-weight-bold">Search Asset</div>
                 
                 <div v-show="tradeForm.action === 'SELL'">
                   <v-select
@@ -345,11 +367,11 @@
               </v-col>
             </v-row>
 
-            <v-row class="mb-4">
+            <v-row class="mb-2">
               <v-col cols="6">
                 <v-text-field
                   v-model.number="tradeForm.quantity"
-                  label="Share Quantity"
+                  label="Asset Quantity"
                   type="number"
                   step="any"
                   min="0.000001"
@@ -377,6 +399,13 @@
                 ></v-text-field>
               </v-col>
             </v-row>
+          <v-expand-transition>
+            <div v-if="tradeForm.ticker && !marketPrices.some(p => p.ticker.toUpperCase() === tradeForm.ticker.toUpperCase())" class="mb-4">
+              <v-alert type="amber" variant="tonal" density="compact" icon="mdi-cloud-search-outline" class="text-caption">
+                ✨ <strong>Uncached Asset:</strong> Price will be verified from live market feeds when you press Submit.
+              </v-alert>
+            </div>
+          </v-expand-transition>
 
             <v-alert v-if="['SHORT', 'COVER'].includes(tradeForm.action)" type="warning" variant="tonal" class="mb-4 text-caption">
               <span>
@@ -435,9 +464,10 @@
             </v-card>
 
             <v-btn type="submit" :color="tradeForm.action === 'SELL' ? 'emerald' : 'primary'" block size="large" class="font-weight-bold" :loading="isTradeProcessing">
-              {{ tradeForm.action === 'SELL' ? 'Liquidate Shares' : 'Submit Order Wire' }}
+              {{ tradeForm.action === 'SELL' ? 'Liquidate Asset' : 'Submit Order' }}
             </v-btn>
           </v-form>
+
         </v-col>
 
         <v-col cols="6" class="pa-6 overflow-y-auto h-100">
@@ -533,22 +563,52 @@
                 <tr class="bg-grey-lighten-4">
                   <th class="font-weight-bold">Ticker</th>
                   <th class="font-weight-bold">Direction</th>
-                  <th class="font-weight-bold">Units Vol</th>
+                  <th class="font-weight-bold">Units</th>
                   <th class="font-weight-bold">Avg Entry Price</th>
                   <th class="font-weight-bold text-right">Live Price</th>
                 </tr>
               </thead>
               <tbody>
                 <tr v-for="holding in selectedPortfolio?.assets" :key="holding.id">
-                  <td class="font-weight-black text-slate-800">{{ holding.ticker }}</td>
-                  <td>
-                    <v-chip size="x-small" :color="holding.position_type === 'SHORT' ? 'orange' : 'blue'" variant="flat">
-                      {{ holding.position_type }}
-                    </v-chip>
+                  <td class="font-weight-black text-slate-800">
+                    <v-menu 
+                      open-on-hover 
+                      :close-on-content-click="false" 
+                      location="end center" 
+                      transition="fade-transition"
+                      @update:model-value="(isOpen) => isOpen && handleLoadChartHistory(holding.ticker)"
+                    >
+                      <template v-slot:activator="{ props }">
+                        <span v-bind="props" class="cursor-pointer text-primary border-b border-dashed border-primary">
+                          {{ holding.ticker }}
+                        </span>
+                      </template>
+
+                      <v-card width="340" class="pa-4 bg-slate-900 rounded-lg border border-slate-700 shadow-xl" style="background: #0f172a; color: white;">
+                        <div class="tooltip-header d-flex justify-space-between align-center">
+                          <div>
+                            <strong class="text-subtitle-2 font-weight-black">{{ getAssetName(holding.ticker) }}</strong> 
+                            <span class="text-caption text-slate-400 ml-1">({{ holding.ticker }})</span>
+                          </div>
+                        </div>
+                        <v-divider class="my-2 border-opacity-30" color="white"></v-divider>
+                        <div class="tooltip-body mb-3">
+                          <div class="d-flex justify-space-between text-caption align-center">
+                            <span class="text-slate-400 font-weight-bold">48h Performance Delta:</span>
+                            <span class="font-weight-black tracking-tight" :class="getPerformanceColorClass(localTrendMetrics?.performance_pct)">
+                              {{ localTrendMetrics?.performance_pct ? localTrendMetrics.performance_pct + '%' : 'Calculating...' }}
+                            </span>
+                          </div>
+                        </div>
+                        <div class="relative-chart-wrapper" style="position: relative; height: 110px; width: 100%;">
+                          <div v-if="isChartLoading" class="d-flex justify-center align-center h-100">
+                            <v-progress-circular indeterminate color="sky-lighten-2" size="20"></v-progress-circular>
+                          </div>
+                          <canvas v-show="!isChartLoading && localTrendMetrics?.prices?.length" ref="chartCanvasRef"></canvas>
+                        </div>
+                      </v-card>
+                    </v-menu>
                   </td>
-                  <td>{{ parseFloat(holding.quantity).toFixed(4) }}</td>
-                  <td>${{ parseFloat(holding.average_buy_price).toFixed(2) }}</td>
-                  <td class="text-right font-weight-bold">${{ getLivePrice(holding.ticker) }}</td>
                 </tr>
                 <tr v-if="!selectedPortfolio?.assets?.length">
                   <td colspan="5" class="text-center text-slate-400 py-4">No positions in this account.</td>
@@ -662,10 +722,11 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
 import api from "@/axios"
 import TickerSearchBar from "@/components/TickerSearchBar.vue"
 import marketDirectory from '@/assets/data/marketDirectory.json'
+import Chart from 'chart.js/auto'
 
 const studentInitials = ref('')
 const portfolios = ref([])
@@ -676,6 +737,9 @@ const watchlistSearchRef = ref(null)
 const watchlistSelectedTicker = ref('')
 const isActionProcessing = ref(false)
 const isCreateModalActive = ref(false)
+
+const isQuoteModalActive = ref(false)
+const quoteData = ref(null)
 
 const portfolioDialog = ref({ isOpen: false })
 const selectedPortfolio = ref(null)
@@ -725,6 +789,79 @@ const fetchDashboardData = async () => {
     console.error("Pricing hub disconnect:", err)
   }
 }
+
+//  for historical price charts
+const chartCanvasRef = ref(null)
+const isChartLoading = ref(false)
+const localTrendMetrics = ref(null)
+let liveChartInstance = null
+
+// Helper utility to match performance numbers cleanly to colors
+const getPerformanceColorClass = (pctStr) => {
+  if (!pctStr) return 'text-slate-400'
+  return pctStr.startsWith('-') ? 'text-rose-400 font-weight-bold' : 'text-emerald-400 font-weight-bold'
+}
+
+// 🔄 CHARTS HYDRATION CORE ENGINE HANDLER
+// 🔄 UPDATED SCRIPT SEGMENT: Captures a completely generic string variable safely
+const handleLoadChartHistory = async (targetTicker) => {
+  if (!targetTicker) return
+  isChartLoading.value = true
+  localTrendMetrics.value = null
+  
+  if (liveChartInstance) {
+    liveChartInstance.destroy()
+    liveChartInstance = null
+  }
+
+  try {
+    const res = await api.get(`/market-masters/assets/history/?ticker=${targetTicker}`)
+    localTrendMetrics.value = res.data
+    
+    if (!res.data.prices || res.data.prices.length === 0) {
+      isChartLoading.value = false
+      return
+    }
+
+    await nextTick()
+    
+    // 🛡️ Safe fallback resolution to locate our canvas node instance elements
+    const canvasElement = chartCanvasRef.value;
+    if (!canvasElement) return
+    
+    const ctx = canvasElement.getContext('2d')
+    const isBearishTrend = res.data.performance_pct.startsWith('-')
+    const primaryLineColor = isBearishTrend ? '#f43f5e' : '#10b981'
+
+    liveChartInstance = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: res.data.labels,
+        datasets: [{
+          data: res.data.prices,
+          borderColor: primaryLineColor,
+          borderWidth: 2,
+          pointRadius: 0,
+          pointHoverRadius: 4,
+          fill: false,
+          tension: 0.25
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false }, tooltip: { enabled: true } },
+        scales: { x: { display: false }, y: { display: false } }
+      }
+    })
+  } catch (err) {
+    console.error("Historical rendering intercept drop trace error:", err)
+  } finally {
+    isChartLoading.value = false
+  }
+}
+
+
 
 // for suggested buys section
 // Clean static sectors mapping block for structural rendering loops
@@ -1215,6 +1352,82 @@ const killWorkingOrder = async (orderId) => {
     triggerErrorModal(`Retraction Refused: ${backendMsg}`)
   }
 }
+
+
+// ⚡ STEP 1: Intercept form submission and call your existing search endpoint
+const handleInitiateOrderProcess = async () => {
+  const { valid } = await tradeFormRef.value.validate()
+  if (!valid) return
+
+  const targetTicker = tradeForm.value.ticker.toUpperCase().trim()
+  isTradeProcessing.value = true
+
+  try {
+    // 🌟 HITS YOUR EXISTING VIEW: Re-uses search to pull or provision the asset
+    const res = await api.get(`/market-masters/search/?ticker=${targetTicker}`)
+    
+    const livePrice = parseFloat(res.data.current_price)
+    const quantity = parseFloat(tradeForm.value.quantity) || 0
+    const grossPrincipal = livePrice * quantity
+    const txFee = 10.00
+    
+    // Calculate net total impact based on buy vs sell mechanics
+    const totalImpact = tradeForm.value.action === 'SELL' 
+      ? grossPrincipal - txFee 
+      : grossPrincipal + txFee
+
+    // Cache metrics locally to display inside our confirmation dialog box
+    quoteData.value = {
+      ticker: targetTicker,
+      name: res.data.name,
+      live_price: livePrice,
+      gross_principal: grossPrincipal,
+      tx_fee: txFee,
+      total_impact: Math.max(0, totalImpact),
+      trade_type: tradeForm.value.action
+    }
+    
+    isQuoteModalActive.value = true // Launch confirmation card
+  } catch (err) {
+    console.error("Discovery routing exception:", err)
+    const errorDetails = err.response?.data?.error || "This symbol could not be resolved on live market feeds."
+    triggerErrorModal(`Market Quote Denied: ${errorDetails}`)
+  } finally {
+    isTradeProcessing.value = false
+  }
+}
+
+// 🚀 STEP 2: Executed when user taps "Confirm and Transmit" inside the popover
+const confirmAndRouteOrder = async () => {
+  isTradeProcessing.value = true
+  
+  const payload = {
+    portfolio_id: selectedPortfolio.value.id,
+    ticker: tradeForm.value.ticker.toUpperCase().trim(),
+    quantity: tradeForm.value.quantity,
+    trade_type: tradeForm.value.action,
+    order_type: tradeForm.value.orderType,
+    target_price: tradeForm.value.targetPrice
+  }
+
+  try {
+    // Fired directly to your secure trade executor view
+    const res = await api.post('/market-masters/trade/execute/', payload)
+    triggerToast(res.data.message || "Order completed successfully.", "success")
+    
+    isQuoteModalActive.value = false
+    clearOrderFields()
+    fetchDashboardData()
+    manuallyRefreshPortfolio(payload.portfolio_id)
+  } catch (err) {
+    console.error("Trade finalization block:", err.response?.data)
+    triggerErrorModal(err.response?.data?.error || "Transaction dropped due to portfolio boundaries.")
+  } finally {
+    isTradeProcessing.value = false
+  }
+}
+
+
 
 // portfolio health calculations
 // 🧮 EXTRA DYNAMIC FINANCIAL CALCULATORS

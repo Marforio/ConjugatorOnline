@@ -269,6 +269,14 @@
               />
             </template>
 
+            <template v-else-if="mode === 'space_invaders'">
+              <VWSpaceInvadersMode 
+                :plan-items="planItems" 
+                :game-settings="gameSettings"
+                @go-back="goToSettings"
+              />
+            </template>
+
             <template v-else>
               <div class="pa-8 border rounded-xl text-center bg-slate-50 text-caption font-weight-medium text-slate-400">
                 Mode template target string validation signature identity block "{{ mode }}" is currently unassigned in this session view.
@@ -391,6 +399,7 @@ import { contextByListKey, normalizeContextKey, contextApprovedListKeys } from "
 import { useGameCompletion } from '@/composables/useGameCompletion';
 import AiTutorChatDialog from "@/components/AiTutorChatDialog.vue";
 import VWAsteroidzMode from "@/components/vocab_workout_scenes/VWAsteroidzMode.vue";
+import VWSpaceInvadersMode from "@/components/vocab_workout_scenes/VWSpaceInvadersMode.vue";
 
 const tutorOpen = ref(false);
 const tutorTerm = ref<string>("");

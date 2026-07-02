@@ -336,6 +336,8 @@
                 </v-card>
               </v-col>
 
+              <ErrorDistributionPieChart :sessions="sessions" />
+
             </v-row>
 
             <v-divider class="my-8"/>
@@ -355,12 +357,12 @@
                     
                     <div class="text-caption font-weight-bold text-medium-emphasis mb-1">Discovery (1x Correct)</div>
                     <v-progress-linear :model-value="userStore.tierStats?.[idx]?.discovered_pct_ps ?? 0" height="20" color="indigo-lighten-2" class="mb-2 rounded font-weight-black" striped>
-                      <template #default="{ value }"><span>{{ value }}%</span></template>
+                      <template #default="{ value }"><span>{{ value.toFixed(0) }}%</span></template>
                     </v-progress-linear>
                     
                     <div class="text-caption font-weight-bold text-medium-emphasis mb-1">Mastery (3x Correct)</div>
                     <v-progress-linear :model-value="userStore.tierStats?.[idx]?.mastered_pct_ps ?? 0" height="20" color="indigo" class="rounded font-weight-black" striped>
-                      <template #default="{ value }"><span>{{ value }}%</span></template>
+                      <template #default="{ value }"><span>{{ value.toFixed(0) }}%</span></template>
                     </v-progress-linear>
                   </div>
 
@@ -397,7 +399,7 @@
                     
                     <div class="text-caption font-weight-bold text-medium-emphasis mb-1">Discovery (1x Correct)</div>
                     <v-progress-linear :model-value="userStore.tierStats?.[idx]?.discovered_pct_pp ?? 0" height="20" color="deep-orange-lighten-2" class="mb-2 rounded font-weight-black" striped>
-                      <template #default="{ value }"><span>{{ value }}%</span></template>
+                      <template #default="{ value }"><span>{{ value.toFixed(0) }}%</span></template>
                     </v-progress-linear>
                     
                     <div class="text-caption font-weight-bold text-medium-emphasis mb-1">Mastery (3x Correct)</div>
@@ -469,6 +471,7 @@
                               <th class="font-weight-black text-grey-darken-3">User Answer</th>
                               <th class="font-weight-black text-grey-darken-3">Acceptable Answers</th>
                               <th class="font-weight-black text-grey-darken-3 text-center">Correct?</th>
+                              <th class="font-weight-black text-grey-darken-3 text-center">Errors</th>
                               <th class="font-weight-black text-grey-darken-3 text-center">AI Tutor</th>
                               <th class="font-weight-black text-grey-darken-3 text-center">Typo?</th>
                             </tr>
@@ -486,6 +489,46 @@
                                   {{ round.typo_requested ? 'mdi-help-circle-outline' : round.is_correct ? 'mdi-check-circle' : 'mdi-close-circle' }}
                                 </v-icon>
                               </td>
+                              <td class="text-center">
+                              <v-tooltip v-if="round.error_details?.length" location="top" max-width="320">
+                                <template #activator="{ props: tooltipProps }">
+                                  <div v-bind="tooltipProps" class="d-flex gap-1 flex-wrap justify-center">
+                                    <v-chip
+                                      v-for="(err, i) in round.error_details.slice(0, 2)"
+                                      :key="i"
+                                      size="x-small"
+                                      color="warning"
+                                      variant="flat"
+                                      class="font-weight-bold text-uppercase text-xxs"
+                                    >
+                                      {{ formatErrorCode(err.type).slice(0, 8) }}
+                                    </v-chip>
+                                    <v-chip
+                                      v-if="round.error_details.length > 2"
+                                      size="x-small"
+                                      color="warning"
+                                      variant="flat"
+                                      class="font-weight-bold text-uppercase text-xxs"
+                                    >
+                                      +{{ round.error_details.length - 2 }}
+                                    </v-chip>
+                                  </div>
+                                </template>
+                                
+                                <!-- Tooltip Content -->
+                                <div class="pa-3">
+                                  <div class="font-weight-bold mb-2 text-sm">Errors detected:</div>
+                                  <div v-for="err in round.error_details" :key="err.type" class="mb-2 pb-2 border-b border-grey-600 last:border-0">
+                                    <div class="font-weight-bold text-xs text-yellow-100">{{ formatErrorCode(err.type) }}</div>
+                                    <div class="text-xxs mt-1 leading-relaxed text-grey-100">{{ err.label }}</div>
+                                    <div v-if="err.category" class="text-xxs mt-1 text-grey-300">
+                                      <span class="opacity-75">Category:</span> {{ formatCategory(err.category) }}
+                                    </div>
+                                  </div>
+                                </div>
+                              </v-tooltip>
+                              <span v-else class="text-caption text-grey">—</span>
+                            </td>
                               <td class="text-center">
                                 <template v-if="round.is_correct === false && round.typo !== true">
                                   <v-btn icon variant="text" size="x-small" color="indigo-darken-1" @click.stop="openConjRoundTutor(session, round)">
@@ -578,6 +621,7 @@ import { useNotificationStore } from '@/stores/notifications';
 import PieChart from "@/components/charts/PieChart.vue";
 import BarChart from "@/components/charts/BarChart.vue";
 import ErrorsDataTab from "@/components/ErrorsDataTab.vue";
+import ErrorDistributionPieChart from '@/components/charts/ErrorDistributionPieChart.vue';
 import OtherGamesDash from "@/components/OtherGamesDash.vue";
 import VocabDataTab from "@/components/VocabDataTab.vue";
 import GoalsDataTab from "@/components/GoalsDataTab.vue";
@@ -600,6 +644,20 @@ interface Round {
   acceptable_answers?: string[];
   elapsed_time?: number;
   user_answer?: string;
+  difficulty_score?: number;
+  typo_detected?: boolean;
+  typo_lev_min?: number;
+  typo_best_accepted?: string;
+  typo_detector_version?: string;
+  error_types?: string[];
+  error_details?: ErrorDetail[];
+  error_labeled_manually?: boolean;
+}
+
+export interface ErrorDetail {
+  type: string;
+  label: string;
+  category: 'morphology' | 'syntax' | 'semantics' | 'other';
 }
 
 interface GameSession {
@@ -706,6 +764,23 @@ const selectedPpOption = ref(presentPerfectOptions[0].key);
 
 const BarchartColorPalette = ["#4CAF50", "#2196F3", "#FFC107", "#E91E63", "#9C27B0", "#FF5722"];
 const sparklineGradients = [['#222'], ['#42b3f4'], ['green', 'yellow', 'red']];
+
+function formatErrorCode(code: string): string {
+  return code
+    .split('_')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+}
+
+function formatCategory(category: string): string {
+  const categoryLabels: Record<string, string> = {
+    morphology: 'Word Formation',
+    syntax: 'Sentence Structure',
+    semantics: 'Meaning/Agreement',
+    other: 'Other',
+  };
+  return categoryLabels[category] || 'Other';
+}
 
 const conjTutorSystemMessage = [
   "You are an English grammar tutor.",
@@ -817,12 +892,25 @@ const tenseAccuracyData = computed(() => {
 const sentenceTypeAccuracyData = computed(() => {
   const rList = sessions.value.flatMap(s => s.rounds ?? []);
   const typeGroups: Record<string, { correct: number; total: number }> = {};
+
   for (const round of rList) {
-    const type = round.sentence_type ?? "unknown";
+    let type = round.sentence_type ?? "unknown";
+
+    // 1. Normalize and merge legacy types
+    if (type === "Declarative") type = "Positive";
+    if (type === "Question") type = "Questions";
+
+    // 2. Strict whitelist: Only allow our three target categories
+    if (!["Positive", "Negative", "Questions"].includes(type)) {
+      continue; // Skip legacy or unknown types that don't match
+    }
+
     if (!typeGroups[type]) typeGroups[type] = { correct: 0, total: 0 };
     typeGroups[type].total += 1;
     if (round.is_correct) typeGroups[type].correct += 1;
   }
+
+  // 3. Map to final array format
   return Object.entries(typeGroups).map(([type, stats], i) => ({
     label: type,
     value: stats.total ? parseFloat(((stats.correct / stats.total) * 100).toFixed(0)) : 0,
@@ -936,33 +1024,6 @@ const requestTypo = async (round: Round): Promise<void> => {
   }
 };
 
-const acceptTypo = async (round: Round): Promise<void> => {
-  try {
-    await api.patch(`/conj-game-rounds/${round.id}/accept-typo/`);
-    round.typo = true;
-    round.is_correct = true;
-    round.typo_requested = false;
-    round.typo_accepted = true;
-    showSnackbar("Typo baseline correction approved.");
-  } catch (err) {
-    console.error(err);
-    showSnackbar("Moderation dispatch block error.", "error");
-  }
-};
-
-const denyTypo = async (round: Round): Promise<void> => {
-  try {
-    await api.patch(`/conj-game-rounds/${round.id}/deny-typo/`);
-    round.typo = false;
-    round.typo_requested = false;
-    round.typo_accepted = false;
-    showSnackbar("Typo status overrule denied.");
-  } catch (err) {
-    console.error(err);
-    showSnackbar("Failed to deny parameter.", "error");
-  }
-};
-
 async function openConjRoundTutor(session: GameSession, round: Round) {
   tutorOpen.value = false;
   await nextTick();
@@ -999,7 +1060,7 @@ onMounted(async () => {
   try {
     await userStore.fetchUserData();
     await fetchConjGameSessionsDashboardData();
-    userStore.fetchVerbUsageDashboardData?.();
+    await userStore.fetchVerbUsageDashboardData?.();
     
     const validTab = typeof route.query.tab === "string" && tabItems.some(t => t.value === route.query.tab);
     activeTab.value = validTab ? (route.query.tab as string) : tabItems[0].value;

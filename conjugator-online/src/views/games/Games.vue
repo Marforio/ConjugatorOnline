@@ -58,7 +58,7 @@
       <!-- Word Families -->
       <v-col cols="12" sm="6" md="4" class="d-flex justify-center">
         <RouterLink
-          :to="{ name: 'wordfamilies' }"
+          :to="{ name: 'word-families' }"
           class="image-tile"
         >
           <div class="tile-frame">
@@ -142,7 +142,7 @@
         <!-- Idea Linker -->
       <v-col cols="12" sm="6" md="4" class="d-flex justify-center">
         <RouterLink
-          :to="{ name: 'idealinker' }"
+          :to="{ name: 'idea-linker' }"
           class="image-tile"
         >
           <div class="tile-frame">
@@ -154,9 +154,8 @@
       <!-- Tricky Translator -->
       <v-col cols="12" sm="6" md="4" class="d-flex justify-center">
         <RouterLink
-          :to="isEnabled ? { name: 'trickytranslator' } : undefined"
+          :to="{ name: 'tricky-translator' }"
           class="image-tile"
-          :style="{ pointerEvents: isEnabled ? 'auto' : 'none', opacity: isEnabled ? 1 : 0.5 }"
         >
           <div class="tile-frame">
             <v-img src="/images/banners/TrickyTranslator.png" alt="Tricky Translator" cover class="tile-image" />

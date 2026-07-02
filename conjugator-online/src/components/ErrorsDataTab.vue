@@ -381,51 +381,69 @@ const generateLocalPdfSummary = async () => {
         const offscreenCanvas = document.createElement("canvas");
         offscreenCanvas.width = renderWidth;
         offscreenCanvas.height = renderHeight;
+        offscreenCanvas.style.backgroundColor = "#FFFFFF"; 
         const offscreenCtx = offscreenCanvas.getContext("2d");
 
         if (offscreenCtx) {
-          offscreenCtx.fillStyle = "#F8FAFC"; 
+          offscreenCtx.save();
+          offscreenCtx.globalCompositeOperation = "source-over";
+          offscreenCtx.fillStyle = "#FFFFFF"; // hard white paint
           offscreenCtx.fillRect(0, 0, renderWidth, renderHeight);
+          offscreenCtx.restore();
 
           const offscreenCtxInstance = new Chart(offscreenCtx, {
             type: "bar",
             data: {
               labels: topErrors.map(e => e.error_code),
               datasets: [{
-                data: topErrors.map(e => e.total_times),
-                backgroundColor: "rgba(0, 150, 136, 0.75)", 
-                borderColor: "rgba(0, 150, 136, 1)",
-                borderWidth: 2,
-                barThickness: 45,       
-                maxBarThickness: 50,
-                borderRadius: 6         
-              }]
+                  data: topErrors.map(e => e.total_times),
+                  backgroundColor: "rgba(0, 150, 136, 0.72)",
+                  borderColor: "rgba(0, 150, 136, 1)",
+                  borderWidth: 1.5,
+                  borderRadius: 5,
+                  categoryPercentage: 0.62, // slimmer category occupancy
+                  barPercentage: 0.72        // slimmer bars
+                }]
             },
             options: {
-              responsive: false,
-              animation: false,
-              layout: {
-                padding: { top: 40, bottom: 20, left: 30, right: 30 }
-              },
-              plugins: { legend: { display: false } },
-              scales: {
-                x: { 
-                  grid: { display: false }, 
-                  ticks: { font: { size: 18, weight: "bold", family: "helvetica" }, color: "#2C3E50", padding: 10 } 
+                responsive: false,
+                maintainAspectRatio: false,
+                animation: false,
+                devicePixelRatio: 2, // sharper output in PDF
+                layout: {
+                  padding: { top: 18, bottom: 8, left: 8, right: 12 }
                 },
-                y: { 
-                  beginAtZero: true, 
-                  grid: { color: "rgba(0, 0, 0, 0.05)" },
-                  ticks: { font: { size: 16, family: "helvetica" }, color: "#78828C", padding: 10 } 
+                plugins: {
+                  legend: { display: false },
+                  tooltip: { enabled: false } // no tooltips needed for export
+                },
+                scales: {
+                  x: {
+                    grid: { display: false },
+                    ticks: {
+                      color: "#2C3E50",
+                      font: { size: 13, weight: 600, family: "helvetica" },
+                      maxRotation: 0,
+                      minRotation: 0
+                    }
+                  },
+                  y: {
+                    beginAtZero: true,
+                    grid: { color: "rgba(44, 62, 80, 0.12)" },
+                    ticks: {
+                      precision: 0,
+                      color: "#5F6B7A",
+                      font: { size: 11, family: "helvetica" }
+                    }
+                  }
                 }
               }
-            }
           });
 
-          const cleanChartImgBase64 = offscreenCanvas.toDataURL("image/jpeg", 1.0);
+          const cleanChartImgBase64 = offscreenCanvas.toDataURL("image/png");
           const pdfImageHeight = 170; 
           
-          doc.addImage(cleanChartImgBase64, "JPEG", margin, currentY, contentWidth, pdfImageHeight);
+          doc.addImage(cleanChartImgBase64, "PNG", margin, currentY, contentWidth, pdfImageHeight);
           currentY += pdfImageHeight + 30;
           offscreenCtxInstance.destroy();
         }

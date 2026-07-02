@@ -172,6 +172,7 @@
                       <v-chip value="multiple_choice" filter variant="tonal" size="comfortable" class="font-weight-bold rounded-lg px-4 py-1">Multiple Choice</v-chip>
                       <v-chip value="write" filter variant="tonal" size="comfortable" class="font-weight-bold rounded-lg px-4 py-1">Write</v-chip>
                       <v-chip value="asteroidz" filter variant="tonal" size="comfortable" disabled class="font-weight-bold rounded-lg px-4 py-1">Asteroidz</v-chip>
+                      <v-chip value="space_invaders" filter variant="tonal" size="comfortable" disabled class="font-weight-bold rounded-lg px-4 py-1">Space Invaderz</v-chip>
                       <v-chip value="quiz" filter variant="tonal" size="comfortable" disabled class="font-weight-bold rounded-lg px-4 py-1">Quiz</v-chip>
                     </v-chip-group>
                   </div>
