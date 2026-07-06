@@ -71,10 +71,10 @@
             </div>
 
             <div v-else-if="gameName === 'Regret Machine'">
-              <div class="text-subtitle-2 text-grey-darken-1 mb-1">Situation:</div>
+              <div class="text-subtitle-2 text-grey-darken-1 ms-12 mb-7">Situation:</div>
               <div class="text-body-1 text-center font-italic mb-4" v-html="highlightedRegretPrompt" />
-              <v-divider class="my-2" />
-              <div class="d-flex justify-center align-center my-3" style="gap: 12px;">
+              <v-divider class="my-8" />
+              <div class="d-flex justify-center align-center my-8" style="gap: 12px;">
                 <v-chip color="primary" variant="flat" size="small">{{ activePrompt.modal }}</v-chip>
                 <v-chip color="secondary" variant="flat" size="small">{{ activePrompt.verb }}</v-chip>
                 <v-chip v-if="activePrompt.negative" color="error" variant="flat" size="small">Negative</v-chip>
@@ -114,12 +114,18 @@
                 <v-card v-if="activePrompt.displayed_intensifier" variant="tonal" color="purple" class="px-2 py-0">
                   <v-card-title class="text-caption text-uppercase font-weight-bold pa-1">
                     {{ activePrompt.displayed_intensifier }}
+                    <v-tooltip activator="parent" location="top">
+                    {{ activePrompt.displayed_intensifier == 'impressive' ? 'so' : 'too' }}
+                  </v-tooltip>
                   </v-card-title>
                 </v-card>
                 
                 <v-card variant="flat" color="blue-lighten-5" class="px-2 py-0 border">
                   <v-card-title class="text-caption text-uppercase text-blue-darken-4 font-weight-bold pa-1">
                     {{ activePrompt.displayed_quantity }}
+                    <v-tooltip activator="parent" location="top">
+                    {{ activePrompt.displayed_quantity == 'big quantity' ? 'many (a lot of) / much' : 'a few / a little' }}
+                  </v-tooltip>
                   </v-card-title>
                 </v-card>
               </div>
@@ -180,19 +186,16 @@
 
             <!-- VERB MIXER CORE INTERACTIVE ROW -->
             <div v-else-if="gameName === 'Verb Mixer'" class="mb-2">
-              <div class="d-flex justify-space-between align-center mb-2">
-                <div class="text-caption text-uppercase text-grey-darken-1 font-weight-medium">
-                  🏷 Category Class: {{ activePrompt.category?.replace('_', ' ') }}
-                </div>
-                <v-chip color="primary" size="x-small" label class="font-weight-black">
+              <div class="d-flex justify-end align-center mb-5">
+                <v-chip color="primary" size="x-small" label class="font-weight-medium">
                   BASE: {{ activePrompt.key }}
                 </v-chip>
               </div>
 
               <v-card variant="outlined" class="pa-4 bg-white rounded-lg text-center mb-3">
                 <div class="mb-3">
-                  <v-chip color="blue-darken-3" class="text-white font-weight-bold" variant="flat" size="large">
-                    🎯 {{ activePrompt.answer_verb }}
+                  <v-chip color="blue-darken-3" class="text-white font-weight-medium" variant="tonal" size="large">
+                    {{ activePrompt.answer_verb }}
                   </v-chip>
                 </div>
                 
@@ -325,7 +328,7 @@
                       <v-img :src="resolveSpeakerAvatar(activePrompt.speaker)" cover />
                     </v-avatar>
                     <div class="text-center text-caption font-weight-bold text-grey-darken-2 mt-1">
-                      {{ activePrompt.speaker }}
+                      "{{ activePrompt.speaker }}"
                     </div>
                   </div>
 
@@ -382,10 +385,6 @@
                   class="font-weight-black"
                 >
                   INTENSIFY
-                </v-chip>
-                <v-chip v-if="displayedCompSecondChip" size="small" variant="tonal" color="secondary">
-                  <v-icon start size="small">{{ displayedCompSecondChip }}</v-icon>
-                  {{ activePrompt.target_form?.replace('_', ' ') }}
                 </v-chip>
                 <v-chip v-if="displayedSuperSecondChip" size="small" variant="flat" color="amber-darken-2" class="text-white font-weight-bold">
                   {{ displayedSuperSecondChip }}
@@ -582,7 +581,7 @@
             <v-btn color="primary" variant="flat" rounded="pill" size="large" @click="$emit('restart')">
               Play Again
             </v-btn>
-            <RouterLink :to="{ name: 'student-data' }" class="text-decoration-none">
+            <RouterLink :to="{ path: '/student-data', query: { tab: 'other-games', game: gameName } }" class="text-decoration-none">
               <v-btn color="secondary" variant="flat" rounded="pill" size="large">
                 Dashboard
               </v-btn>

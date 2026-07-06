@@ -56,13 +56,14 @@
       </v-col>
 
       <!-- Word Families -->
-      <v-col cols="12" sm="6" md="4" class="d-flex justify-center">
+      <v-col v-if="isEnabled" cols="12" sm="6" md="4" class="d-flex justify-center">
         <RouterLink
           :to="{ name: 'word-families' }"
           class="image-tile"
+          disabled
         >
           <div class="tile-frame">
-            <v-img src="/images/banners/WordFamilies.png" alt="Word Families" cover class="tile-image" />
+            <v-img src="/images/banners/WordFamilies.png" alt="Word Families" cover class="tile-image" :class="isEnabled ? '' : 'disabled-tile'" />
           </div>
         </RouterLink>
       </v-col>
@@ -140,25 +141,25 @@
       </v-col>     
 
         <!-- Idea Linker -->
-      <v-col cols="12" sm="6" md="4" class="d-flex justify-center">
+      <v-col v-if="isEnabled" cols="12" sm="6" md="4" class="d-flex justify-center">
         <RouterLink
           :to="{ name: 'idea-linker' }"
           class="image-tile"
         >
           <div class="tile-frame">
-            <v-img src="/images/banners/IdeaLinker.png" alt="Idea Linker" cover class="tile-image" />
+            <v-img src="/images/banners/IdeaLinker.png" alt="Idea Linker" cover class="tile-image" :class="isEnabled ? '' : 'disabled-tile'" />
           </div>
         </RouterLink>
       </v-col>   
 
       <!-- Tricky Translator -->
-      <v-col cols="12" sm="6" md="4" class="d-flex justify-center">
+      <v-col v-if="isEnabled" cols="12" sm="6" md="4" class="d-flex justify-center">
         <RouterLink
           :to="{ name: 'tricky-translator' }"
           class="image-tile"
         >
           <div class="tile-frame">
-            <v-img src="/images/banners/TrickyTranslator.png" alt="Tricky Translator" cover class="tile-image" />
+            <v-img src="/images/banners/TrickyTranslator.png" alt="Tricky Translator" cover class="tile-image" :class="isEnabled ? '' : 'disabled-tile'" />
           </div>
         </RouterLink>
       </v-col>

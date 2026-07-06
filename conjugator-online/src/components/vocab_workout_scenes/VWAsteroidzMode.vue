@@ -6,7 +6,7 @@
           <v-icon icon="mdi-rocket-launch" color="primary" /> Asteroidz Mode
         </div>
         <div class="text-caption text-slate-400">
-          Target Vector: <span class="text-secondary font-weight-bold">{{ currentVectorLabel }}</span>
+          <span class="text-secondary font-weight-bold">{{ currentVectorLabel }}</span>
         </div>
       </div>
       
@@ -108,6 +108,15 @@
                 <v-btn color="primary" variant="flat" prepend-icon="mdi-restart" class="rounded-lg font-weight-bold" @click="startGame">
                   Play Again
                 </v-btn>
+                <v-btn 
+                  color="amber" 
+                  variant="flat" 
+                  prepend-icon="mdi-podium" 
+                  class="rounded-lg font-weight-bold"
+                  @click="goToPodium"
+                >
+                  See Podium
+                </v-btn>
                 <v-btn color="slate-600" variant="outlined" prepend-icon="mdi-arrow-left" class="rounded-lg font-weight-bold" @click="goBackToSettings">
                   Back to Settings
                 </v-btn>
@@ -145,6 +154,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onBeforeUnmount, onMounted, nextTick, watch } from "vue";
+import api from "@/axios";
 import { getFrontText, getAcceptedAnswers } from "@/assets/scripts/vocab_workout/VocabWorkoutPromptEngine";
 
 interface AsteroidItem {
@@ -212,7 +222,7 @@ let particles: ExplosionParticle[] = [];
 let crashEffects: CrashEffect[] = [];
 let animationFrameId: number | null = null;
 let lastSpawnTime = 0;
-let spawnInterval = 2800; // 🌟 Faster spawning (was 3400)
+let spawnInterval = 2000; // 🌟 Faster spawning (was 3400)
 let baseAsteroidSpeed = 0.5; // 🌟 Faster base speed (was 0.25)
 let audioContext: AudioContext | null = null;
 let musicOscillators: OscillatorNode[] = [];
@@ -226,6 +236,13 @@ const difficultyLevel = computed(() => {
   const level = Math.floor(correctAnswersInRound.value / 5) + 1;
   return `Lvl ${level}`;
 });
+
+
+function goToPodium() {
+  // Navigate to podium page with game type
+  const gameMode = props.gameSettings?.mode || "space_invaders";
+  window.open(`/arcade/podium?game=${gameMode}`, '_blank');
+}
 
 const accuracy = computed(() => {
   if (totalItems.value === 0) return 0;
@@ -532,7 +549,7 @@ function spawnAsteroid() {
 
   if (attempts >= 5) return;
 
-  const speedMultiplier = 1 + (correctAnswersInRound.value / 5) * 0.15;
+  const speedMultiplier = 1 + (correctAnswersInRound.value / 5) * 0.25;
   const speed = baseAsteroidSpeed * speedMultiplier;
 
   const pointsCount = 8;
@@ -654,14 +671,15 @@ function checkVictoryCondition() {
     gameState.value = "victory";
     showVictoryDialog.value = true;
     
-    // 🌟 Emit score for leaderboard
-    emit("recordScore", {
+    // 🌟 Record score to backend leaderboard
+    recordGameScore({
       score: score.value,
       accuracy: accuracy.value,
       totalItems: totalItems.value,
-      destroyedAsteroids: destroyedAsteroids.value,
+      roundsWon: destroyedAsteroids.value,
       difficulty: difficultyLevel.value,
       gameSettings: props.gameSettings,
+      won: true,
     });
 
     if (animationFrameId) cancelAnimationFrame(animationFrameId);
@@ -787,12 +805,12 @@ function gameLoop() {
         showGameOverDialog.value = true;
         playSoundEffect("gameover");
         
-        // 🌟 Emit score even on loss
-        emit("recordScore", {
+        // 🌟 Record score to backend leaderboard
+        recordGameScore({
           score: score.value,
           accuracy: accuracy.value,
           totalItems: totalItems.value,
-          destroyedAsteroids: destroyedAsteroids.value,
+          roundsWon: destroyedAsteroids.value,
           difficulty: difficultyLevel.value,
           gameSettings: props.gameSettings,
           won: false,
@@ -840,7 +858,7 @@ function gameLoop() {
     const lines = wrapText(ctx, rock.promptText, maxTextWidth, lineHeight);
 
     // 🌟 Truncate after many lines if still too long
-    const maxLines = 3;
+    const maxLines = 4;
     const displayLines = lines.slice(0, maxLines);
     if (lines.length > maxLines) {
       displayLines[displayLines.length - 1] += "...";
@@ -866,6 +884,27 @@ function gameLoop() {
 
   if (gameState.value === "playing") {
     animationFrameId = requestAnimationFrame(gameLoop);
+  }
+}
+
+
+async function recordGameScore(payload: any) {
+  try {
+    await api.post("/arcade-scores/", {
+      game_type: props.gameSettings?.mode || "space_invaders",
+      score: payload.score,
+      accuracy: payload.accuracy,
+      total_items: payload.totalItems,
+      rounds_won: payload.roundsWon,
+      difficulty_reached: payload.difficulty,
+      vocab_list_id: props.gameSettings?.listId,
+      vocab_list_name: props.gameSettings?.listName,
+      front_field: props.gameSettings?.frontField,
+      back_field: props.gameSettings?.backField,
+      won: payload.won,
+    });
+  } catch (error) {
+    console.error("Failed to record score:", error);
   }
 }
 

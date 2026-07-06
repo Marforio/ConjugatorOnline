@@ -57,8 +57,8 @@
                   hide-details
                 />
               </div>
-              <div class="text-caption text-error mt-2">
-                *Note: All three modes are required to trigger special game achievements.
+              <div class="text-caption text-error mt-2 ms-6">
+                *Note: All three modes are required to get the trophy
               </div>
             </div>
 
@@ -173,10 +173,6 @@
                 variant="outlined"
                 class="mt-2"
               />
-              
-              <div class="mt-2 text-caption text-grey-darken-1">
-                ⏱ Session set to <strong>30 rounds</strong>.
-              </div>
             </div>
 
             <div v-else-if="gameName === 'Year 2040'">
@@ -190,10 +186,6 @@
                 <v-radio label="Regular + Advanced Irregs" value="advanced_mix" />
                 <v-radio label="All Prompts Included" value="all" />
               </v-radio-group>
-
-              <div class="mt-2 text-caption text-grey-darken-1">
-                ⏱ Session scale locked to <strong>24 target rounds</strong>.
-              </div>
             </div>
 
             <div v-else-if="gameName === 'Parallel Universe'">
@@ -332,7 +324,7 @@
           <div v-if="gameName === 'Quantifier Quest'">
             <p class="text-body-1 mb-3">
               <v-icon color="warning" class="me-1">mdi-alert-outline</v-icon>
-              Before playing, make sure you understand these rules:
+              Please note that the game expects you to use these quantifiers:
             </p>
             
             <v-table class="text-center border rounded-lg overflow-hidden mb-4" density="compact">
@@ -393,22 +385,38 @@
 
           <!-- CASE B: VERB MIXER RULES SHEET -->
           <div v-else-if="gameName === 'Verb Mixer'">
-            <p class="text-body-1 font-weight-medium mb-2">Gerund versus Infinitive Complement Rules:</p>
+            <p class="text-body-1 font-weight-medium mb-2">Gerund or Infinitive?</p>
             <p class="text-body-2 text-grey-darken-3 mb-2">
-              Verbs vary in what pattern follow them. Certain matrix items command a prepositional 
-              split <strong>Infinitive</strong> (e.g., <em>decide to go, refuse to talk</em>), whereas others 
-              demand a participle <strong>Gerund</strong> suffix inflection (e.g., <em>enjoy dancing, avoid crashing</em>).
+              Verbs complements can be <strong>infinitive</strong> (e.g., <em>decide to go, refuse to talk</em>) or <strong>gerund</strong> (e.g., <em>enjoy dancing, avoid crashing</em>). Review the rules on how to choose the correct verb complement in <a href="https://book.language-labs.ch/ch11" target="_blank" class="text-primary text-decoration-none">Verb Complements</a>.
             </p>
-            <v-alert type="info" variant="tonal" density="compact" class="text-caption">
-              Type out the complete complement block string expression clearly as required.
-            </v-alert>
           </div>
 
           <!-- CASE C: DEFAULT FALLBACK WRAPPER SHEET -->
           <div v-else>
             <p class="text-body-1 mb-2 font-weight-medium">Before playing:</p>
-            <p v-if="gameName === 'Passive Party'" class="text-body-2 text-grey-darken-3">
-              Review the rules on how to convert sentences in <a href="https://book.language-labs.ch/ch8" target="_blank" class="text-primary text-decoration-none">active voice to passive voice</a>.
+              <p v-if="gameName === 'Passive Party'" class="text-body-2 text-grey-darken-3">
+                Review the rules on how to convert sentences in <a href="https://book.language-labs.ch/ch8" target="_blank" class="text-primary text-decoration-none">active voice to passive voice</a>.
+              </p>
+              <p v-else-if="gameName === 'Pronoun Practice'" class="text-body-2 text-grey-darken-3">
+              Review the <a href="https://book.language-labs.ch/ch9" target="_blank" class="text-primary text-decoration-none">table of English Pronouns</a>.
+            </p>
+            <p v-else-if="gameName === 'Regret Machine'" class="text-body-2 text-grey-darken-3">
+              Review the <a href="https://book.language-labs.ch/ch5#should-could" target="_blank" class="text-primary text-decoration-none">use of should or could for criticism of past actions</a>.
+            </p>
+            <p v-else-if="gameName === 'Year 2040'" class="text-body-2 text-grey-darken-3">
+              Review the <a href="https://book.language-labs.ch/ch4#future-tenses" target="_blank" class="text-primary text-decoration-none">use of advanced future tenses</a>.
+            </p>
+            <p v-else-if="gameName === 'Comparison'" class="text-body-2 text-grey-darken-3">
+              Review <a href="https://book.language-labs.ch/ch2#comparative-and-superlative" target="_blank" class="text-primary text-decoration-none">comparative and superlative forms</a>.
+            </p>
+            <p v-else-if="gameName === 'Parallel Universe'" class="text-body-2 text-grey-darken-3">
+              Review <a href="https://book.language-labs.ch/ch4#1st-2nd-conditionals" target="_blank" class="text-primary text-decoration-none">first and second conditional sentences for real and unreal situations,</a> as well as <a href="https://book.language-labs.ch/ch4#past-perfect" target="_blank" class="text-primary text-decoration-none">third conditional sentences for hypothetical past situations</a>.
+            </p>
+            <p v-else-if="gameName === 'Reported Speech'" class="text-body-2 text-grey-darken-3">
+              Review the rules for tense backshifting and <a href="https://book.language-labs.ch/ch4#reported-speech" target="_blank" class="text-primary text-decoration-none">reported speech</a>.
+            </p>
+            <p v-else-if="gameName === 'Uses Of Auxiliaries'" class="text-body-2 text-grey-darken-3">
+              Review the ways auxiliary verbs are used as discourse markers to <a href="https://book.language-labs.ch/ch13" target="_blank" class="text-primary text-decoration-none">show interest, agreement or willingness to participate in a conversation</a>.
             </p>
           </div>
         </v-card-text>

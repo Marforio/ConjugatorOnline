@@ -396,11 +396,11 @@ async function ensureUserLoaded() {
           : res.data;
 
         if (Array.isArray(rawArray) && rawArray.length > 0) {
-          student.value = rawArray[0];
-          if (student.value?.linguistic_profile) {
-            linguisticProfile.value = student.value.linguistic_profile;
+            const sid = rawArray[0].id;
+            const detail = await api.get<any>(`/students/${sid}/`); // triggers retrieve()
+            student.value = detail.data;
+            if (student.value?.linguistic_profile) linguisticProfile.value = student.value.linguistic_profile;
           }
-        }
       }
     } catch (err: any) {
       console.error("Failed to fetch student data profile trace context:", err);

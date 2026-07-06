@@ -170,9 +170,27 @@
                     <v-chip-group v-model="selectedMode" mandatory color="primary" column class="ma-0 chip-matrix-row">
                       <v-chip value="cards" filter variant="tonal" size="comfortable" class="font-weight-bold rounded-lg px-4 py-1">Cards</v-chip>
                       <v-chip value="multiple_choice" filter variant="tonal" size="comfortable" class="font-weight-bold rounded-lg px-4 py-1">Multiple Choice</v-chip>
-                      <v-chip value="write" filter variant="tonal" size="comfortable" class="font-weight-bold rounded-lg px-4 py-1">Write</v-chip>
-                      <v-chip value="asteroidz" filter variant="tonal" size="comfortable" disabled class="font-weight-bold rounded-lg px-4 py-1">Asteroidz</v-chip>
-                      <v-chip value="space_invaders" filter variant="tonal" size="comfortable" disabled class="font-weight-bold rounded-lg px-4 py-1">Space Invaderz</v-chip>
+                      
+                      <!-- 🌟 WRITE MODE - HIGHLIGHTED -->
+                      <v-tooltip text="Awards trophy" location="top">
+                        <template #activator="{ props: tooltipProps }">
+                          <v-chip 
+                            v-bind="tooltipProps"
+                            value="write" 
+                            filter 
+                            variant="tonal"
+                            size="large"
+                            color="yellow-lighten-3"
+                            class="font-weight-black rounded-lg px-5 py-2 text-slate-900 elevation-2 write-mode-chip"
+                            prepend-icon="mdi-trophy"
+                          >
+                            Write
+                          </v-chip>
+                        </template>
+                      </v-tooltip>
+
+                      <v-chip value="asteroidz" filter variant="tonal" disabled size="comfortable" class="font-weight-bold rounded-lg px-4 py-1">Asteroidz</v-chip>
+                      <v-chip value="space_invaders" filter variant="tonal" size="comfortable" class="font-weight-bold rounded-lg px-4 py-1">Space Invaderz</v-chip>
                       <v-chip value="quiz" filter variant="tonal" size="comfortable" disabled class="font-weight-bold rounded-lg px-4 py-1">Quiz</v-chip>
                     </v-chip-group>
                   </div>
@@ -695,6 +713,10 @@ function computeTrackKeyFrontend(
     if (front === "term" && back === "present_perfect") return "to_past_particple";
     if (front === "term" && back === "past_forms") return "to_past_forms";
 
+    if (["past_simple", "present_perfect", "past_forms"].includes(back)) {
+      return `to_${back}`;
+    }
+
     return null;
   }
 
@@ -1018,4 +1040,14 @@ function start() {
 .text-slate-500 { color: #64748b; }
 .text-slate-400 { color: #94a3b8; }
 .bg-slate-50 { background-color: #f8fafc !important; }
+
+.write-mode-chip {
+  transition: all 0.2s ease;
+  box-shadow: 0 0 12px rgba(251, 191, 36, 0.4) !important;
+}
+
+.write-mode-chip:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 20px rgba(251, 191, 36, 0.6) !important;
+}
 </style>

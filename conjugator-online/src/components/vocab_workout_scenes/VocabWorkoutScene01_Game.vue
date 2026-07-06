@@ -274,6 +274,7 @@
                 :plan-items="planItems" 
                 :game-settings="gameSettings"
                 @go-back="goToSettings"
+                @record-score="handleSpaceInvadersScore"
               />
             </template>
 
@@ -1342,6 +1343,14 @@ const formattedTranslations = computed(() => {
 });
 
 /* =========================================================
+   Space invaderz
+    ========================================================= */
+function handleSpaceInvadersScore(payload: any) {
+  console.log("[VocabWorkout] Space Invaders score recorded:", payload);
+  // Optionally emit or track this
+}
+
+/* =========================================================
    📊 COMPUTE RUNTIME TRANSLATION VECTOR LABELS
    ========================================================= */
 const currentVectorDirectionLabel = computed(() => {
@@ -1578,7 +1587,7 @@ async function begin() {
   resultsStore.value = [];
   pendingAttempts.value = [];
 
-  if (mode.value === "asteroidz") {
+  if (mode.value === "asteroidz" || mode.value === "space_invaders") {
     gameStarted.value = true;
     return; // Exit early since Asteroidz initializes its own loop internally
   }

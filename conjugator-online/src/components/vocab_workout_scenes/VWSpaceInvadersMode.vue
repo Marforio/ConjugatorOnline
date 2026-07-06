@@ -3,16 +3,16 @@
     <div class="d-flex align-center justify-space-between mb-4">
       <div>
         <div class="text-h5 font-weight-bold tracking-tight text-primary d-flex align-center ga-2">
-          <v-icon icon="mdi-space-invaders" color="primary" /> Space Invaders Mode
+          <v-icon icon="mdi-space-invaders" color="primary" /> Space Invaderz
         </div>
         <div class="text-caption text-slate-400">
-          Target Vector: <span class="text-secondary font-weight-bold">{{ currentVectorLabel }}</span>
+          Target: <span class="text-secondary font-weight-bold">{{ currentVectorLabel }}</span>
         </div>
       </div>
       
       <div class="d-flex ga-6 text-right align-center">
         <div>
-          <div class="text-overline text-slate-400 line-height-1 mb-1">Shields / Lives</div>
+          <div class="text-overline text-slate-400 line-height-1 mb-1">Lives</div>
           <div class="d-flex ga-1 justify-end">
             <v-icon 
               v-for="n in 3" 
@@ -25,7 +25,7 @@
         </div>
         <div>
           <div class="text-overline text-slate-400 line-height-1">Progress</div>
-          <div class="text-h6 font-weight-bold text-amber-400 line-height-1">{{ itemsRemaining }} / {{ totalItems }}</div>
+          <div class="text-h6 font-weight-bold text-amber-400 line-height-1">{{ roundsWon }} / {{ totalItems }}</div>
         </div>
         <div>
           <div class="text-overline text-slate-400 line-height-1">Score</div>
@@ -72,16 +72,18 @@
           </v-card-title>
           <v-card-text class="text-center py-6 text-slate-300">
             <div class="text-body-2 mb-4">
-              Four answer options will descend in formation, bouncing left and right like enemy invaders.
+              Four options will descend, bouncing left and right.
             </div>
             <div class="text-body-2 mb-4">
-              <strong class="text-green-400">ONE is correct</strong> (shown in green).
+              <strong class="text-red-400">THREE are distractors</strong> - shoot these down.
             </div>
             <div class="text-body-2 mb-4">
-              <strong class="text-red-400">THREE are distractors</strong> (shown in red).
+              <strong class="text-green-400">ONE is correct</strong> - protect it!
             </div>
-            <div class="text-body-2 mb-6">
-              Use <strong class="text-blue-300">← → arrow keys</strong> to move your ship and press <strong class="text-yellow-300">SPACEBAR</strong> to shoot down the distractors.
+            <div class="text-body-2 mb-3">
+              Use <strong class="text-blue-300">← → arrow keys</strong> to move your ship. </div>
+            <div class="text-body-2 mb-4">
+              Press <strong class="text-yellow-300">SPACEBAR</strong> to shoot.
             </div>
             <div class="text-body-2 text-error font-weight-bold">
               ⚠️ Don't shoot the correct answer!
@@ -110,14 +112,23 @@
           <v-dialog v-model="showGameOverDialog" max-width="500" persistent>
             <v-card class="bg-slate-800 rounded-xl">
               <v-card-title class="text-center pt-6">
-                <v-icon icon="mdi-alert-octagon" size="64" color="error" class="d-block mb-3" />
-                <div class="text-h4 font-weight-bold text-error">Mission Failed</div>
+                <v-icon 
+                  :icon="score >= 2000 ? 'mdi-medal' : 'mdi-alert-octagon'" 
+                  :size="score >= 2000 ? '64' : '64'" 
+                  :color="score >= 2000 ? 'amber' : 'error'" 
+                  class="d-block mb-3" 
+                />
+                <div :class="score >= 2000 ? 'text-h4 font-weight-bold text-amber-400' : 'text-h4 font-weight-bold text-error'">
+                  {{ score >= 2000 ? 'Good work, commander!' : 'Mission Failed' }}
+                </div>
               </v-card-title>
               <v-card-text class="text-center py-4">
-                <div class="text-subtitle-1 text-slate-300 mb-2">Shields collapsed!</div>
+                <div class="text-subtitle-1 text-slate-300 mb-2">
+                  {{ score >= 2000 ? `You earned ${score} points!` : 'Sadness invades the galaxy!' }}
+                </div>
                 <div class="text-h6 text-emerald-400 mb-2">Final Score: {{ score }}</div>
                 <div class="text-body-2 text-slate-400 mb-4">
-                  Completed {{ roundsWon }} / {{ totalItems }} questions
+                  Completed {{ roundsWon }} / {{ totalItems }} questions ({{ accuracy }}% accuracy)
                 </div>
               </v-card-text>
               <v-card-actions class="justify-center pb-6 gap-3">
@@ -150,6 +161,15 @@
                 <v-btn color="primary" variant="flat" prepend-icon="mdi-restart" class="rounded-lg font-weight-bold" @click="showInstructions = true">
                   Play Again
                 </v-btn>
+                <v-btn 
+                  color="amber" 
+                  variant="flat" 
+                  prepend-icon="mdi-podium" 
+                  class="rounded-lg font-weight-bold"
+                  @click="goToPodium"
+                >
+                  See Podium
+                </v-btn>
                 <v-btn color="slate-600" variant="outlined" prepend-icon="mdi-arrow-left" class="rounded-lg font-weight-bold" @click="goBackToSettings">
                   Back to Settings
                 </v-btn>
@@ -164,6 +184,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onBeforeUnmount, onMounted, nextTick, watch } from "vue";
+import api from "@/axios";
 import { getAcceptedAnswers } from "@/assets/scripts/vocab_workout/VocabWorkoutPromptEngine";
 
 interface OptionChip {
@@ -174,7 +195,9 @@ interface OptionChip {
   x: number;
   width: number;
   height: number;
-  direction: number; // 1 for right, -1 for left
+  direction: number;
+  driftTimer?: number;    
+  driftDirection?: number;  
 }
 
 interface Bullet {
@@ -217,27 +240,41 @@ const showVictoryDialog = ref(false);
 const showWrongAnswerFeedback = ref(false);
 const showRoundCompleteFeedback = ref(false);
 const showInstructions = ref(false);
-const totalItems = ref(30);
+const totalItems = ref(0);
 
 let itemPool: any[] = [];
+let currentItem: any = null; // 🌟 Track current item for display
 let currentRoundOptions: OptionChip[] = [];
 let particles: ExplosionParticle[] = [];
+let lifeGainParticles: ExplosionParticle[] = []; // 🌟 Separate particles for life gain
 let animationFrameId: number | null = null;
 let baseChipSpeed = 0.5;
 let audioContext: AudioContext | null = null;
 let musicOscillators: OscillatorNode[] = [];
-
-// Player ship
+let roundCompletionLocked = false;
 let playerX = 0;
 let playerWidth = 50;
 let playerHeight = 40;
 let playerSpeed = 4;
 let keysPressed: Record<string, boolean> = {};
 let bullets: Bullet[] = [];
+let roundStartTime = 0; // 🌟 Track when round starts
 
 const itemsRemaining = computed(() => {
-  return totalItems.value - roundsWon.value;
+  return Math.max(0, totalItems.value - roundsWon.value);
 });
+
+
+function resetAndShowInstructions() {
+  showInstructions.value = true;
+  startGame();
+}
+
+function goToPodium() {
+  // Navigate to podium page with game type
+  const gameMode = props.gameSettings?.mode || "space_invaders";
+  window.open(`/arcade/podium?game=${gameMode}`, '_blank');
+}
 
 const difficultyLevel = computed(() => {
   const level = Math.floor(correctAnswersInRound.value / 5) + 1;
@@ -263,29 +300,29 @@ watch(difficultyLevel, () => {
 });
 
 /* =====================================================
-   🎵 DIFFERENT RETRO MUSIC TRACKS (Not Asteroidz)
+   🎵 RETRO MUSIC TRACKS
 ===================================================== */
 const musicTracks = [
   {
     name: "Defender",
     pattern: [
-      { freq: 220, duration: 0.25 },  // A3
-      { freq: 246, duration: 0.25 },  // B3
       { freq: 220, duration: 0.25 },
       { freq: 246, duration: 0.25 },
       { freq: 220, duration: 0.25 },
       { freq: 246, duration: 0.25 },
-      { freq: 196, duration: 0.25 },  // G3
+      { freq: 220, duration: 0.25 },
+      { freq: 246, duration: 0.25 },
+      { freq: 196, duration: 0.25 },
       { freq: 220, duration: 0.25 },
     ],
   },
   {
     name: "Centipede",
     pattern: [
-      { freq: 415, duration: 0.15 },  // G#4
-      { freq: 370, duration: 0.15 },  // F#4
-      { freq: 329, duration: 0.15 },  // E4
-      { freq: 293, duration: 0.15 },  // D4
+      { freq: 415, duration: 0.15 },
+      { freq: 370, duration: 0.15 },
+      { freq: 329, duration: 0.15 },
+      { freq: 293, duration: 0.15 },
       { freq: 329, duration: 0.15 },
       { freq: 370, duration: 0.15 },
       { freq: 415, duration: 0.15 },
@@ -295,17 +332,17 @@ const musicTracks = [
   {
     name: "Asteroids Classic",
     pattern: [
-      { freq: 523, duration: 0.1 },   // C5
       { freq: 523, duration: 0.1 },
-      { freq: 440, duration: 0.1 },   // A4
+      { freq: 523, duration: 0.1 },
       { freq: 440, duration: 0.1 },
-      { freq: 392, duration: 0.1 },   // G4
+      { freq: 440, duration: 0.1 },
       { freq: 392, duration: 0.1 },
-      { freq: 349, duration: 0.1 },   // F4
+      { freq: 392, duration: 0.1 },
       { freq: 349, duration: 0.1 },
-      { freq: 329, duration: 0.1 },   // E4
+      { freq: 349, duration: 0.1 },
       { freq: 329, duration: 0.1 },
-      { freq: 293, duration: 0.1 },   // D4
+      { freq: 329, duration: 0.1 },
+      { freq: 293, duration: 0.1 },
       { freq: 293, duration: 0.1 },
     ],
   },
@@ -389,7 +426,6 @@ function playSoundEffect(type: "laser" | "hit" | "crash" | "gameover" | "lifeup"
   osc.connect(gain);
 
   if (type === "laser") {
-    // 🌟 Laser sound
     osc.frequency.setValueAtTime(400, now);
     osc.frequency.exponentialRampToValueAtTime(300, now + 0.05);
     osc.start(now);
@@ -450,6 +486,7 @@ function startGame() {
   bullets = [];
   keysPressed = {};
 
+  // 🌟 Shuffle and use ALL items in the pool
   const shuffled = [...props.planItems].sort(() => 0.5 - Math.random());
   totalItems.value = shuffled.length;
   itemPool = [...shuffled];
@@ -482,7 +519,9 @@ function spawnNewRound() {
   if (itemPool.length === 0) {
     gameState.value = "victory";
     showVictoryDialog.value = true;
-    emit("recordScore", {
+    
+    // 🌟 Record score to backend leaderboard
+    recordGameScore({
       score: score.value,
       accuracy: accuracy.value,
       totalItems: totalItems.value,
@@ -491,12 +530,15 @@ function spawnNewRound() {
       gameSettings: props.gameSettings,
       won: true,
     });
+    
     if (animationFrameId) cancelAnimationFrame(animationFrameId);
     return;
   }
 
   const item = itemPool.shift();
   if (!item) return;
+
+  currentItem = item;
 
   const frontField = props.gameSettings?.frontField || "definition";
   const backField = props.gameSettings?.backField || "term";
@@ -514,7 +556,6 @@ function spawnNewRound() {
     correctAnswer = answers[0] || item.term;
   }
 
-  // Generate 3 random wrong options + 1 correct
   const wrongOptions = props.planItems
     .filter((it: any) => it.id !== item.id)
     .sort(() => 0.5 - Math.random())
@@ -531,7 +572,6 @@ function spawnNewRound() {
 
   const allOptions = [correctAnswer, ...wrongOptions].sort(() => 0.5 - Math.random());
 
-  // 🌟 Spawn in 4 vertical columns
   const canvasWidth = gameCanvas.value?.width || 800;
   const chipWidth = 120;
   const spacing = canvasWidth / 4;
@@ -544,10 +584,11 @@ function spawnNewRound() {
     x: spacing * idx + (spacing - chipWidth) / 2,
     width: chipWidth,
     height: 50,
-    direction: idx % 2 === 0 ? 1 : -1, // Alternate left/right
+    direction: idx % 2 === 0 ? 1 : -1,
   }));
 
   particles = [];
+  roundStartTime = Date.now(); // 🌟 ADD THIS LINE HERE - at the very end
 }
 
 function createExplosion(x: number, y: number, color: string) {
@@ -595,7 +636,65 @@ function gameLoop() {
 
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  // 🌟 Update player position
+  // 🌟 Draw the prompt/term at the top
+  const frontField = String(props.gameSettings?.frontField || "definition");
+  let promptText = "";
+  
+  if (currentItem) {
+    if (frontField === "term") {
+      promptText = currentItem.term;
+    } else if (currentItem.additional_data) {
+      promptText = String(currentItem.additional_data[frontField] || currentItem[frontField] || "");
+    } else {
+      promptText = String(currentItem[frontField] || "");
+    }
+  }
+
+if (promptText) {
+  ctx.fillStyle = "#e0f2fe";
+  ctx.font = "bold 18px sans-serif";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "top";
+  
+  // 🌟 Wrap text to multiple lines
+  const maxWidth = canvas.width - 40; // Leave 20px margin on each side
+  const lineHeight = 24;
+  const words = promptText.split(" ");
+  const lines: string[] = [];
+  let currentLine = "";
+
+  words.forEach((word) => {
+    const testLine = currentLine + (currentLine ? " " : "") + word;
+    const metrics = ctx.measureText(testLine);
+
+    if (metrics.width > maxWidth && currentLine) {
+      lines.push(currentLine);
+      currentLine = word;
+    } else {
+      currentLine = testLine;
+    }
+  });
+
+  if (currentLine) {
+    lines.push(currentLine);
+  }
+
+  // Draw each line
+  lines.forEach((line, idx) => {
+    ctx.fillText(line, canvas.width / 2, 20 + idx * lineHeight);
+  });
+
+  // Draw a line separator (adjust position based on number of lines)
+  const separatorY = 20 + lines.length * lineHeight + 10;
+  ctx.strokeStyle = "#64748b";
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(20, separatorY);
+  ctx.lineTo(canvas.width - 20, separatorY);
+  ctx.stroke();
+}
+
+  // Update player position
   if (keysPressed["ArrowLeft"]) {
     playerX = Math.max(0, playerX - playerSpeed);
   }
@@ -605,103 +704,82 @@ function gameLoop() {
 
   const speedMultiplier = 1 + (correctAnswersInRound.value / 5) * 0.1;
   const speed = baseChipSpeed * speedMultiplier;
-  const bounceDistance = 60;
 
-  // 🌟 Update and draw chips
-  for (let i = currentRoundOptions.length - 1; i >= 0; i--) {
-    const chip = currentRoundOptions[i];
-    chip.y += speed;
+    // Update and draw chips
+    for (let i = currentRoundOptions.length - 1; i >= 0; i--) {
+      const chip = currentRoundOptions[i];
+      chip.y += speed;
 
-    // 🌟 Bouncing left-right movement (Space Invaders style)
-    chip.x += chip.direction * 0.8;
-    if (chip.x <= 20 || chip.x >= canvas.width - chip.width - 20) {
-      chip.direction *= -1;
-    }
-
-    // Check if chip passed bottom
-    if (chip.y > canvas.height) {
-      if (chip.isCorrect) {
-        // Correct answer passed - lose a life
-        lives.value -= 1;
-        playSoundEffect("crash");
-
-        if (lives.value <= 0) {
-          gameState.value = "gameover";
-          showGameOverDialog.value = true;
-          playSoundEffect("gameover");
-          emit("recordScore", {
-            score: score.value,
-            accuracy: accuracy.value,
-            totalItems: totalItems.value,
-            roundsWon: roundsWon.value,
-            difficulty: difficultyLevel.value,
-            gameSettings: props.gameSettings,
-            won: false,
-          });
-          if (animationFrameId) cancelAnimationFrame(animationFrameId);
-          return;
+      // Initialize drift properties if not already done
+      if (chip.driftTimer === undefined || chip.driftDirection === undefined) {
+        chip.driftTimer = 0;
+        chip.driftDirection = Math.random() > 0.5 ? 1 : -1;
+      }
+      
+      // Base horizontal movement (alternating direction)
+      let horizontalMovement = chip.direction * 0.8;
+      
+      // Add subtle wave-like oscillation
+      const waveAmplitude = 1.2;
+      const waveFrequency = 0.02;
+      const oscillation = Math.sin(chip.y * waveFrequency + chip.id.charCodeAt(0)) * waveAmplitude;
+      
+      // Add random drift component
+      chip.driftTimer++;
+      
+      // Change drift direction randomly every 60-100 frames
+      if (chip.driftTimer > 60 + Math.random() * 40) {
+        chip.driftDirection = Math.random() > 0.5 ? 1 : -1;
+        chip.driftTimer = 0;
+      }
+      
+      const driftComponent = chip.driftDirection * 0.3;
+      
+      // Combine all movement components
+      chip.x += horizontalMovement + oscillation + driftComponent;
+      
+      // 🌟 COLLISION AVOIDANCE: Keep blocks separated
+      const minSeparation = chip.width + 30; // Minimum distance between blocks
+      for (let j = 0; j < currentRoundOptions.length; j++) {
+        if (i === j) continue;
+        
+        const otherChip = currentRoundOptions[j];
+        const dx = chip.x - otherChip.x;
+        const dy = chip.y - otherChip.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        
+        if (distance < minSeparation) {
+          // Push blocks apart
+          const angle = Math.atan2(dy, dx);
+          const pushForce = (minSeparation - distance) / 2;
+          chip.x += Math.cos(angle) * pushForce;
+          otherChip.x -= Math.cos(angle) * pushForce;
         }
       }
+      
+      // Clamp X position to stay within viewport
+      const minX = 10;
+      const maxX = canvas.width - chip.width - 10;
+      if (chip.x < minX) {
+        chip.x = minX;
+        chip.direction = 1; // Force right
+      }
+      if (chip.x > maxX) {
+        chip.x = maxX;
+        chip.direction = -1; // Force left
+      }
 
-      currentRoundOptions.splice(i, 1);
-      continue;
-    }
-
-    // Draw chip box
-    ctx.fillStyle = chip.isCorrect ? "#10b981" : "#ef4444";
-    ctx.fillRect(chip.x, chip.y, chip.width, chip.height);
-
-    // Draw chip border
-    ctx.strokeStyle = chip.isCorrect ? "#059669" : "#dc2626";
-    ctx.lineWidth = 2;
-    ctx.strokeRect(chip.x, chip.y, chip.width, chip.height);
-
-    // Draw text
-    ctx.fillStyle = "#f8fafc";
-    ctx.font = "bold 12px sans-serif";
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-
-    let text = chip.text;
-    if (text.length > 12) text = text.substring(0, 10) + "...";
-
-    ctx.fillText(text, chip.x + chip.width / 2, chip.y + chip.height / 2);
-  }
-
-  // 🌟 Update and draw bullets
-  for (let i = bullets.length - 1; i >= 0; i--) {
-    const bullet = bullets[i];
-    bullet.y -= 5;
-
-    if (bullet.y < 0) {
-      bullets.splice(i, 1);
-      continue;
-    }
-
-    // Check collision with chips
-    let hit = false;
-    for (let j = currentRoundOptions.length - 1; j >= 0; j--) {
-      const chip = currentRoundOptions[j];
-      if (
-        bullet.x >= chip.x &&
-        bullet.x <= chip.x + chip.width &&
-        bullet.y >= chip.y &&
-        bullet.y <= chip.y + chip.height
-      ) {
-        hit = true;
-
+      // Check if chip passed bottom
+      if (chip.y > canvas.height) {
         if (chip.isCorrect) {
-          // Hit correct answer
-          showWrongAnswerFeedback.value = true;
-          playSoundEffect("wrong");
           lives.value -= 1;
-          createExplosion(chip.x + chip.width / 2, chip.y + chip.height / 2, "#10b981");
+          playSoundEffect("crash");
 
           if (lives.value <= 0) {
             gameState.value = "gameover";
             showGameOverDialog.value = true;
             playSoundEffect("gameover");
-            emit("recordScore", {
+            recordGameScore({
               score: score.value,
               accuracy: accuracy.value,
               totalItems: totalItems.value,
@@ -713,39 +791,126 @@ function gameLoop() {
             if (animationFrameId) cancelAnimationFrame(animationFrameId);
             return;
           }
-        } else {
-          // Hit distractor
-          playSoundEffect("hit");
-          createExplosion(chip.x + chip.width / 2, chip.y + chip.height / 2, "#ef4444");
-          score.value += 100;
-          correctAnswersInRound.value += 1;
-
-          if (score.value % 500 === 0 && lives.value < 3) {
-            lives.value += 1;
-            playSoundEffect("lifeup");
-          }
         }
 
-        currentRoundOptions.splice(j, 1);
-        bullets.splice(i, 1);
-        break;
+        currentRoundOptions.splice(i, 1);
+        continue;
+      }
+
+      // Draw chip
+      ctx.fillStyle = "#64748b";
+      ctx.fillRect(chip.x, chip.y, chip.width, chip.height);
+
+      ctx.strokeStyle = "#475569";
+      ctx.lineWidth = 2;
+      ctx.strokeRect(chip.x, chip.y, chip.width, chip.height);
+
+      ctx.fillStyle = "#f8fafc";
+      ctx.font = "bold 10px sans-serif";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+
+      let text = chip.text;
+      ctx.fillText(text, chip.x + chip.width / 2, chip.y + chip.height / 2);
+    }
+
+  // Update and draw bullets
+  for (let i = bullets.length - 1; i >= 0; i--) {
+    const bullet = bullets[i];
+    bullet.y -= 5;
+
+    if (bullet.y < 0) {
+      bullets.splice(i, 1);
+      continue;
+    }
+
+    // Check collision with chips
+    // Check collision with chips
+let hit = false;
+for (let j = currentRoundOptions.length - 1; j >= 0; j--) {
+  const chip = currentRoundOptions[j];
+  if (
+    bullet.x >= chip.x &&
+    bullet.x <= chip.x + chip.width &&
+    bullet.y >= chip.y &&
+    bullet.y <= chip.y + chip.height
+  ) {
+    hit = true;
+
+    if (chip.isCorrect) {
+      // Hit correct answer - penalty
+      playSoundEffect("wrong");
+      lives.value -= 1;
+      createExplosion(chip.x + chip.width / 2, chip.y + chip.height / 2, "#ef4444");
+
+      // Clear ALL remaining boxes and end round
+      currentRoundOptions = [];
+      bullets = [];
+
+      if (lives.value <= 0) {
+        gameState.value = "gameover";
+        showGameOverDialog.value = true;
+        playSoundEffect("gameover");
+        
+        // 🌟 Record score to backend leaderboard
+        recordGameScore({
+          score: score.value,
+          accuracy: accuracy.value,
+          totalItems: totalItems.value,
+          roundsWon: roundsWon.value,
+          difficulty: difficultyLevel.value,
+          gameSettings: props.gameSettings,
+          won: false,
+        });
+        
+        if (animationFrameId) cancelAnimationFrame(animationFrameId);
+        animationFrameId = requestAnimationFrame(gameLoop);
+        return;
+      }
+
+      // 🌟 Move to next round after delay
+      roundCompletionLocked = true;
+      setTimeout(() => {
+        roundCompletionLocked = false;
+        spawnNewRound();
+      }, 600);
+      
+      // 🌟 Break out of loop but DON'T return from gameLoop
+      break;
+    } else {
+      // Hit distractor - success
+      playSoundEffect("hit");
+      createExplosion(chip.x + chip.width / 2, chip.y + chip.height / 2, "#10b981");
+      score.value += 100;
+      correctAnswersInRound.value += 1;
+
+      if (score.value % 500 === 0 && lives.value < 3) {
+        lives.value += 1;
+        playSoundEffect("lifeup");
       }
     }
 
+    currentRoundOptions.splice(j, 1);
+    bullets.splice(i, 1);
+    break;
+  }
+}
+
     if (!hit) {
-      // Draw bullet
       ctx.fillStyle = "#fbbf24";
       ctx.fillRect(bullet.x - 2, bullet.y, 4, 10);
     }
   }
 
-  // Check if round won
-  if (currentRoundOptions.every((opt) => opt.isCorrect)) {
+  // Check if round won - 🌟 WITH LOCK
+  if (currentRoundOptions.every((opt) => opt.isCorrect) && !roundCompletionLocked) {
+    roundCompletionLocked = true;
     showRoundCompleteFeedback.value = true;
     playSoundEffect("roundcomplete");
     roundsWon.value += 1;
 
     setTimeout(() => {
+      roundCompletionLocked = false;
       spawnNewRound();
     }, 600);
   }
@@ -772,7 +937,31 @@ function gameLoop() {
     ctx.restore();
   }
 
-  // 🌟 Draw player ship
+  // Draw life gain particles
+for (let i = lifeGainParticles.length - 1; i >= 0; i--) {
+  const p = lifeGainParticles[i];
+  if (!p) continue; // Skip if undefined
+
+  p.x += p.vx;
+  p.y += p.vy;
+  p.vy += 0.05; // Slight gravity
+  p.alpha -= p.decay;
+
+  if (p.alpha <= 0) {
+    lifeGainParticles.splice(i, 1);
+    continue;
+  }
+
+  ctx.save();
+  ctx.globalAlpha = p.alpha;
+  ctx.fillStyle = p.color;
+  ctx.beginPath();
+  ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+}
+
+  // Draw player ship
   ctx.fillStyle = "#38bdf8";
   ctx.beginPath();
   ctx.moveTo(playerX + playerWidth / 2, canvas.height - playerHeight);
@@ -811,9 +1000,32 @@ function handleKeyUp(event: KeyboardEvent) {
   keysPressed[event.key] = false;
 }
 
+
+async function recordGameScore(payload: any) {
+  try {
+    await api.post("/arcade-scores/", {
+      game_type: props.gameSettings?.mode || "space_invaders",
+      score: payload.score,
+      accuracy: payload.accuracy,
+      total_items: payload.totalItems,
+      rounds_won: payload.roundsWon,
+      difficulty_reached: payload.difficulty,
+      vocab_list_id: props.gameSettings?.listId,
+      vocab_list_name: props.gameSettings?.listName,
+      front_field: props.gameSettings?.frontField,
+      back_field: props.gameSettings?.backField,
+      won: payload.won,
+    });
+  } catch (error) {
+    console.error("Failed to record score:", error);
+  }
+}
+
+
 onMounted(() => {
   window.addEventListener("keydown", handleKeyDown);
   window.addEventListener("keyup", handleKeyUp);
+  showInstructions.value = true;
 });
 
 onBeforeUnmount(() => {
