@@ -305,8 +305,8 @@ const filteredActivities = computed(() => {
 });
 
 function wsUrl(): string {
-  const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
-  return `${protocol}://${window.location.host}/ws/teacher/live/`;
+  const base = import.meta.env.VITE_WS_BASE_URL;
+  return `${base}/ws/teacher/live/`;
 }
 
 function connectWs() {
