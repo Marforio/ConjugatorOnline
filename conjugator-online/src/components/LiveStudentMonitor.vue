@@ -325,46 +325,27 @@ function connectWs() {
     isWsConnected.value = true;
     wsError.value = null;
     reconnectAttempts = 0;
+    console.info('WS open:', wsUrl());
   };
 
   ws.onmessage = (event) => {
-    try {
-      const msg = JSON.parse(event.data);
-
-      if (msg.type === 'presence.snapshot') {
-        applyPresenceSnapshot(msg.students || []);
-        lastUpdate.value = new Date();
-        return;
-      }
-
-      if (msg.type === 'presence.upsert' && msg.presence) {
-        applyPresenceUpsert(msg.presence as WsPresence);
-        lastUpdate.value = new Date();
-        return;
-      }
-
-      if (msg.type === 'presence.remove' && typeof msg.student_id === 'number') {
-        onlineStudents.value = onlineStudents.value.filter((s) => s.student_id !== msg.student_id);
-        lastUpdate.value = new Date();
-        return;
-      }
-
-      if (msg.type === 'activity.event' && msg.event) {
-        applyActivityEvent(msg.event as WsActivityEvent);
-        lastUpdate.value = new Date();
-      }
-    } catch {
-      // ignore malformed message
-    }
+    // ... keep your existing message handling
   };
 
-  ws.onclose = () => {
+  ws.onclose = (e) => {
     isWsConnected.value = false;
+    console.error('WS close', {
+      code: e.code,
+      reason: e.reason,
+      wasClean: e.wasClean,
+      url: wsUrl(),
+    });
     scheduleReconnect();
   };
 
-  ws.onerror = () => {
+  ws.onerror = (e) => {
     wsError.value = 'WebSocket connection error';
+    console.error('WS error', e, 'url=', wsUrl());
   };
 }
 
