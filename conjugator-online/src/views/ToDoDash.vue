@@ -163,21 +163,21 @@
               <!-- Standard View if tasks are pending -->
               <div v-else class="ga-5 d-flex flex-column">
                 
-                <div v-if="currentCourseData" class="border rounded-xl pa-4 bg-white mb-2 border-slate-200">
-                  <div class="d-flex align-center justify-space-between flex-wrap ga-2" @click="activeTab = 3" style="cursor: pointer;">
-                    <div class="d-flex align-center ga-3">
-                      <v-avatar color="indigo-lighten-5" size="36">
-                        <v-icon color="indigo-darken-1" size="20">mdi-google-classroom</v-icon>
-                      </v-avatar>
-                      <div>
-                        <div class="text-body-2 font-weight-black text-slate-800">
-                          Enrolled in Course Space: <span class="text-indigo">{{ currentCourseData.slug.toUpperCase() }}</span>
-                        </div>
-                        <div class="text-caption text-slate-500">
-                          Term Semester: {{ currentCourseData.semester }} • Click to review performance milestones
+                  <div v-if="currentCourseData" class="border rounded-xl pa-4 bg-white mb-2 border-slate-200">
+                    <div class="d-flex align-center justify-space-between flex-wrap ga-2" @click="activeTab = 3" style="cursor: pointer;">
+                      <div class="d-flex align-center ga-3">
+                        <v-avatar color="indigo-lighten-5" size="36">
+                          <v-icon color="indigo-darken-1" size="20">mdi-google-classroom</v-icon>
+                        </v-avatar>
+                        <div>
+                          <div class="text-body-2 font-weight-black text-slate-800">
+                              Enrolled in Course Space: <span class="text-indigo">{{ currentCourseData?.slug?.toUpperCase() || 'N/A' }}</span>
+                          </div>
+                          <div class="text-caption text-slate-500">
+                           Term Semester: {{ currentCourseData?.semester || 'N/A' }} • Click to review performance milestones
+                          </div>
                         </div>
                       </div>
-                    </div>
                     
                     <div class="d-flex align-center ga-2">
                       <v-progress-linear
@@ -188,8 +188,8 @@
                         rounded
                         class="d-none d-sm-inline-block"
                       />
-                      <v-chip size="x-small" color="indigo" variant="flat" class="font-weight-black">
-                        {{ currentCourseFulfillmentCount }} / {{ currentCourseData.objectives?.length || 0 }} Achieved
+                      <v-chip v-if="currentCourseData" size="x-small" color="indigo" variant="flat" class="font-weight-black">
+                        {{ currentCourseFulfillmentCount }} / {{ currentCourseData?.objectives?.length || 0 }} Achieved
                       </v-chip>
                     </div>
                   </div>
@@ -199,7 +199,7 @@
                 <div v-if="currentWorkout" class="border rounded-xl pa-4 bg-white">
                   <div class="d-flex align-center justify-space-between flex-wrap ga-2 mb-3">
                     <div>
-                      <div class="text-subtitle-1 font-weight-bold text-slate-900">Current Assigned Practice Drill</div>
+                      <div class="text-subtitle-1 font-weight-bold text-slate-900">Your Personal Workout</div>
                       <div class="text-caption text-slate-500">Focus: {{ currentWorkout.focus_area || 'General Practice' }}</div>
                     </div>
                     <v-chip size="small" :color="workoutProgressColor" variant="flat" class="text-white font-weight-bold">

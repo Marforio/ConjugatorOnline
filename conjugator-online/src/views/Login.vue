@@ -186,25 +186,28 @@ async function handleLogin() {
     }, 1200);
     
   } catch (err: any) {
-    error.value =
-      err.response?.status === 401
-        ? "Invalid username or password"
-        : err.message || "Login system error encountered";
+  error.value =
+    err.response?.status === 401
+      ? "Invalid username or password"
+      : err.message || "Login system error encountered";
 
-    loginError.value = true;
-    showError.value = true;
+  // stop loading overlay immediately
+  loading.value = false;
 
-    setTimeout(() => {
-      loading.value = false;
-      setTimeout(() => {
-        loginError.value = false;
-      }, 2500);
-    }, 100);
+  // show inline alert immediately
+  showError.value = true;
 
-    setTimeout(() => {
-      showError.value = false;
-    }, 4500);
-  }
+  // optional: quick "denied" visual pulse only
+  loginError.value = true;
+  setTimeout(() => {
+    loginError.value = false;
+  }, 350);
+
+  // auto-hide alert later (optional)
+  setTimeout(() => {
+    showError.value = false;
+  }, 4500);
+}
 }
 </script>
 

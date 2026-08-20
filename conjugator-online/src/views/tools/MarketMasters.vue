@@ -117,30 +117,74 @@
             <div class="vuetify-tooltip-content">
               <div class="tooltip-header d-flex justify-space-between align-center">
                 <div>
-                  <strong class="text-subtitle-2 font-weight-black">{{ getAssetName(ticker) }}</strong> 
+                  <strong class="text-subtitle-2 font-weight-black">{{ getAssetName(ticker) }}</strong>
                   <span class="text-caption text-slate-400 ml-1">({{ ticker }})</span>
                 </div>
               </div>
-              
+
               <v-divider class="my-2 border-opacity-30" color="white"></v-divider>
-              
+
               <div class="tooltip-body mb-3">
-                <div class="d-flex justify-space-between text-caption align-center">
-                  <span class="text-slate-400 font-weight-bold">48h Performance Delta:</span>
-                  <span class="font-weight-black tracking-tight" :class="getPerformanceColorClass(localTrendMetrics?.performance_pct)">
-                    {{ localTrendMetrics?.performance_pct ? localTrendMetrics.performance_pct + '%' : 'Calculating...' }}
+                <div class="d-flex justify-space-between align-center mb-2">
+                  <span class="text-caption text-slate-400 font-weight-bold">48h Performance</span>
+                  <span
+                    class="text-subtitle-2 font-weight-black tracking-tight"
+                    :class="getPerformanceColorClass(trendByTicker[ticker]?.performance_pct_48h)"
+                  >
+                    {{
+                      trendByTicker[ticker]?.performance_pct_48h
+                        ? trendByTicker[ticker].performance_pct_48h + '%'
+                        : 'Insufficient 48h data'
+                    }}
                   </span>
                 </div>
-              </div>
 
-              <div class="relative-chart-wrapper" style="position: relative; height: 110px; width: 100%;">
-                <div v-if="isChartLoading" class="d-flex justify-center align-center h-100">
-                  <v-progress-circular indeterminate color="sky-lighten-2" size="20"></v-progress-circular>
+                <div class="d-flex justify-space-between align-center text-caption text-slate-400 mb-1">
+                  <span>Window</span>
+                  <span class="font-weight-medium text-right">
+                    {{
+                      trendByTicker[ticker]?.last_48h?.from
+                        ? new Date(trendByTicker[ticker].last_48h.from).toLocaleString('en-US', { month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit' })
+                        : '—'
+                    }}
+                    →
+                    {{
+                      trendByTicker[ticker]?.last_48h?.to
+                        ? new Date(trendByTicker[ticker].last_48h.to).toLocaleString('en-US', { month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit' })
+                        : '—'
+                    }}
+                  </span>
                 </div>
-                <div v-else-if="!localTrendMetrics?.prices?.length" class="d-flex justify-center align-center h-100 text-slate-500 font-italic text-caption">
-                  Awaiting historical timeline compilation...
+
+                <div class="d-flex justify-space-between align-center text-caption text-slate-400 mb-3">
+                  <span>Chart coverage</span>
+                  <span class="font-weight-medium">
+                    Since
+                    {{
+                      trendByTicker[ticker]?.history_since
+                        ? new Date(trendByTicker[ticker].history_since).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' })
+                        : 'N/A'
+                    }}
+                  </span>
                 </div>
-                <canvas v-show="!isChartLoading && localTrendMetrics?.prices?.length" ref="chartCanvasRef"></canvas>
+
+                <div class="relative-chart-wrapper rounded" style="position: relative; height: 110px; width: 100%;">
+                  <div v-if="chartLoadingByTicker[ticker]" class="d-flex justify-center align-center h-100">
+                    <v-progress-circular indeterminate color="sky-lighten-2" size="20"></v-progress-circular>
+                  </div>
+
+                  <div
+                    v-else-if="!trendByTicker[ticker]?.prices?.length"
+                    class="d-flex justify-center align-center h-100 text-slate-500 font-italic text-caption"
+                  >
+                    No historical data available.
+                  </div>
+
+                  <canvas
+                    v-show="!chartLoadingByTicker[ticker] && trendByTicker[ticker]?.prices?.length"
+                    :ref="el => { if (el) chartRefs[ticker] = el }"
+                  ></canvas>
+                </div>
               </div>
             </div>
           </v-card>
@@ -557,64 +601,78 @@
           </v-card>
 
           <h3 class="text-subtitle-2 font-weight-bold text-slate-700 mb-2">📦 Open Positions</h3>
-          <v-card variant="outlined" class="bg-white mb-6">
-            <v-table density="comfortable" class="text-caption">
-              <thead>
-                <tr class="bg-grey-lighten-4">
-                  <th class="font-weight-bold">Ticker</th>
-                  <th class="font-weight-bold">Direction</th>
-                  <th class="font-weight-bold">Units</th>
-                  <th class="font-weight-bold">Avg Entry Price</th>
-                  <th class="font-weight-bold text-right">Live Price</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="holding in selectedPortfolio?.assets" :key="holding.id">
-                  <td class="font-weight-black text-slate-800">
-                    <v-menu 
-                      open-on-hover 
-                      :close-on-content-click="false" 
-                      location="end center" 
-                      transition="fade-transition"
-                      @update:model-value="(isOpen) => isOpen && handleLoadChartHistory(holding.ticker)"
-                    >
-                      <template v-slot:activator="{ props }">
-                        <span v-bind="props" class="cursor-pointer text-primary border-b border-dashed border-primary">
-                          {{ holding.ticker }}
-                        </span>
-                      </template>
+          <v-card width="340" class="pa-4 bg-slate-900 rounded-lg border border-slate-700 shadow-xl" style="background: #0f172a; color: white;">
+            <div class="tooltip-header d-flex justify-space-between align-center">
+              <div>
+                <strong class="text-subtitle-2 font-weight-black">{{ getAssetName(holding.ticker) }}</strong>
+                <span class="text-caption text-slate-400 ml-1">({{ holding.ticker }})</span>
+              </div>
+            </div>
 
-                      <v-card width="340" class="pa-4 bg-slate-900 rounded-lg border border-slate-700 shadow-xl" style="background: #0f172a; color: white;">
-                        <div class="tooltip-header d-flex justify-space-between align-center">
-                          <div>
-                            <strong class="text-subtitle-2 font-weight-black">{{ getAssetName(holding.ticker) }}</strong> 
-                            <span class="text-caption text-slate-400 ml-1">({{ holding.ticker }})</span>
-                          </div>
-                        </div>
-                        <v-divider class="my-2 border-opacity-30" color="white"></v-divider>
-                        <div class="tooltip-body mb-3">
-                          <div class="d-flex justify-space-between text-caption align-center">
-                            <span class="text-slate-400 font-weight-bold">48h Performance Delta:</span>
-                            <span class="font-weight-black tracking-tight" :class="getPerformanceColorClass(localTrendMetrics?.performance_pct)">
-                              {{ localTrendMetrics?.performance_pct ? localTrendMetrics.performance_pct + '%' : 'Calculating...' }}
-                            </span>
-                          </div>
-                        </div>
-                        <div class="relative-chart-wrapper" style="position: relative; height: 110px; width: 100%;">
-                          <div v-if="isChartLoading" class="d-flex justify-center align-center h-100">
-                            <v-progress-circular indeterminate color="sky-lighten-2" size="20"></v-progress-circular>
-                          </div>
-                          <canvas v-show="!isChartLoading && localTrendMetrics?.prices?.length" ref="chartCanvasRef"></canvas>
-                        </div>
-                      </v-card>
-                    </v-menu>
-                  </td>
-                </tr>
-                <tr v-if="!selectedPortfolio?.assets?.length">
-                  <td colspan="5" class="text-center text-slate-400 py-4">No positions in this account.</td>
-                </tr>
-              </tbody>
-            </v-table>
+            <v-divider class="my-2 border-opacity-30" color="white"></v-divider>
+
+            <div class="tooltip-body mb-3">
+              <div class="d-flex justify-space-between align-center mb-2">
+                <span class="text-caption text-slate-400 font-weight-bold">48h Performance</span>
+                <span
+                  class="text-subtitle-2 font-weight-black tracking-tight"
+                  :class="getPerformanceColorClass(trendByTicker[holding.ticker]?.performance_pct_48h)"
+                >
+                  {{
+                    trendByTicker[holding.ticker]?.performance_pct_48h
+                      ? trendByTicker[holding.ticker].performance_pct_48h + '%'
+                      : 'Insufficient 48h data'
+                  }}
+                </span>
+              </div>
+
+              <div class="d-flex justify-space-between align-center text-caption text-slate-400 mb-1">
+                <span>Window</span>
+                <span class="font-weight-medium text-right">
+                  {{
+                    trendByTicker[holding.ticker]?.last_48h?.from
+                      ? new Date(trendByTicker[holding.ticker].last_48h.from).toLocaleString('en-US', { month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit' })
+                      : '—'
+                  }}
+                  →
+                  {{
+                    trendByTicker[holding.ticker]?.last_48h?.to
+                      ? new Date(trendByTicker[holding.ticker].last_48h.to).toLocaleString('en-US', { month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit' })
+                      : '—'
+                  }}
+                </span>
+              </div>
+
+              <div class="d-flex justify-space-between align-center text-caption text-slate-400 mb-3">
+                <span>Chart coverage</span>
+                <span class="font-weight-medium">
+                  Since
+                  {{
+                    trendByTicker[holding.ticker]?.history_since
+                      ? new Date(trendByTicker[holding.ticker].history_since).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' })
+                      : 'N/A'
+                  }}
+                </span>
+              </div>
+
+              <div class="relative-chart-wrapper rounded" style="position: relative; height: 110px; width: 100%;">
+                <div v-if="chartLoadingByTicker[holding.ticker]" class="d-flex justify-center align-center h-100">
+                  <v-progress-circular indeterminate color="sky-lighten-2" size="20"></v-progress-circular>
+                </div>
+
+                <div
+                  v-else-if="!trendByTicker[holding.ticker]?.prices?.length"
+                  class="d-flex justify-center align-center h-100 text-slate-500 font-italic text-caption"
+                >
+                  No historical data available.
+                </div>
+
+                <canvas
+                  v-show="!chartLoadingByTicker[holding.ticker] && trendByTicker[holding.ticker]?.prices?.length"
+                  :ref="el => { if (el) chartRefs[holding.ticker] = el }"
+                ></canvas>
+              </div>
+            </div>
           </v-card>
 
           <div class="d-flex justify-space-between align-center mb-2 mt-4">
@@ -791,10 +849,10 @@ const fetchDashboardData = async () => {
 }
 
 //  for historical price charts
-const chartCanvasRef = ref(null)
-const isChartLoading = ref(false)
-const localTrendMetrics = ref(null)
-let liveChartInstance = null
+const chartRefs = ref({})                 // { [ticker]: HTMLCanvasElement }
+const chartInstances = ref({})            // { [ticker]: Chart instance }
+const chartLoadingByTicker = ref({})      // { [ticker]: boolean }
+const trendByTicker = ref({})             // { [ticker]: api response }
 
 // Helper utility to match performance numbers cleanly to colors
 const getPerformanceColorClass = (pctStr) => {
@@ -806,39 +864,38 @@ const getPerformanceColorClass = (pctStr) => {
 // 🔄 UPDATED SCRIPT SEGMENT: Captures a completely generic string variable safely
 const handleLoadChartHistory = async (targetTicker) => {
   if (!targetTicker) return
-  isChartLoading.value = true
-  localTrendMetrics.value = null
-  
-  if (liveChartInstance) {
-    liveChartInstance.destroy()
-    liveChartInstance = null
+  const key = String(targetTicker).toUpperCase()
+
+  chartLoadingByTicker.value[key] = true
+  trendByTicker.value[key] = null
+
+  // destroy only this ticker's old chart
+  if (chartInstances.value[key]) {
+    chartInstances.value[key].destroy()
+    delete chartInstances.value[key]
   }
 
   try {
-    const res = await api.get(`/market-masters/assets/history/?ticker=${targetTicker}`)
-    localTrendMetrics.value = res.data
-    
-    if (!res.data.prices || res.data.prices.length === 0) {
-      isChartLoading.value = false
-      return
-    }
+    const res = await api.get(`/market-masters/assets/history/?ticker=${encodeURIComponent(key)}`)
+    trendByTicker.value[key] = res.data
+
+    if (!res.data?.prices?.length) return
 
     await nextTick()
-    
-    // 🛡️ Safe fallback resolution to locate our canvas node instance elements
-    const canvasElement = chartCanvasRef.value;
+
+    const canvasElement = chartRefs.value[key]
     if (!canvasElement) return
-    
+
     const ctx = canvasElement.getContext('2d')
-    const isBearishTrend = res.data.performance_pct.startsWith('-')
+    const isBearishTrend = String(res.data?.performance_pct || '').startsWith('-')
     const primaryLineColor = isBearishTrend ? '#f43f5e' : '#10b981'
 
-    liveChartInstance = new Chart(ctx, {
+    chartInstances.value[key] = new Chart(ctx, {
       type: 'line',
       data: {
-        labels: res.data.labels,
+        labels: res.data.labels || [],
         datasets: [{
-          data: res.data.prices,
+          data: res.data.prices || [],
           borderColor: primaryLineColor,
           borderWidth: 2,
           pointRadius: 0,
@@ -855,12 +912,11 @@ const handleLoadChartHistory = async (targetTicker) => {
       }
     })
   } catch (err) {
-    console.error("Historical rendering intercept drop trace error:", err)
+    console.error("Historical rendering error:", err)
   } finally {
-    isChartLoading.value = false
+    chartLoadingByTicker.value[key] = false
   }
 }
-
 
 
 // for suggested buys section
@@ -1511,6 +1567,10 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   if (clockIntervalId) clearInterval(clockIntervalId)
+  Object.values(chartInstances.value).forEach(instance => {
+  try { instance.destroy() } catch (_) {}
+})
+chartInstances.value = {}
 })
 </script>
 
@@ -1786,9 +1846,69 @@ onBeforeUnmount(() => {
 }
 /* Custom Content Formatting for the Vuetify Popover Window */
 .vuetify-tooltip-content {
-  padding: 6px 10px;
+  padding: 12px 14px;
   font-family: 'Inter', sans-serif;
-  line-height: 1.4;
+  line-height: 1.45;
+  display: grid;
+  row-gap: 10px;
+}
+
+/* Header */
+.vuetify-tooltip-content .tooltip-header {
+  margin-bottom: 2px;
+}
+
+/* Metrics block */
+.vuetify-tooltip-content .tooltip-body {
+  display: grid;
+  row-gap: 8px;
+}
+
+/* Label/value rows */
+.vuetify-tooltip-content .metric-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.vuetify-tooltip-content .metric-label {
+  color: #94a3b8;           /* slate-400 */
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+}
+
+.vuetify-tooltip-content .metric-value {
+  color: #e2e8f0;           /* slate-200 */
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-align: right;
+  line-height: 1.35;
+}
+
+/* Main 48h delta number */
+.vuetify-tooltip-content .perf-value {
+  font-size: 0.95rem;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+}
+
+/* Chart container spacing */
+.vuetify-tooltip-content .relative-chart-wrapper {
+  margin-top: 4px;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  border-radius: 10px;
+  padding: 6px;
+  background: rgba(15, 23, 42, 0.55);
+}
+
+/* Empty/loading states inside chart area */
+.vuetify-tooltip-content .chart-state-msg {
+  color: #94a3b8;
+  font-size: 0.73rem;
+  font-style: italic;
 }
 
 .tooltip-header {

@@ -110,10 +110,10 @@
               <v-icon start size="20" color="teal">mdi-clipboard-text</v-icon>
               Workouts (in-class routines)
             </div>
-            <v-chip size="x-small" color="teal" variant="flat" class="text-white font-weight-bold">Live Drills</v-chip>
+            <v-chip size="x-small" color="teal" variant="flat" class="text-white font-weight-bold">In-Class</v-chip>
           </div>
           <div class="text-caption text-slate-500 mb-4">
-            Configure live lesson tracks. Deploying will automatically archive any old active workout for this student.
+            Assign in-class workouts. Deploying will automatically archive any old active workout for this student.
           </div>
 
           <v-btn
@@ -125,7 +125,7 @@
             class="text-none font-weight-bold mb-4 rounded-lg"
             @click="openTemplateDialog"
           >
-            Load Preset Template Blueprint
+            Load Blueprint
           </v-btn>
 
           <v-text-field 
@@ -138,7 +138,7 @@
           
           <v-textarea 
             v-model="newWorkout.notes" 
-            label="Teacher Setup/Pedagogical Intent Notes" 
+            label="Pedagogical Notes" 
             placeholder="Why this workout? What strategy boundaries apply?"
             variant="outlined" 
             rows="2" 
@@ -206,7 +206,7 @@
                 <v-card v-if="activeWorkout" class="mb-4 pa-4 border bg-teal-tight rounded-xl" elevation="0">
                   <div class="d-flex align-center justify-space-between mb-3 border-b-teal pb-2 flex-wrap ga-2">
                     <div>
-                      <div class="text-subtitle-2 font-weight-bold text-teal-darken-3 uppercase tracking-wide" style="font-size: 11px;">Active In-Class Session Tracking</div>
+                      <div class="text-subtitle-2 font-weight-bold text-teal-darken-3 uppercase tracking-wide" style="font-size: 11px;">Active Workouts</div>
                       <div class="text-body-1 font-weight-black text-slate-900">{{ activeWorkout.focus_area || 'General Focus Track' }}</div>
                     </div>
                     
@@ -222,7 +222,7 @@
 
                   <v-textarea 
                     v-model="activeWorkout.notes" 
-                    label="Live Performance Observations / Corrective Progress Feedback Logs" 
+                    label="Observations / Notes" 
                     variant="outlined" 
                     rows="2" 
                     density="comfortable" 
@@ -231,7 +231,7 @@
                     hide-details
                   />
 
-                  <div class="text-caption font-weight-bold text-slate-600 mb-2 uppercase tracking-wider">Session Drill Objectives Matrix:</div>
+                  <div class="text-caption font-weight-bold text-slate-600 mb-2 uppercase tracking-wider">Record progress:</div>
                   <div class="d-flex flex-column ga-2">
                     <div v-for="(drill, index) in activeWorkout.drills" :key="index" class="bg-white border rounded-lg pa-3 d-flex align-center justify-space-between shadow-xs">
                       <div style="max-width: 75%;">

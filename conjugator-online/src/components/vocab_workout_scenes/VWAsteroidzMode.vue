@@ -150,6 +150,20 @@
       </v-col>
     </v-row>
   </v-card>
+  <!-- 🌟 Hint Snackbar for wrong answers -->
+<v-snackbar
+  v-model="showHintSnackbar"
+  color="info"
+  location="top"
+  timeout="3000"
+  class="font-weight-bold"
+>
+  <v-icon icon="mdi-lightbulb" class="mr-2" />
+  <div>
+    <div>Incorrect! -20 points</div>
+    <div class="text-caption mt-2 font-mono">{{ hintText }}</div>
+  </div>
+</v-snackbar>
 </template>
 
 <script setup lang="ts">
@@ -214,6 +228,9 @@ const showGameOverDialog = ref(false);
 const showVictoryDialog = ref(false);
 const showWrongAnswerFeedback = ref(false); // 🌟 Wrong answer toast
 const totalItems = ref(30); // Default, will be set on start
+let currentItem = ref<any>(null);
+let showHintSnackbar = ref(false);
+let hintText = ref("");
 
 // Game Play Loops Properties
 let itemPool: any[] = [];
@@ -253,6 +270,30 @@ const currentVectorLabel = computed(() => {
   const from = String(props.gameSettings?.frontField || "definition").replace(/_/g, " ");
   const to = String(props.gameSettings?.backField || "term").replace(/_/g, " ");
   return `${from.charAt(0).toUpperCase() + from.slice(1)} ➔ ${to.charAt(0).toUpperCase() + to.slice(1)}`;
+});
+
+const maskedHint = computed(() => {
+  const item = currentItem.value;
+  if (!item) return "—";
+
+  const term = item.term || "";
+  if (!term) return "—";
+
+  return term
+    .split(" ")
+    .map((word: string) => {
+      return word
+        .split("")
+        .map((char: string, index: number) => {
+          // Always show the first character of each word, hyphens, or punctuation marks
+          if (index === 0 || char === "-" || !/[a-zA-Z0-9]/.test(char)) {
+            return char;
+          }
+          return "_";
+        })
+        .join(" ");
+    })
+    .join("    ");
 });
 
 // 🌟 Watch for difficulty level changes to switch music
@@ -507,6 +548,10 @@ function spawnAsteroid() {
   if (itemPool.length === 0 || !gameCanvas.value) return;
 
   const item = itemPool.pop();
+  if (!item) return;
+
+  currentItem.value = item; // 🌟 Track current item for hints
+
   const frontField = props.gameSettings?.frontField || "definition";
   const backField = props.gameSettings?.backField || "term";
 
@@ -645,13 +690,11 @@ function fireLaser() {
     destroyedAsteroids.value += 1;
     userInput.value = "";
 
-    // 🌟 Grant life every 500 points (5 correct answers)
     if (score.value > 0 && score.value % 500 === 0 && lives.value < 3) {
       lives.value += 1;
       playSoundEffect("lifeup");
     }
 
-    // 🌟 Refocus input field after answer
     nextTick(() => {
       const input = inputField.value?.$el?.querySelector?.("input");
       if (input) input.focus();
@@ -659,9 +702,21 @@ function fireLaser() {
 
     checkVictoryCondition();
   } else {
-    // 🌟 Wrong answer feedback
+    // 🌟 WRONG ANSWER: Deduct points and show hint
     playSoundEffect("wrong");
-    showWrongAnswerFeedback.value = true;
+    
+    // Deduct 20 points (but don't go below 0)
+    score.value = Math.max(0, score.value - 20);
+    
+    // Show hint snackbar
+    hintText.value = maskedHint.value;
+    showHintSnackbar.value = true;
+    
+    // Keep input field focused for retry
+    nextTick(() => {
+      const input = inputField.value?.$el?.querySelector?.("input");
+      if (input) input.focus();
+    });
   }
 }
 

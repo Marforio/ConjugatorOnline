@@ -2,23 +2,12 @@
   <v-container fluid class="d-flex flex-column align-center justify-center fill-height splash-hero-frame pa-6">
     <div class="text-center splash-content-card pa-8 rounded-xl elevation-4 bg-white border">
       <!-- Minimalist Icon Shield -->
-      <v-avatar color="blue-lighten-5" size="80" class="mb-4">
-        <v-img
-          src="/icons/logo1.png"
-          alt="Logo"
-          cover
-          class="rounded-circle"
-        />
-      </v-avatar>
 
 
       <!-- Brand Heading Title -->
-      <h1 class="text-h2 font-weight-black text-slate-900 tracking-tight mb-2">
+      <h1 class="text-h4 font-weight-black text-slate-900 tracking-tight mb-5">
         Language Labs
       </h1>
-      <p class="text-body-1 text-slate-500 max-width-text mx-auto mb-8">
-        Custom tools for language-learning
-      </p>
 
       <!-- Dynamic Entry Actions Core -->
       <div class="d-flex flex-column align-center justify-center gap-4">
@@ -42,20 +31,29 @@
         </template>
 
         <template v-else>
-          <!-- Prominent Authorization redirection call -->
-          <v-btn
-            :to="{ name: 'login' }"
-            color="primary"
-            size="large"
-            height="56"
-            width="280"
-            class="enter-workspace-btn rounded-xl font-weight-bold text-none text-subtitle-1 elevation-2"
-            append-icon="mdi-login-variant"
-          >
-            Log In to Begin
-          </v-btn>
-          <span class="text-caption text-slate-400 mt-2">Ask your teacher for login credentials</span>
-        </template>
+            <div class="d-flex flex-column align-center text-cente">
+
+                <v-img
+                src="/maintenance.jpg"
+                width="160"
+                height="auto"
+                class="mb-6"
+                cover
+                eager
+                />
+
+                <div class="text-body-2 text-warning font-weight-medium text-slate-700">
+                Language Labs is in <strong>summer maintenance mode</strong>.
+                You can
+                <RouterLink :to="{ name: 'login' }" class="text-primary font-weight-bold">
+                    log in
+                </RouterLink>,
+                but you may experience disruptions or unfinished pages.
+                </div>
+
+            </div>
+            </template>
+
       </div>
     </div>
   </v-container>

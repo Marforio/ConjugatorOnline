@@ -45,6 +45,23 @@
         </RouterLink>
       </v-col>   
 
+      <!-- The Price Is Right -->
+<v-col cols="12" sm="6" md="4" class="d-flex justify-center">
+  <RouterLink
+    :to="{ name: 'price-is-right' }"
+    class="image-tile"
+  >
+    <div class="tile-frame">
+      <v-img
+        src="/images/banners/PriceIsRight.png"
+        alt="The Price Is Right"
+        cover
+        class="tile-image"
+      />
+    </div>
+  </RouterLink>
+</v-col>
+
       <!-- Be Polite! -->
   <v-col cols="12" sm="6" md="4" class="d-flex justify-center">
     <div

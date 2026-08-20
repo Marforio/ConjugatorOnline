@@ -59,18 +59,20 @@
           <v-list-item :to="{ name: 'teacher-tools' }" slim prepend-icon="mdi-human-male-board" title="Classroom Tools" rounded="lg" color="primary" @click="closeDrawerBelowLg" />
 
           <v-sheet border rounded="lg" class="group-sheet position-relative mb-2 pt-2 px-2 pb-1">
-            <v-list-item :to="{ name: 'manage-students' }" slim prepend-icon="mdi-account-cog" title="Manage Students" rounded="lg" color="primary" @click="closeDrawerBelowLg" />
-            <v-list-item :to="{ name: 'manage-vocab-lists' }" slim prepend-icon="mdi-bookshelf" title="Manage Vocab Lists" rounded="lg" color="primary" @click="closeDrawerBelowLg" />
-            <v-list-item :to="{ name: 'manage-work' }" slim prepend-icon="mdi-tray-full" title="Manage Tasks" rounded="lg" color="primary" @click="closeDrawerBelowLg" />
-            <v-list-item :to="{ name: 'manage-achievement-data' }" slim prepend-icon="mdi-trophy" title="Manage Trophies" rounded="lg" color="primary" @click="closeDrawerBelowLg" />
-            <v-list-item :to="{ name: 'manage-feedback' }" slim prepend-icon="mdi-comment-quote" title="Give Feedback" rounded="lg" color="primary" @click="closeDrawerBelowLg" />
+            <div class="text-caption ms-2">Manage</div>
+            <v-list-item :to="{ name: 'manage-students' }" slim density="compact" prepend-icon="mdi-account-cog" title="Students" rounded="lg" color="primary" @click="closeDrawerBelowLg" />
+            <v-list-item :to="{ name: 'manage-vocab-lists' }" slim density="compact" prepend-icon="mdi-bookshelf" title="Vocab Lists" rounded="lg" color="primary" @click="closeDrawerBelowLg" />
+            <v-list-item :to="{ name: 'manage-work' }" slim density="compact" prepend-icon="mdi-tray-full" title="Student Tasks" rounded="lg" color="primary" @click="closeDrawerBelowLg" />
+            <v-list-item :to="{ name: 'manage-achievement-data' }" slim density="compact" prepend-icon="mdi-trophy" title="Trophies" rounded="lg" color="primary" @click="closeDrawerBelowLg" />
+            <v-list-item :to="{ name: 'manage-feedback' }" slim density="compact" prepend-icon="mdi-comment-quote" title="Feedback" rounded="lg" color="primary" @click="closeDrawerBelowLg" />
           </v-sheet>
 
           <v-sheet border rounded="lg" class="group-sheet position-relative mb-2 pt-2 px-2 pb-1">
-            <v-list-item :to="{ name: 'manage-vocab-data' }" slim prepend-icon="mdi-chart-timeline-variant-shimmer" title="Vocab Training Data" rounded="lg" color="primary" @click="closeDrawerBelowLg" />
-            <v-list-item :to="{ name: 'manage-error-data' }" slim prepend-icon="mdi-google-analytics" title="Error & Exercise Data" rounded="lg" color="primary" @click="closeDrawerBelowLg" />
-            <v-list-item :to="{ name: 'manage-conjugator-data' }" slim prepend-icon="mdi-chart-arc" title="Conjugator Data" rounded="lg" color="primary" @click="closeDrawerBelowLg" />
-            <v-list-item :to="{ name: 'manage-other-games-data' }" slim prepend-icon="mdi-chart-timeline" title="Other Games Data" rounded="lg" color="primary" @click="closeDrawerBelowLg" />
+            <div class="text-caption ms-2">Inspect</div>
+            <v-list-item :to="{ name: 'manage-vocab-data' }" slim density="compact" prepend-icon="mdi-chart-timeline-variant-shimmer" title="Vocab Training Data" rounded="lg" color="primary" @click="closeDrawerBelowLg" />
+            <v-list-item :to="{ name: 'manage-error-data' }" slim density="compact" prepend-icon="mdi-google-analytics" title="Error & Exercise Data" rounded="lg" color="primary" @click="closeDrawerBelowLg" />
+            <v-list-item :to="{ name: 'manage-conjugator-data' }" slim density="compact" prepend-icon="mdi-chart-arc" title="Conjugator Data" rounded="lg" color="primary" @click="closeDrawerBelowLg" />
+            <v-list-item :to="{ name: 'manage-other-games-data' }" slim density="compact" prepend-icon="mdi-chart-timeline" title="Other Games Data" rounded="lg" color="primary" @click="closeDrawerBelowLg" />
           </v-sheet>
 
   
@@ -113,7 +115,7 @@
           />
 
           <v-sheet border rounded="lg" class="group-sheet position-relative mb-2 pt-2 px-2 pb-1">
-            <div class="text-caption">Theory</div>
+            <div class="text-caption">Review</div>
             <v-list-item
               href="https://book.language-labs.ch"
               target="_blank"
@@ -126,7 +128,7 @@
           </v-sheet>
 
           <v-sheet border rounded="lg" class="group-sheet position-relative mb-2 pt-2 px-2 pb-1">
-            <div class="text-caption">Activities</div>
+            <div class="text-caption">Train</div>
             <v-list-item
               :to="{ name: 'exercises' }"
               slim

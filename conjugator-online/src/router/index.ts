@@ -44,6 +44,7 @@ const routes = [
   { path: '/teacher-tools', name: 'teacher-tools', component: () => import('@/views/teacher_tools/TeacherTools.vue'), meta: { requiresAuth: true, requiresAdmin: true } },
   { path: '/teacher-tools/classroom-challenges', name: 'classroom-challenges', component: () => import('@/views/teacher_tools/ClassroomChallenges.vue'), meta: { requiresAuth: true, requiresAdmin: true }, props: (route: RouteLocationNormalized) => ({ game: route.query.game as string, student: route.query.student as string }) },
   { path: '/teacher-tools/graph-generator', name: 'graph-generator-teacher', component: () => import('@/views/teacher_tools/GraphGeneratorTeacher.vue'), meta: { requiresAuth: true, requiresAdmin: true } },
+  { path: '/teacher-tools/price-is-right', name: 'price-is-right', component: () => import('@/views/teacher_tools/PriceIsRight.vue'), meta: { requiresAuth: true, requiresAdmin: true } },
   { path: '/teacher-tools/market-masters-teacher', name: 'market-masters-teacher', component: () => import('@/views/teacher_tools/MarketMastersTeacher.vue'), meta: { requiresAuth: true, requiresAdmin: true } },
   { path: '/teacher', name: 'teacher', component: () => import('@/views/Teacher.vue'), meta: { requiresAuth: true, requiresAdmin: true } },
   { path: '/teacher/manage-students', name: 'manage-students', component: () => import('@/views/ManageStudents.vue'), meta: { requiresAuth: true, requiresAdmin: true } },

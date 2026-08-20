@@ -272,7 +272,7 @@
                 </div>
               </v-col>
               <v-col cols="12" sm="6" class="mt-2 mt-sm-0 ps-sm-4 border-l-sm">
-                <div class="text-caption font-weight-bold text-slate-400">VALID TARGET KEY VALUE:</div>
+                <div class="text-caption font-weight-bold text-slate-400">TARGET ANSWER:</div>
                 <div class="text-body-2 font-weight-black font-mono text-slate-800 mt-0.5">
                   <span v-if="q.item.type === 'text_mono'">{{ q.item.answer }}</span>
                   <span v-else-if="q.item.type === 'text_multi'">{{ q.item.answers.join(' / ') }}</span>

@@ -586,11 +586,11 @@
       :show-context-preview="false"
       :reset-on-context-change="true"
       api-url="/llm/chat/"
-      :max-tokens="250"
+      :max-tokens="300"
       :temperature="0.4"
     >
       <template #context-summary="{ ctx }">
-        <div class="my-2 pa-2 bg-grey-lighten-4 rounded-xl border border-dashed">
+        <div class="my-1 pa-3 px-6 bg-grey-lighten-4 rounded-xl border border-dashed">
           <div class="text-body-2 font-weight-bold text-grey-darken-3">
             <span class="text-indigo-darken-3 font-weight-black">Prompt:</span>
             verb={{ ctx?.verb }} | person={{ ctx?.person }} | tense={{ ctx?.tense }} | format={{ ctx?.sentence_type }}

@@ -100,7 +100,7 @@
       <div class="game-viewport-card-wrapper mb-6">
         
         <v-card 
-          v-if="props.game !== 'Balanced Opinions' && props.game !== 'Unfinished Business' && props.game !== 'Verb Mixer Classroom Edition'"
+          v-if="props.game !== 'Balanced Opinions' && props.game !== 'Unfinished Business' && props.game !== 'Verb Mixer Classroom Edition' && props.game !== 'Spelling Bee'" 
           class="mx-auto rounded-2xl border border-slate-200 slide-card layout-flex-center"
           elevation="3"
           :class="animationClass"
@@ -113,6 +113,23 @@
           <div class="flashcard-main-display-text text-slate-800 font-weight-bold">
             {{ prompt?.question }}
           </div>
+        </v-card>
+
+        <v-card 
+          v-else-if="props.game === 'Spelling Bee'"
+          class="mx-auto rounded-2xl border border-slate-200 slide-card layout-flex-center pa-8"
+          elevation="3"
+          :class="animationClass"
+        >
+          <div class="text-overline font-weight-bold text-slate-400 tracking-widest mb-3">
+            Spelling Bee Challenge
+          </div>
+
+          <div class="flashcard-main-display-text text-slate-900 font-weight-black line-height-tight mb-4">
+            {{ prompt?.question }}
+          </div>
+
+
         </v-card>
 
         <v-card 
@@ -333,8 +350,9 @@
 import { ref, reactive, computed } from "vue"
 import api from "@/axios"
 
+
 const props = defineProps<{
-  game: "Spelling bee" | "Pronunciation Challenge" | "Prove it!" | "Be Polite!" | "Balanced Opinions" | "Unfinished Business" | "Verb Mixer Classroom Edition" | "Numbers Workout",
+  game: "Spelling Bee" | "Pronunciation Challenge" | "Prove it!" | "Be Polite!" | "Balanced Opinions" | "Unfinished Business" | "Verb Mixer Classroom Edition" | "Numbers Workout",
   student: string
 }>()
 
@@ -342,7 +360,7 @@ const props = defineProps<{
 // STATE MANAGEMENT & DATA DEFINITIONS KEYS
 // --------------------------
 const BANNERS = {
-  "Spelling bee": "/images/banners/SpellingBee.png",
+  "Spelling Bee": "/images/banners/SpellingBee.png",
   "Pronunciation Challenge": "/images/banners/PronunciationChallenge.png",
   "Prove it!": "/images/banners/ProveIt.png",
   "Be Polite!": "/images/banners/BePolite.png",
@@ -369,7 +387,7 @@ const promptQueue = ref<{ question: string; verb: string; correctAnswers: string
 const shownPrompts = ref<{ question: string; verb: string; correctAnswers: string[]; category: string; is_correct: boolean | null }[]>([])
 
 const totalRounds = computed(() =>
-  props.game === "Balanced Opinions" ? 12 : props.game === "Unfinished Business" ? 24 : props.game === "Verb Mixer Classroom Edition" ? 28 : 30
+  props.game === "Spelling Bee" ? 8 : props.game === "Balanced Opinions" ? 12 : props.game === "Unfinished Business" ? 24 : props.game === "Verb Mixer Classroom Edition" ? 28 : 30
 )
 const remainingCount = ref(totalRounds.value)
 const snackbar = reactive({ show: false, message: "", color: "success" })
@@ -391,10 +409,10 @@ const score = computed(() => rightCount.value !== 0 ? ((rightCount.value / total
 // --------------------------
 
 type PromptGroup =
-  | string[] // simple list of prompts
+  | string[] // e.g. spelling/pronunciation groups
   | {
       weight: number
-      prompts: Record<string, string>
+      prompts: Record<string, string> // e.g. Numbers Workout weighted maps
     }
 
 const gameData: Record<
@@ -690,6 +708,13 @@ const gameData: Record<
   }
 }
 
+  },
+  "Spelling Bee": {
+    description: "Practice spelling with feedback from the teacher",
+    instructions: "A card will appear with a word or phrase. Spell the word aloud. The teacher will confirm if your spelling was correct.",
+    prompts: {
+      "standard": ['idea', 'beautiful', 'necessary', 'artificial', 'axe', 'taxes', 'generation', 'giant', 'ninja', 'renewable', 'sustainable', 'environment', 'technology', 'innovation', 'education', 'communication', 'collaboration', 'motivation', 'determination', 'organization', 'responsibility', 'opportunity', 'achievement', 'development', 'improvement', 'salami', 'pneumonia', 'psychology', 'rhythm', 'accommodation', 'embarrassment', 'conscience', 'consciousness', 'entrepreneurship', 'miscellaneous', 'supercalifragilisticexpialidocious', 'ideally', 'believe', 'receive', 'trolley', 'bureaucracy', 'cinema', 'exaggerate', 'maintenance', 'explode', 'exhale', 'inhale', 'excuse', 'explain', 'experience', 'yarn', 'yacht', 'yogurt', 'yesterday', 'yawn', 'yellow', 'yolk', 'yodel', 'yummy', 'yoga', 'youthful', 'yield', 'yodeling', 'shield', 'shrine', 'shriek', 'yawn','walrus', 'warranty', 'tragedy', 'limousine', 'adrenaline', 'alloy'],
+    },
   },
   
   "Pronunciation Challenge": {
@@ -1501,29 +1526,38 @@ function startGame() {
     snackbar.show = true
     return
   }
+
+  buildPromptQueue()
+
+  if (!promptQueue.value.length) {
+    snackbar.message = `No prompts found for ${props.game}`
+    snackbar.color = "error"
+    snackbar.show = true
+    return
+  }
+
   gameStarted.value = true
   gameComplete.value = false
-  buildPromptQueue()
   loadNextPrompt()
 }
 
 function buildPromptQueue() {
-  const dataset =
-    props.game === "Prove it!"
-      ? gameData[selectedCategory.value]
-      : gameData[props.game]
+  promptQueue.value = [] // always reset first
 
-  if (!dataset) return
+  const dataset = gameData[props.game]
+  if (!dataset || !dataset.prompts) return
 
   // -----------------------------
   // SPECIAL CASE: Unfinished Business
   // -----------------------------
   if (props.game === "Unfinished Business") {
-    const essentials = gameData["Essential irregulars past simple"]
+    const essentials = gameData["Essential irregulars past simple" as keyof typeof gameData] as any
     if (!essentials?.prompts) return
 
     const verbs = shuffle(Object.keys(essentials.prompts))
-    const timeRefs = essentials.prompts.time_references as string[]
+    const timeRefs = essentials.prompts.time_references as string[] | undefined
+    if (!timeRefs?.length) return
+
     const queue: typeof promptQueue.value = []
     const rounds = Math.min(totalRounds.value, verbs.length)
 
@@ -1546,9 +1580,9 @@ function buildPromptQueue() {
   // SPECIAL CASE: Balanced Opinions
   // -----------------------------
   if (props.game === "Balanced Opinions") {
-    const linkingWords = shuffle(dataset.prompts.linking_words as string[])
-    const topics = shuffle(dataset.prompts.topics as string[])
-    const rounds = totalRounds.value
+    const linkingWords = shuffle((dataset.prompts.linking_words as string[]) ?? [])
+    const topics = shuffle((dataset.prompts.topics as string[]) ?? [])
+    const rounds = Math.min(totalRounds.value, linkingWords.length, topics.length)
     const queue: typeof promptQueue.value = []
 
     for (let i = 0; i < rounds; i++) {
@@ -1582,8 +1616,7 @@ function buildPromptQueue() {
 
     for (const [category, count] of Object.entries(distribution)) {
       const values = dataset.prompts[category]
-
-      if (!Array.isArray(values)) continue // skip weighted groups
+      if (!Array.isArray(values) || !values.length) continue
 
       const shuffled = shuffle(values)
       for (let i = 0; i < count; i++) {
@@ -1602,62 +1635,33 @@ function buildPromptQueue() {
   }
 
   // -----------------------------
-  // DEFAULT CASE (most games)
-  // Handles BOTH:
-  //   - string[] groups
-  //   - weighted groups { weight, prompts }
+  // DEFAULT CASE (includes Spelling Bee)
   // -----------------------------
   const queue: typeof promptQueue.value = []
 
   Object.entries(dataset.prompts).forEach(([key, group]) => {
-    // CASE 1: weighted group
-    if (!Array.isArray(group)) {
-      const entries = Object.entries(group.prompts)
-
-      entries.forEach(([prompt, answer]) => {
+    if (Array.isArray(group)) {
+      group.forEach(v => {
         queue.push({
-          question: prompt,
+          question: v,
+          verb: key,
+          correctAnswers: [v],
+          category: key
+        })
+      })
+      return
+    }
+
+    if (group && typeof group === "object" && "prompts" in group) {
+      Object.entries(group.prompts).forEach(([q, answer]) => {
+        queue.push({
+          question: q,
           verb: key,
           correctAnswers: [answer],
           category: key
         })
       })
-
-      return
     }
-
-    // CASE 2: simple string[] group
-    const values = group
-
-    if (selectedCategory.value.includes("present perfect")) {
-      queue.push({
-        question: values[1],
-        verb: key,
-        correctAnswers: [values[0]],
-        category: key
-      })
-      return
-    }
-
-    if (selectedCategory.value.includes("past simple")) {
-      const q = values[Math.floor(Math.random() * values.length)]
-      queue.push({
-        question: q,
-        verb: key,
-        correctAnswers: [key],
-        category: key
-      })
-      return
-    }
-
-    values.forEach(v => {
-      queue.push({
-        question: v,
-        verb: key,
-        correctAnswers: [v],
-        category: key
-      })
-    })
   })
 
   promptQueue.value = shuffle(queue).slice(0, totalRounds.value)
