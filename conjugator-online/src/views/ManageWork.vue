@@ -4,7 +4,7 @@
       <v-col cols="12">
         <h1 class="text-h4 font-weight-black text-slate-900 d-flex align-center">
           <v-icon icon="mdi-tray-full" color="indigo" class="mr-5" />
-          Manage Student Tasks
+          Manage Assigned Tasks
         </h1>
         <p class="text-caption text-slate-500 mt-1">
           Create assignments (app challenges) or workouts (in-class routines) for individual students or entire courses. Track progress and completion.
@@ -13,7 +13,7 @@
     </v-row>
 
     <v-row>
-      <v-col cols="12" md="4">
+      <v-col cols="12" md="5">
         <v-card class="pa-5 mb-6 border bg-white" rounded="lg" elevation="0">
           <div class="text-subtitle-2 font-weight-bold mb-3 text-slate-500 uppercase tracking-wider">Give work to:</div>
           
@@ -50,7 +50,9 @@
             v-else
             v-model="selectedCourseId"
             :items="uniqueCourses"
-            item-title="title"  item-value="value"  label="Select course"
+            item-title="title"
+            item-value="value"
+            label="Select course"
             prepend-inner-icon="mdi-book-open-variant"
             variant="outlined"
             density="comfortable"
@@ -105,15 +107,15 @@
           elevation="0"
           :disabled="targetScope !== 'student' || !selectedStudentId"
         >
-          <div class="d-flex align-center justify-space-between mb-2">
-            <div class="text-subtitle-1 font-weight-bold text-slate-900">
+          <div class="d-flex align-center justify-space-between mb-4">
+            <div class="d-flex align-center ga-2">
               <v-icon start size="20" color="teal">mdi-clipboard-text</v-icon>
-              Workouts (in-class routines)
+              <div>
+                <div class="text-subtitle-1 font-weight-bold text-slate-900">In-Class Workout</div>
+                <div class="text-caption text-slate-500">Structured practice plan for this session</div>
+              </div>
             </div>
             <v-chip size="x-small" color="teal" variant="flat" class="text-white font-weight-bold">In-Class</v-chip>
-          </div>
-          <div class="text-caption text-slate-500 mb-4">
-            Assign in-class workouts. Deploying will automatically archive any old active workout for this student.
           </div>
 
           <v-btn
@@ -128,52 +130,132 @@
             Load Blueprint
           </v-btn>
 
+          <!-- Workout Metadata -->
           <v-text-field 
             v-model="newWorkout.focus_area" 
-            label="Focus Area Title" 
-            placeholder="e.g., Fluency Flow" 
+            label="Focus Area" 
+            placeholder="e.g., Pronunciation Drills, Verb Conjugation" 
             variant="outlined" 
-            density="comfortable" 
-          />
-          
-          <v-textarea 
-            v-model="newWorkout.notes" 
-            label="Pedagogical Notes" 
-            placeholder="Why this workout? What strategy boundaries apply?"
-            variant="outlined" 
-            rows="2" 
-            density="comfortable" 
+            density="comfortable"
+            class="mb-3"
           />
 
-          <div v-if="newWorkout.drills.length > 0" class="ga-3 d-flex flex-column mb-4">
-            <div v-for="(drill, idx) in newWorkout.drills" :key="idx" class="border pa-3 rounded-lg bg-white position-relative shadow-sm">
-              <v-text-field v-model="drill.name" label="Drill Name" variant="underlined" density="compact" hide-details class="mb-1 font-weight-bold" />
-              <v-textarea v-model="drill.description" label="Drill Description" variant="underlined" density="compact" rows="1" auto-grow hide-details class="text-caption text-slate-600 mb-2" />
-              
-              <v-row dense class="mt-1">
-                <v-col cols="12" sm="4">
-                  <v-select v-model="drill.type" :items="['pronunciation', 'conjugation', 'vocabulary', 'grammar', 'fluency', 'listening', 'other']" label="Type" variant="outlined" density="compact" hide-details />
-                </v-col>
-                <v-col cols="6" sm="4">
-                  <v-text-field v-model.number="drill.target_reps" label="Target Reps" type="number" variant="outlined" density="compact" hide-details />
-                </v-col>
-                <v-col cols="6" sm="4">
-                  <v-text-field v-model.number="drill.target_sessions" label="Target Sessions" type="number" variant="outlined" density="compact" hide-details />
-                </v-col>
-              </v-row>
-              
-              <v-btn icon="mdi-delete-outline" size="x-small" variant="text" color="red-lighten-1" class="position-absolute" style="top: 2px; right: 2px;" @click="removeNewDrill(idx)" />
+          <v-textarea 
+            v-model="newWorkout.notes" 
+            label="Teacher Notes" 
+            placeholder="Why this workout? What should the student focus on?"
+            variant="outlined" 
+            rows="2" 
+            density="comfortable"
+            class="mb-4"
+          />
+
+          <!-- Repetitions for entire workout -->
+          <v-text-field 
+            v-model.number="newWorkout.target_repetitions" 
+            label="Expected Repetitions (for entire workout)" 
+            type="number"
+            min="1"
+            variant="outlined" 
+            density="comfortable"
+            hint="How many times should the student go through this complete workout?"
+            class="mb-4"
+          />
+
+          <!-- Drills List -->
+          <div class="mb-4">
+            <div class="d-flex align-center justify-space-between mb-2">
+              <div class="text-subtitle-2 font-weight-bold text-slate-900">Drills</div>
+              <v-btn 
+                icon="mdi-plus" 
+                size="x-small" 
+                variant="text" 
+                color="teal"
+                @click="addNewDrill"
+              />
+            </div>
+
+            <div v-if="newWorkout.drills.length === 0" class="text-center py-6 border-dashed border rounded-lg bg-white text-slate-400">
+              <v-icon size="32" class="mb-1">mdi-format-list-bulleted</v-icon>
+              <div class="text-caption">No drills added yet. Click the + button or load a blueprint.</div>
+            </div>
+
+            <div v-else class="ga-2 d-flex flex-column">
+              <div 
+                v-for="(drill, idx) in newWorkout.drills" 
+                :key="idx" 
+                class="border pa-4 rounded-lg bg-white hover-elevation-1 transition-all"
+              >
+                <div class="d-flex align-center justify-space-between mb-3">
+                  <div class="flex-grow-1">
+                    <v-text-field 
+                      v-model="drill.name" 
+                      label="Drill Name" 
+                      variant="underlined" 
+                      density="compact" 
+                      hide-details 
+                      class="mb-1 font-weight-bold text-body-2"
+                    />
+                    <v-textarea 
+                      v-model="drill.description" 
+                      label="Brief Description" 
+                      variant="underlined" 
+                      density="compact" 
+                      rows="1" 
+                      auto-grow 
+                      hide-details 
+                      class="text-caption text-slate-600"
+                    />
+                  </div>
+                  <v-btn 
+                    icon="mdi-delete-outline" 
+                    size="x-small" 
+                    variant="text" 
+                    color="red-lighten-1" 
+                    @click="removeDrill(idx)"
+                  />
+                </div>
+
+                <!-- Comments (for tracking student performance on this drill) -->
+                <v-textarea 
+                  v-model="drill.notes" 
+                  label="Comments (e.g., student's progress, focus points)" 
+                  variant="outlined" 
+                  density="compact" 
+                  rows="2" 
+                  hide-details
+                  class="text-caption"
+                />
+              </div>
             </div>
           </div>
 
+          <!-- Action Buttons -->
           <div class="d-flex ga-2">
-            <v-btn color="teal" variant="outlined" size="small" class="text-none font-weight-bold flex-grow-1 rounded-lg" prepend-icon="mdi-plus" @click="addNewWorkoutDrill">Add Custom Drill</v-btn>
-            <v-btn color="teal" variant="flat" size="small" class="text-none font-weight-bold flex-grow-1 text-white rounded-lg" :disabled="!canCreateWorkout" :loading="dispatching" @click="createWorkout">Deploy Plan</v-btn>
+            <v-btn 
+              color="teal" 
+              variant="outlined" 
+              class="text-none font-weight-bold flex-grow-1 rounded-lg" 
+              prepend-icon="mdi-plus" 
+              @click="addNewDrill"
+            >
+              Add Drill
+            </v-btn>
+            <v-btn 
+              color="teal" 
+              variant="flat" 
+              class="text-none font-weight-bold flex-grow-1 text-white rounded-lg" 
+              :disabled="!canCreateWorkout" 
+              :loading="dispatching" 
+              @click="createWorkout"
+            >
+              Assign Workout
+            </v-btn>
           </div>
         </v-card>
       </v-col>
 
-      <v-col cols="12" md="8">
+      <v-col cols="12" md="7">
         <v-card 
           v-if="(targetScope === 'student' && selectedStudentId) || (targetScope === 'course' && selectedCourseId)"
           class="border fill-height d-flex flex-column bg-white shadow-xs" 
@@ -206,13 +288,13 @@
                 <v-card v-if="activeWorkout" class="mb-4 pa-4 border bg-teal-tight rounded-xl" elevation="0">
                   <div class="d-flex align-center justify-space-between mb-3 border-b-teal pb-2 flex-wrap ga-2">
                     <div>
-                      <div class="text-subtitle-2 font-weight-bold text-teal-darken-3 uppercase tracking-wide" style="font-size: 11px;">Active Workouts</div>
+                      <div class="text-subtitle-2 font-weight-bold text-teal-darken-3 uppercase tracking-wide" style="font-size: 11px;">Active Workout</div>
                       <div class="text-body-1 font-weight-black text-slate-900">{{ activeWorkout.focus_area || 'General Focus Track' }}</div>
                     </div>
                     
                     <div class="d-flex ga-2">
                       <v-btn size="x-small" color="teal-darken-1" variant="flat" class="text-white font-weight-bold" prepend-icon="mdi-content-save-check" :loading="dispatching" @click="saveActiveWorkoutProgressState">
-                        Save Progress Log
+                        Save Progress
                       </v-btn>
                       <v-btn size="x-small" color="red-lighten-1" variant="outlined" class="text-none font-weight-bold bg-white" prepend-icon="mdi-archive-check-outline" @click="archiveWorkoutPlan(activeWorkout.id)">
                         Complete & Archive
@@ -227,29 +309,49 @@
                     rows="2" 
                     density="comfortable" 
                     bg-color="white"
-                    class="mb-3 text-body-2"
+                    class="mb-4 text-body-2"
                     hide-details
                   />
 
-                  <div class="text-caption font-weight-bold text-slate-600 mb-2 uppercase tracking-wider">Record progress:</div>
+                  <!-- Workout Repetitions Progress -->
+                  <div class="mb-4 pa-3 bg-white border rounded-lg">
+                    <div class="text-caption font-weight-bold text-slate-600 mb-2 uppercase tracking-wider">Workout Repetitions</div>
+                    <div class="d-flex align-center justify-space-between">
+                      <div class="text-body-2 text-slate-700">
+                        Times student should complete this full workout
+                      </div>
+                      <div class="d-flex align-center ga-2">
+                        <v-btn icon="mdi-minus" size="x-small" variant="text" color="slate-600" density="compact" :disabled="activeWorkout.completed_repetitions <= 0" @click="activeWorkout.completed_repetitions--" />
+                        <div class="d-flex flex-column align-center px-2">
+                          <span class="text-h6 font-weight-black text-slate-900">{{ activeWorkout.completed_repetitions }}</span>
+                          <span class="text-caption text-slate-400 font-weight-bold">of {{ activeWorkout.target_repetitions }}</span>
+                        </div>
+                        <v-btn icon="mdi-plus" size="x-small" variant="text" color="teal" density="compact" :disabled="activeWorkout.completed_repetitions >= activeWorkout.target_repetitions" @click="activeWorkout.completed_repetitions++" />
+                      </div>
+                    </div>
+                    <v-progress-linear :model-value="(activeWorkout.completed_repetitions / activeWorkout.target_repetitions) * 100" color="teal" height="4" rounded class="mt-2" />
+                  </div>
+
+                  <!-- Drills List -->
+                  <div class="text-caption font-weight-bold text-slate-600 mb-2 uppercase tracking-wider">Drills in this workout:</div>
                   <div class="d-flex flex-column ga-2">
-                    <div v-for="(drill, index) in activeWorkout.drills" :key="index" class="bg-white border rounded-lg pa-3 d-flex align-center justify-space-between shadow-xs">
-                      <div style="max-width: 75%;">
-                        <div class="text-body-2 font-weight-bold text-slate-800 d-flex align-center flex-wrap ga-2">
+                    <div v-for="(drill, index) in activeWorkout.drills" :key="index" class="bg-white border rounded-lg pa-3">
+                      <div class="d-flex align-center justify-space-between mb-2">
+                        <div class="text-body-2 font-weight-bold text-slate-800">
                           {{ drill.name }}
-                          <v-chip size="x-small" color="teal" variant="tonal" class="text-uppercase font-weight-bold">{{ drill.type }}</v-chip>
                         </div>
-                        <div class="text-caption text-slate-500 mt-0.5">{{ drill.description }}</div>
                       </div>
-                      
-                      <div class="text-center bg-slate-50 border pa-2 rounded-lg d-flex align-center ga-2">
-                        <v-btn icon="mdi-minus" size="x-small" variant="text" color="slate-600" density="compact" :disabled="drill.completed_sessions <= 0" @click="drill.completed_sessions--" />
-                        <div class="d-flex flex-column px-1">
-                          <span class="text-body-2 font-weight-black text-slate-900">{{ drill.completed_sessions }}</span>
-                          <span class="text-slate-400 font-weight-bold uppercase" style="font-size: 8px;">of {{ drill.target_sessions || '∞' }}</span>
-                        </div>
-                        <v-btn icon="mdi-plus" size="x-small" variant="text" color="teal" density="compact" :disabled="drill.completed_sessions >= (drill.target_sessions || 99)" @click="drill.completed_sessions++" />
+                      <div class="text-caption text-slate-600 mb-2">
+                        {{ drill.description }}
                       </div>
+                      <div v-if="drill.notes" class="text-caption text-slate-500 italic border-l-2 border-teal-lighten-2 pl-2">
+                        💬 {{ drill.notes }}
+                      </div>
+                    </div>
+
+                    <div v-if="activeWorkout.drills.length === 0" class="text-center py-4 text-slate-400 border-dashed border rounded-lg">
+                      <v-icon size="24" class="mb-1">mdi-format-list-bulleted</v-icon>
+                      <div class="text-caption">No drills assigned to this workout</div>
                     </div>
                   </div>
                 </v-card>
@@ -294,7 +396,7 @@
                     
                     <v-list-item-subtitle class="text-caption text-slate-500 mt-1 d-flex flex-wrap align-center ga-2">
                       <span>Assigned: {{ formatDisplayDate(item.created_at) }}</span>
-                      <span v-if="item.task_type === 'exercise'" class="font-weight-bold text-teal-darken-2">• Spaced Runs: ({{ item.spaced_progress }}/{{ item.spaced_required }})</span>
+                      <span v-if="item.task_type === 'exercise'" class="font-weight-bold text-teal-darken-2">• Repetitions: ({{ item.spaced_progress }}/{{ item.spaced_required }})</span>
                     </v-list-item-subtitle>
 
                     <template v-slot:append>
@@ -360,44 +462,121 @@
         </v-card>
       </v-col>
     </v-row>
+
     <v-snackbar v-model="snackbar" :color="snackbarColor" :timeout="3000" rounded="lg">{{ snackbarText }}</v-snackbar>
   </v-container>
 
+  <!-- Blueprint Selection Dialog -->
   <v-dialog v-model="templateDialog" max-width="500px">
-  <v-card rounded="xl" class="pa-4 bg-white">
-    <v-card-title class="font-weight-black text-h6 d-flex align-center">
-      <v-icon color="teal" class="mr-2">mdi-layers-triple-outline</v-icon>
-      Select Workout Preset Blueprint
-    </v-card-title>
-    <v-card-text class="text-caption text-slate-500 pa-2">
-      Choosing a workout blueprint imports a predefined set of structured drills.
-    </v-card-text>
-    
-    <v-list class="bg-transparent mt-2 py-0 ga-2 d-flex flex-column">
-      <v-list-item 
-        v-for="tpl in availableWorkoutTemplates" 
-        :key="tpl.template_code"
-        class="border rounded-xl pa-3 cursor-pointer list-item-hover"
-        @click="applyWorkoutTemplate(tpl)"
-      >
-        <div class="d-flex align-center justify-space-between w-100">
-          <div>
-            <div class="font-weight-bold text-slate-800 text-body-2">{{ tpl.focus_area }}</div>
-            <div class="text-caption text-slate-500 mt-0.5 line-clamp-1">{{ tpl.notes }}</div>
+    <v-card rounded="xl" class="pa-4 bg-white">
+      <v-card-title class="font-weight-black text-h6 d-flex align-center">
+        <v-icon color="teal" class="mr-2">mdi-layers-triple-outline</v-icon>
+        Select Workout Preset Blueprint
+      </v-card-title>
+      <v-card-text class="text-caption text-slate-500 pa-2">
+        Choosing a workout blueprint imports a predefined set of structured drills.
+      </v-card-text>
+      
+      <v-list v-if="availableWorkoutTemplates.length > 0" class="bg-transparent mt-2 py-0 ga-2 d-flex flex-column">
+        <v-list-item 
+          v-for="tpl in availableWorkoutTemplates" 
+          :key="tpl.template_id"
+          class="border rounded-xl pa-3 cursor-pointer list-item-hover"
+          @click="applyWorkoutTemplate(tpl)"
+        >
+          <div class="d-flex align-center justify-space-between w-100">
+            <div>
+              <div class="font-weight-bold text-slate-800 text-body-2">{{ tpl.name }}</div>
+              <div class="text-caption text-slate-500 mt-0.5">{{ tpl.focus_area }}</div>
+              <div class="text-xxs text-slate-400 mt-1">{{ tpl.description }}</div>
+            </div>
+            <v-chip size="x-small" color="teal" variant="tonal" class="font-weight-bold">
+              {{ tpl.drill_count }} Drills
+            </v-chip>
           </div>
-          <v-chip size="x-small" color="teal" variant="tonal" class="font-weight-bold">
-            {{ tpl.drills?.length }} Drills
-          </v-chip>
-        </div>
-      </v-list-item>
-    </v-list>
-    
-    <v-card-actions class="mt-4 pa-0">
-      <v-spacer />
-      <v-btn variant="text" color="slate-500" class="text-none font-weight-bold" @click="templateDialog = false">Cancel</v-btn>
-    </v-card-actions>
-  </v-card>
-</v-dialog>
+        </v-list-item>
+      </v-list>
+
+      <div v-else class="text-center py-8 text-slate-400">
+        <v-icon size="32" class="mb-2">mdi-folder-open-outline</v-icon>
+        <div class="text-caption">No workout templates available. Create one first!</div>
+      </div>
+      
+      <v-card-actions class="mt-4 pa-0">
+        <v-spacer />
+        <v-btn variant="text" color="slate-500" class="text-none font-weight-bold" @click="templateDialog = false">Cancel</v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
+
+    <!-- Save as Template Dialog -->
+  <v-dialog v-model="saveTemplateDialog" max-width="500px">
+    <v-card rounded="xl" class="pa-4 bg-white">
+      <v-card-title class="font-weight-black text-h6 d-flex align-center">
+        <v-icon color="teal" class="mr-2">mdi-plus-circle-outline</v-icon>
+        Save Workout as Template
+      </v-card-title>
+      <v-card-text class="text-caption text-slate-500 pa-2">
+        Would you like to save this workout as a reusable template for future use?
+      </v-card-text>
+
+      <v-card-text class="pa-4">
+        <v-text-field 
+          v-model="templateForm.name" 
+          label="Template Name" 
+          placeholder="e.g., Pronunciation Drills - Session 1" 
+          variant="outlined" 
+          density="comfortable"
+          class="mb-3"
+          hint="Give this template a descriptive name"
+        />
+
+        <v-textarea 
+          v-model="templateForm.description" 
+          label="Template Description" 
+          placeholder="Optional notes about when/how to use this template..."
+          variant="outlined" 
+          rows="2" 
+          density="comfortable"
+          class="mb-3"
+        />
+
+        <v-select
+          v-model="templateForm.difficulty"
+          :items="[
+            { title: 'Beginner', value: 'beginner' },
+            { title: 'Intermediate', value: 'intermediate' },
+            { title: 'Advanced', value: 'advanced' }
+          ]"
+          item-title="title"
+          item-value="value"
+          label="Difficulty Level"
+          variant="outlined"
+          density="comfortable"
+          class="mb-3"
+        />
+
+        <v-chip color="teal" variant="flat" size="small" class="text-white">
+          {{ newWorkout.drills.length }} drills • {{ newWorkout.target_repetitions }} repetitions
+        </v-chip>
+      </v-card-text>
+
+      <v-card-actions class="pa-4">
+        <v-btn variant="text" color="slate-500" class="text-none font-weight-bold" @click="saveTemplateDialog = false">Skip</v-btn>
+        <v-spacer />
+        <v-btn 
+          color="teal-darken-1" 
+          variant="flat" 
+          class="text-none font-weight-bold text-white"
+          :disabled="!templateForm.name.trim()"
+          :loading="savingTemplate"
+          @click="saveAsTemplate"
+        >
+          Save as Template
+        </v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
 </template>
 
 <script setup lang="ts">
@@ -434,13 +613,9 @@ interface TemplatePreset {
 
 interface WorkoutDrill {
   id?: number;
-  type: string;
   name: string;
   description: string;
-  target_reps: number | null;
-  target_sessions: number | null;
-  completed_sessions: number;
-  notes: string;
+  notes?: string;
 }
 
 interface Workout {
@@ -449,8 +624,40 @@ interface Workout {
   focus_area: string;
   notes: string;
   is_current: boolean;
+  target_repetitions: number;
+  completed_repetitions: number;
   drills: WorkoutDrill[];
   created_at: string;
+}
+
+interface DrillTemplate {
+  id: string;
+  type: 'pronunciation' | 'conjugation' | 'vocabulary' | 'grammar' | 'fluency' | 'listening' | 'other';
+  name: string;
+  description: string;
+  target_reps?: number;
+  target_sessions?: number;
+  category: string;
+  difficulty: 'beginner' | 'intermediate' | 'advanced';
+  notes_template?: string;
+  question_url?: string;
+}
+
+interface WorkoutTemplate {
+  template_id: string;
+  teacher: number;
+  teacher_name: string;
+  name: string;
+  description: string;
+  focus_area: string;
+  difficulty: 'beginner' | 'intermediate' | 'advanced';
+  estimated_duration: string;
+  target_repetitions: number;
+  drills: WorkoutDrill[];
+  drill_count: number;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
 }
 
 interface RosterMatrixRow {
@@ -470,6 +677,7 @@ const targetScope = ref<'student' | 'course'>('student');
 const rightPanelTab = ref(0);
 const statusFilterMode = ref<'all' | 'pending' | 'completed'>('all');
 const templateDialog = ref(false);
+const saveTemplateDialog = ref(false);
 
 // Core Reactive Arrays Data Pools
 const studentsList = computed(() => userStore.teacherRoster.map(s => ({
@@ -479,38 +687,60 @@ const studentsList = computed(() => userStore.teacherRoster.map(s => ({
   domain: s.domain,
   display_name: `${s.initials} (${s.web_id}) [${s.domain || 'No Class'}]`
 })));
+
 const activeAssignments = ref<Assignment[]>([]);
 const activeWorkout = ref<Workout | null>(null);
 const matrixRosterData = ref<RosterMatrixRow[]>([]);
 const courses = ref<any[]>([]);
 const enrollments = ref<any[]>([]);
-const availableWorkoutTemplates = ref<any[]>([]);
 const selectedTemplatesList = ref<TemplatePreset[]>([]);
 const rawAchievementsJson = ref<Record<string, any>>({});
+const workoutTemplatesFromApi = ref<WorkoutTemplate[]>([]);
+const workoutFromTemplate = ref(false);
+
+const availableWorkoutTemplates = computed(() => {
+  return workoutTemplatesFromApi.value.filter(t => t.is_active);
+});
+const pendingWorkoutData = ref<{
+  focus_area: string;
+  notes: string;
+  target_repetitions: number;
+  drills: WorkoutDrill[];
+} | null>(null);
 
 // Target Dropdown Model Trackers
 const selectedStudentId = ref<number | null>(null);
-const selectedCourseId = ref<string | null>(null); // Binds to course slug code strings
+const selectedCourseId = ref<string | null>(null);
 
-// 🌟 ALL TRACKING CONTROLS DECLARED AND VERIFIED
+// Loading and UI States
 const loadingData = ref(false);
 const loadingMatrix = ref(false);
 const dispatching = ref(false);
+const savingTemplate = ref(false);
 const snackbar = ref(false);
 const snackbarText = ref('');
 const snackbarColor = ref('success');
 
+// Workout Form State
 function getCleanWorkoutState() {
   return {
     focus_area: '',
     notes: '',
+    target_repetitions: 3,
     drills: [] as WorkoutDrill[]
   };
 }
 
-// Form dynamic property re-assignment tracker initial state
 const newWorkout = ref(getCleanWorkoutState());
 
+// Template Form State
+const templateForm = ref({
+  name: '',
+  description: '',
+  difficulty: 'intermediate'
+});
+
+// Computed Properties
 const uniqueCourses = computed(() => userStore.availableTeacherCourses);
 
 const assignmentTemplates = computed(() => {
@@ -543,60 +773,98 @@ const filteredActiveAssignments = computed(() => {
     : activeAssignments.value.filter(item => item.status === statusFilterMode.value);
 });
 
-const canCreateWorkout = computed(() => newWorkout.value.focus_area.trim().length > 0 && newWorkout.value.drills.length > 0);
+const canCreateWorkout = computed(() => 
+  newWorkout.value.focus_area.trim().length > 0 && 
+  newWorkout.value.drills.length > 0 &&
+  newWorkout.value.target_repetitions > 0
+);
 
+// Watchers
 watch(targetScope, (currentScope) => {
   selectedStudentId.value = null;
   selectedCourseId.value = null;
   activeAssignments.value = [];
   activeWorkout.value = null;
   selectedTemplatesList.value = [];
+  workoutFromTemplate.value = false;  
   rightPanelTab.value = currentScope === 'student' ? 0 : 1;
 });
 
+// Lifecycle
 onMounted(async () => {
   loadingData.value = true;
   try {
-    // Ensure store is hydrated via the new centralized boot sequence
     await userStore.ensureUserLoaded();
     
-    // Fetch external non-API assets
+    // Fetch assignments data
     const res = await fetch('/data/assignments.json');
     rawAchievementsJson.value = await res.json();
     
-    const tplResponse = await fetch('/data/workout_templates.json');
-    const parsedTemplates = await tplResponse.json();
-    availableWorkoutTemplates.value = parsedTemplates.templates || [];
+    // Fetch workout templates
+    await fetchWorkoutTemplates();
   } catch (err) {
     console.error('Initialization error:', err);
+    triggerAlert('Failed to load data templates.', 'error');
   } finally {
     loadingData.value = false;
   }
 });
 
+// Drill Management Functions
+function addNewDrill() {
+  newWorkout.value.drills.push({
+    name: 'New Drill',
+    description: '',
+    notes: ''
+  });
+}
+
+function removeDrill(idx: number) {
+  newWorkout.value.drills.splice(idx, 1);
+}
+
+// Template Functions
 function openTemplateDialog() {
   templateDialog.value = true;
 }
 
-function applyWorkoutTemplate(tpl: any) {
-  newWorkout.value.focus_area = tpl.focus_area || '';
-  newWorkout.value.notes = tpl.notes || '';
-  newWorkout.value.drills = JSON.parse(JSON.stringify(tpl.drills || []));
-  
-  templateDialog.value = false;
-  triggerAlert(`Workout plan format loaded from blueprint: "${tpl.focus_area}".`, 'success');
+function drillTemplateToWorkoutDrill(template: DrillTemplate): WorkoutDrill {
+  return {
+    id: Date.now() + Math.random(),
+    name: template.name,
+    description: template.description,
+    notes: template.notes_template || ''
+  };
 }
 
-function addNewWorkoutDrill() {
-  newWorkout.value.drills.push({
-    type: 'pronunciation',
-    name: 'New Custom Practice Drill Element',
-    description: '',
-    target_reps: 10,
-    target_sessions: 2,
-    completed_sessions: 0,
-    notes: ''
-  });
+function applyWorkoutTemplate(tpl: WorkoutTemplate) {
+  newWorkout.value.focus_area = (tpl.focus_area || '').trim();
+  newWorkout.value.notes = (tpl.description || '').trim();  
+  newWorkout.value.target_repetitions = tpl.target_repetitions || 1;
+  newWorkout.value.drills = (tpl.drills || []).map((drill: WorkoutDrill) => ({
+    name: drill.name?.trim() || '',
+    description: drill.description?.trim() || '',
+    notes: drill.notes?.trim() || ''
+  }));
+  
+  workoutFromTemplate.value = true;  // Mark as from template
+  templateDialog.value = false;
+  triggerAlert(`Workout blueprint loaded: "${tpl.focus_area}".`, 'success');
+}
+
+// Student and Course Selection
+function onStudentChanged() {
+  if (selectedStudentId.value) {
+    rightPanelTab.value = 0; 
+    refreshAssignmentLogs();
+  }
+}
+
+function onCourseChanged() {
+  if (selectedCourseId.value) {
+    rightPanelTab.value = 1; 
+    loadGlobalClassMatrix(); 
+  }
 }
 
 function getStudentIdsInSelectedCourse(): string[] {
@@ -606,6 +874,7 @@ function getStudentIdsInSelectedCourse(): string[] {
     .map(e => String(e.student || e.student_id));
 }
 
+// Data Fetching Functions
 async function refreshAssignmentLogs() {
   if (targetScope.value !== 'student' || !selectedStudentId.value) {
     activeAssignments.value = [];
@@ -622,130 +891,11 @@ async function refreshAssignmentLogs() {
     
     activeWorkout.value = workoutRes.data;
     activeAssignments.value = assignRes.data?.results || assignRes.data || [];
-  } catch {
+  } catch (err) {
+    console.error('Failed to refresh assignment logs:', err);
     triggerAlert('Failed to refresh student logs.', 'error');
   } finally {
     loadingData.value = false;
-  }
-}
-
-
-async function saveActiveWorkoutProgressState() {
-  if (!activeWorkout.value) return;
-  dispatching.value = true;
-  try {
-    const res = await api.post(`/workouts/${activeWorkout.value.id}/update_progress/`, {
-      drills: activeWorkout.value.drills,
-      notes: activeWorkout.value.notes 
-    });
-    
-    activeWorkout.value = res.data;
-    triggerAlert('Session notes and parameters matrix logged successfully.', 'success');
-  } catch (err) {
-    console.error(err);
-    triggerAlert('Could not map progress changes down onto core server layers.', 'error');
-  } finally {
-    dispatching.value = false;
-  }
-}
-
-function onStudentChanged() {
-  if (selectedStudentId.value) {
-    rightPanelTab.value = 0; 
-    refreshAssignmentLogs();
-  }
-}
-
-function onCourseChanged() {
-  if (selectedCourseId.value) {
-    rightPanelTab.value = 1; 
-    loadGlobalClassMatrix(); 
-  }
-}
-
-function removeNewDrill(idx: number) { newWorkout.value.drills.splice(idx, 1); }
-
-async function createWorkout() {
-  if (!selectedStudentId.value) return;
-  dispatching.value = true;
-  try {
-    await api.post('/workouts/', {
-      student: selectedStudentId.value,
-      focus_area: newWorkout.value.focus_area,
-      notes: newWorkout.value.notes,
-      is_current: true,
-      drills: newWorkout.value.drills.map((d, index) => ({ id: index + 1, ...d }))
-    });
-    triggerAlert('Live session workout deployed.', 'success');
-    newWorkout.value = getCleanWorkoutState(); 
-    await refreshAssignmentLogs();
-  } catch (err) {
-    triggerAlert('Validation failure or backend initialization error rejection.', 'error');
-  } finally { dispatching.value = false; }
-}
-
-async function archiveWorkoutPlan(id: number) {
-  if (!confirm('Archive this active session workout?')) return;
-  try {
-    await api.post(`/workouts/${id}/archive/`);
-    triggerAlert('Workout archived.', 'success');
-    await refreshAssignmentLogs();
-    if (rightPanelTab.value === 1) await loadGlobalClassMatrix();
-  } catch (err) {
-    triggerAlert('Could not archive the workout plan.', 'error');
-  }
-}
-
-async function issueAssignmentTask() {
-    dispatching.value = true;
-    try {
-      let targetsListIds: number[] = [];
-      if (targetScope.value === 'student' && selectedStudentId.value) {
-        targetsListIds.push(selectedStudentId.value);
-      } else if (targetScope.value === 'course' && selectedCourseId.value) {
-        const courseStudentWebIds = getStudentIdsInSelectedCourse();
-        targetsListIds = studentsList.value
-          .filter(s => courseStudentWebIds.includes(String(s.web_id)))
-          .map(s => s.id);
-      }
-
-      const batchRequests: Array<Promise<any>> = [];
-      targetsListIds.forEach(studentId => {
-        selectedTemplatesList.value.forEach(template => {
-          batchRequests.push(
-            api.post('/assignment/', {
-              student: studentId,
-              task_type: template.task_type,
-              trigger_key: template.trigger_key,
-              description: template.description,
-              required_sessions: template.required_sessions,
-              min_days_between_sessions: template.task_type === 'achievement' ? 0 : 1,
-              manually_created: true
-            })
-          );
-        });
-      });
-
-      await Promise.all(batchRequests);
-      triggerAlert(`Successfully deployed tasks across course class metrics matching sets.`, 'success');
-      selectedTemplatesList.value = [];
-      await refreshAssignmentLogs();
-    } catch (err) {
-      triggerAlert('Batch deployment failed.', 'error');
-    } finally {
-      dispatching.value = false;
-    }
-}
-
-async function removeAssignmentRow(id: string) {
-  if (!confirm('Delete this autonomous assignment?')) return;
-  try {
-    await api.delete(`/assignment/${id}/`);
-    triggerAlert('Assignment deleted.', 'success');
-    await refreshAssignmentLogs();
-    if (rightPanelTab.value === 1) await loadGlobalClassMatrix();
-  } catch (err) {
-    triggerAlert('Failed to terminate record entry.', 'error');
   }
 }
 
@@ -754,18 +904,14 @@ async function loadGlobalClassMatrix() {
   loadingMatrix.value = true;
   
   try {
-    // 🌟 FIX: Query assignments and workouts globally, or filter specifically by this course slug slug 
     const [assignmentsResponse, workoutsResponse] = await Promise.all([
       api.get('/assignment/'),
-      // Passing no user parameters enables teachers to fetch the active workout state
-      // matrix layout across their entire student population track footprints!
       api.get('/workouts/', { params: { is_current: true } }).catch(() => ({ data: [] }))
     ]);
 
     const assignmentsPool = assignmentsResponse.data?.results || assignmentsResponse.data || [];
     const workoutsPool = workoutsResponse.data?.results || workoutsResponse.data || [];
 
-    // Filter students using store data
     const courseStudentWebIds = userStore.enrollments
       .filter(e => {
         const cSlug = e.course?.slug || String(e.course);
@@ -781,7 +927,6 @@ async function loadGlobalClassMatrix() {
           return assignStudentId === student.id;
         });
 
-        // 🌟 FIX: Look up using a robust validation mapping sequence that handles nested relations cleanly
         const activeWk = workoutsPool.find((w: any) => {
           const workoutStudentId = w.student && typeof w.student === 'object' ? w.student.id : Number(w.student);
           return workoutStudentId === student.id && w.is_current;
@@ -798,21 +943,241 @@ async function loadGlobalClassMatrix() {
         };
       });
   } catch (err) {
-    console.error("Matrix compilation crashed:", err);
+    console.error('Matrix compilation crashed:', err);
     triggerAlert('Could not build overview metrics charts.', 'error');
   } finally {
     loadingMatrix.value = false;
   }
 }
 
+async function fetchWorkoutTemplates() {
+  try {
+    const response = await api.get('/workout-templates/');
+    const templates = response.data?.results || response.data || [];
+    workoutTemplatesFromApi.value = templates;
+  } catch (err) {
+    console.error('Failed to fetch workout templates:', err);
+    triggerAlert('Could not load workout templates.', 'error');
+  }
+}
 
+// Workout Management Functions
+async function createWorkout() {
+  if (!selectedStudentId.value) return;
+  
+  // Validate before sending
+  if (!newWorkout.value.focus_area.trim()) {
+    triggerAlert('Focus Area cannot be empty.', 'error');
+    return;
+  }
+  
+  if (newWorkout.value.drills.length === 0) {
+    triggerAlert('At least one drill is required.', 'error');
+    return;
+  }
+
+  dispatching.value = true;
+  try {
+    // Save data for template dialog
+    pendingWorkoutData.value = {
+      focus_area: newWorkout.value.focus_area,
+      notes: newWorkout.value.notes,
+      target_repetitions: newWorkout.value.target_repetitions,
+      drills: JSON.parse(JSON.stringify(newWorkout.value.drills))
+    };
+
+    await api.post('/workouts/', {
+      student: selectedStudentId.value,
+      focus_area: pendingWorkoutData.value.focus_area,
+      notes: pendingWorkoutData.value.notes,
+      target_repetitions: pendingWorkoutData.value.target_repetitions,
+      is_current: true,
+      drills: pendingWorkoutData.value.drills
+    });
+    
+    triggerAlert('Workout assigned successfully.', 'success');
+    
+    // Only show template save dialog if workout was NOT loaded from a template
+    if (!workoutFromTemplate.value) {
+      templateForm.value.name = '';
+      templateForm.value.description = '';
+      saveTemplateDialog.value = true;
+    } else {
+      pendingWorkoutData.value = null;
+    }
+    
+    // Clear form
+    newWorkout.value = getCleanWorkoutState();
+    workoutFromTemplate.value = false;
+    await refreshAssignmentLogs();
+  } catch (err: any) {
+    console.error('Failed to create workout:', err);
+    triggerAlert('Failed to create workout.', 'error');
+  } finally { 
+    dispatching.value = false; 
+  }
+}
+
+async function saveAsTemplate() {
+  if (!templateForm.value.name.trim()) return;
+  if (!pendingWorkoutData.value) return;
+  
+  savingTemplate.value = true;
+  try {
+    const cleanDrills = (pendingWorkoutData.value.drills || [])
+      .map(drill => ({
+        name: String(drill.name || '').trim(),
+        description: String(drill.description || '').trim(),
+        notes: String(drill.notes || '').trim()
+      }))
+      .filter(drill => drill.name.length > 0);
+    
+    if (cleanDrills.length === 0) {
+      triggerAlert('All drills must have at least a name.', 'error');
+      return;
+    }
+
+    const payload = {
+      name: templateForm.value.name.trim(),
+      description: templateForm.value.description.trim(),
+      focus_area: pendingWorkoutData.value.focus_area.trim(),
+      difficulty: templateForm.value.difficulty,
+      estimated_duration: '',
+      target_repetitions: Number(pendingWorkoutData.value.target_repetitions) || 1,
+      drills: cleanDrills
+    };
+
+    console.log('Template payload:', payload);
+
+    await api.post('/workout-templates/', payload);
+    
+    triggerAlert(`Template "${templateForm.value.name}" saved successfully.`, 'success');
+    saveTemplateDialog.value = false;
+    pendingWorkoutData.value = null;
+    await fetchWorkoutTemplates();
+  } catch (err: any) {
+    console.error('Failed to save template:', err.response?.data || err);
+    const errorDetails = err.response?.data;
+    let errorMsg = 'Unknown error';
+    
+    if (typeof errorDetails === 'object') {
+      errorMsg = Object.entries(errorDetails)
+        .map(([key, value]: [string, any]) => {
+          if (Array.isArray(value)) return `${key}: ${value.join(', ')}`;
+          return `${key}: ${value}`;
+        })
+        .join(' | ');
+    }
+    
+    triggerAlert(`Failed to save template: ${errorMsg}`, 'error');
+  } finally {
+    savingTemplate.value = false;
+  }
+}
+
+async function saveActiveWorkoutProgressState() {
+  if (!activeWorkout.value) return;
+  dispatching.value = true;
+  try {
+    const payload = {
+      drills: activeWorkout.value.drills,
+      notes: activeWorkout.value.notes,
+      completed_repetitions: activeWorkout.value.completed_repetitions
+    };
+
+    console.log('Saving progress payload:', payload);
+
+    const res = await api.post(`/workouts/${activeWorkout.value.id}/update_progress/`, payload);
+    
+    activeWorkout.value = res.data;
+    triggerAlert('Workout progress saved successfully.', 'success');
+  } catch (err: any) {
+    console.error('Failed to save progress:', err.response?.data || err);
+    triggerAlert('Could not save workout progress.', 'error');
+  } finally {
+    dispatching.value = false;
+  }
+}
+
+async function archiveWorkoutPlan(id: number) {
+  if (!confirm('Archive this active session workout?')) return;
+  try {
+    await api.post(`/workouts/${id}/archive/`);
+    triggerAlert('Workout archived.', 'success');
+    await refreshAssignmentLogs();
+    if (rightPanelTab.value === 1) await loadGlobalClassMatrix();
+  } catch (err) {
+    console.error('Failed to archive workout:', err);
+    triggerAlert('Could not archive the workout plan.', 'error');
+  }
+}
+
+// Assignment Management Functions
+async function issueAssignmentTask() {
+  dispatching.value = true;
+  try {
+    let targetsListIds: number[] = [];
+    if (targetScope.value === 'student' && selectedStudentId.value) {
+      targetsListIds.push(selectedStudentId.value);
+    } else if (targetScope.value === 'course' && selectedCourseId.value) {
+      const courseStudentWebIds = getStudentIdsInSelectedCourse();
+      targetsListIds = studentsList.value
+        .filter(s => courseStudentWebIds.includes(String(s.web_id)))
+        .map(s => s.id);
+    }
+
+    const batchRequests: Array<Promise<any>> = [];
+    targetsListIds.forEach(studentId => {
+      selectedTemplatesList.value.forEach(template => {
+        batchRequests.push(
+          api.post('/assignment/', {
+            student: studentId,
+            task_type: template.task_type,
+            trigger_key: template.trigger_key,
+            description: template.description,
+            required_sessions: template.required_sessions,
+            min_days_between_sessions: template.task_type === 'achievement' ? 0 : 1,
+            manually_created: true
+          })
+        );
+      });
+    });
+
+    await Promise.all(batchRequests);
+    triggerAlert(`Successfully deployed ${selectedTemplatesList.value.length} assignment(s).`, 'success');
+    selectedTemplatesList.value = [];
+    await refreshAssignmentLogs();
+  } catch (err) {
+    console.error('Failed to issue assignments:', err);
+    triggerAlert('Batch deployment failed.', 'error');
+  } finally {
+    dispatching.value = false;
+  }
+}
+
+async function removeAssignmentRow(id: string) {
+  if (!confirm('Delete this assignment?')) return;
+  try {
+    await api.delete(`/assignment/${id}/`);
+    triggerAlert('Assignment deleted.', 'success');
+    await refreshAssignmentLogs();
+    if (rightPanelTab.value === 1) await loadGlobalClassMatrix();
+  } catch (err) {
+    console.error('Failed to delete assignment:', err);
+    triggerAlert('Failed to delete assignment.', 'error');
+  }
+}
+
+// Utility Functions
 function formatDisplayDate(dateStr: string): string {
   if (!dateStr) return '';
   return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 }
 
 function triggerAlert(msg: string, color: string = 'success') {
-  snackbarText.value = msg; snackbarColor.value = color; snackbar.value = true;
+  snackbarText.value = msg;
+  snackbarColor.value = color;
+  snackbar.value = true;
 }
 </script>
 

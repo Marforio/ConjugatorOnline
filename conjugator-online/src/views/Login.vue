@@ -117,7 +117,7 @@
                 class="rounded-xl text-none font-weight-black tracking-wide elevation-1"
                 :disabled="loading"
               >
-                Sign In
+                Sign in
               </v-btn>
             </v-col>
           </v-row>

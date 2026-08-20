@@ -13,12 +13,12 @@
 
 
       <!-- Brand Heading Title -->
-      <h1 class="text-h2 font-weight-black text-slate-900 tracking-tight mb-2">
+      <h1 class="text-h2 font-weight-black text-slate-900 tracking-tight mb-12">
         Language Labs
       </h1>
-      <p class="text-body-1 text-slate-500 max-width-text mx-auto mb-8">
+     <!--  <p class="text-body-1 text-slate-500 max-width-text mx-auto mb-8">
         Custom tools for language-learning
-      </p>
+      </p> -->
 
       <!-- Dynamic Entry Actions Core -->
       <div class="d-flex flex-column align-center justify-center gap-4">
@@ -52,7 +52,7 @@
             class="enter-workspace-btn rounded-xl font-weight-bold text-none text-subtitle-1 elevation-2"
             append-icon="mdi-login-variant"
           >
-            Log In to Begin
+            Log in to begin
           </v-btn>
           <span class="text-caption text-slate-400 mt-2">Ask your teacher for login credentials</span>
         </template>

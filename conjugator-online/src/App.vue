@@ -62,7 +62,7 @@
             <div class="text-caption ms-2">Manage</div>
             <v-list-item :to="{ name: 'manage-students' }" slim density="compact" prepend-icon="mdi-account-cog" title="Students" rounded="lg" color="primary" @click="closeDrawerBelowLg" />
             <v-list-item :to="{ name: 'manage-vocab-lists' }" slim density="compact" prepend-icon="mdi-bookshelf" title="Vocab Lists" rounded="lg" color="primary" @click="closeDrawerBelowLg" />
-            <v-list-item :to="{ name: 'manage-work' }" slim density="compact" prepend-icon="mdi-tray-full" title="Student Tasks" rounded="lg" color="primary" @click="closeDrawerBelowLg" />
+            <v-list-item :to="{ name: 'manage-work' }" slim density="compact" prepend-icon="mdi-tray-full" title="Assignments" rounded="lg" color="primary" @click="closeDrawerBelowLg" />
             <v-list-item :to="{ name: 'manage-achievement-data' }" slim density="compact" prepend-icon="mdi-trophy" title="Trophies" rounded="lg" color="primary" @click="closeDrawerBelowLg" />
             <v-list-item :to="{ name: 'manage-feedback' }" slim density="compact" prepend-icon="mdi-comment-quote" title="Feedback" rounded="lg" color="primary" @click="closeDrawerBelowLg" />
           </v-sheet>

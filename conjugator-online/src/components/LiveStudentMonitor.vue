@@ -1,20 +1,26 @@
 <template>
   <v-card class="pa-4 pa-md-6 mb-6 text-slate-800 border bg-white rounded-xl" flat>
-    
     <div class="d-flex align-center justify-space-between mb-6 pb-4 border-b">
       <div>
         <div class="text-h5 font-weight-black text-slate-900 tracking-tight d-flex align-center">
-          <v-icon class="mr-2" :color="isPolling ? 'success' : 'slate-300'" size="26">
-            {{ isPolling ? 'mdi-wifi' : 'mdi-wifi-off' }}
+          <v-icon
+            class="mr-2"
+            :color="isWsConnected ? 'success' : (isPolling ? 'warning' : 'slate-300')"
+            size="26"
+          >
+            {{ isWsConnected ? 'mdi-access-point' : (isPolling ? 'mdi-wifi-strength-alert-outline' : 'mdi-wifi-off') }}
           </v-icon>
           Live Activity Monitor
         </div>
+
         <div class="text-caption text-slate-500 font-weight-medium mt-0.5">
-          Updates every {{ pollInterval / 1000 }} seconds
+          Mode:
+          <span class="font-weight-bold">{{ isWsConnected ? 'Live WebSocket' : 'REST Fallback' }}</span>
+          • Poll every {{ pollInterval / 1000 }}s
           • Last update: <span class="font-mono text-slate-700">{{ formatLastUpdate }}</span>
         </div>
       </div>
-      
+
       <v-btn
         :color="isPolling ? 'error' : 'success'"
         size="small"
@@ -27,9 +33,7 @@
     </div>
 
     <v-row>
-      
       <v-col cols="12" md="7" class="pr-md-4 border-md-r">
-        
         <v-alert
           :type="onlineStudents.length > 0 ? 'success' : 'info'"
           variant="tonal"
@@ -43,7 +47,7 @@
                 {{ onlineStudents.length }} Student{{ onlineStudents.length !== 1 ? 's' : '' }} Online
               </div>
               <div class="text-xxs opacity-80 font-weight-medium">
-                Active within the last 5 minutes (only gameplay, exercises, and checking 'My data' are counted).
+                Live presence (WS) with REST fallback.
               </div>
             </div>
           </div>
@@ -53,7 +57,7 @@
           <div class="text-overline font-weight-black text-slate-400 tracking-wider mb-3">
             Currently Active Cohorts
           </div>
-          
+
           <v-row dense>
             <v-col
               v-for="student in onlineStudents"
@@ -64,7 +68,10 @@
             >
               <v-card
                 variant="outlined"
-                :class="['student-card bg-slate-50 border rounded-xl overflow-hidden shadow-sm-hover', getActivityClass(student.seconds_ago)]"
+                :class="[
+                  'student-card bg-slate-50 border rounded-xl overflow-hidden shadow-sm-hover',
+                  getActivityClass(student.seconds_ago),
+                ]"
               >
                 <v-card-text class="pa-3">
                   <div class="d-flex align-center">
@@ -88,13 +95,10 @@
                     </div>
 
                     <v-tooltip location="top" offset="4">
-                      <template v-slot:activator="{ props: tProps }">
+                      <template #activator="{ props: tProps }">
                         <div v-bind="tProps" class="flex-shrink-0">
                           <v-avatar color="white" size="28" class="border shadow-sm">
-                            <v-icon
-                              :color="getActivityColor(student.last_activity_type)"
-                              size="16"
-                            >
+                            <v-icon :color="getActivityColor(student.last_activity_type)" size="16">
                               {{ getActivityIcon(student.last_activity_type) }}
                             </v-icon>
                           </v-avatar>
@@ -117,7 +121,9 @@
                     </v-chip>
                   </div>
 
-                  <div class="text-xxs text-slate-500 font-weight-bold font-italic mt-2 pt-2 border-t text-truncate w-100">
+                  <div
+                    class="text-xxs text-slate-500 font-weight-bold font-italic mt-2 pt-2 border-t text-truncate w-100"
+                  >
                     {{ student.last_activity_name }}
                   </div>
                 </v-card-text>
@@ -126,13 +132,18 @@
           </v-row>
         </div>
 
-        <div v-else class="text-center pa-10 border rounded-xl border-dashed bg-slate-50 my-4 animate-fade-in">
+        <div
+          v-else
+          class="text-center pa-10 border rounded-xl border-dashed bg-slate-50 my-4 animate-fade-in"
+        >
           <v-avatar size="56" color="slate-100" class="mb-3 text-slate-300">
             <v-icon size="28">mdi-account-off</v-icon>
           </v-avatar>
-          <div class="text-subtitle-1 font-weight-black text-slate-700 leading-none mb-1">No Students Online</div>
+          <div class="text-subtitle-1 font-weight-black text-slate-700 leading-none mb-1">
+            No Students Online
+          </div>
           <div class="text-caption text-slate-400 max-w-280 mx-auto font-weight-medium">
-            Active tracking starts automatically as soon as students are active.
+            Tracking starts automatically when students become active.
           </div>
         </div>
       </v-col>
@@ -141,7 +152,7 @@
         <div class="text-overline font-weight-black text-slate-400 tracking-wider mb-4 px-1">
           Latest activity
         </div>
-        <!-- 🔍 Inline Micro Search Input Field -->
+
         <v-text-field
           v-model="activitySearchQuery"
           placeholder="Search logs by initials or action..."
@@ -152,48 +163,50 @@
           clearable
           class="mb-4 rounded-lg bg-slate-50 text-caption"
         />
-        
+
         <div v-if="filteredActivities.length > 0" class="max-h-timeline overflow-y-auto style-custom-scroll pr-1">
-        <v-timeline density="compact" side="end" class="compact-clean-timeline">
-          <v-timeline-item
-            v-for="(activity, i) in filteredActivities.slice(0, 20)"
-            :key="i"
-            :dot-color="getActivityColor(activity.activity_type)"
-            size="x-small"
-            class="mb-3"
-          >
-            <template v-slot:icon>
-              <v-icon size="10" color="white">{{ getActivityIcon(activity.activity_type) }}</v-icon>
-            </template>
-            
-            <div class="d-flex align-start justify-space-between ga-2 text-xxs leading-tight pr-1">
-              <div class="text-slate-700">
-                <strong class="text-slate-900 font-weight-black mr-1">{{ activity.student_initials }}</strong>
-                <span class="opacity-90">{{ activity.description }}</span>
-              </div>
-              <div class="text-slate-400 font-mono text-right flex-shrink-0 font-weight-bold pl-1">
-                {{ formatTimeAgo(activity.timestamp) }}
-              </div>
-            </div>
-          </v-timeline-item>
-        </v-timeline>
-      </div>
+          <v-timeline density="compact" side="end" class="compact-clean-timeline">
+            <v-timeline-item
+              v-for="(activity, i) in filteredActivities.slice(0, 20)"
+              :key="`${activity.id}-${i}`"
+              :dot-color="getActivityColor(activity.activity_type)"
+              size="x-small"
+              class="mb-3"
+            >
+              <template #icon>
+                <v-icon size="10" color="white">{{ getActivityIcon(activity.activity_type) }}</v-icon>
+              </template>
 
-      <!-- Fallback micro screen state block -->
-      <div v-else class="text-center pa-6 rounded-xl border border-dashed bg-slate-50 text-caption font-weight-bold text-slate-400">
-        <v-icon size="16" class="mr-1">mdi-history-off</v-icon> No logs available.
-      </div>
+              <div class="d-flex align-start justify-space-between ga-2 text-xxs leading-tight pr-1">
+                <div class="text-slate-700">
+                  <strong class="text-slate-900 font-weight-black mr-1">
+                    {{ activity.student_initials }}
+                  </strong>
+                  <span class="opacity-90">{{ activity.description }}</span>
+                </div>
+                <div class="text-slate-400 font-mono text-right flex-shrink-0 font-weight-bold pl-1">
+                  {{ formatTimeAgo(activity.timestamp) }}
+                </div>
+              </div>
+            </v-timeline-item>
+          </v-timeline>
+        </div>
+
+        <div
+          v-else
+          class="text-center pa-6 rounded-xl border border-dashed bg-slate-50 text-caption font-weight-bold text-slate-400"
+        >
+          <v-icon size="16" class="mr-1">mdi-history-off</v-icon> No logs available.
+        </div>
       </v-col>
-
     </v-row>
   </v-card>
 </template>
 
-
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 import api from '@/axios';
-import { useUserStore } from '@/stores/user'; 
+import { useUserStore } from '@/stores/user';
 
 interface OnlineStudent {
   student_id: number;
@@ -215,44 +228,74 @@ interface RecentActivity {
   timestamp: string;
 }
 
-// Instantiate store tracking references
+interface WsPresence {
+  student_id: number;
+  initials: string;
+  web_id: string;
+  teacher_id?: number;
+  last_activity_type: string;
+  last_activity_name: string;
+  page?: string;
+  seconds_ago: number;
+  last_seen?: number;
+}
+
+interface WsActivityEvent {
+  teacher_id?: number;
+  student_id: number;
+  student_initials: string;
+  activity_type: string;
+  activity_name: string;
+  description: string;
+  timestamp?: string | null;
+  durable?: boolean;
+}
+
 const userStore = useUserStore();
 
 const onlineStudents = ref<OnlineStudent[]>([]);
 const recentActivities = ref<RecentActivity[]>([]);
 const activitySearchQuery = ref('');
 const lastUpdate = ref<Date | null>(null);
+
+// Monitor switch (keeps your existing button semantics)
 const isPolling = ref(true);
-const pollInterval = ref(60000); // 60 seconds
+
+// REST fallback polling interval
+const pollInterval = ref(60000);
+
+// WS connection state
+const isWsConnected = ref(false);
+const wsError = ref<string | null>(null);
+
 let pollTimer: number | null = null;
-let localClockTimer: number | null = null; // Local ticker variable
+let localClockTimer: number | null = null;
+
+let ws: WebSocket | null = null;
+let reconnectTimer: number | null = null;
+let reconnectAttempts = 0;
+const MAX_EVENTS = 200;
 
 const formatLastUpdate = computed(() => {
   if (!lastUpdate.value) return 'Never';
-  
   const now = new Date();
   const diff = Math.floor((now.getTime() - lastUpdate.value.getTime()) / 1000);
-  
+
   if (diff < 5) return 'Just now';
   if (diff < 60) return `${diff} seconds ago`;
   return lastUpdate.value.toLocaleTimeString();
 });
 
 const filteredActivities = computed(() => {
-  // 1. First, separate or grab the teacher's own student ID if it exists
-  const currentStudentId = userStore.student?.id; 
-
-  // 2. Pre-filter the raw array to drop any rows generated by the teacher themselves
-  let activities = recentActivities.value.filter(activity => {
-    // If an activity matches the teacher's student row id, discard it
+  const currentStudentId = userStore.student?.id;
+  let activities = recentActivities.value.filter((activity) => {
     return Number(activity.student) !== Number(currentStudentId);
   });
 
-  // 3. Apply your existing textual search query parameters on the remaining dataset
   const query = activitySearchQuery.value.trim().toLowerCase();
   if (!query) return activities;
 
-  return activities.filter(activity => {
+  return activities.filter((activity) => {
     return (
       (activity.student_initials && activity.student_initials.toLowerCase().includes(query)) ||
       (activity.description && activity.description.toLowerCase().includes(query)) ||
@@ -261,21 +304,167 @@ const filteredActivities = computed(() => {
   });
 });
 
+function wsUrl(): string {
+  const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
+  return `${protocol}://${window.location.host}/ws/teacher/live/`;
+}
+
+function connectWs() {
+  cleanupWsOnly();
+
+  try {
+    ws = new WebSocket(wsUrl());
+  } catch (err) {
+    isWsConnected.value = false;
+    wsError.value = 'Failed to initialize WebSocket';
+    scheduleReconnect();
+    return;
+  }
+
+  ws.onopen = () => {
+    isWsConnected.value = true;
+    wsError.value = null;
+    reconnectAttempts = 0;
+  };
+
+  ws.onmessage = (event) => {
+    try {
+      const msg = JSON.parse(event.data);
+
+      if (msg.type === 'presence.snapshot') {
+        applyPresenceSnapshot(msg.students || []);
+        lastUpdate.value = new Date();
+        return;
+      }
+
+      if (msg.type === 'presence.upsert' && msg.presence) {
+        applyPresenceUpsert(msg.presence as WsPresence);
+        lastUpdate.value = new Date();
+        return;
+      }
+
+      if (msg.type === 'presence.remove' && typeof msg.student_id === 'number') {
+        onlineStudents.value = onlineStudents.value.filter((s) => s.student_id !== msg.student_id);
+        lastUpdate.value = new Date();
+        return;
+      }
+
+      if (msg.type === 'activity.event' && msg.event) {
+        applyActivityEvent(msg.event as WsActivityEvent);
+        lastUpdate.value = new Date();
+      }
+    } catch {
+      // ignore malformed message
+    }
+  };
+
+  ws.onclose = () => {
+    isWsConnected.value = false;
+    scheduleReconnect();
+  };
+
+  ws.onerror = () => {
+    wsError.value = 'WebSocket connection error';
+  };
+}
+
+function scheduleReconnect() {
+  if (!isPolling.value) return; // do not reconnect while paused
+  if (reconnectTimer) return;
+
+  reconnectAttempts += 1;
+  const backoff = Math.min(10000, 1000 * Math.pow(2, Math.min(reconnectAttempts, 4)));
+
+  reconnectTimer = window.setTimeout(() => {
+    reconnectTimer = null;
+    connectWs();
+  }, backoff);
+}
+
+function cleanupWsOnly() {
+  if (!ws) return;
+  ws.onopen = null;
+  ws.onmessage = null;
+  ws.onclose = null;
+  ws.onerror = null;
+  try {
+    ws.close();
+  } catch {
+    // no-op
+  }
+  ws = null;
+}
+
+async function fetchPresenceSnapshot() {
+  try {
+    const response = await api.get('/presence/snapshot/');
+    if (response.data && Array.isArray(response.data.students)) {
+      applyPresenceSnapshot(response.data.students);
+      lastUpdate.value = new Date();
+    }
+  } catch {
+    // Optional endpoint; if unavailable, we rely on WS snapshot or legacy REST fallback
+  }
+}
+
+function applyPresenceSnapshot(students: WsPresence[]) {
+  onlineStudents.value = students
+    .map((s) => ({
+      student_id: s.student_id,
+      initials: s.initials,
+      web_id: s.web_id,
+      last_activity_type: s.last_activity_type || 'heartbeat',
+      last_activity_name: s.last_activity_name || 'Active',
+      last_seen: s.last_seen ? new Date(s.last_seen * 1000).toISOString() : new Date().toISOString(),
+      seconds_ago: Number(s.seconds_ago || 0),
+    }))
+    .sort((a, b) => a.seconds_ago - b.seconds_ago);
+}
+
+function applyPresenceUpsert(s: WsPresence) {
+  const next: OnlineStudent = {
+    student_id: s.student_id,
+    initials: s.initials,
+    web_id: s.web_id,
+    last_activity_type: s.last_activity_type || 'heartbeat',
+    last_activity_name: s.last_activity_name || 'Active',
+    last_seen: s.last_seen ? new Date(s.last_seen * 1000).toISOString() : new Date().toISOString(),
+    seconds_ago: Number(s.seconds_ago || 0),
+  };
+
+  const idx = onlineStudents.value.findIndex((st) => st.student_id === s.student_id);
+  if (idx >= 0) {
+    onlineStudents.value[idx] = next;
+  } else {
+    onlineStudents.value.push(next);
+  }
+  onlineStudents.value.sort((a, b) => a.seconds_ago - b.seconds_ago);
+}
+
+function applyActivityEvent(e: WsActivityEvent) {
+  const item: RecentActivity = {
+    id: -Date.now(),
+    student: e.student_id,
+    student_initials: e.student_initials || '??',
+    activity_type: e.activity_type || 'other_game',
+    activity_name: e.activity_name || 'Activity',
+    description: e.description || e.activity_name || 'Activity',
+    timestamp: e.timestamp || new Date().toISOString(),
+  };
+
+  recentActivities.value = [item, ...recentActivities.value].slice(0, MAX_EVENTS);
+}
+
 async function fetchOnlineStudents() {
   try {
     const params: any = {};
-    
-    // FIX 2: Restrict online view parameters if logged in user is a teacher
-    // This prevents cross-tenant data leaks by telling the backend exactly who is monitoring.
     if (userStore.isStaff) {
-      params.teacher_view = 'true'; // Custom backend flag toggle or filter helper hook if required
+      params.teacher_view = 'true';
     }
 
     const response = await api.get('/online-students/', { params });
-    
-    onlineStudents.value = response.data.students;
+    onlineStudents.value = response.data.students || [];
     lastUpdate.value = new Date();
-    
   } catch (error) {
     console.error('Failed to fetch online students:', error);
   }
@@ -285,21 +474,31 @@ async function fetchRecentActivities() {
   try {
     const params: any = {
       limit: 100,
-      include_heartbeats: 'true'
+      include_heartbeats: 'true',
     };
-    
-    // FIX 3: Link request context to ensure the activity stream is strictly isolated 
-    // to this teacher's assigned student group.
+
     if (userStore.isStaff) {
-      params.managed_only = 'true'; 
+      params.managed_only = 'true';
     }
 
     const response = await api.get('/student-activities/', { params });
-    
-    if (response.data && response.data.results) {
-      recentActivities.value = response.data.results;
-    } else {
-      recentActivities.value = response.data;
+
+    const incoming = response.data?.results ? response.data.results : response.data || [];
+    if (Array.isArray(incoming)) {
+      // Merge REST history under WS-injected live events without duplicates by simple heuristic
+      const existing = recentActivities.value;
+      const merged = [...existing];
+
+      for (const row of incoming) {
+        const duplicate = merged.find((m) =>
+          m.student === row.student &&
+          m.activity_type === row.activity_type &&
+          m.activity_name === row.activity_name &&
+          m.timestamp === row.timestamp
+        );
+        if (!duplicate) merged.push(row);
+      }
+      recentActivities.value = merged.slice(0, MAX_EVENTS);
     }
   } catch (error) {
     console.error('Failed to fetch recent activities:', error);
@@ -307,8 +506,9 @@ async function fetchRecentActivities() {
 }
 
 function startLocalClocks() {
+  if (localClockTimer) clearInterval(localClockTimer);
   localClockTimer = window.setInterval(() => {
-    onlineStudents.value.forEach(student => {
+    onlineStudents.value.forEach((student) => {
       student.seconds_ago += 1;
     });
   }, 1000);
@@ -316,17 +516,27 @@ function startLocalClocks() {
 
 async function poll() {
   if (!isPolling.value) return;
-  
-  await Promise.all([
-    fetchOnlineStudents(),
-    fetchRecentActivities(),
-  ]);
+
+  // Always keep timeline fresh from REST.
+  // Presence: prefer WS/snapshot, fallback to legacy /online-students when WS is down.
+  if (!isWsConnected.value) {
+    await Promise.all([fetchOnlineStudents(), fetchRecentActivities()]);
+  } else {
+    await fetchRecentActivities();
+  }
 }
 
 function startPolling() {
-  poll();
-  pollTimer = window.setInterval(poll, pollInterval.value);
   isPolling.value = true;
+
+  connectWs();
+  fetchPresenceSnapshot(); // optional bootstrap if endpoint exists
+
+  poll();
+  if (pollTimer) clearInterval(pollTimer);
+  pollTimer = window.setInterval(poll, pollInterval.value);
+
+  startLocalClocks();
 }
 
 function stopPolling() {
@@ -334,10 +544,19 @@ function stopPolling() {
     clearInterval(pollTimer);
     pollTimer = null;
   }
+
   if (localClockTimer) {
     clearInterval(localClockTimer);
     localClockTimer = null;
   }
+
+  if (reconnectTimer) {
+    clearTimeout(reconnectTimer);
+    reconnectTimer = null;
+  }
+
+  cleanupWsOnly();
+  isWsConnected.value = false;
   isPolling.value = false;
 }
 
@@ -349,31 +568,37 @@ function togglePolling() {
   }
 }
 
-// Helper functions
+// Helpers
 function getActivityIcon(type: string): string {
   const icons: Record<string, string> = {
-    'conjugation': 'mdi-controller',
-    'other_game': 'mdi-gamepad-variant',
-    'exercise': 'mdi-weight-lifter',
-    'vocab_workout': 'mdi-cards-outline',
-    'achievement': 'mdi-trophy',
-    'workout_drill': 'mdi-clipboard-check',
-    'feedback': 'mdi-comment-alert',
-    'profile_update': 'mdi-account-voice',
+    conjugation: 'mdi-controller',
+    other_game: 'mdi-gamepad-variant',
+    exercise: 'mdi-weight-lifter',
+    vocab_workout: 'mdi-cards-outline',
+    achievement: 'mdi-trophy',
+    workout_drill: 'mdi-clipboard-check',
+    feedback: 'mdi-comment-alert',
+    profile_update: 'mdi-account-voice',
+    page_view: 'mdi-file-document-outline',
+    heartbeat: 'mdi-pulse',
+    presence_join: 'mdi-connection',
   };
   return icons[type] || 'mdi-circle';
 }
 
 function getActivityColor(type: string): string {
   const colors: Record<string, string> = {
-    'conjugation': 'blue',
-    'other_game': 'purple',
-    'exercise': 'orange',
-    'vocab_workout': 'teal',
-    'achievement': 'amber',
-    'workout_drill': 'green',
-    'feedback': 'red',
-    'profile_update': 'indigo',
+    conjugation: 'blue',
+    other_game: 'purple',
+    exercise: 'orange',
+    vocab_workout: 'teal',
+    achievement: 'amber',
+    workout_drill: 'green',
+    feedback: 'red',
+    profile_update: 'indigo',
+    page_view: 'cyan',
+    heartbeat: 'grey',
+    presence_join: 'light-green',
   };
   return colors[type] || 'grey';
 }
@@ -401,17 +626,16 @@ function formatTimeAgo(timestamp: string): string {
   const date = new Date(timestamp);
   const now = new Date();
   const diffSec = Math.floor((now.getTime() - date.getTime()) / 1000);
-  
+
   if (diffSec < 10) return 'just now';
   if (diffSec < 60) return `${diffSec}s ago`;
   if (diffSec < 300) return `${Math.floor(diffSec / 60)}m ago`;
-  
+
   return date.toLocaleTimeString();
 }
 
 onMounted(() => {
   startPolling();
-  startLocalClocks();
 });
 
 onUnmounted(() => {
@@ -433,7 +657,6 @@ onUnmounted(() => {
   max-height: 520px;
 }
 
-/* Multi-Breakpoint Structural Divider lines rules configuration */
 @media (min-width: 960px) {
   .border-md-r {
     border-right: 1px solid #e2e8f0 !important;
@@ -451,7 +674,6 @@ onUnmounted(() => {
   border-color: #cbd5e1 !important;
 }
 
-/* Timeline Padding Cleanup Modifiers */
 .compact-clean-timeline :deep(.v-timeline-item__body) {
   padding-inline-start: 12px !important;
   width: 100%;
@@ -461,7 +683,6 @@ onUnmounted(() => {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
 }
 
-/* Scrollbar layout styles context optimization */
 .style-custom-scroll {
   scrollbar-width: thin;
   scrollbar-color: #cbd5e1 transparent;
@@ -474,7 +695,6 @@ onUnmounted(() => {
   border-radius: 4px;
 }
 
-/* Color definitions alignment updates */
 .text-slate-900 { color: #0f172a; }
 .text-slate-800 { color: #1e293b; }
 .text-slate-700 { color: #334155; }
