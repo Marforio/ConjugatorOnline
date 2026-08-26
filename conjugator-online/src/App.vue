@@ -252,7 +252,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useDisplay } from 'vuetify'
 import TopNavBar from '@/components/TopNavBar.vue'
@@ -260,6 +260,7 @@ import NotificationSnackbar from '@/components/NotificationsSnackBar.vue'
 import InitialsText from '@/components/InitialsText.vue'
 import LogOutButton from '@/components/LogOutButton.vue'
 import { useInactivityTimeout } from "@/composables/useInactivityTimeout"
+import { useStudentPresence } from "@/composables/useStudentPresence"
 import { useAuthStore } from './stores/auth'
 import { useUserStore } from './stores/user'
 
@@ -269,15 +270,17 @@ const route = useRoute()
 const router = useRouter()
 const auth = useAuthStore()
 const userStore = useUserStore()
+const presence = useStudentPresence()
 
 const { xs, smAndDown, mdAndUp, lgAndUp } = useDisplay()
 const drawer = ref(false)
+let presenceActive = false
 
 const isImmersiveMode = computed(() => {
   const deepFocusViews = [
-    'conjugator', 'market-masters', 'meeting-machine', 'pronoun-practice', 'exercise-detail', 'vocabworkout', 
-    'passive-party', 'comparison', 'quantifier-quest', 'idealinker', 'regret-machine', 
-    'year-2040', 'wordfamilies', 'uses-of-auxiliaries', 'verb-mixer', 'reported-speech', 
+    'conjugator', 'market-masters', 'meeting-machine', 'pronoun-practice', 'exercise-detail', 'vocabworkout',
+    'passive-party', 'comparison', 'quantifier-quest', 'idealinker', 'regret-machine',
+    'year-2040', 'wordfamilies', 'uses-of-auxiliaries', 'verb-mixer', 'reported-speech',
     'parallel-universe', 'trickytranslator'
   ]
   return deepFocusViews.includes(route.name || '')
@@ -315,6 +318,81 @@ function escapeToHub() {
 if (auth.isLoggedIn && !auth.isAccessTokenExpired()) {
   useInactivityTimeout()
 }
+
+function isPublicRoute() {
+  const name = String(route.name || '')
+  return ['home', 'login', 'register', 'forgot-password'].includes(name)
+}
+
+async function syncStudentPresence() {
+  const loggedIn = auth.isLoggedIn && !auth.isAccessTokenExpired()
+
+  if (!loggedIn || isPublicRoute()) {
+    if (presenceActive) {
+      presence.disconnect()
+      presenceActive = false
+    }
+    return
+  }
+
+  await userStore.ensureUserLoaded()
+
+  const shouldRun = userStore.isStudentAccount && !userStore.isStaff
+
+  if (shouldRun && !presenceActive) {
+    presence.connect()
+    presenceActive = true
+    return
+  }
+
+  if (!shouldRun && presenceActive) {
+    presence.disconnect()
+    presenceActive = false
+  }
+}
+
+function handleTokenRefreshed() {
+  if (presenceActive) {
+    presence.onTokenRefreshed()
+  }
+}
+
+onMounted(async () => {
+  await syncStudentPresence()
+  window.addEventListener('auth:token-refreshed', handleTokenRefreshed)
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('auth:token-refreshed', handleTokenRefreshed)
+  presence.disconnect()
+  presenceActive = false
+})
+
+watch(
+  () => route.fullPath,
+  async () => {
+    await syncStudentPresence()
+    if (presenceActive) {
+      presence.onRouteChanged()
+    }
+  }
+)
+
+watch(
+  () => auth.access,
+  async () => {
+    await syncStudentPresence()
+  }
+)
+
+// NEW: role/watcher for late user hydration or role switch after load
+watch(
+  () => [userStore.userLoaded, userStore.isStudentAccount, userStore.isStaff],
+  async () => {
+    await syncStudentPresence()
+  },
+  { deep: false }
+)
 </script>
 
 <style scoped>

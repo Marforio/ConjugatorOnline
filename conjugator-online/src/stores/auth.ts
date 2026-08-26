@@ -12,6 +12,14 @@ export const useAuthStore = defineStore("auth", () => {
   const refresh = ref<string | null>(null);
   const isRestored = ref(false); // new: hydration flag
 
+  function emitTokenRefreshed(newAccessToken: string) {
+    window.dispatchEvent(
+      new CustomEvent("auth:token-refreshed", {
+        detail: { accessToken: newAccessToken }
+      })
+    );
+  }
+  
   // Session restoration (hydration)
   function restoreSession() {
     access.value = getAccessToken();
@@ -40,7 +48,11 @@ export const useAuthStore = defineStore("auth", () => {
     const res = await apiRefresh(refresh.value);
     access.value = res.data.access;
     saveTokens(res.data.access, refresh.value);
-    return res.data.access; 
+
+    // notify websocket consumers
+    emitTokenRefreshed(res.data.access);
+
+    return res.data.access;
   }
 
   function logout() {

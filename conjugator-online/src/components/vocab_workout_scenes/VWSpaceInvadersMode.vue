@@ -196,8 +196,11 @@ interface OptionChip {
   width: number;
   height: number;
   direction: number;
-  driftTimer?: number;    
-  driftDirection?: number;  
+  driftTimer?: number;
+  driftDirection?: number;
+  laneX?: number;              // preferred horizontal anchor
+  overlapFrames?: number;      // how long we're overlapping another chip
+  passThroughBoost?: number;   // temporary horizontal boost during crossing
 }
 
 interface Bullet {
@@ -361,6 +364,22 @@ const musicTracks = [
   },
 ];
 
+function normalizeToStringArray(v: any): string[] {
+  if (Array.isArray(v)) return v.map(String).map(s => s.trim()).filter(Boolean);
+  if (typeof v === "string") return v.split(/[;,/]+/).map(s => s.trim()).filter(Boolean);
+  return [];
+}
+
+function getIrregularDistractorsFromItem(item: any, backField: string): string[] {
+  if (backField === "past_simple") {
+    return normalizeToStringArray(item?.multiple_choice_ps ?? item?.additional_data?.multiple_choice_ps);
+  }
+  if (backField === "present_perfect") {
+    return normalizeToStringArray(item?.multiple_choice_pp ?? item?.additional_data?.multiple_choice_pp);
+  }
+  return [];
+}
+
 function selectMusicTrackForDifficulty(): number {
   const level = Math.floor(correctAnswersInRound.value / 5);
   return level % musicTracks.length;
@@ -510,6 +529,31 @@ function initCanvasSize() {
   playerX = gameCanvas.value.width / 2 - playerWidth / 2;
 }
 
+function getDisplayValue(item: any, field: string): string {
+  if (!item || !field) return "";
+
+  // direct
+  let val = item?.[field];
+
+  // nested additional_data
+  if ((val === undefined || val === null || val === "") && item?.additional_data) {
+    val = item.additional_data[field];
+  }
+
+  // irregular helpers
+  if ((val === undefined || val === null || val === "") && field === "past_forms") {
+    const ps = item?.past_simple ?? item?.additional_data?.past_simple;
+    const pp = item?.present_perfect ?? item?.additional_data?.present_perfect;
+    const psList = Array.isArray(ps) ? ps : ps ? [ps] : [];
+    const ppList = Array.isArray(pp) ? pp : pp ? [pp] : [];
+    val = `${psList.join(" / ")}${psList.length && ppList.length ? " • " : ""}${ppList.join(" / ")}`.trim();
+  }
+
+  if (Array.isArray(val)) return val.filter(Boolean).join(" / ");
+  if (val === undefined || val === null) return "";
+  return String(val).trim();
+}
+
 function goBackToSettings() {
   stopBackgroundMusic();
   emit("goBack");
@@ -519,8 +563,8 @@ function spawnNewRound() {
   if (itemPool.length === 0) {
     gameState.value = "victory";
     showVictoryDialog.value = true;
-    
-    // 🌟 Record score to backend leaderboard
+
+    // Record score to backend leaderboard
     recordGameScore({
       score: score.value,
       accuracy: accuracy.value,
@@ -530,7 +574,7 @@ function spawnNewRound() {
       gameSettings: props.gameSettings,
       won: true,
     });
-    
+
     if (animationFrameId) cancelAnimationFrame(animationFrameId);
     return;
   }
@@ -540,55 +584,86 @@ function spawnNewRound() {
 
   currentItem = item;
 
-  const frontField = props.gameSettings?.frontField || "definition";
-  const backField = props.gameSettings?.backField || "term";
+  const backField = String(props.gameSettings?.backField || "term");
+  const correctFromEngine = getAcceptedAnswers(item, backField as any)?.[0] || "";
+  const correctAnswer =
+    getDisplayValue(item, backField) ||
+    String(correctFromEngine || "").trim() ||
+    String(item?.term || "").trim() ||
+    "—";
 
-  let correctAnswer = "";
-  const isCustom = !!item.additional_data;
+  const listId =
+    props.gameSettings?.listId ||
+    props.gameSettings?.listKey ||
+    props.gameSettings?.vocab_list_id ||
+    "";
 
-  if (isCustom) {
-    correctAnswer =
-      backField === "term"
-        ? item.term
-        : item.additional_data?.[backField] || item[backField] || "—";
-  } else {
-    const answers = getAcceptedAnswers(item, backField as any);
-    correctAnswer = answers[0] || item.term;
+  const isIrregularList = String(listId).startsWith("irregular_verbs");
+
+  // 1) Preferred distractors from current irregular item metadata
+  let wrongOptions: string[] = [];
+  if (isIrregularList) {
+    wrongOptions = getIrregularDistractorsFromItem(item, backField)
+      .map((v) => String(v).trim())
+      .filter((v) => v && v !== correctAnswer);
   }
 
-  const wrongOptions = props.planItems
-    .filter((it: any) => it.id !== item.id)
-    .sort(() => 0.5 - Math.random())
-    .slice(0, 3)
-    .map((it: any) => {
-      const isCustom2 = !!it.additional_data;
-      if (isCustom2) {
-        return it.additional_data?.[backField] || it[backField] || it.term;
-      } else {
-        const answers = getAcceptedAnswers(it, backField as any);
-        return answers[0] || it.term;
-      }
-    });
+  // 2) Fallback to pool-derived distractors
+  if (wrongOptions.length < 3) {
+    const poolFallback = props.planItems
+      .filter((it: any) => it?.id !== item?.id)
+      .sort(() => 0.5 - Math.random())
+      .map((it: any) => {
+        const val =
+          getDisplayValue(it, backField) ||
+          getAcceptedAnswers(it, backField as any)?.[0] ||
+          it?.term ||
+          "";
+        return String(val).trim();
+      })
+      .filter((v: string) => v && v !== correctAnswer);
 
+    // merge unique (keep item-provided distractors first)
+    const merged = [...new Set([...wrongOptions, ...poolFallback])];
+    wrongOptions = merged.slice(0, 3);
+  } else {
+    wrongOptions = wrongOptions.slice(0, 3);
+  }
+
+  // Last-resort fillers to guarantee 4 options total
+  while (wrongOptions.length < 3) {
+    wrongOptions.push(`Option ${wrongOptions.length + 1}`);
+  }
+
+  // Shuffle final options
   const allOptions = [correctAnswer, ...wrongOptions].sort(() => 0.5 - Math.random());
 
   const canvasWidth = gameCanvas.value?.width || 800;
   const chipWidth = 120;
   const spacing = canvasWidth / 4;
 
-  currentRoundOptions = allOptions.map((text, idx) => ({
-    id: `option-${idx}`,
-    text: String(text),
-    isCorrect: text === correctAnswer,
-    y: -80,
-    x: spacing * idx + (spacing - chipWidth) / 2,
-    width: chipWidth,
-    height: 50,
-    direction: idx % 2 === 0 ? 1 : -1,
-  }));
+  currentRoundOptions = allOptions.map((text, idx) => {
+    const lane = spacing * idx + (spacing - chipWidth) / 2;
+    return {
+      id: `option-${idx}`,
+      text: String(text),
+      isCorrect: text === correctAnswer,
+      y: -80,
+      x: lane,
+      width: chipWidth,
+      height: 50,
+      direction: idx % 2 === 0 ? 1 : -1,
+      laneX: lane,
+      overlapFrames: 0,
+      passThroughBoost: 0,
+      driftTimer: 0,
+      driftDirection: Math.random() > 0.5 ? 1 : -1,
+    };
+  });
 
   particles = [];
-  roundStartTime = Date.now(); // 🌟 ADD THIS LINE HERE - at the very end
+  bullets = [];
+  roundStartTime = Date.now();
 }
 
 function createExplosion(x: number, y: number, color: string) {
@@ -638,17 +713,7 @@ function gameLoop() {
 
   // 🌟 Draw the prompt/term at the top
   const frontField = String(props.gameSettings?.frontField || "definition");
-  let promptText = "";
-  
-  if (currentItem) {
-    if (frontField === "term") {
-      promptText = currentItem.term;
-    } else if (currentItem.additional_data) {
-      promptText = String(currentItem.additional_data[frontField] || currentItem[frontField] || "");
-    } else {
-      promptText = String(currentItem[frontField] || "");
-    }
-  }
+  let promptText = currentItem ? getDisplayValue(currentItem, frontField) : "";
 
 if (promptText) {
   ctx.fillStyle = "#e0f2fe";
@@ -705,114 +770,122 @@ if (promptText) {
   const speedMultiplier = 1 + (correctAnswersInRound.value / 5) * 0.1;
   const speed = baseChipSpeed * speedMultiplier;
 
-    // Update and draw chips
-    for (let i = currentRoundOptions.length - 1; i >= 0; i--) {
-      const chip = currentRoundOptions[i];
-      chip.y += speed;
+    // Update and draw chips (osmosis movement: can cross briefly, then separate fast)
+for (let i = currentRoundOptions.length - 1; i >= 0; i--) {
+  const chip = currentRoundOptions[i];
+  if (!chip) continue;
 
-      // Initialize drift properties if not already done
-      if (chip.driftTimer === undefined || chip.driftDirection === undefined) {
-        chip.driftTimer = 0;
-        chip.driftDirection = Math.random() > 0.5 ? 1 : -1;
+  chip.y += speed;
+
+  // Init movement state
+  if (chip.driftTimer === undefined) chip.driftTimer = 0;
+  if (chip.driftDirection === undefined) chip.driftDirection = Math.random() > 0.5 ? 1 : -1;
+  if ((chip as any).laneX === undefined) (chip as any).laneX = chip.x;
+  if ((chip as any).overlapFrames === undefined) (chip as any).overlapFrames = 0;
+  if ((chip as any).passThroughBoost === undefined) (chip as any).passThroughBoost = 0;
+
+  // Base horizontal movement
+  const horizontalMovement = chip.direction * 0.65;
+
+  // Smooth oscillation
+  const waveAmplitude = 1.0;
+  const waveFrequency = 0.02;
+  const oscillation =
+    Math.sin(chip.y * waveFrequency + chip.id.charCodeAt(0)) * waveAmplitude;
+
+  // Random drift
+  chip.driftTimer++;
+  if (chip.driftTimer > 60 + Math.random() * 40) {
+    chip.driftDirection = Math.random() > 0.5 ? 1 : -1;
+    chip.driftTimer = 0;
+  }
+  const driftComponent = chip.driftDirection * 0.25;
+
+  // Soft spring toward lane center so chips don't remain merged
+  const lanePull = (((chip as any).laneX as number) - chip.x) * 0.03;
+
+  // Temporary pass-through force (decays quickly)
+  (chip as any).passThroughBoost *= 0.82;
+
+  // Apply total movement
+  chip.x += horizontalMovement + oscillation + driftComponent + lanePull + (chip as any).passThroughBoost;
+
+  // Osmosis overlap logic:
+  // allow brief crossing, but if overlap persists, inject opposite impulses
+  for (let j = 0; j < currentRoundOptions.length; j++) {
+    if (j === i) continue;
+    const other = currentRoundOptions[j];
+    if (!other) continue;
+
+    const overlapX = chip.x < other.x + other.width && chip.x + chip.width > other.x;
+    const overlapY = chip.y < other.y + other.height && chip.y + chip.height > other.y;
+
+    if (overlapX && overlapY) {
+      (chip as any).overlapFrames += 1;
+
+      if ((chip as any).overlapFrames > 4) {
+        const dir = chip.x < other.x ? -1 : 1;
+        (chip as any).passThroughBoost += dir * 1.8;
+        (other as any).passThroughBoost = (((other as any).passThroughBoost ?? 0) - dir * 1.8);
+        (chip as any).overlapFrames = 0;
       }
-      
-      // Base horizontal movement (alternating direction)
-      let horizontalMovement = chip.direction * 0.8;
-      
-      // Add subtle wave-like oscillation
-      const waveAmplitude = 1.2;
-      const waveFrequency = 0.02;
-      const oscillation = Math.sin(chip.y * waveFrequency + chip.id.charCodeAt(0)) * waveAmplitude;
-      
-      // Add random drift component
-      chip.driftTimer++;
-      
-      // Change drift direction randomly every 60-100 frames
-      if (chip.driftTimer > 60 + Math.random() * 40) {
-        chip.driftDirection = Math.random() > 0.5 ? 1 : -1;
-        chip.driftTimer = 0;
-      }
-      
-      const driftComponent = chip.driftDirection * 0.3;
-      
-      // Combine all movement components
-      chip.x += horizontalMovement + oscillation + driftComponent;
-      
-      // 🌟 COLLISION AVOIDANCE: Keep blocks separated
-      const minSeparation = chip.width + 30; // Minimum distance between blocks
-      for (let j = 0; j < currentRoundOptions.length; j++) {
-        if (i === j) continue;
-        
-        const otherChip = currentRoundOptions[j];
-        const dx = chip.x - otherChip.x;
-        const dy = chip.y - otherChip.y;
-        const distance = Math.sqrt(dx * dx + dy * dy);
-        
-        if (distance < minSeparation) {
-          // Push blocks apart
-          const angle = Math.atan2(dy, dx);
-          const pushForce = (minSeparation - distance) / 2;
-          chip.x += Math.cos(angle) * pushForce;
-          otherChip.x -= Math.cos(angle) * pushForce;
-        }
-      }
-      
-      // Clamp X position to stay within viewport
-      const minX = 10;
-      const maxX = canvas.width - chip.width - 10;
-      if (chip.x < minX) {
-        chip.x = minX;
-        chip.direction = 1; // Force right
-      }
-      if (chip.x > maxX) {
-        chip.x = maxX;
-        chip.direction = -1; // Force left
-      }
-
-      // Check if chip passed bottom
-      if (chip.y > canvas.height) {
-        if (chip.isCorrect) {
-          lives.value -= 1;
-          playSoundEffect("crash");
-
-          if (lives.value <= 0) {
-            gameState.value = "gameover";
-            showGameOverDialog.value = true;
-            playSoundEffect("gameover");
-            recordGameScore({
-              score: score.value,
-              accuracy: accuracy.value,
-              totalItems: totalItems.value,
-              roundsWon: roundsWon.value,
-              difficulty: difficultyLevel.value,
-              gameSettings: props.gameSettings,
-              won: false,
-            });
-            if (animationFrameId) cancelAnimationFrame(animationFrameId);
-            return;
-          }
-        }
-
-        currentRoundOptions.splice(i, 1);
-        continue;
-      }
-
-      // Draw chip
-      ctx.fillStyle = "#64748b";
-      ctx.fillRect(chip.x, chip.y, chip.width, chip.height);
-
-      ctx.strokeStyle = "#475569";
-      ctx.lineWidth = 2;
-      ctx.strokeRect(chip.x, chip.y, chip.width, chip.height);
-
-      ctx.fillStyle = "#f8fafc";
-      ctx.font = "bold 10px sans-serif";
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-
-      let text = chip.text;
-      ctx.fillText(text, chip.x + chip.width / 2, chip.y + chip.height / 2);
     }
+  }
+
+  // Clamp to viewport + bounce direction
+  const minX = 10;
+  const maxX = canvas.width - chip.width - 10;
+
+  if (chip.x < minX) {
+    chip.x = minX;
+    chip.direction = 1;
+  } else if (chip.x > maxX) {
+    chip.x = maxX;
+    chip.direction = -1;
+  }
+
+  // Check if chip passed bottom
+  if (chip.y > canvas.height) {
+    if (chip.isCorrect) {
+      lives.value -= 1;
+      playSoundEffect("crash");
+
+      if (lives.value <= 0) {
+        gameState.value = "gameover";
+        showGameOverDialog.value = true;
+        playSoundEffect("gameover");
+        recordGameScore({
+          score: score.value,
+          accuracy: accuracy.value,
+          totalItems: totalItems.value,
+          roundsWon: roundsWon.value,
+          difficulty: difficultyLevel.value,
+          gameSettings: props.gameSettings,
+          won: false,
+        });
+        if (animationFrameId) cancelAnimationFrame(animationFrameId);
+        return;
+      }
+    }
+
+    currentRoundOptions.splice(i, 1);
+    continue;
+  }
+
+  // Draw chip
+  ctx.fillStyle = "#64748b";
+  ctx.fillRect(chip.x, chip.y, chip.width, chip.height);
+
+  ctx.strokeStyle = "#475569";
+  ctx.lineWidth = 2;
+  ctx.strokeRect(chip.x, chip.y, chip.width, chip.height);
+
+  ctx.fillStyle = "#f8fafc";
+  ctx.font = "bold 10px sans-serif";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText(String(chip.text ?? ""), chip.x + chip.width / 2, chip.y + chip.height / 2);
+}
 
   // Update and draw bullets
   for (let i = bullets.length - 1; i >= 0; i--) {

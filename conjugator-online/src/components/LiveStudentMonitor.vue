@@ -207,6 +207,7 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 import api from '@/axios';
 import { useUserStore } from '@/stores/user';
+import { useAuthStore } from "@/stores/auth";
 
 interface OnlineStudent {
   student_id: number;
@@ -252,6 +253,7 @@ interface WsActivityEvent {
 }
 
 const userStore = useUserStore();
+const auth = useAuthStore();
 
 const onlineStudents = ref<OnlineStudent[]>([]);
 const recentActivities = ref<RecentActivity[]>([]);
@@ -304,9 +306,14 @@ const filteredActivities = computed(() => {
   });
 });
 
+function getWsToken(): string {
+  return auth.access || localStorage.getItem("access_token") || "";
+}
+
 function wsUrl(): string {
-  const base = import.meta.env.VITE_WS_BASE_URL;
-  return `${base}/ws/teacher/live/`;
+  const base = (import.meta.env.VITE_WS_BASE_URL || "").replace(/\/+$/, "");
+  const token = getWsToken();
+  return `${base}/ws/teacher/live/?token=${encodeURIComponent(token)}`;
 }
 
 function connectWs() {
@@ -615,12 +622,23 @@ function formatTimeAgo(timestamp: string): string {
   return date.toLocaleTimeString();
 }
 
-onMounted(() => {
+function handleTokenRefreshed() {
+  // reconnect so wsUrl() uses fresh token
+  cleanupWsOnly();
+  connectWs();
+}
+
+onMounted(async () => {
   startPolling();
+  auth.restoreSession(); // safe idempotent
+  await auth.validateSession(); // optional but ideal
+  connectWs();
+  window.addEventListener("auth:token-refreshed", handleTokenRefreshed);
 });
 
 onUnmounted(() => {
   stopPolling();
+  window.removeEventListener("auth:token-refreshed", handleTokenRefreshed);
 });
 </script>
 
