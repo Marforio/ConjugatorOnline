@@ -335,7 +335,9 @@ async function syncStudentPresence() {
     return
   }
 
-  await userStore.ensureUserLoaded()
+  if (!userStore.userLoaded) {
+    await userStore.ensureUserLoaded()
+  }
 
   const shouldRun = userStore.isStudentAccount && !userStore.isStaff
 

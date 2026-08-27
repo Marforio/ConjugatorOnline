@@ -1,5 +1,5 @@
-import { ref } from 'vue';
-import { useAuthStore } from '@/stores/auth';
+import { ref } from "vue";
+import { useAuthStore } from "@/stores/auth";
 
 type PresenceStudent = {
   student_id: number;
@@ -23,161 +23,265 @@ type ActivityEvent = {
   durable?: boolean;
 };
 
+// module-level singleton state (shared across all composable consumers)
+let socket: WebSocket | null = null;
+let reconnectTimer: number | null = null;
+let reconnectAttempts = 0;
+let authBlocked = false;
+let intentionalClose = false;
+let lastTokenUsed = "";
+let tokenRefreshListenerBound = false;
+let tokenRefreshListener: ((e: Event) => void) | null = null;
+
+// single-flight guards
+let connectInFlight: Promise<void> | null = null;
+let refreshInFlight: Promise<string | null> | null = null;
+let lastAuthFailureAt = 0;
+
+const isWsConnected = ref(false);
+const wsError = ref<string | null>(null);
+const presenceMap = ref<Record<number, PresenceStudent>>({});
+const liveEvents = ref<ActivityEvent[]>([]);
+
+const maxEvents = 200;
+const AUTH_FAILURE_COOLDOWN_MS = 15000;
+
+function wsBase(): string {
+  const protocol = window.location.protocol === "https:" ? "wss" : "ws";
+  return `${protocol}://${window.location.host}`;
+}
+
+function nowMs() {
+  return Date.now();
+}
+
+function markAuthFailure(reason: string) {
+  lastAuthFailureAt = nowMs();
+  stopReconnect(reason);
+}
+
+function inAuthCooldown() {
+  return nowMs() - lastAuthFailureAt < AUTH_FAILURE_COOLDOWN_MS;
+}
+
+function clearReconnectTimer() {
+  if (reconnectTimer) {
+    clearTimeout(reconnectTimer);
+    reconnectTimer = null;
+  }
+}
+
+function cleanupSocketOnly() {
+  if (!socket) return;
+  socket.onopen = null;
+  socket.onmessage = null;
+  socket.onclose = null;
+  socket.onerror = null;
+  try {
+    intentionalClose = true;
+    socket.close(1000, "cleanup");
+  } catch {}
+  socket = null;
+}
+
+function stopReconnect(reason: string) {
+  authBlocked = true;
+  clearReconnectTimer();
+  wsError.value = reason;
+}
+
+function scheduleReconnect(connectFn: () => Promise<void> | void) {
+  if (authBlocked || intentionalClose) return;
+  if (reconnectTimer) return;
+  if (inAuthCooldown()) return;
+
+  reconnectAttempts += 1;
+  const backoff = Math.min(10000, 1000 * Math.pow(2, Math.min(reconnectAttempts, 4)));
+  reconnectTimer = window.setTimeout(() => {
+    reconnectTimer = null;
+    void connectFn();
+  }, backoff);
+}
+
 export function useTeacherLiveMonitor() {
   const auth = useAuthStore();
 
-  const socket = ref<WebSocket | null>(null);
-  const isWsConnected = ref(false);
-  const wsError = ref<string | null>(null);
+  async function ensureFreshAccessSingleFlight(): Promise<string | null> {
+    if (refreshInFlight) return refreshInFlight;
 
-  const presenceMap = ref<Record<number, PresenceStudent>>({});
-  const liveEvents = ref<ActivityEvent[]>([]);
+    refreshInFlight = (async () => {
+      const current = auth.access || "";
+      if (!current) return null;
 
-  let reconnectTimer: number | null = null;
-  let reconnectAttempts = 0;
-  let authBlocked = false;
+      // If token is still valid, use it immediately.
+      if (!auth.isAccessTokenExpired()) return current;
 
-  const maxEvents = 200;
+      // Expired -> refresh once
+      try {
+        await auth.refreshAccessToken();
+        return auth.access || null;
+      } catch {
+        return null;
+      }
+    })();
 
-  function wsBase(): string {
-    const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
-    return `${protocol}://${window.location.host}`;
-  }
-
-  function stopReconnect(reason: string) {
-    authBlocked = true;
-    if (reconnectTimer) {
-      clearTimeout(reconnectTimer);
-      reconnectTimer = null;
-    }
-    wsError.value = reason;
-  }
-
-  async function getValidAccessToken(): Promise<string | null> {
-    if (!auth.access) return null;
-    if (!auth.isAccessTokenExpired()) return auth.access;
     try {
-      await auth.refreshAccessToken();
-      return auth.access;
-    } catch {
-      return null;
+      return await refreshInFlight;
+    } finally {
+      refreshInFlight = null;
     }
   }
 
-  async function connect() {
-    cleanupSocketOnly();
+  async function connectInternal() {
+    // duplicate guard
+    if (socket && (socket.readyState === WebSocket.OPEN || socket.readyState === WebSocket.CONNECTING)) {
+      return;
+    }
 
-    const token = await getValidAccessToken();
+    if (inAuthCooldown()) {
+      wsError.value = "Auth cooldown active; waiting before reconnect";
+      return;
+    }
+
+    intentionalClose = false;
+
+    const token = await ensureFreshAccessSingleFlight();
     if (!token) {
-      stopReconnect('No valid auth token for teacher websocket');
+      markAuthFailure("No valid teacher auth token (refresh/validate failed)");
       return;
     }
 
     const url = `${wsBase()}/ws/teacher/live/?token=${encodeURIComponent(token)}`;
-    socket.value = new WebSocket(url);
+    lastTokenUsed = token;
+    socket = new WebSocket(url);
 
-    socket.value.onopen = () => {
+    socket.onopen = () => {
       isWsConnected.value = true;
       wsError.value = null;
       reconnectAttempts = 0;
       authBlocked = false;
+      lastAuthFailureAt = 0;
+      console.log("TEACHER_WS open:", url);
     };
 
-    socket.value.onmessage = (evt) => {
+    socket.onmessage = (evt) => {
       try {
         const msg = JSON.parse(evt.data);
 
-        if (msg.type === 'presence.snapshot') {
+        if (msg.type === "presence.snapshot") {
           const next: Record<number, PresenceStudent> = {};
           for (const s of msg.students || []) next[s.student_id] = s;
           presenceMap.value = next;
           return;
         }
 
-        if (msg.type === 'presence.upsert' && msg.presence) {
+        if (msg.type === "presence.upsert" && msg.presence) {
           presenceMap.value[msg.presence.student_id] = msg.presence;
           return;
         }
 
-        if (msg.type === 'presence.remove' && typeof msg.student_id === 'number') {
+        if (msg.type === "presence.remove" && typeof msg.student_id === "number") {
           delete presenceMap.value[msg.student_id];
           return;
         }
 
-        if (msg.type === 'activity.event' && msg.event) {
+        if (msg.type === "activity.event" && msg.event) {
           liveEvents.value.unshift(msg.event);
           if (liveEvents.value.length > maxEvents) {
             liveEvents.value = liveEvents.value.slice(0, maxEvents);
           }
+          return;
         }
       } catch {
-        // no-op
+        // ignore malformed messages
       }
     };
 
-    socket.value.onclose = (evt) => {
-      isWsConnected.value = false;
-      socket.value = null;
+    socket.onerror = () => {
+      wsError.value = "Teacher WebSocket error";
+    };
 
-      // stop loop on auth/policy close patterns
+    socket.onclose = (evt) => {
+      isWsConnected.value = false;
+      socket = null;
+
+      // Stop on explicit auth/policy closures
       if (evt.code === 4403 || evt.code === 1008) {
-        stopReconnect(`Teacher websocket rejected (${evt.code})`);
+        markAuthFailure(`Teacher websocket rejected (${evt.code})`);
         return;
       }
 
-      scheduleReconnect();
-    };
+      // Browsers report handshake fail as 1006; treat as potential auth failure if we just refreshed/validated
+      if (evt.code === 1006 && auth.isAccessTokenExpired()) {
+        markAuthFailure("Teacher websocket abnormal close (1006) with expired auth state");
+        return;
+      }
 
-    socket.value.onerror = () => {
-      wsError.value = 'WebSocket connection error';
+      scheduleReconnect(connect);
     };
   }
 
-  function scheduleReconnect() {
-    if (authBlocked) return;
-    if (reconnectTimer) return;
-    reconnectAttempts += 1;
-    const backoff = Math.min(10000, 1000 * Math.pow(2, Math.min(reconnectAttempts, 4)));
-    reconnectTimer = window.setTimeout(() => {
-      reconnectTimer = null;
-      connect();
-    }, backoff);
+  async function connect() {
+    if (connectInFlight) return connectInFlight;
+    connectInFlight = (async () => {
+      await connectInternal();
+    })();
+    try {
+      await connectInFlight;
+    } finally {
+      connectInFlight = null;
+    }
   }
 
   function disconnect() {
-    authBlocked = true;
-    if (reconnectTimer) {
-      clearTimeout(reconnectTimer);
-      reconnectTimer = null;
-    }
+    intentionalClose = true;
+    clearReconnectTimer();
     cleanupSocketOnly();
     isWsConnected.value = false;
   }
 
-  function cleanupSocketOnly() {
-    if (!socket.value) return;
-    socket.value.onopen = null;
-    socket.value.onmessage = null;
-    socket.value.onclose = null;
-    socket.value.onerror = null;
-    try { socket.value.close(); } catch {}
-    socket.value = null;
-  }
-
   function requestSnapshot() {
-    if (socket.value && socket.value.readyState === WebSocket.OPEN) {
-      socket.value.send(JSON.stringify({ type: 'presence.snapshot.request' }));
+    if (socket && socket.readyState === WebSocket.OPEN) {
+      socket.send(JSON.stringify({ type: "presence.snapshot.request" }));
     }
   }
 
-  // resume only when token refreshed successfully
-  function onTokenRefreshed() {
-    authBlocked = false;
-    connect();
+  function bindTokenRefreshListenerOnce() {
+    if (tokenRefreshListenerBound) return;
+    tokenRefreshListenerBound = true;
+
+    tokenRefreshListener = async () => {
+      const current = auth.access || "";
+      if (!current) return;
+
+      // clear auth block only when we actually have a token
+      authBlocked = false;
+
+      // reconnect only when token actually changed
+      if (current !== lastTokenUsed) {
+        disconnect();
+        await connect();
+      }
+    };
+
+    window.addEventListener("auth:token-refreshed", tokenRefreshListener as EventListener);
   }
 
-  if (typeof window !== 'undefined') {
-    window.addEventListener('auth:token-refreshed', onTokenRefreshed as EventListener);
+  function unbindTokenRefreshListener() {
+    if (!tokenRefreshListenerBound || !tokenRefreshListener) return;
+    window.removeEventListener("auth:token-refreshed", tokenRefreshListener as EventListener);
+    tokenRefreshListenerBound = false;
+    tokenRefreshListener = null;
+  }
+
+  // expose for root layout lifecycle control
+  function init() {
+    bindTokenRefreshListenerOnce();
+  }
+
+  function destroy() {
+    unbindTokenRefreshListener();
+    disconnect();
   }
 
   return {
@@ -188,5 +292,7 @@ export function useTeacherLiveMonitor() {
     connect,
     disconnect,
     requestSnapshot,
+    init,
+    destroy,
   };
 }
