@@ -1,4 +1,3 @@
-import { onBeforeUnmount } from "vue";
 import { useRoute } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
 
@@ -14,21 +13,36 @@ export function useStudentPresence() {
   let intentionalClose = false;
   let reconnectAttempts = 0;
   let lastToken = "";
+  let authBlocked = false;
 
   const PING_MS = 25000;
   const MAX_BACKOFF_MS = 10000;
 
   function getToken() {
-    return auth.access || localStorage.getItem("access_token") || "";
+    // single source of truth
+    return auth.access || "";
   }
 
   function wsBase() {
     return (import.meta.env.VITE_WS_BASE_URL || "").replace(/\/+$/, "");
   }
 
-  function wsUrl() {
-    const token = getToken();
+  function wsUrl(token: string) {
     return `${wsBase()}/ws/student/presence/?token=${encodeURIComponent(token)}`;
+  }
+
+  async function ensureValidToken(): Promise<string | null> {
+    const token = getToken();
+    if (!token) return null;
+
+    if (!auth.isAccessTokenExpired()) return token;
+
+    try {
+      await auth.refreshAccessToken();
+      return auth.access || null;
+    } catch {
+      return null;
+    }
   }
 
   function sendJson(payload: Record<string, any>) {
@@ -68,12 +82,18 @@ export function useStudentPresence() {
     try {
       intentionalClose = true;
       ws.close(1000, "cleanup");
-    } catch (_) {}
+    } catch {}
     ws = null;
   }
 
+  function stopReconnect(reason: string) {
+    authBlocked = true;
+    clearTimers();
+    console.warn("STUDENT_WS reconnect stopped:", reason);
+  }
+
   function scheduleReconnect() {
-    if (intentionalClose) return;
+    if (intentionalClose || authBlocked) return;
     const backoff = Math.min(1000 * 2 ** reconnectAttempts, MAX_BACKOFF_MS);
     reconnectAttempts += 1;
     reconnectTimer = setTimeout(() => {
@@ -81,35 +101,34 @@ export function useStudentPresence() {
     }, backoff + Math.floor(Math.random() * 250));
   }
 
-  function connect() {
-    const token = getToken();
-    if (!token) {
-      // no auth yet
+  async function connect() {
+    if (authBlocked) return;
+
+    // prevent duplicates
+    if (ws && (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING)) {
       return;
     }
 
-    // prevent duplicate sockets
-    if (ws && (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING)) {
+    const token = await ensureValidToken();
+    if (!token) {
+      stopReconnect("no valid token");
       return;
     }
 
     intentionalClose = false;
     lastToken = token;
-
-    ws = new WebSocket(wsUrl());
+    ws = new WebSocket(wsUrl(token));
 
     ws.onopen = () => {
       reconnectAttempts = 0;
+      authBlocked = false;
       sendPage(route.fullPath || "app_boot");
       sendPing();
       pingTimer = setInterval(sendPing, PING_MS);
       console.log("STUDENT_WS open", ws?.url);
     };
 
-    ws.onmessage = (evt) => {
-      // optional: handle server ack/messages if you later add them
-      // console.log("STUDENT_WS message", evt.data);
-    };
+    ws.onmessage = () => {};
 
     ws.onerror = (evt) => {
       console.warn("STUDENT_WS error", evt, "url=", ws?.url);
@@ -119,6 +138,12 @@ export function useStudentPresence() {
       console.warn("STUDENT_WS close", { code: evt.code, reason: evt.reason, wasClean: evt.wasClean, url: ws?.url });
       clearTimers();
       ws = null;
+
+      if (evt.code === 4403 || evt.code === 1008) {
+        stopReconnect(`server rejected (${evt.code})`);
+        return;
+      }
+
       scheduleReconnect();
     };
   }
@@ -134,13 +159,15 @@ export function useStudentPresence() {
 
   function onTokenRefreshed() {
     const current = getToken();
-    if (!current || current === lastToken) return;
-    // reconnect with new JWT
-    disconnect();
-    connect();
+    if (!current) return;
+    authBlocked = false;
+
+    if (current !== lastToken) {
+      disconnect();
+      connect();
+    }
   }
 
-  // public API
   return {
     connect,
     disconnect,

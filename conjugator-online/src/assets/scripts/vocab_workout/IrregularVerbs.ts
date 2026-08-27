@@ -21,8 +21,8 @@ export const irregularVerbs = {
     Italian: "avere",
     level: "essential",
     image: "/images/vocab/have.jpg",
-    multiple_choice_ps: [],
-    multiple_choice_pp: []
+    multiple_choice_ps: ["hat", "haved", "hed"],
+    multiple_choice_pp: ["haved", "hed", "hat"]
   },
 
   make: {
@@ -34,8 +34,8 @@ export const irregularVerbs = {
     Italian: "fare (creazione, produzione)",
     level: "essential",
     image: "/images/vocab/make.jpg",
-    multiple_choice_ps: [],
-    multiple_choice_pp: []
+    multiple_choice_ps: ["maked", "mak", "maded"],
+    multiple_choice_pp: ["maked", "maded", "mad"]
   },
 
   do: {
@@ -47,8 +47,8 @@ export const irregularVerbs = {
     Italian: "fare (una attività)",
     level: "essential",
     image: "/images/vocab/do.jpg",
-    multiple_choice_ps: [],
-    multiple_choice_pp: []
+    multiple_choice_ps: ["didd", "doed", "don"],
+    multiple_choice_pp: ["doed", "don", "did"]
   },
 
   go: {
@@ -60,8 +60,8 @@ export const irregularVerbs = {
     Italian: "andare",
     level: "essential",
     image: "/images/vocab/go.jpg",
-    multiple_choice_ps: [],
-    multiple_choice_pp: []
+    multiple_choice_ps: ["goed", "ging", "goned"],
+    multiple_choice_pp: ["goed", "went", "goned"]
   },
 
   give: {
@@ -73,8 +73,8 @@ export const irregularVerbs = {
     Italian: "dare",
     level: "essential",
     image: "/images/vocab/give.jpg",
-    multiple_choice_ps: [],
-    multiple_choice_pp: []
+    multiple_choice_ps: ["gived", "gaf", "gived"],
+    multiple_choice_pp: ["gived", "gaf", "given"]
   },
 
   pay: {
@@ -86,8 +86,8 @@ export const irregularVerbs = {
     Italian: "pagare",
     level: "essential",
     image: "/images/vocab/pay.jpg",
-    multiple_choice_ps: [],
-    multiple_choice_pp: []
+    multiple_choice_ps: ["payed", "payd", "paied"],
+    multiple_choice_pp: ["payed", "payd", "paied"]
   },
 
   buy: {
@@ -99,8 +99,8 @@ export const irregularVerbs = {
     Italian: "comprare",
     level: "essential",
     image: "/images/vocab/buy.jpg",
-    multiple_choice_ps: [],
-    multiple_choice_pp: []
+    multiple_choice_ps: ["buyed", "bang", "boughted"],
+    multiple_choice_pp: ["buyed", "bokt", "boughted"]
   },
 
   sell: {
@@ -112,8 +112,8 @@ export const irregularVerbs = {
     Italian: "vendere",
     level: "essential",
     image: "/images/vocab/sell.jpg",
-    multiple_choice_ps: [],
-    multiple_choice_pp: []
+    multiple_choice_ps: ["selled", "saled", "solded"],
+    multiple_choice_pp: ["selled", "saled", "solded"]
   },
 
   send: {
@@ -125,8 +125,8 @@ export const irregularVerbs = {
     Italian: "inviare",
     level: "essential",
     image: "/images/vocab/send.jpg",
-    multiple_choice_ps: [],
-    multiple_choice_pp: []
+    multiple_choice_ps: ["sended", "sending", "sented"],
+    multiple_choice_pp: ["sended", "sond", "sented"]
   },
 
   know: {
@@ -138,8 +138,8 @@ export const irregularVerbs = {
     Italian: "sapere, conoscere",
     level: "essential",
     image: "/images/vocab/know.jpg",
-    multiple_choice_ps: [],
-    multiple_choice_pp: []
+    multiple_choice_ps: ["knowed", "knewed", "knot"],
+    multiple_choice_pp: ["knowed", "knewed", "knownen"]
   },
 
   understand: {
@@ -151,8 +151,8 @@ export const irregularVerbs = {
     Italian: "capire",
     level: "essential",
     image: "/images/vocab/understand.jpg",
-    multiple_choice_ps: [],
-    multiple_choice_pp: []
+    multiple_choice_ps: ["understanded", "understooded", "understat"],
+    multiple_choice_pp: ["understanded", "understooded", "understat"]
   },
 
   think: {
@@ -164,8 +164,8 @@ export const irregularVerbs = {
     Italian: "pensare",
     level: "essential",
     image: "/images/vocab/think.jpg",
-    multiple_choice_ps: [],
-    multiple_choice_pp: []
+    multiple_choice_ps: ["thinked", "thunk", "thoughted"],
+    multiple_choice_pp: ["thinked", "thunk", "thoughted"]
   },
 
   write: {
@@ -177,8 +177,8 @@ export const irregularVerbs = {
     Italian: "scrivere",
     level: "essential",
     image: "/images/vocab/write.jpg",
-    multiple_choice_ps: [],
-    multiple_choice_pp: []
+    multiple_choice_ps: ["writed", "wroted", "wrooten"],
+    multiple_choice_pp: ["writed", "wroted", "wrooten"]
   },
 
   read: {
@@ -190,8 +190,8 @@ export const irregularVerbs = {
     Italian: "leggere",
     level: "essential",
     image: "/images/vocab/read.jpg",
-    multiple_choice_ps: [],
-    multiple_choice_pp: []
+    multiple_choice_ps: ["readed", "red", "reed"],
+    multiple_choice_pp: ["readed", "red", "reed"]
   },
 
   see: {
@@ -203,8 +203,8 @@ export const irregularVerbs = {
     Italian: "vedere",
     level: "essential",
     image: "/images/vocab/see.jpg",
-    multiple_choice_ps: [],
-    multiple_choice_pp: []
+    multiple_choice_ps: ["seed", "sawed", "seened"],
+    multiple_choice_pp: ["seed", "sawed", "seened"]
   },
 
   find: {
@@ -216,8 +216,8 @@ export const irregularVerbs = {
     Italian: "trovare",
     level: "essential",
     image: "/images/vocab/find.jpg",
-    multiple_choice_ps: [],
-    multiple_choice_pp: []
+    multiple_choice_ps: ["finded", "founded", "fand"],
+    multiple_choice_pp: ["finded", "founded", "fand"]
   },
 
   lose: {
@@ -229,8 +229,8 @@ export const irregularVerbs = {
     Italian: "perdere",
     level: "essential",
     image: "/images/vocab/lose.jpg",
-    multiple_choice_ps: [],
-    multiple_choice_pp: []
+    multiple_choice_ps: ["lossed", "loosed", "losted"],
+    multiple_choice_pp: ["lossed", "loosed", "losted"]
   },
 
   eat: {
@@ -242,8 +242,8 @@ export const irregularVerbs = {
     Italian: "mangiare",
     level: "essential",
     image: "/images/vocab/eat.jpg",
-    multiple_choice_ps: [],
-    multiple_choice_pp: []
+    multiple_choice_ps: ["at", "eated", "eten"],
+    multiple_choice_pp: ["at", "eated", "eten"]
   },
 
   drive: {
@@ -255,8 +255,8 @@ export const irregularVerbs = {
     Italian: "guidare",
     level: "essential",
     image: "/images/vocab/drive.jpg",
-    multiple_choice_ps: [],
-    multiple_choice_pp: []
+    multiple_choice_ps: ["drived", "driv", "droven"],
+    multiple_choice_pp: ["drived", "driv", "droven"]
   },
 
   meet: {
@@ -268,8 +268,8 @@ export const irregularVerbs = {
     Italian: "incontrare",
     level: "essential",
     image: "/images/vocab/meet.jpg",
-    multiple_choice_ps: [],
-    multiple_choice_pp: []
+    multiple_choice_ps: ["meeted", "meted", "mat"],
+    multiple_choice_pp: ["meeted", "meted", "mat"]
   },
 
   build: {
@@ -281,8 +281,8 @@ export const irregularVerbs = {
     Italian: "costruire",
     level: "essential",
     image: "/images/vocab/build.jpg",
-    multiple_choice_ps: [],
-    multiple_choice_pp: []
+    multiple_choice_ps: ["builded", "builted", "bild"],
+    multiple_choice_pp: ["builded", "builted", "bild"]
   },
 
   draw: {
@@ -294,8 +294,8 @@ export const irregularVerbs = {
     Italian: "disegnare",
     level: "essential",
     image: "/images/vocab/draw.jpg",
-    multiple_choice_ps: [],
-    multiple_choice_pp: []
+    multiple_choice_ps: ["drawed", "drawen", "drewed"],
+    multiple_choice_pp: ["drawed", "drawen", "drewed"]
   },
 
   run: {
@@ -307,8 +307,8 @@ export const irregularVerbs = {
     Italian: "correre",
     level: "essential",
     image: "/images/vocab/run.jpg",
-    multiple_choice_ps: [],
-    multiple_choice_pp: []
+    multiple_choice_ps: ["runned", "raned", "rin"],
+    multiple_choice_pp: ["runned", "raned", "rinned"]
   },
 
   feel: {
@@ -320,8 +320,8 @@ export const irregularVerbs = {
     Italian: "sentire",
     level: "essential",
     image: "/images/vocab/feel.jpg",
-    multiple_choice_ps: [],
-    multiple_choice_pp: []
+    multiple_choice_ps: ["feeled", "felted", "fell"],
+    multiple_choice_pp: ["feeled", "fellen", "fell"]
   },
 
   hear: {
@@ -333,8 +333,8 @@ export const irregularVerbs = {
     Italian: "sentire",
     level: "essential",
     image: "/images/vocab/hear.jpg",
-    multiple_choice_ps: [],
-    multiple_choice_pp: []
+    multiple_choice_ps: ["heared", "herd", "hord"],
+    multiple_choice_pp: ["heared", "herd", "hord"]
   },
 
   cost: {
@@ -346,8 +346,8 @@ export const irregularVerbs = {
     Italian: "costare",
     level: "essential",
     image: "/images/vocab/cost.jpg",
-    multiple_choice_ps: [],
-    multiple_choice_pp: []
+    multiple_choice_ps: ["costed", "costen", "coast"],
+    multiple_choice_pp: ["costed", "costen", "coast"]
   },
 
   fall: {
@@ -359,8 +359,8 @@ export const irregularVerbs = {
     Italian: "cadere",
     level: "essential",
     image: "/images/vocab/fall.jpg",
-    multiple_choice_ps: [],
-    multiple_choice_pp: []
+    multiple_choice_ps: ["falled", "fallten", "felt"],
+    multiple_choice_pp: ["falled", "fallten", "felt"]
   },
 
   speak: {
@@ -372,8 +372,8 @@ export const irregularVerbs = {
     Italian: "parlare",
     level: "essential",
     image: "/images/vocab/speak.jpg",
-    multiple_choice_ps: [],
-    multiple_choice_pp: []
+    multiple_choice_ps: ["speaked", "spook", "spake"],
+    multiple_choice_pp: ["speaked", "spok", "spaken"]
   },
 
   break: {
@@ -385,8 +385,8 @@ export const irregularVerbs = {
     Italian: "rompere",
     level: "essential",
     image: "/images/vocab/break.jpg",
-    multiple_choice_ps: [],
-    multiple_choice_pp: []
+    multiple_choice_ps: ["breaked", "broked", "brook"],
+    multiple_choice_pp: ["breaked", "broked", "braken"]
   },
 
   come: {
@@ -398,8 +398,8 @@ export const irregularVerbs = {
     Italian: "venire",
     level: "essential",
     image: "/images/vocab/come.jpg",
-    multiple_choice_ps: [],
-    multiple_choice_pp: []
+    multiple_choice_ps: ["comed", "come", "camen"],
+    multiple_choice_pp: ["comed", "came", "camen"]
   },
 
   wear: {
@@ -411,8 +411,8 @@ export const irregularVerbs = {
     Italian: "indossare",
     level: "essential",
     image: "/images/vocab/wear_v.jpg",
-    multiple_choice_ps: [],
-    multiple_choice_pp: []
+    multiple_choice_ps: ["weared", "wored", "worned"],
+    multiple_choice_pp: ["weared", "wored", "worned"]
   },
 
   win: {
@@ -424,8 +424,8 @@ export const irregularVerbs = {
     Italian: "vincere",
     level: "essential",
     image: "/images/vocab/win.jpg",
-    multiple_choice_ps: [],
-    multiple_choice_pp: []
+    multiple_choice_ps: ["winned", "wonned", "wan"],
+    multiple_choice_pp: ["winned", "wonned", "wan"]
   },
 
   take: {
@@ -437,8 +437,8 @@ export const irregularVerbs = {
     Italian: "prendere",
     level: "essential",
     image: "/images/vocab/take.jpg",
-    multiple_choice_ps: [],
-    multiple_choice_pp: []
+    multiple_choice_ps: ["taked", "tok", "tik"],
+    multiple_choice_pp: ["taked", "tooked", "token"]
   },
 
   leave: {
@@ -450,8 +450,8 @@ export const irregularVerbs = {
     Italian: "lasciare",
     level: "essential",
     image: "/images/vocab/leave.jpg",
-    multiple_choice_ps: [],
-    multiple_choice_pp: []
+    multiple_choice_ps: ["leaved", "loaf", "lefted"],
+    multiple_choice_pp: ["leaved", "loaf", "leaven"]
   },
 
   bring: {
@@ -463,8 +463,8 @@ export const irregularVerbs = {
     Italian: "portare",
     level: "essential",
     image: "/images/vocab/bring.jpg",
-    multiple_choice_ps: [],
-    multiple_choice_pp: []
+    multiple_choice_ps: ["bringed", "brang", "brog"],
+    multiple_choice_pp: ["bringed", "brung", "brot"]
   },
 
   begin: {
@@ -476,8 +476,8 @@ export const irregularVerbs = {
     Italian: "iniziare",
     level: "essential",
     image: "/images/vocab/begin.jpg",
-    multiple_choice_ps: [],
-    multiple_choice_pp: []
+    multiple_choice_ps: ["beginned", "begun", "begon"],
+    multiple_choice_pp: ["begot", "began", "begon"]
   },
 
   teach: {
@@ -489,8 +489,8 @@ export const irregularVerbs = {
     Italian: "insegnare",
     level: "essential",
     image: "/images/vocab/teach.jpg",
-    multiple_choice_ps: [],
-    multiple_choice_pp: []
+    multiple_choice_ps: ["tang", "taughted", "tought"],
+    multiple_choice_pp: ["tung", "tought", "tang"]
   },
 
   steal: {
@@ -502,8 +502,8 @@ export const irregularVerbs = {
     Italian: "rubare",
     level: "essential",
     image: "/images/vocab/steal.jpg",
-    multiple_choice_ps: [],
-    multiple_choice_pp: []
+    multiple_choice_ps: ["stealed", "stool", "stolened"],
+    multiple_choice_pp: ["stealed", "stole", "stealen"]
   },
 
   catch: {
@@ -515,8 +515,8 @@ export const irregularVerbs = {
     Italian: "catturare",
     level: "essential",
     image: "/images/vocab/catch.jpg",
-    multiple_choice_ps: [],
-    multiple_choice_pp: []
+    multiple_choice_ps: ["catched", "cought", "cot"],
+    multiple_choice_pp: ["catched", "cought", "caughten"]
   },
 
   throw: {
@@ -528,8 +528,8 @@ export const irregularVerbs = {
     Italian: "lanciare",
     level: "essential",
     image: "/images/vocab/throw.jpg",
-    multiple_choice_ps: [],
-    multiple_choice_pp: []
+    multiple_choice_ps: ["throwed", "threwed", "throwned"],
+    multiple_choice_pp: ["throod", "threw", "throon"]
   },
 
   sing: {
@@ -541,8 +541,8 @@ export const irregularVerbs = {
     Italian: "cantare",
     level: "essential",
     image: "/images/vocab/sing.jpg",
-    multiple_choice_ps: [],
-    multiple_choice_pp: []
+    multiple_choice_ps: ["singed", "sanged", "sung"],
+    multiple_choice_pp: ["sanged", "sang", "sungen"]
   },
 
   spend: {
@@ -554,8 +554,8 @@ export const irregularVerbs = {
     Italian: "spendere, trascorrere",
     level: "essential",
     image: "/images/vocab/spend.jpg",
-    multiple_choice_ps: [],
-    multiple_choice_pp: []
+    multiple_choice_ps: ["spended", "spant", "spand"],
+    multiple_choice_pp: ["spended", "gespent", "spenden"]
   },
 
   fight: {
@@ -567,8 +567,8 @@ export const irregularVerbs = {
     Italian: "combattere",
     level: "essential",
     image: "/images/vocab/fight.jpg",
-    multiple_choice_ps: [],
-    multiple_choice_pp: []
+    multiple_choice_ps: ["fighted", "foughted", "foughten"],
+    multiple_choice_pp: ["fighted", "foughted", "foughten"]
   },
 
   forgive: {
@@ -580,8 +580,8 @@ export const irregularVerbs = {
     Italian: "perdonare",
     level: "essential",
     image: "/images/vocab/forgive.jpg",
-    multiple_choice_ps: [],
-    multiple_choice_pp: []
+    multiple_choice_ps: ["forgived", "forgove", "forgiven"],
+    multiple_choice_pp: ["forgived", "forgoven", "forgaven"]
   },
 
   hide: {
@@ -593,8 +593,8 @@ export const irregularVerbs = {
     Italian: "nascondere",
     level: "essential",
     image: "/images/vocab/hide.jpg",
-    multiple_choice_ps: [],
-    multiple_choice_pp: []
+    multiple_choice_ps: ["hided", "had", "hiden"],
+    multiple_choice_pp: ["hided", "hoed", "hitten"]
   },
 
   rise: {
@@ -606,8 +606,8 @@ export const irregularVerbs = {
     Italian: "salire",
     level: "essential",
     image: "/images/vocab/rise.jpg",
-    multiple_choice_ps: [],
-    multiple_choice_pp: []
+    multiple_choice_ps: ["raised", "rosed", "rase"],
+    multiple_choice_pp: ["raised", "rosed", "rosen"]
   },
 
   show: {
@@ -619,8 +619,8 @@ export const irregularVerbs = {
     Italian: "mostrare",
     level: "essential",
     image: "/images/vocab/show.jpg",
-    multiple_choice_ps: [],
-    multiple_choice_pp: []
+    multiple_choice_ps: ["shode", "showed", "shat"],
+    multiple_choice_pp: ["shod", "shoon", "showned"]
   },
 
   mean: {
@@ -632,8 +632,8 @@ export const irregularVerbs = {
     Italian: "significare",
     level: "essential",
     image: "/images/vocab/mean.jpg",
-    multiple_choice_ps: [],
-    multiple_choice_pp: []
+    multiple_choice_ps: ["meaned", "moon", "meened"],
+    multiple_choice_pp: ["meaned", "meint", "meened"]
   },
 
   deal: {
@@ -645,8 +645,8 @@ export const irregularVerbs = {
     Italian: "trattare",
     level: "essential",
     image: "/images/vocab/deal.jpg",
-    multiple_choice_ps: [],
-    multiple_choice_pp: []
+    multiple_choice_ps: ["dealed", "dool", "doled"],
+    multiple_choice_pp: ["dealed", "dool", "doled"]
   },
 
   wake: {
@@ -658,8 +658,8 @@ export const irregularVerbs = {
     Italian: "svegliarsi",
     level: "essential",
     image: "/images/vocab/wake.jpg",
-    multiple_choice_ps: [],
-    multiple_choice_pp: []
+    multiple_choice_ps: ["waked", "wook", "wok"],
+    multiple_choice_pp: ["waked", "wook", "waken"]
   },
 
   drink: {
@@ -671,8 +671,8 @@ export const irregularVerbs = {
     Italian: "bere",
     level: "essential",
     image: "/images/vocab/drink.jpg",
-    multiple_choice_ps: [],
-    multiple_choice_pp: []
+    multiple_choice_ps: ["drinked", "drunk", "drunked"],
+    multiple_choice_pp: ["drinked", "drank", "drunked"]
   },
 
   freeze: {
@@ -684,8 +684,8 @@ export const irregularVerbs = {
     Italian: "gelare",
     level: "essential",
     image: "/images/vocab/freeze.jpg",
-    multiple_choice_ps: [],
-    multiple_choice_pp: []
+    multiple_choice_ps: ["freezed", "fraze", "frooze"],
+    multiple_choice_pp: ["freezed", "frazen", "froozen"]
   },
 
   choose: {
@@ -697,8 +697,8 @@ export const irregularVerbs = {
     Italian: "scegliere",
     level: "essential",
     image: "/images/vocab/choose.jpg",
-    multiple_choice_ps: [],
-    multiple_choice_pp: []
+    multiple_choice_ps: ["choosed", "chase", "cheese"],
+    multiple_choice_pp: ["choosed", "choosen", "chasen"]
   },
 
   become: {
@@ -710,8 +710,8 @@ export const irregularVerbs = {
     Italian: "diventare",
     level: "essential",
     image: "/images/vocab/become.jpg",
-    multiple_choice_ps: [],
-    multiple_choice_pp: []
+    multiple_choice_ps: ["becomed", "becam", "become"],
+    multiple_choice_pp: ["becomed", "became", "becomen"]
   },
 
   set: {
@@ -723,8 +723,8 @@ export const irregularVerbs = {
     Italian: "mettere",
     level: "essential",
     image: "/images/vocab/set.jpg",
-    multiple_choice_ps: [],
-    multiple_choice_pp: []
+    multiple_choice_ps: ["setted", "sot", "sat"],
+    multiple_choice_pp: ["setted", "sot", "sat"]
   },
 
   hit: {
@@ -736,8 +736,8 @@ export const irregularVerbs = {
     Italian: "colpire",
     level: "essential",
     image: "/images/vocab/hit.jpg",
-    multiple_choice_ps: [],
-    multiple_choice_pp: []
+    multiple_choice_ps: ["hitted", "hat", "hot"],
+    multiple_choice_pp: ["hitted", "hat", "hot"]
   },
 
   cut: {
@@ -749,8 +749,8 @@ export const irregularVerbs = {
     Italian: "tagliare",
     level: "essential",
     image: "/images/vocab/cut.jpg",
-    multiple_choice_ps: [],
-    multiple_choice_pp: []
+    multiple_choice_ps: ["cutted", "cat", "cot"],
+    multiple_choice_pp: ["cutted", "cat", "cot"]
   },
 
   light: {
@@ -762,8 +762,8 @@ export const irregularVerbs = {
     Italian: "accendere",
     level: "essential",
     image: "/images/vocab/light.jpg",
-    multiple_choice_ps: [],
-    multiple_choice_pp: []
+    multiple_choice_ps: ["litted", "let", "lot"],
+    multiple_choice_pp: ["litted", "let", "litten"]
   },
 
   swim: {
@@ -775,8 +775,8 @@ export const irregularVerbs = {
     Italian: "nuotare",
     level: "essential",
     image: "/images/vocab/swim.jpg",
-    multiple_choice_ps: [],
-    multiple_choice_pp: []
+    multiple_choice_ps: ["swimed", "swum", "swammed"],
+    multiple_choice_pp: ["swimed", "swam", "swammed"]
   },
 
   sleep: {
@@ -788,8 +788,8 @@ export const irregularVerbs = {
     Italian: "dormire",
     level: "essential",
     image: "/images/vocab/sleep.jpg",
-    multiple_choice_ps: [],
-    multiple_choice_pp: []
+    multiple_choice_ps: ["sleeped", "slop", "slep"],
+    multiple_choice_pp: ["sleeped", "slop", "slep"]
   },
 
   lead: {
@@ -801,8 +801,8 @@ export const irregularVerbs = {
     Italian: "guidare",
     level: "essential",
     image: "/images/vocab/lead.jpg",
-    multiple_choice_ps: [],
-    multiple_choice_pp: []
+    multiple_choice_ps: ["leaded", "lead", "load"],
+    multiple_choice_pp: ["leaded", "lead", "load"]
   },
 
   put: {
@@ -814,8 +814,8 @@ export const irregularVerbs = {
     Italian: "mettere",
     level: "essential",
     image: "/images/vocab/put.jpg",
-    multiple_choice_ps: [],
-    multiple_choice_pp: []
+    multiple_choice_ps: ["putted", "pat", "pit"],
+    multiple_choice_pp: ["putted", "pot", "pit"]
   },
 
   dig: {
@@ -827,8 +827,8 @@ export const irregularVerbs = {
     Italian: "scavare",
     level: "essential",
     image: "/images/vocab/dig.jpg",
-    multiple_choice_ps: [],
-    multiple_choice_pp: []
+    multiple_choice_ps: ["digged", "doge", "dog"],
+    multiple_choice_pp: ["digged", "doge", "diggen"]
   },
 
   forbid: {
@@ -840,8 +840,8 @@ export const irregularVerbs = {
     Italian: "vietare",
     level: "essential",
     image: "/images/vocab/forbid.jpg",
-    multiple_choice_ps: [],
-    multiple_choice_pp: []
+    multiple_choice_ps: ["forbided", "forbad", "forbode"],
+    multiple_choice_pp: ["forbided", "forbad", "forboden"]
   },
 
   forget: {
@@ -853,8 +853,8 @@ export const irregularVerbs = {
     Italian: "dimenticare",
     level: "essential",
     image: "/images/vocab/forget.jpg",
-    multiple_choice_ps: [],
-    multiple_choice_pp: []
+    multiple_choice_ps: ["forgetted", "forgat", "forgotted"],
+    multiple_choice_pp: ["forgot", "forgat", "forgotted"]
   },
 
   get: {
@@ -866,8 +866,8 @@ export const irregularVerbs = {
     Italian: "ottenere",
     level: "essential",
     image: "/images/vocab/get.jpg",
-    multiple_choice_ps: [],
-    multiple_choice_pp: []
+    multiple_choice_ps: ["getted", "gat", "gotted"],
+    multiple_choice_pp: ["gat", "godden", "gotted"]
   },
 
   sit: {
@@ -879,8 +879,8 @@ export const irregularVerbs = {
     Italian: "sedersi",
     level: "essential",
     image: "/images/vocab/sit.jpg",
-    multiple_choice_ps: [],
-    multiple_choice_pp: []
+    multiple_choice_ps: ["sitted", "sit", "set"],
+    multiple_choice_pp: ["sitted", "sit", "sitten"]
   },
 
   grow: {
@@ -892,8 +892,8 @@ export const irregularVerbs = {
     Italian: "crescere",
     level: "essential",
     image: "/images/vocab/grow.jpg",
-    multiple_choice_ps: [],
-    multiple_choice_pp: []
+    multiple_choice_ps: ["growed", "graw", "groo"],
+    multiple_choice_pp: ["growed", "grewn", "groan"]
   },
 
   hold: {
@@ -905,8 +905,8 @@ export const irregularVerbs = {
     Italian: "tenere",
     level: "essential",
     image: "/images/vocab/hold.jpg",
-    multiple_choice_ps: [],
-    multiple_choice_pp: []
+    multiple_choice_ps: ["healed", "helded", "holed"],
+    multiple_choice_pp: ["holded", "helded", "holden"]
   },
 
   tell: {
@@ -918,8 +918,8 @@ export const irregularVerbs = {
     Italian: "dire, raccontare",
     level: "essential",
     image: "/images/vocab/tell.jpg",
-    multiple_choice_ps: [],
-    multiple_choice_pp: []
+    multiple_choice_ps: ["telled", "tolded", "tolled"],
+    multiple_choice_pp: ["teld", "tellen", "tollen"]
   },
 
   say: {
@@ -931,8 +931,8 @@ export const irregularVerbs = {
     Italian: "dire",
     level: "essential",
     image: "/images/vocab/say.jpg",
-    multiple_choice_ps: [],
-    multiple_choice_pp: []
+    multiple_choice_ps: ["sayed", "sed", "seed"],
+    multiple_choice_pp: ["sayed", "saided", "sain"]
   },
 
   let: {
@@ -944,8 +944,8 @@ export const irregularVerbs = {
     Italian: "lasciare",
     level: "essential",
     image: "/images/vocab/let.jpg",
-    multiple_choice_ps: [],
-    multiple_choice_pp: []
+    multiple_choice_ps: ["letted", "lat", "lit"],
+    multiple_choice_pp: ["letted", "lit", "letten"]
   },
 
   fly: {
@@ -957,8 +957,8 @@ export const irregularVerbs = {
     Italian: "volare",
     level: "essential",
     image: "/images/vocab/fly.jpg",
-    multiple_choice_ps: [],
-    multiple_choice_pp: []
+    multiple_choice_ps: ["flied", "flow", "fled"],
+    multiple_choice_pp: ["flied", "fled", "flewn"]
   },
    // ADVANCED VERBS -----------------------------------------------------------------------
   bear: {
@@ -1016,14 +1016,14 @@ export const irregularVerbs = {
   bid: {
     definition: "to offer a price for something",
     past_simple: ["bid"],
-    present_perfect: ["bid"],
+    present_perfect: ["bid", "bidden"],
     French: "offrir",
     German: "bieten",
     Italian: "offrire",
     level: "advanced",
     image: "/images/vocab/bid.jpg",
     multiple_choice_ps: ["bidded", "bad", "bade"],
-    multiple_choice_pp: ["bidded", "bidden", "bade"]
+    multiple_choice_pp: ["bidded", "boden", "baden"]
   },
 
   bite: {
@@ -1035,8 +1035,8 @@ export const irregularVerbs = {
     Italian: "mordere",
     level: "advanced",
     image: "/images/vocab/bite.jpg",
-    multiple_choice_ps: ["bote", "bited", "bitte"],
-    multiple_choice_pp: ["biten", "bote", "bittenn"]
+    multiple_choice_ps: ["bote", "bited", "bat"],
+    multiple_choice_pp: ["bat", "bote", "boten"]
   },
 
   bleed: {
@@ -1074,8 +1074,8 @@ export const irregularVerbs = {
     Italian: "trasmettere",
     level: "advanced",
     image: "/images/vocab/broadcast.jpg",
-    multiple_choice_ps: ["broadcasted", "brodcast", "broadcest"],
-    multiple_choice_pp: ["broadcasted", "broadcasten", "brodcast"]
+    multiple_choice_ps: ["broadcasted", "broadcost", "broadcalt"],
+    multiple_choice_pp: ["broadcasted", "broadcasten", "broodcast"]
   },
 
   cast: {
@@ -1101,7 +1101,7 @@ export const irregularVerbs = {
     level: "advanced",
     image: "/images/vocab/cling.jpg",
     multiple_choice_ps: ["clanged", "clinged", "clong"],
-    multiple_choice_pp: ["clinged", "clungen", "clong"]
+    multiple_choice_pp: ["clinged", "clungen", "McClung"]
   },
 
   creep: {
@@ -1139,8 +1139,8 @@ export const irregularVerbs = {
     Italian: "predire",
     level: "advanced",
     image: "/images/vocab/foretell.jpg",
-    multiple_choice_ps: ["foretelled", "foretelt", "fortold"],
-    multiple_choice_pp: ["foretelled", "foretolden", "fortold"]
+    multiple_choice_ps: ["foretelled", "foretelt", "fortole"],
+    multiple_choice_pp: ["foretelled", "foretolden", "fortollen"]
   },
 
   grind: {
@@ -1204,7 +1204,7 @@ export const irregularVerbs = {
     Italian: "prestare",
     level: "advanced",
     image: "/images/vocab/lend.jpg",
-    multiple_choice_ps: ["lended", "land", "lentt"],
+    multiple_choice_ps: ["lended", "land", "lentet"],
     multiple_choice_pp: ["lended", "lenten", "land"]
   },
 
@@ -1217,8 +1217,8 @@ export const irregularVerbs = {
     Italian: "compensare",
     level: "advanced",
     image: "/images/vocab/offset.jpg",
-    multiple_choice_ps: ["offsetted", "ofset", "offet"],
-    multiple_choice_pp: ["offsetted", "offseten", "ofset"]
+    multiple_choice_ps: ["offsetted", "offsit", "offsote"],
+    multiple_choice_pp: ["offsetted", "offseten", "offsat"]
   },
 
   ride: {
@@ -1243,7 +1243,7 @@ export const irregularVerbs = {
     Italian: "suonare",
     level: "advanced",
     image: "/images/vocab/ring.jpg",
-    multiple_choice_ps: ["ringed", "rong", "rangh"],
+    multiple_choice_ps: ["ringed", "rong", "rung"],
     multiple_choice_pp: ["ringed", "rungen", "rong"]
   },
 
@@ -1308,7 +1308,7 @@ export const irregularVerbs = {
     Italian: "restringersi",
     level: "advanced",
     image: "/images/vocab/shrink.jpg",
-    multiple_choice_ps: ["shrunk", "shrinked", "shrankk"],
+    multiple_choice_ps: ["shrunk", "shrinked", "shronk"],
     multiple_choice_pp: ["shrinken", "shrunked", "shrank"]
   },
 
@@ -1321,7 +1321,7 @@ export const irregularVerbs = {
     Italian: "chiudere",
     level: "advanced",
     image: "/images/vocab/shut.jpg",
-    multiple_choice_ps: ["shutted", "shat", "shutt"],
+    multiple_choice_ps: ["shutted", "shat", "shot"],
     multiple_choice_pp: ["shutted", "shuten", "shat"]
   },
 
@@ -1386,7 +1386,7 @@ export const irregularVerbs = {
     Italian: "filare",
     level: "advanced",
     image: "/images/vocab/spin.jpg",
-    multiple_choice_ps: ["spinned", "span", "spunn"],
+    multiple_choice_ps: ["spinned", "span", "spon"],
     multiple_choice_pp: ["spinned", "spunen", "span"]
   },
 

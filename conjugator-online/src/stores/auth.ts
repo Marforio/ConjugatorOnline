@@ -1,16 +1,26 @@
 // src/stores/auth.ts
 import { defineStore } from "pinia";
-import { ref, computed, onMounted, nextTick } from "vue";
-import { 
-  apiLogin, apiRefresh, apiValidateToken, 
-  saveTokens, clearTokens, 
-  getAccessToken, getRefreshToken 
+import { ref, computed, nextTick } from "vue";
+import {
+  apiLogin, apiRefresh, apiValidateToken,
+  saveTokens, clearTokens,
+  getAccessToken, getRefreshToken
 } from "@/services/auth";
+
+function parseJwt(token: string | null): any | null {
+  if (!token) return null;
+  try {
+    const payload = token.split(".")[1];
+    return JSON.parse(atob(payload));
+  } catch {
+    return null;
+  }
+}
 
 export const useAuthStore = defineStore("auth", () => {
   const access = ref<string | null>(null);
   const refresh = ref<string | null>(null);
-  const isRestored = ref(false); // new: hydration flag
+  const isRestored = ref(false);
 
   function emitTokenRefreshed(newAccessToken: string) {
     window.dispatchEvent(
@@ -19,27 +29,36 @@ export const useAuthStore = defineStore("auth", () => {
       })
     );
   }
-  
-  // Session restoration (hydration)
+
+  function emitAuthInvalid() {
+    window.dispatchEvent(new CustomEvent("auth:invalid"));
+  }
+
   function restoreSession() {
     access.value = getAccessToken();
     refresh.value = getRefreshToken();
     isRestored.value = true;
   }
 
-  // Immediate restore on store creation / component mount
-  if (typeof window !== 'undefined') {
+  if (typeof window !== "undefined") {
     restoreSession();
   }
 
   const isLoggedIn = computed(() => !!access.value);
+
+  function isAccessTokenExpired(skewSec = 10): boolean {
+    const payload = parseJwt(access.value);
+    if (!payload?.exp) return true;
+    const nowSec = Math.floor(Date.now() / 1000);
+    return payload.exp <= (nowSec + skewSec);
+  }
 
   async function login(username: string, password: string) {
     const res = await apiLogin(username, password);
     access.value = res.data.access;
     refresh.value = res.data.refresh;
     saveTokens(res.data.access, res.data.refresh);
-    isRestored.value = true; // Set hydrated after login
+    isRestored.value = true;
     return res.data.access;
   }
 
@@ -48,10 +67,7 @@ export const useAuthStore = defineStore("auth", () => {
     const res = await apiRefresh(refresh.value);
     access.value = res.data.access;
     saveTokens(res.data.access, refresh.value);
-
-    // notify websocket consumers
     emitTokenRefreshed(res.data.access);
-
     return res.data.access;
   }
 
@@ -60,14 +76,13 @@ export const useAuthStore = defineStore("auth", () => {
     refresh.value = null;
     isRestored.value = false;
     clearTokens();
+    emitAuthInvalid();
   }
 
   async function validateSession(): Promise<boolean> {
     await nextTick();
 
-    // Hydrate from localStorage if not hydrated
     if (!isRestored.value) restoreSession();
-
     if (!access.value) return false;
 
     if (isAccessTokenExpired()) {
@@ -80,6 +95,7 @@ export const useAuthStore = defineStore("auth", () => {
         return false;
       }
     }
+
     try {
       await apiValidateToken();
       return true;
@@ -95,21 +111,16 @@ export const useAuthStore = defineStore("auth", () => {
     }
   }
 
-  function isAccessTokenExpired(): boolean {
-    const expiry = parseInt(localStorage.getItem("access_expiry") || "0");
-    return Date.now() > expiry;
-  }
-
   return {
     access,
     refresh,
-    isRestored,    
+    isRestored,
     isLoggedIn,
     login,
     logout,
     refreshAccessToken,
     validateSession,
     isAccessTokenExpired,
-    restoreSession, // EXPORTED for early call if needed
+    restoreSession,
   };
 });

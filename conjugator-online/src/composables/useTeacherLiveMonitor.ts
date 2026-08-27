@@ -1,4 +1,5 @@
 import { ref } from 'vue';
+import { useAuthStore } from '@/stores/auth';
 
 type PresenceStudent = {
   student_id: number;
@@ -23,6 +24,8 @@ type ActivityEvent = {
 };
 
 export function useTeacherLiveMonitor() {
+  const auth = useAuthStore();
+
   const socket = ref<WebSocket | null>(null);
   const isWsConnected = ref(false);
   const wsError = ref<string | null>(null);
@@ -32,6 +35,7 @@ export function useTeacherLiveMonitor() {
 
   let reconnectTimer: number | null = null;
   let reconnectAttempts = 0;
+  let authBlocked = false;
 
   const maxEvents = 200;
 
@@ -40,16 +44,43 @@ export function useTeacherLiveMonitor() {
     return `${protocol}://${window.location.host}`;
   }
 
-  function connect() {
+  function stopReconnect(reason: string) {
+    authBlocked = true;
+    if (reconnectTimer) {
+      clearTimeout(reconnectTimer);
+      reconnectTimer = null;
+    }
+    wsError.value = reason;
+  }
+
+  async function getValidAccessToken(): Promise<string | null> {
+    if (!auth.access) return null;
+    if (!auth.isAccessTokenExpired()) return auth.access;
+    try {
+      await auth.refreshAccessToken();
+      return auth.access;
+    } catch {
+      return null;
+    }
+  }
+
+  async function connect() {
     cleanupSocketOnly();
 
-    const url = `${wsBase()}/ws/teacher/live/`;
+    const token = await getValidAccessToken();
+    if (!token) {
+      stopReconnect('No valid auth token for teacher websocket');
+      return;
+    }
+
+    const url = `${wsBase()}/ws/teacher/live/?token=${encodeURIComponent(token)}`;
     socket.value = new WebSocket(url);
 
     socket.value.onopen = () => {
       isWsConnected.value = true;
       wsError.value = null;
       reconnectAttempts = 0;
+      authBlocked = false;
     };
 
     socket.value.onmessage = (evt) => {
@@ -58,9 +89,7 @@ export function useTeacherLiveMonitor() {
 
         if (msg.type === 'presence.snapshot') {
           const next: Record<number, PresenceStudent> = {};
-          for (const s of msg.students || []) {
-            next[s.student_id] = s;
-          }
+          for (const s of msg.students || []) next[s.student_id] = s;
           presenceMap.value = next;
           return;
         }
@@ -80,15 +109,22 @@ export function useTeacherLiveMonitor() {
           if (liveEvents.value.length > maxEvents) {
             liveEvents.value = liveEvents.value.slice(0, maxEvents);
           }
-          return;
         }
       } catch {
         // no-op
       }
     };
 
-    socket.value.onclose = () => {
+    socket.value.onclose = (evt) => {
       isWsConnected.value = false;
+      socket.value = null;
+
+      // stop loop on auth/policy close patterns
+      if (evt.code === 4403 || evt.code === 1008) {
+        stopReconnect(`Teacher websocket rejected (${evt.code})`);
+        return;
+      }
+
       scheduleReconnect();
     };
 
@@ -98,6 +134,7 @@ export function useTeacherLiveMonitor() {
   }
 
   function scheduleReconnect() {
+    if (authBlocked) return;
     if (reconnectTimer) return;
     reconnectAttempts += 1;
     const backoff = Math.min(10000, 1000 * Math.pow(2, Math.min(reconnectAttempts, 4)));
@@ -108,6 +145,7 @@ export function useTeacherLiveMonitor() {
   }
 
   function disconnect() {
+    authBlocked = true;
     if (reconnectTimer) {
       clearTimeout(reconnectTimer);
       reconnectTimer = null;
@@ -122,11 +160,7 @@ export function useTeacherLiveMonitor() {
     socket.value.onmessage = null;
     socket.value.onclose = null;
     socket.value.onerror = null;
-    try {
-      socket.value.close();
-    } catch {
-      // no-op
-    }
+    try { socket.value.close(); } catch {}
     socket.value = null;
   }
 
@@ -134,6 +168,16 @@ export function useTeacherLiveMonitor() {
     if (socket.value && socket.value.readyState === WebSocket.OPEN) {
       socket.value.send(JSON.stringify({ type: 'presence.snapshot.request' }));
     }
+  }
+
+  // resume only when token refreshed successfully
+  function onTokenRefreshed() {
+    authBlocked = false;
+    connect();
+  }
+
+  if (typeof window !== 'undefined') {
+    window.addEventListener('auth:token-refreshed', onTokenRefreshed as EventListener);
   }
 
   return {
