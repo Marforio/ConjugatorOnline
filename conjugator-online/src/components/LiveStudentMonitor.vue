@@ -138,7 +138,7 @@
 
       <v-col cols="12" md="5" class="pl-md-4 mt-6 mt-md-0">
         <div class="text-overline font-weight-black text-slate-400 tracking-wider mb-4 px-1">
-          Latest activity
+          Latest events
         </div>
 
         <v-text-field
@@ -318,17 +318,6 @@ function mapPresenceToOnlineStudent(s: WsPresence): OnlineStudent {
   };
 }
 
-function mapEventToRecentActivity(e: WsActivityEvent): RecentActivity {
-  return {
-    id: -Date.now() - Math.floor(Math.random() * 1000),
-    student: e.student_id,
-    student_initials: e.student_initials || "??",
-    activity_type: e.activity_type || "other_game",
-    activity_name: e.activity_name || "Activity",
-    description: e.description || e.activity_name || "Activity",
-    timestamp: e.timestamp || new Date().toISOString(),
-  };
-}
 
 function syncOnlineFromPresenceMap() {
   const students = Object.values(presenceMap.value as Record<number, WsPresence>)
@@ -339,28 +328,6 @@ function syncOnlineFromPresenceMap() {
   lastUpdate.value = new Date();
 }
 
-function syncRecentFromLiveEvents() {
-  const mapped = (liveEvents.value as WsActivityEvent[])
-    .map(mapEventToRecentActivity)
-    .slice(0, MAX_EVENTS);
-
-  // Keep existing list but prefer WS newest at top; avoid simple duplicates
-  const merged: RecentActivity[] = [...mapped];
-  for (const item of recentActivities.value) {
-    const exists = merged.find(
-      (m) =>
-        m.student === item.student &&
-        m.activity_type === item.activity_type &&
-        m.activity_name === item.activity_name &&
-        m.timestamp === item.timestamp
-    );
-    if (!exists) merged.push(item);
-    if (merged.length >= MAX_EVENTS) break;
-  }
-
-  recentActivities.value = merged.slice(0, MAX_EVENTS);
-  lastUpdate.value = new Date();
-}
 
 // React to composable websocket state
 watch(
@@ -371,13 +338,6 @@ watch(
   { deep: true }
 );
 
-watch(
-  liveEvents,
-  () => {
-    syncRecentFromLiveEvents();
-  },
-  { deep: true }
-);
 
 // ---- REST fallback / hydration ----------------------------------------------
 

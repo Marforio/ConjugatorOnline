@@ -1,5 +1,5 @@
 <template>
-  <v-col cols="12" md="6" class="d-flex">
+  <v-col cols="12" md="8" class="d-flex">
     <v-card
       class="pa-5 d-flex flex-column justify-space-between bg-orange-panel rounded-xl border-orange w-100 shadow-sm"
       elevation="0"
@@ -83,22 +83,20 @@
         <v-expand-transition>
           <div v-if="selectedErrorDetail" class="mt-4 pt-4 border-t border-orange-200">
             <div class="text-xs font-weight-bold text-orange-header mb-2">
-              {{ formatErrorCode(selectedErrorDetail.type) }}
-            </div>
-            <div class="text-xs leading-relaxed text-grey-darken-2 mb-3">
-              {{ selectedErrorDetail.label }}
+              {{ formatErrorCode(selectedErrorDetail.type) }} <span class="text-xs ms-1 font-weight-medium leading-relaxed text-grey-darken-2">
+              ({{ selectedErrorDetail.label }})</span>
             </div>
 
             <!-- Examples -->
             <div v-if="selectedExamples.length" class="bg-orange-50 rounded-lg pa-2 mb-3">
-              <div class="text-xxs font-weight-bold text-orange-header mb-2">Recent Examples:</div>
+              <div class="text-xxs font-weight-bold text-orange-header mb-2">Most recent examples from the game:</div>
               <div
                 v-for="(example, i) in selectedExamples.slice(0, 3)"
                 :key="i"
-                class="text-xxs mb-2 last:mb-0 pb-2 last:pb-0 border-b border-orange-100 last:border-0"
+                class="text-xxs ms-2 mb-2 last:mb-0 pb-2 last:pb-0 border-b border-orange-100 last:border-0"
               >
                 <div class="text-grey-darken-3 mb-1">
-                  <span class="font-weight-bold">{{ example.verb }}</span>
+                  <span class="font-weight-bold me-2">{{ example.verb }}</span>
                   <span class="text-grey-darken-1">({{ example.tense }})</span>
                 </div>
                 <div class="d-flex justify-space-between">
@@ -127,7 +125,7 @@
           class="text-none font-weight-bold"
           @click="resetSelection"
         >
-          Clear
+          Close
         </v-btn>
         <v-btn
           size="small"
@@ -135,6 +133,8 @@
           color="orange-darken-2"
           class="text-none font-weight-bold"
           @click="downloadReport"
+          disabled
+          hidden
         >
           <v-icon size="16" class="me-1">mdi-download</v-icon>
           Report

@@ -24,19 +24,19 @@
                 {{ percentCorrect }}% <span class="text-caption text-slate-500 font-weight-bold ml-1">Score</span>
               </div>
               <div class="text-caption text-slate-500 mt-1 font-weight-medium">
-                Successfully resolved {{ finalStats.correct_count }} out of {{ totalRounds }} verbs.
+                Successfully wrote {{ finalStats.correct_count }} out of {{ totalRounds }} conjugations.
               </div>
             </div>
 
             <!-- Speed summary metric tile -->
             <div class="bg-slate-50 border rounded-xl pa-4">
-              <div class="text-overline font-weight-bold text-slate-400 tracking-wider mb-1">Pace Velocity</div>
+              <div class="text-overline font-weight-bold text-slate-400 tracking-wider mb-1">Speed</div>
               <div class="text-h5 font-weight-black text-slate-900 leading-none d-flex align-baseline">
                 {{ avgTimePerPrompt }}s <span class="text-caption text-slate-500 font-weight-bold ml-1">avg round</span>
               </div>
               <div v-if="parseFloat(String(avgTimePerPrompt)) < 10 && parseFloat(String(percentCorrect)) > 70" class="text-caption text-success font-weight-bold mt-2 d-flex align-center">
                 <v-icon size="14" class="mr-1" color="success">mdi-star-face</v-icon>
-                Excellent reflex mastery and accuracy!
+                Excellent mastery and accuracy!
               </div>
             </div>
 
@@ -108,36 +108,37 @@
                     :style="{ transform: `translateX(-${correctScrollPosition * (100 / visibleCardsCount)}%)` }"
                   >
                     <v-card
-                      v-for="(result, index) in correctResults"
-                      :key="'correct-' + index"
-                      class="result-deck-card border rounded-xl pa-4 bg-white accent-border-success carousel-card"
-                      flat
-                    >
+                        v-for="(result, index) in correctResults"
+                        :key="'correct-' + index"
+                        class="result-deck-card border rounded-xl pa-4 bg-white carousel-card"
+                        :class="isTypoRound(result) ? 'accent-border-info' : 'accent-border-success'"
+                        flat
+                      >
                       <div class="d-flex align-center justify-space-between mb-2">
                         <span class="text-caption font-weight-black text-slate-400 text-uppercase">
                           Q{{ result.prompt_number }}
                         </span>
-                        <v-chip size="x-small" color="success" variant="flat" class="font-weight-bold">
+                        <span v-if="isTypoRound(result)" class="text-xxs font-weight-bold text-info">Typo (correct)</span>
+                        <v-chip size="x-small" :color="isTypoRound(result) ? 'info' : 'success'" variant="flat" class="font-weight-bold">
                           {{ result.elapsed_time }}s
                         </v-chip>
                       </div>
                       
                       <div class="text-center bg-slate-50 border rounded-lg py-2 my-2">
                         <div class="text-xxs font-weight-bold text-slate-400 leading-none">Your Answer</div>
-                        <div class="text-body-2 font-weight-black text-success mt-1">
+                        <div class="text-body-2 font-weight-black mt-1" :class="isTypoRound(result) ? 'text-info' : 'text-success'">
                           <em>{{ result.user_answer || '—' }}</em>
                         </div>
                       </div>
 
-                      <div class="text-xxs font-weight-bold text-slate-400 mt-3 mb-1">Parameters</div>
+                      <div class="text-xxs font-weight-bold text-slate-400 mt-3 mb-1">Prompt</div>
                       <div class="prompt-meta-mini rounded-lg border pa-2 bg-white text-xxs">
                         <div class="d-flex justify-space-between mb-0.5"><span class="text-slate-400">Verb:</span><span class="font-weight-bold text-slate-800">{{ result.verb }}</span></div>
                         <div class="d-flex justify-space-between mb-0.5"><span class="text-slate-400">Subject:</span><span class="font-weight-bold text-slate-700">{{ result.person }}</span></div>
                         <div class="d-flex justify-space-between mb-0.5"><span class="text-slate-400">Tense:</span><span class="font-weight-bold text-slate-700 text-truncate">{{ result.tense }}</span></div>
                         <div class="d-flex justify-space-between"><span class="text-slate-400">Type:</span><span class="font-weight-bold text-slate-700">{{ result.sentence_type }}</span></div>
+                        <div class="d-flex justify-space-between"><span class="text-slate-400">Difficulty:</span><span class="font-weight-bold text-slate-700">{{ result.difficulty_score }}</span></div>
                       </div>
-
-                      <!-- Difficulty Score -->
                     </v-card>
                   </div>
                 </div>
@@ -155,7 +156,7 @@
             <v-expansion-panel-text class="pt-4 px-4 pb-4">
               <div v-if="wrongResults.length === 0" class="pa-4">
                 <v-alert type="success" variant="tonal" class="rounded-xl text-body-2" density="comfortable">
-                  Flawless execution! No incorrect answers recorded. 🌟
+                  Perfect execution! No incorrect answers recorded. 🌟
                 </v-alert>
               </div>
 
@@ -226,12 +227,13 @@
                         </div>
                       </div>
 
-                      <div class="text-xxs font-weight-bold text-slate-400 mt-2 mb-1">Target</div>
+                      <div class="text-xxs font-weight-bold text-slate-400 mt-2 mb-1">Prompt</div>
                       <div class="prompt-meta-mini rounded-lg border pa-2 bg-white text-xxs mb-2">
                         <div class="d-flex justify-space-between mb-0.5"><span class="text-slate-400">Verb:</span><span class="font-weight-bold text-slate-800">{{ result.verb }}</span></div>
                         <div class="d-flex justify-space-between mb-0.5"><span class="text-slate-400">Subject:</span><span class="font-weight-bold text-slate-700">{{ result.person }}</span></div>
                         <div class="d-flex justify-space-between mb-0.5"><span class="text-slate-400">Tense:</span><span class="font-weight-bold text-slate-700 text-truncate">{{ result.tense }}</span></div>
                         <div class="d-flex justify-space-between"><span class="text-slate-400">Type:</span><span class="font-weight-bold text-slate-700">{{ result.sentence_type }}</span></div>
+                        <div class="d-flex justify-space-between"><span class="text-slate-400">Difficulty:</span><span class="font-weight-bold text-slate-700">{{ result.difficulty_score }}</span></div>
                       </div>
 
                       <div class="text-xxs text-slate-500 font-weight-medium mb-2">
@@ -269,8 +271,6 @@
                         </v-tooltip>
                       </div>
 
-                      <!-- Difficulty Score -->
-
                       <v-btn
                         block
                         size="x-small"
@@ -279,8 +279,11 @@
                         class="mt-auto rounded-lg text-none font-weight-bold text-xxs"
                         prepend-icon="mdi-robot-outline"
                         @click="openTutorForRound(result)"
+                        width="100px"
+                        max-height="32"
+                        min-height="32"
                       >
-                        AI Help
+                        AI Tutor: Why is this wrong?
                       </v-btn>
                     </v-card>
                   </div>
@@ -304,72 +307,59 @@
     </v-row>
   </v-container>
 
-  <!-- AI Tutor Chat Component Modal -->
-  <v-dialog v-model="aiOpen" max-width="560px" scrollable transition="dialog-bottom-transition">
-    <v-card class="rounded-xl border bg-white text-slate-800" v-if="aiContext">
-      <v-card-title class="pa-4 d-flex align-center border-b bg-slate-50">
-        <v-avatar color="blue-lighten-5" size="36" class="mr-3">
-          <v-icon color="primary" size="20">mdi-robot-outline</v-icon>
-        </v-avatar>
-        <div>
-          <div class="text-subtitle-1 font-weight-black line-height-tight">AI Grammar Tutor</div>
-          <div class="text-caption text-slate-500">Post-round syntax diagnostic</div>
-        </div>
-        <v-spacer />
-        <v-btn icon="mdi-close" variant="text" density="comfortable" color="slate-500" @click="aiOpen = false" />
-      </v-card-title>
+      <!-- AI Tutor -->
+      <AiTutorChatDialog
+        v-model="aiOpen"
+        title="AI Grammar Tutor"
+        :context="aiContext"
+        :build-initial-user-message="buildInitialPrompt"
+        :show-context-preview="false"
+        :reset-on-context-change="true"
+        api-url="/llm/chat/"
+        :max-tokens="300"
+        :temperature="0.4"
+      >
+        <template #context-summary="{ ctx }">
+          <div class="pa-4 bg-slate-50 border rounded-xl">
+            <div class="text-overline font-weight-bold text-slate-400 mb-2 tracking-wider">
+              Why is this wrong?
+            </div>
 
-      <!-- Context Info -->
-      <div class="pa-4 bg-slate-50 border-b">
-        <div class="text-overline font-weight-bold text-slate-400 mb-2 tracking-wider">Target Failure Profile</div>
-        <div class="bg-white border rounded-xl pa-3 text-center text-caption font-weight-medium">
-          <v-row no-gutters class="mb-2">
-            <v-col cols="6" class="border-r pb-1">
-              <span class="text-slate-400 block mb-0.5">Prompt Formula</span>
-              <span class="font-weight-black text-slate-800 text-uppercase">{{ aiContext.verb }}</span> ({{ aiContext.person }})
-            </v-col>
-            <v-col cols="6" class="pb-1">
-              <span class="text-slate-400 block mb-0.5">Tense Style</span>
-              <span class="font-weight-bold text-slate-700">{{ aiContext.tense }}</span>
-            </v-col>
-          </v-row>
-          <v-divider class="my-1.5"></v-divider>
-          <v-row no-gutters>
-            <v-col cols="6" class="border-r pt-1 text-error">
-              <span class="text-slate-400 block mb-0.5">Your Submission</span>
-              <span class="font-weight-black">"{{ aiContext.student_answer || 'Empty' }}"</span>
-            </v-col>
-            <v-col cols="6" class="pt-1 text-success">
-              <span class="text-slate-400 block mb-0.5">Acceptable Target</span>
-              <span class="font-weight-black">{{ aiContext.acceptable_answers.join(' / ') }}</span>
-            </v-col>
-          </v-row>
-        </div>
-      </div>
+            <div class="bg-white border rounded-xl pa-3 text-center text-caption font-weight-medium">
+              <v-row no-gutters class="mb-2">
+                <v-col cols="6" class="border-r pb-1">
+                  <span class="text-slate-400 d-block mb-0.5">Prompt</span>
+                  <span class="font-weight-black text-slate-800 text-uppercase">
+                    {{ ctx?.verb || "—" }}
+                  </span>
+                  ({{ ctx?.person || "—" }})
+                </v-col>
+                <v-col cols="6" class="pb-1">
+                  <span class="text-slate-400 d-block mb-0.5">Tense</span>
+                  <span class="font-weight-bold text-slate-700">{{ ctx?.tense || "—" }}</span>
+                </v-col>
+              </v-row>
 
-      <v-card-text class="pa-4 text-body-2 line-height-relaxed">
-        <AiTutorChatDialog
-          v-model="aiOpen"
-          title="AI Grammar Tutor"
-          :context="aiContext"
-          :build-initial-user-message="buildInitialPrompt"
-          :show-context-preview="false"
-          :reset-on-context-change="true"
-          api-url="/llm/chat/"
-          :max-tokens="250"
-          :temperature="0.4"
-          embed-mode
-        />
-      </v-card-text>
+              <v-divider class="my-0.5" />
 
-      <v-divider />
-      <v-card-actions class="pa-4 bg-slate-50">
-        <v-btn block color="primary" variant="flat" height="40" class="rounded-xl font-weight-bold text-none" @click="aiOpen = false">
-          Done, Close Tutor
-        </v-btn>
-      </v-card-actions>
-    </v-card>
-  </v-dialog>
+              <v-row no-gutters>
+                <v-col cols="6" class="border-r pt-1 text-error">
+                  <span class="text-slate-400 d-block mb-0.5">Your Submission</span>
+                  <span class="font-weight-black">"{{ ctx?.student_answer || "Empty" }}"</span>
+                </v-col>
+                <v-col cols="6" class="pt-1 text-success">
+                  <span class="text-slate-400 d-block mb-0.5">Acceptable answers</span>
+                  <span class="font-weight-black">
+                    {{ (ctx?.acceptable_answers || []).join(" / ") || "—" }}
+                  </span>
+                </v-col>
+              </v-row>
+            </div>
+          </div>
+
+          <v-divider class="my-3" />
+        </template>
+      </AiTutorChatDialog>
 </template>
 
 <script setup lang="ts">
@@ -498,10 +488,8 @@ function getErrorLabel(errType: string): string {
   return errorDescriptions[errType] || 'Unknown error';
 }
 
-
 function isTypoRound(round: any): boolean {
-  if (!round) return false;
-  return round.typo_detected === true && !round.is_correct;
+  return round?.typo === true;
 }
 
 async function openTutorForRound(round: any) {
@@ -571,6 +559,16 @@ async function fetchGameSessionResults(sessionId: number): Promise<void> {
     };
     
     console.log('[DEBUG] Backend game session loaded:', backendResults.value);
+    console.log('round sample', backendResults.value?.results?.[0]);
+    console.table(
+      (backendResults.value?.results || []).map((r: any) => ({
+        prompt: r.prompt_number,
+        is_correct: r.is_correct,
+        typo_detected: r.typo_detected,
+        typo_accepted: r.typo_accepted,
+        typo_lev_min: r.typo_lev_min,
+      }))
+    );
   } catch (error: any) {
     console.error('Failed to fetch game session results:', error);
     throw new Error(`Failed to load verified game results: ${error.message}`);

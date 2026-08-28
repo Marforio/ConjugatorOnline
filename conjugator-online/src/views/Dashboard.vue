@@ -335,7 +335,7 @@
                   </v-card-actions>
                 </v-card>
               </v-col>
-
+            <v-divider class="mt-8 mb-4"/>
               <ErrorDistributionPieChart :sessions="sessions" />
 
             </v-row>

@@ -67,7 +67,7 @@
               <v-icon color="slate-600" size="18" class="mr-2">mdi-tune-variant</v-icon>
               <h2 class="text-subtitle-1 font-weight-black text-slate-900">Custom Settings</h2>
             </div>
-            <p class="text-caption text-slate-500 mb-2">Design your own game</p>
+            <p class="text-caption text-slate-500 mb-2">Define your own game</p>
 
             <!-- Parameters Module A: Verb Set -->
             <div class="mb-4">
@@ -308,14 +308,14 @@ const selections = computed(() => ({
 const quickPlayButtons = computed(() => [
   { label: 'Present simple and continuous', color: 'magenta lighten-2', settings: { verbSet: 'Common verbs (Reg + Irreg)', sentenceTypes: ['Positive', 'Negative', 'Question'], tenses: ['Present simple', 'Present continuous'], numPrompts: 20 } },
   { label: 'Past simple training', color: 'info', settings: { verbSet: 'Common verbs (Reg + Irreg)', sentenceTypes: ['Positive', 'Negative', 'Question'], tenses: ['Past simple'], numPrompts: 20 } },
+    { label: 'Negatives training (all tenses)', color: 'error', settings: { verbSet: 'Regular verbs only', sentenceTypes: ['Negative'], tenses: ['Present simple','Past simple','Future simple','Recommendation','Present continuous','Present perfect'], numPrompts: 20 } },
+  { label: 'Questions training (all tenses)', color: 'grey', settings: { verbSet: 'Common verbs (Reg + Irreg)', sentenceTypes: ['Question'], tenses: ['Present simple','Past simple','Future simple','Recommendation','Present continuous','Present perfect'], numPrompts: 20 } },
   { label: 'Irregs Basic 20x past simple', color: 'blue lighten-2', settings: { verbSet: 'Basic 75 Irregs', sentenceTypes: ['Positive'], tenses: ['Past simple'], numPrompts: 20 } },
   { label: 'Irregs Basic 20x pres. perf.', color: 'brown lighten-2', settings: { verbSet: 'Basic 75 Irregs', sentenceTypes: ['Positive', 'Negative', 'Question'], tenses: ['Present perfect'], numPrompts: 20 } },
   { label: 'Irregs Master 20x past simple', color: 'green lighten-2', settings: { verbSet: 'Master 110 Irregs', sentenceTypes: ['Positive'], tenses: ['Past simple'], numPrompts: 20 } },
   { label: 'Irregs Master 20x pres. perf.', color: 'red lighten-2', settings: { verbSet: 'Master 110 Irregs', sentenceTypes: ['Positive', 'Negative', 'Question'], tenses: ['Present perfect'], numPrompts: 20 } },
   { label: 'Past simple vs present perfect', color: 'pink', settings: { verbSet: 'Common verbs (Reg + Irreg)', sentenceTypes: ['Positive', 'Negative', 'Question'], tenses: ['Past simple', 'Present perfect'], numPrompts: 20 } },
   { label: 'All tenses and sentences', color: 'green', settings: { verbSet: 'Common verbs (Reg + Irreg)', sentenceTypes: ['Positive', 'Negative', 'Question'], tenses: ['Present simple','Past simple','Future simple','Recommendation','Present continuous','Present perfect'], numPrompts: 25 } },
-  { label: 'Negatives training', color: 'error', settings: { verbSet: 'Regular verbs only', sentenceTypes: ['Negative'], tenses: ['Present simple','Past simple','Future simple','Recommendation','Present continuous','Present perfect'], numPrompts: 20 } },
-  { label: 'Questions training', color: 'grey', settings: { verbSet: 'Common verbs (Reg + Irreg)', sentenceTypes: ['Question'], tenses: ['Present simple','Past simple','Future simple','Recommendation','Present continuous','Present perfect'], numPrompts: 20 } },
 ]);
 
 function goToScene(name: string) {

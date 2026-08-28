@@ -104,8 +104,7 @@
       <!-- Scene Phase A: Instructions -->
       <div v-if="!gameStarted" class="max-width-instructions-panel">
         <h1 class="text-h3 mb-6 font-weight-black text-slate-800">Game Instructions</h1>
-        <ol class="text-slate-700 pl-4 text-body-1">
-          <li class="mb-2">You must write {{ remainingCount }} conjugations ({{ remainingCount }} rounds).</li>
+        <ol class="text-slate-700 pl-4 text-body-1 ms-4">
           <li class="mb-1">Every round, you will see:</li>
           <ul class="mb-3 pl-4" style="list-style-type: circle;">
             <li>a verb</li>
@@ -116,16 +115,14 @@
           <li class="mb-1">Write the correct conjugation for that combination</li>
           <li class="mb-1">REMEMBER:</li>
           <ul class="pl-4" style="list-style-type: circle;">
-            <li>Include both subject and verb</li>
-            <li>Contractions are allowed</li>
-            <li>Don't press BACK during the game</li>
-            <li>Game details are shown at the end and in your data dashboard</li>
+            <li>Include both subject and verb ("She swims, They will not cry")</li>
+            <li>Contractions are OK ("can't", "she's", "won't")</li>
+            <li>Every round is shown at the end, and saved to your data dashboard</li>
           </ul>
         </ol>
 
         <div class="d-flex align-center mt-8 pa-4 rounded-xl bg-slate-50 border">
-          <span class="text-body-1 font-weight-medium text-slate-700">Can't remember tense names? Need a conjugation refresher?</span>
-          <v-spacer />
+          <span class="text-body-1 font-weight-medium text-slate-700 ms-4 me-8">Do you need to review the grammar first? 👉👉👉</span>
           <v-tooltip text="Summary of tense keywords" location="top">
             <template v-slot:activator="{ props: helpProps }">
               <v-btn size="large" icon class="bg-white border elevation-1" v-bind="helpProps" href="https://book.language-labs.ch/ch4#tense-keyword-summary" target='_blank'>
