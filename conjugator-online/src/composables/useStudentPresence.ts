@@ -3,23 +3,58 @@ import { useAuthStore } from "@/stores/auth";
 
 type WsLike = WebSocket | null;
 
+let ws: WsLike = null;
+let pingTimer: ReturnType<typeof setInterval> | null = null;
+let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
+let intentionalClose = false;
+let reconnectAttempts = 0;
+let lastToken = "";
+let authBlocked = false;
+
+// single-flight guards
+let connectInFlight: Promise<void> | null = null;
+let refreshInFlight: Promise<string | null> | null = null;
+let lastAuthFailureAt = 0;
+
+const PING_MS = 25000;
+const MAX_BACKOFF_MS = 10000;
+const AUTH_FAILURE_COOLDOWN_MS = 15000;
+
+function nowMs() {
+  return Date.now();
+}
+
+function clearTimers() {
+  if (pingTimer) {
+    clearInterval(pingTimer);
+    pingTimer = null;
+  }
+  if (reconnectTimer) {
+    clearTimeout(reconnectTimer);
+    reconnectTimer = null;
+  }
+}
+
+function stopReconnect(reason: string) {
+  authBlocked = true;
+  clearTimers();
+  console.warn("STUDENT_WS reconnect stopped:", reason);
+}
+
+function inAuthCooldown() {
+  return nowMs() - lastAuthFailureAt < AUTH_FAILURE_COOLDOWN_MS;
+}
+
+function markAuthFailure(reason: string) {
+  lastAuthFailureAt = nowMs();
+  stopReconnect(reason);
+}
+
 export function useStudentPresence() {
   const auth = useAuthStore();
   const route = useRoute();
 
-  let ws: WsLike = null;
-  let pingTimer: ReturnType<typeof setInterval> | null = null;
-  let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
-  let intentionalClose = false;
-  let reconnectAttempts = 0;
-  let lastToken = "";
-  let authBlocked = false;
-
-  const PING_MS = 25000;
-  const MAX_BACKOFF_MS = 10000;
-
   function getToken() {
-    // single source of truth
     return auth.access || "";
   }
 
@@ -31,17 +66,26 @@ export function useStudentPresence() {
     return `${wsBase()}/ws/student/presence/?token=${encodeURIComponent(token)}`;
   }
 
-  async function ensureValidToken(): Promise<string | null> {
-    const token = getToken();
-    if (!token) return null;
+  async function ensureFreshAccessSingleFlight(): Promise<string | null> {
+    if (refreshInFlight) return refreshInFlight;
 
-    if (!auth.isAccessTokenExpired()) return token;
+    refreshInFlight = (async () => {
+      const current = getToken();
+      if (!current) return null;
+      if (!auth.isAccessTokenExpired()) return current;
+
+      try {
+        await auth.refreshAccessToken();
+        return auth.access || null;
+      } catch {
+        return null;
+      }
+    })();
 
     try {
-      await auth.refreshAccessToken();
-      return auth.access || null;
-    } catch {
-      return null;
+      return await refreshInFlight;
+    } finally {
+      refreshInFlight = null;
     }
   }
 
@@ -66,19 +110,12 @@ export function useStudentPresence() {
     });
   }
 
-  function clearTimers() {
-    if (pingTimer) {
-      clearInterval(pingTimer);
-      pingTimer = null;
-    }
-    if (reconnectTimer) {
-      clearTimeout(reconnectTimer);
-      reconnectTimer = null;
-    }
-  }
-
   function cleanupSocketOnly() {
     if (!ws) return;
+    ws.onopen = null;
+    ws.onmessage = null;
+    ws.onerror = null;
+    ws.onclose = null;
     try {
       intentionalClose = true;
       ws.close(1000, "cleanup");
@@ -86,32 +123,27 @@ export function useStudentPresence() {
     ws = null;
   }
 
-  function stopReconnect(reason: string) {
-    authBlocked = true;
-    clearTimers();
-    console.warn("STUDENT_WS reconnect stopped:", reason);
-  }
-
   function scheduleReconnect() {
     if (intentionalClose || authBlocked) return;
+    if (reconnectTimer) return;
+    if (inAuthCooldown()) return;
+
     const backoff = Math.min(1000 * 2 ** reconnectAttempts, MAX_BACKOFF_MS);
     reconnectAttempts += 1;
     reconnectTimer = setTimeout(() => {
-      connect();
+      reconnectTimer = null;
+      void connect();
     }, backoff + Math.floor(Math.random() * 250));
   }
 
-  async function connect() {
-    if (authBlocked) return;
+  async function connectInternal() {
+    if (authBlocked || inAuthCooldown()) return;
 
-    // prevent duplicates
-    if (ws && (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING)) {
-      return;
-    }
+    if (ws && (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING)) return;
 
-    const token = await ensureValidToken();
+    const token = await ensureFreshAccessSingleFlight();
     if (!token) {
-      stopReconnect("no valid token");
+      markAuthFailure("no valid token (refresh failed)");
       return;
     }
 
@@ -122,6 +154,7 @@ export function useStudentPresence() {
     ws.onopen = () => {
       reconnectAttempts = 0;
       authBlocked = false;
+      lastAuthFailureAt = 0;
       sendPage(route.fullPath || "app_boot");
       sendPing();
       pingTimer = setInterval(sendPing, PING_MS);
@@ -135,12 +168,23 @@ export function useStudentPresence() {
     };
 
     ws.onclose = (evt) => {
-      console.warn("STUDENT_WS close", { code: evt.code, reason: evt.reason, wasClean: evt.wasClean, url: ws?.url });
+      console.warn("STUDENT_WS close", {
+        code: evt.code,
+        reason: evt.reason,
+        wasClean: evt.wasClean,
+        url: ws?.url,
+      });
+
       clearTimers();
       ws = null;
 
       if (evt.code === 4403 || evt.code === 1008) {
-        stopReconnect(`server rejected (${evt.code})`);
+        markAuthFailure(`server rejected (${evt.code})`);
+        return;
+      }
+
+      if (evt.code === 1006 && auth.isAccessTokenExpired()) {
+        markAuthFailure("abnormal close (1006) with expired auth");
         return;
       }
 
@@ -148,7 +192,20 @@ export function useStudentPresence() {
     };
   }
 
+  async function connect() {
+    if (connectInFlight) return connectInFlight;
+    connectInFlight = (async () => {
+      await connectInternal();
+    })();
+    try {
+      await connectInFlight;
+    } finally {
+      connectInFlight = null;
+    }
+  }
+
   function disconnect() {
+    intentionalClose = true;
     clearTimers();
     cleanupSocketOnly();
   }
@@ -157,14 +214,15 @@ export function useStudentPresence() {
     sendPage(route.fullPath || "");
   }
 
-  function onTokenRefreshed() {
+  async function onTokenRefreshed() {
     const current = getToken();
     if (!current) return;
+
     authBlocked = false;
 
     if (current !== lastToken) {
       disconnect();
-      connect();
+      await connect();
     }
   }
 

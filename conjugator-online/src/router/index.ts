@@ -56,6 +56,7 @@ const routes = [
   { path: '/teacher/other-games-data', name: 'manage-other-games-data', component: () => import('@/views/ManageOtherGamesData.vue'), meta: { requiresAuth: true, requiresAdmin: true } },
   { path: '/teacher/vocab-data', name: 'manage-vocab-data', component: () => import('@/views/ManageVocabData.vue'), meta: { requiresAuth: true, requiresAdmin: true } },
   { path: '/teacher/manage-vocab-lists', name: 'manage-vocab-lists', component: () => import('@/views/ManageVocabLists.vue'), meta: { requiresAuth: true, requiresAdmin: true } },
+  { path: '/ws-test', name: 'ws-test', component: () => import('@/views/WSTest.vue'), meta: { requiresAuth: false } }
 
 ]
 
