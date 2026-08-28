@@ -93,7 +93,7 @@
             <div class="text-caption text-slate-500 mt-2">Loading activity...</div>
           </div>
 
-          <div v-else-if="activityFeed.length > 0" class="pa-6 position-relative">
+          <div v-else-if="activityFeed.length > 0" class="pa-2 pt-0 position-relative">
             <!-- Horizontal scrollable track -->
             <div 
               ref="activityTrackRef"
@@ -105,7 +105,7 @@
                 class="flex-shrink-0"
                 style="min-width: 260px;"
               >
-                <div class="d-flex ga-3 align-start">
+                <div class="d-flex ga-3 align-start border rounded-lg py-2 px-3">
                   <!-- Dot -->
                   <div class="flex-shrink-0 pt-1">
                     <v-avatar 

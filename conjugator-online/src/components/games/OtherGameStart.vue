@@ -35,11 +35,11 @@
             />
 
             <div v-else-if="gameName === 'Uses Of Auxiliaries'">
-              <div class="text-subtitle-2 mb-1 text-grey-darken-1">Select Active Modes:</div>
+              <div class="text-subtitle-2 mb-1 text-grey-darken-1">Categories:</div>
               <div class="ms-2">
                 <v-checkbox
                   v-model="selections.settings.modes.echo"
-                  label="Echo questions (do you?)"
+                  label="Echo questions (really, do you?)"
                   density="compact"
                   hide-details
                 />
@@ -51,13 +51,13 @@
                 />
                 <v-checkbox
                   v-model="selections.settings.modes.tag"
-                  label="Tag questions (..., isn't it?)"
+                  label="Tag questions (nice day, isn't it?)"
                   density="compact"
                   hide-details
                 />
               </div>
               <div class="text-caption text-error mt-2 ms-6">
-                *Note: All three modes are required to get the trophy
+                *Note: All three categories are required to get the trophy
               </div>
             </div>
 
@@ -86,13 +86,13 @@
 
             <div v-else-if="gameName === 'Word Families'">
               <p class="text-body-2 text-grey-darken-3 mb-3">
-                Strengthen your vocabulary by modifying single lemmas across multiple parts of speech.
+                Strengthen your vocabulary by modifying base words across parts of speech.
               </p>
               
-              <div class="text-subtitle-2 mb-1 text-grey-darken-1">Assessment Engine Type:</div>
+              <div class="text-subtitle-2 mb-1 text-grey-darken-1">Game Mode:</div>
               <v-radio-group v-model="selections.settings.mode" inline class="mb-1">
-                <v-radio label="Matching Mode (Easy Activation)" value="matching" />
-                <v-radio label="Writing Mode (Memory Challenge)" value="writing" />
+                <v-radio label="Matching (Easy Activation)" value="matching" />
+                <v-radio label="Writing (Memory Challenge)" value="writing" />
               </v-radio-group>
 
               <v-select
@@ -107,7 +107,7 @@
                   { title: 'Mechanical Engineering', value: 'mechanical' },
                   { title: 'Electrical Engineering', value: 'electrical' }
                 ]"
-                label="Vocab Focus Domain Set"
+                label="Choose your domain"
                 density="compact"
                 variant="outlined"
                 class="mt-2"
@@ -125,8 +125,8 @@
             </div>
 
             <div v-else-if="gameName === 'Comparison'">
-              <div class="text-subtitle-2 mb-1 text-grey-darken-1">Practice Pool:</div>
-              <v-radio-group v-model="selections.settings.partOfSpeech" inline class="mb-2">
+              <div class="text-subtitle-2 mb-1 text-grey-darken-1">Categories:</div>
+              <v-radio-group v-model="selections.settings.partOfSpeech" density="compact" class="mb-2">
                 <v-radio label="Adjectives only" value="adjectives" />
                 <v-radio label="Adverbs only" value="adverbs" />
                 <v-radio label="Mix" value="mix" />
@@ -137,6 +137,7 @@
                 label="Require grammatical intensifiers"
                 color="primary"
                 inset
+                disabled
                 density="compact"
               />
             </div>
@@ -152,13 +153,13 @@
 
             <div v-else-if="gameName === 'Verb Mixer'">
               <p class="text-body-2 text-grey-darken-3 mb-3">
-                Choose the right category of verb complement (infinitive versus gerund).
+                Choose the right category of verb complement (infinitive versus gerund)
               </p>
               
               <div class="text-subtitle-2 mb-1 text-grey-darken-1">Game Mode:</div>
-              <v-radio-group v-model="selections.settings.mode" inline class="mb-1">
-                <v-radio label="Both categories (recommended)" value="mixed" />
-                <v-radio label="One category (easy mode)" value="single" />
+              <v-radio-group v-model="selections.settings.mode" class="mb-1">
+                <v-radio label="Both categories (awards trophy)" value="mixed" />
+                <v-radio label="One category (easy warm-up mode)" value="single" />
               </v-radio-group>
 
               <v-select
@@ -177,20 +178,20 @@
 
             <div v-else-if="gameName === 'Year 2040'">
               <p class="text-body-2 text-grey-darken-3 mb-3">
-                Master complex upcoming timelines by manipulating Future Continuous and Future Perfect aspects.
+                Practice the Future Continuous and Future Perfect tenses
               </p>
               
-              <div class="text-subtitle-2 mb-1 text-grey-darken-1">Difficulty Filter:</div>
-              <v-radio-group v-model="selections.settings.mode" inline class="mb-1">
+              <div class="text-subtitle-2 text-grey-darken-1">Verb set:</div>
+              <v-radio-group v-model="selections.settings.mode" class="mb-1">
                 <v-radio label="Regular + Essential Irregs" value="essential_mix" />
                 <v-radio label="Regular + Advanced Irregs" value="advanced_mix" />
-                <v-radio label="All Prompts Included" value="all" />
+                <v-radio label="All Verbs" value="all" />
               </v-radio-group>
             </div>
 
             <div v-else-if="gameName === 'Parallel Universe'">
-              <div class="text-subtitle-2 mb-1 text-grey-darken-1">Verb Difficulty Set:</div>
-              <v-radio-group v-model="selections.settings.verbSet" inline class="mb-2">
+              <div class="text-subtitle-2 mb-1 text-grey-darken-1">Verb Set:</div>
+              <v-radio-group v-model="selections.settings.verbSet" density="compact" class="mb-2">
                 <v-radio label="Regular + Essential" value="regular_essential" />
                 <v-radio label="Regular + Advanced" value="regular_advanced" />
                 <v-radio label="All Prompts" value="all" />
@@ -200,7 +201,7 @@
               <div class="ms-2">
                 <v-checkbox
                   v-model="selections.settings.conditionalTypes"
-                  label="First Conditional (Reality)"
+                  label="First Conditional (Present Reality)"
                   value="first"
                   density="compact"
                   hide-details
@@ -261,14 +262,14 @@
 
             <div v-else-if="gameName === 'Reported Speech'">
               <p class="text-body-2 text-grey-darken-3 mb-3">
-                Practice backshifting by converting direct speech into reported speech.
+                Practice tense backshifting by converting direct speech into reported speech
               </p>
               
               <div class="text-subtitle-2 mb-1 text-grey-darken-1">Irregular Verb Set:</div>
-              <v-radio-group v-model="selections.settings.irregMode" class="ms-2">
-                <v-radio label="Essential irregular verbs mixed setup" value="essential" />
-                <v-radio label="Advanced irregular verbs mixed setup" value="advanced" />
-                <v-radio label="Both essential and advanced categories combined" value="both" />
+              <v-radio-group v-model="selections.settings.irregMode" density="compact" class="ms-2">
+                <v-radio label="Essential irregular verbs" value="essential" />
+                <v-radio label="Advanced irregular verbs" value="advanced" />
+                <v-radio label="Both essential and advanced" value="both" />
               </v-radio-group>
             </div>
 
@@ -418,6 +419,9 @@
             </p>
             <p v-else-if="gameName === 'Uses Of Auxiliaries'" class="text-body-2 text-grey-darken-3">
               Review the ways auxiliary verbs are used as discourse markers to <a href="https://book.language-labs.ch/ch13" target="_blank" class="text-primary text-decoration-none">show interest, agreement or willingness to participate in a conversation</a>.
+            </p>
+            <p v-else-if="gameName === 'Word Families'" class="text-body-2 text-grey-darken-3">
+              Recommendation coming soon
             </p>
           </div>
         </v-card-text>

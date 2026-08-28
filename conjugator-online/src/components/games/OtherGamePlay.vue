@@ -159,9 +159,9 @@
             </div>
 
             <div v-else-if="gameName === 'Parallel Universe'" class="mb-2">
-              <div class="d-flex justify-space-between align-center mb-2">
+              <div class="d-flex justify-space-between align-center mb-12">
                 <div class="text-caption text-uppercase text-grey-darken-1 font-weight-medium">
-                  🌌 Clause Focus: {{ activePrompt.condition ? 'IF CLAUSE' : 'MAIN CLAUSE' }}
+                  {{ activePrompt.condition ? 'CONDITION (IF CLAUSE)' : 'CONSEQUENCE (MAIN CLAUSE)' }}
                 </div>
                 <v-chip color="secondary" size="x-small" class="text-uppercase font-weight-bold">
                   {{ activePrompt.conditional_type }} conditional
@@ -212,30 +212,31 @@
             </div>
 
             <!-- YEAR 2040 WORKSPACE CARD -->
-            <div v-else-if="gameName === 'Year 2040'" class="mb-2">
-              <div class="d-flex justify-space-between align-center mb-3">
-                <div class="text-caption text-uppercase text-grey-darken-1 font-weight-bold">
-                  ⏱ aspect: {{ activePrompt.tense }}
-                </div>
-                
-                <!-- Timeline Status Vector Graphics Widget -->
-                <div class="d-flex align-center ga-2">
-                  <span class="text-caption text-grey-darken-1 font-weight-medium">State:</span>
-                  <v-progress-circular
-                    v-if="activePrompt.tense?.includes('continuous')"
-                    indeterminate
-                    size="20"
-                    width="2"
-                    color="purple"
-                  />
-                  <v-icon
-                    v-else
-                    icon="mdi-check-circle-outline"
-                    size="20"
-                    color="success"
-                  />
+            <div v-else-if="gameName === 'Year 2040'" class="mb-5">
+              <div class="d-flex align-center mb-8">
+                <!-- Tense label -->
+                <div class="text-body-1 text-uppercase text-grey-darken-1 font-weight-bold d-flex align-center">
+                  ⏱ Tense: {{ activePrompt.tense }}
+
+                  <!-- Inline status widget -->
+                  <div class="d-flex align-center ms-3">
+                    <v-progress-circular
+                      v-if="activePrompt.tense?.includes('continuous')"
+                      indeterminate
+                      size="20"
+                      width="2"
+                      color="purple"
+                    />
+                    <v-icon
+                      v-else
+                      icon="mdi-check-circle-outline"
+                      size="20"
+                      color="success"
+                    />
+                  </div>
                 </div>
               </div>
+
 
               <v-card variant="outlined" class="pa-4 bg-white rounded-lg text-center mb-3">
                 <div class="d-flex justify-center align-center ga-2 mb-3">
@@ -324,17 +325,17 @@
             <!-- 9. REPORTED SPEECH  -->
             <div v-else-if="gameName === 'Reported Speech'" class="mb-2">
               <div class="text-caption text-uppercase font-weight-bold text-grey-darken-1 mb-2">
-                🗣 Yesterday's Statement
+                🗣 Yesterday's Direct Statement
               </div>
 
-              <v-card variant="flat" class="pa-3 bg-grey-lighten-4 rounded-lg border mb-4">
+              <v-card variant="flat" class="pa-3 bg-grey-lighten-4 rounded-lg border mb-3">
                 <div class="d-flex align-center ga-3 flex-wrap flex-sm-nowrap">
                   <div>
                     <v-avatar size="100" class="border elevation-1">
                       <v-img :src="resolveSpeakerAvatar(activePrompt.speaker)" cover />
                     </v-avatar>
-                    <div class="text-center text-caption font-weight-bold text-grey-darken-2 mt-1">
-                      "{{ activePrompt.speaker }}"
+                    <div class="text-center text-subtitle-2 font-weight-bold text-grey-darken-2 mt-2">
+                      <span class="text-uppercase">{{ activePrompt.speaker }}</span>
                     </div>
                   </div>
 
@@ -348,10 +349,10 @@
                 </div>
               </v-card>
 
-              <div class="text-caption text-uppercase font-weight-bold text-grey-darken-1 mb-1">
+              <div class="text-caption text-uppercase font-weight-bold text-grey-darken-1 mb-1 mt-6">
                 📰 Today's News
               </div>
-              <v-card variant="outlined" class="pa-4 bg-white rounded-lg text-center mb-2">
+              <v-card variant="outlined" class="pa-4 bg-white rounded-lg text-center">
                 <div class="text-h6 font-weight-medium font-italic text-grey-darken-4 text-wrap px-1 py-1">
                   " Yesterday, {{ activePrompt.speaker }} {{ activePrompt.reporting_verb }} {{ activePrompt.reported }} "
                 </div>
@@ -403,21 +404,93 @@
               <div class="text-center text-body-1 font-italic px-2 my-4 text-grey-darken-4">
                 <div v-if="activePrompt.part_of_speech === 'adverb'">
                   <span v-if="activePrompt.target_form === 'comparative' || activePrompt.target_form === 'comparison_less' || activePrompt.target_form === 'equality'">
-                    {{ activePrompt.person_A }} {{ activePrompt.prompt }} ________ {{ activePrompt.person_B }}.
+                    <span class="text-capitalize">{{ activePrompt.person_A }}</span> {{ activePrompt.prompt }} ________ {{ activePrompt.person_B }}.
                   </span>
                   <span v-else>
-                    {{ activePrompt.person_A }} {{ activePrompt.prompt }} ________.
+                    <span class="text-capitalize">{{ activePrompt.person_A }}</span> {{ activePrompt.prompt }} ________.
                   </span>
                 </div>
                 <div v-else>
                   <span v-if="activePrompt.target_form === 'comparative' || activePrompt.target_form === 'comparison_less' || activePrompt.target_form === 'equality'">
-                    {{ activePrompt.person_A }} is ________ {{ activePrompt.person_B }}.
+                    <span class="text-capitalize">{{ activePrompt.person_A }}</span> is ________ {{ activePrompt.person_B }}.
                   </span>
                   <span v-else>
-                    {{ activePrompt.person_A }} is ________.
+                    <span class="text-capitalize">{{ activePrompt.person_A }}</span> is ________.
                   </span>
                 </div>
               </div>
+            </div>
+
+            <!-- 10. WORD FAMILIES MULTI-ASPECT WORKSPACE CARD -->
+            <div v-else-if="gameName === 'Word Families'" class="mb-2 w-100">
+              <div class="text-subtitle-2 text-uppercase text-grey-darken-1 font-weight-bold mb-2">
+                🔑 Root Lemma Family: <span class="text-primary font-weight-black">{{ activePrompt.key }}</span>
+              </div>
+
+              <!-- WRITING INTERACTION MODE -->
+              <v-card v-if="gameSettings?.mode === 'writing'" variant="flat" class="pa-2 bg-white">
+                <v-row v-for="it in activePrompt.items" :key="it.pos" class="align-center border-b py-2 ma-0">
+                  <v-col cols="12" sm="8" class="pa-1">
+                    <v-chip size="x-small" color="secondary" label class="font-weight-black text-uppercase mr-2 mb-1">{{ it.pos }}</v-chip>
+                    <span class="text-body-1 text-grey-darken-3 font-italic">{{ it.sentence }}</span>
+                  </v-col>
+                  <v-col cols="12" sm="4" class="pa-1">
+                    <v-text-field
+                      v-model="wfAnswers[it.pos]"
+                      :label="`Type the ${it.pos} variant`"
+                      variant="outlined"
+                      density="compact"
+                      hide-details
+                      :disabled="inputLocked"
+                      @keyup.enter="handleKeyboardEnterEvent"
+                    />
+                  </v-col>
+                </v-row>
+                <div class="d-flex justify-center mt-4">
+                  <v-btn color="primary" variant="flat" rounded="pill" size="large" class="px-6"
+                        @click="handleAnswerSubmission" :disabled="inputLocked">
+                    Submit Answer
+                  </v-btn>
+                </div>
+              </v-card>
+
+              <!-- MATCHING INTERACTION MODE -->
+              <v-card v-else variant="flat" class="pa-2 bg-white">
+                <div class="d-flex flex-column ga-2 mb-3">
+                  <div 
+                    v-for="it in activePrompt.items" 
+                    :key="it.pos" 
+                    class="d-flex align-center justify-space-between pa-2 border rounded-lg cursor-pointer transition-all"
+                    :class="{ 'bg-blue-thin border-primary': selectedWfPos === it.pos }"
+                    @click="selectedWfPos = it.pos"
+                  >
+                    <div class="flex-grow-1 pr-3">
+                      <v-chip size="x-small" color="grey" label class="font-weight-bold text-uppercase mb-1">{{ it.pos }}</v-chip>
+                      <div class="font-italic text-body-2">{{ it.sentence }}</div>
+                    </div>
+                    
+                    <div class="min-width-150">
+                      <draggable :list="wfSlots[it.pos]" group="wfGroup" item-key="id" class="border dashed rounded pa-1 d-flex align-center min-height-40">
+                        <template #item="{ element }">
+                          <v-chip color="primary" variant="flat" size="small" closable @click.stop="clearWfSlot(it.pos)">
+                            {{ element.text }}
+                          </v-chip>
+                        </template>
+                      </draggable>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Draggable Chip Bank Row Block -->
+                <div class="text-caption text-grey mb-1 text-center">Available options bank:</div>
+                <draggable :list="wfBank" group="wfGroup" item-key="id" class="d-flex justify-center flex-wrap ga-2 border rounded pa-2 bg-grey-lighten-4">
+                  <template #item="{ element }">
+                    <v-chip variant="outlined" color="secondary" class="cursor-pointer" @click="tapWfChip(element)">
+                      {{ element.text }}
+                    </v-chip>
+                  </template>
+                </draggable>
+              </v-card>
             </div>
 
             <div style="position: absolute; overflow: hidden; width: 0; height: 0; opacity: 0; z-index: -100;" aria-hidden="true">
@@ -437,7 +510,7 @@
               </button>
             </div>
 
-            <div ref="inputWrapper" class="mt-12">
+            <div v-if="showGlobalAnswerInput" ref="inputWrapper" class="mt-12">
               <v-text-field
                 v-model="userAnswer"
                 :label="inputPlaceholderLabel"
@@ -449,7 +522,7 @@
               />
             </div>
 
-            <div class="d-flex justify-center my-8">
+            <div v-if="showGlobalAnswerInput" class="d-flex justify-center my-8">
               <v-btn color="primary" @click="handleAnswerSubmission" :disabled="inputLocked">Submit Answer</v-btn>
             </div>
           </v-card>
@@ -470,71 +543,6 @@
         </div>
       </div>
 
-      <!-- 10. WORD FAMILIES MULTI-ASPECT WORKSPACE CARD -->
-        <div v-else-if="gameName === 'Word Families'" class="mb-2 w-100">
-          <div class="text-subtitle-2 text-uppercase text-grey-darken-1 font-weight-bold mb-2">
-            🔑 Root Lemma Family: <span class="text-primary font-weight-black">{{ activePrompt.key }}</span>
-          </div>
-
-          <!-- WRITING INTERACTION MODE -->
-          <v-card v-if="gameSettings?.mode === 'writing'" variant="flat" class="pa-2 bg-white">
-            <v-row v-for="it in activePrompt.items" :key="it.pos" class="align-center border-b py-2 ma-0">
-              <v-col cols="12" sm="8" class="pa-1">
-                <v-chip size="x-small" color="secondary" label class="font-weight-black text-uppercase mr-2 mb-1">{{ it.pos }}</v-chip>
-                <span class="text-body-1 text-grey-darken-3 font-italic">{{ it.sentence }}</span>
-              </v-col>
-              <v-col cols="12" sm="4" class="pa-1">
-                <v-text-field
-                  v-model="wfAnswers[it.pos]"
-                  :label="`Type the ${it.pos} variant`"
-                  variant="outlined"
-                  density="compact"
-                  hide-details
-                  :disabled="inputLocked"
-                  @keyup.enter="handleEnter"
-                />
-              </v-col>
-            </v-row>
-          </v-card>
-
-          <!-- MATCHING INTERACTION MODE -->
-          <v-card v-else variant="flat" class="pa-2 bg-white">
-            <div class="d-flex flex-column ga-2 mb-3">
-              <div 
-                v-for="it in activePrompt.items" 
-                :key="it.pos" 
-                class="d-flex align-center justify-space-between pa-2 border rounded-lg cursor-pointer transition-all"
-                :class="{ 'bg-blue-thin border-primary': selectedWfPos === it.pos }"
-                @click="selectedWfPos = it.pos"
-              >
-                <div class="flex-grow-1 pr-3">
-                  <v-chip size="x-small" color="grey" label class="font-weight-bold text-uppercase mb-1">{{ it.pos }}</v-chip>
-                  <div class="font-italic text-body-2">{{ it.sentence }}</div>
-                </div>
-                
-                <div class="min-width-150">
-                  <draggable :list="wfSlots[it.pos]" group="wfGroup" class="border dashed rounded pa-1 d-flex align-center min-height-40">
-                    <template #item="{ element }">
-                      <v-chip color="primary" variant="flat" size="small" closable @click.stop="clearWfSlot(it.pos)">
-                        {{ element.text }}
-                      </v-chip>
-                    </template>
-                  </draggable>
-                </div>
-              </div>
-            </div>
-
-            <!-- Draggable Chip Bank Row Block -->
-            <div class="text-caption text-grey mb-1 text-center">Available options bank:</div>
-            <draggable :list="wfBank" group="wfGroup" class="d-flex justify-center flex-wrap ga-2 border rounded pa-2 bg-grey-lighten-4">
-              <template #item="{ element }">
-                <v-chip variant="outlined" color="secondary" class="cursor-pointer" @click="tapWfChip(element)">
-                  {{ element.text }}
-                </v-chip>
-              </template>
-            </draggable>
-          </v-card>
-        </div>
 
         <!-- Inside your RESULTS template block in OtherGamePlay.vue -->
         <div v-else-if="gameState === 'RESULTS'" class="d-flex flex-column justify-space-between h-100 flex-grow-1">
@@ -703,6 +711,10 @@ const totalRounds = computed(() => props.prompts.length);
 const activePrompt = computed(() => props.prompts[currentRound.value] || {});
 const progressPercentage = computed(() => (currentRound.value / totalRounds.value) * 100);
 
+const showGlobalAnswerInput = computed(() => {
+  return !(props.gameName === "Word Families");
+});
+
 // ============================================================================
 // HONEYPOT & TELEMETRY TRACKERS
 // ============================================================================
@@ -791,7 +803,7 @@ const computeHighlightedBubbleHtml = (text, highlight) => {
   const match = text.slice(idx, idx + highlight.length);
   const after = text.slice(idx + highlight.length);
   
-  return `${before}&nbsp;<span class="font-weight-black text-primary">${match}</span>&nbsp;${after}`;
+  return `" ${before}<span class="font-weight-black text-primary">${match}</span>${after} "`;
 };
 
 // Word Families 
@@ -952,6 +964,7 @@ const avgResponseTime = computed(() => {
 const inputWrapper = ref(null);
 async function focusInputField() {
   await nextTick();
+  if (props.gameName === "Word Families") return;
   const input = inputWrapper.value?.querySelector("input");
   input?.focus();
 }
@@ -970,9 +983,7 @@ watch(showWrongDialog, async (isOpened, wasOpened) => {
 watch(currentRound, async () => {
   if (activePrompt.value) {
     if (props.gameName === "Word Families") resetWfState();
-    if (props.gameName === "Idea Linker") {
-      textInputString.value = ""; // clear text field
-    }
+    if (props.gameName === "Idea Linker") {userAnswer.value = "";}
     await nextTick();
     focusInputField();
   }
@@ -1085,92 +1096,109 @@ async function computeSha256(text) {
 
 function normalizeString(text) {
   let s = String(text || "").trim().toLowerCase();
-  while (s && [".", ",", "!", "?", ";", ":"].includes(s[s.length - 1])) {
-    s = s.slice(0, -1);
-  }
-  return s.replace(/\s+/g, " ");
+  s = s.normalize("NFKC");
+  s = s.replace(/[’']/g, "");          // remove apostrophes
+  s = s.replace(/[?.!,;:"]/g, "");     // remove punctuation
+  s = s.replace(/\s+/g, " ");
+  return s;
 }
 
 async function handleAnswerSubmission() {
   if (inputLocked.value || showWrongDialog.value) return;
+
   inputLocked.value = true;
   clearInterval(timerInterval);
 
-  const rawInput = userAnswer.value;
+  // Capture per-game input
+  const rawInput =
+    props.gameName === "Word Families"
+      ? (props.gameSettings?.mode === "writing"
+          ? JSON.stringify(wfAnswers.value)
+          : JSON.stringify(
+              Object.fromEntries(
+                ["verb", "noun", "adjective", "adverb"].map((pos) => [
+                  pos,
+                  wfSlots.value[pos]?.[0]?.text || ""
+                ])
+              )
+            ))
+      : userAnswer.value;
+
   const cleanedInput = normalizeString(rawInput);
-  
-  // Calculate round duration safely using local tracking tickers
   const elapsedMs = Date.now() - roundStartTime.value;
   const elapsedSeconds = parseFloat((elapsedMs / 1000).toFixed(1));
-  
-  // Run bot detection scan evaluations
   const hpResult = evaluateHoneypotTelemetry();
 
   let isCorrect = false;
   let serverAcceptedPool = null;
 
-  // ==========================================
-  // CASE A: IDEA LINKER (Requires State/API)
-  // ==========================================
-  if (props.gameName === "Idea Linker") {
-    try {
+  try {
+    // A) Idea Linker -> server verify
+    if (props.gameName === "Idea Linker") {
       const response = await api.post("/other-games/verify-answer/", {
         session_id: props.session_id,
         prompt_number: activePrompt.value.prompt_number,
         user_answer: JSON.stringify({
-          answer: rawInput,
+          answer: userAnswer.value,
           used: ilUsedWords.value
         })
       });
 
-      isCorrect = response.data.is_correct;
-      serverAcceptedPool = response.data.accepted_pool;
-      
+      isCorrect = !!response.data.is_correct;
+      serverAcceptedPool = response.data.accepted_pool ?? null;
+
       if (isCorrect) {
-        ilUsedWords.value.push(rawInput.trim().toLowerCase());
+        ilUsedWords.value.push((userAnswer.value || "").trim().toLowerCase());
       }
-    } catch (error) {
-      console.error("Idea Linker validation pipeline failed:", error);
-      inputLocked.value = false;
-      startCountdown();
-      return;
+
+    // B) Word Families -> server verify
+    } else if (props.gameName === "Word Families") {
+      const response = await api.post("/other-games/verify-answer/", {
+        session_id: props.session_id,
+        prompt_number: activePrompt.value.prompt_number,
+        user_answer: rawInput
+      });
+
+      isCorrect = !!response.data.is_correct;
+      serverAcceptedPool = response.data.accepted_pool ?? null;
+
+    // C) All other games -> local hash
+    } else {
+      const userHash = await computeSha256(cleanedInput);
+      isCorrect = activePrompt.value.answer_hashes?.includes(userHash) || false;
     }
 
-  // ==========================================
-  // CASE B: ALL OTHER GAMES (Fast Local Hashes)
-  // ==========================================
-  } else {
-    const userHash = await computeSha256(cleanedInput);
-    isCorrect = activePrompt.value.answer_hashes?.includes(userHash) || false;
-  }
+    // Log round
+    logRoundMetrics(
+      rawInput,
+      isCorrect,
+      false,
+      elapsedSeconds,
+      hpResult.flagged,
+      hpResult.score,
+      hpResult.reasons
+    );
 
-  // ==========================================
-  // TELEMETRY REPLICATOR METRICS COMPILER
-  // ==========================================
-  // Pass the newly captured bot parameters directly into your logging cache matrices
-  logRoundMetrics(
-    rawInput, 
-    isCorrect, 
-    false, 
-    elapsedSeconds, 
-    hpResult.flagged, 
-    hpResult.score, 
-    hpResult.reasons
-  );
+    // Resolve UX flow
+    if (isCorrect) {
+      showFloatingFeedback.value = true;
+      setTimeout(() => (showFloatingFeedback.value = false), 800);
+      await advanceNextRound();
+    } else {
+      lastRoundTimeout.value = false;
+      userAnswerLog.value = rawInput;
 
-  if (isCorrect) {
-    showFloatingFeedback.value = true;
-    setTimeout(() => (showFloatingFeedback.value = false), 800);
-    advanceNextRound();
-  } else {
-    lastRoundTimeout.value = false;
-    userAnswerLog.value = rawInput;
-    
-    if (serverAcceptedPool) {
-      currentIlCorrectTrack.value = serverAcceptedPool;
+      if (serverAcceptedPool) {
+        currentIlCorrectTrack.value = serverAcceptedPool;
+      }
+
+      showWrongDialog.value = true;
     }
-    
-    showWrongDialog.value = true;
+
+  } catch (error) {
+    console.error("Answer validation pipeline failed:", error);
+    inputLocked.value = false;
+    startCountdown();
   }
 }
 
@@ -1275,6 +1303,7 @@ function quitSession() {
 onMounted(() => {
   startCountdown();
   focusInputField();
+  if (props.gameName === "Word Families") resetWfState();
 });
 
 onBeforeUnmount(() => clearInterval(timerInterval));
@@ -1297,4 +1326,23 @@ onBeforeUnmount(() => clearInterval(timerInterval));
 .ga-2 { gap: 8px; }
 .ga-3 { gap: 12px; }
 .ga-4 { gap: 16px; }
+.bubble-wrap, .player-bubble-wrap {
+  position: relative;
+  width: 100%;
+  min-height: 120px;
+}
+.bubble-svg, .player-bubble-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.bubble-text, .player-bubble-content {
+  position: relative;
+  z-index: 1;
+  padding: 18px 24px;
+  line-height: 1.5;
+  word-break: break-word;
+  white-space: normal;
+}
 </style>

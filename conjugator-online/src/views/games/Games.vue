@@ -123,7 +123,7 @@
           class="image-tile"
         >
           <div class="tile-frame">
-            <v-img src="/images/banners/UsesOfAuxiliaries.png" alt="Uses of Auxiliaries" cover class="tile-image" />
+            <v-img src="/images/banners/UsesOfAuxiliaries.png" alt="Uses of Auxiliaries" cover class="tile-image" :class="isEnabled ? '' : 'disabled-tile'" />
           </div>
         </RouterLink>
       </v-col>
