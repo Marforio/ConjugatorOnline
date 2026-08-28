@@ -8,31 +8,21 @@ const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL, // must be set in .env
 });
 
-// Request interceptor: attach access token if available
-api.interceptors.request.use(
-  (config: InternalAxiosRequestConfig) => {
-    const auth = useAuthStore();
+// Request interceptor
+api.interceptors.request.use((config) => {
+  const auth = useAuthStore();
 
-    // Skip attaching for auth endpoints
-    if (config.url?.includes("/login") || config.url?.includes("/token/")) {
-      return config;
-    }
-
-    if (auth.isAccessTokenExpired()) {
-      auth.logout();
-      window.location.href = "/login";
-      return Promise.reject(new Error("Access token expired"));
-    }
-
-    if (auth.access || getAccessToken()) {
-      config.headers = config.headers ?? {};
-      config.headers.Authorization = `Bearer ${auth.access || getAccessToken()}`;
-    }
-
+  if (config.url?.includes("/login") || config.url?.includes("/token/")) {
     return config;
-  },
-  (error) => Promise.reject(error)
-);
+  }
+
+  const token = auth.access || getAccessToken();
+  if (token) {
+    config.headers = config.headers ?? {};
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
 
 // Response interceptor: try refresh on 401
 api.interceptors.response.use(

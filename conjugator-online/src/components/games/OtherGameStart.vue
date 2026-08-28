@@ -10,15 +10,13 @@
           <div class="d-flex justify-center mb-4">
             <v-img :src="bannerSrc" max-width="320" />
           </div>
-          <h2 class="text-h4 ms-2 text-wrap">Settings</h2>
-          <div class="text-h6 ms-2 font-weight-light">Configure your game</div>
+          <h2 class="text-h5 text-wrap">Settings</h2> <span class="text-h7 font-weight-light">Configure your game</span>
         </div>
       </v-card-title>
 
       <v-card-text>
         <v-row>
           <v-col cols="12" md="8">
-            <v-card-title class="font-weight-medium px-0">Game Mode</v-card-title>
             
             <v-select
               v-if="gameName === 'Regret Machine'"
@@ -33,6 +31,7 @@
               label="Choose set"
               density="compact"
               variant="outlined"
+              max-width="250"
             />
 
             <div v-else-if="gameName === 'Uses Of Auxiliaries'">
@@ -81,6 +80,7 @@
                 label="Choose Tense Selection Group"
                 density="compact"
                 variant="outlined"
+                max-width="250"
               />
             </div>
 
@@ -152,13 +152,13 @@
 
             <div v-else-if="gameName === 'Verb Mixer'">
               <p class="text-body-2 text-grey-darken-3 mb-3">
-                Practice choosing the right category of verb complement (infinitive versus gerund).
+                Choose the right category of verb complement (infinitive versus gerund).
               </p>
               
-              <div class="text-subtitle-2 mb-1 text-grey-darken-1">Mix Category Strategy:</div>
+              <div class="text-subtitle-2 mb-1 text-grey-darken-1">Game Mode:</div>
               <v-radio-group v-model="selections.settings.mode" inline class="mb-1">
                 <v-radio label="Both categories (recommended)" value="mixed" />
-                <v-radio label="One category split mode" value="single" />
+                <v-radio label="One category (easy mode)" value="single" />
               </v-radio-group>
 
               <v-select
@@ -168,10 +168,10 @@
                   { title: 'Infinitive Forms', value: 'infinitive' },
                   { title: 'Gerund (-ing) Forms', value: 'gerund' }
                 ]"
-                label="Active target complement category focus"
+                label="Category"
                 density="compact"
                 variant="outlined"
-                class="mt-2"
+                max-width="250"
               />
             </div>
 
@@ -273,7 +273,7 @@
             </div>
 
             <div v-else-if="gameName === 'Pronoun Practice'" class="text-body-1 mt-2 text-grey-darken-2">
-              <v-icon icon="mdi-account-switch" class="me-2" /> Pronoun review.
+              <div class="text-body-2">Nothing to configure. The game will randomly ask for pronouns from all categories.</div>
             </div>
           </v-col>
 
@@ -302,6 +302,7 @@
             :loading="loading" 
             :disabled="!isValid"
             @click="handleStart"
+            class="px-3"
           >
             Start Game
           </v-btn>
@@ -315,8 +316,8 @@
     <v-dialog v-model="showGrammarDialog" max-width="680" persistent scrollable>
       <v-card class="rounded-xl pa-2">
         <v-card-title class="text-h5 font-weight-bold d-flex align-center border-b pb-3">
-          <v-icon icon="mdi-book-open-page-variant" color="cyan-darken-2" class="me-2" />
-          Grammar Reference & Rules
+          <v-icon icon="mdi-book-open-page-variant" color="cyan-darken-2" class="me-4" />
+          Have you studied the rules?
         </v-card-title>
 
         <v-card-text class="py-4">
@@ -339,7 +340,7 @@
                 <tr>
                   <td class="font-weight-bold text-left">Big quantity</td>
                   <td>many</td>
-                  <td>a lot of **</td>
+                  <td class="bg-yellow">a lot of **</td>
                 </tr>
                 <tr>
                   <td class="text-left"><span class="text-decoration-underline">Impressive</span> big quantity</td>
@@ -370,7 +371,7 @@
             </v-table>
 
             <div class="text-caption text-grey-darken-2 bg-cyan-lighten-5 pa-3 rounded-lg border mb-3">
-              ** <strong>A lot of</strong> is used in declarative sentences only. 
+              ** <strong>Much</strong> is not used on its own in declarative sentences; <strong>a lot of</strong> is used instead.
               <strong>Much</strong> is preferred the rest of the time, especially with 'too' and 'so' 
               and when the syntax context is negative. Example: <em>"I have a lot of time"</em> vs 
               <em>"I don't have much time"</em>. This is what the game checks for.
@@ -508,8 +509,14 @@ async function executeActualGameLaunch() {
 
   const targetSettings = { ...selections.value.settings };
 
-  if (props.gameName === "Verb Mixer" && targetSettings.mode === "mixed") {
-    delete targetSettings.singleCategory; 
+  if (props.gameName === "Verb Mixer") {
+    if (targetSettings.mode === "mixed") {
+      targetSettings.singleCategory = null; // or delete
+    } else if (targetSettings.mode === "single") {
+      if (!targetSettings.singleCategory) {
+        targetSettings.singleCategory = "infinitive";
+      }
+    }
   }
   
   const payload = {
@@ -588,7 +595,7 @@ watch(
       selections.value.num_prompts = 30; // Override default 24
       selections.value.settings = {
         mode: "mixed",
-        singleCategory: "infinitive"
+        singleCategory: null
       };
     } else if (newGameName === "Year 2040") {
       selections.value.num_prompts = 24;

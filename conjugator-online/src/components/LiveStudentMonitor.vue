@@ -15,21 +15,11 @@
 
         <div class="text-caption text-slate-500 font-weight-medium mt-0.5">
           Mode:
-          <span class="font-weight-bold">{{ isWsConnected ? 'Live WebSocket' : 'REST Fallback' }}</span>
-          • Poll every {{ pollInterval / 1000 }}s
+          <span class="font-weight-bold">{{ isWsConnected ? 'Live Feed' : 'Fallback' }}</span>
           • Last update: <span class="font-mono text-slate-700">{{ formatLastUpdate }}</span>
         </div>
       </div>
 
-      <v-btn
-        :color="isPolling ? 'error' : 'success'"
-        size="small"
-        height="32"
-        class="rounded-lg text-none font-weight-black tracking-wide"
-        @click="togglePolling"
-      >
-        {{ isPolling ? 'Pause Monitor' : 'Resume Monitor' }}
-      </v-btn>
     </div>
 
     <v-row>
@@ -46,16 +36,14 @@
               <div class="text-subtitle-1 font-weight-black leading-none mb-1">
                 {{ onlineStudents.length }} Student{{ onlineStudents.length !== 1 ? 's' : '' }} Online
               </div>
-              <div class="text-xxs opacity-80 font-weight-medium">
-                Live presence (WS) with REST fallback.
-              </div>
+
             </div>
           </div>
         </v-alert>
 
         <div v-if="onlineStudents.length > 0">
           <div class="text-overline font-weight-black text-slate-400 tracking-wider mb-3">
-            Currently Active Cohorts
+            Currently Active Students
           </div>
 
           <v-row dense>
@@ -204,10 +192,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue';
-import api from '@/axios';
-import { useUserStore } from '@/stores/user';
-import { useAuthStore } from "@/stores/auth";
+import { ref, computed, onMounted, onUnmounted, watch } from "vue";
+import api from "@/axios";
+import { useUserStore } from "@/stores/user";
+import { useTeacherLiveMonitor } from "@/composables/useTeacherLiveMonitor";
 
 interface OnlineStudent {
   student_id: number;
@@ -253,208 +241,178 @@ interface WsActivityEvent {
 }
 
 const userStore = useUserStore();
-const auth = useAuthStore();
+
+const {
+  isWsConnected,
+  wsError,
+  presenceMap,
+  liveEvents,
+  connect,
+  disconnect,
+  requestSnapshot,
+  init,
+  destroy,
+} = useTeacherLiveMonitor();
 
 const onlineStudents = ref<OnlineStudent[]>([]);
 const recentActivities = ref<RecentActivity[]>([]);
-const activitySearchQuery = ref('');
+const activitySearchQuery = ref("");
 const lastUpdate = ref<Date | null>(null);
 
-// Monitor switch (keeps your existing button semantics)
+// Keep your existing toggle semantics (monitor on/off)
 const isPolling = ref(true);
 
-// REST fallback polling interval
+// REST fallback / hydration interval
 const pollInterval = ref(60000);
-
-// WS connection state
-const isWsConnected = ref(false);
-const wsError = ref<string | null>(null);
 
 let pollTimer: number | null = null;
 let localClockTimer: number | null = null;
 
-let ws: WebSocket | null = null;
-let reconnectTimer: number | null = null;
-let reconnectAttempts = 0;
 const MAX_EVENTS = 200;
 
 const formatLastUpdate = computed(() => {
-  if (!lastUpdate.value) return 'Never';
+  if (!lastUpdate.value) return "Never";
   const now = new Date();
   const diff = Math.floor((now.getTime() - lastUpdate.value.getTime()) / 1000);
 
-  if (diff < 5) return 'Just now';
+  if (diff < 5) return "Just now";
   if (diff < 60) return `${diff} seconds ago`;
   return lastUpdate.value.toLocaleTimeString();
 });
 
 const filteredActivities = computed(() => {
   const currentStudentId = userStore.student?.id;
-  let activities = recentActivities.value.filter((activity) => {
-    return Number(activity.student) !== Number(currentStudentId);
-  });
+
+  let activities = recentActivities.value.filter(
+    (activity) => Number(activity.student) !== Number(currentStudentId)
+  );
 
   const query = activitySearchQuery.value.trim().toLowerCase();
   if (!query) return activities;
 
   return activities.filter((activity) => {
     return (
-      (activity.student_initials && activity.student_initials.toLowerCase().includes(query)) ||
-      (activity.description && activity.description.toLowerCase().includes(query)) ||
-      (activity.activity_name && activity.activity_name.toLowerCase().includes(query))
+      (activity.student_initials &&
+        activity.student_initials.toLowerCase().includes(query)) ||
+      (activity.description &&
+        activity.description.toLowerCase().includes(query)) ||
+      (activity.activity_name &&
+        activity.activity_name.toLowerCase().includes(query))
     );
   });
 });
 
-function getWsToken(): string {
-  return auth.access || localStorage.getItem("access_token") || "";
-}
+// ---- WS -> UI mapping --------------------------------------------------------
 
-function wsUrl(): string {
-  const base = (import.meta.env.VITE_WS_BASE_URL || "").replace(/\/+$/, "");
-  const token = getWsToken();
-  return `${base}/ws/teacher/live/?token=${encodeURIComponent(token)}`;
-}
-
-function connectWs() {
-  cleanupWsOnly();
-
-  try {
-    ws = new WebSocket(wsUrl());
-  } catch (err) {
-    isWsConnected.value = false;
-    wsError.value = 'Failed to initialize WebSocket';
-    scheduleReconnect();
-    return;
-  }
-
-  ws.onopen = () => {
-    isWsConnected.value = true;
-    wsError.value = null;
-    reconnectAttempts = 0;
-    console.info('WS open:', wsUrl());
-  };
-
-  ws.onmessage = (event) => {
-    // ... keep your existing message handling
-  };
-
-  ws.onclose = (e) => {
-    isWsConnected.value = false;
-    console.error('WS close', {
-      code: e.code,
-      reason: e.reason,
-      wasClean: e.wasClean,
-      url: wsUrl(),
-    });
-    scheduleReconnect();
-  };
-
-  ws.onerror = (e) => {
-    wsError.value = 'WebSocket connection error';
-    console.error('WS error', e, 'url=', wsUrl());
-  };
-}
-
-function scheduleReconnect() {
-  if (!isPolling.value) return; // do not reconnect while paused
-  if (reconnectTimer) return;
-
-  reconnectAttempts += 1;
-  const backoff = Math.min(10000, 1000 * Math.pow(2, Math.min(reconnectAttempts, 4)));
-
-  reconnectTimer = window.setTimeout(() => {
-    reconnectTimer = null;
-    connectWs();
-  }, backoff);
-}
-
-function cleanupWsOnly() {
-  if (!ws) return;
-  ws.onopen = null;
-  ws.onmessage = null;
-  ws.onclose = null;
-  ws.onerror = null;
-  try {
-    ws.close();
-  } catch {
-    // no-op
-  }
-  ws = null;
-}
-
-async function fetchPresenceSnapshot() {
-  try {
-    const response = await api.get('/presence/snapshot/');
-    if (response.data && Array.isArray(response.data.students)) {
-      applyPresenceSnapshot(response.data.students);
-      lastUpdate.value = new Date();
-    }
-  } catch {
-    // Optional endpoint; if unavailable, we rely on WS snapshot or legacy REST fallback
-  }
-}
-
-function applyPresenceSnapshot(students: WsPresence[]) {
-  onlineStudents.value = students
-    .map((s) => ({
-      student_id: s.student_id,
-      initials: s.initials,
-      web_id: s.web_id,
-      last_activity_type: s.last_activity_type || 'heartbeat',
-      last_activity_name: s.last_activity_name || 'Active',
-      last_seen: s.last_seen ? new Date(s.last_seen * 1000).toISOString() : new Date().toISOString(),
-      seconds_ago: Number(s.seconds_ago || 0),
-    }))
-    .sort((a, b) => a.seconds_ago - b.seconds_ago);
-}
-
-function applyPresenceUpsert(s: WsPresence) {
-  const next: OnlineStudent = {
+function mapPresenceToOnlineStudent(s: WsPresence): OnlineStudent {
+  return {
     student_id: s.student_id,
     initials: s.initials,
     web_id: s.web_id,
-    last_activity_type: s.last_activity_type || 'heartbeat',
-    last_activity_name: s.last_activity_name || 'Active',
-    last_seen: s.last_seen ? new Date(s.last_seen * 1000).toISOString() : new Date().toISOString(),
+    last_activity_type: s.last_activity_type || "heartbeat",
+    last_activity_name: s.last_activity_name || "Active",
+    last_seen: s.last_seen
+      ? new Date(s.last_seen * 1000).toISOString()
+      : new Date().toISOString(),
     seconds_ago: Number(s.seconds_ago || 0),
   };
-
-  const idx = onlineStudents.value.findIndex((st) => st.student_id === s.student_id);
-  if (idx >= 0) {
-    onlineStudents.value[idx] = next;
-  } else {
-    onlineStudents.value.push(next);
-  }
-  onlineStudents.value.sort((a, b) => a.seconds_ago - b.seconds_ago);
 }
 
-function applyActivityEvent(e: WsActivityEvent) {
-  const item: RecentActivity = {
-    id: -Date.now(),
+function mapEventToRecentActivity(e: WsActivityEvent): RecentActivity {
+  return {
+    id: -Date.now() - Math.floor(Math.random() * 1000),
     student: e.student_id,
-    student_initials: e.student_initials || '??',
-    activity_type: e.activity_type || 'other_game',
-    activity_name: e.activity_name || 'Activity',
-    description: e.description || e.activity_name || 'Activity',
+    student_initials: e.student_initials || "??",
+    activity_type: e.activity_type || "other_game",
+    activity_name: e.activity_name || "Activity",
+    description: e.description || e.activity_name || "Activity",
     timestamp: e.timestamp || new Date().toISOString(),
   };
+}
 
-  recentActivities.value = [item, ...recentActivities.value].slice(0, MAX_EVENTS);
+function syncOnlineFromPresenceMap() {
+  const students = Object.values(presenceMap.value as Record<number, WsPresence>)
+    .map(mapPresenceToOnlineStudent)
+    .sort((a, b) => a.seconds_ago - b.seconds_ago);
+
+  onlineStudents.value = students;
+  lastUpdate.value = new Date();
+}
+
+function syncRecentFromLiveEvents() {
+  const mapped = (liveEvents.value as WsActivityEvent[])
+    .map(mapEventToRecentActivity)
+    .slice(0, MAX_EVENTS);
+
+  // Keep existing list but prefer WS newest at top; avoid simple duplicates
+  const merged: RecentActivity[] = [...mapped];
+  for (const item of recentActivities.value) {
+    const exists = merged.find(
+      (m) =>
+        m.student === item.student &&
+        m.activity_type === item.activity_type &&
+        m.activity_name === item.activity_name &&
+        m.timestamp === item.timestamp
+    );
+    if (!exists) merged.push(item);
+    if (merged.length >= MAX_EVENTS) break;
+  }
+
+  recentActivities.value = merged.slice(0, MAX_EVENTS);
+  lastUpdate.value = new Date();
+}
+
+// React to composable websocket state
+watch(
+  presenceMap,
+  () => {
+    syncOnlineFromPresenceMap();
+  },
+  { deep: true }
+);
+
+watch(
+  liveEvents,
+  () => {
+    syncRecentFromLiveEvents();
+  },
+  { deep: true }
+);
+
+// ---- REST fallback / hydration ----------------------------------------------
+
+async function fetchPresenceSnapshot() {
+  try {
+    const response = await api.get("/presence/snapshot/");
+    if (response.data && Array.isArray(response.data.students)) {
+      // Only apply REST snapshot as fallback when WS has not yet populated anything
+      if (Object.keys(presenceMap.value).length === 0) {
+        onlineStudents.value = response.data.students
+          .map((s: WsPresence) => mapPresenceToOnlineStudent(s))
+          .sort((a: OnlineStudent, b: OnlineStudent) => a.seconds_ago - b.seconds_ago);
+      }
+      lastUpdate.value = new Date();
+    }
+  } catch {
+    // optional endpoint
+  }
 }
 
 async function fetchOnlineStudents() {
   try {
     const params: any = {};
-    if (userStore.isStaff) {
-      params.teacher_view = 'true';
-    }
+    if (userStore.isStaff) params.teacher_view = "true";
 
-    const response = await api.get('/online-students/', { params });
-    onlineStudents.value = response.data.students || [];
-    lastUpdate.value = new Date();
+    const response = await api.get("/online-students/", { params });
+    const incoming: OnlineStudent[] = response.data.students || [];
+
+    // Use fallback only if WS disconnected
+    if (!isWsConnected.value) {
+      onlineStudents.value = incoming;
+      lastUpdate.value = new Date();
+    }
   } catch (error) {
-    console.error('Failed to fetch online students:', error);
+    console.error("Failed to fetch online students:", error);
   }
 }
 
@@ -462,34 +420,32 @@ async function fetchRecentActivities() {
   try {
     const params: any = {
       limit: 100,
-      include_heartbeats: 'true',
+      include_heartbeats: "true",
     };
 
-    if (userStore.isStaff) {
-      params.managed_only = 'true';
-    }
+    if (userStore.isStaff) params.managed_only = "true";
 
-    const response = await api.get('/student-activities/', { params });
-
+    const response = await api.get("/student-activities/", { params });
     const incoming = response.data?.results ? response.data.results : response.data || [];
-    if (Array.isArray(incoming)) {
-      // Merge REST history under WS-injected live events without duplicates by simple heuristic
-      const existing = recentActivities.value;
-      const merged = [...existing];
 
+    if (Array.isArray(incoming)) {
+      // Keep WS-injected events at top; backfill with REST rows
+      const existing = [...recentActivities.value];
       for (const row of incoming) {
-        const duplicate = merged.find((m) =>
-          m.student === row.student &&
-          m.activity_type === row.activity_type &&
-          m.activity_name === row.activity_name &&
-          m.timestamp === row.timestamp
+        const duplicate = existing.find(
+          (m) =>
+            m.student === row.student &&
+            m.activity_type === row.activity_type &&
+            m.activity_name === row.activity_name &&
+            m.timestamp === row.timestamp
         );
-        if (!duplicate) merged.push(row);
+        if (!duplicate) existing.push(row);
       }
-      recentActivities.value = merged.slice(0, MAX_EVENTS);
+      recentActivities.value = existing.slice(0, MAX_EVENTS);
+      lastUpdate.value = new Date();
     }
   } catch (error) {
-    console.error('Failed to fetch recent activities:', error);
+    console.error("Failed to fetch recent activities:", error);
   }
 }
 
@@ -505,24 +461,33 @@ function startLocalClocks() {
 async function poll() {
   if (!isPolling.value) return;
 
-  // Always keep timeline fresh from REST.
-  // Presence: prefer WS/snapshot, fallback to legacy /online-students when WS is down.
-  if (!isWsConnected.value) {
-    await Promise.all([fetchOnlineStudents(), fetchRecentActivities()]);
-  } else {
+  // WS connected -> only backfill timeline
+  if (isWsConnected.value) {
     await fetchRecentActivities();
+    return;
   }
+
+  // WS down -> full REST fallback
+  await Promise.all([fetchOnlineStudents(), fetchRecentActivities()]);
 }
 
 function startPolling() {
   isPolling.value = true;
 
-  connectWs();
-  fetchPresenceSnapshot(); // optional bootstrap if endpoint exists
+  // start composable WS lifecycle
+  init();
+  void connect();
+  requestSnapshot();
 
-  poll();
+  // optional bootstrap REST snapshot
+  void fetchPresenceSnapshot();
+
+  // start fallback polling
+  void poll();
   if (pollTimer) clearInterval(pollTimer);
-  pollTimer = window.setInterval(poll, pollInterval.value);
+  pollTimer = window.setInterval(() => {
+    void poll();
+  }, pollInterval.value);
 
   startLocalClocks();
 }
@@ -538,73 +503,67 @@ function stopPolling() {
     localClockTimer = null;
   }
 
-  if (reconnectTimer) {
-    clearTimeout(reconnectTimer);
-    reconnectTimer = null;
-  }
+  disconnect();
+  destroy();
 
-  cleanupWsOnly();
-  isWsConnected.value = false;
   isPolling.value = false;
 }
 
 function togglePolling() {
-  if (isPolling.value) {
-    stopPolling();
-  } else {
-    startPolling();
-  }
+  if (isPolling.value) stopPolling();
+  else startPolling();
 }
 
-// Helpers
+// ---- UI helpers --------------------------------------------------------------
+
 function getActivityIcon(type: string): string {
   const icons: Record<string, string> = {
-    conjugation: 'mdi-controller',
-    other_game: 'mdi-gamepad-variant',
-    exercise: 'mdi-weight-lifter',
-    vocab_workout: 'mdi-cards-outline',
-    achievement: 'mdi-trophy',
-    workout_drill: 'mdi-clipboard-check',
-    feedback: 'mdi-comment-alert',
-    profile_update: 'mdi-account-voice',
-    page_view: 'mdi-file-document-outline',
-    heartbeat: 'mdi-pulse',
-    presence_join: 'mdi-connection',
+    conjugation: "mdi-controller",
+    other_game: "mdi-gamepad-variant",
+    exercise: "mdi-weight-lifter",
+    vocab_workout: "mdi-cards-outline",
+    achievement: "mdi-trophy",
+    workout_drill: "mdi-clipboard-check",
+    feedback: "mdi-comment-alert",
+    profile_update: "mdi-account-voice",
+    page_view: "mdi-file-document-outline",
+    heartbeat: "mdi-pulse",
+    presence_join: "mdi-connection",
   };
-  return icons[type] || 'mdi-circle';
+  return icons[type] || "mdi-circle";
 }
 
 function getActivityColor(type: string): string {
   const colors: Record<string, string> = {
-    conjugation: 'blue',
-    other_game: 'purple',
-    exercise: 'orange',
-    vocab_workout: 'teal',
-    achievement: 'amber',
-    workout_drill: 'green',
-    feedback: 'red',
-    profile_update: 'indigo',
-    page_view: 'cyan',
-    heartbeat: 'grey',
-    presence_join: 'light-green',
+    conjugation: "blue",
+    other_game: "purple",
+    exercise: "orange",
+    vocab_workout: "teal",
+    achievement: "amber",
+    workout_drill: "green",
+    feedback: "red",
+    profile_update: "indigo",
+    page_view: "cyan",
+    heartbeat: "grey",
+    presence_join: "light-green",
   };
-  return colors[type] || 'grey';
+  return colors[type] || "grey";
 }
 
 function getActivityClass(secondsAgo: number): string {
-  if (secondsAgo < 60) return 'active-now';
-  if (secondsAgo < 180) return 'active-recent';
-  return 'active-idle';
+  if (secondsAgo < 60) return "active-now";
+  if (secondsAgo < 180) return "active-recent";
+  return "active-idle";
 }
 
 function getTimeChipColor(secondsAgo: number): string {
-  if (secondsAgo < 60) return 'success';
-  if (secondsAgo < 180) return 'warning';
-  return 'grey';
+  if (secondsAgo < 60) return "success";
+  if (secondsAgo < 180) return "warning";
+  return "grey";
 }
 
 function formatSecondsAgo(seconds: number): string {
-  if (seconds < 10) return 'now';
+  if (seconds < 10) return "now";
   if (seconds < 60) return `${seconds}s ago`;
   const minutes = Math.floor(seconds / 60);
   return `${minutes}m ago`;
@@ -615,31 +574,23 @@ function formatTimeAgo(timestamp: string): string {
   const now = new Date();
   const diffSec = Math.floor((now.getTime() - date.getTime()) / 1000);
 
-  if (diffSec < 10) return 'just now';
+  if (diffSec < 10) return "just now";
   if (diffSec < 60) return `${diffSec}s ago`;
   if (diffSec < 300) return `${Math.floor(diffSec / 60)}m ago`;
 
   return date.toLocaleTimeString();
 }
 
-function handleTokenRefreshed() {
-  // reconnect so wsUrl() uses fresh token
-  cleanupWsOnly();
-  connectWs();
-}
+// ---- lifecycle ---------------------------------------------------------------
 
-onMounted(async () => {
+onMounted(() => {
   startPolling();
-  auth.restoreSession(); // safe idempotent
-  await auth.validateSession(); // optional but ideal
-  connectWs();
-  window.addEventListener("auth:token-refreshed", handleTokenRefreshed);
 });
 
 onUnmounted(() => {
   stopPolling();
-  window.removeEventListener("auth:token-refreshed", handleTokenRefreshed);
 });
+
 </script>
 
 <style scoped>

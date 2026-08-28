@@ -1,9 +1,15 @@
 <template>
   <v-container fluid class="pa-4 d-flex justify-center">
     
-    <div v-if="showFloatingFeedback" class="floating-feedback success bg-success">
-      <strong>Correct! <v-icon icon="mdi-emoticon-happy-outline" /></strong>
-    </div>
+    <v-snackbar
+      v-model="showFloatingFeedback"
+      :timeout="900"
+      location="center"
+      color="success"
+      rounded="pill"
+    >
+      <div class="text-center text-h4"><strong>Correct! <v-icon icon="mdi-emoticon-happy-outline" /></strong></div>
+    </v-snackbar>
 
     <v-card width="520" min-height="650" elevation="3" class="d-flex flex-column pa-4">
       
@@ -111,9 +117,9 @@
               </div>
 
               <div class="d-flex justify-center align-center ga-3 mb-6 my-3 flex-wrap">
-                <v-card v-if="activePrompt.displayed_intensifier" variant="tonal" color="purple" class="px-2 py-0">
+                <v-card v-if="activePrompt.displayed_intensifier" variant="tonal" :color="activePrompt.displayed_intensifier == 'impressive' ? 'purple' : 'red'" class="px-2 py-0">
                   <v-card-title class="text-caption text-uppercase font-weight-bold pa-1">
-                    {{ activePrompt.displayed_intensifier }}
+                    <span style="font-size: 16px;" class="me-1">{{ activePrompt.displayed_intensifier === 'impressive' ? '👀' : '😵' }}</span>  {{ activePrompt.displayed_intensifier }} <span style="font-size: 16px;" class="ms-1">{{ activePrompt.displayed_intensifier === 'impressive' ? '👀' : '😵' }}</span>
                     <v-tooltip activator="parent" location="top">
                     {{ activePrompt.displayed_intensifier == 'impressive' ? 'so' : 'too' }}
                   </v-tooltip>
@@ -578,11 +584,11 @@
 
           <v-card-actions class="pt-3 border-t mt-4">
             <v-spacer />
-            <v-btn color="primary" variant="flat" rounded="pill" size="large" @click="$emit('restart')">
+            <v-btn color="primary" variant="flat" rounded="pill" size="large" class="px-3" @click="$emit('restart')">
               Play Again
             </v-btn>
-            <RouterLink :to="{ path: '/student-data', query: { tab: 'other-games', game: gameName } }" class="text-decoration-none">
-              <v-btn color="secondary" variant="flat" rounded="pill" size="large">
+            <RouterLink :to="{ path: '/my-data', query: { tab: 'other-games', game: gameName } }" class="text-decoration-none">
+              <v-btn color="secondary" variant="flat" rounded="pill" size="large" class="px-3">
                 Dashboard
               </v-btn>
             </RouterLink>
@@ -621,7 +627,7 @@
               {{ 
                 activePrompt?.blueprint?.accepted_pool?.join(' / ') || 
                 activePrompt?.blueprint?.answers?.join(' / ') || 
-                activePrompt?.blueprint?.correct_map ? Object.values(activePrompt.blueprint.correct_map).join(' | ') : 'Available in the dashboard'
+                activePrompt?.blueprint?.correct_map ? Object.values(activePrompt.blueprint.correct_map).join(' | ') : 'Available at the end of the game'
               }}
             </strong>
           </div>
@@ -631,6 +637,20 @@
           <v-spacer/>
           <v-btn ref="wrongOkButton" color="secondary" variant="flat" @click="advanceNextRound">OK</v-btn>
         </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+    <v-dialog
+      v-model="showGameOverOverlay"
+      persistent
+      width="420"
+      scrim="black"
+      opacity="0.55"
+    >
+      <v-card class="pa-6 text-center">
+        <v-progress-circular indeterminate color="primary" class="mb-3" />
+        <div class="text-h6 font-weight-bold">Game Over</div>
+        <div class="text-body-2 text-grey-darken-1">Preparing your results...</div>
       </v-card>
     </v-dialog>
   </v-container>
@@ -670,6 +690,8 @@ const showWrongDialog = ref(false);
 const lastRoundTimeout = ref(false);
 const userAnswerLog = ref("");
 const wrongOkButton = ref(null);
+const showGameOverOverlay = ref(false);
+const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 const roundTelemetryBatch = ref([]);
 
@@ -1110,7 +1132,7 @@ async function handleAnswerSubmission() {
     } catch (error) {
       console.error("Idea Linker validation pipeline failed:", error);
       inputLocked.value = false;
-      startTimer();
+      startCountdown();
       return;
     }
 
@@ -1197,7 +1219,10 @@ async function advanceNextRound() {
   userAnswer.value = "";
 
   if (currentRound.value >= totalRounds.value - 1) {
-    await commitBulkTelemetryBatch();
+    showGameOverOverlay.value = true;     // block page
+    await delay(2000);                    // 2s signpost
+    await commitBulkTelemetryBatch();     // this sets gameState = "RESULTS"
+    showGameOverOverlay.value = false;
   } else {
     currentRound.value++;
     inputLocked.value = false;
@@ -1208,13 +1233,11 @@ async function advanceNextRound() {
 
 async function commitBulkTelemetryBatch() {
   gameState.value = "RESULTS";
-  const mode = props.gameSettings?.mode ?? 'mixed';
-  const finalGameNameHeader = mode === 'mixed' ? 'Verb Mixer' : 'Verb Mixer Practice';
   
   try {
     const payload = {
       session_id: props.session_id,
-      game_name: props.gameName === 'Verb Mixer' ? finalGameNameHeader : props.gameName,
+      game_name: props.gameName,
       rounds: roundTelemetryBatch.value.map(r => ({
         prompt_number: r.prompt_number,
         user_answer: r.user_answer,
@@ -1223,6 +1246,7 @@ async function commitBulkTelemetryBatch() {
       }))
     };
     
+    console.log('Submitting payload:', JSON.stringify(payload, null, 2));
     const response = await api.post("/other-games/submit-results/", payload);
     
     // MERGE SERVER CORRECT ANSWERS INTO LOCAL TELEMETRY ROWS

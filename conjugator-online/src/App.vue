@@ -315,9 +315,7 @@ function escapeToHub() {
   router.push({ name: userStore.isStaff ? 'teacher' : 'student-home' })
 }
 
-if (auth.isLoggedIn && !auth.isAccessTokenExpired()) {
-  useInactivityTimeout()
-}
+useInactivityTimeout();
 
 function isPublicRoute() {
   const name = String(route.name || '')
