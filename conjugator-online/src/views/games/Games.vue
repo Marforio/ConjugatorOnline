@@ -56,7 +56,7 @@
       </v-col>
 
       <!-- Word Families -->
-      <v-col v-if="isEnabled" cols="12" sm="6" md="4" class="d-flex justify-center">
+      <v-col cols="12" sm="6" md="4" class="d-flex justify-center">
         <RouterLink
           :to="{ name: 'word-families' }"
           class="image-tile"
@@ -123,7 +123,7 @@
           class="image-tile"
         >
           <div class="tile-frame">
-            <v-img src="/images/banners/UsesOfAuxiliaries.png" alt="Uses of Auxiliaries" cover class="tile-image" :class="isEnabled ? '' : 'disabled-tile'" />
+            <v-img src="/images/banners/UsesOfAuxiliaries.png" alt="Uses of Auxiliaries" cover class="tile-image" />
           </div>
         </RouterLink>
       </v-col>

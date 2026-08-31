@@ -287,6 +287,13 @@ const filteredActivities = computed(() => {
     (activity) => Number(activity.student) !== Number(currentStudentId)
   );
 
+  // Staff-only exclusion: hide feedback items in teacher monitor
+  if (userStore.isStaff) {
+    activities = activities.filter(
+      (activity) => activity.activity_type !== "feedback"
+    );
+  }
+
   const query = activitySearchQuery.value.trim().toLowerCase();
   if (!query) return activities;
 
@@ -301,7 +308,6 @@ const filteredActivities = computed(() => {
     );
   });
 });
-
 // ---- WS -> UI mapping --------------------------------------------------------
 
 function mapPresenceToOnlineStudent(s: WsPresence): OnlineStudent {

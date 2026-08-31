@@ -44,7 +44,10 @@ export const useAuthStore = defineStore("auth", () => {
     restoreSession();
   }
 
-  const isLoggedIn = computed(() => !!access.value);
+  const isLoggedIn = computed(() => {
+    if (!access.value) return false;
+    return !isAccessTokenExpired(0);
+  });
 
   function isAccessTokenExpired(skewSec = 10): boolean {
     const payload = parseJwt(access.value);

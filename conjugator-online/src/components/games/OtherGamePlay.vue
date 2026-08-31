@@ -42,37 +42,64 @@
                 💡 {{ activePrompt.mode?.toUpperCase() }}: {{ getAuxiliaryModeLabel(activePrompt.mode) }}
               </div>
 
-              <div class="d-flex align-center ga-3 mb-2">
+              <!-- Bob row -->
+              <div
+                class="d-flex align-center ga-3 mb-2"
+                :class="{ 'justify-center': activePrompt.mode === 'tag' }"
+              >
                 <div class="speaker-col text-center">
-                  <v-avatar size="80" class="border shadow-sm">
+                  <v-avatar :size="activePrompt.mode === 'tag' ? 120 : 80" class="border shadow-sm">
                     <v-img src="/images/speaker_pics_resized/bob.jpg" cover />
                   </v-avatar>
                   <div class="text-caption font-weight-bold mt-1 text-grey-darken-3">Bob</div>
                 </div>
 
-                <div class="bubble-wrap">
+                <div v-if="activePrompt.mode !== 'tag'" class="bubble-wrap">
                   <svg class="bubble-svg" viewBox="0 0 520 200" preserveAspectRatio="none">
-                    <path d="M40 18 H480 Q502 18 502 40 V130 Q502 152 480 152 H170 L120 182 L125 152 H40 Q18 152 18 130 V40 Q18 18 40 18 Z" fill="#ffffff" stroke="rgba(0,0,0,0.12)" stroke-width="3" />
+                    <path d="M40 18 H480 Q502 18 502 40 V130 Q502 152 480 152 H170 L120 182 L125 152 H40 Q18 152 18 130 V40 Q18 18 40 18 Z"
+                          fill="#ffffff" stroke="rgba(0,0,0,0.12)" stroke-width="3" />
                   </svg>
-                  <div class="bubble-text font-italic">
-                    {{ activePrompt.mode === 'tag' ? "Go ahead, I'm listening..." : activePrompt.prompt }}
+                  <div class="bubble-text font-italic ms-2 mt-3">
+                    {{ activePrompt.prompt }}
                   </div>
                 </div>
               </div>
 
               <v-divider class="my-3" variant="dashed" />
 
-              <div class="d-flex align-center justify-end ga-3">
-                <div class="player-bubble-wrap flex-grow-1">
-                  <svg class="player-bubble-svg" viewBox="0 0 520 200" preserveAspectRatio="none">
-                    <path d="M40 18 H480 Q502 18 502 40 V130 Q502 152 480 152 H250 L310 188 L300 152 H40 Q18 152 18 130 V40 Q18 18 40 18 Z" fill="#fff" stroke="rgba(0,0,0,0.12)" stroke-width="3" />
+              <!-- User row -->
+              <div class="d-flex flex-column align-end ga-2">
+                <div class="player-bubble-wrap flex-grow-1 w-100">
+                  <svg class="player-bubble-svg" viewBox="0 0 520 220" preserveAspectRatio="none">
+                    <path d="M40 18 H480 Q502 18 502 40 V150 Q502 172 480 172 H250 L310 208 L300 172 H40 Q18 172 18 150 V40 Q18 18 40 18 Z"
+                          fill="#fff" stroke="rgba(0,0,0,0.12)" stroke-width="3" />
                   </svg>
-                  <div class="player-bubble-content pl-4 pr-6">
-                    <span v-if="activePrompt.mode === 'echo'" class="font-italic text-body-2 me-2">Really?</span>
-                    <span v-else-if="activePrompt.mode === 'agreement'" class="font-italic text-body-2 me-2">Right.</span>
-                    <span v-else-if="activePrompt.mode === 'tag'" class="font-medium text-body-2 text-wrap pr-4">"{{ activePrompt.prompt }}" ...</span>
+
+                  <!-- inline prompt + input -->
+                  <div class="player-bubble-content d-flex align-center justify-center ga-2 flex-wrap pl-4 pr-6 mt-3">
+                    <span v-if="activePrompt.mode === 'echo'" class="font-italic text-body-2">Really?</span>
+                    <span v-else-if="activePrompt.mode === 'agreement'" class="font-italic text-body-2">What a coincidence! </span>
+                    <span v-else class="text-body-2">"{{ activePrompt.prompt }}" </span>
+
+                    <v-text-field
+                      ref="auxInputRef"
+                      v-model="userAnswer"
+                      class="aux-inline-input"
+                      label="answer"
+                      variant="outlined"
+                      density="compact"
+                      hide-details
+                      :disabled="inputLocked"
+                      @keydown.enter.prevent.stop="handleKeyboardEnterEvent"
+                      max-width="150"
+                    />
                   </div>
                 </div>
+
+                <!-- YOU icon under bubble -->
+                <v-avatar size="60" color="secondary" class="you-badge">
+                  <span class="text-white text-caption font-weight-bold">YOU</span>
+                </v-avatar>
               </div>
             </div>
 
@@ -436,8 +463,9 @@
                   </v-col>
                   <v-col cols="12" sm="4" class="pa-1">
                     <v-text-field
+                      :v-ref="(el) => setWfInputRef(it.pos, el)"  
                       v-model="wfAnswers[it.pos]"
-                      :label="`Type the ${it.pos} variant`"
+                      :label="`${it.pos}`"
                       variant="outlined"
                       density="compact"
                       hide-details
@@ -457,39 +485,85 @@
               <!-- MATCHING INTERACTION MODE -->
               <v-card v-else variant="flat" class="pa-2 bg-white">
                 <div class="d-flex flex-column ga-2 mb-3">
-                  <div 
-                    v-for="it in activePrompt.items" 
-                    :key="it.pos" 
-                    class="d-flex align-center justify-space-between pa-2 border rounded-lg cursor-pointer transition-all"
-                    :class="{ 'bg-blue-thin border-primary': selectedWfPos === it.pos }"
+                  <div
+                    v-for="it in activePrompt.items"
+                    :key="it.pos"
+                    class="match-row"
+                    :class="{ selected: selectedWfPos === it.pos }"
                     @click="selectedWfPos = it.pos"
                   >
-                    <div class="flex-grow-1 pr-3">
-                      <v-chip size="x-small" color="grey" label class="font-weight-bold text-uppercase mb-1">{{ it.pos }}</v-chip>
-                      <div class="font-italic text-body-2">{{ it.sentence }}</div>
+                    <div class="row-left">
+                      <div class="pos-pill">{{ it.pos }}</div>
+                      <div class="sentence">{{ it.sentence }}</div>
                     </div>
-                    
-                    <div class="min-width-150">
-                      <draggable :list="wfSlots[it.pos]" group="wfGroup" item-key="id" class="border dashed rounded pa-1 d-flex align-center min-height-40">
+
+                    <div class="row-right">
+                      <draggable
+                        :list="wfSlots[it.pos]"
+                        item-key="id"
+                        :group="wfDragGroup"
+                        :sort="false"
+                        class="slot"
+                        @change="onWfSlotDragChange(it.pos)"
+                      >
                         <template #item="{ element }">
-                          <v-chip color="primary" variant="flat" size="small" closable @click.stop="clearWfSlot(it.pos)">
+                          <v-chip
+                            class="ma-1"
+                            color="primary"
+                            variant="flat"
+                            closable
+                            @click.stop="clearWfSlot(it.pos)"
+                            @click:close.stop="clearWfSlot(it.pos)"
+                          >
                             {{ element.text }}
                           </v-chip>
+                        </template>
+
+                        <template #footer>
+                          <div v-if="wfSlots[it.pos].length === 0" class="slot-placeholder">
+                            Drop here
+                          </div>
                         </template>
                       </draggable>
                     </div>
                   </div>
                 </div>
 
-                <!-- Draggable Chip Bank Row Block -->
+                <v-divider class="my-2" />
+
                 <div class="text-caption text-grey mb-1 text-center">Available options bank:</div>
-                <draggable :list="wfBank" group="wfGroup" item-key="id" class="d-flex justify-center flex-wrap ga-2 border rounded pa-2 bg-grey-lighten-4">
+                <draggable
+                  :list="wfBank"
+                  item-key="id"
+                  :group="wfDragGroup"
+                  class="bank"
+                  @change="onWfBankDragChange"
+                >
                   <template #item="{ element }">
-                    <v-chip variant="outlined" color="secondary" class="cursor-pointer" @click="tapWfChip(element)">
+                    <v-chip
+                      class="ma-1"
+                      variant="outlined"
+                      :color="selectedWfPos ? 'secondary' : undefined"
+                      @click="tapWfChip(element)"
+                    >
                       {{ element.text }}
                     </v-chip>
                   </template>
                 </draggable>
+
+                <!-- submit button added -->
+                <div class="d-flex justify-center mt-3">
+                  <v-btn
+                    color="primary"
+                    variant="flat"
+                    rounded="pill"
+                    class="px-6"
+                    :disabled="inputLocked || !wfAllSlotsFilled"
+                    @click="handleAnswerSubmission"
+                  >
+                    Submit Answer
+                  </v-btn>
+                </div>
               </v-card>
             </div>
 
@@ -703,7 +777,7 @@ const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 const roundTelemetryBatch = ref([]);
 
-const SECONDS_PER_ROUND = props.gameName === "Pronoun Practice" ? 15 : 20;
+const SECONDS_PER_ROUND = props.gameName === "Pronoun Practice" ? 15 : props.gameName === "Word Families" ? 40 : 20;
 const timeLeft = ref(SECONDS_PER_ROUND);
 let timerInterval = null;
 
@@ -712,7 +786,7 @@ const activePrompt = computed(() => props.prompts[currentRound.value] || {});
 const progressPercentage = computed(() => (currentRound.value / totalRounds.value) * 100);
 
 const showGlobalAnswerInput = computed(() => {
-  return !(props.gameName === "Word Families");
+  return !["Word Families", "Uses Of Auxiliaries"].includes(props.gameName);
 });
 
 // ============================================================================
@@ -808,6 +882,38 @@ const computeHighlightedBubbleHtml = (text, highlight) => {
 
 // Word Families 
 // --- REACTIVE STATE DESCRIPTORS ---
+const wfDragGroup = { name: "wf-words", pull: true, put: true };
+
+const wfAllSlotsFilled = computed(() => {
+  const p = activePrompt.value;
+  if (!p?.items) return false;
+  return p.items.every(it => (wfSlots.value[it.pos]?.length || 0) === 1);
+});
+
+function onWfSlotDragChange(pos) {
+  const list = wfSlots.value[pos] || [];
+  while (list.length > 1) {
+    const extra = list.pop();
+    if (extra) wfBank.value.push(extra);
+  }
+  dedupeWfSlots();
+}
+
+function onWfBankDragChange() {
+  dedupeWfSlots();
+}
+
+function dedupeWfSlots() {
+  const seen = new Set();
+  ["verb", "noun", "adjective", "adverb"].forEach(pos => {
+    const list = wfSlots.value[pos] || [];
+    wfSlots.value[pos] = list.filter(w => {
+      if (seen.has(w.id)) return false;
+      seen.add(w.id);
+      return true;
+    });
+  });
+}
 const wfAnswers = ref({ verb: "", noun: "", adjective: "", adverb: "" });
 const selectedWfPos = ref(null);
 const wfBank = ref([]);
@@ -849,6 +955,22 @@ const clearWfSlot = (pos) => {
   const existing = wfSlots.value[pos].pop(); // Fixed: changed from valueOf to value
   if (existing) wfBank.value.push(existing);  // Fixed: changed from valueOf to value
 };
+
+const wfInputRefs = ref({}); // { verb: componentRef, noun: ..., adjective: ..., adverb: ... }
+
+function setWfInputRef(pos, el) {
+  if (el) wfInputRefs.value[pos] = el;
+}
+
+async function focusWordFamiliesInput() {
+  await nextTick();
+  if (props.gameName !== "Word Families") return;
+  if (props.gameSettings?.mode !== "writing") return;
+
+  const order = ["verb", "noun", "adjective", "adverb"];
+  const firstEmpty = order.find(pos => !String(wfAnswers.value[pos] || "").trim()) || order[0];
+  wfInputRefs.value[firstEmpty]?.focus?.();
+}
 
 
 // Tricky Translator
@@ -962,11 +1084,22 @@ const avgResponseTime = computed(() => {
 });
 
 const inputWrapper = ref(null);
+const auxInputRef = ref(null);
+
 async function focusInputField() {
   await nextTick();
-  if (props.gameName === "Word Families") return;
+  if (props.gameName === "Word Families") {
+    await focusWordFamiliesInput();
+    return;
+  }
+
+  if (props.gameName === "Uses Of Auxiliaries") {
+    auxInputRef.value?.focus?.();
+    return;
+  }
+
   const input = inputWrapper.value?.querySelector("input");
-  input?.focus();
+  input?.focus?.();
 }
 
 // Dialog focus monitor with keyboard entry guard synchronization hooks
@@ -1199,6 +1332,7 @@ async function handleAnswerSubmission() {
     console.error("Answer validation pipeline failed:", error);
     inputLocked.value = false;
     startCountdown();
+    return;
   }
 }
 
@@ -1225,7 +1359,23 @@ function logRoundMetrics(answer, isCorrect, timedOut) {
       questionString = `[${activePrompt.value.conditional_type.toUpperCase()}] (${focusClause}) || ${activePrompt.value.sentence}`;
     } else if (props.gameName === "Passive Party") {
     questionString = `"${activePrompt.value.active}" ➔ "${activePrompt.value.passive}"`;
-  }
+  } else if (props.gameName === "Uses Of Auxiliaries") {
+    const mode = (activePrompt.value.mode || "").toUpperCase();
+    if (activePrompt.value.mode === "tag") {
+      questionString = `[${mode}] Complete tag for: "${activePrompt.value.prompt || ""}"`;
+    } else {
+      questionString = `[${mode}] Bob says: "${activePrompt.value.prompt || ""}"`;
+    } 
+  } else if (props.gameName === "Word Families") {
+  const lemma = activePrompt.value.key || "unknown-lemma";
+  const mode = props.gameSettings?.mode || "unknown-mode";
+
+  const itemSummary = (activePrompt.value.items || [])
+    .map(it => `${it.pos}: ${it.sentence}`)
+    .join(" || ");
+
+  questionString = `[WORD FAMILIES - ${mode.toUpperCase()}] Lemma: "${lemma}" || ${itemSummary}`;
+}
 
   roundTelemetryBatch.value.push({
     prompt_number: activePrompt.value.prompt_number,
@@ -1344,5 +1494,73 @@ onBeforeUnmount(() => clearInterval(timerInterval));
   line-height: 1.5;
   word-break: break-word;
   white-space: normal;
+}
+.match-row {
+  display: flex;
+  gap: 12px;
+  align-items: stretch;
+  border: 1px solid rgba(0,0,0,0.12);
+  border-radius: 10px;
+  padding: 10px;
+  cursor: pointer;
+  transition: all .15s ease;
+}
+.match-row:hover {
+  background: rgba(25,118,210,0.04);
+}
+.match-row.selected {
+  outline: 2px solid rgba(25,118,210,0.35);
+  background: rgba(25,118,210,0.08);
+}
+.row-left { flex: 1; }
+.row-right { width: 220px; }
+
+.pos-pill {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: .75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  background: rgba(0,0,0,0.06);
+  margin-bottom: 6px;
+}
+.sentence { line-height: 1.3; }
+
+.slot {
+  min-height: 44px;
+  border: 2px dashed rgba(0,0,0,0.2);
+  border-radius: 10px;
+  padding: 6px;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  background: #fff;
+}
+.slot-placeholder {
+  width: 100%;
+  text-align: center;
+  font-size: .82rem;
+  color: rgba(0,0,0,0.55);
+}
+
+.bank {
+  min-height: 54px;
+  border: 1px solid rgba(0,0,0,0.12);
+  border-radius: 10px;
+  padding: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  background: #f5f5f5;
+}
+.you-badge {
+  margin: 6px auto 0 auto;   /* centers horizontally */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  transform: translateX(60px);
 }
 </style>

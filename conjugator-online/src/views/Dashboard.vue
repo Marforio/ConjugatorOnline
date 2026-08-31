@@ -729,7 +729,7 @@ const HEALTH_TIERS: Record<string, [number, number]> = {
 };
 
 const tabItems = [
-  { value: "grammar-feedback", label: "Errors" },
+  { value: "grammar-feedback", label: "Feedback" },
   { value: "vocabulary", label: "Vocab" },
   { value: "conjugation-game", label: "Conjugator" },
   { value: "other-games", label: "Other Games" },

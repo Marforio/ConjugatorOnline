@@ -335,7 +335,7 @@
                   <!-- Drills List -->
                   <div class="text-caption font-weight-bold text-slate-600 mb-2 uppercase tracking-wider">Drills in this workout:</div>
                   <div class="d-flex flex-column ga-2">
-                    <div v-for="(drill, index) in activeWorkout.drills" :key="index" class="bg-white border rounded-lg pa-3">
+                    <div v-for="(drill, index) in (activeWorkout.drills || [])" :key="index" class="bg-white border rounded-lg pa-3">
                       <div class="d-flex align-center justify-space-between mb-2">
                         <div class="text-body-2 font-weight-bold text-slate-800">
                           {{ drill.name }}
@@ -360,8 +360,8 @@
                   <div class="text-subtitle-2 text-slate-500 font-weight-bold uppercase tracking-wider">Assignments Filter</div>
                   <v-btn-toggle v-model="statusFilterMode" mandatory variant="text" color="indigo-darken-1" density="compact" class="border rounded-lg bg-slate-50">
                     <v-btn value="all" size="small" class="text-none font-weight-medium">All ({{ activeAssignments.length }})</v-btn>
-                    <v-btn value="pending" size="small" color="orange-darken-2" class="text-none font-weight-medium">Pending ({{ activeAssignments.filter(a => a.status === 'pending').length }})</v-btn>
-                    <v-btn value="completed" size="small" color="green-darken-2" class="text-none font-weight-medium">Done ({{ activeAssignments.filter(a => a.status === 'completed').length }})</v-btn>
+                    <v-btn value="pending" size="small" color="orange-darken-2" class="text-none font-weight-medium">Pending ({{ pendingAssignmentsCount }})</v-btn>
+                    <v-btn value="completed" size="small" color="green-darken-2" class="text-none font-weight-medium">Done ({{ completedAssignmentsCount }})</v-btn>
                   </v-btn-toggle>
                 </div>
 
@@ -396,7 +396,7 @@
                     
                     <v-list-item-subtitle class="text-caption text-slate-500 mt-1 d-flex flex-wrap align-center ga-2">
                       <span>Assigned: {{ formatDisplayDate(item.created_at) }}</span>
-                      <span v-if="item.task_type === 'exercise'" class="font-weight-bold text-teal-darken-2">• Repetitions: ({{ item.spaced_progress }}/{{ item.spaced_required }})</span>
+                      <span v-if="item.task_type === 'exercise'" class="font-weight-bold text-teal-darken-2">• Repetitions: ({{ item.spaced_progress ?? 0 }}/{{ item.spaced_required ?? 0 }})</span>
                     </v-list-item-subtitle>
 
                     <template v-slot:append>
@@ -611,6 +611,66 @@ interface TemplatePreset {
   required_sessions: number;
 }
 
+interface HardcodedVocabAssignmentDef {
+  listKey: string;
+  listLabel: string;
+  level?: 'essential' | 'advanced' | null;
+  variants: Array<'def_to_term' | 'past_forms'>;
+}
+
+const HARDCODED_VOCAB_ASSIGNMENTS: HardcodedVocabAssignmentDef[] = [
+  {
+    listKey: 'irregular_verbs',
+    listLabel: 'Irregular Verbs',
+    level: 'essential',
+    variants: ['def_to_term', 'past_forms'],
+  },
+  {
+    listKey: 'irregular_verbs',
+    listLabel: 'Irregular Verbs',
+    level: 'advanced',
+    variants: ['def_to_term', 'past_forms'],
+  },
+  {
+    listKey: 'general_regular_verbs',
+    listLabel: 'Regular Verbs',
+    variants: ['def_to_term'],
+  },
+  {
+    listKey: 'general_phrasal_verbs',
+    listLabel: 'Phrasal Verbs',
+    variants: ['def_to_term'],
+  },
+];
+
+function buildHardcodedVocabTriggerKey(
+  listKey: string,
+  variant: 'def_to_term' | 'past_forms',
+  level?: 'essential' | 'advanced' | null
+): string {
+  const levelPart = level ? `_${level}` : '';
+  return `vw_write_complete_${listKey}${levelPart}_${variant}`;
+}
+
+function buildHardcodedVocabDescription(
+  listLabel: string,
+  variant: 'def_to_term' | 'past_forms',
+  level?: 'essential' | 'advanced' | null
+): string {
+  const levelText = level ? ` (${level})` : '';
+  if (variant === 'past_forms') {
+    return `Complete ${listLabel}${levelText} in write mode (infinitive → both past forms).`;
+  }
+  return `Complete ${listLabel}${levelText} in write mode (definition/translation → term).`;
+}
+
+interface VocabList {
+  id: string;              // UUID from backend
+  name: string;
+  domain?: string | null;
+  description?: string | null;
+}
+
 interface WorkoutDrill {
   id?: number;
   name: string;
@@ -720,6 +780,8 @@ const savingTemplate = ref(false);
 const snackbar = ref(false);
 const snackbarText = ref('');
 const snackbarColor = ref('success');
+const vocabLists = ref<VocabList[]>([]);
+const loadingVocabLists = ref(false);
 
 // Workout Form State
 function getCleanWorkoutState() {
@@ -733,6 +795,14 @@ function getCleanWorkoutState() {
 
 const newWorkout = ref(getCleanWorkoutState());
 
+const pendingAssignmentsCount = computed(() =>
+  (activeAssignments.value ?? []).filter(a => a?.status === 'pending').length
+);
+
+const completedAssignmentsCount = computed(() =>
+  (activeAssignments.value ?? []).filter(a => a?.status === 'completed').length
+);
+
 // Template Form State
 const templateForm = ref({
   name: '',
@@ -745,27 +815,60 @@ const uniqueCourses = computed(() => userStore.availableTeacherCourses);
 
 const assignmentTemplates = computed(() => {
   const data = rawAchievementsJson.value;
-  if (!data || Object.keys(data).length === 0) return [];
-  const universalList = data._all?.achievements || [];
-  
-  let activeDomain = '';
-  if (targetScope.value === 'student' && selectedStudentId.value) {
-    activeDomain = userStore.teacherRoster.find(s => s.id === selectedStudentId.value)?.domain || '';
+  const baseTemplates: TemplatePreset[] = [];
+
+  // Existing JSON achievements
+  if (data && Object.keys(data).length > 0) {
+    const universalList = data._all?.achievements || [];
+    let activeDomain = '';
+
+    if (targetScope.value === 'student' && selectedStudentId.value) {
+      activeDomain = userStore.teacherRoster.find(s => s.id === selectedStudentId.value)?.domain || '';
+    }
+
+    const domainSpecificList = (activeDomain && data[activeDomain]) ? data[activeDomain].achievements : [];
+
+    baseTemplates.push(
+      ...[...universalList, ...domainSpecificList].map((ach: any) => {
+        const key = ach.criteria_key;
+        const isConjugatorGame = key.includes('_correct_prompts') || key.startsWith('health_tier_');
+        const inferredType = key.startsWith('vw_write_complete') || isConjugatorGame ? 'achievement' : 'exercise';
+        return {
+          trigger_key: key,
+          description: ach.description,
+          task_type: inferredType,
+          required_sessions: (!isConjugatorGame && ach.description.match(/(three times|x 3)/i)) ? 3 : 1
+        } as TemplatePreset;
+      })
+    );
   }
 
-  const domainSpecificList = (activeDomain && data[activeDomain]) ? data[activeDomain].achievements : [];
-  return [...universalList, ...domainSpecificList].map((ach: any) => {
-    const key = ach.criteria_key;
-    const isConjugatorGame = key.includes('_correct_prompts') || key.startsWith('health_tier_');
-    const inferredType = key.startsWith('vw_write_complete') || isConjugatorGame ? 'achievement' : 'exercise';
-    return { 
-      trigger_key: key, 
-      description: ach.description, 
-      task_type: inferredType, 
-      required_sessions: (!isConjugatorGame && ach.description.match(/(three times|x 3)/i)) ? 3 : 1 
-    };
-  });
+  // Custom DB lists (teacher-scoped via endpoint)
+  const customVocabTemplates: TemplatePreset[] = vocabLists.value.map((list) => ({
+    trigger_key: `vw_write_complete:${list.id}`,
+    description: `Complete ${list.name} in write mode.`,
+    task_type: 'achievement',
+    required_sessions: 1,
+  }));
+
+  // Hardcoded frontend vocab lists
+  const hardcodedVocabTemplates: TemplatePreset[] = HARDCODED_VOCAB_ASSIGNMENTS.flatMap((entry) =>
+    entry.variants.map((variant) => ({
+      trigger_key: buildHardcodedVocabTriggerKey(entry.listKey, variant, entry.level),
+      description: buildHardcodedVocabDescription(entry.listLabel, variant, entry.level),
+      task_type: 'achievement' as const,
+      required_sessions: 1,
+    }))
+  );
+
+  // Deduplicate by trigger_key
+  const merged = [...baseTemplates, ...customVocabTemplates, ...hardcodedVocabTemplates];
+  const dedupMap = new Map<string, TemplatePreset>();
+  merged.forEach((t) => dedupMap.set(t.trigger_key, t));
+
+  return Array.from(dedupMap.values());
 });
+
 
 const filteredActiveAssignments = computed(() => {
   return statusFilterMode.value === 'all' 
@@ -795,13 +898,14 @@ onMounted(async () => {
   loadingData.value = true;
   try {
     await userStore.ensureUserLoaded();
-    
-    // Fetch assignments data
+
     const res = await fetch('/data/assignments.json');
     rawAchievementsJson.value = await res.json();
-    
-    // Fetch workout templates
-    await fetchWorkoutTemplates();
+
+    await Promise.all([
+      fetchWorkoutTemplates(),
+      fetchVocabLists(), 
+    ]);
   } catch (err) {
     console.error('Initialization error:', err);
     triggerAlert('Failed to load data templates.', 'error');
@@ -889,8 +993,19 @@ async function refreshAssignmentLogs() {
       api.get('/assignment/', { params: { student: selectedStudentId.value } })
     ]);
     
-    activeWorkout.value = workoutRes.data;
-    activeAssignments.value = assignRes.data?.results || assignRes.data || [];
+    const wk = workoutRes.data;
+    activeWorkout.value = wk
+      ? {
+          ...wk,
+          drills: Array.isArray(wk.drills) ? wk.drills : [],
+          completed_repetitions: Number(wk.completed_repetitions ?? 0),
+          target_repetitions: Number(wk.target_repetitions ?? 1),
+          notes: wk.notes ?? ''
+        }
+      : null;
+    const raw = assignRes.data?.results ?? assignRes.data ?? [];
+    activeAssignments.value = Array.isArray(raw) ? raw : [];
+    console.log('assignRes.data shape:', assignRes.data);
   } catch (err) {
     console.error('Failed to refresh assignment logs:', err);
     triggerAlert('Failed to refresh student logs.', 'error');
@@ -958,6 +1073,17 @@ async function fetchWorkoutTemplates() {
   } catch (err) {
     console.error('Failed to fetch workout templates:', err);
     triggerAlert('Could not load workout templates.', 'error');
+  }
+}
+
+async function fetchVocabLists() {
+  try {
+    const res = await api.get('/vocab-lists/');
+    const raw = res.data?.results ?? res.data ?? [];
+    vocabLists.value = Array.isArray(raw) ? raw : [];
+  } catch (err) {
+    console.error('Failed to fetch vocab lists:', err);
+    vocabLists.value = [];
   }
 }
 
@@ -1117,6 +1243,7 @@ async function issueAssignmentTask() {
   dispatching.value = true;
   try {
     let targetsListIds: number[] = [];
+
     if (targetScope.value === 'student' && selectedStudentId.value) {
       targetsListIds.push(selectedStudentId.value);
     } else if (targetScope.value === 'course' && selectedCourseId.value) {
@@ -1127,8 +1254,15 @@ async function issueAssignmentTask() {
     }
 
     const batchRequests: Array<Promise<any>> = [];
+
     targetsListIds.forEach(studentId => {
       selectedTemplatesList.value.forEach(template => {
+        console.log('Creating assignment', {
+          student: studentId,
+          trigger_key: template.trigger_key,
+          task_type: template.task_type,
+        });
+
         batchRequests.push(
           api.post('/assignment/', {
             student: studentId,

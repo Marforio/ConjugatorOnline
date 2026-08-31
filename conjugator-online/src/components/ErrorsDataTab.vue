@@ -25,7 +25,7 @@
   <!-- Active Data State -->
   <div v-else>
     <!-- ✨ TOP CONTROL ACTION BAR: Frontend PDF Report Exporter -->
-    <div class="d-flex justify-end mb-4 px-4" style="max-width: 95%;">
+    <div class="d-flex justify-end ga-3 mb-4 px-4" style="max-width: 95%;">
       <v-btn
         color="red-lighten-2"
         variant="elevated"
@@ -36,7 +36,19 @@
       >
         Export Error Summary PDF
       </v-btn>
+
+      <v-btn
+        v-if="!loading && impressives.length > 0"
+        color="teal-lighten-1"
+        variant="elevated"
+        prepend-icon="mdi-star-circle-outline"
+        class="text-button font-weight-bold px-5 rounded-lg"
+        @click="impressiveDialog = true"
+      >
+        That was impressive!
+      </v-btn>
     </div>
+
 
     <!-- Chart Card -->
     <div v-if="xs">
@@ -130,6 +142,44 @@
     :hide-initial-user-message="true"
     :reset-on-context-change="true"
   />
+
+  <!-- impressive dialog -->
+  <v-dialog v-model="impressiveDialog" max-width="900">
+    <v-card rounded="lg">
+      <v-card-title class="d-flex align-center justify-space-between">
+        <span class="text-h6 font-weight-bold">
+          Impressive Language Highlights
+        </span>
+        <v-btn icon="mdi-close" variant="text" @click="impressiveDialog = false" />
+      </v-card-title>
+
+      <v-divider />
+
+      <v-card-text>
+        <div v-if="impressives.length === 0" class="text-medium-emphasis">
+          No impressive language items available yet.
+        </div>
+
+        <v-list v-else>
+          <v-list-item
+            v-for="(item, idx) in impressives"
+            :key="item.impressive_id || idx"
+            class="mb-2 rounded-lg border"
+          >
+            <v-list-item-title class="font-weight-bold" style="white-space: normal;">
+              {{ item.content }}
+            </v-list-item-title>
+            <v-list-item-subtitle v-if="item.comment" class="mt-1" style="white-space: normal;">
+              {{ item.comment }}
+            </v-list-item-subtitle>
+            <template #append>
+              <v-chip size="small" color="green" variant="tonal">{{ item.times || 1 }}x</v-chip>
+            </template>
+          </v-list-item>
+        </v-list>
+      </v-card-text>
+    </v-card>
+  </v-dialog>
 </template>
 
 
@@ -180,6 +230,16 @@ interface Feedback {
   content?: string;
 }
 
+// add interface
+interface ImpressiveItem {
+  impressive_id: string;
+  content: string;
+  comment: string | null;
+  times: number;
+  feedback?: string | { feedback_id?: string; date?: string };
+  student?: number | string;
+}
+
 // ---------------- Reactive State ----------------
 const userStore = useUserStore();
 const { xs } = useDisplay();
@@ -192,6 +252,10 @@ const errorData = errorsData;
 
 const tutorOpen = ref(false);
 const selectedError = ref<ErrorItem | null>(null);
+
+  const impressiveDialog = ref(false);
+const impressives = ref<ImpressiveItem[]>([]);
+
 
 // ---------------- AI Tutor Configurations ----------------
 const errorTutorSystemMessage =
@@ -262,7 +326,7 @@ function buildErrorTutorInitialUserMessage(ctx: any) {
     .join("\n");
 }
 
-// ---------------- API Actions & Core Secure Filter Tree ----------------
+// ---------------- API Actions  ----------------
 const fetchErrorDashboardData = async () => {
   loading.value = true;
   errorsError.value = null;
@@ -284,6 +348,21 @@ const fetchErrorDashboardData = async () => {
     errorsError.value = "Failed to fetch errors.";
   } finally {
     loading.value = false;
+  }
+};
+
+// fetch function
+const fetchImpressiveData = async () => {
+  try {
+    const params: any = {};
+    if (userStore.isStaff && userStore.studentId) {
+      params.student = userStore.studentId;
+    }
+    const res = await api.get<ImpressiveItem[]>("/impressive/", { params });
+    impressives.value = res.data || [];
+  } catch (err) {
+    console.error("Failed to fetch impressives:", err);
+    impressives.value = [];
   }
 };
 
@@ -346,7 +425,7 @@ const generateLocalPdfSummary = async () => {
     doc.setFontSize(9);
     doc.setFont("helvetica", "normal");
     currentY += 15;
-    doc.text(`Generated on ${new Date().toLocaleDateString()} for ${courseLabel}`, margin, currentY);
+    doc.text(`Generated on ${new Date().toLocaleDateString()}`, margin, currentY);
 
     currentY += 15;
     const totalAnomaliesCount = sortedErrorsArray.reduce((acc, curr) => acc + curr.total_times, 0);
@@ -354,12 +433,12 @@ const generateLocalPdfSummary = async () => {
     autoTable(doc, {
       startY: currentY,
       margin: { left: margin, right: margin },
-      head: [["Your Key Stats", "Current Standing"]],
+      head: [["Key Stats", "Value"]],
       body: [
         ["Domain", userStore.studentDomainLabel || "General Practice"],
-        ["Total Documented Errors", `${totalAnomaliesCount} logged items`],
-        ["Unique Errors", `${sortedErrorsArray.length} items identified`],
-        ["Feedbacks", `${feedbackGroups.value.length} evaluated sessions`]
+        ["Total Documented Errors", `${totalAnomaliesCount}`],
+        ["Unique Errors", `${sortedErrorsArray.length} items`],
+        ["Feedbacks", `${feedbackGroups.value.length}`]
       ],
       theme: "striped",
       headStyles: { fillColor: [0, 150, 136], textColor: 255, fontStyle: "bold" },
@@ -636,7 +715,10 @@ const cardStyle = computed(() => ({
 }));
 
 // ---------------- Lifecycle ----------------
-onMounted(() => {
-  fetchErrorDashboardData();
+onMounted(async () => {
+  await Promise.all([
+    fetchErrorDashboardData(),
+    fetchImpressiveData(),
+  ]);
 });
 </script>

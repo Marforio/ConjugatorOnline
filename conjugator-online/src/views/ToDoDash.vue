@@ -574,6 +574,8 @@ function getActivityColor(type: string): string {
     'exercise': 'orange-lighten-2',
     'vocab_workout': 'teal-lighten-2',
     'achievement': 'amber-lighten-1',
+    'feedback': 'pink-lighten-2',
+    'profile_update': 'indigo-lighten-2',
   };
   return colors[type] || 'slate-300';
 }

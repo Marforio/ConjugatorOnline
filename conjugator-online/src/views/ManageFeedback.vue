@@ -57,7 +57,7 @@
               <v-text-field
                 v-bind="props"
                 v-model="searchQuery"
-                label="Search active student rosters..."
+                label="Search active student roster..."
                 prepend-inner-icon="mdi-account-search"
                 append-inner-icon="mdi-chevron-down"
                 variant="outlined"
@@ -121,135 +121,49 @@
           />
         </v-col>
       </v-row>
-    </v-card>
-
-    <v-card v-if="selectedStudent && loadedTemplateStructure" class="pa-6 mb-6 animate-fade-in" elevation="2" rounded="lg">
-      <div class="text-overline font-weight-bold text-primary mb-4 tracking-wider">Feedback for {{ selectedStudent.initials }}</div>
-      
-      <form @submit.prevent>
-        <div v-for="comp in loadedTemplateStructure.components" :key="comp.id" class="mb-5">
-          
-          <div v-if="comp.type === 'paragraph'" class="pa-4 bg-slate-50 border rounded-xl text-body-2 text-slate-700 mb-2">
-            <v-icon icon="mdi-information-outline" color="indigo" class="mr-2" size="small" />
-            {{ comp.text }}
-          </div>
-
-          <v-text-field v-if="comp.type === 'text_input'" v-model="formDataValues[comp.id]" :label="comp.label" variant="outlined" density="comfortable" />
-
-          <v-textarea v-if="comp.type === 'textarea'" v-model="formDataValues[comp.id]" :label="comp.label" :rows="comp.rows || 3" variant="outlined" auto-grow />
-
-          <v-select v-if="comp.type === 'select'" v-model="formDataValues[comp.id]" :items="comp.options" :label="comp.label" variant="outlined" />
-
-          <div v-if="comp.type === 'checkbox_group'" class="pa-4 border rounded-xl bg-slate-50">
-            <div class="text-subtitle-2 font-weight-black text-slate-800 mb-2">{{ comp.label }}</div>
-            <v-checkbox v-for="(opt, oIdx) in comp.options" :key="oIdx" v-model="formDataValues[comp.id]" :label="opt" :value="opt" color="indigo" density="compact" hide-details />
-          </div>
-
-          <div v-if="comp.type === 'error_matrix'" class="pa-4 border rounded-xl border-amber-lighten-3 bg-amber-lighten-5">
-            <div class="d-flex align-center justify-space-between mb-4">
-              <div class="text-subtitle-1 font-weight-bold text-amber-darken-4"><v-icon icon="mdi-alert-circle-outline" class="mr-2"/>ERRORS</div>
-              <v-btn size="small" color="amber-darken-3" class="text-white font-weight-bold" prepend-icon="mdi-plus" @click="addErrorRow">Add Error Entry</v-btn>
-            </div>
-            <v-row v-for="(err, eIdx) in errorsList" :key="eIdx" dense class="mb-2 align-center">
-              <v-col cols="12" md="4"><v-select v-model="err.code" :items="errorCodes" label="Error Code" variant="outlined" density="compact" bg-color="white" hide-details /></v-col>
-              <v-col cols="12" md="6"><v-textarea v-model="err.evidence" @input="calculateAutoErrorCount(eIdx)" label="Evidence (separate items with semicolons)" variant="outlined" rows="1" auto-grow density="compact" bg-color="white" hide-details /></v-col>
-              <v-col cols="12" md="1" class="text-center font-weight-black text-amber-darken-4">{{ err.times }}x</v-col>
-              <v-col cols="12" md="1" class="text-center"><v-btn icon="mdi-delete" size="small" color="error" variant="text" @click="errorsList.splice(eIdx, 1)" /></v-col>
-            </v-row>
-          </div>
-
-          <div v-if="comp.type === 'vocab_notebook'" class="pa-4 border rounded-xl border-indigo-lighten-4 bg-indigo-lighten-5">
-            <div class="d-flex align-center justify-space-between mb-4">
-              <div class="text-subtitle-1 font-weight-bold text-indigo-darken-4"><v-icon icon="mdi-notebook-outline" class="mr-2"/>Vocabulary</div>
-              <v-btn size="small" color="indigo" class="font-weight-bold" prepend-icon="mdi-plus" @click="addVocabRow">Add Vocabulary Term</v-btn>
-            </div>
-            <v-row v-for="(vRow, vIdx) in vocabList" :key="vIdx" dense class="mb-2 align-center">
-              <v-col cols="12" md="3"><v-textarea v-model="vRow.correct" label="Correct Form" variant="outlined" rows="1" auto-grow density="compact" bg-color="white" hide-details /></v-col>
-              <v-col cols="12" md="3"><v-textarea v-model="vRow.incorrect" label="Incorrect Form" variant="outlined" rows="1" auto-grow density="compact" bg-color="white" hide-details /></v-col>
-              <v-col cols="12" md="5"><v-textarea v-model="vRow.comment" label="Teacher Usage Notes / Context" variant="outlined" rows="1" auto-grow density="compact" bg-color="white" hide-details /></v-col>
-              <v-col cols="12" md="1" class="text-center"><v-btn icon="mdi-delete" size="small" color="error" variant="text" @click="vocabList.splice(vIdx, 1)" /></v-col>
-            </v-row>
-          </div>
-
-          <div v-if="comp.type === 'impressive_matrix'" class="pa-4 border rounded-xl border-emerald-lighten-3 bg-emerald-lighten-5">
-            <div class="d-flex align-center justify-space-between mb-4">
-              <div class="text-subtitle-1 font-weight-bold text-emerald-darken-4">
-                <v-icon icon="mdi-star-circle-outline" class="mr-2"/>Impressive Language Structures
-              </div>
-              <v-btn size="small" color="emerald-darken-2" class="text-white font-weight-bold" prepend-icon="mdi-plus" @click="addImpressiveRow">
-                Add Impressive Item
-              </v-btn>
-            </div>
-            <v-row v-for="(imp, iIdx) in impressiveList" :key="iIdx" dense class="mb-2 align-center">
-              <v-col cols="12" md="5">
-                <v-textarea v-model="imp.content" label="Advanced Phrase / Nuanced Construction used" variant="outlined" rows="1" auto-grow density="compact" bg-color="white" hide-details />
-              </v-col>
-              <v-col cols="12" md="6">
-                <v-textarea v-model="imp.comment" label="Praise Notes / Semantic Context Details" variant="outlined" rows="1" auto-grow density="compact" bg-color="white" hide-details />
-              </v-col>
-              <v-col cols="12" md="1" class="text-center">
-                <v-btn icon="mdi-delete" size="small" color="error" variant="text" @click="impressiveList.splice(iIdx, 1)" />
-              </v-col>
-            </v-row>
-          </div>
-
-          <div v-if="comp.type === 'comment_block'" class="pa-4 border rounded-xl border-blue-grey-lighten-4 bg-blue-grey-lighten-5">
-            <div class="d-flex align-center justify-space-between mb-3">
-              <div class="text-subtitle-1 font-weight-bold text-blue-grey-darken-4">
-                <v-icon icon="mdi-comment-text-multiple-outline" class="mr-2"/>Evaluation Remarks
-              </div>
-              <v-btn size="small" color="blue-grey" class="text-white font-weight-bold" prepend-icon="mdi-plus" @click="addCommentRow">
-                Add Remark Node
-              </v-btn>
-            </div>
-            <v-row v-for="(comm, cIdx) in commentsList" :key="cIdx" dense class="mb-2">
-              <v-col cols="12" md="11">
-                <v-textarea v-model="comm.comment" label="Enter freeform evaluation commentary note..." variant="outlined" rows="2" auto-grow bg-color="white" hide-details />
-              </v-col>
-              <v-col cols="12" md="1" class="d-flex align-center justify-center">
-                <v-btn icon="mdi-delete" size="small" color="error" variant="text" @click="commentsList.splice(cIdx, 1)" />
-              </v-col>
-            </v-row>
-          </div>
-        </div>
-
-        <v-divider class="my-6" />
-        <div class="d-flex gap-3 flex-wrap">
-          <v-btn color="indigo-darken-1" size="large" class="text-white font-weight-bold rounded-xl" :loading="submitting" prepend-icon="mdi-send-check" @click="executeSubmitFeedback">
-            Submit & Save
+      <v-row class="d-flex justify-end px-3 mt-2">
+        <v-col cols="12" md="5">
+          <v-btn
+            color="green-lighten-5"
+            variant="flat"
+            size="x-large"
+            block
+            class="text-green-darken-3 font-weight-black rounded-xl text-none mt-4"
+            prepend-icon="mdi-comment-edit-outline"
+            :disabled="!canStartFeedback"
+            @click="showFeedbackDialog = true"
+          >
+            Give Feedback
           </v-btn>
-          <v-btn color="indigo" size="large" variant="outlined" class="font-weight-bold rounded-xl" prepend-icon="mdi-file-pdf-box" @click="generateClientSidePdfReport(null)">
-            Preview Live PDF
-          </v-btn>
-        </div>
-      </form>
+        </v-col>
+      </v-row>
     </v-card>
 
     <v-card class="pa-6 mt-6" elevation="2" rounded="lg">
-  <v-row class="align-center mb-2">
-    <v-col cols="12" sm="5">
-      <div class="text-h5 font-weight-bold">Issued Feedback</div>
-      <div class="text-caption text-slate-500">Track feedback and recreate PDFs.</div>
-    </v-col>
-    
-    <v-col cols="12" sm="5">
-      <v-text-field
-        v-model="historySearchQuery"
-        label="Filter history by student initials or username..."
-        prepend-inner-icon="mdi-magnify"
-        variant="outlined"
-        density="compact"
-        clearable
-        hide-details
-      />
-    </v-col>
-    
-    <v-col cols="12" sm="2" class="text-sm-right">
-      <v-btn prepend-icon="mdi-refresh" variant="text" color="primary" size="small" :loading="loadingHistory" @click="fetchIssuedFeedbackHistory">
-        Refresh
-      </v-btn>
-    </v-col>
-  </v-row>
+      <v-row class="align-center mb-2">
+        <v-col cols="12" sm="5">
+          <div class="text-h5 font-weight-bold">Issued Feedback</div>
+          <div class="text-caption text-slate-500">Track feedback and recreate PDFs.</div>
+        </v-col>
+        
+        <v-col cols="12" sm="5">
+          <v-text-field
+            v-model="historySearchQuery"
+            label="Filter history by initials or username..."
+            prepend-inner-icon="mdi-magnify"
+            variant="outlined"
+            density="compact"
+            clearable
+            hide-details
+          />
+        </v-col>
+        
+        <v-col cols="12" sm="2" class="text-sm-right">
+          <v-btn prepend-icon="mdi-refresh" variant="text" color="primary" size="small" :loading="loadingHistory" @click="fetchIssuedFeedbackHistory">
+            Refresh
+          </v-btn>
+        </v-col>
+      </v-row>
 
   <v-progress-linear v-if="loadingHistory" indeterminate color="indigo" class="mb-4" />
 
@@ -257,11 +171,11 @@
     <v-table class="w-100">
       <thead class="sticky-thead bg-slate-50">
         <tr>
-          <th class="text-left font-weight-bold text-slate-700">Feedback ID Reference</th>
-          <th class="text-left font-weight-bold text-slate-700">Student Target</th>
-          <th class="text-left font-weight-bold text-slate-700">Course Track</th>
+          <th class="text-left font-weight-bold text-slate-700">Feedback ID</th>
+          <th class="text-left font-weight-bold text-slate-700">Student</th>
+          <th class="text-left font-weight-bold text-slate-700">Course</th>
           <th class="text-left font-weight-bold text-slate-700">Date Committed</th>
-          <th class="text-center font-weight-bold text-slate-700">Action Actions</th>
+          <th class="text-center font-weight-bold text-slate-700">Actions</th>
         </tr>
       </thead>
       <tbody>
@@ -283,6 +197,14 @@
               title="Regenerate Report PDF"
               @click="recreatePdfFromHistoricalLogs(item)"
             />
+            <v-btn
+              icon="mdi-pencil"
+              size="small"
+              color="primary"
+              variant="text"
+              title="Edit Feedback"
+              @click="loadHistoricalFeedbackIntoForm(item)"
+            />
           </td>
         </tr>
       </tbody>
@@ -300,6 +222,159 @@
   </v-container>
 
   <FeedbackTemplateBuilderDialog v-model="showBuilderStudio" @template-created="handleNewTemplateDeployment" />
+  
+  
+  <v-dialog v-model="showFeedbackDialog" fullscreen transition="dialog-bottom-transition">
+  <v-card class="px-5 py-2">
+    <v-toolbar color="indigo" dark>
+      <v-btn icon="mdi-close" @click="showFeedbackDialog = false" />
+      <v-toolbar-title>
+        Feedback for {{ selectedStudent?.initials }} ({{ selectedCourse?.toUpperCase() }})
+      </v-toolbar-title>
+    </v-toolbar>
+
+    <v-card-text class="pa-6">
+      <form @submit.prevent>
+        <div v-for="comp in loadedTemplateStructure.components" :key="comp.id" class="mb-5">
+          
+          <div v-if="comp.type === 'paragraph'" class="pa-4 bg-slate-50 border rounded-xl text-body-2 text-slate-700 mb-2">
+            <v-icon icon="mdi-information-outline" color="indigo" class="mr-2" size="small" />
+            {{ comp.text }}
+          </div>
+
+          <v-text-field v-if="comp.type === 'text_input'" v-model="formDataValues[comp.id]" :label="comp.label" variant="outlined" density="comfortable" />
+
+          <v-textarea v-if="comp.type === 'textarea'" v-model="formDataValues[comp.id]" :label="comp.label" :rows="comp.rows || 3" variant="outlined" auto-grow />
+
+          <v-select v-if="comp.type === 'select'" v-model="formDataValues[comp.id]" :items="comp.options" :label="comp.label" variant="outlined" />
+
+          <div v-if="comp.type === 'checkbox_group'" class="pa-4 border rounded-xl bg-slate-50">
+            <div class="text-subtitle-2 font-weight-black text-slate-800 mb-2">{{ comp.label }}</div>
+            <v-checkbox v-for="(opt, oIdx) in comp.options" :key="oIdx" v-model="formDataValues[comp.id]" :label="opt" :value="opt" color="indigo" density="compact" hide-details />
+          </div>
+
+          <div v-if="comp.type === 'error_matrix'" class="pa-4 border rounded-xl border-amber-lighten-3 bg-amber-lighten-5">
+            <div class="d-flex align-center justify-space-between mb-4">
+              <div class="text-subtitle-1 font-weight-bold text-amber-darken-4"><v-icon icon="mdi-alert-circle-outline" class="mr-2"/>Errors</div>
+              <v-btn size="small" color="amber-darken-3" class="text-white font-weight-bold" prepend-icon="mdi-plus" @click="addErrorRow">Add Error Entry</v-btn>
+            </div>
+              <div class="d-flex justify-end flex-wrap ga-2 mb-6">
+                <v-tooltip
+                  v-for="code in commonErrorCodes"
+                  :key="code"
+                  :text="`${code} — ${errorsData[code]?.description || 'No description available'}`"
+                  location="top"
+                >
+                  <template #activator="{ props }">
+                    <v-chip
+                      v-bind="props"
+                      color="amber-darken-2"
+                      class="text-white font-weight-bold"
+                      label
+                      @click="addCommonError(code)"
+                    >
+                      + {{ code }}
+                    </v-chip>
+                  </template>
+                </v-tooltip>
+              </div>
+
+            <v-row v-for="(err, eIdx) in errorsList" :key="eIdx" dense class="mb-2 align-center">
+              <v-col cols="12" md="4"><v-select v-model="err.code" :items="errorCodes" label="Error Code" variant="outlined" density="compact" bg-color="white" hide-details /></v-col>
+              <v-col cols="12" md="6"><v-textarea v-model="err.evidence" @input="calculateAutoErrorCount(eIdx)" label="Evidence (separate items with semicolons)" variant="outlined" rows="1" auto-grow density="compact" bg-color="white" hide-details /></v-col>
+              <v-col cols="12" md="1" class="text-center font-weight-black text-amber-darken-4">{{ err.times }}x</v-col>
+              <v-col cols="12" md="1" class="text-center"><v-btn icon="mdi-delete" size="small" color="error" variant="text" @click="errorsList.splice(eIdx, 1)" /></v-col>
+            </v-row>
+          </div>
+
+          <div v-if="comp.type === 'vocab_notebook'" class="pa-4 border rounded-xl border-indigo-lighten-4 bg-indigo-lighten-5">
+            <div class="d-flex align-center justify-space-between mb-4">
+              <div class="text-subtitle-1 font-weight-bold text-indigo-darken-4"><v-icon icon="mdi-notebook-outline" class="mr-2"/>Vocabulary</div>
+              <v-btn size="small" color="indigo" class="font-weight-bold" prepend-icon="mdi-plus" @click="addVocabRow">Add Vocabulary Term</v-btn>
+            </div>
+            <v-row v-for="(vRow, vIdx) in vocabList" :key="vIdx" dense class="mb-2 align-center">
+              <v-col cols="12" md="3"><v-textarea v-model="vRow.correct" label="Correct Form" variant="outlined" rows="1" auto-grow density="compact" bg-color="white" hide-details /></v-col>
+              <v-col cols="12" md="3"><v-textarea v-model="vRow.incorrect" label="Incorrect Form" variant="outlined" rows="1" auto-grow density="compact" bg-color="white" hide-details /></v-col>
+              <v-col cols="12" md="5"><v-textarea v-model="vRow.comment" label="Teacher Usage Notes / Context" variant="outlined" rows="1" auto-grow density="compact" bg-color="white" hide-details /></v-col>
+              <v-col cols="12" md="1" class="text-center"><v-btn icon="mdi-delete" size="small" color="error" variant="text" @click="vocabList.splice(vIdx, 1)" /></v-col>
+            </v-row>
+          </div>
+
+          <div v-if="comp.type === 'impressive_matrix'" class="pa-4 border rounded-xl border-emerald-lighten-3 bg-green-lighten-5">
+            <div class="d-flex align-center justify-space-between mb-4">
+              <div class="text-subtitle-1 font-weight-bold text-emerald-darken-4">
+                <v-icon icon="mdi-star-circle-outline" class="mr-2"/>Impressive Language
+              </div>
+              <v-btn size="small" color="green" class="text-white font-weight-bold" prepend-icon="mdi-plus" @click="addImpressiveRow">
+                Add Impressive Item
+              </v-btn>
+            </div>
+            <v-row v-for="(imp, iIdx) in impressiveList" :key="iIdx" dense class="mb-2 align-center">
+              <v-col cols="12" md="5">
+                <v-textarea v-model="imp.content" label="Advanced Phrase / Nuanced Construction used" variant="outlined" rows="1" auto-grow density="compact" bg-color="white" hide-details />
+              </v-col>
+              <v-col cols="12" md="6">
+                <v-textarea v-model="imp.comment" label="Praise Notes / Semantic Context Details" variant="outlined" rows="1" auto-grow density="compact" bg-color="white" hide-details />
+              </v-col>
+              <v-col cols="12" md="1" class="text-center">
+                <v-btn icon="mdi-delete" size="small" color="error" variant="text" @click="impressiveList.splice(iIdx, 1)" />
+              </v-col>
+            </v-row>
+          </div>
+
+          <div v-if="comp.type === 'comment_block'" class="pa-4 border rounded-xl border-blue-grey-lighten-4 bg-blue-grey-lighten-5">
+            <div class="d-flex align-center justify-space-between mb-3">
+              <div class="text-subtitle-1 font-weight-bold text-blue-grey-darken-4">
+                <v-icon icon="mdi-comment-text-multiple-outline" class="mr-2"/>Remarks
+              </div>
+              <v-btn size="small" color="blue-grey" class="text-white font-weight-bold" prepend-icon="mdi-plus" @click="addCommentRow">
+                Add Remark Field
+              </v-btn>
+            </div>
+            <v-row v-for="(comm, cIdx) in commentsList" :key="cIdx" dense class="mb-2">
+              <v-col cols="12" md="11">
+                <v-textarea v-model="comm.comment" label="Enter freeform evaluation commentary note..." variant="outlined" rows="2" auto-grow bg-color="white" hide-details />
+              </v-col>
+              <v-col cols="12" md="1" class="d-flex align-center justify-center">
+                <v-btn icon="mdi-delete" size="small" color="error" variant="text" @click="commentsList.splice(cIdx, 1)" />
+              </v-col>
+            </v-row>
+          </div>
+        </div>
+        <div class="px-4 py-2 border rounded-xl border-purple-lighten-4 bg-purple-lighten-5" style="max-width: fit-content;">
+          <div class="d-flex align-center ga-4 me-5">
+            <span class="text-subtitle-1 font-weight-bold d-flex align-center">
+              <v-icon icon="mdi-timer-outline" class="mr-2" />
+              Approx. total speaking time in minutes
+            </span>
+
+            <v-text-field
+              v-model.number="speakingTimeMinutes"
+              type="number"
+              min="0"
+              step="1"
+              variant="outlined"
+              density="compact"
+              max-width="100"
+              class="ms-5 mt-2"
+            />
+          </div>
+        </div>
+
+
+        <v-divider class="my-6" />
+        <div class="d-flex gap-3 flex-wrap">
+          <v-btn color="indigo-darken-1" size="large" class="text-white font-weight-bold rounded-xl" :loading="submitting" prepend-icon="mdi-send-check" @click="executeSubmitFeedback">
+            Submit & Save
+          </v-btn>
+          <v-btn color="indigo" size="large" variant="outlined" class="font-weight-bold rounded-xl" prepend-icon="mdi-file-pdf-box" @click="generateClientSidePdfReport(null)">
+            Preview PDF
+          </v-btn>
+        </div>
+      </form>
+    </v-card-text>
+  </v-card>
+</v-dialog>
 </template>
 
 <script setup lang="ts">
@@ -360,6 +435,17 @@ const loadedTemplateStructure = computed(() => {
 })
 
 const showBuilderStudio = ref(false)
+const showFeedbackDialog = ref(false)
+const canStartFeedback = computed(() => !!selectedStudent.value && !!activeTemplateId.value)
+
+const editingFeedbackId = ref<string | null>(null)
+
+const commonErrorCodes = ['0110', '0310', '1401', '1402', '1403']
+function addCommonError(code: string) {
+    errorsList.value.push({ code, evidence: '', times: 0 })
+  }
+
+const speakingTimeMinutes = ref<number | null>(null)
 
 function handleNewTemplateDeployment(newTemplateRecord: any) {
   availableTemplates.value.push({
@@ -466,10 +552,11 @@ async function executeSubmitFeedback() {
     const comprehensiveJSONContent = {
       template_id: activeTemplateId.value,
       form_data_snapshot: formDataValues.value,
-      errors: errorsList.value.filter(e => e.code && e.evidence),
-      vocab: vocabList.value.filter(v => v.correct),
-      impressive: impressiveList.value.filter(i => i.content),
-      comments: commentsList.value.filter(c => c.comment.trim())
+      errors: errorsList.value.filter(e => (e?.code || '') && (e?.evidence || '')),
+      vocab: vocabList.value.filter(v => (v?.correct || '').trim().length > 0),
+      impressive: impressiveList.value.filter(i => (i?.content || '').trim().length > 0),
+      comments: commentsList.value.filter(c => (c?.comment || '').trim().length > 0),
+      speaking_time_minutes: speakingTimeMinutes.value, 
     }
 
     const payload = {
@@ -478,15 +565,44 @@ async function executeSubmitFeedback() {
       date: new Date().toLocaleDateString('en-CA'), // YYYY-MM-DD format
       content: comprehensiveJSONContent // Submitted directly into Django's upgraded JSONField
     }
+    
+    if (editingFeedbackId.value) {
+        await api.patch(`/feedback/${editingFeedbackId.value}/`, payload) // or put
+        showToast("Feedback updated successfully.", "success")
+      } else {
+        await api.post('/feedback/', payload)
+        showToast("Feedback record saved successfully.", "success")
+      }
 
-    await api.post('/feedback/', payload)
-    showToast("Feedback record saved successfully.", "success")
+    editingFeedbackId.value = null
     resetFormState()
     await fetchIssuedFeedbackHistory() // Refresh listing tracking rows
-  } catch (err) {
-    console.error(err)
-    showToast("Operational exception writing evaluation parameters.", "error")
-  } finally { submitting.value = false }
+  } catch (err: any) {
+  console.error('POST /feedback failed:', err?.response?.status, err?.response?.data || err)
+  showToast("Submission failed.", "error")
+} finally { submitting.value = false }
+}
+
+function loadHistoricalFeedbackIntoForm(item: HistoricalFeedback) {
+  const c = item.content || {}
+  speakingTimeMinutes.value = c.speaking_time_minutes ?? null
+
+  // select student by web_id
+  const stu = studentsRawPool.value.find(s => s.web_id === item.student) || null
+  selectedStudent.value = stu
+  searchQuery.value = stu?.initials || item.student
+
+  selectedCourse.value = item.course?.toLowerCase?.() || item.course || ''
+  activeTemplateId.value = c.template_id || activeTemplateId.value
+
+  formDataValues.value = { ...(c.form_data_snapshot || {}) }
+  errorsList.value = [...(c.errors || [])]
+  vocabList.value = [...(c.vocab || [])]
+  impressiveList.value = [...(c.impressive || [])]
+  commentsList.value = [...(c.comments || [])]
+
+  editingFeedbackId.value = item.feedback_id
+  window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 
 
@@ -649,7 +765,7 @@ function generateClientSidePdfReport(historicalItem: HistoricalFeedback | null =
       const rows = activeErrors.map(e => [e.code, `${e.times}x`, e.evidence])
       autoTable(doc, {
         startY: currentY, margin: { left: margin, right: margin },
-        head: [['Error Code', 'Frequency', 'Evidence Snippets from Transcripts']],
+        head: [['Error Code', 'Frequency', 'Evidence']],
         body: rows, theme: 'grid',
         headStyles: { fillColor: [239, 68, 68] }, styles: { fontSize: 8.5 }
       })
@@ -681,7 +797,7 @@ function generateClientSidePdfReport(historicalItem: HistoricalFeedback | null =
       const rows = activeImpressive.map(i => [i.content, i.comment || '—'])
       autoTable(doc, {
         startY: currentY, margin: { left: margin, right: margin },
-        head: [['Advanced Language / Structures', 'Analysis & Commendations']],
+        head: [['Advanced Language / Structures', 'Analysis & Recommendations']],
         body: rows, theme: 'striped',
         headStyles: { fillColor: [16, 185, 129] }, styles: { fontSize: 8.5 }
       })
@@ -719,6 +835,7 @@ function resetFormState() {
   vocabList.value = []
   impressiveList.value = []  
   commentsList.value = []   
+  speakingTimeMinutes.value = null
   clearSelection()
 }
 
@@ -733,7 +850,6 @@ function seedMockTemplateBlueprints() {
       name: "Standard Oral Presentation",
       structure: {
         components: [
-          { id: "p1", type: "paragraph", text: "Teacher evaluation parameters matrix context logs." },
           { id: "topic", type: "select", label: "Project Topic", options: ["My professional project", "Story of a startup", "Present a research paper"] },
           { id: "positives", type: "checkbox_group", label: "Demonstrated Skills", options: ["Excellent use of target vocabulary.", "Good visual support.", "Good use of target grammar."] },
           { id: "notes", type: "textarea", label: "Comments" },
@@ -749,7 +865,7 @@ function seedMockTemplateBlueprints() {
       name: "Mid-Semester Performance",
       structure: {
         components: [
-          { id: "p1", type: "paragraph", text: "Use this form matrix to give feedback." },
+          { id: "p1", type: "paragraph", text: "Use this field to give feedback." },
           { id: "overall_assessment", type: "textarea", label: "General Summary", rows: 4 },
           { id: "errors", type: "error_matrix" }
         ]
@@ -764,12 +880,12 @@ onMounted(async () => {
   seedMockTemplateBlueprints()
   await fetchIssuedFeedbackHistory() // Build table items upon component initialization
   
-  errorCodes.value = Object.entries(errorsData).map(([code, details]) => {
-    return {
-      title: `${code} — ${details.description}`, 
-      value: code                                
-    };
-  });
+  errorCodes.value = Object.entries(errorsData)
+  .map(([code, details]) => ({
+    title: `${code} — ${details.description}`,
+    value: code
+  }))
+  .sort((a, b) => Number(a.value) - Number(b.value))
 })
 
 async function fetchStudents() {

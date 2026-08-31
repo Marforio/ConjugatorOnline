@@ -65,69 +65,62 @@ const router = createRouter({
   routes,
 })
 
-router.beforeEach(async (to, from, next) => {
+router.beforeEach(async (to) => {
   const auth = useAuthStore();
   const userStore = useUserStore();
-  const notificationStore = useNotificationStore(); 
+  const notificationStore = useNotificationStore();
 
+  // 1) Rehydrate tokens from storage on first nav
   if (!auth.isRestored) {
-    const stop = watch(
-      () => auth.isRestored,
-      (ready) => {
-        if (ready) {
-          stop();
-          next(to);
-        }
-      }
-    );
-    return;
+    auth.restoreSession();
   }
 
-  const requiresAuth = to.meta?.requiresAuth ?? false;
-  const studentsOnly = to.meta?.studentsOnly ?? false;
-  const requiresAdmin = to.meta?.requiresAdmin ?? false;
+  const requiresAuth = Boolean(to.meta?.requiresAuth);
+  const studentsOnly = Boolean(to.meta?.studentsOnly);
+  const requiresAdmin = Boolean(to.meta?.requiresAdmin);
 
-  // 🛡️ BACKGROUND HYDRATION: If logged in but on public page, hydrate user parameters silently
-  if (auth.access && !userStore.isStaff) {
-    userStore.ensureUserLoaded().catch(() => {});
-  }
-
+  // 2) Public routes pass through (optional background hydration)
   if (!requiresAuth) {
-    return next();
-  }
-
-  if (!auth.access) {
-    const valid = await auth.validateSession();
-    if (!valid) {
-      if (to.name === 'login') return next();
-      return next({ name: "login", query: { redirect: to.fullPath } });
+    if (auth.access && !userStore.isStaff) {
+      userStore.ensureUserLoaded().catch(() => {});
     }
+    return true;
   }
 
+  // 3) Critical: validate for ALL protected route entries
+  // Handles "token exists but expired after 24h" correctly
+  const valid = await auth.validateSession();
+  if (!valid) {
+    if (to.name === "login") return true;
+    return { name: "login", query: { redirect: to.fullPath } };
+  }
+
+  // 4) Role hydration for guarded routes
   if (studentsOnly || requiresAdmin) {
-    await userStore.ensureUserLoaded();
+    try {
+      await userStore.ensureUserLoaded();
+    } catch {
+      auth.logout();
+      return { name: "login", query: { redirect: to.fullPath } };
+    }
   }
 
-  // 🎯 UPDATE THIS PIECE IN YOUR router.beforeEach:
-
+  // 5) Role guards
   if (studentsOnly && userStore.isStaff) {
-    // Allow staff members to view both the playground hub and the conjugation dashboard tabs!
-    if (to.name === 'student-home' || to.name === 'student-data') {
-      return next();
-    }
-    return next({ name: "student-home" });
+    if (to.name === "student-home" || to.name === "student-data") return true;
+    return { name: "student-home" };
   }
 
   if (requiresAdmin && !userStore.isStaff) {
-    if (to.name === 'student-home') return next();
-    return next({ name: "student-home" });
+    if (to.name === "student-home") return true;
+    return { name: "student-home" };
   }
 
   if (to.meta?.checkNotifications && !userStore.isStaff) {
     checkNotificationsIfNeeded(notificationStore);
   }
 
-  return next();
+  return true;
 });
 
 function checkNotificationsIfNeeded(notificationStore: any) {

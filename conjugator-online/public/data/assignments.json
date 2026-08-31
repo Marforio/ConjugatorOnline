@@ -251,76 +251,11 @@
         "criteria_key": "uses_of_auxiliaries_all_perfect_Mastery_3_Times",
         "name": "Uses of Auxiliaries Mastery × 3",
         "description": "Complete Uses of Auxiliaries (All Modes) successfully three times."
-      }
-    ]
-  },
-  "architecture": {
-    "name": "Architecture",
-    "achievements": [
-      {
-        "criteria_key": "vw_write_complete_house_elements_none_to_term",
-        "name": "Vocab mastered: house_elements (All)",
-        "description": "Complete Architecture Basic 01 vocabulary list in writing mode."
-      }
-    ]
-  },
-  "business_2": {
-    "name": "Business 2",
-    "achievements": [
-      {
-        "criteria_key": "vw_write_complete_product_marketing_none_to_term",
-        "name": "Vocab mastered: product_marketing (All)",
-        "description": "Complete Product Marketing vocabulary list in writing mode."
       },
       {
-        "criteria_key": "vw_write_complete_promotion_and_business_development_none_to_term",
-        "name": "Vocab mastered: promotion_and_business_development (All)",
-        "description": "Complete Promotion & Business Development vocabulary list in writing mode."
-      },
-      {
-        "criteria_key": "vw_write_complete_startups_none_to_term",
-        "name": "Vocab mastered: startups (All)",
-        "description": "Complete Startups vocabulary list in writing mode."
-      },
-      {
-        "criteria_key": "vw_write_complete_product_marketing_3x_none_to_term",
-        "name": "Vocab mastered: product_marketing (All) x 3",
-        "description": "Complete Product Marketing vocabulary list in writing mode three times."
-      },
-      {
-        "criteria_key": "vw_write_complete_promotion_and_business_development_3x_none_to_term",
-        "name": "Vocab mastered: promotion_and_business_development (All) x 3",
-        "description": "Complete Promotion & Business Development vocabulary list in writing mode three times."
-      },
-      {
-        "criteria_key": "vw_write_complete_3x_startups_none_to_term",
-        "name": "Vocab mastered: startups (All) x 3",
-        "description": "Complete Startups vocabulary list in writing mode three times."
-      }
-    ]
-  },
-  "business_4": {
-    "name": "Business 4",
-    "achievements": [
-      {
-        "criteria_key": "vw_write_complete_sustainability_none_to_term",
-        "name": "Vocab mastered: sustainability (All)",
-        "description": "Complete Sustainability vocabulary list in writing mode."
-      },
-      {
-        "criteria_key": "vw_write_complete_business_ethics_none_to_term",
-        "name": "Vocab mastered: business_ethics (All)",
-        "description": "Complete Business Ethics vocabulary list in writing mode."
-      },
-      {
-        "criteria_key": "vw_write_complete_sustainability_3x_none_to_term",
-        "name": "Vocab mastered: sustainability (All) x 3",
-        "description": "Complete Sustainability vocabulary list in writing mode three times."
-      },
-      {
-        "criteria_key": "vw_write_complete_business_ethics_3x_none_to_term",
-        "name": "Vocab mastered: business_ethics (All) x 3",
-        "description": "Complete Business Ethics vocabulary list in writing mode three times."
+        "criteria_key": "vw_write_complete_irreg_verbs_essential",
+        "name": "Vocab mastered: irregular verbs (Essential)",
+        "description": "Complete Irregular Verbs (Essential) vocabulary list in writing mode."
       }
     ]
   }

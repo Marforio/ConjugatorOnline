@@ -323,7 +323,7 @@ function isPublicRoute() {
 }
 
 async function syncStudentPresence() {
-  const loggedIn = auth.isLoggedIn && !auth.isAccessTokenExpired()
+  const loggedIn = auth.isLoggedIn; 
 
   if (!loggedIn || isPublicRoute()) {
     if (presenceActive) {
