@@ -1414,8 +1414,7 @@ async function commitBulkTelemetryBatch() {
   
   try {
     const payload = {
-      session_id: props.session_id,
-      game_name: props.gameName,
+      session_id: props.session_id,   // game_name will be taken from metadata on the server side
       rounds: roundTelemetryBatch.value.map(r => ({
         prompt_number: r.prompt_number,
         user_answer: r.user_answer,

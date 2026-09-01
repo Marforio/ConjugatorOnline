@@ -125,8 +125,8 @@
               <v-divider class="my-2 border-opacity-30" color="white"></v-divider>
 
               <div class="tooltip-body mb-3">
-                <div class="d-flex justify-space-between align-center mb-2">
-                  <span class="text-caption text-slate-400 font-weight-bold">48h Performance</span>
+                <div class="d-flex justify-start align-center mb-2">
+                  <span class="text-caption text-slate-400 font-weight-bold me-3">48h Performance: </span>
                   <span
                     class="text-subtitle-2 font-weight-black tracking-tight"
                     :class="getPerformanceColorClass(trendByTicker[ticker]?.performance_pct_48h)"
@@ -140,31 +140,13 @@
                 </div>
 
                 <div class="d-flex justify-space-between align-center text-caption text-slate-400 mb-1">
-                  <span>Window</span>
-                  <span class="font-weight-medium text-right">
-                    {{
-                      trendByTicker[ticker]?.last_48h?.from
-                        ? new Date(trendByTicker[ticker].last_48h.from).toLocaleString('en-US', { month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit' })
-                        : '—'
-                    }}
-                    →
-                    {{
-                      trendByTicker[ticker]?.last_48h?.to
-                        ? new Date(trendByTicker[ticker].last_48h.to).toLocaleString('en-US', { month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit' })
-                        : '—'
-                    }}
-                  </span>
-                </div>
-
-                <div class="d-flex justify-space-between align-center text-caption text-slate-400 mb-3">
-                  <span>Chart coverage</span>
                   <span class="font-weight-medium">
-                    Since
+                    Price since
                     {{
                       trendByTicker[ticker]?.history_since
                         ? new Date(trendByTicker[ticker].history_since).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' })
                         : 'N/A'
-                    }}
+                    }} :
                   </span>
                 </div>
 
@@ -251,24 +233,47 @@
         </div>
 
         <div class="portfolios-list" v-if="portfolios.length > 0">
+          <!-- ACTIVE PORTFOLIOS LIST -->
           <div v-for="portfolio in portfolios" :key="portfolio.id" class="portfolio-row">
             <div class="portfolio-meta">
               <h3>{{ portfolio.name }}</h3>
+
               <div class="tag-row">
                 <span class="tag" :class="!portfolio.competition ? 'ind' : 'comp'">
-                  {{ !portfolio.competition ? 'Independent' : 'Competition' }}
+                  {{ !portfolio.competition ? 'Independent' : 'Teacher Competition' }}
                 </span>
                 <span class="tag structure-tag" :class="portfolio.is_dynamic ? 'dyn' : 'stat'">
                   {{ portfolio.is_dynamic ? '🔄 Dynamic' : '🔒 Static' }}
                 </span>
+                <span
+                  v-if="portfolio.competition"
+                  class="tag"
+                  :class="portfolio.competition_trading_is_open ? 'dyn' : 'stat'"
+                >
+                  {{ portfolio.competition_trading_is_open ? 'Trading Open' : 'Trading Closed' }}
+                </span>
+              </div>
+
+              <!-- NEW: teacher competition visibility -->
+              <div v-if="portfolio.competition" class="text-caption text-slate-500 mt-1">
+                🏫 {{ portfolio.competition_name || 'Competition' }}
+                • Starts: {{ formatDate(portfolio.competition_start_time) }}
+                <span v-if="portfolio.competition_trade_cutoff_time">
+                  • Cutoff: {{ formatDate(portfolio.competition_trade_cutoff_time) }}
+                </span>
+                • Ends: {{ formatDate(portfolio.competition_end_time) }}
               </div>
             </div>
+
             <div class="portfolio-stats">
               <div>
                 <span class="label">Available Cash</span>
-                <span class="value">${{ parseFloat(portfolio.cash_balance).toLocaleString('en-US', { minimumFractionDigits: 2 }) }}</span>
+                <span class="value">
+                  ${{ parseFloat(portfolio.cash_balance).toLocaleString('en-US', { minimumFractionDigits: 2 }) }}
+                </span>
               </div>
             </div>
+
             <div class="portfolio-actions">
               <button class="btn btn-primary" @click="inspectPortfolio(portfolio.id)">Open Portfolio View</button>
             </div>
@@ -286,26 +291,26 @@
     <div v-if="isCreateModalActive" class="dialog-overlay" @click.self="isCreateModalActive = false">
       <div class="dialog-box upgraded">
         <div class="dialog-header">
-          <h2>Create a Trading Portfolio</h2>
+          <h2>Create Your Personal Trading Portfolio</h2>
           <button class="close-x" @click="isCreateModalActive = false">&times;</button>
         </div>
         <div class="dialog-body">
           <div class="form-group">
             <label>Portfolio Name</label>
             <input type="text" v-model="newPortfolioForm.name" placeholder="e.g., Up Only" class="form-control" />
-            <label>This portfolio will allow you to trade independently of any competition created by your teacher</label>
+            <label>This portfolio will allow you to trade on your own, independently of any competition created by your teacher</label>
           </div>
           
           <div class="form-group" v-if="!newPortfolioForm.isCompMode">
             <label>Starting Capital</label>
-            <input 
-              type="number" 
-              v-model.number="newPortfolioForm.customBudget" 
-              min="100" 
-              max="1000000000" 
-              placeholder="Default: 100,000.00" 
-              class="form-control"
-            />
+            <input
+                type="text"
+                :value="uiCustomBudget"
+                @input="onBudgetInput"
+                inputmode="decimal"
+                placeholder="Default: 100'000.00"
+                class="form-control"
+              />
             <span class="input-hint">Define your starting capital</span>
           </div>
 
@@ -318,14 +323,14 @@
               </label>
               <label class="radio-label">
                 <input type="radio" :value="false" v-model="newPortfolioForm.isDynamic" :disabled="newPortfolioForm.isCompMode" />
-                <span class="ms-2"><strong>Static:</strong> No rebalancing allowed; assets are locked after creation.</span>
+                <span class="ms-2"><strong>Static:</strong> No rebalancing allowed; assets are locked after short trading period.</span>
               </label>
             </div>
             <span class="input-hint" v-if="newPortfolioForm.isCompMode">* Note: In Competition Mode, settings are defined by the teacher.</span>
           </div>
 
           <button class="btn btn-secondary full-width margin-top" @click="submitNewPortfolio" :disabled="isActionProcessing">
-            {{ isActionProcessing ? 'Processing Deployment...' : 'Deploy Portfolio Assets' }}
+            {{ isActionProcessing ? 'Creating...' : 'Create Portfolio' }}
           </button>
         </div>
       </div>
@@ -336,7 +341,11 @@
       
       <v-toolbar color="slate-900" dark class="px-4" density="compact" flat style="background: #0f172a; color: white;">
         <v-toolbar-title class="text-subtitle-1 font-weight-black tracking-wide">
-          PORTFOLIO TERMINAL &mdash; PORTFOLIO {{ selectedPortfolio?.id }}
+          PORTFOLIO TERMINAL — {{ selectedPortfolio?.name || `PORTFOLIO ${selectedPortfolio?.id || ''}` }}
+          <span v-if="selectedPortfolio?.competition" class="text-caption ms-2" style="opacity:.85;">
+            | 🏫 {{ selectedPortfolio?.competition_name }}
+            ({{ selectedPortfolio?.competition_portfolio_type }})
+          </span>
         </v-toolbar-title>
         <v-spacer></v-spacer>
         <v-btn icon variant="text" @click="portfolioDialog.isOpen = false">×</v-btn>
@@ -344,7 +353,7 @@
 
       <v-row no-gutters class="flex-grow-1 overflow-hidden" style="height: calc(100vh - 48px);">
         
-        <v-col cols="6" class="bg-white pa-6 overflow-y-auto h-100 border-e">
+        <v-col cols="12" lg="5" class="bg-white pa-6 overflow-y-auto h-100 border-e">
           <div class="d-flex justify-between align-center mb-2">
             <h2 class="text-h6 font-weight-bold text-slate-800">Order Entry</h2>
             <v-btn variant="text" color="secondary" size="small" class="font-weight-bold" @click="clearOrderFields">
@@ -363,9 +372,9 @@
             <v-tab v-if="selectedPortfolio?.leverage_setting > 1" value="COVER">🛡️ BUY TO COVER</v-tab>
           </v-tabs>
 
-          <v-form ref="tradeFormRef" @submit.prevent="dispatchOrder">
+          <v-form ref="tradeFormRef" @submit.prevent="submitOrder">
             <v-row class="mb-2">
-              <v-col cols="7">
+              <v-col cols="8">
                 <div class="text-caption text-slate-600 mb-1 font-weight-bold">Search Asset</div>
                 
                 <div v-show="tradeForm.action === 'SELL'">
@@ -399,7 +408,7 @@
                 </div>
               </v-col>
 
-              <v-col cols="5">
+              <v-col cols="4">
                 <div class="text-caption text-slate-600 mb-1 font-weight-bold">Execution Class</div>
                 <v-select
                   v-model="tradeForm.orderType"
@@ -407,6 +416,7 @@
                   variant="outlined"
                   density="comfortable"
                   hide-details
+                  max-width="150"
                 ></v-select>
               </v-col>
             </v-row>
@@ -489,7 +499,7 @@
               <v-expand-transition>
                 <div v-if="tradeForm.action === 'SELL' && computedTotalImpact > 0" class="mt-2 pt-2 border-t border-dashed border-slate-300">
                   <v-alert type="success" variant="tonal" density="compact" icon="mdi-cash-plus" class="text-caption pa-2 ma-0">
-                    Upon execution, the fee will be subtracted from your asset sale value. <strong>${{ computedTotalImpact.toFixed(2) }}</strong> will be added back into your capital balance.
+                    On execution, the fee will be subtracted from your asset sale value. <strong>${{ computedTotalImpact.toFixed(2) }}</strong> will be added back into your capital balance.
                   </v-alert>
                 </div>
               </v-expand-transition>
@@ -514,7 +524,65 @@
 
         </v-col>
 
-        <v-col cols="6" class="pa-6 overflow-y-auto h-100">
+        <v-col cols="12" lg="7" class="pa-6 overflow-y-auto h-100">
+          <v-card variant="outlined" class="bg-white mb-4 rounded-lg pa-3">
+            <div class="d-flex justify-space-between align-center mb-2">
+              <h3 class="text-subtitle-2 font-weight-bold text-slate-700">📊 Portfolio Visualizations</h3>
+              <v-chip size="x-small" color="indigo" variant="flat">Learning Mode</v-chip>
+            </div>
+
+            <v-row>
+              <v-col cols="12" md="6">
+                <div class="text-caption font-weight-bold mb-1">Asset Allocation</div>
+                <div style="height:180px;"><canvas ref="allocationChartRef"></canvas></div>
+              </v-col>
+              <v-col cols="12" md="6">
+                <div class="text-caption font-weight-bold mb-1">Cash vs Invested</div>
+                <div style="height:180px;"><canvas ref="cashVsAssetsChartRef"></canvas></div>
+              </v-col>
+            </v-row>
+
+            <v-row>
+              <v-col cols="12">
+                <div class="text-caption font-weight-bold mb-1">Asset Contribution (Estimated)</div>
+                <div style="height:220px;"><canvas ref="contribChartRef"></canvas></div>
+              </v-col>
+            </v-row>
+          </v-card>
+
+        <!-- PERFORMANCE CARD (place above your existing available capital card) -->
+        <v-card
+          variant="flat"
+          class="mb-4 pa-4 text-white rounded-lg"
+          :style="{ background: performanceCardBg }"
+        >
+          <v-row no-gutters align="center">
+            <v-col cols="8">
+              <div class="text-overline font-weight-bold opacity-80 tracking-wide">Portfolio Performance</div>
+              <div class="text-h4 font-weight-black">
+                {{ performancePctText }}
+              </div>
+              <div class="text-caption opacity-90 mt-1">
+                Since initialization
+              </div>
+            </v-col>
+
+            <v-col cols="4" class="text-right">
+              <v-chip
+                :color="performancePct >= 0 ? 'emerald-lighten-4' : 'red-lighten-4'"
+                variant="tonal"
+                size="small"
+                class="font-weight-bold"
+              >
+                {{ performancePct >= 0 ? '📈 Gain' : '📉 Loss' }}
+              </v-chip>
+              <div class="text-caption mt-1">
+                {{ performanceValueText }}
+              </div>
+            </v-col>
+          </v-row>
+        </v-card>
+
           <v-card 
             v-if="!selectedPortfolio?.leverage_setting || selectedPortfolio?.leverage_setting === 1"
             variant="flat" 
@@ -601,79 +669,87 @@
           </v-card>
 
           <h3 class="text-subtitle-2 font-weight-bold text-slate-700 mb-2">📦 Open Positions</h3>
-          <v-card width="340" class="pa-4 bg-slate-900 rounded-lg border border-slate-700 shadow-xl" style="background: #0f172a; color: white;">
-            <div class="tooltip-header d-flex justify-space-between align-center">
-              <div>
-                <strong class="text-subtitle-2 font-weight-black">{{ getAssetName(holding.ticker) }}</strong>
-                <span class="text-caption text-slate-400 ml-1">({{ holding.ticker }})</span>
-              </div>
-            </div>
-
-            <v-divider class="my-2 border-opacity-30" color="white"></v-divider>
-
-            <div class="tooltip-body mb-3">
-              <div class="d-flex justify-space-between align-center mb-2">
-                <span class="text-caption text-slate-400 font-weight-bold">48h Performance</span>
-                <span
-                  class="text-subtitle-2 font-weight-black tracking-tight"
-                  :class="getPerformanceColorClass(trendByTicker[holding.ticker]?.performance_pct_48h)"
-                >
-                  {{
-                    trendByTicker[holding.ticker]?.performance_pct_48h
-                      ? trendByTicker[holding.ticker].performance_pct_48h + '%'
-                      : 'Insufficient 48h data'
-                  }}
-                </span>
+          <div v-if="selectedPortfolio?.assets?.length">
+            <v-card
+              v-for="holding in selectedPortfolio.assets"
+              :key="`${holding.ticker}-${holding.position_type}`"
+              width="340"
+              class="pa-4 bg-slate-900 rounded-lg border border-slate-700 shadow-xl mb-3"
+              style="background: #0f172a; color: white;"
+            >
+              <div class="tooltip-header d-flex justify-space-between align-center">
+                <div>
+                  <strong class="text-subtitle-2 font-weight-black">{{ getAssetName(holding.ticker) }}</strong>
+                  <span class="text-caption text-slate-400 ml-1">({{ holding.ticker }})</span>
+                </div>
               </div>
 
-              <div class="d-flex justify-space-between align-center text-caption text-slate-400 mb-1">
-                <span>Window</span>
-                <span class="font-weight-medium text-right">
-                  {{
-                    trendByTicker[holding.ticker]?.last_48h?.from
-                      ? new Date(trendByTicker[holding.ticker].last_48h.from).toLocaleString('en-US', { month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit' })
-                      : '—'
-                  }}
-                  →
-                  {{
-                    trendByTicker[holding.ticker]?.last_48h?.to
-                      ? new Date(trendByTicker[holding.ticker].last_48h.to).toLocaleString('en-US', { month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit' })
-                      : '—'
-                  }}
-                </span>
-              </div>
+              <v-divider class="my-2 border-opacity-30" color="white"></v-divider>
 
-              <div class="d-flex justify-space-between align-center text-caption text-slate-400 mb-3">
-                <span>Chart coverage</span>
-                <span class="font-weight-medium">
-                  Since
-                  {{
-                    trendByTicker[holding.ticker]?.history_since
-                      ? new Date(trendByTicker[holding.ticker].history_since).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' })
-                      : 'N/A'
-                  }}
-                </span>
-              </div>
-
-              <div class="relative-chart-wrapper rounded" style="position: relative; height: 110px; width: 100%;">
-                <div v-if="chartLoadingByTicker[holding.ticker]" class="d-flex justify-center align-center h-100">
-                  <v-progress-circular indeterminate color="sky-lighten-2" size="20"></v-progress-circular>
+              <div class="tooltip-body mb-3">
+                <div class="d-flex justify-space-between align-center mb-2">
+                  <span class="text-caption text-slate-400 font-weight-bold">48h Performance</span>
+                  <span
+                    class="text-subtitle-2 font-weight-black tracking-tight"
+                    :class="getPerformanceColorClass(trendByTicker[holding.ticker]?.performance_pct_48h)"
+                  >
+                    {{
+                      trendByTicker[holding.ticker]?.performance_pct_48h
+                        ? trendByTicker[holding.ticker].performance_pct_48h + '%'
+                        : 'Insufficient 48h data'
+                    }}
+                  </span>
                 </div>
 
-                <div
-                  v-else-if="!trendByTicker[holding.ticker]?.prices?.length"
-                  class="d-flex justify-center align-center h-100 text-slate-500 font-italic text-caption"
-                >
-                  No historical data available.
+                <div class="d-flex justify-space-between align-center text-caption text-slate-400 mb-1">
+                  <span>Window</span>
+                  <span class="font-weight-medium text-right">
+                    {{
+                      trendByTicker[holding.ticker]?.last_48h?.from
+                        ? new Date(trendByTicker[holding.ticker].last_48h.from).toLocaleString('en-US', { month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit' })
+                        : '—'
+                    }}
+                    →
+                    {{
+                      trendByTicker[holding.ticker]?.last_48h?.to
+                        ? new Date(trendByTicker[holding.ticker].last_48h.to).toLocaleString('en-US', { month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit' })
+                        : '—'
+                    }}
+                  </span>
                 </div>
 
-                <canvas
-                  v-show="!chartLoadingByTicker[holding.ticker] && trendByTicker[holding.ticker]?.prices?.length"
-                  :ref="el => { if (el) chartRefs[holding.ticker] = el }"
-                ></canvas>
+                <div class="d-flex justify-space-between align-center text-caption text-slate-400 mb-3">
+                  <span>Chart coverage</span>
+                  <span class="font-weight-medium">
+                    Since
+                    {{
+                      trendByTicker[holding.ticker]?.history_since
+                        ? new Date(trendByTicker[holding.ticker].history_since).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' })
+                        : 'N/A'
+                    }}
+                  </span>
+                </div>
+
+                <div class="relative-chart-wrapper rounded" style="position: relative; height: 110px; width: 100%;">
+                  <div v-if="chartLoadingByTicker[holding.ticker]" class="d-flex justify-center align-center h-100">
+                    <v-progress-circular indeterminate color="sky-lighten-2" size="20"></v-progress-circular>
+                  </div>
+
+                  <div
+                    v-else-if="!trendByTicker[holding.ticker]?.prices?.length"
+                    class="d-flex justify-center align-center h-100 text-slate-500 font-italic text-caption"
+                  >
+                    No historical data available.
+                  </div>
+
+                  <canvas
+                    v-show="!chartLoadingByTicker[holding.ticker] && trendByTicker[holding.ticker]?.prices?.length"
+                    :ref="el => { if (el) chartRefs[holding.ticker] = el }"
+                  ></canvas>
+                </div>
               </div>
-            </div>
-          </v-card>
+            </v-card>
+          </div>
 
           <div class="d-flex justify-space-between align-center mb-2 mt-4">
             <h3 class="text-subtitle-2 font-weight-bold text-slate-700">⏳ Limit Orders</h3>
@@ -777,6 +853,27 @@
     </div>
 
   </div>
+
+  <v-dialog v-model="isQuoteModalActive" max-width="520">
+    <v-card class="pa-4 rounded-lg">
+      <h3 class="text-h6 font-weight-bold mb-3">Confirm Order</h3>
+
+      <div v-if="quoteData">
+        <div><strong>{{ quoteData.order_type }}</strong> {{ quoteData.trade_type }} {{ quoteData.quantity }} {{ quoteData.ticker }}</div>
+        <div>Live Price: ${{ quoteData.live_price.toFixed(4) }}</div>
+        <div>Gross: ${{ quoteData.gross_principal.toFixed(2) }}</div>
+        <div>Fee: ${{ quoteData.tx_fee.toFixed(2) }}</div>
+        <div class="mt-2"><strong>Estimated Impact: ${{ quoteData.total_impact.toFixed(2) }}</strong></div>
+      </div>
+
+      <div class="d-flex justify-end mt-4">
+        <v-btn variant="text" @click="cancelQuoteConfirmation">Cancel</v-btn>
+        <v-btn color="primary" :loading="isTradeProcessing" @click="confirmAndRouteOrder">
+          Confirm & Submit
+        </v-btn>
+      </div>
+    </v-card>
+  </v-dialog>
 </template>
 
 <script setup>
@@ -803,6 +900,152 @@ const portfolioDialog = ref({ isOpen: false })
 const selectedPortfolio = ref(null)
 const isTradeProcessing = ref(false)
 const tradeFormRef = ref(null)
+
+// --- Portfolio visualization charts ---
+const allocationChartRef = ref(null)
+const cashVsAssetsChartRef = ref(null)
+const contribChartRef = ref(null)
+
+let allocationChart = null
+let cashVsAssetsChart = null
+let contribChart = null
+
+const getLivePriceNumber = (ticker) => {
+  const hit = marketPrices.value.find(p => String(p.ticker).toUpperCase() === String(ticker).toUpperCase())
+  return hit ? Number(hit.current_price || 0) : 0
+}
+
+const computePortfolioVizData = (portfolio) => {
+  if (!portfolio) return null
+
+  const cash = Number(portfolio.cash_balance || 0)
+  const assets = portfolio.assets || []
+
+  const allocationRows = []
+  let investedTotal = 0
+
+  for (const a of assets) {
+    const qty = Number(a.quantity || 0)
+    const px = getLivePriceNumber(a.ticker) || Number(a.average_buy_price || 0)
+    const mvSigned = qty * px
+    const mvAbs = Math.abs(mvSigned)
+
+    investedTotal += mvAbs
+
+    allocationRows.push({
+      ticker: a.ticker,
+      position_type: a.position_type,
+      qty,
+      price: px,
+      marketValueAbs: mvAbs,
+      pnlEstimate: (px - Number(a.average_buy_price || 0)) * qty
+    })
+  }
+
+  return {
+    cash,
+    investedTotal,
+    allocationRows
+  }
+}
+
+const destroyVizCharts = () => {
+  if (allocationChart) { allocationChart.destroy(); allocationChart = null }
+  if (cashVsAssetsChart) { cashVsAssetsChart.destroy(); cashVsAssetsChart = null }
+  if (contribChart) { contribChart.destroy(); contribChart = null }
+}
+const renderPortfolioVizCharts = async () => {
+  await nextTick()
+  const p = selectedPortfolio.value
+  if (!p) return
+
+  const data = computePortfolioVizData(p)
+  if (!data) return
+
+  destroyVizCharts()
+
+  // Only assets actually held (exclude CASH from this chart entirely)
+  const heldAssets = (data.allocationRows || []).filter(r => Number(r.marketValueAbs || 0) > 0)
+
+  // 1) Asset distribution pie (ASSETS ONLY)
+  if (allocationChartRef.value) {
+    const ctx = allocationChartRef.value.getContext('2d')
+    if (ctx) {
+      if (heldAssets.length) {
+        const labels = heldAssets.map(r => `${r.ticker}`)
+        const values = heldAssets.map(r => Number(r.marketValueAbs || 0))
+
+        allocationChart = new Chart(ctx, {
+          type: 'pie',
+          data: {
+            labels,
+            datasets: [{ data: values }]
+          },
+          options: {
+            plugins: { legend: { position: 'bottom' } },
+            maintainAspectRatio: false
+          }
+        })
+      }
+      // else: no chart; let template show "No assets held yet."
+    }
+  }
+
+  // 2) Cash vs assets-held donut
+  if (cashVsAssetsChartRef.value) {
+    const ctx = cashVsAssetsChartRef.value.getContext('2d')
+    if (ctx) {
+      const invested = heldAssets.reduce((sum, r) => sum + Number(r.marketValueAbs || 0), 0)
+      const cash = Number(data.cash || 0)
+
+      cashVsAssetsChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: ['Cash', 'Assets Held'],
+          datasets: [{ data: [cash, invested] }]
+        },
+        options: {
+          cutout: '60%',
+          plugins: { legend: { position: 'bottom' } },
+          maintainAspectRatio: false
+        }
+      })
+    }
+  }
+
+  // 3) Contribution bar (estimated P/L contribution by held assets)
+  if (contribChartRef.value) {
+    const ctx = contribChartRef.value.getContext('2d')
+    if (ctx && heldAssets.length) {
+      const labels = heldAssets.map(r => `${r.ticker} (${r.position_type})`)
+      const values = heldAssets.map(r => Number((r.pnlEstimate || 0).toFixed(2)))
+
+      contribChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels,
+          datasets: [
+            {
+              label: 'Estimated Contribution ($)',
+              data: values
+            }
+          ]
+        },
+        options: {
+          plugins: { legend: { display: false } },
+          scales: {
+            y: {
+              ticks: {
+                callback: (v) => `$${v}`
+              }
+            }
+          },
+          maintainAspectRatio: false
+        }
+      })
+    }
+  }
+}
 
 const tradeForm = ref({
   ticker: '',
@@ -835,6 +1078,41 @@ const triggerErrorModal = (msg) => {
 const handleWatchlistSelection = (ticker) => {
   watchlistSelectedTicker.value = ticker
 }
+
+function formatWithApostrophes(raw, type) {
+  const cleaned = String(raw ?? "").replace(/[^0-9.]/g, "")
+  if (!cleaned) return ""
+
+  const [intRaw, decRaw = ""] = cleaned.split(".")
+  const intNoLeading = intRaw.replace(/^0+(?=\d)/, "") || "0"
+  const grouped = intNoLeading.replace(/\B(?=(\d{3})+(?!\d))/g, "'")
+
+  if (type === "integer") return grouped
+  if (type === "money") return `${grouped}${decRaw.length ? "." + decRaw.slice(0, 2) : ""}`
+  return `${grouped}${decRaw.length ? "." + decRaw.slice(0, 3) : ""}` // decimal
+}
+
+function parseFormattedNumber(input) {
+  if (!input) return null
+  const normalized = String(input).replace(/'/g, "").trim()
+  if (!normalized) return null
+
+  const n = Number(normalized)
+  return Number.isFinite(n) ? n : null
+}
+
+const uiCustomBudget = ref("100'000.00")
+
+const onBudgetInput = (e) => {
+  uiCustomBudget.value = formatWithApostrophes(e.target.value, "money")
+}
+
+// before submit:
+const parsedBudget = parseFormattedNumber(uiCustomBudget.value)
+newPortfolioForm.value.customBudget = parsedBudget
+watch(uiCustomBudget, (v) => {
+  uiCustomBudget.value = formatWithApostrophes(v, "money")
+})
 
 const fetchDashboardData = async () => {
   try {
@@ -1064,52 +1342,81 @@ const removeFromWatchlist = async (tick) => {
   }
 }
 
+const portfolioMarketValue = computed(() => {
+  const p = selectedPortfolio.value
+  if (!p) return 0
+
+  const assets = p.assets || []
+  const assetsValue = assets.reduce((sum, a) => {
+    const qty = Number(a.quantity || 0)
+    const live = getLivePriceNumber(a.ticker) || Number(a.average_buy_price || 0)
+    return sum + (qty * live)
+  }, 0)
+
+  return Number(p.cash_balance || 0) + assetsValue
+})
+
+// Prefer backend field if available; fallback to current cash as baseline
+const initialCapital = computed(() => {
+  const p = selectedPortfolio.value
+  if (!p) return 0
+  return Number(p.initial_budget || p.starting_budget || p.initial_cash || p.cash_balance || 0)
+})
+
+const performancePct = computed(() => {
+  const base = initialCapital.value
+  if (!base || base <= 0) return 0
+  return ((portfolioMarketValue.value - base) / base) * 100
+})
+
+const performancePctText = computed(() => {
+  const v = performancePct.value
+  const sign = v > 0 ? '+' : ''
+  return `${sign}${v.toFixed(2)}%`
+})
+
+const performanceValueText = computed(() => {
+  const delta = portfolioMarketValue.value - initialCapital.value
+  const sign = delta > 0 ? '+' : ''
+  return `${sign}$${Math.abs(delta).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+})
+
+const performanceCardBg = computed(() => {
+  return performancePct.value >= 0
+    ? 'linear-gradient(135deg, #065f46 0%, #10b981 100%)'
+    : 'linear-gradient(135deg, #7f1d1d 0%, #ef4444 100%)'
+})
+
+
 const submitNewPortfolio = async () => {
-  if (newPortfolioForm.value.isCompMode && !newPortfolioForm.value.compId) {
-    triggerToast("A target Tournament Match ID configuration code parameters string is required.", "warning")
-    return
-  }
-  if (!newPortfolioForm.value.isCompMode) {
-    const budget = newPortfolioForm.value.customBudget
-    if (!budget || budget < 100 || budget > 1000000000) {
-      triggerErrorModal("Capital allocations must sit within boundary limits constraints between $100.00 and $1,000,000,000.00 max scaling rules.")
-      return
-    }
-  }
+  const cleanName = (newPortfolioForm.value.name || '').trim()
 
   isActionProcessing.value = true
-
-
-  // STEP 1: Isolate the Portfolio Creation request explicitly
   try {
     await api.post('/market-masters/hub/', {
-      name: newPortfolioForm.value.name.trim(),
-      competition_id: newPortfolioForm.value.isCompMode ? newPortfolioForm.value.compId : null,
-      custom_budget: newPortfolioForm.value.isCompMode ? null : newPortfolioForm.value.customBudget,
-      is_dynamic: newPortfolioForm.value.isCompMode ? null : newPortfolioForm.value.isDynamic
+      name: cleanName
     })
-    
-    // If the code reaches here, the portfolio was 100% successfully created!
-    triggerToast(`Portfolio "${newPortfolioForm.value.name || 'Sandbox Portfolio'}" successfully deployed to Postgres.`, "success")
-    isCreateModalActive = false
-    
-  } catch (err) {
-    // This ONLY catches actual portfolio creation deployment blocks
-    const contextError = err.response?.data?.error || "Check competition parameters constraints details."
-    triggerErrorModal(`Deployment Failed: ${contextError}`)
-    isActionProcessing.value = false
-    return // Halt execution here since the creation genuinely failed
-  }
 
-  // 🌟 STEP 2: Background state refresh runs independently outside the creation gate
-  try {
+    triggerToast(
+      `Portfolio "${cleanName || 'My Portfolio'}" created successfully.`,
+      'success'
+    )
+
+    isCreateModalActive.value = false
+
     await fetchDashboardData()
-  } catch (refreshErr) {
-    console.error("Background dashboard sync paused temporarily:", refreshErr)
-    triggerToast("Portfolio created! Data views will sync automatically on the next poll.", "warning")
+
+    newPortfolioForm.value = {
+      name: '',
+      isCompMode: false,
+      compId: null,
+      customBudget: 100000,
+      isDynamic: true
+    }
+  } catch (err) {
+    const msg = err?.response?.data?.error || 'Portfolio creation failed.'
+    triggerErrorModal(`Deployment Failed: ${msg}`)
   } finally {
-    // Reset form states cleanly
-    newPortfolioForm.value = { name: '', isCompMode: false, compId: null, customBudget: 100000, isDynamic: true }
     isActionProcessing.value = false
   }
 }
@@ -1171,6 +1478,12 @@ const getLastUpdatedTime = (ticker) => {
     return dateObj.toLocaleTimeString('en-US', { month: 'short', day: '2-digit', hour12: false, hour: '2-digit', minute: '2-digit' })
   }
   return 'Pending'
+}
+
+const formatDate = (dateStr) => {
+  if (!dateStr) return '—'
+  const d = new Date(dateStr)
+  return d.toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
 }
 
 const nyseClock = ref({
@@ -1285,6 +1598,27 @@ watch(() => tradeForm.value.action, (newAction) => {
   }
 })
 
+watch(
+  () => selectedPortfolio.value,
+  async (val) => {
+    if (val) await renderPortfolioVizCharts()
+    else destroyVizCharts()
+  },
+  { deep: true }
+)
+
+watch(
+  () => marketPrices.value,
+  async () => {
+    if (selectedPortfolio.value) await renderPortfolioVizCharts()
+  },
+  { deep: true }
+)
+
+onBeforeUnmount(() => {
+  destroyVizCharts()
+})
+
 // INTERCEPTOR: Receives ticker strings from custom TickerSearchBar selections safely
 const handleTerminalAssetSelection = (tickerData) => {
   if (!tickerData) return
@@ -1351,42 +1685,6 @@ const computedGrossPrincipal = computed(() => {
   }
 })
 
-// 🚀 DISPATCH ORDER PIPELINE WIRE INTERCEPTOR
-const dispatchOrder = async () => {
-  const { valid } = await tradeFormRef.value.validate()
-  if (!valid) return
-
-  isTradeProcessing.value = true
-  
-  const payload = {
-    portfolio_id: selectedPortfolio.value.id,
-    ticker: tradeForm.value.ticker.toUpperCase(),
-    quantity: tradeForm.value.quantity,
-    trade_type: tradeForm.value.action, // Transmits standard actions: BUY, SELL, SHORT, COVER
-    order_type: tradeForm.value.orderType,       // ✅ FIXED: Translates orderType to order_type
-    target_price: tradeForm.value.targetPrice
-  }
-
-  // Routes requests to the secure rate-limited trade endpoint
-api.post('/market-masters/trade/execute/', payload)
-    .then(res => {
-      triggerToast(res.data.message || "Order filled successfully.", "success")
-      clearOrderFields()
-      fetchDashboardData()
-      manuallyRefreshPortfolio(payload.portfolio_id)
-    })
-    .catch(err => {
-      // 🌟 NEW DEBUGGING LOG: Prints out the exact field parameters causing the 400 rejection
-      console.error("DRF Serializer Errors Logged:", err.response?.data)
-      
-      const apiErrorMsg = err.response?.data?.error || "Transaction declined due to execution rules constraints."
-      triggerErrorModal(`Trade Rejection: ${apiErrorMsg}`)
-    })
-    .finally(() => {
-      isTradeProcessing.value = false
-    })
-}
-
 // ⚡ KILL EXECUTOR: Retracts a resting pending limit order from active database rows
 const killWorkingOrder = async (orderId) => {
   if (!orderId) return
@@ -1410,83 +1708,109 @@ const killWorkingOrder = async (orderId) => {
 }
 
 
-// ⚡ STEP 1: Intercept form submission and call your existing search endpoint
-const handleInitiateOrderProcess = async () => {
+// STEP 1: submit button handler (always opens confirmation)
+const submitOrder = async () => {
   const { valid } = await tradeFormRef.value.validate()
   if (!valid) return
 
-  const targetTicker = tradeForm.value.ticker.toUpperCase().trim()
+  const targetTicker = (tradeForm.value.ticker || "").toUpperCase().trim()
+  if (!targetTicker) return
+
   isTradeProcessing.value = true
-
   try {
-    // 🌟 HITS YOUR EXISTING VIEW: Re-uses search to pull or provision the asset
-    const res = await api.get(`/market-masters/search/?ticker=${targetTicker}`)
-    
-    const livePrice = parseFloat(res.data.current_price)
-    const quantity = parseFloat(tradeForm.value.quantity) || 0
-    const grossPrincipal = livePrice * quantity
-    const txFee = 10.00
-    
-    // Calculate net total impact based on buy vs sell mechanics
-    const totalImpact = tradeForm.value.action === 'SELL' 
-      ? grossPrincipal - txFee 
-      : grossPrincipal + txFee
+    // Use your search endpoint to resolve/provision live quote preview
+    const res = await api.get(`/market-masters/search/?ticker=${encodeURIComponent(targetTicker)}`)
 
-    // Cache metrics locally to display inside our confirmation dialog box
+    const livePrice = Number(res.data?.current_price || 0)
+    const qty = Number(tradeForm.value.quantity || 0)
+    const fee = 10
+    const gross = livePrice * qty
+
+    const isCredit = ['SELL', 'SHORT'].includes(tradeForm.value.action)
+    const totalImpact = isCredit ? (gross - fee) : (gross + fee)
+
     quoteData.value = {
       ticker: targetTicker,
-      name: res.data.name,
+      name: res.data?.name || targetTicker,
       live_price: livePrice,
-      gross_principal: grossPrincipal,
-      tx_fee: txFee,
-      total_impact: Math.max(0, totalImpact),
-      trade_type: tradeForm.value.action
+      quantity: qty,
+      tx_fee: fee,
+      gross_principal: gross,
+      total_impact: totalImpact,
+      trade_type: tradeForm.value.action,
+      order_type: tradeForm.value.orderType,
+      target_price: tradeForm.value.orderType === 'LIMIT'
+        ? Number(tradeForm.value.targetPrice || 0)
+        : null
     }
-    
-    isQuoteModalActive.value = true // Launch confirmation card
+
+    isQuoteModalActive.value = true
   } catch (err) {
-    console.error("Discovery routing exception:", err)
-    const errorDetails = err.response?.data?.error || "This symbol could not be resolved on live market feeds."
-    triggerErrorModal(`Market Quote Denied: ${errorDetails}`)
+    console.error("Quote precheck failed:", err?.response?.data || err)
+    triggerErrorModal(err?.response?.data?.error || "Unable to fetch quote for this symbol.")
   } finally {
     isTradeProcessing.value = false
   }
 }
 
-// 🚀 STEP 2: Executed when user taps "Confirm and Transmit" inside the popover
+// STEP 2: confirmation modal action
 const confirmAndRouteOrder = async () => {
-  isTradeProcessing.value = true
-  
-  const payload = {
-    portfolio_id: selectedPortfolio.value.id,
-    ticker: tradeForm.value.ticker.toUpperCase().trim(),
-    quantity: tradeForm.value.quantity,
-    trade_type: tradeForm.value.action,
-    order_type: tradeForm.value.orderType,
-    target_price: tradeForm.value.targetPrice
-  }
+  if (!quoteData.value) return
 
+  isTradeProcessing.value = true
   try {
-    // Fired directly to your secure trade executor view
+    const payload = {
+      portfolio_id: selectedPortfolio.value.id,
+      ticker: quoteData.value.ticker,
+      quantity: tradeForm.value.quantity,
+      trade_type: tradeForm.value.action,
+      order_type: tradeForm.value.orderType
+    }
+
+    if (tradeForm.value.orderType === 'LIMIT') {
+      payload.target_price = tradeForm.value.targetPrice
+    }
+
     const res = await api.post('/market-masters/trade/execute/', payload)
-    triggerToast(res.data.message || "Order completed successfully.", "success")
-    
+    const data = res.data || {}
+
+    // queued market order toast
+    if (data.queued) {
+      triggerToast(
+        `🕒 Market closed: your MARKET ${payload.trade_type} order for ${payload.ticker} is queued for next NYSE open.`,
+        "warning"
+      )
+    } else {
+      triggerToast(data.message || "Order completed successfully.", "success")
+    }
+
     isQuoteModalActive.value = false
+    quoteData.value = null
     clearOrderFields()
-    fetchDashboardData()
-    manuallyRefreshPortfolio(payload.portfolio_id)
+    await fetchDashboardData()
+    await manuallyRefreshPortfolio(payload.portfolio_id)
   } catch (err) {
-    console.error("Trade finalization block:", err.response?.data)
-    triggerErrorModal(err.response?.data?.error || "Transaction dropped due to portfolio boundaries.")
+    console.error("Trade execute failed:", err?.response?.data || err)
+    const firstFieldError = Object.values(err?.response?.data || {}).flat?.()[0]
+    triggerErrorModal(
+      err?.response?.data?.error ||
+      firstFieldError ||
+      "Transaction declined due to portfolio constraints."
+    )
   } finally {
     isTradeProcessing.value = false
   }
+}
+
+const cancelQuoteConfirmation = () => {
+  isQuoteModalActive.value = false
+  quoteData.value = null
 }
 
 
 
 // portfolio health calculations
-// 🧮 EXTRA DYNAMIC FINANCIAL CALCULATORS
+// DYNAMIC FINANCIAL CALCULATORS
 
 // 1. Computes total spending potential based on the account's cash balance and leverage multiplier
 const maxPurchasingPower = computed(() => {

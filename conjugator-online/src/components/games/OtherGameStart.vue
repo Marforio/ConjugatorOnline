@@ -485,8 +485,9 @@ const selections = ref({
 
 const isValid = computed(() => {
   if (props.gameName === "Uses Of Auxiliaries") {
-    const m = selections.value.settings?.modes;
-    return !!(m?.echo || m?.agreement || m?.tag);
+    const m = selections.value.settings?.modes || {};
+    const count = ["echo", "agreement", "tag"].filter(k => !!m[k]).length;
+    return count === 1 || count === 3;
   }
   if (props.gameName === "Parallel Universe") {
     const t = selections.value.settings?.conditionalTypes;
@@ -521,6 +522,24 @@ async function executeActualGameLaunch() {
         targetSettings.singleCategory = "infinitive";
       }
     }
+  }
+  if (props.gameName === "Uses Of Auxiliaries") {
+    const m = targetSettings.modes || {};
+    const enabled = ["echo", "agreement", "tag"].filter(k => !!m[k]);
+
+    if (enabled.length === 3) {
+      targetSettings.variant = "all";
+    } else if (enabled.length === 1) {
+      targetSettings.variant = enabled[0]; // echo | agreement | tag
+    } else {
+      // choose strict behavior; safest is block invalid multi-select
+      loading.value = false;
+      console.error("Uses Of Auxiliaries requires exactly one mode or all three.");
+      return;
+    }
+
+    // optional cleanup so backend sees one canonical knob
+    delete targetSettings.modes;
   }
   
   const payload = {
