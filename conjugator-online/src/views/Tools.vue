@@ -3,7 +3,7 @@
     <v-row align="stretch" justify="center" class="game-grid" dense>
 
       <! -- Market Masters -->
-      <v-col v-if="isEnabled" cols="12" sm="6" md="4" class="d-flex justify-center">
+      <v-col cols="12" sm="6" md="4" class="d-flex justify-center">
         <RouterLink :to="{ name: 'market-masters' }" class="image-tile">
           <div class="tile-frame">
             <v-img

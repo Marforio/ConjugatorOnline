@@ -11,7 +11,6 @@
     </v-row>
 
     <v-row>
-      <!-- LEFT: STEP 1 + STEP 2 -->
       <v-col cols="12" md="5">
         <!-- STEP 1 -->
         <v-card variant="flat" class="pa-5 border bg-white rounded-lg">
@@ -34,10 +33,12 @@
             <v-row>
               <v-col cols="6" class="py-0">
                 <v-text-field
-                  v-model.number="newComp.budget"
+                  v-model="uiCustomBudget"
+                  @input="onBudgetInput"
                   label="Starting Capital ($)"
-                  type="number"
-                  min="1000"
+                  type="text"
+                  inputmode="decimal"
+                  placeholder="100'000.00"
                   variant="outlined"
                   density="comfortable"
                   required
@@ -57,12 +58,26 @@
               </v-col>
             </v-row>
 
+            <!-- NEW: decoupled trading level -->
             <v-select
-              v-model="newComp.trading_mode"
-              label="Competition Complexity Level"
+              v-model="newComp.trading_level"
+              label="Competition Level"
               :items="[
-                { title: '🟢 Basic Mode (Set & Forget) — Static', value: 'BASIC' },
-                { title: '🔥 Advanced Mode (Active Trading) — Dynamic', value: 'ADVANCED' }
+                { title: '🟢 Basic Level (BUY/SELL only)', value: 'BASIC' },
+                { title: '🔥 Advanced Level (BUY/SELL/SHORT/COVER)', value: 'ADVANCED' }
+              ]"
+              variant="outlined"
+              density="comfortable"
+              class="mb-3"
+            />
+
+            <!-- NEW: decoupled portfolio structure -->
+            <v-select
+              v-model="newComp.portfolio_type"
+              label="Portfolio Mode"
+              :items="[
+                { title: '📌 Static (cutoff applies)', value: 'STATIC' },
+                { title: '⚡ Dynamic (active until end time)', value: 'DYNAMIC' }
               ]"
               variant="outlined"
               density="comfortable"
@@ -70,7 +85,7 @@
             />
 
             <v-expand-transition>
-              <div v-if="!isStaticMode" class="bg-grey-lighten-4 rounded pa-3 mb-4 border">
+              <div v-if="isAdvancedLevel" class="bg-grey-lighten-4 rounded pa-3 mb-4 border">
                 <div class="text-caption font-weight-bold text-slate-700 mb-1 d-flex justify-space-between">
                   <span>Max Leverage:</span>
                   <span class="text-primary font-weight-black">{{ newComp.leverage_setting }}x</span>
@@ -326,7 +341,7 @@
 
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import api from '@/axios'
 import { useUserStore } from '@/stores/user'
 
@@ -361,14 +376,45 @@ const newComp = ref({
   name: '',
   budget: 100000,
   min_assets_required: 3,
-  trading_mode: 'BASIC', // BASIC => STATIC, ADVANCED => DYNAMIC
+  trading_level: 'BASIC',   
+  portfolio_type: 'STATIC', 
   leverage_setting: 1,
   start_time: '',
-  trade_cutoff_time: '', // required for BASIC/STATIC
+  trade_cutoff_time: '',
   end_time: ''
 })
 
-const isStaticMode = computed(() => newComp.value.trading_mode === 'BASIC')
+const isStaticMode = computed(() => newComp.value.portfolio_type === 'STATIC')
+const isAdvancedLevel = computed(() => newComp.value.trading_level === 'ADVANCED')
+
+const uiCustomBudget = ref("100'000.00")
+
+const onBudgetInput = (e) => {
+  uiCustomBudget.value = formatWithApostrophes(e.target.value, "money")
+}
+
+function formatWithApostrophes(raw, type) {
+  const cleaned = String(raw ?? "").replace(/[^0-9.]/g, "")
+  if (!cleaned) return ""
+
+  const [intRaw, decRaw = ""] = cleaned.split(".")
+  const intNoLeading = intRaw.replace(/^0+(?=\d)/, "") || "0"
+  const grouped = intNoLeading.replace(/\B(?=(\d{3})+(?!\d))/g, "'")
+
+  if (type === "integer") return grouped
+  if (type === "money") return `${grouped}${decRaw.length ? "." + decRaw.slice(0, 2) : ""}`
+  return `${grouped}${decRaw.length ? "." + decRaw.slice(0, 3) : ""}` // decimal
+}
+
+const parseFormattedMoney = (raw) => {
+  const cleaned = String(raw ?? '').replace(/'/g, '').replace(/,/g, '').trim()
+  const n = Number(cleaned)
+  return Number.isFinite(n) ? n : NaN
+}
+
+watch(uiCustomBudget, (v) => {
+  uiCustomBudget.value = formatWithApostrophes(v, "money")
+})
 
 const fetchCompetitions = async () => {
   try {
@@ -424,26 +470,35 @@ const handleCreateCompetition = async () => {
   }
 
   isCreating.value = true
+  const parsedBudget = parseFormattedMoney(uiCustomBudget.value)
+    if (!Number.isFinite(parsedBudget) || parsedBudget < 1000) {
+      showToast('Starting capital must be a valid number >= 1000.', 'warning')
+      return
+    }
   try {
     const payload = {
-      name: newComp.value.name.trim(),
-      budget: newComp.value.budget,
-      min_assets_required: newComp.value.min_assets_required,
-      start_time: newComp.value.start_time,
-      end_time: newComp.value.end_time,
-      trade_cutoff_time: isStaticMode.value ? newComp.value.trade_cutoff_time : null,
-      portfolio_type: isStaticMode.value ? 'STATIC' : 'DYNAMIC',
-      max_leverage_tier: isStaticMode.value ? 1 : parseInt(newComp.value.leverage_setting || 1, 10)
-    }
+        name: newComp.value.name.trim(),
+        budget: parsedBudget,
+        min_assets_required: newComp.value.min_assets_required,
+        start_time: newComp.value.start_time,
+        end_time: newComp.value.end_time,
+        trade_cutoff_time: isStaticMode.value ? newComp.value.trade_cutoff_time : null,
+        portfolio_type: newComp.value.portfolio_type,         // STATIC/DYNAMIC
+        trading_level: newComp.value.trading_level,           // BASIC/ADVANCED
+        max_leverage_tier: isAdvancedLevel.value
+          ? parseInt(newComp.value.leverage_setting || 1, 10)
+          : 1
+      }
 
     await api.post('/market-masters/competitions/', payload)
     showToast('Competition created successfully!')
 
     newComp.value = {
       name: '',
-      budget: 100000,
+      budget: uiCustomBudget.value,
       min_assets_required: 3,
-      trading_mode: 'BASIC',
+      trading_level: 'BASIC',
+      portfolio_type: 'STATIC',
       leverage_setting: 1,
       start_time: '',
       trade_cutoff_time: '',
@@ -537,7 +592,6 @@ const competitionStatus = (comp) => {
 </script>
 
 <style scoped>
-/* 🧹 Extraneous pure CSS rule properties purged. Styles are now derived directly from Vuetify primitives! */
 .max-h-60 {
   max-height: 400px;
 }

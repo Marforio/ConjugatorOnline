@@ -219,14 +219,16 @@
         <!-- Results Summary Score Dashboard Card -->
         <v-card class="pa-6 mb-8 text-center border position-relative overflow-hidden" rounded="xl" elevation="0" style="background: white;">
           <div class="bg-decoration-blob"></div>
-          <div class="text-caption font-weight-bold text-slate-400 uppercase tracking-widest">Exercise Performance Profile</div>
+          <div class="text-h6 font-weight-bold text-slate-400 uppercase tracking-widest mb-2">Exercises for Error {{ errorCode }}</div>
+          <div class="text-caption font-weight-bold text-slate-400 uppercase tracking-widest">Your Performance</div>
           
-          <div class="text-h1 font-weight-black mt-2 mb-1 font-mono tracking-tight" :class="scorePercent >= 70 ? 'text-green-darken-2' : 'text-orange-darken-3'">
+          
+          <div class="text-h1 font-weight-black mt-1 mb-1 font-mono tracking-tight" :class="scorePercent >= 80 ? 'text-green-darken-2' : 'text-orange-darken-3'">
             {{ scorePercent }}%
           </div>
           
-          <v-chip :color="scorePercent >= 70 ? 'success' : 'warning'" variant="tonal" class="font-weight-bold px-4">
-            {{ scorePercent >= 70 ? 'Competency Threshold Maintained' : 'Requires Structural Target Practice' }}
+          <v-chip :color="scorePercent >= 80 ? 'success' : 'warning'" variant="tonal" class="font-weight-bold px-4">
+            {{ scorePercent >= 80 ? 'You completed the module!' : 'You need more practice!' }}
           </v-chip>
 
           <v-row class="mt-6 border-t pt-4 max-w-sm mx-auto" dense>
@@ -241,7 +243,7 @@
           </v-row>
         </v-card>
 
-        <h2 class="text-h5 font-weight-black text-slate-800 mb-4">Granular Verification Audit</h2>
+        <h2 class="text-h5 font-weight-black text-slate-800 mb-4">Summary of Your Performance on Unit {{ errorCode }}</h2>
 
         <div class="d-flex flex-column ga-4 mb-8">
           <v-card

@@ -100,7 +100,7 @@ export const exerciseData = {
     },
     6: { 
         type : "radio",
-        question : "Choose the best option.",
+        question : "Choose the correct sentence.",
         answers : [
             ["I don't want any problems", true, "Correct! This is the best option. English differs from French in this type of construction."],
             ["I don't want any problem", false, "Wrong. This is not the best option. 'Any' usually refers to a plural quantity."]
@@ -108,7 +108,7 @@ export const exerciseData = {
     },
         7: {
         type : "radio",
-        question : "Choose the best option.",
+        question : "Choose the correct sentence.",
         answers : [
             ["I have a lot of friends.", true, "Correct! This is the best option. English differs from French in this type of construction."],
             ["I have a lot of friend.", false, "Wrong. This is not the best option. 'A lot of' usually refers to a plural quantity."]
@@ -116,7 +116,7 @@ export const exerciseData = {
     },
         8: {
         type : "radio",
-        question : "Choose the best option.",
+        question : "Choose the correct sentence.",
         answers : [
             ["No, I don't have any more question.", false, "Wrong. This is not the best option. 'Any more' usually refers to a plural quantity."],
             ["No, I don't have any more questions.", true, "Correct! This is the best option. 'Any more' usually refers to a plural quantity."]
@@ -163,7 +163,7 @@ export const exerciseData = {
         type : "checkbox",
         question : "Which of these are examples of error 0111?",
         answers : [
-            ["I have a cats,", true, "Correct! This is an example of error 0111. The plural 's' is not needed here."],
+            ["I have a cats.", true, "Correct! This is an example of error 0111. The plural 's' is not needed here."],
             ["I have a lot of friend.", false, "Wrong. This is not an example of error 0111."],
         ]
     },
@@ -365,10 +365,10 @@ export const exerciseData = {
         },
         2: {
             type : "radio",
-            question : "Plural nouns can be treated as a single thing ('A house is expensive'), or as multiple things ('The houses are expensive').",
+            question : "Plural nouns can be treated as a single thing ('The stair is dangerous'), or as multiple things ('The stairs are dangerous').",
             answers : [
-                ["True", false, "Incorrect. Plural nouns should never be treated as a single thing. 'House' is not a plural noun."],
-                ["False", true, "Correct. Plural nouns should never be treated as a single thing. 'House' is not a plural noun." ]
+                ["True", false, "Incorrect. Plural nouns should never be treated as a single thing. 'Stair' is not a valid word form."],
+                ["False", true, "Correct. Plural nouns should never be treated as a single thing. 'Stairs' is the only valid word form." ]
             ]
         },
         3: {
@@ -484,12 +484,12 @@ export const exerciseData = {
         3: {
             type : "text_multi",
             question : "Change the following phrase into a compound noun: 'A journey lasting three days'",
-            answers : ["a three-day journey", "a 3-day journey","a three day journey", "a 3 day journey", "three-day journey", "3-day journey"]
+            answers : ["a three-day journey", "a 3-day journey","a three day journey", "a 3 day journey", "three-day journey", "3-day journey", "three day journey", "3 day journey"]
         },
         4: {
             type: "text_multi",
             question: "Change the following phrase into a compound noun: 'A boy who is 5 years old'",
-            answers: ["a five-year-old boy", "a 5-year-old boy", "a five year old boy", "a 5 year old boy", "five-year-old boy", "5-year-old boy", "five year old boy", "5 year old boy"]
+            answers: ["a five-year-old boy", "a 5-year old boy", "a 5-year-old boy", "a five year old boy", "a five-year old boy", "a 5 year old boy", "five-year-old boy", "5-year-old boy", "five year old boy", "5 year old boy"]
         },
         5: {
             type : "text_multi",
@@ -641,7 +641,7 @@ export const exerciseData = {
         },
         12: {
             type : "checkbox",
-            question : "Which of these is an example of a compound noun?",
+            question : "Which of these are examples of compound nouns?",
             answers : [
                 ["Concert hall", true, "Correct! 'Concert hall' is a compound noun made up of 'concert' and 'hall'."],
                 ["The big dog", false, "Wrong. 'Dog' is a simple noun modified by an adjective and specified by the article."],
@@ -687,9 +687,10 @@ export const exerciseData = {
             type : "radio",
             question : "Why are the articles 'a' and 'an' and the determiners 'each' and 'every' not used with uncountable nouns such as 'information' and 'advice'?",
             answers : [
-                ["Because these articles and determiners imply that the noun is a single unit, which is incompatible with uncountable nouns.", true, "Correct! The articles 'a' and 'an' and the determiners 'each' and 'every' imply that the noun is a single unit, which is incompatible with uncountable nouns."],
                 ["Because these articles and determiners are only used with plural nouns.", false, "Wrong. The articles 'a' and 'an' and the determiners 'each' and 'every' are used with singular countable nouns." ],
-                ["Because these articles and determiners are only used with countable nouns.", false, "Wrong. The articles 'a' and 'an' and the determiners 'each' and 'every' are used with singular countable nouns." ]
+                ["Because these articles and determiners are only used with in casual contexts.", false, "Wrong. The articles 'a' and 'an' and the determiners 'each' and 'every' are used in all contexts." ],
+                ["Because these articles and determiners imply that the noun is a single unit, which is incompatible with uncountable nouns.", true, "Correct! The articles 'a' and 'an' and the determiners 'each' and 'every' imply that the noun is a single unit, which is incompatible with uncountable nouns."]
+
             ]
         },
         5: {
@@ -730,17 +731,17 @@ export const exerciseData = {
         9: {
             type : "text_multi",
             question : "If we want to say 'one unit' of 'information', what other word can we say instead of 'information'?",
-            answers : ["a piece of information", "a fact", "a bit of information", "fact", "piece of information", "bit of information"]
+            answers : ["a piece of information", "a fact", "a bit of information", "fact", "piece of information", "bit of information", "data point", "a data point"]
         },        
         10: {
             type : "text_multi",
             question : "If we want to say 'one unit' of 'advice', what other word can we say instead of 'advice'?",
-            answers : ["a piece of advice", "a tip", "some advice", "a bit of advice", "a suggestion", "piece of advice", "bit of advice", "tip", "suggestion"],
+            answers : ["a piece of advice", "a tip", "some advice", "a bit of advice", "a suggestion", "piece of advice", "bit of advice", "tip", "suggestion", "a recommendation", "recommendation"],
         },
         12: {
             type : "text_multi",
             question : "If we want to say 'one unit' of 'news', what can we say instead of 'a news'?",
-            answers : ["a piece of news", "a news item", "a news story", "a news report"]
+            answers : ["a piece of news", "a news item", "a news story", "a news report", "piece of news", "news item", "news story", "news report"]
             },
         13: {   
             type : "text_multi",
@@ -755,15 +756,15 @@ export const exerciseData = {
         15: {
             type : "text_multi",
             question : "If we want to say 'one unit' of 'software', what other word can we say instead of 'software'?",
-            answers : ["a piece of software", "an application", "a program", "application", "program", "piece of software"],
+            answers : ["a piece of software", "an application", "a program", "application", "program", "piece of software", "app", "an app"],
             },
         16: {
             type: "checkbox",
             question: "Why is it wrong to say 'I have a lot of job'? Check all that apply.",
             answers: [
-                ["Because 'job' refers to a position of employment, which is a countable noun. You can say 'I have a job' or 'I have a lot of jobs'.", true, "Correct! 'Job' is a countable noun. You can say 'I have a job' or 'I have a lot of jobs'."],
+                ["Because 'job' refers to a position of employment (manager, engineer), not to the act of working (cleaning, leading).", true, "Correct! 'Job' is a countable noun. You can say 'I have a job' or 'I have a lot of jobs'."],
                 ["Because there is no difference in the way 'job' and 'work' are used in English.", false, "Wrong. 'Job' and 'work' are different words with different meanings and grammatical properties."],
-                ["Because 'work' is an uncountable noun that refers to the activity of doing a job.", true, "Correct! 'Work' is an uncountable noun that refers to the activity of doing a job."]
+                ["Because 'work' is the noun that refers to the activity of doing a job.", true, "Correct! 'Work' is an uncountable noun that refers to the activity of doing a job."]
             ]
         },
         17: {
@@ -837,10 +838,10 @@ export const exerciseData = {
     },
     7: {
         type: "radio",
-        question: "Fill in the blank: 'No ______ is good ______.'",
+        question: "Fill in the blanks to complete the well-known saying: 'No ______ is good ______.'",
         answers: [
             ["news / news", true, "Correct! 'News' looks plural but is an uncountable singular noun."],
-            ["new / news", false, "Wrong. The fixed expression uses 'news' (uncountable) for both."],
+            ["new / new", false, "Wrong. The fixed expression uses 'news' (uncountable) for both."],
             ["news / newses", false, "Wrong. 'News' cannot be pluralized further into 'newses'."]
         ]
     },
@@ -917,7 +918,7 @@ export const exerciseData = {
             question: "Which French translation is grammatically similar to 'all the furniture'?",
             answers: [
                 ["tout le mobilier", true, "Correct! 'Mobilier' is an uncountable noun in French, just like 'furniture' in English."],
-                ["toutes les meubles", false, "Wrong. 'Meuble' is a countable noun in French, while 'furniture' is uncountable in English."],
+                ["tous les meubles", false, "Wrong. 'Meuble' is a countable noun in French, while 'furniture' is uncountable in English."],
             ]
         },
         17: {
@@ -996,14 +997,6 @@ export const exerciseData = {
             ["There is some news today.", true, "Correct! 'News' is uncountable and pairs with 'some' and 'is'."]
         ]
     },
-    8: {
-        type: "radio",
-        question: "Can we use 'a large number of' with the word 'machinery'?",
-        answers: [
-            ["True", false, "Wrong. 'A large number of' is for countable nouns. Use 'a large amount of machinery'."],
-            ["False", true, "Correct! 'Machinery' is uncountable."]
-        ]
-    },
     9: {
         type: "checkbox",
         question: "Choose the correct sentences:",
@@ -1013,15 +1006,7 @@ export const exerciseData = {
             ["He gave me a lot of advice.", true, "Correct! 'A lot of' works perfectly here."]
         ]
     },
-    10: {
-        type: "radio",
-        question: "If 'many' is for countable, which word is the uncountable equivalent?",
-        answers: [
-            ["Several", false, "Wrong. 'Several' is also for countable."],
-            ["Much", true, "Correct! 'Much' is the uncountable counterpart to 'many'."],
-            ["A few", false, "Wrong. 'A few' is for countable."]
-        ]
-    },
+
     11: {
         type: "radio",
         question: "Can we say 'We need several softwares'?",
@@ -1033,7 +1018,7 @@ export const exerciseData = {
     12: {
         type: "text_multi",
         question: "Correct the quantifier: 'How many progress have you made?'",
-        answers: ["How much progress", "much progress"]
+        answers: ["much", "How much progress", "much progress", "How much progress have you made?"]
     },
     13: {
         type: "radio",
@@ -1181,7 +1166,7 @@ export const exerciseData = {
     },
     10: {
         type: "radio",
-        question: "Fill in the blank: 'I need ____ map and ____ umbrella.'",
+        question: "Fill in the blanks to complete the sentence: 'I need ____ map and ____ umbrella.'",
         answers: [
             ["a / an", true, "Correct! 'Map' starts with a consonant sound, 'umbrella' starts with a vowel sound."],
             ["an / a", false, "Wrong. This is the opposite of the correct rule."],
