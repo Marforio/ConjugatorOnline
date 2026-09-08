@@ -1168,14 +1168,14 @@ const confirmDeleteCourse = (course: any) => {
 const confirmDeleteStudent = (student: any) => {
   deleteTargetType.value = 'student'
   deleteTargetId.value = student.id
-  deleteTargetLabel.value = `Student global account "${student.web_id}" and their authentication records`
+  deleteTargetLabel.value = `Student "${student.web_id}" and associated records`
   deleteConfirmDialog.value = true
 }
 
 const confirmUnenrollStudent = (student: any, courseSlug: string) => {
   const match = enrollments.value.find(e => normalizeWebId(e.student) === student.web_id && normalizeCourseSlug(e.course) === courseSlug)
   if (!match) {
-    showToast('Failed to resolve database link reference pairing for un-enrollment.', 'error')
+    showToast('Failed to resolve reference for un-enrollment.', 'error')
     return
   }
   deleteTargetType.value = 'unenroll'
@@ -1189,13 +1189,13 @@ const executeConfirmedDestruction = async () => {
   try {
     if (deleteTargetType.value === 'course') {
       await api.delete(`/courses/${deleteTargetId.value}/`)
-      showToast('Course module wiped out.')
+      showToast('Course successfully deleted.')
     } else if (deleteTargetType.value === 'student') {
       await api.delete(`/students/${deleteTargetId.value}/`)
-      showToast('Student global master profile deleted.')
+      showToast('Student profile deleted.')
     } else if (deleteTargetType.value === 'unenroll') {
       await api.delete(`/enrollment/${deleteTargetId.value}/`)
-      showToast('Student successfully removed from course roster layout track.')
+      showToast('Student successfully removed from course roster.')
     }
     deleteConfirmDialog.value = false
     await fetchData(true)

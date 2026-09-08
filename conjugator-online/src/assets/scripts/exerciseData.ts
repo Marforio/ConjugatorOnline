@@ -4749,6 +4749,7 @@ export const exerciseData = {
             ["No, not really.", true, "Correct! 'Yet' is not used like German 'jetzt' (now), but rather like 'noch nicht' or 'bereits' in German."]
         ]
     },
+},
 
 // 0289 Still vs Anymore
 "0289": {
@@ -5115,15 +5116,15 @@ export const exerciseData = {
         question: "Which word is an adjective (modifies a noun)?",
         answers: [
             ["Good", true, "Correct!"],
-            ["Well", false, "Wrong (Well is an adverb)."]
+            ["Well", false, "Wrong (Well is an adverb >> modifies a verb)."]
         ]
     },
     2: {
         type: "radio",
-        question: "Which word is an adverb (modifies a verb)?",
+        question: "Which word pair is an adverb + verb (modifies a verb)?",
         answers: [
-            ["Well", true, "Correct!"],
-            ["Good", false, "Wrong."]
+            ["plays well", true, "Correct!"],
+            ["Good game", false, "Wrong."]
         ]
     },
     3: {
@@ -5159,22 +5160,17 @@ export const exerciseData = {
     },
     7: {
         type: "radio",
-        question: "Which is correct for health?",
+        question: "True or false: In addition to being an adverb, 'well' can also be an adjective describing good health.",
         answers: [
-            ["I don't feel well.", true, "Correct!"],
-            ["I don't feel good.", true, "Correct! (Used informally for emotions/health)."]
+            ["True", true, "Correct! Example: 'He is well.' (meaning he is in good health)"],
+            ["False", false, "Wrong. 'Well' can describe good health: Example: 'He is well.' (meaning he is in good health)."]
         ]
-    },
-    8: {
-        type: "text_multi",
-        question: "What is the adverb of 'good'?",
-        answers: ["well"]
     },
     9: {
         type: "radio",
         question: "Is 'The team played good' correct?",
         answers: [
-            ["No, it should be 'well'.", true, "Correct!"],
+            ["No, it should be 'well'.", true, "Correct! Even if 'good' is sometimes used informally, 'well' is grammatically correct here."],
             ["Yes.", false, "Wrong."]
         ]
     },
@@ -5198,7 +5194,23 @@ export const exerciseData = {
     12: {
         type: "text_multi",
         question: "Fix this: 'He drives very good.'",
-        answers: ["He drives very well"]
+        answers: ["He drives very well", "very well", "well"]
+    },
+    13: {
+        type: "radio",
+        question: "Why do Swiss students tend to use 'good' instead of 'well' as an adverb?",
+        answers: [
+            ["Because of direct translation from German.", true, "Correct! In German, 'gut' ('gut gemacht') is used similarly to 'well' in English, leading to this tendency."],
+            ["Because English be crazy.", false, "Wrong. The correct reason is the influence of German on Swiss students' English usage."]
+        ]
+    },
+    14: {
+        type: "radio",
+        question: "True or false: 'good' is equivalent to French 'bon', and the adverb 'well' is equivalent to French 'bien'.",
+        answers: [
+            ["True", true, "Correct! 'Good' corresponds to 'bon' and 'well' corresponds to 'bien'."],
+            ["False", false, "Wrong. 'Good' corresponds to 'bon' and 'well' corresponds to 'bien'."]
+        ]
     }
 },
 
@@ -13457,6 +13469,6 @@ export const exerciseData = {
         question: "Fix this: 'She doesn't smoke.' - 'Neither she does.'",
         answers: ["Neither does she"]
     }
-},
+}
 
 }
