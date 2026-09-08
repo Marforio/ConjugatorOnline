@@ -5226,7 +5226,7 @@ export const exerciseData = {
     },
     2: {
         type: "radio",
-        question: "Which word means 'barely' or 'almost not'?",
+        question: "Which word means 'barely' or 'almost not' (French 'presque pas, à peine'; German 'kaum')?",
         answers: [
             ["Hardly", true, "Correct!"],
             ["Hard", false, "Wrong."]
@@ -5237,15 +5237,16 @@ export const exerciseData = {
         question: "Which of these are correct?",
         answers: [
             ["I work hard.", true, "Correct!"],
+            ["It is a hardly bed.", false, "Wrong. 'Hardly' cannot be used to describe the texture of a bed."],
             ["I can hardly hear you.", true, "Correct!"],
             ["I can hard hear you.", false, "Wrong."],
-            ["It is a hard bed.", true, "Correct!"]
+            
         ]
     },
     4: {
         type: "text_multi",
-        question: "Correct the error: 'I hardly studied, so I passed.' (If you mean you studied a lot)",
-        answers: ["I studied hard"]
+        question: "Correct the error: 'I trained hardly.' (If you mean you trained a lot)",
+        answers: ["I trained hard", "hard", "trained hard"]
     },
     5: {
         type: "radio",
@@ -5272,9 +5273,12 @@ export const exerciseData = {
         ]
     },
     8: {
-        type: "text_multi",
+        type: "radio",
         question: "What does 'hardly ever' mean?",
-        answers: ["almost never", "very rarely"]
+        answers: [
+            ["almost never, very rarely", true, "Correct!"],
+            ["absolutely always", false, "Wrong."]
+        ]
     },
     9: {
         type: "radio",
@@ -5298,13 +5302,13 @@ export const exerciseData = {
         question: "Where is 'hardly' usually placed?",
         answers: [
             ["Before the verb (e.g., I hardly know her).", true, "Correct!"],
-            ["At the end of the sentence.", false, "Wrong."]
+            ["After the verb (e.g., I know her hardly).", false, "Wrong."]
         ]
     },
     12: {
         type: "text_multi",
         question: "Fix this: 'The exams were hardly.' (meaning difficult)",
-        answers: ["The exams were hard"]
+        answers: ["The exams were hard", "hard", "were hard"]
     }
 },
 
@@ -5368,7 +5372,7 @@ export const exerciseData = {
     8: {
         type: "text_multi",
         question: "Correct the error: 'The movies was great.'",
-        answers: ["The movies were great"]
+        answers: ["The movies were great", "were", "movies were great", "were great"]
     },
     9: {
         type: "radio",
@@ -5389,16 +5393,34 @@ export const exerciseData = {
     },
     11: {
         type: "radio",
-        question: "Can 'be' be used as an auxiliary for the continuous tense (e.g., I am eating)?",
+        question: "How important is it to have perfect memorization of the conjugation of 'be'?",
         answers: [
-            ["Yes.", true, "Correct!"],
-            ["No.", false, "Wrong."]
+            ["Very important", true, "Correct!"],
+            ["Kind of important", false, "Wrong."],
+            ["Not important", false, "Wrong."]
         ]
     },
     12: {
         type: "text_multi",
         question: "Correct: 'Why was you late?'",
         answers: ["Why were you late?"]
+    },
+    13: {
+        type: "radio",
+        question: "What is the correct conjugation of 'be' in the present simple:",
+        answers: [
+                        ["I am, you are, he/she/it are, we is, you are, they are", false, "Wrong."],
+            ["I am, you are, he/she/it is, we are, you are, they are", true, "Correct!"],
+
+        ]
+    },
+    14: {
+        type: "radio",
+        question: "What is the correct conjugation of 'be' in the past simple:",
+        answers: [
+            ["I was, you were, he/she/it was, we were, you were, they were", true, "Correct!"],
+            ["I were, you was, he/she/it were, we was, you was, they were", false, "Wrong."]
+        ]
     }
 },
 
@@ -5433,7 +5455,7 @@ export const exerciseData = {
     4: {
         type: "text_multi",
         question: "Correct the error: 'The sun rise in the east.'",
-        answers: ["The sun rises in the east", "rises"]
+        answers: ["The sun rises in the east", "rises", "The sun rises"]
     },
     5: {
         type: "radio",
@@ -5455,14 +5477,15 @@ export const exerciseData = {
         type: "radio",
         question: "Which is correct for the negative?",
         answers: [
-            ["She doesn't like pizza.", true, "Correct! (The -s is on 'does')."],
-            ["She doesn't likes pizza.", false, "Wrong. (Don't double the -s)."]
+            ["She don't likes pizza.", false, "Wrong. (Use 'doesn't' instead of 'don't' for 3rd person singular)."],
+            ["She doesn't likes pizza.", false, "Wrong. (Don't double the -s)."],
+            ["She doesn't like pizza.", true, "Correct! (The -s is on 'does')."]
         ]
     },
     8: {
         type: "text_multi",
         question: "Correct: 'She do not go.'",
-        answers: ["She does not go"]
+        answers: ["She does not go", "does not go", "She doesn't go", "doesn't go", "does not", "does"]
     },
     9: {
         type: "radio",
@@ -5472,29 +5495,82 @@ export const exerciseData = {
             ["Cats sleeps a lot.", false, "Wrong. (Plural 'cats' doesn't need -s on the verb)."]
         ]
     },
-    10: {
-        type: "checkbox",
-        question: "Identify the correct 3rd person singular verbs:",
-        answers: [
-            ["He watches", true, "Correct!"],
-            ["She flys", false, "Wrong (flies)."],
-            ["It goes", true, "Correct!"]
-        ]
-    },
     11: {
         type: "radio",
         question: "Is 'Everyone knows him' correct?",
         answers: [
-            ["True", true, "Correct! 'Everyone' is singular."],
-            ["False", false, "Wrong."]
+            ["True", true, "Correct! 'Everyone' is singular ('one' indicates a single person >> 'chacun' in French)."],
+            ["False", false, "Wrong. 'Everyone' is singular ('one' indicates a single person >> 'chacun' in French)."]
         ]
     },
     12: {
-        type: "text_multi",
-        question: "Fix this: 'He have a car.'",
-        answers: ["He has a car"]
-    }
+        type: "radio",
+        question: "Is this correct: 'No one know the truth?'",
+        answers: [
+            ["True", false, "Wrong. 'No one' is singular ('one' indicates a single person >> 'personne' in French), so it should be 'No one knows the truth.'"],
+            ["False", true, "Correct! 'No one' is singular ('one' indicates a single person >> 'personne' in French), so it should be 'No one knows the truth.'"]
+        ]
+    },
 },
+// Positive form (S A P )
+"0319": {
+    1: {
+        type: "radio",
+        question: "What is the standard order for a declarative (positive) sentence?",
+        answers: [
+            ["Subject + Auxiliary + Principal Verb", true, "Correct! (e.g., I am going)."],
+            ["Subject + Principal Verb", false, "Wrong. (e.g., 'I going' is incorrect)."]
+        ]
+    },
+    2: {
+        type: "radio",
+        question: "Why is 'I done my apprenticeship' incorrect?",
+        answers: [
+            ["Because the auxiliary verb is missing", true, "Correct! (The correct form is 'I've done my apprenticeship')."],
+            ["Because 'done' does not collocate with 'apprenticeship'.", false, "Wrong. (The correct form is 'I've done my apprenticeship')."]
+        ]
+    },
+    3: {
+        type: "checkbox",
+        question: "Which of these are correct declarative forms?",
+        answers: [
+            ["I have done my apprenticeship.", true, "Correct!"],
+            ["I done my apprenticeship.", false, "Wrong. (The correct form is 'I've done my apprenticeship')."],
+            ["They going back", false, "Wrong. (The correct form is 'They are going back')."]
+        ]
+    },
+    4: {
+        type: "radio",
+        question: "Which tenses have no auxiliary verb in the declarative (positive) form?",
+        answers: [
+            ["Simple Present", true, "Correct! The Simple Present tense does not require an auxiliary verb in the declarative form."],
+            ["Present Continuous", false, "Wrong. The Present Continuous tense requires the auxiliary verb 'to be'."],
+            ["Simple Past", true, "Correct! The Simple Past tense does not require an auxiliary verb in the declarative form."],
+            ["Present Perfect", false, "Wrong. The Present Perfect tense requires the auxiliary verb 'to have'."],
+            ["Future Simple", false, "Wrong. The Future Simple tense requires the auxiliary verb 'will'."]
+        ]
+    },
+    5: {
+        type: "radio",
+        question: "True or False: ALl tenses and modalities share the same structure for declarative sentences: Subject + Auxiliary + Principal Verb?",
+        answers: [
+            ["True, absolutely all the tenses follow this structure", false, "Wrong. The present simple and past simple are important exceptions."],
+            ["True, with the exception of the present simple and past simple", true, "Correct! All other tenses and modalities share the same structure for declarative sentences: Subject + Auxiliary + Principal Verb."],
+            ["False", false, "Wrong. All tenses and modalities share the same structure for declarative sentences: Subject + Auxiliary + Principal Verb, with two important exceptions: the present simple and past simple."]
+        ]
+    },
+    7: {
+        type: "radio",
+        question: "Which is correct?",
+        answers: [
+            ["what they were thinking.", true, "Correct!"],
+            ["what they thinking.", false, "Wrong (the auxiliary is missing.)"]
+        ]
+    },
+
+},
+
+
 
 // 0320 Negative Form (S A not P)
 "0320": {
@@ -5508,41 +5584,48 @@ export const exerciseData = {
     },
     2: {
         type: "radio",
-        question: "Is 'I eat not meat' correct?",
+        question: "Why is 'I eat not meat' incorrect?",
         answers: [
-            ["True", false, "Wrong. Use 'I do not eat meat'."],
-            ["False", true, "Correct!"]
+            ["Because the auxiary verb is missing", true, "Correct! (The correct form is 'I do not eat meat')."],
+            ["Because 'not' should be placed in front of 'eat'", false, "Wrong. (The correct form is 'I do not eat meat')."]
         ]
     },
     3: {
         type: "checkbox",
         question: "Which of these are correct negative forms?",
         answers: [
-            ["I do not know.", true, "Correct!"],
+            ["I cannot know.", true, "Correct!"],
             ["She does not smoke.", true, "Correct!"],
             ["They not arrive.", false, "Wrong."],
-            ["We did not see it.", true, "Correct!"]
+            ["We did not see it.", true, "Correct!"],
+            ["The went not", false, "Wrong. (The correct form is 'They did not go')."]
         ]
     },
     4: {
-        type: "text_multi",
-        question: "Correct the error: 'He works not here.'",
-        answers: ["He does not work here", "He doesn't work here"]
+        type: "radio",
+        question: "Where does the 'not' particle go in a conjugation?'",
+        answers: [
+            ["Before the auxiliary verb", false, "Wrong. The 'not' particle should be placed after the auxiliary verb and before the principal verb."],
+            ["After the principal verb", false, "Wrong. The 'not' particle should be placed after the auxiliary verb and before the principal verb."],
+            ["Between the auxiliary and the principal verb", true, "Correct!"]
+        ]
     },
     5: {
         type: "radio",
-        question: "What is the auxiliary for the negative in the present simple?",
+        question: "True or False: ALl tenses and modalities share the same structure for negation: Subject + Auxiliary + not + Principal Verb?",
         answers: [
-            ["Do / Does", true, "Correct!"],
-            ["Have", false, "Wrong."]
+            ["True", true, "Correct! (All tenses and modalities share the same structure for negation: Subject + Auxiliary + not + Principal Verb)."],
+            ["False", false, "Wrong. (All tenses and modalities share the same structure for negation: Subject + Auxiliary + not + Principal Verb)."]
         ]
     },
     6: {
         type: "radio",
-        question: "What is the auxiliary for the negative in the past simple?",
+        question: "Which of these verbs is NOT an auxiliary verb?",
         answers: [
-            ["Did", true, "Correct!"],
-            ["Was", false, "Wrong (except for the verb 'be')."]
+            ["did", false, "Wrong. 'Did' is an auxiliary verb."],
+            ["can", false, "Wrong. 'Can' is an auxiliary verb."],
+            ["go", true, "Correct! 'Go' is not an auxiliary verb."],
+            ["will", false, "Wrong. 'Will' is an auxiliary verb."]
         ]
     },
     7: {
@@ -5560,10 +5643,10 @@ export const exerciseData = {
     },
     9: {
         type: "radio",
-        question: "Can we say 'I can not'?",
+        question: "Which is correct?",
         answers: [
-            ["Yes, 'cannot' is the auxiliary/principal combined.", true, "Correct!"],
-            ["No.", false, "Wrong."]
+            ["I didn't have time.", true, "Correct!"],
+            ["I hadn't time.", false, "Wrong (in modern standard English, 'did' is preferred)."]
         ]
     },
     10: {
@@ -5575,18 +5658,10 @@ export const exerciseData = {
             ["She liked not it.", false, "Wrong."]
         ]
     },
-    11: {
-        type: "radio",
-        question: "Is 'They don't are happy' correct?",
-        answers: [
-            ["No, 'be' is a special case and doesn't use 'do'.", true, "Correct!"],
-            ["Yes.", false, "Wrong."]
-        ]
-    },
     12: {
         type: "text_multi",
-        question: "Fix this: 'I not want it.'",
-        answers: ["I do not want it", "I don't want it"]
+        question: "Fix this: 'I not want'",
+        answers: ["I do not want", "I don't want", "don't want", "dont want", "do not want"]
     }
 },
 
@@ -5597,7 +5672,7 @@ export const exerciseData = {
         question: "What is the standard order for a question in English?",
         answers: [
             ["Auxiliary + Subject + Principal Verb", true, "Correct! (e.g., Do you know?)."],
-            ["Subject + Verb", false, "Wrong."]
+            ["Subject + Auxiliary Verb + Principal Verb", false, "Wrong."]
         ]
     },
     2: {
@@ -5621,22 +5696,14 @@ export const exerciseData = {
     4: {
         type: "text_multi",
         question: "Correct the error: 'Where went they?'",
-        answers: ["Where did they go?"]
+        answers: ["Where did they go?", "where did they go?"]
     },
     5: {
         type: "radio",
-        question: "What is the order if there is a 'Wh-' word (like Who, Where)?",
+        question: "What is the problem with this question: 'You can see?'",
         answers: [
-            ["Wh- + A + S + P", true, "Correct!"],
-            ["Wh- + S + P", false, "Wrong."]
-        ]
-    },
-    6: {
-        type: "radio",
-        question: "Fill in the blank: '______ you see the movie?'",
-        answers: [
-            ["Did", true, "Correct!"],
-            ["Have", false, "Wrong (would need past participle 'seen')."]
+            ["There is no inversion of subject and auxiliary verb.", true, "Correct!"],
+            ["The auxiliary verb is missing.", false, "Wrong."]
         ]
     },
     7: {
@@ -5652,21 +5719,14 @@ export const exerciseData = {
         question: "Put in order: (you / why / did / leave)",
         answers: ["why did you leave"]
     },
-    9: {
-        type: "radio",
-        question: "Is 'Are you ready?' a correct A S P form?",
-        answers: [
-            ["Yes, 'be' acts as its own auxiliary.", true, "Correct!"],
-            ["No.", false, "Wrong."]
-        ]
-    },
     10: {
         type: "checkbox",
         question: "Identify correct questions:",
         answers: [
             ["Can you help me?", true, "Correct!"],
             ["How much does it cost?", true, "Correct!"],
-            ["How much costs it?", false, "Wrong."]
+            ["How much costs it?", false, "Wrong."],
+            ["You like?", false, "Wrong. It should be 'Do you like?'."]
         ]
     },
     11: {
@@ -5681,6 +5741,32 @@ export const exerciseData = {
         type: "text_multi",
         question: "Fix this: 'What you want?'",
         answers: ["What do you want?"]
+    },
+    13: {
+        type: "checkbox",
+        question: "Why is 'What means this word?' incorrect? Tick all that apply.",
+        answers: [
+            ["Because it's an exception to the rule.", false, "Wrong. It should be 'What does this word mean?'."],
+            ["Because it doesn't follow the Auxiliary Verb + Subject + Principal Verb order.", true, "Correct!"],
+            ["Because the auxiliary verb is missing.", true, "Correct!"]
+        ]
+    },
+    14: {
+        type: "radio",
+        question: "True or false: in professional situations, questions cannot be formed through intonation alone (example: 'You're coming?' instead of 'Are you coming?')?",
+        answers: [
+            ["True", true, "Correct! In professional situations, questions typically require auxiliary verbs or inversion."],
+            ["False", false, "Wrong. Intonation alone is not sufficient to form standard questions in professional situations."]
+        ]
+    },
+    15: {
+        type: "radio",
+        question: "Why do we say that we need 'inversion' to make questions in English?",
+        answers: [
+            ["Because a question is the conceptual inverse of a statement, according to Wittgenstein.", false, "Wrong. The correct reason involves the inversion of the subject and auxiliary verb."],
+            ["Because the subject and auxiliary verb must switch places to form a question.", true, "Correct!"],
+            ["Because English questions always start with 'Do'.", false, "Wrong."]
+        ]
     }
 },
 
@@ -5690,8 +5776,8 @@ export const exerciseData = {
         type: "radio",
         question: "Do you use 'to' between a modal verb (can, must, should) and the main verb?",
         answers: [
-            ["No", true, "Correct! (e.g., I must go)."],
-            ["Yes", false, "Wrong."]
+            ["No", true, "Correct! (e.g., 'I must go' is correct, not 'I must to go')."],
+            ["Yes", false, "Wrong. You should not use 'to' after a modal verb."]
         ]
     },
     2: {
@@ -5709,13 +5795,13 @@ export const exerciseData = {
             ["I can swim.", true, "Correct!"],
             ["You should to study.", false, "Wrong."],
             ["They might come.", true, "Correct!"],
-            ["We would like to go.", true, "Correct! ('would like' is an exception where 'to' follows 'like', not 'would')."]
+            ["We will to win.", false, "Wrong."],
         ]
     },
     4: {
         type: "text_multi",
         question: "Correct the error: 'He can to speak English.'",
-        answers: ["He can speak English"]
+        answers: ["He can speak English", "can speak", "he can speak"]
     },
     5: {
         type: "radio",
@@ -5727,10 +5813,10 @@ export const exerciseData = {
     },
     6: {
         type: "radio",
-        question: "Is 'I must go' the same as 'I have to go'?",
+        question: "What is a modal verb?",
         answers: [
-            ["Yes, but 'have' is not a modal, so it needs 'to'.", true, "Correct!"],
-            ["No.", false, "Wrong."]
+            ["An auxiliary verb that expresses necessity, possibility, or permission.", true, "Correct!"],
+            ["A verb that always requires 'to' after it.", false, "Wrong. Modal verbs do not take 'to' before the main verb."]
         ]
     },
     7: {
@@ -5742,9 +5828,14 @@ export const exerciseData = {
         ]
     },
     8: {
-        type: "text_multi",
-        question: "What is the missing word: 'She can ____.' (meaning she knows how to run)",
-        answers: ["run"]
+        type: "checkbox",
+        question: "Which of these are modal verbs?",
+        answers: [
+            ["can", true, "Correct!"],
+            ["must", true, "Correct!"],
+            ["should", true, "Correct!"],
+            ["go", false, "Wrong."]
+        ]
     },
     9: {
         type: "radio",
@@ -5765,26 +5856,110 @@ export const exerciseData = {
     },
     11: {
         type: "radio",
-        question: "True or False: 'Ought to' is a modal that actually uses 'to'.",
+        question: "True or False: 'Ought to' is a modal that actually uses 'to' ('I ought to go').",
         answers: [
-            ["True, it is a rare exception.", true, "Correct!"],
+            ["True, it is a rare exception. It is far less common than 'should'.", true, "Correct!"],
             ["False.", false, "Wrong."]
         ]
     },
     12: {
         type: "text_multi",
         question: "Fix this: 'You must to see this film.'",
-        answers: ["You must see this film"]
+        answers: ["You must see this film", "must see", "must", "you must see"]
     }
 },
 
-// 0330/0331 Negative/Question in Past Simple (A S P / S A not P)
+// 0330 wrong question structure (missing aux) in past simple questions and negs
 "0330": {
+    1: {
+        type: "radio",
+        question: "Why is this wrong: 'Went you?'",
+        answers: [
+            ["Because in past simple questions, we need the auxiliary 'did'. The correct form is 'Did you go?'", true, "Correct!"],
+            ["Because 'went' is always used at the beginning of a question.", false, "Wrong."]
+        ]
+    },
+    2: {
+        type: "radio",
+        question: "Which is correct?",
+        answers: [
+            ["Did you go to the party?", true, "Correct!"],
+            ["Do you went to the party?", false, "Wrong."],
+            ["Went you to the party?", false, "Wrong. In past simple questions, we need the auxiliary 'did'."],
+        ]
+    },
+    3: {
+        type: "radio",
+        question: "Why is this wrong: 'Why he not come?'",
+        answers: [
+            ["Because in past simple questions, we need the auxiliary 'did'.'", true, "Correct!"],
+            ["Because 'come' is always used at the beginning of a question.", false, "Wrong."]
+        ]
+    },
+    4: {
+        type: "checkbox",
+        question: "Which is correct?",
+        answers: [
+            ["Where works he?", false, "Wrong. In present simple questions, we need the auxiliary 'does'."],
+            ["Where does he work?", true, "Correct!"],
+            ["Where he works?", false, "Wrong. In present simple questions, we need the auxiliary 'does'."],
+        ]
+    },
+    5: {
+        type: "radio",
+        question: "Is this correct: 'Do you yoga?'" ,
+        answers: [
+            ["No, it should be 'Do you do yoga?'", true, "Correct!  "],
+            ["Yes.", false, "Wrong. The correct form is 'Do you do yoga?'"]
+
+        ]
+    },
+    6: {
+        type: "radio",
+        question: "Why is the past simple a special case in conjugation?",
+        answers: [
+            ["Because the auxiliary is not visible in the positive (declarative) form, but it is required in questions and negations.", true, "Correct!"],
+            ["Because 2 auxiliaries are needed instead of one.", false, "Wrong. The correct reason is that it's because the auxiliary 'do/did' is used in questions and negations."]
+        ]
+    },
+    7: {
+        type: "radio",
+        question: "Is this correct: 'As a teenager, I didn't sports'",
+        answers: [
+            ["No, it should be 'As a teenager, I didn't play/do sports.'", true, "Correct!"],
+            ["Yes.", false, "Wrong. The correct form is 'As a teenager, I didn't play/do sports.'"]
+        ]
+    },
+    8: {
+        type: "text_multi",
+        question: "Correct the error: 'He didn't his homework.'",
+        answers: ["He didn't do his homework", "didn't do", "didnt do", "he didnt do", "he didn't do"]
+    },
+    9: {
+        type: "radio",
+        question: "Can it be correct to use the verb 'do' two times in the same conjugation?",
+        answers: [
+            ["Yes, in questions and negations in the present or past simple.", true, "Correct! (e.g., Do you do yoga?)"],
+            ["No, it is never correct.", false, "Wrong. It is correct in questions and negations in the present or past simple (e.g., Do you do yoga? / Did you do yoga?)."]
+        ]
+    },
+    10: {
+        type: "radio",
+        question: "Why is this question incorrect: 'See you the bird?'",
+        answers: [
+            ["Because the auxiliary 'do' is missing. It should be 'Do you see the bird?'", true, "Correct!"],
+            ["Because 'see' is in the wrong tense.", false, "Wrong. The correct reason is that the auxiliary 'do' is missing. It should be 'Did you see the bird?'"]
+        ]
+    }
+},
+
+// 0331 Wrong principal verb in Past Simple negs and questions 
+"0331": {
     1: {
         type: "radio",
         question: "In a negative past simple sentence, what happens to the principal verb?",
         answers: [
-            ["It returns to the infinitive form.", true, "Correct! (e.g., I didn't GO)."],
+            ["It is used in the infinitive form.", true, "Correct! (e.g., I didn't GO)."],
             ["It stays in the past form.", false, "Wrong. (e.g., I didn't went is incorrect)."]
         ]
     },
@@ -5808,23 +5983,26 @@ export const exerciseData = {
     },
     4: {
         type: "text_multi",
-        question: "Correct the error: 'She didn't chose the red one.'",
-        answers: ["She didn't choose the red one", "didn't choose"]
+        question: "Correct the error: 'She didn't chose'",
+        answers: ["She didn't choose", "didn't choose", "didnt choose", "did not choose", "she didnt choose", "she did not choose"]
     },
     5: {
         type: "radio",
         question: "What is the auxiliary for all past simple questions?",
         answers: [
             ["Did", true, "Correct!"],
-            ["Done", false, "Wrong."]
+            ["Done", false, "Wrong."],
+            ["Do", false, "Wrong. The correct auxiliary for past simple questions is 'Did'."],
+            ["Dad", false, "Wrong. The correct auxiliary for past simple questions is 'Did'."]
         ]
     },
     6: {
         type: "radio",
-        question: "Fill in the blank: 'I ______ not see it.'",
+        question: "Fill in the blank: 'I ______ not saw it.'",
         answers: [
-            ["did", true, "Correct!"],
-            ["do", false, "Wrong (this would be present)."]
+            ["did", false, "Wrong (there is no possible correct answer)."],
+            ["do", false, "Wrong (there is no possible correct answer)."],
+            ["there is no possible correct answer", true, "Correct!"]
         ]
     },
     7: {
@@ -5837,24 +6015,24 @@ export const exerciseData = {
     },
     8: {
         type: "text_multi",
-        question: "Correct the error: 'Did you went to the party?'",
-        answers: ["Did you go to the party?"]
+        question: "Correct the error: 'Do she goes?'",
+        answers: ["Does she go?"]
     },
     9: {
         type: "radio",
-        question: "Is 'I didn't have' the correct past negative of 'I had'?",
+        question: "Take the sentence 'I don't run'. If I change 'I' to 'she', which part of the sentence must change?",
         answers: [
-            ["True", true, "Correct!"],
-            ["False", false, "Wrong."]
+            ["The auxiliary: I don't run -> She doesn't run", true, "Correct!"],
+            ["The principal verb: I don't run -> She don't runs", false, "Wrong."],
+            ["Both auxiliary and principal verb: I don't run -> She doesn't runs", false, "Wrong."]
         ]
     },
     10: {
-        type: "checkbox",
-        question: "Identify the correct negative/question structures:",
+        type: "radio",
+        question: "True or false: In negatives and questions, the present simple and past simple ALWAYS use the principal verb in infinitive form?",
         answers: [
-            ["Did + Subject + Infinitive", true, "Correct!"],
-            ["Subject + didn't + Infinitive", true, "Correct!"],
-            ["I didn't ate lunch.", false, "Wrong."]
+            ["True", true, "Correct!"],
+            ["False", false, "Wrong."]
         ]
     },
     11: {
@@ -5868,7 +6046,7 @@ export const exerciseData = {
     12: {
         type: "text_multi",
         question: "Fix this: 'They didn't liked the food.'",
-        answers: ["They didn't like the food"]
+        answers: ["They didn't like the food", "didnt like", "didn't like", "did not like", "They did not like", "They didn't like", "They didnt like"]
     }
 },
 
@@ -5876,7 +6054,7 @@ export const exerciseData = {
 "0332": {
     1: {
         type: "radio",
-        question: "Do you normally use 'do' or 'did' in a positive statement (e.g., I went)?",
+        question: "Do you normally use 'do' or 'did' in a positive statement (e.g., I see, I went)?",
         answers: [
             ["No", true, "Correct! (Unless you are emphasizing something)."],
             ["Yes", false, "Wrong."]
@@ -5895,15 +6073,15 @@ export const exerciseData = {
         question: "Which of these are correct positive sentences?",
         answers: [
             ["He lives in Rome.", true, "Correct!"],
-            ["He does live in Rome.", false, "Wrong."],
+            ["He does live in Rome.", false, "Wrong, unless you are emphasizing this fact."],
             ["We saw the film.", true, "Correct!"],
-            ["We did see the film.", false, "Wrong."]
+            ["We did see the film.", false, "Wrong, unless you are emphasizing this fact."]
         ]
     },
     4: {
         type: "text_multi",
         question: "Correct the error: 'I do work here.' (for a normal statement)",
-        answers: ["I work here"]
+        answers: ["I work here", "I work"]
     },
     5: {
         type: "radio",
@@ -5923,7 +6101,7 @@ export const exerciseData = {
     },
     7: {
         type: "radio",
-        question: "Which is correct?",
+        question: "Which is correct in a normal positive statement?",
         answers: [
             ["They arrive at 6 PM.", true, "Correct!"],
             ["They do arrive at 6 PM.", false, "Wrong."]
@@ -5932,40 +6110,28 @@ export const exerciseData = {
     8: {
         type: "text_multi",
         question: "Fix this: 'I did find my keys.'",
-        answers: ["I found my keys"]
+        answers: ["I found my keys", "found", "I found"]
     },
     9: {
         type: "radio",
-        question: "Is 'He does eats' correct?",
+        question: "What is the translation of 'I did watch that film'?",
         answers: [
-            ["No, never double the -s.", true, "Correct!"],
-            ["Yes.", false, "Wrong."]
+            ["There is no correct translation. This form is does not exist in standard English.", false, "Wrong."],
+            ["Si, j'ai vue ce film (vraiment!) // Doch, ich habe diesen Film gesehen (wirklich!)", true, "Correct!"],
+            ["J'aurais vu ce film // Ich hätte diesen Film gesehen", false, "Wrong."],
+            ["J'aurai voulu voir ce film // Ich hätte diesen Film sehen wollen", false, "Wrong."]
         ]
     },
     10: {
-        type: "checkbox",
-        question: "Identify the standard positive forms:",
-        answers: [
-            ["I like music.", true, "Correct!"],
-            ["I did like music.", false, "Wrong."],
-            ["He came home.", true, "Correct!"]
-        ]
-    },
-    11: {
         type: "radio",
-        question: "True or False: In most European languages, there is no 'do' support, so this error is common.",
+        question: "Complete this dialog: 'A: You didn't pay me back. Give me my money! B: I ______ . Don't you remember?'",
         answers: [
-            ["True.", true, "Correct!"],
-            ["False.", false, "Wrong."]
+            ["did pay you back", true, "Correct! This is an example of using 'did' for emphasis in a positive statement."],
+            ["mega paid you back", false, "Wrong. Mega is not a correct form in English."],
+            ["I paid you back", false, "Wrong. This is grammatically correct, but not emphatic enough in this context."],
         ]
     },
-    12: {
-        type: "text_multi",
-        question: "Correct: 'I did see you last week.'",
-        answers: ["I saw you last week"]
-    }
 },
-
 // 0335 Special Case: 'Be' as Principal Verb
 "0335": {
     1: {
@@ -5997,7 +6163,7 @@ export const exerciseData = {
     4: {
         type: "text_multi",
         question: "Correct the error: 'Why do you be angry?'",
-        answers: ["Why are you angry?"]
+        answers: ["Why are you angry?", "Why are you angry"]
     },
     5: {
         type: "radio",
@@ -6026,7 +6192,7 @@ export const exerciseData = {
     8: {
         type: "text_multi",
         question: "Correct the error: 'She didn't be there.'",
-        answers: ["She wasn't there", "She was not there"]
+        answers: ["She wasn't there", "She was not there", "was not", "wasnt", "wasn't", "she wasnt", "she wasn't", "she was not"]
     },
     9: {
         type: "radio",
@@ -6040,7 +6206,7 @@ export const exerciseData = {
         type: "checkbox",
         question: "Identify correct 'be' questions:",
         answers: [
-            ["Is she coming?", true, "Correct!"],
+            ["Is she dreaming?", true, "Correct!"],
             ["Was it cold?", true, "Correct!"],
             ["Did it be cold?", false, "Wrong."]
         ]
@@ -6049,15 +6215,10 @@ export const exerciseData = {
         type: "radio",
         question: "Does 'be' follow the A S P pattern in questions?",
         answers: [
-            ["Yes, but 'be' is both the A and the P.", true, "Correct!"],
-            ["No.", false, "Wrong."]
+            ["No, it has its own unique pattern: Conjugated(BE) + Subject?", true, "Correct! For example, 'Are you ready?'."],
+            ["Yes, yes it does.", false, "Wrong. 'Be' does not follow the A S P pattern."]
         ]
     },
-    12: {
-        type: "text_multi",
-        question: "Fix this: 'We don't be ready yet.'",
-        answers: ["We aren't ready yet", "We are not ready yet"]
-    }
 },
 
 
@@ -6092,9 +6253,12 @@ export const exerciseData = {
         ]
     },
     4: {
-        type: "text_multi",
-        question: "Correct the combination: 'She is go to the park.'",
-        answers: ["She is going to the park", "She goes to the park"]
+        type: "radio",
+        question: "How is the present simple tense formed?",
+        answers: [
+            ["Infinitive form of the verb (with -s in 3rd person) for positives, and do/does + infinitive for negatives and questions)", true, "Correct! The present simple uses the infinitive form of the verb."],
+            ["do/does + infinitive for positives, negatives and questions", false, "Wrong. We don't use 'do/does' for forming positive statements in the present simple."],
+        ]
     },
     5: {
         type: "radio",
@@ -6115,23 +6279,30 @@ export const exerciseData = {
     },
     7: {
         type: "radio",
-        question: "Which auxiliary combines with the past participle to form the passive voice?",
+        question: "Which verb tense is formed by combining the auxiliary 'be' with the '-ing' form of the main verb?",
         answers: [
-            ["Be (is, was, were)", true, "Correct! (e.g., It was made)."],
-            ["Do (do, does, did)", false, "Wrong."]
+            ["Present continuous", true, "Correct! (e.g., I am eating)."],
+            ["Past simple", false, "Wrong."],
+            ["Future simple", false, "Wrong."]
         ]
     },
     8: {
-        type: "text_multi",
-        question: "Correct the combination: 'Did you saw him?'",
-        answers: ["Did you see him?"]
+        type: "radio",
+        question: "Which verb tense is created by combining the auxiliary 'have' with the past participle of the main verb?",
+        answers: [
+            ["Present perfect", true, "Correct! (e.g., I have eaten)."],
+            ["Past simple", false, "Wrong."],
+            ["Future simple", false, "Wrong."]
+        ]
     },
     9: {
-        type: "radio",
-        question: "In the present perfect continuous, 'have' is followed by 'been'. What follows 'been'?",
+        type: "checkbox",
+        question: "The infinitive form of the principal combines with which auxiliary verb? Tick all that apply.",
         answers: [
-            ["The -ing form (e.g., working)", true, "Correct! 'I have been working'."],
-            ["The infinitive", false, "Wrong."]
+            ["Do (do, does, did)", true, "Correct! (e.g., I do go, She does see)."],
+            ["Be (am, is, are, was, were)", false, "Wrong. (e.g. 'I am see', 'She was go' are not valid)"],
+            ["Have (have, has, had)", false, "Wrong (e.g. 'I have go', 'She has see' are not valid)."],
+            ["Modal verbs (can, could, may, might, shall, should, will, would)", true, "Correct! (e.g., I can go, She should see)."]
         ]
     },
     10: {
@@ -6139,23 +6310,64 @@ export const exerciseData = {
         question: "Identify the INCORRECT combinations:",
         answers: [
             ["I have ate", true, "Incorrect. Should be 'I have eaten'."],
+            ["They have tasting", true, "Incorrect. Should be 'They have tasted'."],
             ["He was seen", false, "Correct."],
             ["They might coming", true, "Incorrect. Should be 'They might come'."],
-            ["We are done", false, "Correct."]
+            ["We are doing", false, "Correct."]
         ]
     },
     11: {
         type: "radio",
-        question: "True or False: The auxiliary 'do' is only used with the base infinitive form of a verb.",
+        question: "True or False: The auxiliary 'do' is only used in combination with the infinitive form of a verb.",
         answers: [
-            ["True", true, "Correct!"],
+            ["True", true, "Correct! This results in the present simple tense"],
             ["False", false, "Wrong."]
         ]
     },
     12: {
-        type: "text_multi",
-        question: "Correct the sentence: 'She has already do it.'",
-        answers: ["She has already done it"]
+        type: "radio",
+        question: "Modal verbs (can, could, may, might, shall, should, will, would) are used to express necessity, possibility, permission, or ability. Which of the forms of the principal verb do they combine with?",
+        answers: [
+            ["Infinitive only", true, "Correct! Modal verbs are followed by the infinitive form of the principal verb."],
+            ["Infinitive and Past participle", false, "Wrong. Modal verbs are not followed by the past participle."],
+            ["Infinitive and gerund (-ing)", false, "Wrong. Modal verbs are not followed by the gerund form."],
+        ]
+    },
+    13: {
+        type: "radio",
+        question: "True or false: tenses are made by combining one auxiliary verb (there are about 12 of them) with the main verb in one of three forms (infinitive, past participle, gerund (-ing))?",
+        answers: [
+            ["True", true, "Correct!"],
+            ["False", false, "Wrong."]
+        ]
+    }, 
+    14: {
+        type: "radio",
+        question: "The gerund (-ing) form of the principal verb is used in continuous tenses to indicate ongoing actions. What is the only auxiliary verb that can combine with it?",
+        answers: [
+            ["Be (am, is, are, was, were)", true, "Correct! (e.g., I am working, We were dancing)."],
+            ["Have (have, has, had)", false, "Wrong ('I have working', 'I should working' and 'I did working' are all impossible)."],
+            ["Do (do, does, did)", false, "Wrong. 'I do working', 'I did working' and 'I should working' are all impossible."]
+        ]
+},
+15: {
+        type: "checkbox",
+        question: "The past participle form of the principal verb is used in perfect tenses to indicate the completion of an action. What are the auxiliary verbs that can combine directly with it?",
+        answers: [
+            ["Do (do, does, did)", false, "Wrong. (e.g., 'I do eaten' is incorrect)."],
+            ["Have (have, has, had)", true, "Correct! (e.g., I have eaten, She has finished, I had taken)."],
+            ["Be (am, is, are, was, were)", true, "Correct! This results in passive voice conjugations (e.g. 'It is done', 'They were seen')."],
+            ["Modal verbs (can, could, will, would)", false, "Wrong. (e.g., 'I can eaten' is incorrect)."]
+        ]
+    },
+    16: {
+        type: "radio",
+        question: "Why do we say that the auxiliary verb is 'hidden' in the positive (declarative) form of the past simple tense?",
+        answers: [
+            ["Because the past simple uses the principal verb directly without an auxiliary in positive statements.", true, "Correct! The auxiliary 'did' is only used in negatives and questions."],
+            ["Because the auxiliary verb is always omitted in English.", false, "Wrong. The auxiliary is only 'hidden' in the past simple positive form."],
+            ["Because the past simple never uses auxiliaries.", false, "Wrong. The auxiliary 'did' is used in negatives and questions, but is 'hidden' in positive statements."]
+        ]
     }
 },
 
@@ -6186,9 +6398,12 @@ export const exerciseData = {
         ]
     },
     4: {
-        type: "text_multi",
-        question: "If admission is free, you '____ ____ ____ pay'.",
-        answers: ["don't have to", "do not have to"]
+        type: "radio",
+        question: "Why do French speakers often use 'don't have to' instead of 'must not' to express prohibition?",
+        answers: [
+            ["Because French is a more expressive language.", false, "Wrong. This is a made-up explanation."],
+            ["Because 'don't have to' seems like a direct translation of the French 'tu ne dois pas', which expresses both prohibition and lack of obligation.", true, "Correct! French speakers often use 'don't have to' due to this direct translation." ]
+        ]
     },
     5: {
         type: "radio",
@@ -6214,17 +6429,12 @@ export const exerciseData = {
             ["Needn't", false, "Wrong. 'Needn't' is like 'don't have to'."]
         ]
     },
-    8: {
-        type: "text_multi",
-        question: "Correct the error: 'You don't have to touch that wire! It's dangerous!'",
-        answers: ["You must not touch", "You can't touch", "You mustn't touch"]
-    },
     9: {
         type: "radio",
         question: "Which sentence describes a choice?",
         answers: [
             ["You don't have to come if you're tired.", true, "Correct!"],
-            ["You must not come if you're tired.", false, "Wrong. (That's a prohibition)."]
+            ["You must not come if you're tired.", false, "Wrong. (That's a prohibition-- no choice)."]
         ]
     },
     10: {
@@ -6236,19 +6446,6 @@ export const exerciseData = {
             ["You can't use your phone during the exam.", true, "Correct!"]
         ]
     },
-    11: {
-        type: "radio",
-        question: "Does 'don't have to' mean the same as French 'ne pas devoir'?",
-        answers: [
-            ["No. In French 'ne pas devoir' often means prohibition, but in English 'don't have to' never does.", true, "Correct!"],
-            ["Yes, they are identical.", false, "Wrong."]
-        ]
-    },
-    12: {
-        type: "text_multi",
-        question: "Fix this: 'In soccer, you don't have to touch the ball with your hands.'",
-        answers: ["you must not touch", "you mustn't touch", "you can't touch"]
-    }
 },
 
 // 0412 Would in Condition Clause
@@ -6258,15 +6455,15 @@ export const exerciseData = {
         question: "In an 'If' clause (the condition), should you use 'would'?",
         answers: [
             ["No, use the past simple (for 2nd conditional).", true, "Correct! 'If I were', not 'If I would be'."],
-            ["Yes, it makes it more polite.", false, "Wrong."]
+            ["Yes, it makes it clearer.", false, "Wrong."]
         ]
     },
     2: {
         type: "radio",
         question: "Which part of the sentence usually contains 'would'?",
         answers: [
-            ["The result clause (e.g., ...I would buy a car).", true, "Correct!"],
-            ["The 'if' clause (e.g., If I would have...).", false, "Wrong."]
+            ["The result/consequence clause (e.g., ...I would buy a car).", true, "Correct!"],
+            ["The 'if' or condition clause (e.g., If I would have...).", false, "Wrong."]
         ]
     },
     3: {
@@ -6280,9 +6477,12 @@ export const exerciseData = {
         ]
     },
     4: {
-        type: "text_multi",
+        type: "radio",
         question: "Correct the error: 'If I would be you, I would go.'",
-        answers: ["If I were you, I would go", "If I was you, I would go"]
+        answers: [
+            ["If I was you, I would go", true, "Correct!"],
+            ["If I would you be, I would go", false, "Wrong."]
+        ]
     },
     5: {
         type: "radio",
@@ -6304,15 +6504,18 @@ export const exerciseData = {
         type: "radio",
         question: "When referring to a hypothetical present, the 'if' clause uses:",
         answers: [
-            ["Past Simple", true, "Correct!"],
-            ["Future with 'will'", false, "Wrong."],
-            ["Would", false, "Wrong."]
+            ["Past Simple", true, "Correct! Example: If I knew her name..."],
+            ["Future with 'will'", false, "Wrong. The 'if' clause should use the past simple for hypothetical present situations."],
+            ["Would", false, "Wrong. The 'if' clause should not use 'would' for hypothetical present situations."]
         ]
     },
     8: {
-        type: "text_multi",
-        question: "Correct the error: 'If I would know her name, I would tell you.'",
-        answers: ["If I knew her name", "If I knew her name, I would tell you"]
+        type: "radio",
+        question: "Why is the past simple form of the verb used in the 'if' clause for hypothetical present situations?",
+        answers: [
+            ["The temporal distance of the past simple is used, in this case, to express a distance from reality.", true, "Correct!"],
+            ["Because of the influence of Latin.", false, "Wrong."]
+        ]
     },
     9: {
         type: "radio",
@@ -6328,40 +6531,30 @@ export const exerciseData = {
         answers: [
             ["If I would have money, I'd go.", true, "Incorrect."],
             ["If I had money, I'd go.", false, "Correct."],
-            ["If you would help me, I'd finish.", true, "Incorrect (should be 'If you helped me')."]
+            ["If I would know, I would tell you.", true, "Incorrect (should be 'If I knew, I would tell you')."]
         ]
     },
-    11: {
-        type: "radio",
-        question: "True or False: Using 'would' in both parts of a conditional is a common error for German speakers because of the 'wenn... würde...' structure.",
-        answers: [
-            ["True", true, "Correct! English requires the past simple in the 'if' part."],
-            ["False", false, "Wrong."]
-        ]
-    },
-    12: {
-        type: "text_multi",
-        question: "Fix this: 'If I would see him, I would say hello.'",
-        answers: ["If I saw him, I would say hello", "If I saw him"]
-    }
+
 },
 
 // 0415 Will vs Want
 "0415": {
     1: {
         type: "radio",
-        question: "Which word expresses a desire (I want to)?",
+        question: "Which word expresses a desire, and which word an intention?",
         answers: [
-            ["Want", true, "Correct!"],
-            ["Will", false, "Wrong. 'Will' is for the future."]
+            ["Want expresses a desire, will expresses an intention.", true, "Correct! Want expresses desires."],
+            ["Want expresses an intention, will expresses a desire.", false, "Wrong. 'Will' is for the future and expresses intention."]
         ]
     },
     2: {
         type: "radio",
         question: "What does 'I will go' mean?",
         answers: [
-            ["I am going in the future (future tense).", true, "Correct!"],
-            ["I want to go (desire).", false, "Wrong. This is a common confusion with German 'will'."]
+            ["je veux aller // ich will gehen", false, "Wrong. These are translated as 'I want to go' in English."],
+            ["j'irai // ich werde gehen", true, "Correct! These are translated as 'I will go' in English."],
+            ["j'irais // ich würde gehen", false, "Wrong. These are translated as 'I would go' in English."]
+
         ]
     },
     3: {
@@ -6375,8 +6568,8 @@ export const exerciseData = {
     },
     4: {
         type: "text_multi",
-        question: "How do you say 'Je veux manger' in English?",
-        answers: ["I want to eat", "I would like to eat"]
+        question: "How do you say 'Je veux manger' in English?: 'I ______________ eat.",
+        answers: ["want to", "would like to", "'d like to", "I want to eat", "I would like to eat"]
     },
     5: {
         type: "radio",
@@ -6403,16 +6596,19 @@ export const exerciseData = {
         ]
     },
     8: {
-        type: "text_multi",
-        question: "Correct the error: 'I will a pizza.' (Meaning: I want to order/eat one)",
-        answers: ["I want a pizza", "I'll have a pizza", "I would like a pizza"]
+        type: "radio",
+        question: "Can the French 'je veux ceci' be translated as 'I would this' in English?",
+        answers: [
+            ["No. 'Je veux ceci' should be translated as 'I want this' in English.", true, "Correct!"],
+            ["Yes, it can.", false, "Wrong. 'Je veux ceci' should be translated as 'I want this' in English."]
+        ]
     },
     9: {
         type: "radio",
-        question: "Which word functions as a future auxiliary?",
+        question: "Is 'want' an auxiliary verb?",
         answers: [
-            ["Will", true, "Correct!"],
-            ["Want", false, "Wrong."]
+            ["No, it is a principal verb like any other: jump, sing, dance...", true, "Correct!"],
+            ["Yes, it is, like 'can' or 'must'.", false, "Wrong. 'Want' is a normal principal verb."]
         ]
     },
     10: {
@@ -6426,32 +6622,34 @@ export const exerciseData = {
     },
     11: {
         type: "radio",
-        question: "True or False: 'I would' is sometimes used for desire (I would like), but 'will' is purely for the future/intention.",
+        question: "True or False: The polite way to express desire in English is using 'I would like' instead of 'I want'.",
         answers: [
             ["True", true, "Correct!"],
             ["False", false, "Wrong."]
         ]
     },
     12: {
-        type: "text_multi",
-        question: "Correct: 'I will to stay home because I'm tired.' (Meaning: I want to)",
-        answers: ["I want to stay home", "I'd like to stay home"]
-    }
+        type: "radio",
+        question: "True or False: 'I would like' is translated as 'je veux aimer' in French.",
+        answers: [
+            ["True", false, "Wrong. 'I would like' is translated as 'je voudrais' or 'jaimerais' in French."],
+            ["False", true, "Correct! 'I would like' is translated as 'je voudrais' or 'jaimerais' in French."]
+        ]
+    },
 },
-
 // 0416 Will in 2nd Conditional
 "0416": {
     1: {
         type: "radio",
-        question: "In a 2nd conditional (hypothetical), what word belongs in the result clause?",
+        question: "What is a 2nd conditional sentence?",
         answers: [
-            ["Would", true, "Correct! (e.g., I would go)."],
-            ["Will", false, "Wrong. 'Will' is for real possibilities in the future (1st conditional)."]
+            ["A sentence describing an imaginary or unlikely situation, using 'if' + past tense and 'would' in the result clause.", true, "Correct!"],
+            ["A sentence describing a real possibility in the future, using 'if' + present tense and 'will' in the result clause.", false, "Wrong. That's a 1st conditional sentence."]
         ]
     },
     2: {
         type: "radio",
-        question: "Which is a correct 2nd conditional sentence?",
+        question: "Which is a correct 2nd conditional sentence (hypothetical situation)?",
         answers: [
             ["If I had time, I would help you.", true, "Correct!"],
             ["If I had time, I will help you.", false, "Wrong. You can't mix past 'had' with future 'will'."]
@@ -6469,7 +6667,7 @@ export const exerciseData = {
     4: {
         type: "text_multi",
         question: "Correct the error: 'If I was rich, I will buy a mansion.'",
-        answers: ["I would buy a mansion", "would buy"]
+        answers: ["I would buy a mansion", "I would buy", "would buy", "I'd buy", "Id buy"]
     },
     5: {
         type: "radio",
@@ -6526,12 +6724,14 @@ export const exerciseData = {
         ]
     },
     12: {
-        type: "text_multi",
-        question: "Correct: 'If I won, I will share the prize.'",
-        answers: ["If I won, I would share", "I would share the prize"]
-    }
+        type: "radio",
+        question: "If the past tense is used in the 2nd conditionl, does that mean the entire sentence takes place in the past?",
+        answers: [
+            ["Yes. The use of the past obviously places the time of the action in the past.", false, "Wrong. This is a different application of past forms."],
+            ["No. The past tense in the 'if' clause actually expresses the unreality of the condition.", true, "Correct! This is a non-temporal use of the past simple form."]
+        ]
+    },
 },
-
 // 0417 Past in Result Clause (2nd Conditional)
 "0417": {
     1: {
@@ -6547,7 +6747,7 @@ export const exerciseData = {
         question: "Which is correct?",
         answers: [
             ["If I were king, I would make a law.", true, "Correct!"],
-            ["If I were king, I made a law.", false, "Wrong. 'Made' is past simple, not a hypothetical result."]
+            ["If I were king, I made a law.", false, "Wrong. 'Made' is past simple, so it cannot be a hypothetical result."]
         ]
     },
     3: {
@@ -6562,22 +6762,22 @@ export const exerciseData = {
     4: {
         type: "text_multi",
         question: "Correct the error: 'If I had a car, I drove to work.'",
-        answers: ["I would drive to work", "would drive"]
+        answers: ["I would drive to work", "I would drive to work", "I would drive", "Id drive", "i'd drive"]
     },
     5: {
         type: "radio",
         question: "Where does the 'past simple' belong in a conditional sentence?",
         answers: [
             ["Only in the 'if' clause (condition).", true, "Correct!"],
-            ["Only in the result clause.", false, "Wrong."],
+            ["Only in the result/consequence clause.", false, "Wrong."],
             ["In both parts.", false, "Wrong."]
         ]
     },
     6: {
         type: "radio",
-        question: "Fill in the blank: 'If she found her keys, she ______ leave.'",
+        question: "Fill in the blank: 'If she found her keys, she ______ .'",
         answers: [
-            ["would", true, "Correct!"],
+            ["would leave", true, "Correct!"],
             ["left", false, "Wrong."]
         ]
     },
@@ -6589,14 +6789,9 @@ export const exerciseData = {
             ["Yes.", false, "Wrong."]
         ]
     },
-    8: {
-        type: "text_multi",
-        question: "Correct the sentence: 'If I won, I traveled around the world.'",
-        answers: ["I would travel around the world", "would travel"]
-    },
     9: {
         type: "radio",
-        question: "Which describes a hypothetical result?",
+        question: "Which describes a hypothetical result or consequence?",
         answers: [
             ["I would call you.", true, "Correct!"],
             ["I called you.", false, "Wrong."]
@@ -6604,26 +6799,14 @@ export const exerciseData = {
     },
     10: {
         type: "checkbox",
-        question: "Identify correct conditional results:",
+        question: "Identify correct conditional results or consequences:",
         answers: [
             ["...it would be great.", true, "Correct!"],
             ["...it was great.", false, "Wrong."],
             ["...they would enjoy it.", true, "Correct!"]
         ]
     },
-    11: {
-        type: "radio",
-        question: "True or False: The 'result' clause is about what *would* happen, so it must use 'would'.",
-        answers: [
-            ["True", true, "Correct!"],
-            ["False", false, "Wrong."]
-        ]
-    },
-    12: {
-        type: "text_multi",
-        question: "Fix this: 'If we had more money, we bought a boat.'",
-        answers: ["we would buy a boat", "would buy"]
-    }
+
 },
 
 // 0420 Irregular Verb Form
@@ -6648,8 +6831,8 @@ export const exerciseData = {
         type: "checkbox",
         question: "Which of these irregular forms are correct?",
         answers: [
-            ["Fall -> Fell", true, "Correct!"],
-            ["Feel -> Felt", true, "Correct!"],
+            ["Fall -> Felt", false, "Wrong (Fell)!"],
+            ["Bring -> Brang", true, "Correct!"],
             ["Write -> Writed", false, "Wrong (Wrote)."],
             ["Bring -> Brought", true, "Correct!"]
         ]
@@ -6690,10 +6873,10 @@ export const exerciseData = {
     },
     9: {
         type: "radio",
-        question: "Which is the past of 'teach'?",
+        question: "Which is the past of 'buy'?",
         answers: [
-            ["Taught", true, "Correct!"],
-            ["Teached", false, "Wrong."]
+            ["Bought", true, "Correct!"],
+            ["Boughten", false, "Wrong."]
         ]
     },
     10: {
@@ -6717,7 +6900,25 @@ export const exerciseData = {
         type: "text_multi",
         question: "Write the past simple of 'think':",
         answers: ["thought"]
-    }
+    }, 
+    13:{
+        type: "radio",
+        question: "True or False: 'By memorizing the forms of around 80 irregular verbs, you can have the superpower of saying almost anything in English.'",
+        answers: [
+            ["True", true, "Correct!"],
+            ["False", false, "Wrong."]
+        ]
+},
+14: {
+    type: "checkbox",
+    question: "Select all of the skills I can use if I know the English irregular verbs.",
+    answers: [
+        ["Talk about past actions confidently; telling anecdotes", true, "Correct!"],
+        ["Talk about hyptothetical situations", true, "Correct!"],
+        ["Criticize past actions", true, "Correct! Using past modals."],
+        ["Describe processes", true, "Correct! Through use of the passive voice."],
+        ["Also raise my level of German", false, "Not really. Sorry!"]]
+}
 },
 
 // 0424 Pres Cont Overuse (vs Simple)
@@ -6750,14 +6951,14 @@ export const exerciseData = {
     4: {
         type: "text_multi",
         question: "Correct the error: 'I am taking the bus on Fridays.'",
-        answers: ["I take the bus on Fridays", "I take the bus"]
+        answers: ["I take the bus on Fridays", "I take the bus", "I take", "take"]
     },
     5: {
         type: "radio",
-        question: "When should you NOT use '-ing'?",
+        question: "When should you NOT use present continuous?",
         answers: [
             ["For repeated, permanent situations.", true, "Correct!"],
-            ["For actions happening right now.", false, "Wrong."]
+            ["For actions happening right now.", false, "Wrong. That's precisely when you need it."]
         ]
     },
     6: {
@@ -6765,7 +6966,7 @@ export const exerciseData = {
         question: "Fill in the blank: 'He ______ in a bank.' (permanent job)",
         answers: [
             ["works", true, "Correct!"],
-            ["is working", false, "Wrong (unless it is only a temporary project)."]
+            ["is working", false, "Wrong (unless it is only a temporary state)."]
         ]
     },
     7: {
@@ -6776,16 +6977,11 @@ export const exerciseData = {
             ["Water is boiling at 100 degrees.", false, "Wrong."]
         ]
     },
-    8: {
-        type: "text_multi",
-        question: "Correct the sentence: 'I'm usually waking up at 7.'",
-        answers: ["I usually wake up at 7", "I wake up at 7"]
-    },
     9: {
         type: "radio",
-        question: "Is 'She's always coming late' an exception?",
+        question: "Is 'She's always coming late. It's annoying!' an exception?",
         answers: [
-            ["Yes, 'always + -ing' is used to express annoyance.", true, "Correct!"],
+            ["Yes, 'always + -ing' is used to express annoyance at repeated actions.", true, "Correct!"],
             ["No, it's just wrong.", false, "Wrong."]
         ]
     },
@@ -6800,7 +6996,7 @@ export const exerciseData = {
     },
     11: {
         type: "radio",
-        question: "True or False: Present continuous is for temporary actions; Present simple is for permanent ones.",
+        question: "True or False: Present continuous is for temporary actions; Present simple is for permanent or regular ones.",
         answers: [
             ["True", true, "Correct!"],
             ["False", false, "Wrong."]
@@ -6809,7 +7005,7 @@ export const exerciseData = {
     12: {
         type: "text_multi",
         question: "Fix this: 'I am living in Switzerland.' (if you mean permanently)",
-        answers: ["I live in Switzerland"]
+        answers: ["I live in Switzerland", "I live", "live"]
     }
 },
 
@@ -6843,7 +7039,7 @@ export const exerciseData = {
     4: {
         type: "text_multi",
         question: "Correct the error: 'Listen! The phone rings.'",
-        answers: ["The phone is ringing"]
+        answers: ["The phone is ringing", "is ringing"]
     },
     5: {
         type: "radio",
@@ -6871,8 +7067,8 @@ export const exerciseData = {
     },
     8: {
         type: "text_multi",
-        question: "Correct the sentence: 'At the moment, he works in the garden.'",
-        answers: ["At the moment, he is working in the garden", "he is working"]
+        question: "Complete the sentence: 'At the moment, he ___________ in the garden.'",
+        answers: ["is working", "s working", "'s working"]
     },
     9: {
         type: "radio",
@@ -6899,13 +7095,7 @@ export const exerciseData = {
             ["False", false, "Wrong."]
         ]
     },
-    12: {
-        type: "text_multi",
-        question: "Fix this: 'The weather changes as we speak.'",
-        answers: ["The weather is changing"]
-    }
 },
-
 // 0426 Pres Cont State Verbs
 "0426": {
     1: {
@@ -6931,13 +7121,13 @@ export const exerciseData = {
             ["I am wanting a sandwich.", true, "Incorrect. Should be 'I want'."],
             ["She is owning a car.", true, "Incorrect. Should be 'She owns'."],
             ["He is understanding me.", true, "Incorrect. Should be 'He understands'."],
-            ["I am thinking.", false, "Correct. (Thinking is an mental action, but 'thinking that' for an opinion is a state)."]
+            ["I am joking.", false, "Correct. (Joking is an action, not a state)."]
         ]
     },
     4: {
         type: "text_multi",
         question: "Correct the error: 'I am needing your help.'",
-        answers: ["I need your help", "I need"]
+        answers: ["I need your help", "I need", "need"]
     },
     5: {
         type: "radio",
@@ -6964,9 +7154,12 @@ export const exerciseData = {
         ]
     },
     8: {
-        type: "text_multi",
-        question: "Correct the sentence: 'She is believing in ghosts.'",
-        answers: ["She believes in ghosts"]
+        type: "radio",
+        question: "What is a state verb?",
+        answers: [
+            ["A verb that describes a state rather than an action.", true, "Correct!"],
+            ["A verb that describes an action.", false, "Wrong. State verbs describe conditions or situations, not actions."]
+        ]
     },
     9: {
         type: "radio",
@@ -6987,34 +7180,41 @@ export const exerciseData = {
     },
     11: {
         type: "radio",
-        question: "Is 'I am having a party' correct?",
+        question: "How are state verbs used when the time frame is 'right now'?",
         answers: [
-            ["Yes, because 'have' here is an action (hosting), not possession.", true, "Correct!"],
-            ["No.", false, "Wrong."]
+            ["They are usually used in the simple tense, even when the time frame is 'right now'.", true, "Correct!"],
+            ["They are usually used in the continuous tense, like any other verb.", false, "Wrong. State verbs typically do not appear in the continuous tense."]
         ]
     },
     12: {
-        type: "text_multi",
-        question: "Fix this: 'I am hearing you clearly.'",
-        answers: ["I hear you clearly", "I can hear you"]
-    }
+        type: "checkbox",
+        question: "Identify the categories of state verbs: (tick all that apply)",
+        answers: [
+            ["Verbs of perception (see, hear, smell, taste, feel)", true, "Correct!"],
+            ["Verbs of preference (like, love, hate)", true, "Correct!"],
+            ["Verbs of possession (have, own, belong)", true, "Correct!"],
+            ["Action verbs (run, jump, write)", false, "Wrong. Action verbs are not state verbs."],
+            ["Mental state verbs (know, believe, think)", true, "Correct!"]
+        ]
+},
 },
 
-// 0430 Pres Simple Overuse (vs Present Perfect)
+// 0430 Pres Simple or present continuous Overuse (vs Present Perfect)
 "0430": {
     1: {
         type: "radio",
         question: "Which tense describes an action that started in the past and is still true now?",
         answers: [
+            ["Present Continuous (I am living)", false, "Wrong. 'I am living' is limited to actions happening right now."],
             ["Present Perfect (I have lived)", true, "Correct!"],
-            ["Present Simple (I live)", false, "Wrong. 'I live' doesn't specify the duration."]
+            ["Present Simple (I live)", false, "Wrong. 'I live' expresses an action that is generally true, not one that started in the past and continues to the present."]
         ]
     },
     2: {
         type: "radio",
-        question: "Is 'I am a teacher since 20 years' correct?",
+        question: "Is 'I am a teacher since 2017' correct?",
         answers: [
-            ["True", false, "Wrong. Should be 'I have been a teacher for 20 years'."],
+            ["True", false, "Wrong. Should be 'I have been a teacher since 2017'."],
             ["False", true, "Correct!"]
         ]
     },
@@ -7028,9 +7228,12 @@ export const exerciseData = {
         ]
     },
     4: {
-        type: "text_multi",
-        question: "Correct the error: 'I live here since 2010.'",
-        answers: ["I have lived here since 2010", "I've lived here since 2010"]
+        type: "radio",
+        question: "Correct the error: 'I am living here since 2013.'",
+        answers: [
+            ["I've lived here since 2013", true, "Correct!"],
+            ["I live here since 2013", false, "Wrong. The present simple is not used with 'since' for actions that started in the past and continue to the present."],
+        ]
     },
     5: {
         type: "radio",
@@ -7057,9 +7260,12 @@ export const exerciseData = {
         ]
     },
     8: {
-        type: "text_multi",
-        question: "Correct the sentence: 'We are friends since we were kids.'",
-        answers: ["We have been friends since we were kids"]
+        type: "radio",
+        question: "The -ing ending in 'I am living' suggests a duration. Why can't it be used with 'since' for actions that started in the past and continue to the present?'",
+        answers: [
+            ["Because the duration of the present continuous is limited to the present moment.", true, "Correct!"],
+            ["It actually can be used with 'since'.", false, "Wrong. The present continuous is not used with 'since' for actions that started in the past and continue to the present."]
+        ]
     },
     9: {
         type: "radio",
@@ -7087,9 +7293,13 @@ export const exerciseData = {
         ]
     },
     12: {
-        type: "text_multi",
-        question: "Fix this: 'The climate changes since the industrial revolution.'",
-        answers: ["The climate has been changing", "The climate has changed"]
+        type: "radio",
+        question: "What is the correct translation of 'je vis ici depuis 2013' // 'ich wohne hier seit 2013'?",
+        answers: [
+            ["I have lived here since 2013.", true, "Correct!"],
+            ["I am living here since 2013.", false, "Wrong. The present continuous is not used with 'since' for actions that started in the past and continue to the present."],
+            ["I live here since 2013.", false, "Wrong. The present simple is not used with 'since' for actions that started in the past and continue to the present."]
+        ]
     }
 },
 
@@ -7120,11 +7330,6 @@ export const exerciseData = {
             ["Have you ever seen a whale?", true, "Correct!"]
         ]
     },
-    4: {
-        type: "text_multi",
-        question: "Instead of 'I did it already', say: '____ ____ ____ ____.'",
-        answers: ["I have already done it", "I've already done it"]
-    },
     5: {
         type: "radio",
         question: "Fill in the blank: 'We ______ that movie three times so far.'",
@@ -7149,31 +7354,26 @@ export const exerciseData = {
             ["I finished my homework!", false, "Wrong (in British English especially)."]
         ]
     },
-    8: {
-        type: "text_multi",
-        question: "Correct the sentence: 'I was in London many times.'",
-        answers: ["I have been to London many times"]
-    },
     9: {
         type: "radio",
         question: "Is 'Did you ever hear this song?' correct?",
         answers: [
-            ["It's better as 'Have you ever heard...'.", true, "Correct!"],
+            ["'Have you ever heard...' is a better option.", true, "Correct!"],
             ["Yes.", false, "Wrong."]
         ]
     },
     10: {
         type: "checkbox",
-        question: "Identify the correct indefinite past sentences:",
+        question: "Identify the correct indefinite or unfinished past sentences:",
         answers: [
-            ["He has just arrived.", true, "Correct!"],
-            ["He arrived just now.", false, "Wrong (requires past simple)."],
-            ["She has never tried sushi.", true, "Correct!"]
+            ["He has just arrived.", true, "Correct! (indefinite past >> present perfect is preferred)."],
+            ["He practiced since he was 5.", true, "Correct! (unfinished past >> present perfect is preferred)."],
+            ["She has never tried sushi.", true, "Correct! (indefinite past >> present perfect is preferred)."]
         ]
     },
     11: {
         type: "radio",
-        question: "True or False: The present perfect is used when the result of the past action is relevant to the present.",
+        question: "True or False: The present perfect is used when the result of the past action is relevant to the present, and the specific time is not mentioned.",
         answers: [
             ["True", true, "Correct!"],
             ["False", false, "Wrong."]
@@ -7182,8 +7382,16 @@ export const exerciseData = {
     12: {
         type: "text_multi",
         question: "Fix this: 'I lost my keys!' (meaning you don't have them now)",
-        answers: ["I have lost my keys", "I've lost my keys"]
-    }
+        answers: ["I have lost my keys", "I've lost my keys", "Ive lost", "I have lost", "I've lost"]
+    },
+    13: {
+        type: "radio",
+        question: "When do we use the present perfect tense?",
+        answers: [
+            ["When the time of the action is finished and specifically mentioned.", false, "Wrong. This is when we use past simple."],
+            ["When the time of the action is indefinite or unfinished (not closed), so it has an impact on the present.", true, "Correct!"]
+        ]
+    },
 },
 
 // 0433 Pres Perfect Simple vs Continuous

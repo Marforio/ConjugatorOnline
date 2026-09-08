@@ -401,11 +401,18 @@ export const errorsData: Record<string, ErrorEntry> = {
         "examples": "do not make errors such as 'I were not happy' and 'They was not very good'"
     },
     "0310":{
-        "short_slug": "pres-simple-s'",
+        "short_slug": "pres-simple-s",
         "description": "forgetting to add -s to a present simple verb in the 3rd person singular",
         "reference": "<a href='https://book.language-labs.ch/ch3#e0310' target='_blank'>error 0310</a>",
         "recommendation": "remember pronouns 'he', 'she', and 'it' require an -s ending in the present simple",
         "examples": "say 'he runs, it doesn't work, she does not go', etc."
+    },
+    "0319":{
+        "short_slug": "standard-positive-form",
+        "description": "missing auxiliary verb in the standard positive form",
+        "reference": "<a href='https://book.language-labs.ch/ch3#e0319' target='_blank'>error 0319</a>",
+        "recommendation": "remember that the standard positive form is 'S A P'. An auxiliary verb is needed.",
+        "examples": "say 'I going', 'he done', etc."
     },
     "0320":{
         "short_slug": "standard-negative-form",
@@ -527,11 +534,11 @@ export const errorsData: Record<string, ErrorEntry> = {
         "examples": "avoid saying 'She was ownning two houses' or 'I am believing in aliens'"
     },
     "0430":{
-        "short_slug": "pres-simple-overuse-pperf",
-        "description": "overuse of the present simple in present perfect situations",
+        "short_slug": "pres-simple-or-pres-cont-overuse-pperf",
+        "description": "overuse of the present simple or present continuous in present perfect situations",
         "reference": "<a href='https://book.language-labs.ch/ch4#e0430' target='_blank'>error 0430</a>",
-        "recommendation": "in English, we rarely use the present simple to describe actions that began in the past and continue until today; this is the job of the present perfect tense",
-        "examples": "say 'I have lived here since 2013', not 'I live here since 2013'"
+        "recommendation": "in English, we rarely use the present simple or present continuous to describe actions that began in the past and continue until today; this is the job of the present perfect tense",
+        "examples": "say 'I have lived here since 2013', not 'I am living here since 2013' or even 'I live here since 2013'"
     },
     "0432":{
         "short_slug": "past-simple-overuse-pperf",
@@ -540,10 +547,10 @@ export const errorsData: Record<string, ErrorEntry> = {
         "recommendation": "remember that English has a specific verb tense for unfinished or indefinite past time, and it's not the past simple",
         "examples": "try to say 'I have done this already', instead of 'I did it already'; and 'I've been there many times', not 'I was there many times'"
     },
-        "0433":{
+    "0433":{
         "short_slug": "pperf-continuous",
         "description": "incorrect choice between present perfect simple and present perfect continuous",
-        "reference": "<a href='https://book.language-labs.ch/ch4#e0433' target='_blank'>error 0432</a>",
+        "reference": "<a href='https://book.language-labs.ch/ch4#e0433' target='_blank'>error 0433</a>",
         "recommendation": "remember that the present perfect continuous is used to emphasize the duration of an ongoing action, while the present perfect simple is used to emphasize the completion or result of an action",
         "examples": "'I have been working here for five years' (emphasizing duration) vs 'I have worked here for five years' (emphasizing completion)"
     },
