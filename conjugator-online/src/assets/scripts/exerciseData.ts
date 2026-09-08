@@ -1125,17 +1125,9 @@ export const exerciseData = {
             ["I saw a unicorn.", true, "Correct! The 'u' in unicorn is pronounced as a consonant 'y' sound."]
         ]
     },
-    5: {
-        type: "radio",
-        question: "What is the correct article for the word 'hour'?",
-        answers: [
-            ["A hour", false, "Wrong. The 'h' is silent, so the word starts with a vowel sound."],
-            ["An hour", true, "Correct! Because the 'h' is silent, we hear the vowel sound 'ou', so we use 'an'."]
-        ]
-    },
     6: {
         type: "checkbox",
-        question: "Which of these 'u' words correctly use 'a' because they start with a 'y' sound?",
+        question: "Which of the fragments below is correct (hint: 'u' sounds like 'you')",
         answers: [
             ["A unit", true, "Correct! 'Unit' sounds like 'yu-nit'."],
             ["A umbrella", false, "Wrong. 'Umbrella' starts with a vowel sound (uh-mbrella), so it needs 'an'."],
@@ -1175,7 +1167,7 @@ export const exerciseData = {
     },
     11: {
         type: "checkbox",
-        question: "Identify the INCORRECT pairs:",
+        question: "Identify the INCORRECT article-noun pairs:",
         answers: [
             ["An horse", true, "Incorrect. 'Horse' has a voiced 'h', so it should be 'a horse'."],
             ["A egg", true, "Incorrect. 'Egg' starts with a vowel sound, so it should be 'an egg'."],
@@ -1202,7 +1194,7 @@ export const exerciseData = {
     },
     2: {
         type: "checkbox",
-        question: "Which of these common 'h' words correctly use 'a'?",
+        question: "Which of these is CORRECT?",
         answers: [
             ["A hotel", true, "Correct! The 'h' is voiced, so 'an hotel' is incorrect."],
             ["A history book", true, "Correct! 'History' starts with a voiced consonant sound."],
@@ -1247,7 +1239,7 @@ export const exerciseData = {
     7: {
         type: "text_multi",
         question: "Correct this sentence: 'It was an hard test.'",
-        answers: ["It was a hard test", "a hard test"]
+        answers: ["a","It was a hard test", "a hard test"]
     },
     8: {
         type: "radio",
@@ -1335,8 +1327,8 @@ export const exerciseData = {
     },
     8: {
         type: "text_multi",
-        question: "Correct this sentence: 'The English is a difficult language.'",
-        answers: ["English is a difficult language", "English is difficult"]
+        question: "Correct this sentence: 'The English is an easy language.'",
+        answers: ["English is an easy language", "English is easy", "English", "English is", "English is..."]
     },
     9: {
         type: "radio",
@@ -1356,18 +1348,18 @@ export const exerciseData = {
     },
     11: {
         type: "checkbox",
-        question: "Which of these categories usually do NOT take 'the' when used generally?",
+        question: "Which of these categories usually DO take 'the' when used generally?",
         answers: [
-            ["Languages (e.g., French, Japanese)", true, "Correct!"],
-            ["Academic subjects (e.g., History, Math)", true, "Correct!"],
-            ["Specific rivers (e.g., Nile, Thames)", false, "Wrong. Rivers actually DO take 'the'."],
-            ["Sports (e.g., Football, Tennis)", true, "Correct!"]
+            ["Languages (e.g., French, Japanese)", false, "Wrong. Languages generally do not take 'the'."],
+            ["Academic subjects (e.g., History, Math)", false, "Wrong. Academic subjects generally do not take 'the'."],
+            ["Specific rivers (e.g., Nile, Thames)", true, "Correct! Rivers with names actually DO take 'the'."],
+            ["Sports (e.g., Football, Tennis)", false, "Wrong. Sports generally do not take 'the'."]
         ]
     },
     12: {
         type: "text_multi",
-        question: "Fix the error: 'The People are often afraid of change.'",
-        answers: ["People are often afraid of change", "People are often afraid"]
+        question: "Fix the error: 'The people are often afraid of change.'",
+        answers: ["people", "no the", "people are", "people are...","People are often afraid of change", "People are often afraid"]
     }
 },
 // 0164 Incorrect use of the definite article 'the' with a country name
@@ -1443,9 +1435,9 @@ export const exerciseData = {
     },
     9: {
         type: "radio",
-        question: "Which of these is correct for the country of the Maldives?",
+        question: "Which of these is correct: 'Maldives / the Maldives'?",
         answers: [
-            ["The Maldives are islands.", true, "Correct! Because it is a plural name (islands), it takes 'the'."],
+            ["The Maldives are islands.", true, "Correct! Because it is a plural name ('islands' is implied), it takes 'the'."],
             ["Maldives are islands.", false, "Wrong. Plural island-group countries require 'the'."]
         ]
     },
@@ -1471,15 +1463,15 @@ export const exerciseData = {
     },
     2: {
         type: "radio",
-        question: "Is 'these houses here' correct?",
+        question: "Is this correct: 'theses houses'?",
         answers: [
-            ["True", true, "Correct! 'These' is plural and refers to things that are 'here'."],
-            ["False", false, "Wrong. 'These' is the correct plural form for nearby objects."]
+            ["True", false, "Wrong. 'Theses' incorrectly has a plural -es ending instead of the correct form 'these'."],
+            ["False", true, "Correct! 'These' is the correct plural form for multiple nearby objects."]
         ]
     },
     3: {
         type: "checkbox",
-        question: "Which of these are grammatically incorrect?",
+        question: "Which of these are grammatically INCORRECT?",
         answers: [
             ["This books", true, "Incorrect. 'This' is singular, 'books' is plural."],
             ["Those car", true, "Incorrect. 'Those' is plural, 'car' is singular."],
@@ -1510,6 +1502,7 @@ export const exerciseData = {
         question: "How do you refer to a single object far away?",
         answers: [
             ["That object there", true, "Correct! 'That' is singular and far."],
+            ["Them object there", false, "Wrong. 'Them' is not a valid demonstrative."],
             ["Those object there", false, "Wrong. 'Those' is plural."]
         ]
     },
@@ -1523,7 +1516,7 @@ export const exerciseData = {
     },
     9: {
         type: "radio",
-        question: "Which is correct?",
+        question: "Which is CORRECT?",
         answers: [
             ["This house is mine.", true, "Correct! Singular determiner with singular noun."],
             ["These house is mine.", false, "Wrong. 'These' requires a plural noun."]
@@ -1531,12 +1524,12 @@ export const exerciseData = {
     },
     10: {
         type: "checkbox",
-        question: "Select the correct pairs:",
+        question: "Select the CORRECT pairs:",
         answers: [
-            ["Near + Singular: This", true, "Correct!"],
-            ["Far + Singular: That", true, "Correct!"],
-            ["Near + Plural: These", true, "Correct!"],
-            ["Far + Plural: Those", true, "Correct!"]
+            ["Near + Singular = This", true, "Correct!"],
+            ["Far + Singular = That", true, "Correct!"],
+            ["Near + Plural = These", true, "Correct!"],
+            ["Far + Plural = Those", true, "Correct!"]
         ]
     },
     11: {
@@ -1550,7 +1543,17 @@ export const exerciseData = {
     12: {
         type: "text_multi",
         question: "Correct the error: 'I want that cookies.'",
-        answers: ["I want those cookies", "those cookies"]
+        answers: ["those","I want those cookies", "those cookies"]
+    },
+    13: {
+        type: "radio",
+        question: "This, That, These, and Those are demonstrative determiners. What is a demonstrative determiner?",
+        answers: [
+            ["A cute baby robot", false, "Wrong. Demonstratives are not robots."],
+            ["A word that points to a specific thing in the real world", true, "Correct! Demonstratives indicate which real noun is being referred to."],
+            ["A type of verb", false, "Wrong. Demonstratives are not verbs."],
+            ["A type of adjective", false, "Wrong. While demonstratives can function as adjectives, they are primarily known as determiners."]
+        ]
     }
 },
 
@@ -1561,13 +1564,14 @@ export const exerciseData = {
         question: "Can you use 'some' in a standard negative sentence (e.g., with 'don't')?",
         answers: [
             ["Yes", false, "Wrong. 'Some' is generally replaced by 'any' in negative sentences."],
-            ["No", true, "Correct! We use 'any' for negations."]
+            ["No", true, "Correct! We use 'any' for negations ('don't have any food')."]
         ]
     },
     2: {
-        type: "radio",
-        question: "Which is correct?",
+        type: "checkbox",
+        question: "Which is CORRECT? Tick any that apply.",
         answers: [
+            ["I had no money.", true, "Correct! This is a valid negative sentence without 'any'."],
             ["I didn't have some money.", false, "Wrong. You cannot use 'some' with a negative verb."],
             ["I didn't have any money.", true, "Correct! 'Any' is the correct quantifier for negative sentences."]
         ]
@@ -1575,7 +1579,7 @@ export const exerciseData = {
     3: {
         type: "text_multi",
         question: "Correct this sentence: 'They don't have some food.'",
-        answers: ["They don't have any food", "They have no food"]
+        answers: ["any", "any food", "no", "no food", "They don't have any food", "They have no food"]
     },
     4: {
         type: "radio",
@@ -1589,7 +1593,7 @@ export const exerciseData = {
         type: "checkbox",
         question: "Which of these are WRONG?",
         answers: [
-            ["She doesn't want some help.", true, "Incorrect. Should be 'any help'."],
+            ["She didn't get some help.", true, "Incorrect. Should be 'any help'."],
             ["We didn't see some people.", true, "Incorrect. Should be 'any people'."],
             ["I saw some birds.", false, "Correct. This is a positive sentence."]
         ]
@@ -1612,7 +1616,7 @@ export const exerciseData = {
     },
     8: {
         type: "text_multi",
-        question: "If 'some' is used in a positive sentence, what replaces it in a negative one?",
+        question: "If 'some' is used in a positive sentence ('I have some food'), what replaces it in a negative one ('I don't have ____ food')?",
         answers: ["any"]
     },
     9: {
@@ -1672,15 +1676,11 @@ export const exerciseData = {
         type: "checkbox",
         question: "When is it correct to use 'any'?",
         answers: [
-            ["In questions (e.g., Do you have any...?)", true, "Correct!"],
-            ["In negative sentences (e.g., I don't have any...)", true, "Correct!"],
-            ["In positive statements (e.g., I have any...)", false, "Wrong."]
+            ["In questions (e.g., Do you have any money?)", true, "Correct!"],
+            ["In negative sentences (e.g., I don't have any money)", true, "Correct!"],
+            ["In positive statements (e.g., I have any money)", false, "Wrong."],
+            ["In positive statements with the meaning 'it doesn't matter which' (e.g., Take any card; Any option is fine)", true, "Correct!"]
         ]
-    },
-    4: {
-        type: "text_multi",
-        question: "Correct this sentence: 'I have any water.'",
-        answers: ["I have some water", "I have water"]
     },
     5: {
         type: "radio",
@@ -1695,37 +1695,38 @@ export const exerciseData = {
         question: "Fill in the blank: 'We need ____ help.'",
         answers: [
             ["some", true, "Correct! This is an affirmative request/statement."],
-            ["any", false, "Wrong. 'Any' would sound like you are looking for a negation."]
+            ["any", false, "Wrong. 'Any' would sound like you are looking for a negation."],
+            ["no", true, "Correct! This is a negative statement."]
+
         ]
     },
     7: {
-        type: "radio",
-        question: "What is better?",
+        type: "checkbox",
+        question: "Which of these are correct?",
         answers: [
             ["I have any time today.", false, "Wrong."],
-            ["I have some time today.", true, "Correct!"]
+            ["I have some time today.", true, "Correct!"],
+            ["I have no time today.", true, "Correct!"],
+            ["I don't have any time today.", true, "Correct!"],
+            ["I don't have no time today.", false, "Wrong. This is a double negative."]
         ]
     },
     8: {
         type: "checkbox",
-        question: "Which of these are correct questions?",
+        question: "Which of these are correct?",
         answers: [
             ["Is there any coffee left?", true, "Correct!"],
             ["Do you want any sugar?", true, "Correct!"],
             ["I have any sugar.", false, "Wrong."]
         ]
     },
-    9: {
-        type: "text_multi",
-        question: "Instead of 'I have any money', what should you say?",
-        answers: ["I have some money", "I have money"]
-    },
     10: {
         type: "radio",
         question: "In the sentence 'I don't have ____ friends', which is correct?",
         answers: [
             ["any", true, "Correct! It is a negative sentence."],
-            ["some", false, "Wrong. 'Some' is not used in negatives."]
+            ["some", false, "Wrong. 'Some' is not used in negatives."],
+            ["no", false, "Wrong. 'No' is not used after a negative conjugation."]
         ]
     },
     11: {
@@ -1733,15 +1734,31 @@ export const exerciseData = {
         question: "True or False: You can use 'any' in positive sentences to mean 'it doesn't matter which'.",
         answers: [
             ["True", true, "Correct! (e.g., 'Take any card'). But it cannot be used to mean 'a certain amount' in a positive statement."],
-            ["False", false, "Wrong."]
+            ["False", false, "Wrong. It is True. 'Any' can be used in positive sentences to mean 'it doesn't matter which' (e.g., 'Take any card')."]
         ]
     },
     12: {
         type: "radio",
-        question: "Which is the correct positive form?",
+        question: "Which is a correct negative form?",
         answers: [
             ["There are any books on the table.", false, "Wrong."],
-            ["There are some books on the table.", true, "Correct!"]
+            ["There are no books on the table.", true, "Correct!"]
+        ]
+    }, 
+    13: {
+        type: "radio",
+        question: "True or False: 'Any' on its own is not enough to express a negative meaning.",
+        answers: [
+            ["True", true, "Correct! 'Any' needs to be used with a negative verb ('I don't have...') to express a negative meaning ('I don't have any money')."],
+            ["False", false, "Wrong. 'Any' alone does not create a negative meaning ('I have any money' is incorrect)."]
+        ]
+    },
+    14: {
+        type: "radio",
+        question: "True or False: 'Any' can exceptionally be used in a positive sentence to mean 'it doesn't matter which'.",
+        answers: [
+            ["True", true, "Correct! (e.g., 'Any day is fine', 'Book any hotel you want')."],
+            ["False", false, "Wrong. We CAN use any in positive sentences to mean 'it doesn't matter which' (e.g., 'Any day is fine', 'Book any hotel you want')."]
         ]
     }
 },
@@ -1750,7 +1767,7 @@ export const exerciseData = {
 "0181": {
     1: {
         type: "radio",
-        question: "Can you use a negative verb (don't) and a negative quantifier (no) in the same sentence?",
+        question: "Can you use a negative verb (don't) and a negative quantifier (no) in the same sentence ('I don't want no trouble')?",
         answers: [
             ["Yes", false, "Wrong. This creates a 'double negative', which is incorrect in standard English."],
             ["No", true, "Correct! You should use 'don't + any' or 'have + no'."]
@@ -1766,7 +1783,7 @@ export const exerciseData = {
     },
     3: {
         type: "checkbox",
-        question: "Which are correct ways to say you have zero of something?",
+        question: "Which are correct ways to say you have zero time?",
         answers: [
             ["I have no time.", true, "Correct!"],
             ["I don't have any time.", true, "Correct!"],
@@ -1776,11 +1793,11 @@ export const exerciseData = {
     4: {
         type: "text_multi",
         question: "Correct the double negative: 'I didn't see nobody.'",
-        answers: ["I didn't see anybody", "I saw nobody", "I didn't see anyone"]
+        answers: ["anybody", "saw nobody", "didn't see anybody", "I didn't see anybody", "I saw nobody", "anyone", "saw no one", "I didn't see anyone", "I saw no one"]
     },
     5: {
         type: "radio",
-        question: "Is 'We don't need no education' grammatically correct in standard English?",
+        question: "Is the famous lyric 'We don't need no education' grammatically correct in standard English?",
         answers: [
             ["True", false, "Wrong. It is a famous lyric, but it is a double negative. It should be 'We don't need any education'."],
             ["False", true, "Correct! Standard English avoids double negatives."]
@@ -1796,8 +1813,8 @@ export const exerciseData = {
     },
     7: {
         type: "text_multi",
-        question: "Change 'I have no friends' to a sentence using 'don't':",
-        answers: ["I don't have any friends"]
+        question: "Write the missing word to complete the sentence: 'I don't have ____ friends.'",
+        answers: ["any"]
     },
     8: {
         type: "radio",
@@ -1826,34 +1843,46 @@ export const exerciseData = {
     },
     11: {
         type: "radio",
-        question: "If the verb is already negative (didn't), which word should you use?",
+        question: "If the verb is already negative ('I didn't see'), which word should you use?",
         answers: [
-            ["Any", true, "Correct!"],
-            ["No", false, "Wrong. This would create a double negative."]
+            ["any bears.", true, "Correct!"],
+            ["no bears.", false, "Wrong. This would create a double negative."]
         ]
     },
     12: {
-        type: "text_multi",
-        question: "Correct the sentence: 'She hasn't no homework.'",
-        answers: ["She has no homework", "She hasn't any homework", "She hasn't got any homework"]
+        type: "radio",
+        question: "Is the famous lyric 'I can't get no satisfaction' grammatically correct in standard English?",
+        answers: [
+            ["True", false, "Wrong. It is a famous lyric, but it is a double negative. It should be 'I can't get any satisfaction'."],
+            ["False", true, "Correct! Standard English avoids double negatives."]
+        ]
+    },
+    13: {
+        type: "radio",
+        question: "What is a 'double negative'?",
+        answers: [
+            ["A sentence with two negative words that is considered INCORRECT in standard English.", true, "Correct! Double negatives are not standard English."],
+            ["A sentence with two negative words that is considered CORRECT in standard English.", false, "Wrong. Double negatives are not standard English."]
+        ]
     }
+
 },
 
 // 0182 Placement of 'enough'
 "0182": {
     1: {
         type: "radio",
-        question: "Where is 'enough' placed when used with a noun?",
+        question: "Where is 'enough' placed when used with a noun ('money')?",
         answers: [
-            ["Before the noun.", true, "Correct! (e.g., enough water)."],
-            ["After the noun.", false, "Wrong."]
+            ["Before the noun.", true, "Correct! (e.g., enough money)."],
+            ["After the noun.", false, "Wrong. It should be before the noun (e.g., enough money), not after (e.g., money enough)."]
         ]
     },
     2: {
         type: "radio",
         question: "Where is 'enough' placed when used with an adjective?",
         answers: [
-            ["Before the adjective.", false, "Wrong."],
+            ["Before the adjective.", false, "Wrong. It should be after the adjective (e.g., tall enough), not before (e.g., enough tall)."],
             ["After the adjective.", true, "Correct! (e.g., tall enough)."]
         ]
     },
@@ -1862,15 +1891,15 @@ export const exerciseData = {
         question: "Which of these are correct?",
         answers: [
             ["Warm enough", true, "Correct! Adjective + enough."],
-            ["Enough warm", false, "Wrong. Adjective must come first."],
+            ["Enough warm", false, "Wrong. Adjective must come first (e.g., warm enough)."],
             ["Enough time", true, "Correct! Enough + noun."],
-            ["Time enough", false, "Wrong (in standard usage)."]
+            ["Time enough", false, "Wrong (in standard usage). It should be 'enough time'."]
         ]
     },
     4: {
         type: "text_multi",
         question: "Correct the placement: 'I am not enough tall.'",
-        answers: ["I am not tall enough", "tall enough"]
+        answers: ["I am not tall enough", "tall enough", "not tall enough"]
     },
     5: {
         type: "radio",
@@ -1885,7 +1914,7 @@ export const exerciseData = {
         question: "Fill in the blank: 'The room is ____.'",
         answers: [
             ["big enough", true, "Correct! Adjective + enough."],
-            ["enough big", false, "Wrong."]
+            ["enough big", false, "Wrong. It should be 'big enough', not 'enough big'."]
         ]
     },
     7: {
@@ -1893,29 +1922,29 @@ export const exerciseData = {
         question: "Fill in the blank: 'We have ____.'",
         answers: [
             ["enough food", true, "Correct! Enough + noun."],
-            ["food enough", false, "Wrong."]
+            ["food enough", false, "Wrong. It should be 'enough food', not 'food enough'."]
         ]
     },
     8: {
         type: "text_multi",
         question: "Correct the placement: 'This coffee is not enough hot.'",
-        answers: ["This coffee is not hot enough", "hot enough"]
+        answers: ["This coffee is not hot enough", "hot enough", "not hot enough"]
     },
     9: {
         type: "radio",
         question: "Which is correct?",
         answers: [
             ["I didn't study enough.", true, "Correct! 'Enough' can follow a verb."],
-            ["I didn't enough study.", false, "Wrong."]
+            ["I didn't enough study.", false, "Wrong. 'Enough' should come after the verb, not before it."]
         ]
     },
     10: {
         type: "checkbox",
         question: "Choose the correct sentences:",
         answers: [
-            ["Are you old enough?", true, "Correct!"],
-            ["Is there enough sugar?", true, "Correct!"],
-            ["The car isn't fast enough.", true, "Correct!"]
+            ["Are you old enough?", true, "Correct! 'Enough' follows the adjective."],
+            ["Is there enough sugar?", true, "Correct! 'Enough' precedes the noun."],
+            ["The car isn't fast enough.", true, "Correct! 'Enough' follows the adjective."]
         ]
     },
     11: {
@@ -1928,8 +1957,13 @@ export const exerciseData = {
     },
     12: {
         type: "text_multi",
-        question: "Write 'enough' and 'sleep' in the correct order:",
-        answers: ["enough sleep"]
+        question: "Write 'enough' and 'sugar' in the correct order:",
+        answers: ["enough sugar"]
+    },
+    13: {
+        type: "text_multi",
+        question: "Write 'enough' and 'warm' in the correct order:",
+        answers: ["warm enough"]
     }
 },
 
@@ -1937,7 +1971,7 @@ export const exerciseData = {
 "0183": {
     1: {
         type: "radio",
-        question: "Which quantifier is used with countable nouns (like 'apples' or 'books')?",
+        question: "Which quantifier for large quantities is used with countable nouns (like 'apples' or 'books')?",
         answers: [
             ["Many", true, "Correct! 'Many' is for plural countable nouns."],
             ["Much", false, "Wrong. 'Much' is for uncountable nouns."]
@@ -1945,7 +1979,7 @@ export const exerciseData = {
     },
     2: {
         type: "radio",
-        question: "Which quantifier is used with uncountable nouns (like 'time' or 'patience')?",
+        question: "Which quantifier for large quantities is used with uncountable nouns (like 'water' or 'patience')?",
         answers: [
             ["Much", true, "Correct! 'Much' is for uncountable nouns."],
             ["Many", false, "Wrong. 'Many' is for countable nouns."]
@@ -1964,7 +1998,7 @@ export const exerciseData = {
     4: {
         type: "text_multi",
         question: "Correct the quantifier: 'I don't have many patience.'",
-        answers: ["I don't have much patience", "much patience"]
+        answers: ["I don't have much patience", "much patience", "much"]
     },
     5: {
         type: "radio",
@@ -1979,7 +2013,7 @@ export const exerciseData = {
         question: "Fill in the blank: 'There were ____ cars on the road.'",
         answers: [
             ["many", true, "Correct! 'Cars' is countable."],
-            ["much", false, "Wrong."]
+            ["much", false, "Wrong. 'Cars' is countable; use 'many' instead."]
         ]
     },
     7: {
@@ -1993,7 +2027,7 @@ export const exerciseData = {
     8: {
         type: "text_multi",
         question: "Correct the error: 'He has much friends.'",
-        answers: ["He has many friends", "many friends"]
+        answers: ["He has many friends", "many friends", "many", "a lot of friends", "a lot of"]
     },
     9: {
         type: "radio",
@@ -2015,10 +2049,10 @@ export const exerciseData = {
     },
     11: {
         type: "radio",
-        question: "Can we say 'many times'?",
+        question: "True or False: We avoid using 'much' by itself in positive sentences; 'I have much money' and 'I drank much water' are unusual.",
         answers: [
-            ["True", true, "Correct! 'Time' as an occasion is countable."],
-            ["False", false, "Wrong. You can say 'many times'."]
+            ["True", true, "Correct! 'Much' by itself is usually used in negative sentences and questions, not in positive statements."],
+            ["False", false, "Wrong. 'Much' by itselfis generally avoided in positive sentences."]
         ]
     },
     12: {
@@ -2035,7 +2069,7 @@ export const exerciseData = {
 "0184": {
     1: {
         type: "radio",
-        question: "Which quantifier is used with plural countable nouns?",
+        question: "Which quantifier for small quantities is used with plural countable nouns such as 'friends'?",
         answers: [
             ["Few", true, "Correct! (e.g., few friends)."],
             ["Little", false, "Wrong. 'Little' is for uncountable nouns."]
@@ -2043,33 +2077,34 @@ export const exerciseData = {
     },
     2: {
         type: "radio",
-        question: "Which quantifier is used with uncountable nouns?",
+        question: "Which quantifier for small quantities is used with uncountable nouns such as 'milk'?",
         answers: [
-            ["Little", true, "Correct! (e.g., little milk)."],
-            ["Few", false, "Wrong. 'Few' is for countable nouns."]
+            ["Little", true, "Correct! (e.g., a little milk)."],
+            ["Few", false, "Wrong. 'Few' is for countable nouns only."]
         ]
     },
     3: {
         type: "checkbox",
         question: "Which of these are correct?",
         answers: [
+            ["A little ideas", false, "Wrong. 'Ideas' is countable; use 'a few'."],
             ["A few days", true, "Correct!"],
             ["A little sugar", true, "Correct!"],
             ["A few water", false, "Wrong. 'Water' is uncountable; use 'a little'."],
-            ["A little ideas", false, "Wrong. 'Ideas' is countable; use 'a few'."]
+
         ]
     },
     4: {
         type: "text_multi",
         question: "Correct the error: 'I have a few patience left.'",
-        answers: ["I have a little patience left", "a little patience"]
+        answers: ["I have a little patience left", "a little patience", "a little", "little", "little patience", "I have little patience", "I have a little patience"]
     },
     5: {
         type: "radio",
         question: "Is 'He has few friends' correct?",
         answers: [
             ["True", true, "Correct! 'Friends' is countable plural."],
-            ["False", false, "Wrong."]
+            ["False", false, "Wrong. The sentence is valid English."]
         ]
     },
     6: {
@@ -2090,8 +2125,8 @@ export const exerciseData = {
     },
     8: {
         type: "text_multi",
-        question: "Correct the error: 'There is a few hope.'",
-        answers: ["There is a little hope", "a little hope"]
+        question: "Correct the error: 'There is a few hope'",
+        answers: ["There is a little hope", "a little hope", "a little", "little", "little hope", "There is little hope"]
     },
     9: {
         type: "radio",
@@ -2114,14 +2149,38 @@ export const exerciseData = {
         type: "radio",
         question: "What is the difference between 'few' and 'a few'?",
         answers: [
-            ["'Few' is negative (not many); 'a few' is positive (some).", true, "Correct!"],
+            ["'Few' is pessimistic (not many); 'a few' is optimistic (some).", true, "Correct!"],
             ["There is no difference.", false, "Wrong."]
         ]
     },
     12: {
         type: "text_multi",
-        question: "Write the correct quantifier for 'luck' (few or little):",
-        answers: ["little", "a little"]
+        question: "Write the correct quantifier for a small quantity of 'luck':",
+        answers: ["little", "a little", "little luck", "a little luck"]
+    },
+    13: {
+        type: "radio",
+        question: "Is the following sentence good news or bad news: 'He has few friends'?",
+        answers: [
+            ["Good news", false, "Wrong. 'Few friends' implies not many friends, which is generally bad news."],
+            ["Bad news", true, "Correct! 'Few friends' implies not many friends, which is generally bad news."]
+        ]
+    },
+    14: {
+        type: "radio",
+        question: "Is this message optimistic or pessimistic: 'I have a little money'?",
+        answers: [
+            ["Optimistic", true, "Correct! 'A little money' implies he has some money, which is generally good news."],
+            ["Pessimistic", false, "Wrong. 'A little money' implies he has some money, which is generally good news."]
+        ]
+    },
+    15: {
+        type: "radio",
+        question: "True or False: 'Little is both an adjective meaning 'small in size' ('a little baby') and a quantifier for small quantities ('a little luck').",
+        answers: [
+            ["True", true, "Correct! Depending on the context, 'little' can mean 'petit/klein' (small in size) or 'peu/wenig' (small quantity)."],
+            ["False", false, "Wrong. Depending on the context, 'little' can mean 'petit/klein' (small in size) or 'peu/wenig' (small quantity)."]
+        ]
     }
 },
 
@@ -2131,8 +2190,8 @@ export const exerciseData = {
         type: "radio",
         question: "Should 'every' and 'each' be followed by a singular or plural noun?",
         answers: [
-            ["Singular", true, "Correct! They refer to individual units."],
-            ["Plural", false, "Wrong. You cannot say 'every days'."]
+            ["Singular", true, "Correct! They refer to individual units: 'every day', 'each student', etc."],
+            ["Plural", false, "Wrong. You cannot say 'every days' or 'each students'."]
         ]
     },
     2: {
@@ -2148,8 +2207,8 @@ export const exerciseData = {
         question: "Which of these are correct?",
         answers: [
             ["Each student", true, "Correct!"],
-            ["Every country", true, "Correct!"],
             ["Every countries", false, "Wrong."],
+            ["Every country", true, "Correct!"],
             ["Each students", false, "Wrong."]
         ]
     },
@@ -2162,16 +2221,18 @@ export const exerciseData = {
         type: "radio",
         question: "Does 'each' take a singular or plural verb?",
         answers: [
-            ["Singular (e.g., 'Each has')", true, "Correct!"],
-            ["Plural (e.g., 'Each have')", false, "Wrong."]
+            ["Singular (e.g., 'Each person has')", true, "Correct!"],
+            ["Plural (e.g., 'Each person have')", false, "Wrong."]
         ]
     },
     6: {
         type: "radio",
-        question: "Fill in the blank: '____ person in the room was silent.'",
+        question: "Fill in the blanks: 'Every __________ in the room __________ silent.'",
         answers: [
-            ["Every", true, "Correct!"],
-            ["All", false, "Wrong (all would require plural 'people' and 'were')."]
+            ["people / were", false, "Wrong (every requires singular 'person' and 'was')."],
+            ["people / was", false, "Wrong (every requires singular 'person' and 'was')."],
+            ["person / was", true, "Correct! This is the proper singular form required by 'every'."],
+            ["person / were", false, "Wrong (every requires singular 'person' and the matching conjugation for one person, 'was')."],
         ]
     },
     7: {
@@ -2185,7 +2246,7 @@ export const exerciseData = {
     8: {
         type: "text_multi",
         question: "Correct the error: 'Every computers need an update.'",
-        answers: ["Every computer needs an update", "Every computer"]
+        answers: ["Every computer needs an update", "Every computer needs", "computer needs"]
     },
     9: {
         type: "radio",
@@ -2201,7 +2262,7 @@ export const exerciseData = {
         answers: [
             ["Every book", true, "Correct!"],
             ["Each child", true, "Correct!"],
-            ["Every children", false, "Wrong."]
+            ["Every children", false, "Wrong. Children is plural; use 'Every child' instead."]
         ]
     },
     11: {
@@ -2215,7 +2276,15 @@ export const exerciseData = {
     12: {
         type: "text_multi",
         question: "Rewrite 'All the students' using 'Each':",
-        answers: ["Each student"]
+        answers: ["Each student", "student"]
+    }, 
+    13: {
+        type: "radio",
+        question: "Grammatically, which French translation is closer to 'Every student' and 'Each student'?",
+        answers: [
+            ["Chaque étudiant", true, "Correct! 'Chaque' is used for singular nouns, similar to 'every' and 'each'."],
+            ["Tous les étudiants", false, "Wrong. 'Tous les étudiants' means 'All the students', which is plural."]
+        ]
     }
 },
 
@@ -2225,16 +2294,17 @@ export const exerciseData = {
         type: "radio",
         question: "How many items are 'both', 'either', and 'neither' used to refer to?",
         answers: [
+            ["One thing", false, "Wrong. 'Both', 'either', and 'neither' refer to two things."],
             ["Two things", true, "Correct!"],
-            ["Three or more things", false, "Wrong."]
+            ["Three or more things", false, "Wrong. These words are used specifically for two items."]
         ]
     },
     2: {
         type: "radio",
         question: "Which word is used to mean 'one or the other'?",
         answers: [
-            ["Either", true, "Correct!"],
-            ["Neither", false, "Wrong. 'Neither' means 'not one and not the other'."]
+            ["Either", true, "Correct! (Similar to 'or' in meaning)"],
+            ["Neither", false, "Wrong. 'Neither' means 'not one AND not the other' (similar to NOR gates)."]
         ]
     },
     3: {
@@ -2242,21 +2312,21 @@ export const exerciseData = {
         question: "Which of these are correct?",
         answers: [
             ["Both my parents", true, "Correct!"],
-            ["Neither of them", true, "Correct!"],
-            ["I don't like either of these.", true, "Correct!"],
-            ["I don't like neither of these.", false, "Wrong. Double negative."]
+            ["Neither of my parents", true, "Correct!"],
+            ["I don't like either of my parents.", true, "Correct!"],
+            ["I don't like neither of my parents.", false, "Wrong. Double negative."]
         ]
     },
     4: {
         type: "text_multi",
-        question: "Which word means 'A and B'?",
+        question: "'both, either, neither' - Which word means 'A and B'?",
         answers: ["both"]
     },
     5: {
         type: "radio",
         question: "Is 'I don't like neither' correct?",
         answers: [
-            ["True", false, "Wrong. Use 'I like neither' or 'I don't like either'."],
+            ["True", false, "Wrong. Neither is negative, resulting in a double negative. Use 'I like neither' or 'I don't like either'."],
             ["False", true, "Correct!"]
         ]
     },
@@ -2268,14 +2338,6 @@ export const exerciseData = {
             ["both", false, "Wrong (unless you want them to use two pens at once)."]
         ]
     },
-    7: {
-        type: "radio",
-        question: "Which is the negative version of 'Both'?",
-        answers: [
-            ["Neither", true, "Correct!"],
-            ["Either", false, "Wrong."]
-        ]
-    },
     8: {
         type: "text_multi",
         question: "Complete: '____ of the two options is acceptable.' (meaning zero options)",
@@ -2283,19 +2345,19 @@ export const exerciseData = {
     },
     9: {
         type: "radio",
-        question: "Which is correct?",
+        question: "Is it reasonable to say that the usage of 'both', 'either', and 'neither' is similar to 'some, any, and none', but for two items?",
         answers: [
-            ["I didn't see either of them.", true, "Correct!"],
-            ["I didn't see both of them.", false, "Wrong (this would mean you saw only one)."]
+            ["True", true, "Correct! 'Both', 'either', and 'neither' are used for two items, similar to how 'some', 'any', and 'none' are used for any number of items."],
+            ["False", false, "Wrong. The comparison is reasonable because 'both', 'either', and 'neither' are specifically for two items."]
         ]
     },
     10: {
         type: "checkbox",
         question: "Select the correct phrases for two items:",
         answers: [
-            ["On either side of the road", true, "Correct!"],
-            ["Both of my hands", true, "Correct!"],
-            ["Neither answer is right", true, "Correct!"]
+            ["On either side of the road", true, "Correct! This means one side or the other side of the road."],
+            ["Both of my hands", true, "Correct! This means that you are referring to your two hands collectively."],
+            ["Neither answer is right", true, "Correct! This means that not one of the answers is correct."]
         ]
     },
     11: {
@@ -2303,13 +2365,42 @@ export const exerciseData = {
         question: "Can we use 'both' for three people?",
         answers: [
             ["True", false, "Wrong. Use 'all' for three or more."],
-            ["False", true, "Correct!"]
+            ["False", true, "Correct! We use 'all' for three or more."]
         ]
     },
     12: {
-        type: "text_multi",
-        question: "What is the negative counterpart to 'either'?",
-        answers: ["neither"]
+        type: "radio",
+        question: "Can we use 'both', 'neither' and 'either' with uncountable nouns such as 'water'?",
+        answers: [
+            ["Yes", false, "Wrong. 'Both', 'Either' and 'Neither' imply number two, so they cannot be used with uncountable nouns."],
+            ["No", true, "Correct! 'Both', 'Either' and 'Neither' imply number two, so they cannot be used with uncountable nouns."]
+        ]
+    },
+    13: {
+        type: "radio",
+        question: "What do you have to be careful with when using 'neither'?",
+        answers: [
+            ["Double negatives", true, "Correct! 'Neither' is negative, so using it with another negative can create a double negative."],
+            ["Triple negatives", false, "Wrong. That concept doesn't even exist LOL."]
+  
+        ]
+    },
+    14: {
+        type: "radio",
+        question: "What is the meaninig of 'either'?",
+        answers: [
+            ["One or the other of two options", true, "Correct!"],
+            ["The two options", false, "Wrong. 'Either' refers to one or the other of two options."],
+            ["None of the options", false, "Wrong. 'Either' refers to one or the other of two options."]
+        ]
+    },
+    15: {
+        type: "radio",
+        question: "Is it correct to say 'Both options are ok', but 'Either option is ok' and 'Neither option is ok'?",
+        answers: [
+            ["Yes", true, "Correct! 'Both' refers to two items collectively, so we use the plural and 'are', while 'either' and 'neither' refer to individual items in the pair, so we use the singular and 'is'."],
+            ["No", false, "Wrong. 'Both' refers to two items collectively, so we use the plural and 'are', while 'either' and 'neither' refer to individual items in the pair, so we use the singular and 'is' for them."]
+        ]
     }
 },
 
@@ -2338,13 +2429,13 @@ export const exerciseData = {
             ["Both cars are red.", true, "Correct!"],
             ["Both of the cars are red.", true, "Correct!"],
             ["The two cars are red.", true, "Correct!"],
-            ["The both cars...", false, "Wrong."]
+            ["The both cars are red.", false, "Wrong."]
         ]
     },
     4: {
         type: "text_multi",
-        question: "Correct the error: 'The both students passed.'",
-        answers: ["Both students passed", "Both of the students passed"]
+        question: "Correct the error: 'The both students passed'",
+        answers: ["Both students passed", "Both of the students passed", "Both", "Both of them", "Both students"]
     },
     5: {
         type: "radio",
@@ -2367,29 +2458,25 @@ export const exerciseData = {
         question: "Which is correct?",
         answers: [
             ["Both the parents were there.", true, "Correct! (the follows both)."],
-            ["The both parents were there.", false, "Wrong."]
+            ["The both parents were there.", false, "Wrong. 'The' should not be used before 'both'."]
         ]
     },
     8: {
-        type: "text_multi",
-        question: "Fix this phrase: 'I liked the both movies.'",
-        answers: ["I liked both movies", "I liked both of the movies"]
-    },
-    9: {
         type: "radio",
-        question: "Where does 'the' go when using 'both' and 'of'?",
+        question: "Why to French speakers often make the error 'The both'?",
         answers: [
-            ["Before 'both'", false, "Wrong."],
-            ["After 'of' (e.g., both of the...)", true, "Correct!"]
+            ["Because English is too hard.", false, "Wrong. English is actually easier to learn than French."],
+            ["Because in French 'les deux' translates directly to 'the both'", true, "Correct! French speakers might directly translate 'les deux' to 'the both', which is incorrect in English."]
         ]
     },
-    10: {
+    9: {
         type: "checkbox",
         question: "Choose the correct expressions:",
         answers: [
+            ["The both of them", false, "Wrong."],
             ["Both of them", true, "Correct!"],
-            ["Both these things", true, "Correct!"],
-            ["The both of them", false, "Wrong."]
+            ["Both these things", true, "Correct!"]
+
         ]
     },
     11: {
@@ -2397,14 +2484,9 @@ export const exerciseData = {
         question: "Can we say 'The two options are good'?",
         answers: [
             ["True", true, "Correct! You can use 'the' with 'two', just not with 'both'."],
-            ["False", false, "Wrong."]
+            ["False", false, "Wrong. You can use 'the' with 'two', just not with 'both'."]
         ]
     },
-    12: {
-        type: "text_multi",
-        question: "Write 'both' and 'sides' in the correct order without any article:",
-        answers: ["both sides"]
-    }
 },
 
 // 0188 Implicit Nouns with Much/Little
@@ -2422,7 +2504,7 @@ export const exerciseData = {
         question: "Is 'I don't have many to say' correct?",
         answers: [
             ["True", false, "Wrong. It should be 'I don't have much to say'."],
-            ["False", true, "Correct!"]
+            ["False", true, "Correct! That sentence is incorrect because 'many' should not be used with an implicit noun. It should be 'I don't have much to say'."]
         ]
     },
     3: {
@@ -2436,8 +2518,8 @@ export const exerciseData = {
     },
     4: {
         type: "text_multi",
-        question: "Complete: 'There is ____ we can do about it.' (meaning not much)",
-        answers: ["little"]
+        question: "Complete: 'There is ____ we can do about it.'",
+        answers: ["little", "not much", "not a lot"]
     },
     5: {
         type: "radio",
@@ -2466,7 +2548,7 @@ export const exerciseData = {
     8: {
         type: "text_multi",
         question: "Correct the error: 'How many is left?' (referring to an uncountable quantity)",
-        answers: ["How much is left"]
+        answers: ["How much is left", "How much", "much"]
     },
     9: {
         type: "radio",
@@ -2481,33 +2563,40 @@ export const exerciseData = {
         question: "Choose correct phrases for abstract/unspecified quantities:",
         answers: [
             ["Too much to do", true, "Correct!"],
+            ["Very few to see", false, "Wrong."],
             ["Very little to see", true, "Correct!"],
             ["Too many to do", false, "Wrong."]
         ]
     },
     11: {
         type: "radio",
-        question: "Is 'Many are called, but few are chosen' an exception?",
+        question: "What is an implicit noun?",
         answers: [
-            ["Yes", true, "Correct! Here 'many' and 'few' refer to implicit countable 'people'."],
-            ["No", false, "Wrong."]
+            ["A noun that is understood from context but not explicitly stated.", true, "Correct!"],
+            ["A noun that is always plural.", false, "Wrong."],
+            ["A noun that is always singular.", false, "Wrong."]
         ]
-    },
+        },
     12: {
-        type: "text_multi",
-        question: "Correct: 'There wasn't many to eat.'",
-        answers: ["There wasn't much to eat"]
+        type: "checkbox",
+        question: "Which of these is an example of an implicit noun?",
+        answers: [
+            ["There is so much to do.", true, "Correct! 'Much' refers to an implicit 'work' or 'tasks'."],
+            ["I have a red car.", false, "Wrong. There is no implicit noun here."],
+            ["There was very little to eat.", true, "Correct! 'Little' refers to an implicit 'food'."],
+            ["She bought a new book.", false, "Wrong. No implicit noun."],
+            ["Few have ever succeeded.", true, "Correct! 'Few' refers to an implicit 'people' who have succeeded."]
+        ]
     }
 },
-
 // 0189 'Of' with specified vs unspecified nouns
 "0189": {
     1: {
         type: "radio",
-        question: "When should you use 'of' after a quantifier?",
+        question: "When should you use 'of' after a quantifier (e.g., many, some, a few)?",
         answers: [
-            ["When referring to a specific group (e.g., 'the', 'these', 'my').", true, "Correct!"],
-            ["When referring to things in general.", false, "Wrong."]
+            ["When referring to a subset of the noun that follows the quantifier (e.g., 'many of the cars', 'some of these things', 'a few of my friends').", true, "Correct!"],
+            ["When referring to things in general.", false, "Wrong. We use 'of' when talking about a specific subset of the noun mentioned."]
         ]
     },
     2: {
@@ -2515,7 +2604,7 @@ export const exerciseData = {
         question: "Is 'Many of cars' correct?",
         answers: [
             ["True", false, "Wrong. You say 'Many cars' or 'Many of the cars'."],
-            ["False", true, "Correct!"]
+            ["False", true, "Correct! 'Many of cars' is incorrect because 'of' requires a specific subset, like 'many of the cars'."]
         ]
     },
     3: {
@@ -2523,14 +2612,17 @@ export const exerciseData = {
         question: "Which of these are correct?",
         answers: [
             ["Many students", true, "Correct! (General)"],
-            ["Many of the students", true, "Correct! (Specific)"],
-            ["Many of students", false, "Wrong. (Missing determiner)"]
+            ["Many of the students", true, "Correct! (A subset of the students)"],
+            ["Many of students", false, "Wrong. (The specific subset needs to be identified with 'the')"]
         ]
     },
     4: {
-        type: "text_multi",
+        type: "radio",
         question: "Correct the error: 'A few of players were injured.'",
-        answers: ["A few players were injured", "A few of the players were injured"]
+        answers: [
+            ["A few player were injured", false, "Wrong. This is incorrect because 'player' should be plural."],
+            ["A few of the players were injured", true, "Correct! This specifies a subset of the players."]
+        ]
     },
     5: {
         type: "radio",
@@ -2557,13 +2649,17 @@ export const exerciseData = {
         ]
     },
     8: {
-        type: "text_multi",
-        question: "Correct: 'Several of those books are mine.'",
-        answers: ["Several of those books are mine", "Several of those books"]
+        type: "checkbox",
+        question: "Correct: 'Several of books are mine.' Tick all the correct options.",
+        answers: [
+            ["Several of those books are mine", true, "Correct!"],
+            ["Several of the books", true, "Correct!"],
+            ["Several of books are mine", false, "Wrong. If the noun remains general, 'of' cannot be used"]
+        ]
     },
     9: {
         type: "radio",
-        question: "Do we use 'of' before a pronoun like 'us', 'you', or 'them'?",
+        question: "Do we use have to use 'of' after a quantifier and before a pronoun like 'us', 'you', or 'them' (e.g. Many of us, Many of you, Most of them)?",
         answers: [
             ["Yes (e.g., Many of us)", true, "Correct!"],
             ["No (e.g., Many us)", false, "Wrong."]
@@ -2589,10 +2685,26 @@ export const exerciseData = {
     12: {
         type: "text_multi",
         question: "Correct: 'Much of information was lost.'",
-        answers: ["Much information was lost", "Much of the information was lost"]
+        answers: ["much information", "much of the information","Much information was lost", "Much of the information was lost"]
+    },
+    13: {
+        type: "radio",
+        question: "Why do we have to use 'of' after a quantifier and before a pronoun like 'us', 'you', or 'them' (e.g. Many of us, Many of you, Most of them)?",
+        answers: [
+            ["Because the pronoun by definition specifies the group being referred to", true, "Correct!"],
+            ["No particular reason", false, "Wrong. The 'of' is necessary to indicate the specific group."]
+        ]
+
+    },
+    14: {
+        type: "radio",
+        question: "True or False: When a noun is general, we quantify it without using 'of' (e.g., Many people), but when the noun is a specific subset of the general category, we use 'of' (many of those people).",
+        answers: [
+            ["True", true, "Correct!"],
+            ["False", false, "Wrong. The 'of' is necessary for specific subsets."]
+        ]
     }
 },
-
 
 // 0210 Adjective Position
 "0210": {
@@ -2658,22 +2770,6 @@ export const exerciseData = {
         question: "Put these words in order: (wine / expensive / an)",
         answers: ["an expensive wine"]
     },
-    9: {
-        type: "radio",
-        question: "Does the rule change if there are two adjectives (e.g., 'big' and 'red')?",
-        answers: [
-            ["No, both still go before the noun.", true, "Correct! 'The big red house'."],
-            ["Yes, one goes before and one goes after.", false, "Wrong."]
-        ]
-    },
-    10: {
-        type: "radio",
-        question: "Is 'The weather is hot' an exception to the 'before the noun' rule?",
-        answers: [
-            ["No, because 'hot' follows a linking verb, not a noun.", true, "Correct! If there is no noun immediately after, adjectives follow verbs like 'be'."],
-            ["Yes, it's an error.", false, "Wrong."]
-        ]
-    },
     11: {
         type: "radio",
         question: "Which sounds natural?",
@@ -2720,7 +2816,7 @@ export const exerciseData = {
     4: {
         type: "text_multi",
         question: "Correct the error: 'He has differents ideas.'",
-        answers: ["He has different ideas", "different ideas"]
+        answers: ["He has different ideas", "different ideas", "different"]
     },
     5: {
         type: "radio",
@@ -2749,7 +2845,7 @@ export const exerciseData = {
     8: {
         type: "text_multi",
         question: "Fix this: 'The blues eyes'",
-        answers: ["The blue eyes", "blue eyes"]
+        answers: ["The blue eyes", "blue eyes", "blue"]
     },
     9: {
         type: "checkbox",
@@ -2761,27 +2857,22 @@ export const exerciseData = {
             ["Modern buildings", false, "Correct."]
         ]
     },
-    10: {
-        type: "radio",
-        question: "Which is correct?",
-        answers: [
-            ["Those are goods news.", false, "Wrong. 'News' is uncountable, and 'good' must be singular."],
-            ["That is good news.", true, "Correct!"]
-        ]
-    },
     11: {
         type: "radio",
-        question: "True or False: In English, adjectives do not have a gender or plural form.",
+        question: "True or False: In English, adjectives do not have a gender (masculine or feminine).",
         answers: [
             ["True", true, "Correct!"],
             ["False", false, "Wrong."]
         ]
     },
     12: {
-        type: "text_multi",
-        question: "Rewrite 'a red car' in the plural:",
-        answers: ["red cars", "some red cars"]
-    }
+        type: "radio",
+        question: "True or False: In English, adjectives such as 'red' or 'big' have no gender or plural form.",
+        answers: [
+            ["True", true, "Correct!"],
+            ["False", false, "Wrong."]
+        ]
+    },
 },
 
 // 0225 -ed vs -ing/-y adjectives
@@ -2829,14 +2920,21 @@ export const exerciseData = {
         ]
     },
     6: {
-        type: "text_multi",
-        question: "Which word describes a person who makes you feel afraid?",
-        answers: ["scary"]
+        type: "radio",
+        question: "What is the effect of the -y ending in 'scary'?",
+        answers: [
+            ["It describes the thing that causes the feeling: 'The movie was scary.'", true, "Correct! '-y' adjectives describe the cause of the emotion."],
+            ["It describes the person feeling the emotion: 'I was scary (by the movie).'", false, "Wrong. '-y' adjectives describe the cause of the emotion."]
+        ]
     },
     7: {
-        type: "text_multi",
-        question: "Which word describes how you feel when you see a ghost?",
-        answers: ["scared", "frightened"]
+        type: "radio",
+        question: "Choose the correct form: 'I couldn't sleep after watching the movie. I was very ________ .'",
+        answers: [
+            ["scared", true, "Correct!"],
+            ["scaring", false, "Wrong. The person feeling the emotion should use the -ed form."],
+            ["scary", false, "Wrong. The person feeling the emotion should use the -ed form."]
+        ]
     },
     8: {
         type: "radio",
@@ -2875,7 +2973,7 @@ export const exerciseData = {
     12: {
         type: "text_multi",
         question: "Correct the error: 'I was very exciting to see you.'",
-        answers: ["I was very excited to see you", "I was excited"]
+        answers: ["excited", "I was very excited to see you", "I was very excited"]
     }
 },
 
@@ -2925,7 +3023,7 @@ export const exerciseData = {
     },
     6: {
         type: "radio",
-        question: "True or False: '-ty' endings (like 40, 50, 60) have a short, blunt ending sound.",
+        question: "True or False: '-ty' endings (like 40, 50, 60) have a short shound that is not stressed.",
         answers: [
             ["True", true, "Correct!"],
             ["False", false, "Wrong."]
@@ -2933,7 +3031,7 @@ export const exerciseData = {
     },
     7: {
         type: "radio",
-        question: "True or False: '-teen' endings (like 14, 15, 16) have a long 'n' sound at the end.",
+        question: "True or False: '-teen' endings (like 14, 15, 16) have a clear 'n' sound at the end.",
         answers: [
             ["True", true, "Correct!"],
             ["False", false, "Wrong."]
@@ -2944,7 +3042,7 @@ export const exerciseData = {
         question: "How do you pronounce 19?",
         answers: [
             ["nine-TEEN", true, "Correct!"],
-            ["NINE-ty", false, "Wrong. That is 90."]
+            ["NINE-teen", false, "Wrong. That can be confused with 90."]
         ]
     },
     9: {
@@ -2952,13 +3050,8 @@ export const exerciseData = {
         question: "How do you pronounce 60?",
         answers: [
             ["SIX-ty", true, "Correct!"],
-            ["six-TEEN", false, "Wrong. That is 16."]
+            ["six-TY", false, "Wrong. That can be confused with 16."]
         ]
-    },
-    10: {
-        type: "text_multi",
-        question: "Which word has a stressed '-ty' sound? (trick question)",
-        answers: ["none", "neither", "no word"]
     },
     11: {
         type: "radio",
@@ -2968,14 +3061,6 @@ export const exerciseData = {
             ["SEVEN", false, "Wrong."]
         ]
     },
-    12: {
-        type: "radio",
-        question: "Which number is SEVEN-ty?",
-        answers: [
-            ["70", true, "Correct!"],
-            ["17", false, "Wrong."]
-        ]
-    }
 },
 
 // 0232 Numerals - 'One' hundred/thousand
@@ -2985,7 +3070,7 @@ export const exerciseData = {
         question: "How do you say the number 100?",
         answers: [
             ["One hundred", true, "Correct!"],
-            ["Hundred", false, "Wrong. You must say 'a hundred' or 'one hundred'."]
+            ["Hundred", false, "Wrong. We usually say 'a hundred' or 'one hundred'."]
         ]
     },
     2: {
@@ -3004,11 +3089,6 @@ export const exerciseData = {
             ["A hundred and fifty", true, "Correct!"],
             ["Hundred fifty", false, "Wrong. Missing 'a' or 'one'."]
         ]
-    },
-    4: {
-        type: "text_multi",
-        question: "Write out 1,200 in words (beginning with 'one'):",
-        answers: ["one thousand two hundred"]
     },
     5: {
         type: "radio",
@@ -3039,14 +3119,6 @@ export const exerciseData = {
         question: "What is the missing word: '____ thousand years ago.'",
         answers: ["One", "A"]
     },
-    9: {
-        type: "radio",
-        question: "Which is more formal for a report?",
-        answers: [
-            ["One hundred", true, "Correct!"],
-            ["Hundred", false, "Wrong."]
-        ]
-    },
     10: {
         type: "checkbox",
         question: "Identify correct readings of 1,005:",
@@ -3069,7 +3141,7 @@ export const exerciseData = {
         question: "Which is correct?",
         answers: [
             ["One hundred percent", true, "Correct!"],
-            ["Hundred percent", false, "Wrong."]
+            ["Hundred percent", false, "Wrong. This is informal; use 'one hundred percent' instead."]
         ]
     }
 },
@@ -3086,7 +3158,7 @@ export const exerciseData = {
     },
     2: {
         type: "radio",
-        question: "Do you use 'of' between a specific number and the noun (e.g., 1 million people)?",
+        question: "Do you use 'of' between a specific number and the noun (e.g., 1 million of people)?",
         answers: [
             ["No, you say 'one million people'.", true, "Correct!"],
             ["Yes, you say 'one million of people'.", false, "Wrong."]
@@ -3099,13 +3171,13 @@ export const exerciseData = {
             ["Three million dollars", true, "Correct!"],
             ["Three millions dollars", false, "Wrong. No 's'."],
             ["Three millions of dollars", false, "Wrong. No 's' and no 'of'."],
-            ["Millions of dollars", true, "Correct! (Note: 'of' and 's' are used only when the number is NOT specific)."]
+            ["Three million of dollars", false, "Wrong. No 'of' after a specific number."]
         ]
     },
     4: {
         type: "text_multi",
-        question: "How do you read 200,000?",
-        answers: ["two hundred thousand"]
+        question: "How do you read 2'000'000?",
+        answers: ["two million", "2 million"]
     },
     5: {
         type: "radio",
@@ -3120,8 +3192,8 @@ export const exerciseData = {
         type: "radio",
         question: "Is 'six thousands cars' correct?",
         answers: [
-            ["True", false, "Wrong. It should be 'six thousand cars'."],
-            ["False", true, "Correct!"]
+            ["True. The number 6 forces us to use the plural 'thousands'.", false, "Wrong. It should be 'six thousand cars'."],
+            ["False. The correct form is 'six thousand cars'.", true, "Correct!"]
         ]
     },
     7: {
@@ -3129,13 +3201,13 @@ export const exerciseData = {
         question: "When is it okay to say 'thousands of'?",
         answers: [
             ["When the exact number is unknown (e.g., Thousands of people).", true, "Correct!"],
-            ["When the exact number is 2,000.", false, "Wrong."]
+            ["When the exact number is known and higher than 1, for example 2,000.", false, "Wrong."]
         ]
     },
     8: {
         type: "text_multi",
         question: "Correct the error: 'Ten millions of inhabitants'",
-        answers: ["Ten million inhabitants"]
+        answers: ["Ten million inhabitants", "10 million inhabitants", "Ten million", "10 million"]
     },
     9: {
         type: "checkbox",
@@ -3163,12 +3235,21 @@ export const exerciseData = {
         ]
     },
     12: {
-        type: "text_multi",
-        question: "Read '5,000,000 CHF':",
-        answers: ["five million Swiss Francs", "five million"]
+        type: "radio",
+        question: "Is this rule about numbers correct: 'When the exact number is known, we never use 'of''?",
+        answers: [
+            ["True", true, "Correct!"],
+            ["False", false, "Wrong."]
+        ]
+},
+13: { type: "radio",
+        question: "Is this rule about numbers correct: 'When the exact number is known, we never use the plural forms 'hundreds', 'thousands', 'millions''?",
+        answers: [
+            ["True", true, "Correct!"],
+            ["False", false, "Wrong."]
+        ]
     }
 },
-
 // 0234 Years (e.g., 1995)
 "0234": {
     1: {
@@ -3176,7 +3257,7 @@ export const exerciseData = {
         question: "What is the standard way to say the year 1985?",
         answers: [
             ["Nineteen eighty-five", true, "Correct! (split into two numbers)."],
-            ["One thousand nine hundred eighty-five", false, "Wrong. This is too formal and unusual."]
+            ["One thousand nine hundred eighty-five", false, "Wrong. This is too formal and too long."]
         ]
     },
     2: {
@@ -3184,7 +3265,7 @@ export const exerciseData = {
         question: "How do you say the year 1700?",
         answers: [
             ["Seventeen hundred", true, "Correct!"],
-            ["One thousand seven hundred", false, "Wrong."]
+            ["One thousand seven hundred", false, "Wrong. This is too formal and too long."]
         ]
     },
     3: {
@@ -3197,16 +3278,21 @@ export const exerciseData = {
         ]
     },
     4: {
-        type: "text_multi",
+        type: "checkbox",
         question: "How do you say 1999?",
-        answers: ["nineteen ninety-nine"]
+        answers: [
+            ["Nineteen ninety-nine", true, "Correct!"],
+            ["One thousand nine hundred ninety-nine", false, "Wrong. This is too formal and too long."],
+            ["Nineteen hundred ninety-nine", false, "Wrong. This is too formal and too long."]
+        ]
     },
     5: {
-        type: "radio",
+        type: "checkbox",
         question: "How do you say 1805?",
         answers: [
             ["Eighteen oh-five", true, "Correct!"],
-            ["Eighteen five", false, "Wrong."]
+            ["Eighteen five", false, "Wrong."],
+            ["One thousand eight hundred five", false, "Wrong. This is too formal and too long."]
         ]
     },
     6: {
@@ -3228,7 +3314,7 @@ export const exerciseData = {
     8: {
         type: "text_multi",
         question: "How do you say 2010?",
-        answers: ["twenty-ten", "two thousand and ten"]
+        answers: ["twenty-ten", "twenty ten", "two thousand ten", "two thousand and ten"]
     },
     9: {
         type: "radio",
@@ -3243,7 +3329,8 @@ export const exerciseData = {
         question: "Identify correct readings for 1900:",
         answers: [
             ["Nineteen hundred", true, "Correct!"],
-            ["One thousand nine hundred", false, "Wrong."]
+            ["One thousand nine hundred", false, "Wrong."],
+            ["Nineteen oh oh", false, "Wrong."]
         ]
     },
     11: {
@@ -3254,11 +3341,7 @@ export const exerciseData = {
             ["Yes.", false, "Wrong."]
         ]
     },
-    12: {
-        type: "text_multi",
-        question: "Read the year '1492':",
-        answers: ["fourteen ninety-two"]
-    }
+
 },
 
 // 0235 Decades (e.g., the 80s)
@@ -3268,14 +3351,15 @@ export const exerciseData = {
         question: "How do you say 'the 80s'?",
         answers: [
             ["The eighties", true, "Correct!"],
-            ["The eighty years", false, "Wrong."]
+            ["The eighty years", false, "Wrong."],
+            ["The eighties years", false, "Wrong."]
         ]
     },
     2: {
         type: "radio",
         question: "Which is correct?",
         answers: [
-            ["I grew up in the 90s.", true, "Correct!"],
+            ["I grew up in the 90s.", true, "Correct! We use 'the' before decades."],
             ["I grew up in 90s.", false, "Wrong. Decades require the article 'the'."]
         ]
     },
@@ -3291,7 +3375,7 @@ export const exerciseData = {
     },
     4: {
         type: "text_multi",
-        question: "Write out 'the 70s':",
+        question: "Translate 'les années septante' / 'Die siebziger Jahre':",
         answers: ["the seventies"]
     },
     5: {
@@ -3312,32 +3396,10 @@ export const exerciseData = {
     },
     7: {
         type: "radio",
-        question: "Is 'the 2000s' said as 'the two thousands'?",
+        question: "Is 'the 2000s' read 'the two thousands'?",
         answers: [
             ["True", true, "Correct!"],
             ["False", false, "Wrong."]
-        ]
-    },
-    8: {
-        type: "text_multi",
-        question: "Correct the error: 'The movie was set in eighties.'",
-        answers: ["The movie was set in the eighties"]
-    },
-    9: {
-        type: "radio",
-        question: "Which is the correct written form?",
-        answers: [
-            ["the '80s", true, "Correct!"],
-            ["the 80's", false, "Wrong (technically '80s is preferred as there is no possession)."]
-        ]
-    },
-    10: {
-        type: "checkbox",
-        question: "Identify the correct decade names:",
-        answers: [
-            ["The thirties", true, "Correct!"],
-            ["The fourties", false, "Wrong (spelling: 'forties')"],
-            ["The forties", true, "Correct!"]
         ]
     },
     11: {
@@ -3350,7 +3412,7 @@ export const exerciseData = {
     },
     12: {
         type: "text_multi",
-        question: "Read 'the 60s':",
+        question: "How do we say 'the 60s':",
         answers: ["the sixties"]
     }
 },
@@ -3426,16 +3488,6 @@ export const exerciseData = {
             ["-st", false, "Wrong. Only numbers ending in 1 (except 11) end in -st."]
         ]
     },
-    10: {
-        type: "checkbox",
-        question: "Identify the irregular ordinals:",
-        answers: [
-            ["First", true, "Correct!"],
-            ["Second", true, "Correct!"],
-            ["Third", true, "Correct!"],
-            ["Tenth", false, "Wrong (it follows the -th rule)."]
-        ]
-    },
     11: {
         type: "radio",
         question: "Is 'twenty-oneth' correct?",
@@ -3509,9 +3561,13 @@ export const exerciseData = {
         ]
     },
     8: {
-        type: "text_multi",
-        question: "Correct the error: 'Your car is more fast than mine.'",
-        answers: ["Your car is faster than mine", "faster"]
+        type: "radio",
+        question: "When do we add -er to an adjective to form the comparative?",
+        answers: [
+            ["For short adjectives (one syllable).", true, "Correct!"],
+            ["For long adjectives (two or more syllables).", false, "Wrong. Use 'more' for long adjectives."],
+            ["Always use 'more' regardless of adjective length.", false, "Wrong. Short adjectives take -er."]
+        ]
     },
     9: {
         type: "radio",
@@ -3532,10 +3588,11 @@ export const exerciseData = {
     },
     11: {
         type: "radio",
-        question: "Can we say 'littler'?",
+        question: "When do we use 'more' instead of adding -er to form the comparative?",
         answers: [
-            ["'Smaller' is much more common.", true, "Correct!"],
-            ["Yes, always.", false, "Wrong."]
+            ["For long adjectives (two or more syllables).", true, "Correct!"],
+            ["For short adjectives (one syllable).", false, "Wrong. Short adjectives take -er."],
+            ["Always use 'more' regardless of adjective length.", false, "Wrong. Short adjectives take -er."]
         ]
     },
     12: {
@@ -3549,7 +3606,7 @@ export const exerciseData = {
 "0241": {
     1: {
         type: "radio",
-        question: "Which word do we use to link two things in a comparison?",
+        question: "Which word do we use to link two things in a comparison (A is better ___ B)?",
         answers: [
             ["Than", true, "Correct!"],
             ["That", false, "Wrong."],
@@ -3568,39 +3625,24 @@ export const exerciseData = {
         type: "checkbox",
         question: "Identify correct sentences:",
         answers: [
-            ["She is older than me.", true, "Correct!"],
             ["It's cheaper than I thought.", true, "Correct!"],
-            ["He's faster that me.", false, "Wrong. Use 'than'."]
+            ["He's faster as me.", false, "Wrong. Use 'than'."],
+            ["She is taller that her sister.", false, "Wrong. Use 'than'."],
         ]
     },
     4: {
         type: "text_multi",
         question: "Correct the error: 'Your house is bigger that mine.'",
-        answers: ["Your house is bigger than mine", "bigger than"]
+        answers: ["Your house is bigger than mine", "bigger than", "than"]
     },
     5: {
         type: "radio",
         question: "Fill in the blank: 'London is larger ______ Geneva.'",
         answers: [
             ["than", true, "Correct!"],
+            ["als", false, "Wrong."],
             ["from", false, "Wrong."],
             ["then", false, "Wrong. ('Then' is for time)."]
-        ]
-    },
-    6: {
-        type: "radio",
-        question: "Which word is often confused with 'than' but means 'at that time'?",
-        answers: [
-            ["Then", true, "Correct!"],
-            ["Than", false, "Wrong."]
-        ]
-    },
-    7: {
-        type: "radio",
-        question: "Is 'This is better from that' correct?",
-        answers: [
-            ["True", false, "Wrong. Use 'than'."],
-            ["False", true, "Correct!"]
         ]
     },
     8: {
@@ -3630,21 +3672,16 @@ export const exerciseData = {
         question: "Can we use 'than' with 'the same'?",
         answers: [
             ["No, we use 'the same as'.", true, "Correct!"],
-            ["Yes.", false, "Wrong."]
+            ["Yes.", false, "Wrong. We use 'the same as' with 'the same'."]
         ]
     },
-    12: {
-        type: "text_multi",
-        question: "Fix this: 'He is stronger then he looks.'",
-        answers: ["He is stronger than he looks", "than"]
-    }
 },
 
 // 0245 Comparative vs Superlative
 "0245": {
     1: {
         type: "radio",
-        question: "How many things are you comparing when you use a 'comparative' (-er)?",
+        question: "How many things are you comparing when you use a 'comparative' (-er or more)?",
         answers: [
             ["Two things", true, "Correct!"],
             ["Three or more things", false, "Wrong."]
@@ -3652,7 +3689,7 @@ export const exerciseData = {
     },
     2: {
         type: "radio",
-        question: "How many things are you comparing when you use a 'superlative' (-est)?",
+        question: "How many things are you comparing when you use a 'superlative' (-est or the most)?",
         answers: [
             ["One thing vs a whole group (3+)", true, "Correct!"],
             ["Only two things", false, "Wrong."]
@@ -3675,39 +3712,10 @@ export const exerciseData = {
             ["False", true, "Correct!"]
         ]
     },
-    5: {
-        type: "radio",
-        question: "If you have two sons, should you say 'he is my oldest son' or 'he is my older son'?",
-        answers: [
-            ["Older son", true, "Correct! (Comparing only 2)."],
-            ["Oldest son", false, "Wrong. (Technically, oldest is for 3+)."]
-        ]
-    },
-    6: {
-        type: "text_multi",
-        question: "Which form is used for 'the top one of all'?",
-        answers: ["superlative"]
-    },
-    7: {
-        type: "radio",
-        question: "Which is correct?",
-        answers: [
-            ["This path is the shortest of the three.", true, "Correct!"],
-            ["This path is the shorter of the three.", false, "Wrong."]
-        ]
-    },
     8: {
         type: "text_multi",
         question: "Correct the error: 'This is the better day of my life.'",
-        answers: ["This is the best day of my life", "best day"]
-    },
-    9: {
-        type: "radio",
-        question: "Fill in the blank: 'Between Sarah and Jane, Jane is ______.'",
-        answers: [
-            ["the taller", true, "Correct! (Comparing 2)."],
-            ["the tallest", false, "Wrong."]
-        ]
+        answers: ["This is the best day of my life", "the best", "the best day"]
     },
     10: {
         type: "checkbox",
@@ -3728,8 +3736,8 @@ export const exerciseData = {
     },
     12: {
         type: "text_multi",
-        question: "Fix this: 'Mount Everest is the higher mountain in the world.'",
-        answers: ["highest"]
+        question: "Fix this: 'Mount Everest is the higher mountain in the world'",
+        answers: ["highest", "the highest", "the highest mountain", "Mount Everest is the highest mountain in the world"]
     }
 },
 
@@ -3776,7 +3784,7 @@ export const exerciseData = {
     },
     6: {
         type: "radio",
-        question: "Fill in the blank: 'It was the ______ day of my life.'",
+        question: "Fill in the blank: 'It was the ______ day of the decade.'",
         answers: [
             ["hottest", true, "Correct!"],
             ["most hot", false, "Wrong."]
@@ -3793,7 +3801,7 @@ export const exerciseData = {
     8: {
         type: "text_multi",
         question: "Correct the error: 'He is the goodest player.'",
-        answers: ["He is the best player", "the best"]
+        answers: ["He is the best player", "the best", "best", "the best player"]
     },
     9: {
         type: "radio",
@@ -3813,12 +3821,9 @@ export const exerciseData = {
         ]
     },
     11: {
-        type: "radio",
-        question: "What is the superlative of 'wide'?",
-        answers: [
-            ["The widest", true, "Correct!"],
-            ["The wideste", false, "Wrong."]
-        ]
+        type: "text_multi",
+        question: "What is the superlative of 'far'?",
+        answers: [ "the farthest", "the furthest"  ]
     },
     12: {
         type: "text_multi",
@@ -3910,27 +3915,19 @@ export const exerciseData = {
         type: "radio",
         question: "Is 'The smartest of all' correct?",
         answers: [
-            ["True", true, "Correct! 'Of all' is a standard phrase."],
+            ["True", true, "Correct! We use 'of' after superlatives with groups."],
             ["False", false, "Wrong."]
         ]
     },
     12: {
         type: "text_multi",
         question: "Fix this: 'The coldest city of the country.'",
-        answers: ["The coldest city in the country", "in the country"]
+        answers: ["The coldest city in the country", "in the country", "in"]
     }
 },
 
 // 0261 The more..., the more...
 "0261": {
-    1: {
-        type: "radio",
-        question: "How many times do you use 'the' in this construction?",
-        answers: [
-            ["Twice (before both adjectives)", true, "Correct!"],
-            ["Once (at the beginning only)", false, "Wrong."]
-        ]
-    },
     2: {
         type: "radio",
         question: "Is 'More you study, better you do' correct?",
@@ -3951,8 +3948,8 @@ export const exerciseData = {
     },
     4: {
         type: "text_multi",
-        question: "Complete the phrase: 'The more, the ______.'",
-        answers: ["merrier"]
+        question: "Complete the phrase: 'The more, ___ merrier.'",
+        answers: ["the"]
     },
     5: {
         type: "radio",
@@ -3978,11 +3975,6 @@ export const exerciseData = {
             ["The harder he works, more successful he becomes.", false, "Wrong."]
         ]
     },
-    8: {
-        type: "text_multi",
-        question: "Correct the error: 'The cheaper it is, better for me.'",
-        answers: ["The cheaper it is, the better for me", "the better"]
-    },
     9: {
         type: "radio",
         question: "Is 'The less you know, the better' correct?",
@@ -3997,12 +3989,12 @@ export const exerciseData = {
         answers: [
             ["The faster, the better", true, "Correct!"],
             ["The more expensive, the better quality", true, "Correct!"],
-            ["The older I get, I am wiser", false, "Wrong."]
+            ["The older I get, more I am wise", false, "Wrong."]
         ]
     },
     11: {
         type: "radio",
-        question: "Does this construction exist in French/German without 'the'?",
+        question: "Does this construction exist in French/German without the equivalent of the article 'the'?",
         answers: [
             ["Yes, which is why it's a common error.", true, "Correct!"],
             ["No.", false, "Wrong."]
@@ -4010,7 +4002,7 @@ export const exerciseData = {
     },
     12: {
         type: "text_multi",
-        question: "Finish this: 'The bigger they are, the ____ they fall.'",
+        question: "Finish this: 'The higher they rise, the ____ they fall.'",
         answers: ["harder"]
     }
 },
@@ -4021,13 +4013,14 @@ export const exerciseData = {
         type: "radio",
         question: "Which expression is used to say two things are equal?",
         answers: [
+            ["adjective + as", false, "Wrong."],
             ["As + adjective + as", true, "Correct!"],
             ["As + adjective + than", false, "Wrong."]
         ]
     },
     2: {
         type: "radio",
-        question: "Is 'I am as tall than my brother' correct?",
+        question: "Is 'I am tall as my brother' correct?",
         answers: [
             ["True", false, "Wrong. Use 'as tall as'."],
             ["False", true, "Correct!"]
@@ -4045,8 +4038,8 @@ export const exerciseData = {
     },
     4: {
         type: "text_multi",
-        question: "Correct the error: 'He is as fast like a lightning.'",
-        answers: ["He is as fast as lightning", "as fast as"]
+        question: "Correct the error: 'He is as fast like lightning.'",
+        answers: ["He is as fast as lightning", "as fast as", "He is as fast as"]
     },
     5: {
         type: "radio",
@@ -4082,7 +4075,7 @@ export const exerciseData = {
         question: "Which is the correct way to compare two similar items?",
         answers: [
             ["This one is the same as that one.", true, "Correct!"],
-            ["This one is same as that one.", false, "Wrong. (Need the article 'the')."]
+            ["This one same like that one.", false, "Wrong."]
         ]
     },
     10: {
@@ -4091,7 +4084,7 @@ export const exerciseData = {
         answers: [
             ["As far as I know", true, "Correct!"],
             ["As well as", true, "Correct!"],
-            ["Same than before", false, "Wrong."]
+            ["Same than before", false, "Wrong."],
         ]
     },
     11: {
@@ -4103,9 +4096,12 @@ export const exerciseData = {
         ]
     },
     12: {
-        type: "text_multi",
-        question: "Correct this: 'It's as hot than yesterday.'",
-        answers: ["as hot as yesterday", "as hot as"]
+        type: "radio",
+        question: "True or false: when using adjectives for comparison, we use 'as ... as'; in the specific case of 'the same', use 'the same as'?",
+        answers: [
+            ["True", true, "Correct!"],
+            ["False", false, "Wrong."]
+        ]
     }
 },
 
@@ -4169,14 +4165,14 @@ export const exerciseData = {
     8: {
         type: "text_multi",
         question: "Correct the error: 'Please listen careful.'",
-        answers: ["Please listen carefully", "carefully"]
+        answers: ["Please listen carefully", "carefully", "listen carefully"]
     },
     9: {
         type: "radio",
         question: "Which is correct?",
         answers: [
-            ["The sun is shining brightly.", true, "Correct!"],
-            ["The sun is shining bright.", false, "Wrong."]
+            ["Bob is working efficiently.", true, "Correct!"],
+            ["Bob is working efficient.", false, "Wrong."]
         ]
     },
     10: {
@@ -4193,7 +4189,8 @@ export const exerciseData = {
         question: "What is the adverb form of 'angry'?",
         answers: [
             ["Angrily", true, "Correct!"],
-            ["Angred", false, "Wrong."]
+            ["Angred", false, "Wrong."],
+            ["Angrilein", false, "Wrong."]
         ]
     },
     12: {
@@ -4233,12 +4230,12 @@ export const exerciseData = {
     },
     4: {
         type: "text_multi",
-        question: "Correct the error: 'She runs very fastly.'",
-        answers: ["She runs very fast", "fast"]
+        question: "Correct the error: 'She runs fastly.'",
+        answers: ["She runs fast", "fast"]
     },
     5: {
         type: "radio",
-        question: "Which word means 'with great effort'?",
+        question: "Which word means 'to do something with great effort'?",
         answers: [
             ["Hard", true, "Correct! (e.g., I work hard)."],
             ["Hardly", false, "Wrong. 'Hardly' means 'almost not'."]
@@ -4288,13 +4285,21 @@ export const exerciseData = {
         question: "True or False: 'Hardly' is the adverb of 'hard'.",
         answers: [
             ["False", true, "Correct! 'Hard' is its own adverb. 'Hardly' has a different meaning."],
-            ["True", false, "Wrong."]
+            ["True", false, "Wrong. 'Hardly' is an adverb but it has a different meaning than 'hard'."]
         ]
     },
     12: {
         type: "text_multi",
         question: "Correct this: 'He hits the ball hardly.'",
-        answers: ["He hits the ball hard"]
+        answers: ["He hits the ball hard", "hard", "hits hard", "hits the ball hard"]
+    },
+    13: {
+        type: "radio",
+        question: "True or False: 'Most adverbs end in -ly, but there are a few important exceptions.'",
+        answers: [
+            ["True", true, "Correct! Most adverbs do end in -ly, but there are exceptions like 'fast' and 'hard'."],
+            ["False", false, "Wrong. There are exceptions like 'fast' and 'hard'."]
+        ]
     }
 },
 
@@ -4329,14 +4334,14 @@ export const exerciseData = {
     4: {
         type: "text_multi",
         question: "Correct the error: 'We met the last year.'",
-        answers: ["We met last year"]
+        answers: ["We met last year", "Met last year", "Last year"]
     },
     5: {
         type: "radio",
         question: "When CAN you use 'the last week'?",
         answers: [
-            ["When referring to a duration (e.g., 'in the last week' meaning 'during the past 7 days').", true, "Correct!"],
-            ["When saying when something happened in the past.", false, "Wrong."]
+            ["When using a time preposition to indicate a duration (e.g., 'in the last week', 'during the last 7 days').", true, "Correct!"],
+            ["When using 'the last week' by itself.", false, "Wrong."]
         ]
     },
     6: {
@@ -4355,11 +4360,6 @@ export const exerciseData = {
             ["The last Tuesday was rainy.", false, "Wrong."]
         ]
     },
-    8: {
-        type: "text_multi",
-        question: "What is the missing word: 'I moved here ____ February.'",
-        answers: ["last"]
-    },
     9: {
         type: "radio",
         question: "Which is correct?",
@@ -4369,12 +4369,11 @@ export const exerciseData = {
         ]
     },
     10: {
-        type: "checkbox",
-        question: "Select correct time expressions:",
+        type: "radio",
+        question: "Why is it easy for French speakers to make mistakes with 'the last week'?",
         answers: [
-            ["Last Monday", true, "Correct!"],
-            ["Next month", true, "Correct!"],
-            ["The last month", false, "Wrong."]
+            ["Because in French, 'la semaine dernière' uses a definite article, which can lead to overuse in English.", true, "Correct!"],
+            ["Because English is unfair.", false, "Wrong."]
         ]
     },
     11: {
@@ -4385,11 +4384,6 @@ export const exerciseData = {
             ["Yes.", false, "Wrong."]
         ]
     },
-    12: {
-        type: "text_multi",
-        question: "Fix this: 'The last year was difficult.'",
-        answers: ["Last year was difficult"]
-    }
 },
 
 // 0285 For vs Ago (Time in the past)
@@ -4422,7 +4416,7 @@ export const exerciseData = {
     4: {
         type: "text_multi",
         question: "Correct the error: 'He left for three hours.' (meaning 3 hours in the past)",
-        answers: ["He left three hours ago"]
+        answers: ["He left three hours ago", "three hours ago", "3 hours ago", "ago"]
     },
     5: {
         type: "radio",
@@ -4463,44 +4457,47 @@ export const exerciseData = {
     },
     10: {
         type: "checkbox",
-        question: "Identify correct usage of 'ago':",
+        question: "Identify correct usage of 'for' (tick all that apply)",
         answers: [
-            ["I saw it a minute ago.", true, "Correct!"],
-            ["Five minutes for", false, "Wrong."],
-            ["Six months ago", true, "Correct!"]
+            ["I have lived here for ten years.", true, "Correct! For introduces a duration."],
+            ["She worked for three hours without stopping.", true, "Correct! For introduces a duration."],
+            ["He arrived for five minutes ago.", false, "Wrong. 'For' cannot be used with 'ago'."]
         ]
     },
     11: {
         type: "radio",
-        question: "Is 'I arrived ago 10 minutes' correct?",
+        question: "True or false: 'for' in English corresponds to 'während' in German / 'pendant' in French?",
         answers: [
-            ["No, 'ago' follows the time period.", true, "Correct!"],
-            ["Yes.", false, "Wrong."]
+            ["True", true, "Correct! 'For' indicates a duration, similar to 'während' and 'pendant'."],
+            ["False", false, "Wrong."]
         ]
     },
     12: {
-        type: "text_multi",
-        question: "Correct this: 'I finished for an hour.'",
-        answers: ["I finished an hour ago"]
-    }
+        type: "radio",
+        question: "How is 'ago' used in relation to the point in time it refers to?",
+        answers: [
+            ["It is placed after the time expression it refers to.", true, "Correct! (e.g., 'ten minutes ago')"],
+            ["It is placed before the time expression it refers to.", false, "Wrong. (e.g., 'ago ten minutes' would be wrong)"]
+        ]
+}
 },
 
 // 0286 Since vs For (Length of time)
 "0286": {
     1: {
         type: "radio",
-        question: "Which word is used to describe a duration or length of time?",
+        question: "Which word is used to describe a duration (a period or length of time)?",
         answers: [
-            ["For", true, "Correct! (e.g., for 10 years)."],
-            ["Since", false, "Wrong. 'Since' is for a starting point."]
+            ["For", true, "Correct! (e.g., for 10 years = a duration of 10 years)."],
+            ["Since", false, "Wrong. 'Since' is for a starting point in a duration."]
         ]
     },
     2: {
         type: "radio",
         question: "Which word is used to describe a starting point in time?",
         answers: [
-            ["Since", true, "Correct! (e.g., since 2010)."],
-            ["For", false, "Wrong."]
+            ["Since", true, "Correct! (e.g., since 2010 = starting point in a duration until now)."],
+            ["For", false, "Wrong. 'For' is used for a duration or period of time, not a starting point."]
         ]
     },
     3: {
@@ -4513,13 +4510,16 @@ export const exerciseData = {
         ]
     },
     4: {
-        type: "text_multi",
-        question: "Correct the error: 'I've worked here since 5 years.'",
-        answers: ["I've worked here for 5 years", "for 5 years"]
+        type: "radio",
+        question: "Why is it easy to make errors with 'for' and 'since'?",
+        answers: [
+            ["Because they are both translated in French as 'depuis' and in German as 'seit', so it is easy to confuse them.", true, "Correct!"],
+            ["Because English is so strange.", false, "Wrong. The main reason is the translation confusion with French and German."]
+        ]
     },
     5: {
         type: "radio",
-        question: "Fill in the blank: 'We have known each other ______ childhood.'",
+        question: "Fill in the blank: 'We have known each other ______ we were children (until today).'",
         answers: [
             ["since", true, "Correct!"],
             ["for", false, "Wrong."]
@@ -4530,12 +4530,12 @@ export const exerciseData = {
         question: "Fill in the blank: 'I haven't seen him ______ a long time.'",
         answers: [
             ["for", true, "Correct!"],
-            ["since", false, "Wrong."]
+            ["since", false, "Wrong. 'A long time' is a duration, not a starting point."]
         ]
     },
     7: {
         type: "radio",
-        question: "Which is correct for '10 years'?",
+        question: "Which is correct with '10 years'?",
         answers: [
             ["For 10 years", true, "Correct!"],
             ["Since 10 years", false, "Wrong."]
@@ -4543,7 +4543,7 @@ export const exerciseData = {
     },
     8: {
         type: "text_multi",
-        question: "What is the missing word: 'I've lived here ____ last Monday.'",
+        question: "What is the missing word: 'I haven't slept ____ Monday.'",
         answers: ["since"]
     },
     9: {
@@ -4551,6 +4551,7 @@ export const exerciseData = {
         question: "Which describes an action that started in the past and continues to the present?",
         answers: [
             ["Both 'for' and 'since'.", true, "Correct! (depending on if you state the duration or start)."],
+            ["Only 'since'.", false, "Wrong. Both 'for' and 'since' can describe actions that started in the past and continue to the present-- one indicates the duration ('for') and the other indicates the starting point ('since')."],
             ["Neither.", false, "Wrong."]
         ]
     },
@@ -4572,10 +4573,13 @@ export const exerciseData = {
         ]
     },
     12: {
-        type: "text_multi",
-        question: "Correct: 'I haven't eaten since 2 days.'",
-        answers: ["I haven't eaten for 2 days", "for 2 days"]
-    }
+        type: "radio",
+        question: "Can we say 'Since a long time'?",
+        answers: [
+            ["No, use 'for a long time'.", true, "Correct!"],
+            ["Yes.", false, "Wrong."]
+        ]
+},
 },
 
 // 0287 Ever vs Never
@@ -4588,12 +4592,11 @@ export const exerciseData = {
             ["Never", false, "Wrong. 'Never' is for negations."]
         ]
     },
-    2: {
-        type: "radio",
-        question: "Is 'I have ever seen that movie' correct for a positive statement?",
+    2: { type: "radio",
+        question: "True of false: French 'jamais' is usually equivalent to 'never', but sometimes to 'ever'?",
         answers: [
-            ["True", false, "Wrong. Use 'I have seen' or 'I have always seen'."],
-            ["False", true, "Correct! 'Ever' is not used for continuation."]
+            ["True", true, "Correct! 'Jamais' usually means 'never', but in questions it can mean 'ever' (e.g., 'As-tu jamais...?')."],
+            ["False", false, "Wrong. 'Jamais' can mean 'never', but in questions it can mean 'ever'."]
         ]
     },
     3: {
@@ -4606,17 +4609,12 @@ export const exerciseData = {
             ["I ever go to the gym.", false, "Wrong."]
         ]
     },
-    4: {
-        type: "text_multi",
-        question: "What is the question form of 'I have never'?",
-        answers: ["Have you ever"]
-    },
     5: {
         type: "radio",
-        question: "Does 'ever' mean 'always'?",
+        question: "What does 'ever' mean?",
         answers: [
-            ["No, it means 'at any time'.", true, "Correct!"],
-            ["Yes.", false, "Wrong."]
+            ["It means 'at any time'.", true, "Correct!"],
+            ["It means 'always'.", false, "Wrong. 'Ever' is used to refer to any point in time, not always."]
         ]
     },
     6: {
@@ -4636,16 +4634,11 @@ export const exerciseData = {
         ]
     },
     8: {
-        type: "text_multi",
-        question: "Correct the error: 'I don't never go there.'",
-        answers: ["I never go there", "I don't ever go there"]
-    },
-    9: {
         type: "radio",
-        question: "Which sounds natural?",
+        question: "Which is correct?",
         answers: [
-            ["Hardly ever", true, "Correct! (meaning almost never)."],
-            ["Hardly never", false, "Wrong."]
+            ["I don't ever go there.", true, "Correct!"],
+            ["I don't never go there.", false, "Wrong."]
         ]
     },
     10: {
@@ -4666,25 +4659,27 @@ export const exerciseData = {
         ]
     },
     12: {
-        type: "text_multi",
-        question: "Fix this: 'Have you never been to the moon?' (for a standard question)",
-        answers: ["Have you ever been to the moon?"]
-    }
-},
+        type: "radio",
+        question: "Is 'ever' the same as 'always'?",
+        answers: [
+            ["Yes.", false, "Wrong. 'Ever' does not mean 'always', except in very specific poetic or old-fashioned usage."],
+            ["No, except in very specific old-fashioned usage, such as 'They lived happily ever after', or, 'The world is ever-changing'.", true, "Correct! 'Ever' is used in traditional expressions like '... And they lived happily ever after.'"]
+        ]
+},},
 
 // 0288 Already vs Yet
 "0288": {
     1: {
         type: "radio",
-        question: "Which word is used in positive statements to show that an action is finished?",
+        question: "Which word is used to declare that an action is finished?",
         answers: [
             ["Already", true, "Correct! (e.g., I have already eaten)."],
-            ["Yet", false, "Wrong. 'Yet' is for negations/questions."]
+            ["Yet", false, "Wrong. 'Yet' is for negations/questions, not for declarations."]
         ]
     },
     2: {
         type: "radio",
-        question: "Which word is used at the end of negative sentences or questions?",
+        question: "Which word is most commonly used at the end of negative sentences or questions?",
         answers: [
             ["Yet", true, "Correct! (e.g., I haven't eaten yet)."],
             ["Already", false, "Wrong."]
@@ -4709,8 +4704,8 @@ export const exerciseData = {
         type: "radio",
         question: "Where is 'yet' usually placed in a sentence?",
         answers: [
-            ["At the end.", true, "Correct!"],
-            ["In the middle.", false, "Wrong."]
+            ["At the end.", true, "Correct! Example: I haven't eaten yet."],
+            ["In the middle.", false, "Wrong. 'Yet' is usually placed at the end of the sentence: I haven't eaten yet."]
         ]
     },
     6: {
@@ -4727,19 +4722,6 @@ export const exerciseData = {
         answers: [
             ["The train hasn't arrived yet.", true, "Correct!"],
             ["The train hasn't arrived already.", false, "Wrong."]
-        ]
-    },
-    8: {
-        type: "text_multi",
-        question: "Correct the error: 'Have you already seen the movie?' (Standard question for confirmation)",
-        answers: ["Have you seen the movie yet?"]
-    },
-    9: {
-        type: "radio",
-        question: "Can 'already' be used in questions to express surprise?",
-        answers: [
-            ["Yes (e.g., Have you finished already?!).", true, "Correct!"],
-            ["No.", false, "Wrong."]
         ]
     },
     10: {
@@ -4760,11 +4742,13 @@ export const exerciseData = {
         ]
     },
     12: {
-        type: "text_multi",
-        question: "Correct: 'I don't know it already.'",
-        answers: ["I don't know it yet", "I don't yet know it"]
-    }
-},
+        type: "radio",
+        question: "Is the word 'yet' used in a similar way to German 'jetzt'?",
+        answers: [
+            ["Yes, they're very similar.", false, "Wrong. 'Yet' is not used like German 'jetzt' (now), but rather like 'noch nicht' or 'bereits' in German."],
+            ["No, not really.", true, "Correct! 'Yet' is not used like German 'jetzt' (now), but rather like 'noch nicht' or 'bereits' in German."]
+        ]
+    },
 
 // 0289 Still vs Anymore
 "0289": {
@@ -4781,7 +4765,7 @@ export const exerciseData = {
         question: "Which word expresses that an action has stopped?",
         answers: [
             ["Anymore", true, "Correct! (e.g., I don't work there anymore)."],
-            ["Still", false, "Wrong."]
+            ["Still", false, "Wrong. (e.g., 'I still work there' means the action is continuing from the past, not stopped)."]
         ]
     },
     3: {
@@ -4789,15 +4773,11 @@ export const exerciseData = {
         question: "Which of these are correct?",
         answers: [
             ["I still live in London.", true, "Correct!"],
+            ["I live in London anymore.", false, "Wrong. (Use 'I don't live in London anymore' instead.)"],
             ["I don't live in London anymore.", true, "Correct!"],
             ["I always live in London.", false, "Wrong. (Use 'still' for continuation)."],
             ["I still don't live in London.", true, "Correct!"]
         ]
-    },
-    4: {
-        type: "text_multi",
-        question: "What is the opposite of 'still' in a negative sentence?",
-        answers: ["anymore", "not anymore"]
     },
     5: {
         type: "radio",
@@ -4817,23 +4797,26 @@ export const exerciseData = {
     },
     7: {
         type: "radio",
-        question: "Which is correct?",
+        question: "Which is correct with the meaning 'continuing from the past'?",
         answers: [
             ["I am still active in the club.", true, "Correct!"],
             ["I am always active in the club.", false, "Wrong (if you mean you continue to be)."]
         ]
     },
     8: {
-        type: "text_multi",
-        question: "Correct the error: 'I am no more working for them.'",
-        answers: ["I am not working for them anymore", "I am no longer working for them"]
+        type: "radio",
+        question: "True or False: French toujours, when it means 'continuing from the past', should be translated as 'still' in English, not as 'always'?",
+        answers: [
+            ["True", true, "Correct!"],
+            ["False", false, "Wrong."]
+        ]
     },
     9: {
         type: "radio",
         question: "Where is 'anymore' usually placed?",
         answers: [
-            ["At the end of the sentence.", true, "Correct!"],
-            ["In the middle.", false, "Wrong."]
+            ["At the end of the sentence.", true, "Correct! Example: 'I don't want tolive there anymore.'"],
+            ["In the middle.", false, "Wrong. For example, 'I don't want to live there anymore.' places 'anymore' at the end."]
         ]
     },
     10: {
@@ -4850,13 +4833,13 @@ export const exerciseData = {
         question: "Can 'still' be used in negative sentences?",
         answers: [
             ["Yes, to show a delay (e.g., It still hasn't arrived).", true, "Correct!"],
-            ["No.", false, "Wrong."]
+            ["No.", false, "Wrong. 'Still' can be used in negative sentences to show a delay (e.g., It still hasn't arrived)."]
         ]
     },
     12: {
         type: "text_multi",
         question: "Fix this: 'I always have the same car.' (Meaning you continue to have it)",
-        answers: ["I still have the same car"]
+        answers: ["I still have the same car", "still", "I still have", "I still"]
     }
 },
 
@@ -4885,13 +4868,13 @@ export const exerciseData = {
             ["Such a beautiful place!", true, "Correct!"],
             ["Such nice people!", true, "Correct!"],
             ["Such beautiful!", false, "Wrong."],
-            ["Such a movie!", true, "Correct!"]
+            ["Such a weird movie!", true, "Correct!"]
         ]
     },
     4: {
         type: "text_multi",
         question: "Correct the error: 'It was so a long journey.'",
-        answers: ["It was such a long journey", "such a"]
+        answers: ["It was such a long journey", "such a", "such"]
     },
     5: {
         type: "radio",
@@ -4899,14 +4882,6 @@ export const exerciseData = {
         answers: [
             ["such a", true, "Correct!"],
             ["so", false, "Wrong."]
-        ]
-    },
-    6: {
-        type: "radio",
-        question: "Which is correct?",
-        answers: [
-            ["I've never seen such mess.", false, "Wrong. 'Such a mess'."] ,
-            ["I've never seen such a mess.", true, "Correct!"]
         ]
     },
     7: {
@@ -4926,8 +4901,8 @@ export const exerciseData = {
         type: "radio",
         question: "Which is correct?",
         answers: [
-            ["He has such a lot of money.", true, "Correct!"],
-            ["He has so lot of money.", false, "Wrong."]
+            ["He has such a lot of money.", true, "Correct! We use 'such' with a noun phrase."],
+            ["He has so lot of money.", false, "Wrong. We do not use 'so' with 'a lot of'."]
         ]
     },
     10: {
@@ -4936,32 +4911,33 @@ export const exerciseData = {
         answers: [
             ["Such a disaster!", true, "Correct!"],
             ["Such lovely weather!", true, "Correct!"],
-            ["Such weather lovely!", false, "Wrong."]
+            ["Such wonderful!", false, "Wrong."]
         ]
     },
     11: {
         type: "radio",
-        question: "True or False: 'Such' usually precedes the article 'a/an'.",
+        question: "True or False: We cannot use 'such' without a noun phrase.",
         answers: [
-            ["True", true, "Correct!"],
-            ["False", false, "Wrong."]
+            ["True", true, "Correct! 'Such' usually precedes a noun phrase: such a disaster!"],
+            ["False", false, "Wrong. 'Such' is typically used with a noun phrase: such a disaster!"]
         ]
     },
     12: {
         type: "text_multi",
         question: "Fix this: 'It is so a cold night.'",
-        answers: ["It is such a cold night"]
+        answers: ["It is such a cold night", "such a", "such", "such a cold night"]
     }
 },
 
 // 0294 Intensifier 'So'
 "0294": {
     1: {
-        type: "radio",
-        question: "When do you use 'so' as an intensifier?",
+        type: "checkbox",
+        question: "When do you use 'so' as an intensifier? Tick all that apply.",
         answers: [
-            ["With a single adjective.", true, "Correct! (e.g., so happy)."],
-            ["With a noun phrase.", false, "Wrong. Use 'such'."]
+            ["With a single adjective or adverb: 'so happy'.", true, "Correct!"],
+            ["With a noun phrase; 'so a happy day'.", false, "Wrong. Use 'such': such a happy day!." ],
+            ["With 'many' or 'much' to intensify a quantity: 'so many books'.", true, "Correct!"]
         ]
     },
     2: {
@@ -4979,13 +4955,14 @@ export const exerciseData = {
             ["I am so tired.", true, "Correct!"],
             ["You have so many books.", true, "Correct!"],
             ["You have so books.", false, "Wrong."],
-            ["It was so cold.", true, "Correct!"]
+            ["It was so cold.", true, "Correct!"],
+            ["It was so much cold.", false, "Wrong. Use 'so' with uncountable adjectives without 'much': 'It was so cold.'"]
         ]
     },
     4: {
         type: "text_multi",
         question: "Correct the error: 'It was such expensive.'",
-        answers: ["It was so expensive"]
+        answers: ["It was so expensive", "so", "so expensive"]
     },
     5: {
         type: "radio",
@@ -5021,7 +4998,7 @@ export const exerciseData = {
         question: "Is 'I am so a positive person' correct?",
         answers: [
             ["No, it should be 'such a positive person'.", true, "Correct!"],
-            ["Yes.", false, "Wrong."]
+            ["Yes.", false, "Wrong: it should be 'No, it should be 'such a positive person'.'"]
         ]
     },
     10: {
@@ -5037,15 +5014,10 @@ export const exerciseData = {
         type: "radio",
         question: "Can we use 'so' with 'very'?",
         answers: [
-            ["No, it's redundant. Pick one.", true, "Correct!"],
+            ["No, it's redundant. Pick one: so happy or very happy.", true, "Correct!"],
             ["Yes.", false, "Wrong."]
         ]
     },
-    12: {
-        type: "text_multi",
-        question: "Fix this: 'The movie was such good.'",
-        answers: ["The movie was so good"]
-    }
 },
 
 // 0295 Near vs Nearby
@@ -5054,16 +5026,16 @@ export const exerciseData = {
         type: "radio",
         question: "Which word is a preposition that is followed by a noun?",
         answers: [
-            ["Near", true, "Correct! (e.g., near the lake)."],
-            ["Nearby", false, "Wrong. 'Nearby' usually comes after or is used as an adjective."]
+            ["Near. Example: 'near the lake'.", true, "Correct! (e.g., near the lake)."],
+            ["Nearby. Example: 'nearby the lake'.", false, "Wrong. Adding -by means an objeect (the lake) cannot be added."]
         ]
     },
     2: {
         type: "radio",
         question: "Which word is used as an adverb or adjective at the end of a sentence?",
         answers: [
-            ["Nearby", true, "Correct! (e.g., a hotel nearby)."],
-            ["Near", false, "Wrong."]
+            ["Nearby", true, "Correct! (e.g., Is there a hotel nearby?)."],
+            ["Near", false, "Wrong. 'Near' is used as a preposition and needs a noun after it (e.g., The hotel is near the center)."]
         ]
     },
     3: {
@@ -5073,20 +5045,20 @@ export const exerciseData = {
             ["I live near the station.", true, "Correct!"],
             ["I live nearby the station.", false, "Wrong. Don't use 'nearby' as a preposition."],
             ["There is a station nearby.", true, "Correct!"],
-            ["He is close to me.", true, "Correct!"]
         ]
     },
     4: {
         type: "text_multi",
         question: "Correct the error: 'I live nearby the park.'",
-        answers: ["I live near the park", "near the park"]
+        answers: ["I live near the park", "near the park", "nearby", "I live nearby"]
     },
     5: {
-        type: "radio",
-        question: "Fill in the blank: 'Is there a pharmacy ______?'",
+        type: "checkbox",
+        question: "Fill in the blank (tick all that apply): 'Is there a pharmacy ______?'",
         answers: [
             ["nearby", true, "Correct!"],
-            ["near", false, "Wrong. (Need a noun after 'near')."]
+            ["near", false, "Wrong. (Need a noun after 'near')."],
+            ["near here", true, "Correct!"]
         ]
     },
     6: {
@@ -5094,21 +5066,16 @@ export const exerciseData = {
         question: "Fill in the blank: 'We are ______ the end.'",
         answers: [
             ["near", true, "Correct!"],
-            ["closeby", false, "Wrong."]
+            ["nearby", false, "Wrong. You cannot add a noun after 'nearby'."]
         ]
     },
     7: {
         type: "radio",
-        question: "Which is better?",
+        question: "True or false: 'nearby' is essentially the same as 'near here'?",
         answers: [
-            ["Close to the hospital", true, "Correct!"],
-            ["Close the hospital", false, "Wrong. (That's a verb!)."]
+            ["True", true, "Correct! (e.g., The hotel is nearby, which is similar to saying The hotel is near here)."],
+            ["False", false, "Wrong. 'Nearby' is essentially the same as 'near here'."]
         ]
-    },
-    8: {
-        type: "text_multi",
-        question: "Correct the phrase: 'A nearby town.'",
-        answers: ["A nearby town", "a town nearby"]
     },
     9: {
         type: "radio",
@@ -5123,22 +5090,21 @@ export const exerciseData = {
         question: "Identify correct usage:",
         answers: [
             ["Near here", true, "Correct!"],
-            ["Nearby here", false, "Wrong."],
-            ["Closeby", true, "Correct! (As an adverb)."]
+            ["Nearby here", false, "Wrong. The addition of 'here' after 'nearby' is redundant."],
         ]
     },
     11: {
         type: "radio",
         question: "Is 'The park is near' correct?",
         answers: [
-            ["Yes, as an adjective/adverb.", true, "Correct!"],
+            ["Yes.", true, "Correct!"],
             ["No.", false, "Wrong."]
         ]
     },
     12: {
         type: "text_multi",
         question: "Fix this: 'The restaurant is nearby the hotel.'",
-        answers: ["The restaurant is near the hotel", "near the hotel"]
+        answers: ["The restaurant is near the hotel", "near the hotel", "is near the hotel", "near", "is near"]
     }
 },
 
@@ -9631,8 +9597,9 @@ export const exerciseData = {
         type: "radio",
         question: "What are the two essential components of any passive construction?",
         answers: [
+            ["The verb 'be' + Gerund (-ing).", false, "Wrong."],
             ["The verb 'be' + Past Participle.", true, "Correct! (e.g., It was made)."],
-            ["The verb 'do' + Infinitive.", false, "Wrong."]
+            ["The verb 'be' + Infinitive.", false, "Wrong."]
         ]
     },
     2: {
@@ -9645,7 +9612,7 @@ export const exerciseData = {
     },
     3: {
         type: "checkbox",
-        question: "Identify correct passive sentences:",
+        question: "Identify CORRECT passive sentences:",
         answers: [
             ["The decision was made.", true, "Correct!"],
             ["They were invited.", true, "Correct!"],
@@ -9656,7 +9623,7 @@ export const exerciseData = {
     4: {
         type: "text_multi",
         question: "Correct the error: 'The letter was wrote by Mary.'",
-        answers: ["The letter was written by Mary"]
+        answers: ["was written", "written", "The letter was written", "The letter was written by Mary"]
     },
     5: {
         type: "radio",
@@ -9668,36 +9635,39 @@ export const exerciseData = {
     },
     6: {
         type: "radio",
-        question: "Fill in the blank: 'The problem ______ solved yesterday.'",
+        question: "Why do we use passive voice?'",
         answers: [
-            ["was", true, "Correct!"],
-            ["has been", false, "Wrong (because of 'yesterday')."]
+            ["To clarify the subject of the action.", false, "Incorrect! The passive voice is used to emphasize the action or the object of the action, not the subject."],
+            ["To emphasize the object of the action.", true, "Correct! The passive voice shifts focus from the subject to the object of the action."]
         ]
     },
     7: {
         type: "radio",
-        question: "Which is correct?",
+        question: "True or false: every passive conjugation requires the verb 'be'.",
         answers: [
-            ["English is spoken here.", true, "Correct!"],
-            ["English speaks here.", false, "Wrong."]
+            ["True", true, "Correct! Every passive construction requires the verb 'be'."],
+            ["False", false, "Wrong. Every passive construction requires the verb 'be'."]
         ]
     },
     8: {
-        type: "text_multi",
-        question: "What is the missing part: 'The bridge ____ ____ built in 1950.'",
-        answers: ["was"]
+        type: "radio",
+        question: "True or false: every passive sentence requires a verb in past participle form (3rd form of the verb).",
+        answers: [
+            ["True", true, "Correct! Every passive sentence requires a verb in past participle form."],
+            ["False", false, "Wrong. Every passive sentence requires a verb in past participle form."]
+        ]
     },
     9: {
         type: "radio",
-        question: "Is 'I am being watched' a passive construction?",
+        question: "True or false: The sentence 'I can eat fish' cannot be transformed into the passive voice.",
         answers: [
-            ["True", true, "Correct! (Present continuous passive)."],
-            ["False", false, "Wrong."]
+            ["True", false, "Wrong. 'I can eat fish' can be expressed in the passive voice as 'Fish can be eaten by me.'"],
+            ["False", true, "Correct! 'I can eat fish' can be expressed in the passive voice as 'Fish can be eaten by me.'"]
         ]
     },
     10: {
         type: "checkbox",
-        question: "Identify the incorrect passive forms:",
+        question: "Identify INCORRECT passive forms:",
         answers: [
             ["The project was done.", false, "Correct."],
             ["The project was did.", true, "Incorrect."],
@@ -9715,15 +9685,40 @@ export const exerciseData = {
     12: {
         type: "text_multi",
         question: "Fix this: 'The car was steal last night.'",
-        answers: ["The car was stolen last night"]
-    }
+        answers: ["The car was stolen last night", "the car was stolen", "was stolen", "stolen"]
+    },
+    13: {
+        type: "radio",
+        question: "True or false: the passive voice can be used in all tenses and modalities.",
+        answers: [
+            ["True", true, "Correct! The passive voice can be used in all tenses and modalities."],
+            ["False", false, "Wrong. The passive voice can be used in all tenses and modalities."]
+        ]
+    },
+    14: {
+        type: "radio",
+        question: "True or false: the passive voice can be applied to any verb.",
+        answers: [
+            ["True", false, "Wrong. The passive voice can only be applied to transitive verbs that have a direct object. An intransitive verb conjugation such as 'I swim' cannot be used in the passive voice."],
+            ["False", true, "Correct! The passive voice can only be applied to transitive verbs that have a direct object. Intransitive verb conjugations such as 'She meditates' cannot be rendered into passive voice."]
+        ]
+    },
+    15: {
+        type: "radio",
+        question: "When you convert from active to passive voice, how can you know what form the verb 'be' should take in a passive sentence?",
+        answers: [
+            ["It depends on the mood of the speaker.", false, "Wrong. The form of 'be' in a passive sentence does not depend on the mood of the speaker."],
+            ["It depends on the tense of the main verb the last time it was used.", false, "Wrong. The form of 'be' in a passive sentence does not depend on the last time the main verb was used."],
+            ["It depends on the tense of the main verb in the active form of the sentence.", true, "Correct! The form of 'be' in a passive sentence matches the tense of the main verb in the active sentence: 'They built a house.' -> 'A house was built by them.'; 'They will build a house.' -> 'A house will be built by them.'"]
+        ]
+    },
 },
 
 // 0801 Passive with Gerund Error
 "0801": {
     1: {
         type: "radio",
-        question: "Which verb form follows 'be' in a passive sentence?",
+        question: "Which verb form always follows 'be' in a passive sentence?",
         answers: [
             ["Past Participle (e.g., seen).", true, "Correct!"],
             ["Gerund (e.g., seeing).", false, "Wrong. 'Was seeing' is active continuous."]
@@ -9731,10 +9726,10 @@ export const exerciseData = {
     },
     2: {
         type: "radio",
-        question: "Is 'He was hiring last week' correct if someone gave him a job?",
+        question: "Is 'The cars were building in factories' a valid passive sentence?",
         answers: [
-            ["True", false, "Wrong. It should be 'He was hired'."],
-            ["False", true, "Correct!"]
+            ["True", false, "Wrong. It should be 'The cars were built in factories'. The -ing form 'building' is incorrect in passive voice."],
+            ["False", true, "Correct! This sentence is not valid because the last verb in a passive construction can never be a continuous form like 'building'."]
         ]
     },
     3: {
@@ -9748,20 +9743,21 @@ export const exerciseData = {
     },
     4: {
         type: "text_multi",
-        question: "Correct the error: 'The game was exciting.' (if you mean the game was stimulated by something else)",
-        answers: ["The game was excited", "The game was exciting"]
+        question: "Correct the error: 'Typewriters were making in Ivrea.'",
+        answers: ["Typewriters were made in Ivrea.", "were made", "made", "Typewriters were made"]
     },
     5: {
         type: "radio",
-        question: "Fill in the blank: 'He ______ gone before we arrived.'",
+        question: "Fill in the blank: 'Usain Bolt's record  ______ .'",
         answers: [
-            ["was already", true, "Correct!"],
-            ["was already going", false, "Wrong."]
+            ["will never breaking", false, "Wrong. The correct form should be 'will never be broken'."],
+            ["will never be breaking", false, "Wrong. The correct form should be 'will never be broken'."],
+            ["will never be broken", true, "Correct!"],
         ]
     },
     6: {
         type: "radio",
-        question: "Which describes an action done TO someone?",
+        question: "Which of these is a valid passive sentence?",
         answers: [
             ["She was given a gift.", true, "Correct!"],
             ["She was giving a gift.", false, "Wrong (Active)."]
@@ -9769,7 +9765,7 @@ export const exerciseData = {
     },
     7: {
         type: "radio",
-        question: "Which is correct?",
+        question: "Which of these is an example of a correct passive sentence?",
         answers: [
             ["The window was broken.", true, "Correct!"],
             ["The window was breaking.", false, "Wrong."]
@@ -9778,14 +9774,15 @@ export const exerciseData = {
     8: {
         type: "text_multi",
         question: "Correct: 'The cake was eating by the children.'",
-        answers: ["The cake was eaten by the children"]
+        answers: ["The cake was eaten by the children", "was eaten", "eaten", "The cake was eaten", "The cake was eaten..."]
     },
     9: {
         type: "radio",
-        question: "Is 'The shop was closing' the same as 'The shop was closed'?",
+        question: "To convert 'Anyone can win the trophy' into passive voice, which word has to be replaced with 'be'?",
         answers: [
-            ["No. 'Closing' is an active process; 'Closed' is the passive state or action.", true, "Correct!"],
-            ["Yes.", false, "Wrong."]
+            ["The auxiliary: 'can'", false, "Wrong. The auxiliary 'can' should be kept in the passive sentence: 'The trophy can be won by anyone.'."],
+            ["The object: 'the trophy'", false, "Wrong. The object is retained in the passive sentence, and placed at the beginning: 'The trophy can be won by anyone.'"],
+            ["The main verb: 'win'", true, "Correct! In the passive sentence, 'win' is replaced with 'be', and the past participle is then added: 'The trophy can be won by anyone.'"]
         ]
     },
     10: {
@@ -9794,12 +9791,12 @@ export const exerciseData = {
         answers: [
             ["I was inviting to the party.", true, "Incorrect. Should be 'invited'."],
             ["I was calling by my boss.", true, "Incorrect. Should be 'called'."],
-            ["The work was finished.", false, "Correct."]
+            ["The work has been finished.", false, "Correct."]
         ]
     },
     11: {
         type: "radio",
-        question: "True or False: Using the -ing form instead of the past participle makes the subject the *doer* of the action.",
+        question: "True or False: The last verb in a passive sentence can never be in the -ing form.",
         answers: [
             ["True", true, "Correct!"],
             ["False", false, "Wrong."]
@@ -9807,9 +9804,17 @@ export const exerciseData = {
     },
     12: {
         type: "text_multi",
-        question: "Fix this: 'The car is repairing.'",
-        answers: ["The car is being repaired", "The car is repaired"]
-    }
+        question: "Fix this: 'The car was repairing.'",
+        answers: ["The car was being repaired", "The car was repaired", "was repaired", "repaired", "was being repaired"]
+    },
+    13: {
+        type: "radio",
+        question: "True or False: The last verb in a passive sentence is always in the past participle form (taken, written, made, etc.).",
+        answers: [
+            ["True", true, "Correct!"],
+            ["False", false, "Wrong."]
+        ]
+    },
 },
 
 // 0802 Passive Preposition (By)
@@ -9837,29 +9842,23 @@ export const exerciseData = {
         answers: [
             ["Painted by Leonardo.", true, "Correct!"],
             ["Decided by the board.", true, "Correct!"],
-            ["Made of wood.", true, "Correct! (Materials use 'of' or 'from')."],
-            ["Made by wood.", false, "Wrong."]
+            ["Grown from local farmers.", false, "Wrong."],
+            ["Built from the Romans.", false, "Wrong."]
         ]
     },
     4: {
         type: "text_multi",
         question: "Correct the error: 'The song was sung from a famous artist.'",
-        answers: ["The song was sung by a famous artist"]
+        answers: ["by", "by a famous artist", "The song was sung by a famous artist"]
     },
     5: {
-        type: "radio",
-        question: "Fill in the blank: 'He was hit ______ a car.'",
+        type: "checkbox",
+        question: "Fill in the blank: 'The poor cat was hit ______ a car.' Tick any that apply.",
         answers: [
+            ["from", false, "Wrong."],
             ["by", true, "Correct!"],
-            ["with", false, "Wrong (unless someone used a car as a tool to hit him)."]
-        ]
-    },
-    6: {
-        type: "radio",
-        question: "Fill in the blank: 'The door was opened ______ a key.'",
-        answers: [
-            ["with", true, "Correct! (Use 'with' for instruments/tools)."],
-            ["by", false, "Wrong (unless the key is alive)."]
+            ["with", false, "Wrong (unless someone used a car as a tool to hit him)."],
+            ["of", false, "Wrong."]
         ]
     },
     7: {
@@ -9885,7 +9884,7 @@ export const exerciseData = {
     },
     10: {
         type: "checkbox",
-        question: "Identify the correct usage of 'by':",
+        question: "Tick all the correct sentences:",
         answers: [
             ["Discovery by chance.", true, "Correct!"],
             ["Driven by success.", true, "Correct!"],
@@ -9900,11 +9899,6 @@ export const exerciseData = {
             ["False", false, "Wrong."]
         ]
     },
-    12: {
-        type: "text_multi",
-        question: "Fix this: 'The goal was scored through the captain.'",
-        answers: ["The goal was scored by the captain"]
-    }
 },
 
 // 0805 To be born
@@ -9913,8 +9907,9 @@ export const exerciseData = {
         type: "radio",
         question: "Which tense do we use to state the year of your birth?",
         answers: [
-            ["Past Simple Passive (I was born).", true, "Correct!"],
-            ["Present Simple (I am born).", false, "Wrong."]
+            ["Past continuous (I was borning in 1999).", false, "Wrong."],
+            ["Past Simple Passive (I was born in 1999).", true, "Correct!"],
+            ["Present Simple Passive (I am born in 1999).", false, "Wrong."]
         ]
     },
     2: {
@@ -9931,36 +9926,41 @@ export const exerciseData = {
         answers: [
             ["She was born in Berlin.", true, "Correct!"],
             ["They were born in 2000.", true, "Correct!"],
+            ["I borned in London.", false, "Wrong (needs the verb 'to be')."],
             ["I born in London.", false, "Wrong (needs the verb 'to be')."]
         ]
     },
     4: {
         type: "text_multi",
         question: "Correct the error: 'He is born in March.'",
-        answers: ["He was born in March"]
+        answers: ["He was born in March", "was", "was born"]
     },
     5: {
         type: "radio",
-        question: "What is the past participle of 'bear' used in this expression?",
+        question: "What is the infinitive form of the verb 'born'?",
         answers: [
-            ["born", true, "Correct!"],
-            ["bore", false, "Wrong (bore is the past simple)."]
+            ["bar", false, "Wrong."],
+            ["beer", false, "Wrong, that's a refreshing beverage."],
+            ["bear", true, "Correct! (The infinitive form is 'to bear', which means 'to endure or carry.')"],
+            ["bore", false, "Wrong (bore is the past simple form of 'to bear', which is the infinitive of 'born')."]
         ]
     },
     6: {
         type: "radio",
         question: "Fill in the blank: 'Where ______ you born?'",
         answers: [
+            ["are", false, "Wrong. We use PAST simple passive for birth"],
             ["were", true, "Correct!"],
-            ["was", false, "Wrong."]
+            ["was", false, "Wrong. The conjugation of be with pronoun 'you' is 'were'."],
+            ["is", false, "Wrong. We use PAST simple passive for birth."]
         ]
     },
     7: {
         type: "radio",
-        question: "Which is correct?",
+        question: "Why is it so easy for Swiss speakers to mistakenly say 'I am born'?",
         answers: [
-            ["A star was born.", true, "Correct!"],
-            ["A star is born.", true, "Correct! (Title of a movie, but 'was' is for history)."]
+            ["Because English is so weird", false, "Wrong. The correct answer relates to the influence of French and Swiss German."],
+            ["Because we say 'Je suis né' in French or 'Ich bin geboren' in German, with present forms of the verb 'to be'.", true, "Correct!"]
         ]
     },
     8: {
@@ -9970,10 +9970,12 @@ export const exerciseData = {
     },
     9: {
         type: "radio",
-        question: "Can we say 'I borned there'?",
+        question: "Why can't we say 'I borned there'?",
         answers: [
-            ["No, 'born' is not a normal verb you conjugate like that.", true, "Correct!"],
-            ["Yes.", false, "Wrong."]
+            ["Because the act of birth is passive by definition; when we are born, we are recipients of the action, not the agents.", true, "Correct!"],
+            ["Because of archaic usage, 'borned' was once used but is now obsolete.", false, "Wrong."],
+            ["Because it appears this way in Shakespeare, so now everyone thinks it's correct.", false, "Wrong. 'Borned' is not standard English."]
+
         ]
     },
     10: {
@@ -9987,17 +9989,12 @@ export const exerciseData = {
     },
     11: {
         type: "radio",
-        question: "True or False: Since birth is a past event, 'am born' is technically impossible unless you are currently arriving!",
+        question: "True or False: Since birth is always a past event, 'I am born' would be technically impossible.",
         answers: [
-            ["True", true, "Correct!"],
-            ["False", false, "Wrong."]
+            ["True", true, "Correct. Since birth is always a past event, 'I am born' is technically impossible."],
+            ["False", false, "Wrong. Since birth is always a past event, 'I am born' is technically impossible."]
         ]
     },
-    12: {
-        type: "text_multi",
-        question: "Fix this: 'My brother born in 1998.'",
-        answers: ["My brother was born in 1998"]
-    }
 },
 
 // 0910 Subject vs Object Pronouns

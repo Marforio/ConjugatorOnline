@@ -121,18 +121,12 @@
                       <thead>
                         <tr>
                           <th class="font-weight-bold">Student</th>
-                          <th class="font-weight-bold">Domain</th>
                           <th class="text-center font-weight-bold" style="width: 60px;">Action</th>
                         </tr>
                       </thead>
                       <tbody>
                         <tr v-for="student in course.students" :key="student.id">
                           <td class="font-weight-black text-slate-700">{{ student.web_id }}</td>
-                          <td>
-                            <v-chip size="x-small" variant="tonal" color="slate-600" class="text-uppercase font-weight-bold">
-                              {{ student.domain || 'General' }}
-                            </v-chip>
-                          </td>
                           <td class="text-center">
                             <!-- 🔄 Explicit Unenroll Action per Student -->
                             <v-btn 
@@ -402,12 +396,13 @@
 <v-dialog v-model="courseDialog" max-width="550px">
   <v-card rounded="lg">
     <v-card-title class="pa-4 bg-primary text-white font-weight-bold">
-      {{ isEditingCourse ? 'Course Parameters' : 'Create New Course Module' }}
+      {{ isEditingCourse ? 'Course Settings' : 'Create New Course' }}
     </v-card-title>
     <v-card-text class="pt-4">
       <v-form ref="courseFormRef">
         <v-text-field 
           v-model="newCourse.slug" 
+          label="Course Name"
           variant="outlined" 
           density="compact"
           :disabled="isEditingCourse"
@@ -436,7 +431,7 @@
         
         <div v-else max-height="250px" class="overflow-y-auto pr-1 pa-3">
           <div v-for="(goal, index) in newCourse.objectives" :key="index" class="d-flex align-center gap-2 mb-2">
-            <v-text-field v-model="goal.title" :label="`Objective #${index + 1} Title`" placeholder="e.g., Mastery of Subjunctive Form" variant="outlined" density="compact" hide-details />
+            <v-text-field v-model="goal.title" :label="`Objective #${index + 1}`" placeholder="e.g., Mastery of Subjunctive Form" variant="outlined" density="compact" hide-details />
             <v-btn icon="mdi-delete-outline" variant="text" size="small" color="error" @click="newCourse.objectives.splice(index, 1)" />
           </div>
         </div>
@@ -501,11 +496,11 @@
     <v-dialog v-model="deleteConfirmDialog" max-width="450px">
       <v-card rounded="lg" class="pa-2">
         <v-card-title class="text-h6 font-weight-bold text-error d-flex align-center gap-2">
-          <v-icon color="error">mdi-alert-circle</v-icon> Confirm Operations Change
+          <v-icon color="error">mdi-alert-circle</v-icon> Confirm Deletion
         </v-card-title>
         <v-card-text class="text-body-1 py-2">
-          Are you sure you want to execute this operation on <strong>{{ deleteTargetLabel }}</strong>?<br>
-          <span class="text-caption text-error font-weight-bold" v-if="deleteTargetType !== 'unenroll'">⚠️ Warning: This path modification is permanent.</span>
+          Are you sure you want to delete <strong>{{ deleteTargetLabel }}</strong>?<br>
+          <span class="text-caption text-error font-weight-bold" v-if="deleteTargetType !== 'unenroll'">⚠️ Warning: This modification is permanent.</span>
         </v-card-text>
         <v-card-actions class="justify-end">
           <v-btn variant="text" @click="deleteConfirmDialog = false">Cancel</v-btn>
@@ -820,7 +815,7 @@ const activeAssessmentStudent = ref<any>(null)
 
 const domainOptions = [
   { value: 'architecture', label: 'Architecture' }, { value: 'business_1', label: 'Business 1' },
-  { value: 'business_2', label: 'Business 2' }, { value: 'business_3', label: 'Business 3' },
+  { value: 'business_2', label: 'Business 2' }, { value: 'business_3', label: 'Business 3' }, { value: 'business_4', label: 'Business 4' }, { value: 'chemistry', label: 'Chemistry' }, { value: 'civil', label: 'Civil Engineering' }, { value: 'computer_science', label: 'Computer Science' }, { value: 'electrical', label: 'Electrical Engineering' }, { value: 'mechanical', label: 'Mechanical Engineering' },
   { value: 'general', label: 'General' }
 ]
 
@@ -1166,7 +1161,7 @@ const submitAssignCourse = async () => {
 const confirmDeleteCourse = (course: any) => {
   deleteTargetType.value = 'course'
   deleteTargetId.value = course.slug
-  deleteTargetLabel.value = `Course Module space "${course.slug}"`
+  deleteTargetLabel.value = `Course "${course.slug}"`
   deleteConfirmDialog.value = true
 }
 
