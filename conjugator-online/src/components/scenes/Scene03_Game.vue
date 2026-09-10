@@ -2,7 +2,7 @@
   <v-container fluid class="pa-0 d-flex bg-white" style="height: 100vh;">
     <!-- Navigation Drawer -->
     <v-navigation-drawer
-  v-if="$vuetify.display.smAndUp"  
+  v-if="$vuetify.display.mdAndUp"  
   permanent
   width="300"
   class="border-r border-slate-200 bg-white d-flex flex-column"
@@ -875,6 +875,7 @@ const displayedTenseHeader = computed(() => (showKeyword.value ? "Time reference
 .max-width-instructions-panel {
   max-width: 580px;
   width: 100%;
+  margin-left: 20%;
 }
 
 .game-runtime-deck {

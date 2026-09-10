@@ -40,19 +40,6 @@
               </div>
             </div>
 
-            <!-- Suspicious Activity Alert -->
-            <div v-if="finalStats.is_suspicious" class="mt-4 bg-red-lighten-5 border border-error rounded-xl pa-3">
-              <div class="d-flex align-center mb-1">
-                <v-icon color="error" size="18" class="mr-1">mdi-alert-circle-outline</v-icon>
-                <span class="text-caption font-weight-bold text-error">Suspicious Activity Detected</span>
-              </div>
-              <div class="text-xxs text-slate-600">
-                <span class="font-weight-bold">Score:</span> {{ (finalStats.suspicious_score * 100).toFixed(0) }}%
-                <br>
-                <span class="font-weight-bold">Flags:</span> {{ finalStats.suspicious_flags.join(', ') || 'None' }}
-              </div>
-            </div>
-
             <!-- D3 Visual Anchor Container -->
             <v-responsive max-width="320" class="mx-auto mt-6">
               <div id="pie-chart" class="d3-pie-stage-canvas"></div>
@@ -137,7 +124,33 @@
                         <div class="d-flex justify-space-between mb-0.5"><span class="text-slate-400">Subject:</span><span class="font-weight-bold text-slate-700">{{ result.person }}</span></div>
                         <div class="d-flex justify-space-between mb-0.5"><span class="text-slate-400">Tense:</span><span class="font-weight-bold text-slate-700 text-truncate">{{ result.tense }}</span></div>
                         <div class="d-flex justify-space-between"><span class="text-slate-400">Type:</span><span class="font-weight-bold text-slate-700">{{ result.sentence_type }}</span></div>
-                        <div class="d-flex justify-space-between"><span class="text-slate-400">Difficulty:</span><span class="font-weight-bold text-slate-700">{{ result.difficulty_score }}</span></div>
+                        <div class="d-flex justify-space-between align-center">
+                            <span class="text-slate-400 d-flex align-center ga-1">
+                              Difficulty:
+                              <v-tooltip location="top">
+                                <template #activator="{ props }">
+                                  <v-icon v-bind="props" size="16" color="grey-darken-1" class="cursor-help">
+                                    mdi-help-circle-outline
+                                  </v-icon>
+                                </template>
+                                <div>
+                                  <div><strong>{{ (Number(result.difficulty_score || 0)).toFixed(2) }} / 4.30</strong></div>
+                                  <div>
+                                    Score based on the complexity of the prompt (tense, sentence type, and verb set).
+                                  </div>
+                                </div>
+                              </v-tooltip>
+                            </span>
+
+                            <span class="d-flex align-center ga-2">
+                              <span class="font-weight-bold text-slate-700">
+                                {{ (Number(result.difficulty_score || 0)).toFixed(2) }}
+                              </span>
+                              <v-chip size="x-small" :color="difficultyMeta(result.difficulty_score).color" variant="tonal">
+                                {{ difficultyMeta(result.difficulty_score).label }}
+                              </v-chip>
+                            </span>
+                          </div>
                       </div>
                     </v-card>
                   </div>
@@ -233,7 +246,33 @@
                         <div class="d-flex justify-space-between mb-0.5"><span class="text-slate-400">Subject:</span><span class="font-weight-bold text-slate-700">{{ result.person }}</span></div>
                         <div class="d-flex justify-space-between mb-0.5"><span class="text-slate-400">Tense:</span><span class="font-weight-bold text-slate-700 text-truncate">{{ result.tense }}</span></div>
                         <div class="d-flex justify-space-between"><span class="text-slate-400">Type:</span><span class="font-weight-bold text-slate-700">{{ result.sentence_type }}</span></div>
-                        <div class="d-flex justify-space-between"><span class="text-slate-400">Difficulty:</span><span class="font-weight-bold text-slate-700">{{ result.difficulty_score }}</span></div>
+                        <div class="d-flex justify-space-between align-center">
+                            <span class="text-slate-400 d-flex align-center ga-1">
+                              Difficulty:
+                              <v-tooltip location="top">
+                                <template #activator="{ props }">
+                                  <v-icon v-bind="props" size="16" color="grey-darken-1" class="cursor-help">
+                                    mdi-help-circle-outline
+                                  </v-icon>
+                                </template>
+                                <div>
+                                  <div><strong>{{ (Number(result.difficulty_score || 0)).toFixed(2) }} / 4.30</strong></div>
+                                  <div>
+                                    Score based on the complexity of the prompt (tense, sentence type, and verb set).
+                                  </div>
+                                </div>
+                              </v-tooltip>
+                            </span>
+
+                            <span class="d-flex align-center ga-2">
+                              <span class="font-weight-bold text-slate-700">
+                                {{ (Number(result.difficulty_score || 0)).toFixed(2) }}
+                              </span>
+                              <v-chip size="x-small" :color="difficultyMeta(result.difficulty_score).color" variant="tonal">
+                                {{ difficultyMeta(result.difficulty_score).label }}
+                              </v-chip>
+                            </span>
+                          </div>
                       </div>
 
                       <div class="text-xxs text-slate-500 font-weight-medium mb-2">
@@ -434,6 +473,13 @@ function scrollWrong(direction: 'left' | 'right') {
   }
 }
 
+function difficultyMeta(scoreRaw: any) {
+  const s = Number(scoreRaw || 0);
+  if (s >= 3.9) return { label: "Very hard", color: "red-darken-1" };
+  if (s >= 3.3) return { label: "Hard", color: "deep-orange-darken-1" };
+  if (s >= 2.5) return { label: "Medium", color: "amber-darken-2" };
+  return { label: "Easy", color: "green-darken-1" };
+}
 
 // Error display helpers
 function formatErrorCode(code: string): string {

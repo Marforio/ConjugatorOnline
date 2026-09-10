@@ -281,7 +281,7 @@ const isImmersiveMode = computed(() => {
     'conjugator', 'market-masters', 'meeting-machine', 'pronoun-practice', 'exercise-detail', 'vocabworkout',
     'passive-party', 'comparison', 'quantifier-quest', 'idealinker', 'regret-machine',
     'year-2040', 'wordfamilies', 'uses-of-auxiliaries', 'verb-mixer', 'reported-speech',
-    'parallel-universe', 'trickytranslator'
+    'parallel-universe', 'trickytranslator', 'price-is-right'
   ]
   return deepFocusViews.includes(route.name || '')
 })

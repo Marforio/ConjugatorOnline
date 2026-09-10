@@ -17,7 +17,7 @@ export const errorsData: Record<string, ErrorEntry> = {
     "0111":{
         "short_slug": "wild-plural-s", 
         "description": "adding a plural '-s' ending to words in singular form",
-        "reference": "section 1.1.1 in the pdf grammar manual",
+        "reference": "<a href='https://book.language-labs.ch/ch1#e0111' target='_blank'>error 0111</a>",
         "recommendation": "slow down when you speak and focus specifically on having control over -s endings",
         "examples": "'one pieces'; 'a machines', etc."
     },
@@ -407,6 +407,13 @@ export const errorsData: Record<string, ErrorEntry> = {
         "recommendation": "remember pronouns 'he', 'she', and 'it' require an -s ending in the present simple",
         "examples": "say 'he runs, it doesn't work, she does not go', etc."
     },
+    "0311": {
+        "short_slug": "pres-simple-s-excessive",
+        "description": "adding -s to a modal verb, to a principal verb not in the present simple",
+        "reference": "<a href='https://book.language-labs.ch/ch3#e0311' target='_blank'>error 0311</a>",
+        "recommendation": "remember that -s is only added to a principal verb in the present simple when the subject is 'he', 'she' or 'it'",
+        "examples": "say 'he can go', not 'he cans go'; say 'he broke', not 'he brokes'; 'it can allow', not 'it can allows'"
+    },
     "0319":{
         "short_slug": "standard-positive-form",
         "description": "missing auxiliary verb in the standard positive form",
@@ -485,23 +492,23 @@ export const errorsData: Record<string, ErrorEntry> = {
         "examples": "'If I knew where he lived I would tell you' is correct; 'If I would know where he lived I would tell you' is incorrect"
     },
     "0415":{
-        "short_slug": "will-vs-want",
+        "short_slug": "will-would-want",
         "description": "confusing 'will' or 'would' with 'want' due to German influence",
         "reference": "<a href='https://book.language-labs.ch/ch4#e0415' target='_blank'>error 0415</a>",
         "recommendation": "remember that 'will' is the auxiliary verb for the future tense; do not confuse it with 'want to'",
         "examples": "'I will go' (j'irai) is not the same as 'I want to go' (je veux y aller)"
     },
-            "0416":{
+    "0416":{
         "short_slug": "will-in-2nd-conditional",
         "description": "using will instead of would in the result clause of a 2nd conditional sentence",
-        "reference": "<a href='https://book.language-labs.ch/ch4#e0416'>error 0416</a>",
+        "reference": "<a href='https://book.language-labs.ch/ch4#e0416' target='_blank'>error 0416</a>",
         "recommendation": "remember that 'would', not 'will', is used in the result clause of a 2nd conditional sentence",
         "examples": "'If I was rich, I would travel the world' is correct; 'If I am rich, I will travel the world' is incorrect"
     },
-        "0417":{
+    "0417":{
         "short_slug": "past-in-2nd-conditional",
         "description": "using past simple in the restult clause of a 2nd conditional sentence",
-        "reference": "<a href='https://book.language-labs.ch/ch4#e0417'>error 0417</a>",
+        "reference": "<a href='https://book.language-labs.ch/ch4#e0417' target='_blank'>error 0417</a>",
         "recommendation": "remember that the past simple is used only in the condition clause of a 2nd conditional sentence",
         "examples": "'If I was rich, I would travel the world' is correct; 'If I was rich, I traveled the world' is incorrect"
     },
@@ -617,9 +624,17 @@ export const errorsData: Record<string, ErrorEntry> = {
         "recommendation": "remember that the future perfect is used for a single action that will be complete at a set point in the future",
         "examples": "'I will have landed by the time you wake up tomorrow.'"
     },
+    "0460": {
+        "short_slug": "3rd-conditional",
+        "description": "incorrect 3rd conditional form",
+        "reference": "<a href='https://book.language-labs.ch/ch4#e0460' target='_blank'>error 0460</a>",
+        "recommendation": "remember that the 3rd conditional is formed with 'if + past perfect' in the condition clause and 'would have + past participle' in the result clause",
+        "examples": "'If I had studied harder, I would have passed the exam.'"
+
+    },
 
     "0510":{
-        "short_slug": "past-modal-gen",
+        "short_slug": "past-modal-should-could",
         "description": "incorrect past form of should or could to express regret or crticism",
         "reference": "<a href='https://book.language-labs.ch/ch5#e0510' target='_blank'>error 0510</a>",
         "recommendation": "remember that the past of should or could is 'should + have + past participle'",
@@ -670,10 +685,10 @@ export const errorsData: Record<string, ErrorEntry> = {
 
     "0710":{
         "short_slug": "sentence-order-VO",
-        "description": "putting modifiers between the verb and the direct object",
+        "description": "putting modifiers between the verb and the direct object, or putting the object before the verb",
         "reference": "<a href='https://book.language-labs.ch/ch7#e0710' target='_blank'>error 0710</a>",
         "recommendation": "remember that we avoid placing modifiers between a verb and its object",
-        "examples": "say 'she speaks German fluently', not 'she speaks fluently German"
+        "examples": "say 'she speaks German fluently', not 'she speaks fluently German'; say 'they can see this film', not 'they can this film see'"
     },
     "0712":{
         "short_slug": "preposition-position",
@@ -851,18 +866,25 @@ export const errorsData: Record<string, ErrorEntry> = {
         "examples": "say 'There are two stations', not 'There is two stations' or 'There has two stations' or 'It gives two stations'"
     },
     "0960":{
-        "short_slug": "relative-who-which",
-        "description": "incorrect relative pronoun (who vs which)",
+        "short_slug": "relative-who-that-which",
+        "description": "incorrect relative pronoun (who vs that/which)",
         "reference": "<a href='https://book.language-labs.ch/ch9#e0960' target='_blank'>error 0960</a>",
-        "recommendation": "remember that we use 'who' for people and 'which' for things",
+        "recommendation": "remember that we use 'who' for people, not for things. Use 'that' or 'which' for things, and 'who' for people.",
         "examples": "The man who called the police wants to talk to you; the stadium, which was built in 1905, is our greatest monument"
     },
     "0961":{
-        "short_slug": "relative-place",
-        "description": "incorrect relative pronoun for place",
+        "short_slug": "relative-place-time",
+        "description": "incorrect relative pronoun for place or time",
         "reference": "<a href='https://book.language-labs.ch/ch9#e0961' target='_blank'>error 0961</a>",
         "recommendation": "remember that we use 'where' to refer to a place, not 'who'",
         "examples": "The place where I met her is now a parking lot; The city where I was born is very beautiful"
+    },
+    "0962": {
+        "short_slug": "subject-pronoun-or-adverb-as-relative",
+        "description": "incorrect use of a subject pronoun or adverb as a relative pronoun",
+        "reference": "<a href='https://book.language-labs.ch/ch9#e0962' target='_blank'>error 0962</a>",
+        "recommendation": "remember that we do not use subject pronouns (I, he, she, we, they) or adverbs (what) as relative pronouns",
+        "examples": "say 'The man who called the police is my neighbor', not 'The man he called the police is my neighbor' or 'The man what called the police is my neighbor'"
     },
     "0970":{
         "short_slug": "relative-whose",
@@ -935,7 +957,7 @@ export const errorsData: Record<string, ErrorEntry> = {
         "examples": "'I am interested in art'; 'I am bad at swimming'; 'it depends on the weather'"
     },
     "1100":{
-        "short_slug": "verb-comp-choice",
+        "short_slug": "verb-comp-wrong-choice",
         "description": "incorrect type of verb complement",
         "reference": "<a href='https://book.language-labs.ch/ch11#e1100' target='_blank'>error 1100</a>",
         "recommendation": "remember that some verbs are followed by infinitive complements, and others by gerund (-ing) complements",
@@ -951,7 +973,7 @@ export const errorsData: Record<string, ErrorEntry> = {
     "1112":{
         "short_slug": "verb-comp-preposition",
         "description": "incorrectly using infinitive after a preposition",
-        "reference": "<a href='https://book.language-labs.ch/ch11#e1112 target='_blank'>error 1112</a>)",
+        "reference": "<a href='https://book.language-labs.ch/ch11#e1112' target='_blank'>error 1112</a>)",
         "recommendation": "remember that we gerund (-ing) after a preposition",
         "examples": "'I got fired for being late'; 'I am interested in learning languages', etc."
     },
@@ -1033,14 +1055,14 @@ export const errorsData: Record<string, ErrorEntry> = {
         "examples": "the car of my friends is my friends' car"
     },
     "1300":{
-        "short_slug": "auxiliary-application",
+        "short_slug": "auxiliary-wrong-form",
         "description": "error in the use of an auxiliary to show interest or agreement",
         "reference": "<a href='https://book.language-labs.ch/ch13#e1300' target='_blank'>error 1300</a>",
         "recommendation": "remember that auxiliaries are repeated to show interest or to agree with your interlocutor",
         "examples": "'You haven't seen her, have you?'; -'I lived in Taiwan' -'Oh, so did I'"
     },
     "1310":{
-        "short_slug": "auxiliary-application",
+        "short_slug": "auxiliary-too-short-yes-no-answer",
         "description": "sounding dry or cold by answering with a simple 'yes' or 'no'",
         "reference": "<a href='https://book.language-labs.ch/ch13#e1310' target='_blank'>error 1310</a>",
         "recommendation": "remember that auxiliaries are repeated to show interest or to agree with your interlocutor",
@@ -1325,6 +1347,13 @@ export const errorsData: Record<string, ErrorEntry> = {
         "reference": "<a href='https://book.language-labs.ch/ch15#interesting' target='_blank'>interesting</a>",
         "recommendation": "read the explanation in section 15.0.2",
         "examples": "'interesting' is the correct adjective in English; the French form 'interessant' does not exist in English"
+    },
+    "1534":{
+        "short_slug": "common-last-latest",
+        "description": "incorrect use of 'the last' instead of 'the latest' when the meaning is 'the most recent'",
+        "reference": "<a href='https://book.language-labs.ch/ch15#last-latest' target='_blank'>the last vs the latest</a>",
+        "recommendation": "read the explanation in section 15.0.2",
+        "examples": "say 'the latest news', not 'the last news'"
     },
     "1801":{
         "short_slug": "arch-architect",

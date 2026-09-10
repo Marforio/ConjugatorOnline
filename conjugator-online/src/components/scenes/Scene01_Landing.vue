@@ -1,6 +1,6 @@
 <template>
   <!-- Pure white background, clean alignment grid boundaries -->
-  <v-container fluid class="fill-height d-flex flex-column bg-white justify-center pa-6" style="min-height: calc(100vh - 64px);">
+  <v-container fluid class="fill-height d-flex flex-column bg-white justify-center pa-6" style="min-height: calc(100vh - 100px);">
     
     <v-row align="center" justify="center" class="flex-grow-1 text-center w-100">
       <v-col cols="12" class="d-flex flex-column align-center justify-center">
@@ -19,7 +19,7 @@
           <v-img
             :src="xs ? '/images/banners/Conjugator2.png' : '/images/banners/Conjugator.png'"
             class="rounded-xl game-banner-graphic border shadow-sm mx-auto"
-            :max-width="xs ? '100%' : sm ? '560' : md ? '800' : '1100'"
+            :max-width="xs ? '100%' : sm ? '560' : md ? '800' : '1000'"
             cover
           />
         </div>
@@ -31,17 +31,6 @@
       </v-col>
     </v-row>
 
-    <!-- Navigation Escape Link Row -->
-    <v-row no-gutters class="w-100 justify-center pb-4 mt-auto">
-      <v-btn 
-        icon="mdi-arrow-left" 
-        variant="tonal" 
-        size="large" 
-        color="slate-600" 
-        class="bg-white border rounded-xl elevation-1" 
-        :to="{ name: 'student-home' }" 
-      />
-    </v-row>
   </v-container>
 </template>
 

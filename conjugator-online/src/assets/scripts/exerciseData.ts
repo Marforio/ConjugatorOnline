@@ -5511,9 +5511,79 @@ export const exerciseData = {
             ["False", true, "Correct! 'No one' is singular ('one' indicates a single person >> 'personne' in French), so it should be 'No one knows the truth.'"]
         ]
     },
+    13: {
+        type: "radio",
+        question: "True or False: French speakers often transfer the -s ending from the verb to the subject pronoun 'it': e.g., 'It works' becomes 'It-s work'?",
+        answers: [
+            ["True", true, "Correct! This is a common error among French speakers."],
+            ["False", false, "Wrong. French speakers often make this transfer."]
+        ]
+    },
+    14: {
+        type: "radio",
+        question: "Select the errors that French speakers often make with the -s ending in the present simple (Tick all that apply):",
+        answers: [
+            ["They transfer the -s to the subject pronoun 'it': e.g., 'It works' becomes 'It-s work'.", true, "Correct!"],
+            ["They leave out the -s completely: e.g., 'He work' instead of 'He works'.", true, "Correct!"],
+            ["French speakers never make mistakes.", false, "Wrong. French speakers often make mistakes with the -s ending in the present simple."]
+        ]
+    }
 },
-// Positive form (S A P )
-"0319": {
+"0311": {
+1: {
+        type: "radio",
+        question: "Which is correct?",
+        answers: [
+            ["They goes to school.", false, "Wrong. The correct form is 'They go to school.'"],
+            ["They go to school.", true, "Correct!"]
+        ]
+    },
+    2: {
+        type: "radio",
+        question: "Which is correct?",
+        answers: [
+            ["It can allow", true, "Correct!"],
+            ["It can allows", false, "Wrong. The correct form is 'It can allow.'"]
+        ]
+    },
+    3: {
+        type: "radio",
+        question: "Which is correct?",
+        answers: [
+            ["He can goes", false, "Wrong. The correct form is 'He can go.'"],
+            ["He can go", true, "Correct!"]
+        ]
+    },
+    4: {
+        type: "checkbox",
+        question: "Which are correct?",
+        answers: [
+            ["It breaks", true, "Correct!"],
+            ["It break", false, "Wrong. The correct form is 'It breaks.'"],
+            ["It brokes", false, "Wrong. The correct form is 'It broke.'"],
+            ["It broke", true, "Correct!"]
+        ]
+    },
+    5: {
+        type: "checkbox",
+        question: "Which verb tenses require an -s ending for 3rd person singular?",
+        answers: [
+            ["Present Simple", true, "Correct! Example: 'He works.'"],
+            ["Past Simple", false, "Wrong. The Past Simple does not require the -s ending for 3rd person singular (he ran, she stole)."],
+            ["Future Simple", false, "Wrong. The Future Simple does not require the -s ending for 3rd person singular (it will work)."],
+            ["Present Perfect (I have seen)", false, "Wrong. The Present Perfect does not require the -s ending for 3rd person singular (it has changed)."]
+        ]
+    },
+    6: {
+        type: "radio",
+        question: "True or false: French speakers sometimes add -s endings to verbs in tenses that do not require them (e.g., 'He can goes', 'It brokes').",
+        answers: [
+            ["True", true, "Correct! This is frequent among French speakers."],
+            ["False", false, "Wrong. French speakers sometimes add -s endings to verbs in tenses that do not require them."]
+        ]
+    }
+},
+    "0319": {
     1: {
         type: "radio",
         question: "What is the standard order for a declarative (positive) sentence?",
@@ -7422,46 +7492,36 @@ export const exerciseData = {
         ]
     },
     4: {
-        type: "text_multi",
-        question: "Correct the sentence: 'I've written three emails.' (to emphasize the finished number)",
-        answers: ["I have written three emails"]
+        type: "radio",
+        question: "Which tense is better for 'How long'?",
+        answers: [
+            ["Present Perfect Simple (How long have you waited?)", false, "Wrong. Asking 'how long' emphasizes the duration, not the total number."],
+            ["Present Perfect Continuous (How long have you been waiting?)", true, "Correct!"]
+        ]
     },
     5: {
         type: "radio",
-        question: "Fill in the blank: 'My hands are dirty because I ______ in the garden.'",
+        question: "Fill in the blank: 'She is a top pianist because she ______ for 12 years.'",
         answers: [
-            ["have been working", true, "Correct! (Activity in progress)."],
-            ["have worked", false, "Wrong."]
+            ["has been training", true, "Correct!"],
+            ["has trained", false, "Wrong. This emphasizes the completion of a phase, which is not the case."]
         ]
     },
     6: {
         type: "radio",
-        question: "Which is better for 'How many'?",
+        question: "Which tense is better for 'How many'?",
         answers: [
             ["Present Perfect Simple (How many have you made?)", true, "Correct!"],
-            ["Present Perfect Continuous", false, "Wrong."]
-        ]
-    },
-    7: {
-        type: "radio",
-        question: "Which is better for 'How long'?",
-        answers: [
-            ["Present Perfect Continuous (How long have you been waiting?)", true, "Correct!"],
-            ["Present Perfect Simple", false, "Wrong."]
+            ["Present Perfect Continuous (How many have you been making?)", false, "Wrong. Asking 'how many' means asking for the total number, not the duration."]
         ]
     },
     8: {
-        type: "text_multi",
-        question: "Correct the sentence: 'I've been finishing my homework.'",
-        answers: ["I have finished my homework"]
-    },
-    9: {
         type: "radio",
-        question: "Can state verbs (know, like) be used in the continuous form?",
+        question: "Which is correct?",
         answers: [
-            ["No, even in the perfect tense (e.g., I've known him, not I've been knowing).", true, "Correct!"],
-            ["Yes.", false, "Wrong."]
-        ]
+            ["I've been reading for two hours.", true, "Correct! (emphasizes duration)"],
+            ["I've read for two hours.", false, "Wrong. This emphasizes the completion of a phase, which is not the case."]
+        ]   
     },
     10: {
         type: "checkbox",
@@ -7469,7 +7529,8 @@ export const exerciseData = {
         answers: [
             ["I've broken my glass.", true, "Correct!"],
             ["I've been breaking my glass.", false, "Wrong."],
-            ["She's found a new job.", true, "Correct!"]
+            ["She's found a new job.", true, "Correct!"],
+            ["She's been finding a new job.", false, "Wrong."]
         ]
     },
     11: {
@@ -7481,9 +7542,12 @@ export const exerciseData = {
         ]
     },
     12: {
-        type: "text_multi",
-        question: "Fix this: 'I've been learning 50 new words today.' (emphasizing the result)",
-        answers: ["I have learned 50 new words today"]
+        type: "radio",
+        question: "Which is correct for a recent action with a visible result?",
+        answers: [
+            ["I've learned 50 new words today.", true, "Correct!"],
+            ["I've been learning 50 new words today.", false, "Wrong. This emphasizes the process, not the result."]
+        ]
     }
 },
 
@@ -7494,7 +7558,8 @@ export const exerciseData = {
         question: "Which tense should you use for an event that happened and finished last year?",
         answers: [
             ["Past Simple (I went)", true, "Correct!"],
-            ["Present Simple (I go)", false, "Wrong."]
+            ["Present Simple (I go)", false, "Wrong. Present simple is for present habits or general truths."],
+            ["Present Perfect (I have gone)", false, "Wrong. Present perfect is for indefinite or unfinished past actions."]
         ]
     },
     2: {
@@ -7507,17 +7572,18 @@ export const exerciseData = {
     },
     3: {
         type: "checkbox",
-        question: "Which of these require the past tense?",
+        question: "Why do students often use the present simple instead of past simple to talk about the past? Tick all that apply.",
         answers: [
-            ["Last month I visited my aunt.", true, "Correct!"],
-            ["In 1999, they moved to Berlin.", true, "Correct!"],
-            ["Usually, I visit my aunt.", false, "Wrong. (Habit)."]
+            ["Because they don't feel confident with the past simple.", true, "Correct!"],
+            ["Because they don't feel confident with irregular verb forms.", true, "Correct!"],
+            ["To avoid the effort of pronouncing -ed endings.", true, "Correct!"],
+            ["Because English is super hard.", false, "Not really. English is not that hard."]
         ]
     },
     4: {
         type: "text_multi",
-        question: "Correct the error: 'When I was a child, I play soccer.'",
-        answers: ["I played soccer"]
+        question: "Correct the error: 'When I was a child, I always eat healthy.'",
+        answers: ["I always ate healthy", "ate", "When I was a child, I always ate healthy"]
     },
     5: {
         type: "radio",
@@ -7532,7 +7598,7 @@ export const exerciseData = {
         question: "Fill in the blank: 'Suddenly, the door ______.'",
         answers: [
             ["opened", true, "Correct!"],
-            ["opens", false, "Wrong (unless telling a story in the 'historical present')."]
+            ["open", false, "Wrong (unless telling a story in the 'historical present', but then the -s is added)."]
         ]
     },
     7: {
@@ -7540,29 +7606,25 @@ export const exerciseData = {
         question: "Which sounds more like a past story?",
         answers: [
             ["He came in and sat down.", true, "Correct!"],
-            ["He comes in and sits down.", false, "Wrong."]
+            ["He come in and sit down.", false, "Wrong."]
         ]
     },
-    8: {
-        type: "text_multi",
-        question: "Correct the sentence: 'I arrive late for the meeting yesterday.'",
-        answers: ["I arrived late"]
-    },
+
     9: {
         type: "radio",
-        question: "Is 'I didn't went' correct?",
+        question: "Is 'I don't go to the meeting last week' correct?",
         answers: [
-            ["No, after 'didn't', use the infinitive 'go'.", true, "Correct!"],
-            ["Yes.", false, "Wrong."]
+            ["No, after 'didn't', use the infinitive 'go'.", true, "Correct! 'I didn't go to the meeting last week.'"],
+            ["Yes.", false, "Wrong. You're talking about a specific finished time, so use past simple."]
         ]
     },
     10: {
         type: "checkbox",
-        question: "Identify correct past tense verbs:",
+        question: "Identify correct PAST tense verbs:",
         answers: [
             ["He spoke.", true, "Correct!"],
             ["She buyed.", false, "Wrong (Bought)."],
-            ["They knew.", true, "Correct!"]
+            ["They know.", false, "Wrong (Knew)."],
         ]
     },
     11: {
@@ -7574,9 +7636,14 @@ export const exerciseData = {
         ]
     },
     12: {
-        type: "text_multi",
-        question: "Fix this: 'Last night I eat a burger.'",
-        answers: ["Last night I ate a burger"]
+        type: "radio",
+        question: "To avoid making this error in the future, what should you do?",
+        answers: [
+            ["Just learn the past forms of irregular verbs.", true, "Correct!"],
+            ["Use present simple for everything.", false, "Wrong. Present simple is not appropriate for past events."],
+            ["Avoid talking about the past.", false, "Wrong. You can talk about the past, but you need to use the correct tense."],
+            ["Avoid human contact in general.", false, "Wrong. This is not a solution to the grammar issue."]
+        ]
     }
 },
 
@@ -7587,7 +7654,7 @@ export const exerciseData = {
         question: "Can you use the Present Perfect (I have done) with a specific finished time like 'yesterday'?",
         answers: [
             ["No, use the Past Simple.", true, "Correct! 'I did it yesterday', not 'I have done it yesterday'."],
-            ["Yes.", false, "Wrong."]
+            ["Yes.", false, "Wrong. Present Perfect is never used with specific finished times."]
         ]
     },
     2: {
@@ -7610,7 +7677,7 @@ export const exerciseData = {
     4: {
         type: "text_multi",
         question: "Correct the error: 'I have finished my studies in June.'",
-        answers: ["I finished my studies in June"]
+        answers: ["I finished my studies in June", "I finished my studies", "I finished", "finished"]
     },
     5: {
         type: "radio",
@@ -7637,16 +7704,19 @@ export const exerciseData = {
         ]
     },
     8: {
-        type: "text_multi",
-        question: "Correct the sentence: 'I have had a big breakfast this morning.' (it is now afternoon)",
-        answers: ["I had a big breakfast"]
+        type: "radio",
+        question: "Why do French and German speakers often use Present Perfect in Past simple situations?",
+        answers: [
+            ["Because the Present perfect tense is dumb.", false, "Wrong. The Present Perfecct is a beautiful part of English grammar."],
+            ["Because they tend to translate directly from their own languages, which uses passé composée (j'ai mangé) or Perfekt for past events (ich habe gegessen) for events in finished time.", true, "Correct!"]
+        ]
     },
     9: {
         type: "radio",
         question: "Is 'I've worked there from 2005 to 2010' correct?",
         answers: [
-            ["No, use past simple 'I worked'.", true, "Correct!"],
-            ["Yes.", false, "Wrong."]
+            ["No, use past simple 'I worked'.", true, "Correct! The time frame is specific and closed."],
+            ["Yes.", false, "Wrong. The time frame is specific and closed, so past simple is required."]
         ]
     },
     10: {
@@ -7662,14 +7732,14 @@ export const exerciseData = {
         type: "radio",
         question: "True or False: If the sentence has the word 'ago', you MUST use the past simple.",
         answers: [
-            ["True", true, "Correct!"],
-            ["False", false, "Wrong."]
+            ["True", true, "Correct! 'Ago' makes the time frame specific and closed."],
+            ["False", false, "Wrong. 'Ago' indicates a specific time in the past, which requires past simple."]
         ]
     },
     12: {
         type: "text_multi",
         question: "Fix this: 'I have eaten at that restaurant last week.'",
-        answers: ["I ate at that restaurant last week"]
+        answers: ["I ate at that restaurant last week", "I ate", "ate"]
     }
 },
 
@@ -7679,15 +7749,15 @@ export const exerciseData = {
         type: "radio",
         question: "When is the Past Continuous (I was doing) used?",
         answers: [
-            ["For an action ongoing at a specific moment in the past.", true, "Correct!"],
-            ["For a repeated habit in the past.", false, "Wrong."]
+            ["For a single action that is ongoing (in progress) at a specific point in the past.", true, "Correct!"],
+            ["For a repeated habit in the past.", false, "Wrong. Use Past Simple for habits."],
         ]
     },
     2: {
         type: "radio",
         question: "Is 'I was going to the beach every day when I was young' correct?",
         answers: [
-            ["True", false, "Wrong. Should be 'I went to the beach'."],
+            ["True", false, "Wrong. Should be 'I went to the beach' or 'I used to go to the beach'."],
             ["False", true, "Correct!"]
         ]
     },
@@ -7697,20 +7767,25 @@ export const exerciseData = {
         answers: [
             ["I was sleeping when the alarm went off.", true, "Correct!"],
             ["What were you doing at 8 PM yesterday?", true, "Correct!"],
-            ["He was always eating apples.", true, "Correct! (Again, the 'always' exception for annoyance)."]
+            ["He was always walking to school.", true, "Wrong. Use 'I used to walk to school' for past habits."]
         ]
     },
     4: {
-        type: "text_multi",
-        question: "Correct the error: 'As a child, I was playing the violin a lot.'",
-        answers: ["I played the violin a lot", "I used to play"]
+        type: "radio",
+        question: "How do we make the past continuous tense?'",
+        answers: [
+            ["have/has + been + verb-ing", false, "Wrong. That's present perfect continuous."],
+            ["was/were + verb-ing", true, "Correct!"],
+            ["was/were + verb-ed", false, "Wrong. That's past simple."],
+        ]
     },
     5: {
         type: "radio",
-        question: "Which tense provides the 'background' for a specific event?",
+        question: "Which tense provides the 'background' for a specific event in the past?",
         answers: [
             ["Past Continuous", true, "Correct! (e.g., The sun was shining when we left)."],
-            ["Past Simple", false, "Wrong."]
+            ["Past Simple", false, "Wrong. Past Simple is for completed actions, not background context: (e.g., We LEFT when the sun was shining)."],
+            ["Present Perfect", false, "Wrong. Present Perfect is for indefinite or unfinished past actions, not background context."]
         ]
     },
     6: {
@@ -7718,15 +7793,16 @@ export const exerciseData = {
         question: "Fill in the blank: 'While I ______ dinner, the phone rang.'",
         answers: [
             ["was cooking", true, "Correct!"],
-            ["cooked", false, "Wrong (implied sequence, not background)."]
+            ["cooked", false, "Wrong (implied sequence, not background)."],
+            ["have been cooking", false, "Wrong (present perfect continuous is not used for past background)."]
         ]
     },
     7: {
         type: "radio",
         question: "Which is better for a past habit?",
         answers: [
-            ["I took the bus to school.", true, "Correct!"],
-            ["I was taking the bus to school.", false, "Wrong."]
+            ["I took the bus to school.", true, "Correct! Use past simple for habits, or 'used to'."],
+            ["I was taking the bus to school.", false, "Wrong. Past continuous is for SINGLE actions in progress, not habits."]
         ]
     },
     8: {
@@ -7736,10 +7812,10 @@ export const exerciseData = {
     },
     9: {
         type: "radio",
-        question: "Is 'I was finishing my project yesterday' correct for a completed task?",
+        question: "What is better?",
         answers: [
-            ["No, use 'I finished'.", true, "Correct!"],
-            ["Yes.", false, "Wrong."]
+            ["As a child I would always play on the lakeshore.", true, "Correct! We can use 'would' like 'used to' for past habits."],
+            ["As a child I was always playing on the lakeshore.", false, "Wrong. Use past simple, 'would' or 'used to' for past habits."]
         ]
     },
     10: {
@@ -7753,17 +7829,20 @@ export const exerciseData = {
     },
     11: {
         type: "radio",
-        question: "True or False: Use Past Simple for completed actions; Past Continuous for actions 'in progress'.",
+        question: "True or False: Use Past Simple for completed actions; Past Continuous for actions 'in progress', often as background to the past simple action.",
         answers: [
             ["True", true, "Correct!"],
             ["False", false, "Wrong."]
         ]
     },
     12: {
-        type: "text_multi",
-        question: "Fix this: 'Every morning, I was waking up at 6 AM.'",
-        answers: ["I woke up at 6 AM", "I used to wake up at 6 AM"]
-    }
+        type: "radio",
+        question: "True or false: Past continuous often complements a past simple action by providing a background event.",
+        answers: [
+            ["True. Example: 'While I was cooking dinner, the phone rang.'", true, "Correct!"],
+            ["False. We do not use past continuous for background actions.", false, "Wrong."]
+        ]
+},
 },
 
 // 0447 Used To + Inf.
@@ -7781,6 +7860,7 @@ export const exerciseData = {
         question: "How do you form the negative of 'I used to play'?",
         answers: [
             ["I did not use to play", true, "Correct! (Note: 'use' loses the 'd')."],
+            ["I did not used to play", false, "Wrong (the '-d' is removed with 'did')."],
             ["I used not to play", false, "Wrong (archaic)."]
         ]
     },
@@ -7795,15 +7875,15 @@ export const exerciseData = {
     },
     4: {
         type: "text_multi",
-        question: "How do you ask a question about a past habit with 'use'?",
-        answers: ["Did you use to"]
+        question: "Transform this into a question: 'You used to play.'",
+        answers: ["Did you use to play?", "Did you use to play", "Did you use to"]
     },
     5: {
         type: "radio",
         question: "Does 'used to' exist in the present tense?",
         answers: [
-            ["No. For present habits, just use the Present Simple.", true, "Correct!"],
-            ["Yes.", false, "Wrong."]
+            ["No. For present habits, just use the Present Simple and say 'usually': I usually play.", true, "Correct!"],
+            ["Yes. For example: I use to play football.", false, "Wrong."]
         ]
     },
     6: {
@@ -7818,45 +7898,42 @@ export const exerciseData = {
         type: "radio",
         question: "Which is better?",
         answers: [
-            ["I used to have long hair.", true, "Correct!"],
-            ["I was having long hair.", false, "Wrong."]
+            ["I used to have long hair.", true, "Correct! This is how we talk about past habits."],
+            ["I was having long hair.", false, "Wrong. Use 'used to' for past habits, not past continuous."]
         ]
-    },
-    8: {
-        type: "text_multi",
-        question: "Correct the spelling: 'I didn't used to swim.'",
-        answers: ["I didn't use to swim"]
     },
     9: {
         type: "radio",
         question: "Is 'I'm used to' the same as 'I used to'?",
         answers: [
-            ["No. 'I'm used to' means you are accustomed to something now.", true, "Correct!"],
-            ["Yes.", false, "Wrong."]
+            ["No. 'I'm used to' means you are accustomed to something now ('used' is an adjective, not a verb).", true, "Correct!"],
+            ["Yes.", false, "Wrong. 'I'm used to' is not the same as 'I used to'."]
         ]
     },
     10: {
-        type: "checkbox",
-        question: "Identify the correct 'Habit' sentences:",
+        type: "radio",
+        question: "True or false: is 'used to' conjugated like a regular verb?",
         answers: [
-            ["I used to go to church.", true, "Correct!"],
-            ["She used to be shy.", true, "Correct!"],
-            ["I used to go to the gym tomorrow.", false, "Wrong (Future)."]
+            ["True, but only in the past simple tense.", true, "Correct!"],
+            ["False, it is irregular.", false, "Wrong. 'Used to' is regular in the past simple tense."]
         ]
     },
     11: {
         type: "radio",
         question: "True or False: 'Used to' implies that the action no longer happens.",
         answers: [
-            ["True", true, "Correct!"],
-            ["False", false, "Wrong."]
+            ["True, in many cases, but not always.", true, "Correct! Example: 'I used to play football' implies you don't play now, but 'I used to play football and still do' is possible."],
+            ["False. It never implies that.", false, "Wrong. 'Used to' often implies that the action no longer happens, but context matters."]
         ]
     },
     12: {
-        type: "text_multi",
-        question: "Fix this: 'I am used to play tennis when I was 10.'",
-        answers: ["I used to play tennis"]
-    }
+        type: "radio",
+        question: "True or False: 'Used to' is a unique verb that only exists as a past tense form.",
+        answers: [
+            ["True.", true, "Correct!"],
+            ["False. It can be used in the present tense.", false, "Wrong. 'Used to' is a past tense form and does not exist in the present tense."]
+        ]   
+},
 },
 
 // 0448 Past Perfect Incorrect
@@ -7874,7 +7951,7 @@ export const exerciseData = {
         question: "Is 'I had eaten lunch yesterday' a correct standalone sentence?",
         answers: [
             ["No, use 'I ate lunch'.", true, "Correct!"],
-            ["Yes.", false, "Wrong."]
+            ["Yes.", false, "Wrong. The past perfect usually needs another past action in past simple tense to relate to."]
         ]
     },
     3: {
@@ -7887,16 +7964,19 @@ export const exerciseData = {
         ]
     },
     4: {
-        type: "text_multi",
-        question: "Correct the sentence: 'I had graduated in 2010.'",
-        answers: ["I graduated in 2010"]
+        type: "radio",
+        question: "Correct the error: 'I had seen that movie last week.'",
+        answers: [
+            ["I saw that movie last week.", true, "Correct!"],
+            ["I have seen that movie last week.", false, "Wrong. Use past simple for a specific time in the past."]
+        ]
     },
     5: {
         type: "radio",
         question: "Which tense acts as the 'past of the past'?",
         answers: [
-            ["Past Perfect", true, "Correct!"],
-            ["Past Simple", false, "Wrong."]
+            ["Past Perfect (I had seen)", true, "Correct!"],
+            ["Past Simple + did for emphasis (I did saw)", false, "Wrong. This form is not standard English."]
         ]
     },
     6: {
@@ -7916,16 +7996,19 @@ export const exerciseData = {
         ]
     },
     8: {
-        type: "text_multi",
-        question: "Fix this: 'I had gone to bed early last night.'",
-        answers: ["I went to bed early last night"]
+        type: "radio",
+        question: "True or false: Past Perfect is used in specific narrative situations, not as a default past form.",
+        answers: [
+            ["True", true, "Correct! It is used to show that one past action happened before another past action."],
+            ["False", false, "Wrong. Past Perfect is not a default past form; it indicates a past event that occurred before another past event."]
+        ]
     },
     9: {
         type: "radio",
         question: "Is 'The film started when we arrived' different from 'The film had started when we arrived'?",
         answers: [
             ["Yes. 'Had started' means it was already playing when you got there.", true, "Correct!"],
-            ["No.", false, "Wrong."]
+            ["No.", false, "Wrong. 'The film started when we arrived' means it began at the same time you arrived, while 'The film had started when we arrived' means it was already in progress before you got there."]
         ]
     },
     10: {
@@ -7941,16 +8024,28 @@ export const exerciseData = {
         type: "radio",
         question: "True or False: Do not use 'had' just because an action is very old.",
         answers: [
-            ["True", true, "Correct!"],
-            ["False", false, "Wrong."]
+            ["True", true, "Correct! It's not a matter of age; it's about an action happening before another past action."],
+            ["False", false, "Wrong. The use of 'had' is not determined by how long ago the action occurred, but rather by its relationship to another past action."]
         ]
     },
     12: {
-        type: "text_multi",
-        question: "Correct: 'She said she had finished yesterday.'",
-        answers: ["She said she had finished"]
-    }
+        type: "radio",
+        question: "True or false: we use past perfect when the action occurred very long ago (hundreds of years ago).",
+        answers: [
+            ["True", false, "Wrong. Past Perfect is used to show that one past action happened before another past action, not based on how long ago it occurred."],
+            ["False", true, "Correct! The timing of the action does not determine the use of Past Perfect."]
+        ]
 },
+    13: {
+        type: "radio",
+        question: "How do we build the Past Perfect tense?",
+        answers: [
+            ["had + past participle", true, "Correct!"],
+            ["had + present participle (-ing)", false, "Wrong. The past perfect is formed with 'had' followed by the past participle of the verb."],
+            ["have + past participle", false, "Wrong. 'Have' is used for present perfect, not past perfect."]
+        ]
+    }
+}   ,
 
 // 0449 Past Perfect Underuse
 "0449": {
@@ -7974,15 +8069,18 @@ export const exerciseData = {
         type: "checkbox",
         question: "Identify the sentences that NEED Past Perfect for clarity:",
         answers: [
-            ["The meeting ______ (start) before I arrived.", true, "Correct! (had started)."],
-            ["I realized I ______ (leave) my phone at home.", true, "Correct! (had left)."],
-            ["I ______ (buy) a sandwich and ate it.", false, "Wrong (actions are in sequence)."]
+            ["The meeting ______ (start) when I arrived.", true, "Correct! (had started)."],
+            ["I went to the gym and then I had dinner.", false, "Wrong. The sequence is clear without Past Perfect."],
+            ["Correct the sentence: 'When I got home, my brother already ate my pizza.'", true, "Correct! (had already eaten)."]
         ]
     },
     4: {
-        type: "text_multi",
-        question: "Correct the sentence: 'When I got home, my brother already ate my pizza.'",
-        answers: ["had already eaten", "had already eaten my pizza"]
+        type: "radio",
+        question: "True or false: The past perfect is needed when an action happened a very long time ago.",
+        answers: [
+            ["True", false, "Wrong. It is needed to signal that one past action happened before another past action."],
+            ["False", true, "Correct! It is not needed just because an action happened a long time ago."]
+        ]
     },
     5: {
         type: "radio",
@@ -7994,24 +8092,25 @@ export const exerciseData = {
     },
     6: {
         type: "radio",
-        question: "Fill in the blank: 'He was tired because he ______ all night.'",
+        question: "How do we form the Past Perfect tense in a sentence?",
         answers: [
-            ["had been working", true, "Correct!"],
-            ["worked", false, "Wrong (suggests he worked after he was tired)."]
+            ["had + past participle", true, "Correct!"],
+            ["had + present participle (-ing)", false, "Wrong. The past perfect is formed with 'had' followed by the past participle of the verb."],
+            ["have + past participle", false, "Wrong. 'Have' is used for present perfect, not past perfect."]
         ]
     },
     7: {
         type: "radio",
-        question: "Which is correct for reported speech?",
+        question: "True or false: an event in Past Perfect happened AFTER another past event.",
         answers: [
-            ["He said he had lost his wallet.", true, "Correct!"],
-            ["He said he lost his wallet.", false, "Incorrect (technically)."]
+            ["True", false, "Wrong. Past Perfect indicates an action that happened BEFORE another past action."],
+            ["False", true, "Correct! An event in Past Perfect happened before another past event."]
         ]
     },
     8: {
         type: "text_multi",
-        question: "Complete the sentence: 'By the time I was 20, I ____ ____ to three different countries.'",
-        answers: ["had been"]
+        question: "Complete the sentence: 'By the time I was 20, I ____ ____ three different countries.'",
+        answers: ["had been to", "had visited", "had lived in", "had seen", "had experienced", "had known"]
     },
     9: {
         type: "radio",
@@ -8028,14 +8127,6 @@ export const exerciseData = {
             ["I had never seen such a thing until yesterday.", true, "Correct!"],
             ["I felt better after I had slept.", true, "Correct!"],
             ["I had went to the store.", false, "Wrong (Had gone)."]
-        ]
-    },
-    11: {
-        type: "radio",
-        question: "True or False: Use Past Perfect to go 'backwards' in time from a past story.",
-        answers: [
-            ["True", true, "Correct!"],
-            ["False", false, "Wrong."]
         ]
     },
     12: {
@@ -8060,7 +8151,7 @@ export const exerciseData = {
         question: "Which tense is used for a prediction based on opinion?",
         answers: [
             ["Future Simple (I think they will win).", true, "Correct!"],
-            ["Present Continuous", false, "Wrong."]
+            ["Present Continuous (I think they are winning).", false, "Wrong. This is too certain for a prediction based on opinion."]
         ]
     },
     3: {
@@ -8074,14 +8165,14 @@ export const exerciseData = {
     },
     4: {
         type: "text_multi",
-        question: "Instead of 'I will play tennis tomorrow at 10 AM', say: 'I ____ ____ ____ tomorrow.'",
-        answers: ["am playing tennis", "am playing"]
+        question: "Instead of 'I will play tennis tomorrow at 10 AM', say: 'I ____ ____ tennis tomorrow.'",
+        answers: ["I'm playing", "am playing", "m playing", "'m playing"]
     },
     5: {
         type: "radio",
         question: "Fill in the blank: 'Look at those clouds! It ______ rain.' (Prediction with evidence)",
         answers: [
-            ["is going to", true, "Correct!"],
+            ["is going to", true, "Correct! The clouds give certain evidence."],
             ["will", false, "Wrong (less common for immediate physical evidence)."]
         ]
     },
@@ -8090,7 +8181,7 @@ export const exerciseData = {
         question: "Fill in the blank: 'Wait, I ______ help you with those bags.'",
         answers: [
             ["will", true, "Correct! (Spontaneous decision)."],
-            ["am helping", false, "Wrong."]
+            ["am helping", false, "Wrong. This sounds like a planned action, not a spontaneous decision."]
         ]
     },
     7: {
@@ -8103,16 +8194,8 @@ export const exerciseData = {
     },
     8: {
         type: "text_multi",
-        question: "What is the missing auxiliary: 'They ____ ____ to London next week.' (tickets are bought)",
-        answers: ["are going"]
-    },
-    9: {
-        type: "radio",
-        question: "Can we use 'will' for a social arrangement?",
-        answers: [
-            ["It is better to use the continuous form.", true, "Correct!"],
-            ["Yes, always.", false, "Wrong."]
-        ]
+        question: "What is the missing conjugation: 'They ____ ____ to London next week.' (tickets are bought)",
+        answers: ["are going", "are flying", "are traveling", "are travelling"]
     },
     10: {
         type: "checkbox",
@@ -8120,7 +8203,7 @@ export const exerciseData = {
         answers: [
             ["I think it will be a good day.", true, "Correct!"],
             ["In the future, cars will fly.", true, "Correct!"],
-            ["In the future, cars are flying.", false, "Wrong."]
+            ["In the future, cars are flying.", false, "Wrong. This is too certain for a prediction."]
         ]
     },
     11: {
@@ -8131,11 +8214,6 @@ export const exerciseData = {
             ["False", false, "Wrong."]
         ]
     },
-    12: {
-        type: "text_multi",
-        question: "Fix this: 'I will dinner with my parents tonight.' (It's a fixed plan)",
-        answers: ["I am having dinner", "I'm having dinner"]
-    }
 },
 
 // 0451 Future Continuous
@@ -8150,10 +8228,11 @@ export const exerciseData = {
     },
     2: {
         type: "radio",
-        question: "Which is a correct use of Future Continuous?",
+        question: "How is the future continuous formed?",
         answers: [
-            ["At this time tomorrow, I will be sitting on a plane.", true, "Correct!"],
-            ["I will be sitting on a plane tomorrow.", false, "Wrong (lacks the specific time point context)."]
+            ["will + be + verb-ing", true, "Correct!"],
+            ["will + verb-ing", false, "Wrong. You need 'be' before the verb-ing form."],
+            ["am/is/are + verb-ing", false, "Wrong. This is present continuous."],
         ]
     },
     3: {
@@ -8162,28 +8241,20 @@ export const exerciseData = {
         answers: [
             ["I will be working from 9 to 5 tomorrow.", true, "Correct!"],
             ["Will you be using your car tonight?", true, "Correct! (often used for polite requests)."],
-            ["I will being working.", false, "Wrong."]
+            ["I will working.", false, "Wrong."]
         ]
     },
     4: {
         type: "text_multi",
         question: "Correct the error: 'I will working when you arrive.'",
-        answers: ["I will be working"]
+        answers: ["I will be working", "will be working", "I'll be working"]
     },
     5: {
         type: "radio",
-        question: "Fill in the blank: 'This time next week, we ______ on the beach.'",
+        question: "Right or wrong: 'This time next week, we will be lying on the beach.'",
         answers: [
-            ["will be lying", true, "Correct!"],
-            ["will lie", false, "Wrong."]
-        ]
-    },
-    6: {
-        type: "radio",
-        question: "Is 'I will be coming to the party' a polite way to announce your arrival?",
-        answers: [
-            ["True", true, "Correct! It sounds less like a decision and more like a natural event."],
-            ["False", false, "Wrong."]
+            ["Right", true, "Correct!"],
+            ["Wrong", false, "Wrong."]
         ]
     },
     7: {
@@ -8201,10 +8272,10 @@ export const exerciseData = {
     },
     9: {
         type: "radio",
-        question: "Can we use Future Continuous for a temporary future state?",
+        question: "What is the difference between Future Continuous and Future Simple?",
         answers: [
-            ["Yes.", true, "Correct!"],
-            ["No.", false, "Wrong."]
+            ["Future Continuous describes an ongoing action at a specific future time, while Future Simple describes a general future action.", true, "Correct!"],
+            ["Future Continuous is used only with state verbs, while Future Simple is used for future actions.", false, "Wrong."]
         ]
     },
     10: {
@@ -8213,7 +8284,7 @@ export const exerciseData = {
         answers: [
             ["He will be sleeping.", true, "Correct!"],
             ["They will be traveling.", true, "Correct!"],
-            ["She will be been working.", false, "Wrong."]
+            ["She will been working.", false, "Wrong."]
         ]
     },
     11: {
@@ -8224,11 +8295,6 @@ export const exerciseData = {
             ["False", false, "Wrong."]
         ]
     },
-    12: {
-        type: "text_multi",
-        question: "Fix this: 'I will flying to New York this time tomorrow.'",
-        answers: ["I will be flying"]
-    }
 },
 
 // 0452 Future Perfect
@@ -8246,7 +8312,7 @@ export const exerciseData = {
         question: "Which phrase is commonly used with the Future Perfect?",
         answers: [
             ["By the time...", true, "Correct! (e.g., By the time you arrive, I will have finished)."],
-            ["When...", false, "Wrong."]
+            ["During...", false, "Wrong."]
         ]
     },
     3: {
@@ -8254,14 +8320,14 @@ export const exerciseData = {
         question: "Identify the CORRECT structures:",
         answers: [
             ["I will have graduated by next year.", true, "Correct!"],
-            ["I will have finish by 5 PM.", false, "Wrong (Need past participle 'finished')."],
+            ["I will to finish by 5 PM.", false, "Wrong (Need have +past participle 'finished')."],
             ["They will have arrived before we do.", true, "Correct!"]
         ]
     },
     4: {
         type: "text_multi",
         question: "Correct the error: 'I will have see the doctor by then.'",
-        answers: ["I will have seen the doctor"]
+        answers: ["I will have seen the doctor", "seen", "will have seen"]
     },
     5: {
         type: "radio",
@@ -8276,7 +8342,7 @@ export const exerciseData = {
         question: "Is 'I will have landed' the same as 'I will land'?",
         answers: [
             ["No. 'Will have landed' means the action is already over at that future point.", true, "Correct!"],
-            ["Yes.", false, "Wrong."]
+            ["Yes.", false, "Wrong. 'I will land' does not indicate the action is already over at that future point."]
         ]
     },
     7: {
@@ -8288,16 +8354,21 @@ export const exerciseData = {
         ]
     },
     8: {
-        type: "text_multi",
-        question: "What is the missing auxiliary: 'She ____ ____ ____ by the time we arrive.' (leave)",
-        answers: ["will have left"]
+        type: "radio",
+        question: "What is the meaning of the preposition 'by' in the context of the Future Perfect?",
+        answers: [
+            ["Indicates the author of an action.", false, "Wrong. Not in combination with the Future Perfect."],
+            ["Indicates a deadline or a point in the future by which an action will be completed.", true, "Correct!"],
+            ["Indicates the duration of an action.", false, "Wrong."]
+        ]
     },
+        
     9: {
         type: "radio",
-        question: "Can we use Future Perfect for a prediction about the past?",
+        question: "Can we use Future Perfect for a prediction that something probably already happened?",
         answers: [
             ["Yes (e.g., He will have arrived by now).", true, "Correct!"],
-            ["No.", false, "Wrong."]
+            ["No. No way.", false, "Wrong."]
         ]
     },
     10: {
@@ -8306,24 +8377,177 @@ export const exerciseData = {
         answers: [
             ["I will have eaten.", true, "Correct!"],
             ["We will have spent everything.", true, "Correct!"],
-            ["He will have being finished.", false, "Wrong."]
+            ["He will finished.", false, "Wrong. 'Have' is missing. It should be 'He will have finished.'"]
         ]
     },
     11: {
         type: "radio",
         question: "True or False: The future perfect looks 'backwards' from a future point.",
         answers: [
+            ["True", true, "Correct! It describes something that will be 'past' at a future point in time."],
+            ["False", false, "Wrong. The future perfect does look 'backwards' from a future point."]
+        ]
+    },
+},
+
+// 3rd conditional
+"0460": {
+    1: {
+        type: "radio",
+        question: "What is a 3rd conditional sentence?",
+        answers: [
+            ["A sentence describing an unreal past situation and its unreal past result, using 'if' + past perfect and 'would have' + past participle.", true, "Correct!"],
+            ["A sentence describing an imaginary present situation, using 'if' + past simple and 'would'.", false, "Wrong. That's the 2nd conditional."]
+        ]
+    },
+
+    2: {
+        type: "radio",
+        question: "Which is a correct 3rd conditional sentence?",
+        answers: [
+            ["If I had known, I would have helped you.", true, "Correct!"],
+            ["If I knew, I would helped you.", false, "Wrong. The 'if' clause needs past perfect, and the result clause needs 'would have' + past participle."]
+        ]
+    },
+
+    3: {
+        type: "checkbox",
+        question: "Which are INCORRECT 3rd conditional sentences?",
+        answers: [
+            ["If she had studied, she would passed.", true, "Incorrect. Should be 'would have passed'."],
+            ["If they had left earlier, they would have arrived on time.", false, "Correct."],
+            ["If he had seen me, he will say hello.", true, "Incorrect. Wrong result form."]
+        ]
+    },
+
+    5: {
+        type: "radio",
+        question: "Fill in the blank: 'If she had called me, I ______ answered.'",
+        answers: [
+            ["would have", true, "Correct!"],
+            ["would", false, "Wrong."]
+        ]
+    },
+
+    6: {
+        type: "radio",
+        question: "Which form is used in the 'if' clause of a 3rd conditional?",
+        answers: [
+            ["Past perfect ('had + past participle')", true, "Correct! If I had called her..."],
+            ["Past simple", false, "Wrong. The 'if' clause of a 3rd conditional must use past perfect."]
+        ]
+    },
+
+    7: {
+        type: "radio",
+        question: "Is 'If you tried, you would have succeeded' correct?",
+        answers: [
+            ["True", false, "Wrong. Should be 'If you had tried, you would have succeeded'."],
+            ["False", true, "Correct!"]
+        ]
+    },
+
+    8: {
+        type: "radio",
+        question: "Is it OK to use 'would' in the 'if' clause of a 3rd conditional?",
+        answers: [
+            ["True", false, "Wrong. The 'if' clause of a 3rd conditional must use past perfect. The result clause needs 'would have' + past participle."],
+            ["False", true, "Correct! The 'if' clause of a 3rd conditional must use past perfect. The result clause needs 'would have' + past participle."]
+        ]
+    },
+    9: {
+        type: "radio",
+        question: "Which describes an unreal past result?",
+        answers: [
+            ["I would have called you.", true, "Correct!"],
+            ["I would call you.", false, "Wrong."]
+        ]
+    },
+
+    10: {
+        type: "checkbox",
+        question: "Identify correct 3rd conditional results:",
+        answers: [
+            ["...we would have won.", true, "Correct!"],
+            ["...we would win.", false, "Wrong."],
+            ["...she would have understood.", true, "Correct!"]
+        ]
+    },
+
+    11: {
+        type: "radio",
+        question: "True or False: The 3rd conditional talks about a past situation that did NOT happen.",
+        answers: [
             ["True", true, "Correct!"],
             ["False", false, "Wrong."]
         ]
     },
-    12: {
-        type: "text_multi",
-        question: "Fix this: 'I will have arrive before you.'",
-        answers: ["I will have arrived"]
-    }
-},
 
+    12: {
+        type: "radio",
+        question: "Which is correct?",
+        answers: [
+            ["If he had seen the sign, he would have stopped.", true, "Correct!"],
+            ["If he saw the sign, he would have stopped.", false, "Wrong. The 'if' clause must be past perfect."]
+        ]
+    },
+
+    13: {
+        type: "checkbox",
+        question: "Identify the INCORRECT sentences:",
+        answers: [
+            ["If I had known, I would tell you.", true, "Incorrect. Should be 'would have told you'."],
+            ["If they had invited me, I would have gone.", false, "Correct."],
+            ["If she was here, she would be happy.", true, "Incorrect. This is 2nd condition for a present unreal situation."]
+        ]
+    },
+
+    14: {
+        type: "radio",
+        question: "Fill in the blank: 'If we had left earlier, we ______ caught the train.'",
+        answers: [
+            ["would have", true, "Correct!"],
+            ["would", false, "Wrong."],
+            ["had", false, "Wrong. The correct form in the result clause is 'would have' + past participle."]
+        ]
+    },
+
+    15: {
+        type: "text_multi",
+        question: "Translate into ENglish: 'Si j'avais su'",
+        answers: ["If I had known", "Had I known", "I had known"] 
+    },
+
+    17: {
+        type: "radio",
+        question: "Is 'If she had worked harder, she would have succeed' correct?",
+        answers: [
+            ["Yes", false, "Wrong. Should be 'succeeded'."],
+            ["No", true, "Correct!"]
+        ]
+    },
+
+    18: {
+        type: "checkbox",
+        question: "Choose the correct 3rd conditional forms:",
+        answers: [
+            ["If I had known, I would have told you.", true, "Correct!"],
+            ["If I knew, I would have told you.", false, "Wrong."],
+            ["If they had helped, we would have finished earlier.", true, "Correct!"]
+        ]
+    },
+
+    19: {
+        type: "radio",
+        question: "Which sentence describes a past regret?",
+        answers: [
+            ["If I had apologized, she would have forgiven me.", true, "Correct!"],
+            ["If I apologized, she would forgive me.", false, "Wrong."]
+        ]
+    },
+
+}
+,
 
 // 0510 Past Modals (should/could + have + past participle)
 "0510": {
@@ -8333,7 +8557,7 @@ export const exerciseData = {
         answers: [
             ["should + have + past participle", true, "Correct! 'I should have gone'."],
             ["should + past simple", false, "Wrong. 'I should went' is incorrect."],
-            ["should + have + infinitive", false, "Wrong."]
+            ["should + have + infinitive", false, "Wrong. 'I should have go' is incorrect."]
         ]
     },
     2: {
@@ -8356,13 +8580,13 @@ export const exerciseData = {
     4: {
         type: "text_multi",
         question: "Correct the error: 'I should have study harder.'",
-        answers: ["I should have studied harder", "should have studied"]
+        answers: ["I should have studied harder", "should have studied", "studied"]
     },
     5: {
         type: "radio",
         question: "What does 'You shouldn't have done that' imply?",
         answers: [
-            ["Criticism or regret about a past action.", true, "Correct!"],
+            ["Criticism or regret of a past action.", true, "Correct!"],
             ["A suggestion for the future.", false, "Wrong."]
         ]
     },
@@ -8383,16 +8607,19 @@ export const exerciseData = {
         ]
     },
     8: {
-        type: "text_multi",
-        question: "Fix this: 'We could of helped.' (Common phonetic error)",
-        answers: ["We could have helped"]
+        type: "radio",
+        question: "When we speak, what does 'should have' often sound like?",
+        answers: [
+            ["'shoudav', or 'should of'", true, "Correct! This is a common phonetic error."],
+            ["'shai hulud'", false, "Wrong. You're watching too much Netflix, get some sleep!"]
+        ]
     },
     9: {
         type: "radio",
         question: "Which describes a missed opportunity?",
         answers: [
             ["I could have gone to the party.", true, "Correct!"],
-            ["I could go to the party.", false, "Wrong (Present)."]
+            ["I could go to the party.", false, "Wrong (This is still a possibility)."]
         ]
     },
     10: {
@@ -8401,24 +8628,27 @@ export const exerciseData = {
         answers: [
             ["I should have stayed.", true, "Correct!"],
             ["I shouldn't have lied.", true, "Correct!"],
-            ["I should had stayed.", false, "Wrong."]
+            ["I should stayed.", false, "Wrong."]
         ]
     },
     11: {
         type: "radio",
-        question: "True or False: The word 'have' never changes to 'has' in 'should have'.",
+        question: "Right or wrong: 'He should has gone to the doctor sooner.'",
         answers: [
-            ["True", true, "Correct! Modals are always followed by the base form 'have'."],
-            ["False", false, "Wrong."]
+            ["Wrong. It should be 'He should have gone to the doctor sooner.'", true, "Correct!"],
+            ["Right.", false, "Wrong. There is no -s ending after 'should' in this construction, not even after 'he'."]
         ]
     },
     12: {
-        type: "text_multi",
-        question: "Fix this: 'You shoulded tell me.'",
-        answers: ["You should have told me"]
-    }
+        type: "checkbox",
+        question: "Which of the following are correct criticisms of finished projects?",
+        answers: [
+            ["They shouldn't have destroyed the view.", true, "Correct!"],
+            ["They should have consulted an expert.", true, "Correct!"],
+            ["They should have asked for feedback.", true, "Correct!"]
+        ]
 },
-
+},
 // 0520 Must in Past (Had to)
 "0520": {
     1: {
@@ -8430,11 +8660,12 @@ export const exerciseData = {
         ]
     },
     2: {
-        type: "radio",
-        question: "Which is correct for a childhood memory?",
+        type: "checkbox",
+        question: "Which are correct for a childhood memory?",
         answers: [
             ["I had to walk to school.", true, "Correct!"],
-            ["I must walk to school.", false, "Wrong."]
+            ["I must walked to school.", false, "Wrong. This form is not possible. Must only combines with infinitive."],
+            ["I must walk to school.", false, "Wrong. This form is not possible for past obligations."]
         ]
     },
     3: {
@@ -8443,17 +8674,17 @@ export const exerciseData = {
         answers: [
             ["We had to leave early.", true, "Correct!"],
             ["They musted stay.", false, "Wrong."],
-            ["Did you have to work?", true, "Correct!"]
+            ["I must have worked.", false, "Wrong. This form indicates logical deduction, not past obligation."]
         ]
     },
     4: {
         type: "text_multi",
         question: "Correct the error: 'Yesterday I must finish my report.'",
-        answers: ["Yesterday I had to finish my report", "I had to finish"]
+        answers: ["Yesterday I had to finish my report", "I had to finish", "had to", "had to finish"]
     },
     5: {
         type: "radio",
-        question: "What is the past form of 'I must'?",
+        question: "What is the past form of 'I must', if you want to express an obligation?",
         answers: [
             ["I had to", true, "Correct!"],
             ["I must have", false, "Wrong (that's for logical deduction, not obligation)."]
@@ -8463,6 +8694,7 @@ export const exerciseData = {
         type: "radio",
         question: "Fill in the blank: 'Last year, she ______ wear a uniform.'",
         answers: [
+            ["musted", false, "Wrong."],
             ["had to", true, "Correct!"],
             ["must", false, "Wrong."]
         ]
@@ -8476,16 +8708,19 @@ export const exerciseData = {
         ]
     },
     8: {
-        type: "text_multi",
-        question: "Correct: 'We musted wait for an hour.'",
-        answers: ["We had to wait"]
+        type: "radio",
+        question: "True or false: 'must' cannot be used in the past tense, but it CAN be used in future tense.",
+        answers: [
+            ["True", false, "Wrong. It is not possible to say 'I will must do something'."],
+            ["False", true, "Correct! It's impossible to say 'I will must do something'."],
+        ]
     },
     9: {
         type: "radio",
         question: "Is 'I must have finished' an obligation in the past?",
         answers: [
-            ["No, that means 'I probably finished'.", true, "Correct!"],
-            ["Yes.", false, "Wrong."]
+            ["No, that's a deduction. It means 'I probably finished'.", true, "Correct!"],
+            ["Yes. Certainly.", false, "Wrong."]
         ]
     },
     10: {
@@ -8499,16 +8734,17 @@ export const exerciseData = {
     },
     11: {
         type: "radio",
-        question: "True or False: 'Must' has no past tense form of its own.",
+        question: "What is the negative form of 'I had to take a break'?",
         answers: [
-            ["True", true, "Correct!"],
-            ["False", false, "Wrong."]
+            ["I didn't have to take a break.", true, "Correct!"],
+            ["I mustn't take a break.", false, "Wrong."],
+            ["I hadn't to take a break.", false, "Wrong."]
         ]
     },
     12: {
         type: "text_multi",
-        question: "Fix this: 'He musted help his father.'",
-        answers: ["He had to help"]
+        question: "Fix this: 'He musted help his father'",
+        answers: ["He had to help", "Had to help", "Had to", "He had to help his father"]
     }
 },
 
@@ -8516,10 +8752,11 @@ export const exerciseData = {
 "0530": {
     1: {
         type: "radio",
-        question: "If you are reporting a past promise, what does 'will' change to?",
+        question: "If you are reporting a past promise like 'I will help', what does 'will' change to?",
         answers: [
-            ["Would", true, "Correct! (e.g., He said he would help)."],
-            ["Will", false, "Wrong (unless the event is still in the future)."]
+            ["Would: You say 'I promised I WOULD help'", true, "Correct! (e.g., He said he would help)."],
+            ["Stays the same: You say 'I promised I will help'", false, "Wrong (unless the event is still in the future)."],
+            ["There is no way to report a past promise.", false, "Wrong. You can always use 'would' to report a past promise."]
         ]
     },
     2: {
@@ -8539,15 +8776,11 @@ export const exerciseData = {
             ["They thought they would win.", true, "Correct!"]
         ]
     },
-    4: {
-        type: "text_multi",
-        question: "Correct the error: 'He told me he will arrive at six.'",
-        answers: ["He told me he would arrive at six", "would arrive"]
-    },
     5: {
         type: "radio",
         question: "Fill in the blank: 'We didn't know that the party ______ be a surprise.'",
         answers: [
+            ["would to", false, "Wrong."],
             ["would", true, "Correct!"],
             ["will", false, "Wrong."]
         ]
@@ -8564,14 +8797,15 @@ export const exerciseData = {
         type: "radio",
         question: "If a person says 'I will help', how do you report it later?",
         answers: [
-            ["He said he would help.", true, "Correct!"],
-            ["He said he will help.", false, "Wrong."]
+            ["She said she would help.", true, "Correct!"],
+            ["She said she will help.", false, "Wrong."],
+            ["There is no way to report this.", false, "Wrong. You can always use 'would' to report a past promise."]
         ]
     },
     8: {
         type: "text_multi",
         question: "Fix this: 'I was sure it will happen.'",
-        answers: ["I was sure it would happen"]
+        answers: ["I was sure it would happen", "would", "would happen"]
     },
     9: {
         type: "radio",
@@ -8590,19 +8824,7 @@ export const exerciseData = {
             ["She hoped it will stop.", false, "Wrong."]
         ]
     },
-    11: {
-        type: "radio",
-        question: "True or False: This rule is necessary for 'backshifting' tenses in indirect speech.",
-        answers: [
-            ["True", true, "Correct!"],
-            ["False", false, "Wrong."]
-        ]
-    },
-    12: {
-        type: "text_multi",
-        question: "Correct: 'The boss said he will call us back.'",
-        answers: ["The boss said he would call us back"]
-    }
+
 },
 
 // 0540 Past of Can (Could / Was able to)
@@ -8612,37 +8834,41 @@ export const exerciseData = {
         question: "What is the past tense of 'can' for general ability?",
         answers: [
             ["Could", true, "Correct!"],
-            ["Caned", false, "Wrong."]
+            ["Caned", false, "Wrong."],
+            ["can have", false, "Wrong. Use 'could + infinitive' for past ability."]
         ]
     },
     2: {
         type: "radio",
         question: "Is 'When I was five, I can swim' correct?",
         answers: [
-            ["True", false, "Wrong. Use 'could'."],
+            ["True", false, "Wrong. Use 'could': 'When I was five, I could swim.'"],
             ["False", true, "Correct!"]
         ]
     },
     3: {
         type: "checkbox",
-        question: "Identify the correct past abilities:",
+        question: "What is INCORRECT for past abilities:",
         answers: [
-            ["She could speak French as a child.", true, "Correct!"],
-            ["I was able to finish the race.", true, "Correct!"],
-            ["They can see the mountain yesterday.", false, "Wrong."]
+            ["She could speak French as a child.", false, "Wrong! This is actually correct for past ability."],
+            ["I was able to finish the race.", false, "Wrong! This is actually correct for past ability."],
+            ["They can have seen the mountain yesterday.", true, "Wrong. This is not the correct past form. Use 'could' or 'was able to' instead."]
         ]
     },
     4: {
-        type: "text_multi",
-        question: "Correct the error: 'He can't find his keys this morning.'",
-        answers: ["He couldn't find his keys", "couldn't find"]
+        type: "radio",
+        question: "True or false: we can use 'could' or 'was able to' for past abilities?",
+        answers: [
+            ["True", true, "Correct!"],
+            ["False", false, "Wrong."]
+        ]
     },
     5: {
         type: "radio",
-        question: "Which form is better for a specific one-time achievement in the past?",
+        question: "True or false: We can't use 'can' for the past, but we CAN use 'can' for the future: 'I will can do it'",
         answers: [
-            ["Was able to", true, "Correct!"],
-            ["Could", false, "Wrong (Could is usually for general ability)."]
+            ["True", false, "Wrong. We cannot use 'can' for the future either."],
+            ["False", true, "Right! 'Can' is limited to describing present abilities. We use 'be able to' for the future."]
         ]
     },
     6: {
@@ -8655,16 +8881,11 @@ export const exerciseData = {
     },
     7: {
         type: "radio",
-        question: "Which is the correct negative form for the past?",
+        question: "Is this correct? When I'm 18 I will be able to drive.",
         answers: [
-            ["Couldn't", true, "Correct!"],
-            ["Cann't", false, "Wrong."]
+            ["True", true, "Correct! We use 'will be able to' for future abilities."],
+            ["False", false, "Wrong. This is actually correct. We use 'will be able to' for future abilities."]
         ]
-    },
-    8: {
-        type: "text_multi",
-        question: "Fix this: 'I can play piano ten years ago.'",
-        answers: ["I could play piano"]
     },
     9: {
         type: "radio",
@@ -8685,17 +8906,12 @@ export const exerciseData = {
     },
     11: {
         type: "radio",
-        question: "True or False: 'Could' is also used for present requests, which can be confusing.",
+        question: "can + have + past participle: does this form exist in English? Example: 'I can have done it.'",
         answers: [
-            ["True", true, "Correct!"],
-            ["False", false, "Wrong."]
+            ["True", false, "Wrong. This form is not correct in English."],
+            ["False", true, "Correct! 'I can have done it' is not a valid English construction."]
         ]
     },
-    12: {
-        type: "text_multi",
-        question: "Correct: 'I can't sleep last night.'",
-        answers: ["I couldn't sleep last night"]
-    }
 },
 
 // 0710 Syntax (Verb + Object + Modifier)
