@@ -60,23 +60,22 @@ interface LinguisticProfile {
   profile_type?: ProfileType;
 }
 
-interface CourseObjective {
-  id: string;
-  title: string;
+type Objective = { id: string; title: string }
+
+type Course = {
+  slug: string
+  is_active: boolean
+  semester: 'FALL' | 'SPRING'
+  objectives: Objective[]
+  // optional future field if backend adds it:
+  // display_name?: string
 }
 
-interface Course {
-  slug: string;
-  is_active: boolean; 
-  semester: 'FALL' | 'SPRING'; 
-  objectives: CourseObjective[]; 
-}
-
-interface StudentCourse {
-  id: number;
-  student: Student | number;
-  course: Course;
-  objective_fulfillment: Record<string, boolean>;
+type StudentCourse = {
+  id: number
+  student: string // web_id
+  course: string  // course slug
+  objective_fulfillment: Record<string, boolean>
 }
 
 interface VerbUsage {
@@ -196,7 +195,12 @@ export const useUserStore = defineStore("user", () => {
   const enrollments = ref<StudentCourse[]>([]);
   const loadingEnrollments = ref(false);
   const enrollmentError = ref<string | null>(null);
+  const loadingEnrollmentBundle = ref(false)
 
+  // --- Courses ---
+  const courses = ref<Course[]>([]);
+  const loadingCoursesSt = ref(false);
+  const coursesError = ref<string | null>(null);
 
   // --- Computed Coordinates ---
   const isStaff = computed(() => user.value?.is_staff ?? false);
@@ -648,43 +652,91 @@ async function ensureUserLoaded() {
 // =========================================================
 // 🎓 SECURE ENROLLMENT PIPELINE METHOD
 // =========================================================
-async function fetchEnrollments() {
-  if (!hasAccessToken()) return;
-
-  loadingEnrollments.value = true;
-  enrollmentError.value = null;
-
-  try {
-    const params: any = {};
-    
-    // ✨ FIX: Only attach the student query parameter if a Staff/Teacher user
-    // is intentionally inspecting a specific student's workspace card.
-    if (isStaff.value && selectedStudentId.value) {
-      params.student = selectedStudentId.value;
-    }
-
-    const response = await api.get<StudentCourse[]>("/enrollment/", { params });
-    
-    // Unpack DRF's default paginated dictionary wrapper safely
-    const rawData = response.data && typeof response.data === 'object' && 'results' in response.data
-      ? (response.data as any).results
-      : response.data;
-
-    enrollments.value = Array.isArray(rawData) ? rawData : [];
-    console.log("📚 Synced enrollment records count:", enrollments.value.length);
-  } catch (err: any) {
-    console.error("Failed to map enrollment model array streams:", err);
-    enrollmentError.value = "Failed to fetch active student course enrollment records.";
-    enrollments.value = []; // Prevent broken iteration loops in UI templates by falling back to a clean array
-  } finally {
-    loadingEnrollments.value = false;
+async function fetchEnrollments(params: Record<string, any> = {}) {
+    const res = await api.get('/enrollment/', { params }) // adjust to your actual endpoint
+    const payload = res.data?.results ?? res.data
+    enrollments.value = Array.isArray(payload) ? payload : []
   }
-}
-  const enrolledCourses = computed(() => 
-    enrollments.value
-      .filter(e => e && e.course)
-      .map((e) => e.course.slug)
-  );
+
+  async function fetchCourses(params: Record<string, any> = {}) {
+    const res = await api.get('/courses/', { params }) // adjust to your actual endpoint
+    const payload = res.data?.results ?? res.data
+    courses.value = Array.isArray(payload) ? payload : []
+  }
+
+  // Single entrypoint used by dashboard
+  async function fetchEnrollmentBundle(params: Record<string, any> = {}) {
+    loadingEnrollmentBundle.value = true
+    try {
+      await Promise.all([
+        fetchEnrollments(params),
+        fetchCourses({ is_active: true }), // optional filter
+      ])
+    } finally {
+      loadingEnrollmentBundle.value = false
+    }
+  }
+
+
+// -------- helpers --------
+  function prettifyCourseSlug(slug: string): string {
+    // "b2_fall_2026" -> "B2 Fall 2026"
+    return slug
+      .replace(/[-_]+/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .replace(/\b\w/g, (c) => c.toUpperCase())
+  }
+
+  // -------- primary resolved enrollment --------
+  // If multiple enrollments are possible, you can add "active" selection logic here.
+  const primaryEnrollment = computed<StudentCourse | null>(() => {
+    return enrollments.value.length ? enrollments.value[0] : null
+  })
+
+  const primaryCourse = computed<Course | null>(() => {
+    const slug = primaryEnrollment.value?.course
+    if (!slug) return null
+    return courses.value.find(c => c.slug === slug) ?? null
+  })
+
+  const prettyEnrolledCourseName = computed<string>(() => {
+    const c = primaryCourse.value
+    if (!c) return 'N/A'
+    // if backend later sends c.display_name, prefer that:
+    // return c.display_name || prettifyCourseSlug(c.slug)
+    return prettifyCourseSlug(c.slug)
+  })
+
+  const primaryObjectives = computed<Objective[]>(() => {
+    return primaryCourse.value?.objectives ?? []
+  })
+
+  const primaryObjectiveFulfillmentMap = computed<Record<string, boolean>>(() => {
+    return primaryEnrollment.value?.objective_fulfillment ?? {}
+  })
+
+  const objectivesWithStatus = computed(() => {
+    const fulfillment = primaryObjectiveFulfillmentMap.value
+    return primaryObjectives.value.map(obj => ({
+      ...obj,
+      fulfilled: Boolean(fulfillment[obj.id]),
+    }))
+  })
+
+  const fulfilledObjectivesCount = computed<number>(() => {
+    return objectivesWithStatus.value.filter(o => o.fulfilled).length
+  })
+
+  const objectiveCompletionPercent = computed<number>(() => {
+    const total = objectivesWithStatus.value.length
+    if (!total) return 0
+    return Math.round((fulfilledObjectivesCount.value / total) * 100)
+  })
+
+
+
+
   const studentDomain = computed(() => student.value?.domain ?? null);
 
   const studentDomainLabel = computed(() => {
@@ -916,10 +968,19 @@ async function fetchEnrollments() {
 
     // Course enrollments mapping
     enrollments,
-    loadingEnrollments,
-    enrollmentError,
-    enrolledCourses,
+    courses,
+    loadingEnrollmentBundle,
+    primaryEnrollment,
+    primaryCourse,
+    prettyEnrolledCourseName,
+    primaryObjectives,
+    primaryObjectiveFulfillmentMap,
+    objectivesWithStatus,
+    fulfilledObjectivesCount,
+    objectiveCompletionPercent,
     fetchEnrollments,
+    fetchCourses,
+    fetchEnrollmentBundle,
 
     // Class domain tags
     studentDomain,

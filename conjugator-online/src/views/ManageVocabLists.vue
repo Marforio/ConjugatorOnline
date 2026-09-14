@@ -1671,7 +1671,7 @@ function reprocessCurrentCsv() {
 }
 
 async function copySuggestedAiPrompt() {
-  const prompt = `Take this vocabulary list and complete any missing fields. Make sure the CSV headers are exactly:
+  const prompt = `Take this vocabulary list and turn it into a complete CSV dataset. Complete any missing fields. Make sure the CSV headers are exactly:
 
 term,definition,part_of_speech,context_usage,French,German,Italian,multiple_choice
 
@@ -1679,7 +1679,7 @@ Rules:
 - Fill in any missing definitions.
 - Fill in missing translations where appropriate.
 - Fill in example sentences in the context_usage column.
-- Fill in multiple_choice with plausible wrong answers that are close in meaning or category, but not synonyms and not correct answers.
+- Fill in multiple_choice with plausible wrong answers that are close in meaning or category (decoys), but not synonyms and not correct answers.
 - Preserve the original term.
 - Return only CSV output.
 - If any field contains commas, wrap it in double quotes.`

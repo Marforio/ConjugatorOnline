@@ -126,7 +126,7 @@
                       </thead>
                       <tbody>
                         <tr v-for="student in course.students" :key="student.id">
-                          <td class="font-weight-black text-slate-700">{{ student.web_id }}</td>
+                          <td class="font-weight-black text-slate-700">{{ student.initials }} <span class="text-caption">({{ student.web_id }})</span></td>
                           <td class="text-center">
                             <!-- 🔄 Explicit Unenroll Action per Student -->
                             <v-btn 
@@ -211,9 +211,13 @@
                                       :color="isObjectiveFulfilled(student.id, course.slug, obj.id) ? 'success' : 'slate-400'"
                                       class="mr-3"
                                     />
-                                    <span class="font-weight-bold font-monospace text-body-2" :class="isObjectiveFulfilled(student.id, course.slug, obj.id) ? 'text-success-darken-2' : 'text-slate-700'">
-                                      {{ student.web_id }}
-                                    </span>
+                                    <span 
+                                        class="font-weight-bold font-monospace text-body-2 text-wrap min-width-0"
+                                        :class="isObjectiveFulfilled(student.id, course.slug, obj.id) ? 'text-success-darken-2' : 'text-slate-700'"
+                                      >
+                                        {{ student.initials }} 
+                                        <span class="text-caption" style="font-size: 0.4rem;">{{ student.web_id }}</span>
+                                      </span>
                                   </div>
                                   
                                   <v-chip size="x-small" variant="flat" color="slate-100" class="text-caption font-weight-bold">
@@ -1011,7 +1015,8 @@ const submitCreateCourse = async () => {
     courseDialog.value = false
     await fetchData(true) 
   } catch {
-    showToast('Failed to serialize and deploy course model parameters to server.', 'error')
+    showToast('Failed to create course.', 'error')
+    
   } finally { loading.value = false }
 }
 
@@ -1200,7 +1205,7 @@ const executeConfirmedDestruction = async () => {
     deleteConfirmDialog.value = false
     await fetchData(true)
   } catch {
-    showToast('Operational rejection reported by system views endpoints configuration rules.', 'error')
+    showToast('Operation rejected.', 'error')
   } finally {
     loading.value = false
   }

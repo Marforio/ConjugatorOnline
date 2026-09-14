@@ -13,8 +13,11 @@
                   Welcome back, {{ userStore.student?.initials || 'Student' }}!
                 </h1>
                 <p class="text-caption text-slate-600 mb-4">
-                  <span v-if="currentCourseData">
-                    Enrolled in <span class="font-weight-bold text-indigo">{{ currentCourseData?.slug?.toUpperCase() || 'N/A' }}</span>
+                  <span v-if="userStore.primaryCourse">
+                    Enrolled in
+                    <span class="font-weight-bold text-indigo">
+                      {{ userStore.prettyEnrolledCourseName.toUpperCase() || 'N/A' }}
+                    </span>
                   </span>
                   <span v-else>
                     Ready to practice?
@@ -161,7 +164,7 @@
               <v-avatar color="success-lighten-5" size="80" class="mb-4">
                 <v-icon color="success-darken-2" size="48">mdi-check-all</v-icon>
               </v-avatar>
-              <div class="text-h6 font-weight-bold text-slate-800 mb-2">All caught up!</div>
+              <div class="text-h6 font-weight-bold text-slate-800 mb-2">No work suggestions for now!</div>
               <div class="text-body-2 text-slate-600 mb-6">
                 Great work! No pending assignments. Keep practicing to stay sharp.
               </div>
@@ -311,37 +314,49 @@
               </v-card-title>
 
               <v-card-text class="pa-5">
-                <div v-if="loadingEnrollments" class="text-center py-6">
+                <div v-if="userStore.loadingEnrollmentBundle" class="text-center py-6">
                   <v-progress-circular indeterminate color="success" size="32" />
                 </div>
+
                 <div v-else class="ga-3 d-flex flex-column">
-                  <div 
-                    v-for="(obj, idx) in currentCourseData.objectives"
+                  <div
+                    v-for="(obj, idx) in userStore.objectivesWithStatus"
                     :key="obj.id"
-                    class="d-flex align-center ga-2"
+                    class="d-flex align-center ga-3"
                   >
-                    <v-avatar 
-                      size="24" 
-                      :color="isStudentObjectiveFulfilled(obj.id) ? 'success' : 'slate-100'"
+                    <v-avatar
+                      size="24"
+                      :color="obj.fulfilled ? 'success' : 'slate-100'"
                       class="flex-shrink-0"
                     >
-                      <v-icon v-if="isStudentObjectiveFulfilled(obj.id)" size="14" color="white">mdi-check</v-icon>
+                      <v-icon v-if="obj.fulfilled" size="14" color="white">mdi-check</v-icon>
                       <span v-else class="text-slate-600 text-xxs font-weight-bold">{{ idx + 1 }}</span>
                     </v-avatar>
+
                     <div class="flex-grow-1 min-width-0">
-                      <div 
+                      <div
                         class="text-caption font-weight-medium line-clamp-2"
-                        :class="isStudentObjectiveFulfilled(obj.id) ? 'text-success-darken-2 line-through' : 'text-slate-700'"
+                        :class="obj.fulfilled ? 'text-success-darken-2 line-through' : 'text-slate-700'"
                       >
                         {{ obj.title }}
                       </div>
                     </div>
                   </div>
+
                   <v-divider class="my-3" />
+
                   <div class="text-center">
-                    <div class="text-h6 font-weight-black text-success-darken-2">{{ courseProgressPercentage }}%</div>
+                    <div class="text-h6 font-weight-black text-success-darken-2">
+                      {{ userStore.objectiveCompletionPercent }}%
+                    </div>
                     <div class="text-caption text-slate-500">Objectives Completed</div>
-                    <v-progress-linear :model-value="courseProgressPercentage" color="success" height="6" rounded class="mt-2" />
+                    <v-progress-linear
+                      :model-value="userStore.objectiveCompletionPercent"
+                      color="success"
+                      height="6"
+                      rounded
+                      class="mt-2"
+                    />
                   </div>
                 </div>
               </v-card-text>
@@ -519,36 +534,25 @@ interface Workout {
 
 const loadingEnrollments = ref(false)
 
-// Lifecycle computed selectors mapping data out of the Pinia userStore caches layer
-const studentEnrollmentRecord = computed(() => {
-  // Grab the first matching enrollment array line for the student account safely
-  return userStore.enrollments && userStore.enrollments.length > 0 ? userStore.enrollments[0] : null;
-});
 
-const currentCourseData = computed(() => {
-  return studentEnrollmentRecord.value?.course || null;
-});
+// Use normalized/computed data directly from the user store
+const currentCourseData = computed(() => userStore.primaryCourse);
 
-const currentCourseFulfillmentMap = computed(() => {
-  return studentEnrollmentRecord.value?.objective_fulfillment || {};
-});
+const currentCourseFulfillmentMap = computed(
+  () => userStore.primaryObjectiveFulfillmentMap
+);
 
-// Structural Helper metric counts evaluations
-function isStudentObjectiveFulfilled(objectiveId: string): boolean {
-  return !!currentCourseFulfillmentMap.value[objectiveId];
-}
 
-const currentCourseFulfillmentCount = computed(() => {
-  if (!currentCourseData.value?.objectives) return 0;
-  return currentCourseData.value.objectives.filter(obj => isStudentObjectiveFulfilled(obj.id)).length;
-});
 
-const courseProgressPercentage = computed(() => {
-  const total = currentCourseData.value?.objectives?.length || 0;
-  if (total === 0) return 0;
-  return Math.round((currentCourseFulfillmentCount.value / total) * 100);
-});
+// If you still want this local alias for template readability:
+const currentCourseFulfillmentCount = computed(
+  () => userStore.fulfilledObjectivesCount
+);
 
+// Keep existing template variable name, now sourced from store
+const courseProgressPercentage = computed(
+  () => userStore.objectiveCompletionPercent
+);
 
 const showProfileDialog = ref(false);
 const completedTasksPanel = ref<string | string[]>([]);
@@ -926,8 +930,9 @@ onMounted(async () => {
   await fetchActivityFeed();
   await fetchCurrentWorkout();
   loadingEnrollments.value = true;
-  await userStore.fetchEnrollments();
-  loadingEnrollments.value = false;
+  await userStore.fetchEnrollmentBundle(
+    userStore.isStaff ? { student: userStore.studentId } : {}
+  );
 });
 </script>
 
