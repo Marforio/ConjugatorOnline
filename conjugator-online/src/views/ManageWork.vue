@@ -1013,37 +1013,38 @@ async function refreshAssignmentLogs() {
     loadingData.value = false;
   }
 }
-
 async function loadGlobalClassMatrix() {
   if (!selectedCourseId.value) return;
   loadingMatrix.value = true;
-  
+
   try {
     const [assignmentsResponse, workoutsResponse] = await Promise.all([
       api.get('/assignment/'),
-      api.get('/workouts/', { params: { is_current: true } }).catch(() => ({ data: [] }))
+      api.get('/workouts/', { params: { is_current: true } }).catch(() => ({ data: [] })),
     ]);
 
     const assignmentsPool = assignmentsResponse.data?.results || assignmentsResponse.data || [];
     const workoutsPool = workoutsResponse.data?.results || workoutsResponse.data || [];
 
+    const selectedSlug = selectedCourseId.value.trim().toLowerCase();
+
     const courseStudentWebIds = userStore.enrollments
-      .filter(e => {
-        const cSlug = e.course?.slug || String(e.course);
-        return cSlug.trim().toLowerCase() === selectedCourseId.value!.trim().toLowerCase();
-      })
-      .map(e => String(typeof e.student === 'object' ? e.student?.web_id : e.student));
+      .filter((e) => String(e.course || '').trim().toLowerCase() === selectedSlug)
+      .map((e) => String(e.student || '').trim())
+      .filter(Boolean);
 
     matrixRosterData.value = userStore.teacherRoster
-      .filter(s => s.web_id && courseStudentWebIds.includes(String(s.web_id)))
-      .map(student => {
+      .filter((s) => s.web_id && courseStudentWebIds.includes(String(s.web_id)))
+      .map((student) => {
         const personalSet = assignmentsPool.filter((a: any) => {
-          const assignStudentId = a.student && typeof a.student === 'object' ? a.student.id : Number(a.student);
+          const assignStudentId =
+            a.student && typeof a.student === 'object' ? a.student.id : Number(a.student);
           return assignStudentId === student.id;
         });
 
         const activeWk = workoutsPool.find((w: any) => {
-          const workoutStudentId = w.student && typeof w.student === 'object' ? w.student.id : Number(w.student);
+          const workoutStudentId =
+            w.student && typeof w.student === 'object' ? w.student.id : Number(w.student);
           return workoutStudentId === student.id && w.is_current;
         });
 
@@ -1054,7 +1055,7 @@ async function loadGlobalClassMatrix() {
           domain: student.domain,
           pending_count: personalSet.filter((a: any) => a.status === 'pending').length,
           completed_count: personalSet.filter((a: any) => a.status === 'completed').length,
-          has_active_workout: !!activeWk
+          has_active_workout: !!activeWk,
         };
       });
   } catch (err) {

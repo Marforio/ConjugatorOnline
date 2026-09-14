@@ -273,24 +273,26 @@ const studentProgressByCourse = computed<StudentProgressNode[]>(() => {
   const activeCourse = courseModeSlug.value;
   if (!activeCourse || activeCourse === 'all' || !userStore.teacherRoster.length) return [];
 
+  const activeCourseSlug = activeCourse.trim().toLowerCase();
+
   // 1. Create an indexed set of students enrolled in this course from userStore enrollments
   const targetStudentWebIds = new Set<string>();
-  userStore.enrollments.forEach(e => {
-    const enrollmentCourseSlug = e.course?.slug || String(e.course);
-    if (enrollmentCourseSlug.trim().toLowerCase() === activeCourse.trim().toLowerCase()) {
-      const webId = e.student && typeof e.student === 'object' ? e.student.web_id : String(e.student);
+  userStore.enrollments.forEach((e) => {
+    const enrollmentCourseSlug = String(e.course || '').trim().toLowerCase();
+    if (enrollmentCourseSlug === activeCourseSlug) {
+      const webId = String(e.student || '').trim();
       if (webId) targetStudentWebIds.add(webId);
     }
   });
 
   // Filter students based on our indexed lookup set
-  const targetCourseStudents = userStore.teacherRoster.filter(s => 
-    s.web_id && targetStudentWebIds.has(String(s.web_id))
+  const targetCourseStudents = userStore.teacherRoster.filter(
+    (s) => s.web_id && targetStudentWebIds.has(String(s.web_id))
   );
 
   // 2. Pre-index raw session data by student ID to eliminate O(N) array filtering within loops
   const sessionsByStudentMap = new Map<number, any[]>();
-  rawSessionsPool.value.forEach(session => {
+  rawSessionsPool.value.forEach((session) => {
     if (session.student) {
       if (!sessionsByStudentMap.has(session.student)) {
         sessionsByStudentMap.set(session.student, []);
@@ -300,15 +302,15 @@ const studentProgressByCourse = computed<StudentProgressNode[]>(() => {
   });
 
   // 3. Map progress snapshots with O(1) lookups
-  return targetCourseStudents.map(student => {
+  return targetCourseStudents.map((student) => {
     const studentSessions = sessionsByStudentMap.get(student.id) || [];
     const maxProgressMap = new Map<string, number>();
 
-    studentSessions.forEach(s => {
+    studentSessions.forEach((s) => {
       if (!s.list_key) return;
       const totalCount = s.total_count || s.all_item_ids?.length || 0;
       const masteredCount = s.mastered_count || s.mastered_item_ids?.length || 0;
-      
+
       if (totalCount > 0) {
         const percentage = Math.round((masteredCount * 100) / totalCount);
         const currentMax = maxProgressMap.get(s.list_key) || 0;
@@ -323,7 +325,7 @@ const studentProgressByCourse = computed<StudentProgressNode[]>(() => {
       .filter(([_, percentage]) => percentage > 0) // Hide lists with 0% progress
       .map(([listKey, percentage]) => ({
         list_key: listKey,
-        pct: percentage
+        pct: percentage,
       }));
 
     return {
@@ -332,12 +334,9 @@ const studentProgressByCourse = computed<StudentProgressNode[]>(() => {
       web_id: student.web_id,
       // Fallback safely to current enrollments data references
       course_slugs: userStore.enrollments
-        .filter(e => {
-          const webId = e.student && typeof e.student === 'object' ? e.student.web_id : String(e.student);
-          return webId === student.web_id;
-        })
-        .map(e => e.course?.slug || String(e.course)),
-      completedLists
+        .filter((e) => String(e.student || '').trim() === String(student.web_id))
+        .map((e) => String(e.course)),
+      completedLists,
     };
   });
 });

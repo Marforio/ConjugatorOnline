@@ -334,15 +334,18 @@ const courseOptions = computed(() => {
 // Helper to compile a highly efficient set of student web_ids matching the chosen course
 const studentWebIdsInSelectedCourse = computed<Set<string> | null>(() => {
   if (!selectedCourse.value || selectedCourse.value === 'all') return null;
-  
+
+  const selectedSlug = selectedCourse.value.trim().toLowerCase();
   const targetIds = new Set<string>();
-  userStore.enrollments.forEach(e => {
-    const enrollmentCourseSlug = e.course?.slug || String(e.course);
-    if (enrollmentCourseSlug.trim().toLowerCase() === selectedCourse.value.trim().toLowerCase()) {
-      const webId = e.student && typeof e.student === 'object' ? e.student.web_id : String(e.student);
+
+  userStore.enrollments.forEach((e) => {
+    const enrollmentCourseSlug = String(e.course || '').trim().toLowerCase();
+    if (enrollmentCourseSlug === selectedSlug) {
+      const webId = String(e.student || '').trim();
       if (webId) targetIds.add(webId);
     }
   });
+
   return targetIds;
 });
 
