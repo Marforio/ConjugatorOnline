@@ -405,14 +405,15 @@ const coursePrograms: Record<string, string> = {
 }
 
 const courseProgram = computed(() => {
-  const enrolledArray = userStore.enrolledCourses || []
-  const enrolled = Array.isArray(enrolledArray) ? enrolledArray.join("") : String(enrolledArray)
-  const firstChar = enrolled.charAt(0)
-  const firstTwoChars = enrolled.slice(0, 2)
+  const slug = userStore.primaryCourse?.slug ?? '';
+  const normalized = String(slug).trim().toUpperCase();
 
-  if (firstTwoChars === "EM") return "Electrical or Mechanical"
-  return coursePrograms[firstChar] || null
-})
+  const firstChar = normalized.charAt(0);
+  const firstTwoChars = normalized.slice(0, 2);
+
+  if (firstTwoChars === 'EM') return 'Electrical or Mechanical';
+  return coursePrograms[firstChar] || null;
+});
 </script>
 
 <style scoped>
