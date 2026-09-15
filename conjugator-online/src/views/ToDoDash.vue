@@ -790,95 +790,95 @@ const exerciseAssignments = computed(() => allAssignments.value.filter(a => a.ta
 const exercisePendingAssignments = computed(() => exerciseAssignments.value.filter(a => a.status === 'pending'));
 const exerciseCompletedAssignments = computed(() => exerciseAssignments.value.filter(a => a.status === 'completed'));
 
-const conjugationAssignments = computed(() => allAssignments.value.filter(a => a.task_type === 'achievement' && (a.trigger_key.includes('correct_prompts') || a.trigger_key.includes('health_tier') || a.trigger_key.includes('discovery') || a.trigger_key.includes('mastery'))));
-// Helper function to extract numeric targets from text labels (e.g., "500", "750")
-function extractNumberFromText(text: string): number {
-  const match = text.match(/\d+/);
-  return match ? parseInt(match[0], 10) : 0;
+const conjugationAssignments = computed(() =>
+  allAssignments.value.filter(
+    a =>
+      a.task_type === 'achievement' &&
+      (
+        a.trigger_key.includes('correct_prompts') ||
+        a.trigger_key.includes('health_tier') ||
+        a.trigger_key.includes('discovery') ||
+        a.trigger_key.includes('mastery')
+      )
+  )
+)
+
+function containsWord(hay: string, needle: string): boolean {
+  return hay.toLowerCase().includes(needle.toLowerCase())
 }
 
-// Smart "Next-In-Line" Pending Conjugation Assignments
+function extractNumberFromText(text: string): number {
+  if (!text) return Number.POSITIVE_INFINITY; // items with no number go to the end
+  const match = text.match(/\d+/);            // first integer in string
+  return match ? parseInt(match[0], 10) : Number.POSITIVE_INFINITY;
+}
+
+function pickNextBySmallestNumericTarget(list: Assignment[]): Assignment[] {
+  if (!list.length) return []
+  const sorted = [...list].sort(
+    (a, b) => extractNumberFromText(a.description) - extractNumberFromText(b.description)
+  )
+  return [sorted[0]]
+}
+
+// pending conjugation base
+const conjugationPendingAll = computed(() =>
+  conjugationAssignments.value.filter(a => a.status === 'pending')
+)
+
+// Track 1: health queue (show only next)
+const conjugationHealthPendingAssignments = computed(() => {
+  const list = conjugationPendingAll.value.filter(a =>
+    containsWord(a.trigger_key, 'health') || containsWord(a.description, 'health')
+  )
+  return pickNextBySmallestNumericTarget(list)
+})
+
+// Track 2: correct queue (show only next)
+const conjugationCorrectPendingAssignments = computed(() => {
+  const list = conjugationPendingAll.value.filter(a =>
+    containsWord(a.trigger_key, 'correct') || containsWord(a.description, 'correct')
+  )
+  return pickNextBySmallestNumericTarget(list)
+})
+
+// final conjugation cards to show (max 2 items: one per track)
 const conjugationPendingAssignments = computed(() => {
-  const rawPending = conjugationAssignments.value.filter(a => a.status === 'pending');
-  
-  // Group related milestones by checking common phrases in their text descriptions
-  const groups: Record<string, Assignment[]> = {
-    prompts: [],   // For "Answer X conjugation prompts..."
-    basic75: [],   // For "all Basic 75 irregular verbs..."
-    master110: [], // For "all Master 110 irregular verbs..."
-    allIrreg: [],  // For "all irregular verbs..."
-    health: []     // For "Reach X tier... in conjugation health"
-  };
+  const merged = [
+    ...conjugationHealthPendingAssignments.value,
+    ...conjugationCorrectPendingAssignments.value,
+  ]
 
-  rawPending.forEach(a => {
-    const desc = a.description.toLowerCase();
-    if (desc.includes('prompts')) groups.prompts.push(a);
-    else if (desc.includes('basic 75')) groups.basic75.push(a);
-    else if (desc.includes('master 110')) groups.master110.push(a);
-    else if (desc.includes('all irregular verbs')) groups.allIrreg.push(a);
-    else if (desc.includes('health')) groups.health.push(a);
-    else groups.prompts.push(a); // Fallback bucket
-  });
+  // dedupe in case one assignment matches both rules
+  const m = new Map<string, Assignment>()
+  merged.forEach(a => m.set(a.assignment_id, a))
+  return Array.from(m.values())
+})
 
-  const nextInLine: Assignment[] = [];
+const conjugationCompletedAssignments = computed(() =>
+  conjugationAssignments.value.filter(a => a.status === 'completed')
+)
 
-  // 1. Sort prompts by the lowest target number (500 -> 750 -> 1000) and pick the first one
-  if (groups.prompts.length) {
-    groups.prompts.sort((a, b) => extractNumberFromText(a.description) - extractNumberFromText(b.description));
-    nextInLine.push(groups.prompts[0]);
-  }
+// Games: show ALL pending (no queue)
+const gamesAssignments = computed(() =>
+  allAssignments.value.filter(
+    a =>
+      a.task_type === 'achievement' &&
+      !a.trigger_key.includes('vw_write_complete') &&
+      !a.trigger_key.includes('correct_prompts') &&
+      !a.trigger_key.includes('health_tier') &&
+      !a.trigger_key.includes('discovery') &&
+      !a.trigger_key.includes('mastery')
+  )
+)
 
-  // 2. Conjugation Health Tiers: Sort by target values (30 -> 40 -> 50) and pick the first one
-  if (groups.health.length) {
-    groups.health.sort((a, b) => extractNumberFromText(a.description) - extractNumberFromText(b.description));
-    nextInLine.push(groups.health[0]);
-  }
+const gamesPendingAssignments = computed(() =>
+  gamesAssignments.value.filter(a => a.status === 'pending')
+)
 
-  // 3. Verb Lists Progression (Discover must happen before Master)
-  const processVerbListGroup = (list: Assignment[]) => {
-    if (!list.length) return;
-    const discoverTasks = list.filter(a => a.description.toLowerCase().includes('discover'));
-    const masterTasks = list.filter(a => a.description.toLowerCase().includes('master'));
-
-    // If there is an unfinished "Discover" task for a tense, show that first. Otherwise show "Master".
-    if (discoverTasks.length) {
-      nextInLine.push(discoverTasks[0]); 
-    } else if (masterTasks.length) {
-      nextInLine.push(masterTasks[0]);
-    }
-  };
-
-  processVerbListGroup(groups.basic75);
-  processVerbListGroup(groups.master110);
-  processVerbListGroup(groups.allIrreg);
-
-  return nextInLine;
-});
-const conjugationCompletedAssignments = computed(() => conjugationAssignments.value.filter(a => a.status === 'completed'));
-
-const gamesAssignments = computed(() => allAssignments.value.filter(a => a.task_type === 'achievement' && !a.trigger_key.includes('vw_write_complete') && !a.trigger_key.includes('correct_prompts') && !a.trigger_key.includes('health_tier') && !a.trigger_key.includes('discovery') && !a.trigger_key.includes('mastery')));
-const gamesPendingAssignments = computed(() => {
-  const rawPending = gamesAssignments.value.filter(a => a.status === 'pending');
-  
-  // Group matching milestones together by looking at common words
-  const grouped: Record<string, Assignment[]> = {};
-  rawPending.forEach(a => {
-    // Uses the first three words of the task description as a unique key structure
-    const baseGroupKey = a.description.split(' ').slice(0, 3).join('_').toLowerCase();
-    if (!grouped[baseGroupKey]) grouped[baseGroupKey] = [];
-    grouped[baseGroupKey].push(a);
-  });
-
-  const nextInLine: Assignment[] = [];
-  Object.values(grouped).forEach(group => {
-    // Sort milestones with numbers ascendingly and pick only the closest target step
-    group.sort((a, b) => extractNumberFromText(a.description) - extractNumberFromText(b.description));
-    nextInLine.push(group[0]);
-  });
-
-  return nextInLine;
-});
-const gamesCompletedAssignments = computed(() => gamesAssignments.value.filter(a => a.status === 'completed'));
+const gamesCompletedAssignments = computed(() =>
+  gamesAssignments.value.filter(a => a.status === 'completed')
+)
 
 const completedCount = computed(() => allAssignments.value.filter(a => a.status === 'completed').length);
 const pendingCount = computed(() => allAssignments.value.filter(a => a.status === 'pending').length);

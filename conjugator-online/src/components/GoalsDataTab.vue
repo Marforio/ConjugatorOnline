@@ -173,7 +173,7 @@
       </v-col>
 
       <!-- 4) Roadmap -->
-      <v-col cols="12" lg="6" class="d-flex">
+      <v-col v-if="RoadmapActivated" cols="12" lg="6" class="d-flex">
         <v-card elevation="3" class="pa-4 card-fixed trophy-card border-gold d-flex flex-column">
           <div class="flex-shrink-0">
             <v-card-title class="text-h5 d-flex align-center font-weight-bold pb-1">
@@ -270,6 +270,7 @@ interface GroupedRoadmap {
 }
 
 const userStore = useUserStore()
+const RoadmapActivated = ref(false)
 
 const achievements = ref<Achievement[]>([])
 const automaticAchievements = ref<Achievement[]>([])

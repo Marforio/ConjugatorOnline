@@ -334,7 +334,8 @@ async function ensureUserLoaded() {
       // 1. Synchronize the teacher's classroom cohort array roster
       await Promise.all([
           fetchTeacherRoster(),
-          fetchManagedCourses() 
+          fetchManagedCourses(),
+          fetchEnrollments()
         ]);
       
       // 2. Clear out any selection garbage leftover in memory snapshots
@@ -653,19 +654,48 @@ async function ensureUserLoaded() {
 // 🎓 SECURE ENROLLMENT PIPELINE METHOD
 // =========================================================
 async function fetchEnrollments(params: Record<string, any> = {}) {
-    const res = await api.get('/enrollment/', { params }) // adjust to your actual endpoint
-    const payload = res.data?.results ?? res.data
-    enrollments.value = Array.isArray(payload) ? payload : []
-  }
+  if (!hasAccessToken()) return
+  loadingEnrollments.value = true
+  enrollmentError.value = null
 
-  async function fetchCourses(params: Record<string, any> = {}) {
+  try {
+    const res = await api.get('/enrollment/', { params })
+    const payload = res.data?.results ?? res.data
+    const arr = Array.isArray(payload) ? payload : []
+
+    // normalize for consistent downstream use
+    enrollments.value = arr.map((e: any) => ({
+      id: e.id,
+      student:
+        typeof e.student === 'string'
+          ? e.student
+          : String(e.student?.web_id ?? e.student_web_id ?? ''),
+      course:
+        typeof e.course === 'string'
+          ? e.course
+          : String(e.course?.slug ?? e.course_slug ?? ''),
+      objective_fulfillment: e.objective_fulfillment ?? {},
+    }))
+
+    console.log('[userStore.fetchEnrollments] loaded:', enrollments.value.length)
+    console.log('[userStore.fetchEnrollments] sample:', enrollments.value.slice(0, 5))
+  } catch (err: any) {
+    console.error('Failed to fetch enrollments:', err?.response?.status, err?.response?.data || err)
+    enrollmentError.value = 'Failed to load enrollments'
+    enrollments.value = []
+  } finally {
+    loadingEnrollments.value = false
+  }
+}
+
+async function fetchCourses(params: Record<string, any> = {}) {
     const res = await api.get('/courses/', { params }) // adjust to your actual endpoint
     const payload = res.data?.results ?? res.data
     courses.value = Array.isArray(payload) ? payload : []
   }
 
   // Single entrypoint used by dashboard
-  async function fetchEnrollmentBundle(params: Record<string, any> = {}) {
+async function fetchEnrollmentBundle(params: Record<string, any> = {}) {
     loadingEnrollmentBundle.value = true
     try {
       await Promise.all([

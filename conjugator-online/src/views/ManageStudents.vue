@@ -483,11 +483,11 @@
 
     <v-dialog v-model="enrollmentDialog" max-width="500px">
       <v-card rounded="lg">
-        <v-card-title class="pa-4 bg-success text-white font-weight-bold">Assign Student to Course Room</v-card-title>
+        <v-card-title class="pa-4 bg-success text-white font-weight-bold">Assign Student to Course</v-card-title>
         <v-card-text class="pt-4">
           <v-form ref="enrollmentFormRef">
             <v-autocomplete v-model="newEnrollment.studentWebId" :items="userStore.teacherRoster" item-title="web_id" item-value="web_id" label="Select Student Web ID" variant="outlined" :rules="[v => !!v || 'Student ID selection is required']"></v-autocomplete>
-            <v-select v-model="newEnrollment.courseSlug" :items="courses" item-title="slug" item-value="slug" label="Target Course Room" variant="outlined" :rules="[v => !!v || 'Target course selection is required']"></v-select>
+            <v-select v-model="newEnrollment.courseSlug" :items="courses" item-title="slug" item-value="slug" label="Target Course" variant="outlined" :rules="[v => !!v || 'Target course selection is required']"></v-select>
           </v-form>
         </v-card-text>
         <v-card-actions class="pa-4 justify-end">

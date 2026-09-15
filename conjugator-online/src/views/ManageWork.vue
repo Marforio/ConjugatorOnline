@@ -51,7 +51,7 @@
             v-model="selectedCourseId"
             :items="uniqueCourses"
             item-title="title"
-            item-value="value"
+            item-value="slug"
             label="Select course"
             prepend-inner-icon="mdi-book-open-variant"
             variant="outlined"
@@ -457,7 +457,7 @@
         <v-card v-else class="border fill-height d-flex align-center justify-center pa-12 bg-white text-slate-400 text-center" rounded="lg" elevation="0">
           <div>
             <v-icon size="48" class="mb-2 text-slate-300">mdi-arrow-left-bold-box-outline</v-icon>
-            <div class="text-body-2">Please select an individual student or course to populate data views.</div>
+            <div class="text-body-2">Please select an individual student or course</div>
           </div>
         </v-card>
       </v-col>
@@ -474,7 +474,7 @@
         Select Workout Preset Blueprint
       </v-card-title>
       <v-card-text class="text-caption text-slate-500 pa-2">
-        Choosing a workout blueprint imports a predefined set of structured drills.
+        Choosing a workout blueprint imports a predefined set of drills.
       </v-card-text>
       
       <v-list v-if="availableWorkoutTemplates.length > 0" class="bg-transparent mt-2 py-0 ga-2 d-flex flex-column">
@@ -752,7 +752,6 @@ const activeAssignments = ref<Assignment[]>([]);
 const activeWorkout = ref<Workout | null>(null);
 const matrixRosterData = ref<RosterMatrixRow[]>([]);
 const courses = ref<any[]>([]);
-const enrollments = ref<any[]>([]);
 const selectedTemplatesList = ref<TemplatePreset[]>([]);
 const rawAchievementsJson = ref<Record<string, any>>({});
 const workoutTemplatesFromApi = ref<WorkoutTemplate[]>([]);
@@ -970,12 +969,74 @@ function onCourseChanged() {
     loadGlobalClassMatrix(); 
   }
 }
-
 function getStudentIdsInSelectedCourse(): string[] {
-  if (!selectedCourseId.value) return [];
-  return enrollments.value
-    .filter(e => e.course === selectedCourseId.value)
-    .map(e => String(e.student || e.student_id));
+  if (!selectedCourseId.value) {
+    console.log('[getStudentIdsInSelectedCourse] No selectedCourseId.')
+    return []
+  }
+
+  const selected = String(selectedCourseId.value).trim().toLowerCase()
+  console.log('[getStudentIdsInSelectedCourse] selectedCourseId(raw):', selectedCourseId.value)
+  console.log('[getStudentIdsInSelectedCourse] selected(normalized):', selected)
+
+  const availableCourses = userStore.availableTeacherCourses || []
+  console.log('[getStudentIdsInSelectedCourse] availableTeacherCourses count:', availableCourses.length)
+  console.log('[getStudentIdsInSelectedCourse] availableTeacherCourses sample:', availableCourses.slice(0, 5))
+
+  const matchedCourse = availableCourses.find((c) => {
+    const title = String(c.title ?? '').trim().toLowerCase()
+    const slug = String(c.slug ?? '').trim().toLowerCase()
+    return selected === title || selected === slug
+  })
+
+  console.log('[getStudentIdsInSelectedCourse] matchedCourse:', matchedCourse)
+
+  const acceptedCourseKeys = new Set<string>([
+    selected,
+    String(matchedCourse?.slug ?? '').trim().toLowerCase(),
+    String(matchedCourse?.title ?? '').trim().toLowerCase(),
+  ].filter(Boolean))
+
+  console.log('[getStudentIdsInSelectedCourse] acceptedCourseKeys:', Array.from(acceptedCourseKeys))
+
+  const enrollmentPool = userStore.enrollments || []
+  console.log('[getStudentIdsInSelectedCourse] enrollments count:', enrollmentPool.length)
+  console.log('[getStudentIdsInSelectedCourse] enrollments sample:', enrollmentPool.slice(0, 5))
+
+  const filteredEnrollments = enrollmentPool.filter((e: any) => {
+    const rawCourse = e.course
+    const courseKeys = [
+      (typeof rawCourse === 'string' || typeof rawCourse === 'number')
+        ? String(rawCourse)
+        : String(rawCourse?.slug ?? rawCourse?.title ?? ''),
+      String(e.course_slug ?? ''),
+    ].map((v) => v.trim().toLowerCase()).filter(Boolean)
+
+    const isMatch = courseKeys.some((k) => acceptedCourseKeys.has(k))
+
+    console.log('[getStudentIdsInSelectedCourse] enrollment check:', {
+      enrollment: e,
+      derivedCourseKeys: courseKeys,
+      isMatch,
+    })
+
+    return isMatch
+  })
+
+  console.log('[getStudentIdsInSelectedCourse] filteredEnrollments count:', filteredEnrollments.length)
+
+  const studentIds = filteredEnrollments
+    .map((e: any) => {
+      const s = e.student
+      if (typeof s === 'string' || typeof s === 'number') return String(s).trim()
+      if (s && typeof s === 'object') return String(s.web_id ?? s.id ?? '').trim()
+      return String(e.student_id ?? '').trim()
+    })
+    .filter(Boolean)
+
+  console.log('[getStudentIdsInSelectedCourse] resolved student identifiers:', studentIds)
+
+  return studentIds
 }
 
 // Data Fetching Functions
@@ -1241,52 +1302,83 @@ async function archiveWorkoutPlan(id: number) {
 
 // Assignment Management Functions
 async function issueAssignmentTask() {
+  console.log('🚀 [issueAssignmentTask] Function triggered');
   dispatching.value = true;
+  
   try {
     let targetsListIds: number[] = [];
+
+    console.log('🔍 [issueAssignmentTask] Checking target scope:', {
+      targetScope: targetScope.value,
+      selectedStudentId: selectedStudentId.value,
+      selectedCourseId: selectedCourseId.value,
+      selectedTemplatesCount: selectedTemplatesList.value?.length || 0,
+    });
 
     if (targetScope.value === 'student' && selectedStudentId.value) {
       targetsListIds.push(selectedStudentId.value);
     } else if (targetScope.value === 'course' && selectedCourseId.value) {
       const courseStudentWebIds = getStudentIdsInSelectedCourse();
+      console.log('📚 [issueAssignmentTask] Course student web IDs fetched:', courseStudentWebIds);
+
       targetsListIds = studentsList.value
         .filter(s => courseStudentWebIds.includes(String(s.web_id)))
         .map(s => s.id);
+    } else {
+      console.warn('⚠️ [issueAssignmentTask] Target scope condition not met or missing selected IDs!');
+    }
+
+    console.log('👥 [issueAssignmentTask] Resolved Target Student IDs:', targetsListIds);
+    console.log('📋 [issueAssignmentTask] Selected Templates:', selectedTemplatesList.value);
+
+    if (targetsListIds.length === 0) {
+      console.warn('⚠️ [issueAssignmentTask] No target student IDs resolved. Loop will not execute.');
+    }
+
+    if (!selectedTemplatesList.value || selectedTemplatesList.value.length === 0) {
+      console.warn('⚠️ [issueAssignmentTask] No templates selected. Loop will not execute.');
     }
 
     const batchRequests: Array<Promise<any>> = [];
 
     targetsListIds.forEach(studentId => {
       selectedTemplatesList.value.forEach(template => {
-        console.log('Creating assignment', {
+        const payload = {
           student: studentId,
-          trigger_key: template.trigger_key,
           task_type: template.task_type,
-        });
+          trigger_key: template.trigger_key,
+          description: template.description,
+          required_sessions: template.required_sessions,
+          min_days_between_sessions: template.task_type === 'achievement' ? 0 : 1,
+          manually_created: true
+        };
 
-        batchRequests.push(
-          api.post('/assignment/', {
-            student: studentId,
-            task_type: template.task_type,
-            trigger_key: template.trigger_key,
-            description: template.description,
-            required_sessions: template.required_sessions,
-            min_days_between_sessions: template.task_type === 'achievement' ? 0 : 1,
-            manually_created: true
-          })
-        );
+        console.log('✉️ [issueAssignmentTask] Pushing API call to batchRequests:', payload);
+
+        batchRequests.push(api.post('/assignment/', payload));
       });
     });
 
-    await Promise.all(batchRequests);
+    console.log(`📦 [issueAssignmentTask] Total batch requests created: ${batchRequests.length}`);
+
+    if (batchRequests.length === 0) {
+      console.error('❌ [issueAssignmentTask] Zero batch requests generated! Skipping Promise.all.');
+      return;
+    }
+
+    console.log('⏳ [issueAssignmentTask] Sending Promise.all batch requests...');
+    const responses = await Promise.all(batchRequests);
+    console.log('✅ [issueAssignmentTask] All API requests completed successfully:', responses);
+
     triggerAlert(`Successfully deployed ${selectedTemplatesList.value.length} assignment(s).`, 'success');
     selectedTemplatesList.value = [];
     await refreshAssignmentLogs();
   } catch (err) {
-    console.error('Failed to issue assignments:', err);
+    console.error('💥 [issueAssignmentTask] Batch deployment failed:', err);
     triggerAlert('Batch deployment failed.', 'error');
   } finally {
     dispatching.value = false;
+    console.log('🏁 [issueAssignmentTask] Finished execution. dispatching set to false.');
   }
 }
 
