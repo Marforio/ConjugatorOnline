@@ -77,7 +77,7 @@
     </v-row>
 
     <!-- ACTIVITY FEED: Horizontal timeline with dots -->
-    <v-row class="mb-6">
+    <v-row>
       <v-col cols="12">
         <div class="d-flex align-center justify-space-between mb-4">
           <h2 class="text-h6 font-weight-bold text-slate-900">Recent Activity</h2>
@@ -98,15 +98,16 @@
 
           <div v-else-if="activityFeed.length > 0" class="pa-2 pt-0 position-relative">
             <!-- Horizontal scrollable track -->
-            <div 
-              ref="activityTrackRef"
-              class="d-flex ga-3 overflow-x-auto pb-4 activity-horizontal-scroll"
-            >
+            <div
+                ref="activityTrackRef"
+                class="d-flex ga-3 overflow-x-auto pb-4 activity-horizontal-scroll grab-to-scroll"
+                @mousedown="initiateMouseDragScroll"
+              >
               <div 
                 v-for="(activity, index) in activityFeed"
                 :key="index"
                 class="flex-shrink-0"
-                style="min-width: 260px;"
+                style="min-width: 260px; max-width: 300px;"      
               >
                 <div class="d-flex ga-3 align-start border rounded-lg py-2 px-3">
                   <!-- Dot -->
@@ -122,8 +123,8 @@
                     <div class="text-body-2 font-weight-bold text-slate-800">
                       {{ activity.title }}
                     </div>
-                    <div class="text-caption text-slate-500 mt-0.5">
-                      {{ activity.description }}
+                    <div class="text-caption text-slate-500 mt-0.5 text-wrap">
+                      {{ activity.description.slice(0, 75) }}{{ activity.description.length > 75 ? '...' : '' }}
                     </div>
                     <div class="text-xxs text-slate-400 font-monospace mt-1">
                       {{ formatActivityTime(activity.timestamp) }}
@@ -149,8 +150,8 @@
         <v-card class="h-100" elevation="0" rounded="xl" border>
           <v-card-title class="bg-slate-50 border-b pa-5">
             <div class="d-flex align-center ga-2">
-              <v-icon>mdi-checkbox-marked-circle-outline</v-icon>
-              <span>Your Work</span>
+              <v-icon>mdi-account-hard-hat</v-icon>
+              <span>Suggested work</span>
             </div>
           </v-card-title>
 
@@ -257,7 +258,7 @@
               <div v-if="gamesPendingAssignments.length > 0" class="border rounded-xl pa-4 bg-purple-lighten-5">
                 <div class="d-flex align-center ga-2 mb-3">
                   <v-icon color="purple-darken-2">mdi-gamepad-circle</v-icon>
-                  <span class="text-subtitle-2 font-weight-bold text-purple-darken-2">Games</span>
+                  <span class="text-subtitle-2 font-weight-bold text-purple-darken-2">Other Games</span>
                 </div>
                 <div class="ga-2 d-flex flex-column">
                   <div 
@@ -278,7 +279,7 @@
               <div v-if="exercisePendingAssignments.length > 0" class="border rounded-xl pa-4 bg-orange-lighten-5">
                 <div class="d-flex align-center ga-2 mb-3">
                   <v-icon color="orange-darken-2">mdi-book-open-variant</v-icon>
-                  <span class="text-subtitle-2 font-weight-bold text-orange-darken-2">Grammar Review</span>
+                  <span class="text-subtitle-2 font-weight-bold text-orange-darken-2">Grammar Review (based on your error feedback)</span>
                 </div>
                 <div class="ga-2 d-flex flex-column">
                   <div 
@@ -674,20 +675,20 @@ async function fetchAssignments() {
 }
 
 // Ticker reference node pointer hook mapping down to the track element
-const tickerTrackRef = ref<HTMLElement | null>(null);
+const activityTrackRef = ref<HTMLElement | null>(null);
 
 /**
  * BUTTON SCROLL TRIGGER
  * Smoothly shifts view indices horizontally when navigation arrows are clicked
  */
 function scrollTicker(direction: 'left' | 'right') {
-  if (!tickerTrackRef.value) return;
+  if (!activityTrackRef.value) return;
   
   // Shift track layout view by roughly 3 active ticker card blocks per click step
   const scrollOffsetDistance = 600; 
   const targetMultiplier = direction === 'left' ? -1 : 1;
   
-  tickerTrackRef.value.scrollBy({
+  activityTrackRef.value.scrollBy({
     left: scrollOffsetDistance * targetMultiplier,
     behavior: 'smooth'
   });
@@ -698,7 +699,7 @@ function scrollTicker(direction: 'left' | 'right') {
  * Translates click-and-drag movements into horizontal scroll updates
  */
 function initiateMouseDragScroll(mouseDownEvent: MouseEvent) {
-  const track = tickerTrackRef.value;
+  const track = activityTrackRef.value;
   if (!track) return;
 
   // Cache baseline structural geometry data coordinates parameters
@@ -786,7 +787,7 @@ const vocabAssignments = computed(() => allAssignments.value.filter(a => a.task_
 const vocabPendingAssignments = computed(() => vocabAssignments.value.filter(a => a.status === 'pending'));
 const vocabCompletedAssignments = computed(() => vocabAssignments.value.filter(a => a.status === 'completed'));
 
-const exerciseAssignments = computed(() => allAssignments.value.filter(a => a.task_type === 'exercise'));
+const exerciseAssignments = computed(() => allAssignments.value.filter(a => a.task_type === 'exercise' && a.trigger_key.length === 4));
 const exercisePendingAssignments = computed(() => exerciseAssignments.value.filter(a => a.status === 'pending'));
 const exerciseCompletedAssignments = computed(() => exerciseAssignments.value.filter(a => a.status === 'completed'));
 
@@ -863,7 +864,7 @@ const conjugationCompletedAssignments = computed(() =>
 const gamesAssignments = computed(() =>
   allAssignments.value.filter(
     a =>
-      a.task_type === 'achievement' &&
+      (a.task_type === 'achievement' || a.task_type === 'exercise') &&
       !a.trigger_key.includes('vw_write_complete') &&
       !a.trigger_key.includes('correct_prompts') &&
       !a.trigger_key.includes('health_tier') &&
@@ -1005,18 +1006,16 @@ onMounted(async () => {
   transition: all 0.2s ease-in-out;
 }
 
-/* Horizontal scroll settings for the stream cards track */
-.horizontal-ticker-track {
+.activity-horizontal-scroll {
   overflow-x: auto;
   overflow-y: hidden;
   white-space: nowrap;
   -webkit-overflow-scrolling: touch;
   background-color: #fafbfc;
-  scrollbar-width: none; /* Hide scrollbar for clean aesthetic */
+  scrollbar-width: none;
 }
 
-/* Hide scrollbar for Chrome, Safari and Opera */
-.horizontal-ticker-track::-webkit-scrollbar {
+.activity-horizontal-scroll::-webkit-scrollbar {
   display: none;
 }
 

@@ -78,7 +78,7 @@
                         {{ student.initials }}
                       </div>
                       <div class="text-xxs font-mono text-slate-400 text-truncate mt-0.5">
-                        {{ student.web_id }}
+                        {{ student.web_id.slice(0, 10) }}
                       </div>
                     </div>
 

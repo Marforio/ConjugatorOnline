@@ -56,7 +56,7 @@
       </v-col>
 
       <!-- Word Families -->
-      <v-col cols="12" sm="6" md="4" class="d-flex justify-center">
+      <v-col v-if="isEnabled" cols="12" sm="6" md="4" class="d-flex justify-center">
         <RouterLink
           :to="{ name: 'word-families' }"
           class="image-tile"
