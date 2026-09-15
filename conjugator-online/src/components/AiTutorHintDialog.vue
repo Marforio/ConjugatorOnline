@@ -42,11 +42,11 @@
 
             <v-row no-gutters class="bg-white border rounded-xl pa-2 text-center shadow-sm">
               <v-col cols="6" class="border-r border-b pb-2 mb-2">
-                <div class="text-caption font-weight-medium text-slate-400">Verb Anchor</div>
+                <div class="text-caption font-weight-medium text-slate-400">Verb</div>
                 <div class="text-body-2 font-weight-black text-slate-800">{{ ctx.verb }}</div>
               </v-col>
               <v-col cols="6" class="border-b pb-2 mb-2">
-                <div class="text-caption font-weight-medium text-slate-400">Target Subject</div>
+                <div class="text-caption font-weight-medium text-slate-400">Subject</div>
                 <div class="text-body-2 font-weight-bold text-slate-700">{{ ctx.person }}</div>
               </v-col>
               <v-col cols="6" class="border-r pt-1">
@@ -122,8 +122,11 @@ type HintCtx = {
   sentenceType?: string;
   displayed_keyword?: string;
   showing_keyword_mode?: boolean;
-  acceptable_answers?: string[];
-  acceptableAnswers?: string[];
+  constraints?: {
+    never_reveal_english_target_answer?: boolean;
+    output_languages?: string[];
+    include_estimated_conjugated_translation?: boolean;
+  };
   [k: string]: any;
 };
 
@@ -168,15 +171,10 @@ const ctx = computed(() => {
     sentence_type: c.sentence_type ?? c.sentenceType ?? "",
     displayed_keyword: c.displayed_keyword ?? "",
     showing_keyword_mode: c.showing_keyword_mode ?? false,
-    acceptable_answers: (c.acceptable_answers ?? c.acceptableAnswers ?? []) as string[],
   };
 });
 
 const verbTranslations = reactive<{ fr: string; de: string; it: string }>({ fr: "", de: "", it: "" });
-const correctAnswer = computed(() => {
-  const list = ctx.value.acceptable_answers || [];
-  return list.length ? list[0] : "";
-});
 
 watch(
   () => isOpen.value,
@@ -214,42 +212,36 @@ function resetOutput() {
 
 function buildPrompt(): string {
   const dynamicTimeContext = ctx.value.showing_keyword_mode && ctx.value.displayed_keyword
-    ? `The student is seeing the time reference keyword "${ctx.value.displayed_keyword}" instead of a generic tense name.`
-    : `The student is looking directly at the tense name "${ctx.value.tense}".`;
+    ? `Visible time reference keyword: "${ctx.value.displayed_keyword}". Use it naturally in estimated translations if appropriate.`
+    : `Visible tense label: "${ctx.value.tense}".`;
 
   return [
-    "You are a translation helper for a language learning conjugation game.",
+    "You are a translation helper for an English conjugation game.",
     "",
-    "Task:",
-    "1) Translate the base meaning of the English verb into French, German, and Italian (dictionary-style; short).",
-    "2) Translate the MEANING of the correct answer into French, German, and Italian (natural full translation).",
-    "",
-    "CRITICAL TRANSLATION RULE:",
-    `${ctx.value.showing_keyword_mode && ctx.value.displayed_keyword 
-      ? `- You MUST explicitly include the meaning of the active time reference keyword "${ctx.value.displayed_keyword}" as part of the full answer translation for French, German, and Italian while placing it in parentheses. For example, if the keyword is "yesterday", make sure words like "hier", "gestern", or "ieri" are naturally integrated into the sentence in parentheses: "(hier)", "(gestern)", "(ieri)".` 
-      : "- Translate the full conjugated phrase naturally into the target languages."
-    }`,
+    "You are given ONLY prompt metadata, not the true answer text.",
+    "Infer an estimated English target sentence from: verb + person + tense + sentence_type.",
+    "Then translate ONLY into French, German, Italian.",
     "",
     "Hard constraints:",
-    "- Output ONLY valid minified JSON. No markdown backticks (```). No conversational extra text.",
-    '- Exactly this shape: {"verb":{"fr":"...","de":"...","it":"..."},"answer":{"fr":"...","de":"...","it":"..."}}',
-    "- Keep strings concise and natural.",
-    "- If a translation has multiple good options, pick the most common one.",
+    "- NEVER output the inferred English sentence.",
+    "- NEVER output any English conjugated target answer.",
+    "- Output ONLY valid minified JSON (no markdown).",
+    '- Exactly this schema:',
+    '{"verb":{"fr":"...","de":"...","it":"..."},"answer_estimate":{"fr":"...","de":"...","it":"..."},"note":"Estimated from prompt metadata; may vary."}',
+    "- Keep wording natural and concise.",
     "",
     `Context: ${dynamicTimeContext}`,
-    `Game prompt parameters: verb=${ctx.value.verb}, person=${ctx.value.person}, tense=${ctx.value.tense}, sentence_type=${ctx.value.sentence_type}`,
-    `English verb: ${ctx.value.verb || "(missing)"}`,
-    `Correct answer (English phrase): ${correctAnswer.value || "(missing)"}`,
+    `Prompt metadata: verb=${ctx.value.verb}, person=${ctx.value.person}, tense=${ctx.value.tense}, sentence_type=${ctx.value.sentence_type}`,
   ].join("\n");
 }
 
 async function reload() {
   resetOutput();
 
-  if (!correctAnswer.value) {
-    errorMessage.value = "No acceptable answers were provided, so I can’t generate a translation hint.";
-    return;
-  }
+  if (!ctx.value.verb || !ctx.value.person || !ctx.value.tense || !ctx.value.sentence_type) {
+      errorMessage.value = "Missing prompt data (verb/person/tense/type).";
+      return;
+    }
 
   isLoading.value = true;
   currentAbortController.value = new AbortController();
@@ -283,9 +275,9 @@ async function reload() {
     verbTranslations.de = String(parsed?.verb?.de ?? "");
     verbTranslations.it = String(parsed?.verb?.it ?? "");
 
-    translations.fr = String(parsed?.answer?.fr ?? "");
-    translations.de = String(parsed?.answer?.de ?? "");
-    translations.it = String(parsed?.answer?.it ?? "");
+    translations.fr = String(parsed?.answer_estimate?.fr ?? "");
+    translations.de = String(parsed?.answer_estimate?.de ?? "");
+    translations.it = String(parsed?.answer_estimate?.it ?? "");
 
     if (!verbTranslations.fr || !verbTranslations.de || !verbTranslations.it || !translations.fr || !translations.de || !translations.it) {
       throw new Error(`LLM JSON missing keys. Raw output: ${out}`);

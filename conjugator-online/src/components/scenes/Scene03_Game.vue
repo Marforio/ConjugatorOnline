@@ -607,13 +607,23 @@ function displayNextPrompt() {
 const hintOpen = ref(false);
 
 const hintContext = computed(() => ({
-  verb: currentPrompt.verb,
-  person: currentPrompt.person,
+  mode: "prompt_translation_only",
+  verb: currentPrompt.verb,                  // infinitive/base prompt verb
+  person: currentPrompt.person,              // subject
   tense: currentPrompt.tense,
-  sentence_type: currentPrompt.sentenceType,
+  sentence_type: currentPrompt.sentenceType, // affirmative / negative / question
   displayed_keyword: randomTenseDisplay.value,
   showing_keyword_mode: showKeyword.value,
-  acceptable_answers: acceptableAnswersCache.value.get(promptCounter.value) || [],
+
+  // hard policy for LLM
+  constraints: {
+    never_reveal_english_target_answer: true,
+    never_attempt_validation_or_correctness: true,
+    output_languages: ["fr", "de", "es"], // or your 3 target languages
+    include_unconjugated_verb_translation: true,
+    include_estimated_conjugated_translation: true,
+    conjugated_translation_label: "Approximate translations of the target answer",
+  },
 }));
 
 // ============================================================================
