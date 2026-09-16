@@ -399,6 +399,9 @@
               <p v-if="gameName === 'Passive Party'" class="text-body-2 text-grey-darken-3">
                 Review the rules on how to convert sentences in <a href="https://book.language-labs.ch/ch8" target="_blank" class="text-primary text-decoration-none">active voice to passive voice</a>.
               </p>
+              <p v-if="gameName === 'Passive Party'" class="text-body-1 font-weight-bold text-grey-darken-3">
+                Remember: No contractions allowed in this game! (e.g., use "is not" instead of "isn't" and "have not" instead of "haven't"). 
+              </p>
               <p v-else-if="gameName === 'Pronoun Practice'" class="text-body-2 text-grey-darken-3">
               Review the <a href="https://book.language-labs.ch/ch9" target="_blank" class="text-primary text-decoration-none">table of English Pronouns</a>.
             </p>

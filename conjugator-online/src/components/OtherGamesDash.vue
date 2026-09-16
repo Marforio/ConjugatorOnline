@@ -286,8 +286,9 @@
                     <tr>
                       <th class="font-weight-bold text-grey-darken-3">#</th>
                       <th class="font-weight-bold text-grey-darken-3">Game</th>
-                      <th v-if="selectedGame === 'Quantifier Quest' || selectedGame === 'Pronoun Practice'" class="font-weight-bold text-grey-darken-3">Visual Variable</th>
+                      <th v-if="selectedGame === 'Quantifier Quest' || selectedGame === 'Pronoun Practice'" class="font-weight-bold text-grey-darken-3">Picture</th>
                       <th class="font-weight-bold text-grey-darken-3">User Answer</th>
+                      <th class="font-weight-bold text-grey-darken-3">Correct Answer</th>
                       <th class="font-weight-bold text-grey-darken-3 text-center">Status</th>
                       <th class="font-weight-bold text-grey-darken-3 text-center">Typo?</th>
                       <th class="font-weight-bold text-grey-darken-3 text-end">Actions</th>
@@ -303,6 +304,10 @@
                       <td class="text-body-2 font-weight-bold text-grey-darken-4">
                         <span v-if="round.user_answer">{{ round.user_answer }}</span>
                         <span v-else class="text-caption italic text-error">Timeout</span>
+                      </td>
+                      <td class="text-body-2 font-weight-bold text-grey-darken-4">
+                        <span v-if="round.correct_answer">{{ round.correct_answer }}</span>
+                        <span v-else class="text-caption italic text-error">N/A</span>
                       </td>
                       <td class="text-center">
                         <v-icon :color="round.is_correct ? 'success' : 'error'" size="22">
@@ -434,6 +439,7 @@ interface OtherGameRound {
   image: string;
   prompt_number: number;
   is_correct: boolean | null;
+  correct_answer: string | null;
   out_of_time: boolean | null;
   sample_rate?: number;
   typo: boolean;

@@ -62,7 +62,7 @@
                 :loading="pdfLoading"
               >
                 <span class="text-truncate">
-                  Export PDF: {{ selectedListMeta?.name || 'Vocab List' }}
+                  Export PDF: {{ selectedListMeta?.name.slice(0, 25) || 'Vocab List' }}
                 </span>
               </v-btn>
 
