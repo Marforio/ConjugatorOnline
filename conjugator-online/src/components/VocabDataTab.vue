@@ -4,23 +4,13 @@
     <v-row justify="center" class="mb-6">
       <v-col cols="12" md="11" lg="9" class="d-flex justify-space-between align-center gap-3 flex-wrap flex-sm-nowrap">
         <v-btn
-          :variant="activePanel === 0 ? 'elevated' : 'tonal'"
-          :color="activePanel === 0 ? 'primary' : 'grey-darken-1'"
-          size="large"
-          class="flex-grow-1 rounded-xl text-subtitle-1 font-weight-medium tracking-wide panel-toggle-btn"
-          @click="activePanel = 0"
-        >
-          Notebook
-        </v-btn>
-
-        <v-btn
           :variant="activePanel === 1 ? 'elevated' : 'tonal'"
           :color="activePanel === 1 ? 'primary' : 'grey-darken-1'"
           size="large"
           class="flex-grow-1 rounded-xl text-subtitle-1 font-weight-medium tracking-wide panel-toggle-btn"
           @click="activePanel = 1"
         >
-          Vocab Workout Progress
+          Vocab Training Progress
         </v-btn>
 
         <v-btn
@@ -30,7 +20,17 @@
           class="flex-grow-1 rounded-xl text-subtitle-1 font-weight-medium tracking-wide panel-toggle-btn"
           @click="activePanel = 2"
         >
-          Vocab Workout Analytics
+          Vocab Training Analytics
+        </v-btn>
+
+                <v-btn
+          :variant="activePanel === 0 ? 'elevated' : 'tonal'"
+          :color="activePanel === 0 ? 'primary' : 'grey-darken-1'"
+          size="large"
+          class="flex-grow-1 rounded-xl text-subtitle-1 font-weight-medium tracking-wide panel-toggle-btn"
+          @click="activePanel = 0"
+        >
+          Notebook
         </v-btn>
       </v-col>
     </v-row>
@@ -255,7 +255,7 @@
       <v-window-item :value="1">
         <VWMyProgressPanel
           :completionTarget="COMPLETION_TARGET"
-          title="Your progress — Vocab Workout"
+          title="Your progress — Vocab Training"
           subtitle="See your pending work, start a new session or continue where you left off"
           @continue="continueSession"
           @start="startNewSessionForList"
@@ -298,7 +298,7 @@ const router = useRouter();
 const userStore = useUserStore();
 
 // View navigation active index value mappings
-const activePanel = ref(0);
+const activePanel = ref(2);
 
 // Spaced-Repetition Interactive Flashcard Reactive Coordinates
 const currentVocabItem = ref<{ correct: string; incorrect: string } | null>(null);

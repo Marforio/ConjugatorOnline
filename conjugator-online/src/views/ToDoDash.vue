@@ -77,7 +77,7 @@
     </v-row>
 
     <!-- ACTIVITY FEED: Horizontal timeline with dots -->
-    <v-row>
+    <v-row v-if="activityFeed.length > 0">
       <v-col cols="12">
         <div class="d-flex align-center justify-space-between mb-4">
           <h2 class="text-h6 font-weight-bold text-slate-900">Recent Activity</h2>
@@ -181,6 +181,22 @@
             </div>
 
             <div v-else class="ga-6 d-flex flex-column">
+              <!-- Active Vocab Sessions (embedded compact panel) -->
+              <div
+                v-if="hasActiveVocabSessions"
+                class="border rounded-xl pa-4 bg-brown-lighten-5"
+              >
+                <div class="d-flex align-center ga-2 mb-3">
+                  <v-icon color="brown-darken-2">mdi-progress-clock</v-icon>
+                  <span class="text-subtitle-2 font-weight-bold text-brown-darken-2">
+                    Continue Vocabulary Sessions
+                  </span>
+                </div>
+
+                <VWActiveSessionsCompact />
+              </div>
+
+              
               <!-- Workout Section -->
               <div v-if="currentWorkout" class="border rounded-xl pa-6 bg-blue-lighten-5">
                 <div class="d-flex align-center justify-space-between mb-4">
@@ -234,6 +250,7 @@
                 </div>
               </div>
 
+              
               <div v-if="conjugationPendingAssignments.length > 0" class="border rounded-xl pa-4 bg-indigo-lighten-5">
                 <div class="d-flex align-center ga-2 mb-3">
                   <v-icon color="indigo-darken-2">mdi-controller-classic</v-icon>
@@ -371,7 +388,7 @@
                 <v-expansion-panel-title class="bg-slate-50 font-weight-bold pa-4">
                   <div class="d-flex align-center ga-2">
                     <v-icon>mdi-check-circle</v-icon>
-                    <span>Completed ({{ completedCount }})</span>
+                    <span>Completed Assignments ({{ completedCount }})</span>
                   </div>
                 </v-expansion-panel-title>
                 <v-expansion-panel-text class="pa-4">
@@ -470,6 +487,8 @@ import { useUserStore } from "@/stores/user";
 import api from '@/axios';
 import { useRouter } from "vue-router";
 import LinguisticProfileEmbedded from '@/components/LinguisticProfileEmbedded.vue';
+import { useVocabWorkoutStore } from "@/stores/vocabWorkout";
+import VWActiveSessionsCompact from '@/components/vocab_workout_scenes/VWActiveSessionsCompact.vue';
 
 const userStore = useUserStore();
 const router = useRouter();
@@ -543,7 +562,11 @@ const currentCourseFulfillmentMap = computed(
   () => userStore.primaryObjectiveFulfillmentMap
 );
 
+const vw = useVocabWorkoutStore();
 
+const hasActiveVocabSessions = computed(() =>
+  (vw.activeSessions || []).some((s: any) => s?.status === "active" && s?.mode === "write")
+);
 
 // If you still want this local alias for template readability:
 const currentCourseFulfillmentCount = computed(
@@ -615,6 +638,52 @@ function formatActivityTime(timestamp: string): string {
   return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 }
 
+const customListNameMap = ref<Record<string, string>>({});
+
+function normalizeKey(v: string): string {
+  return String(v ?? "").trim().toLowerCase();
+}
+
+function titleCaseWords(s: string): string {
+  return s.replace(/_/g, " ").replace(/\b\w/g, (m) => m.toUpperCase());
+}
+
+async function fetchCustomListNames() {
+  try {
+    const params: any = {};
+    if (userStore.isStaff && userStore.studentId) params.student = userStore.studentId; // important
+    const res = await api.get("/vocab-lists/", { params });
+
+    const rows = Array.isArray(res.data) ? res.data : (res.data?.results || []);
+    const map: Record<string, string> = {};
+    for (const r of rows) {
+      const id = normalizeKey(r.id);
+      const name = String(r.name ?? "").trim();
+      if (id && name) map[id] = name;
+    }
+    customListNameMap.value = map;
+    console.log("Custom list name map:", customListNameMap.value);
+  } catch (e) {
+    console.warn("Could not load custom list names:", e);
+  }
+}
+
+function replaceListIdsInText(text: string): string {
+  let out = String(text ?? "");
+  if (!out) return out;
+
+  // Replace UUIDs inside sentences
+  out = out.replace(
+    /\b[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\b/gi,
+    (uuid) => customListNameMap.value[normalizeKey(uuid)] || uuid
+  );
+
+  // Optional: beautify legacy hardcoded keys still present in text
+  out = out.replace(/\birregular_verbs(?:_[a-z0-9_]+)?\b/gi, (k) => titleCaseWords(k));
+
+  return out;
+}
+
 async function fetchActivityFeed() {
   loadingActivity.value = true;
   try {
@@ -636,12 +705,23 @@ async function fetchActivityFeed() {
         ? rawData.filter((act: any) => act.student === userStore.studentId || act.student_initials === userStore.student?.initials)
         : rawData;
 
-      activityFeed.value = targetFeed.map((activity: any) => ({
-        type: activity.activity_type, 
-        title: activity.activity_name || getActivityLabel(activity.activity_type),
-        description: activity.description || 'Activity session updated successfully.',
-        timestamp: activity.timestamp,
-      }));
+      activityFeed.value = targetFeed.map((activity: any) => {
+        const rawTitle = activity.resolved_activity_name || getActivityLabel(activity.activity_type);
+        const rawDesc = activity.resolved_description || "Activity session updated successfully.";
+
+        return {
+          type: activity.activity_type,
+          title: replaceListIdsInText(rawTitle),
+          description: replaceListIdsInText(rawDesc),
+          timestamp: activity.timestamp,
+        };
+      });
+      /* for (const a of activityFeed.value) {
+        if (/[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}/i.test(a.title + " " + a.description)) {
+          console.warn("Unresolved list id in activity:", a);
+        }
+      }
+      console.log("Fetched activity feed:", activityFeed.value); */
     } else {
       activityFeed.value = [];
     }
@@ -926,10 +1006,15 @@ async function fetchCurrentWorkout() {
 }
 
 onMounted(async () => {
-  await fetchAssignments();
-  await userStore.fetchLinguisticProfile();
-  await fetchActivityFeed();
-  await fetchCurrentWorkout();
+  await Promise.all([
+    fetchAssignments(),
+    userStore.fetchLinguisticProfile(),
+    fetchCustomListNames(),
+    fetchActivityFeed(),
+    fetchCurrentWorkout(),
+    vw.fetchMyWork(), // single source fetch for compact panel + gate
+  ]);
+
   loadingEnrollments.value = true;
   await userStore.fetchEnrollmentBundle(
     userStore.isStaff ? { student: userStore.studentId } : {}

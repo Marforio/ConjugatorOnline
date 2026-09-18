@@ -170,7 +170,7 @@
                   <strong class="text-slate-900 font-weight-black mr-1">
                     {{ activity.student_initials }}
                   </strong>
-                  <span class="opacity-90">{{ activity.description }}</span>
+                  <span class="opacity-90">{{ prettyActivityDescription(activity) }}</span>
                 </div>
                 <div class="text-slate-400 font-mono text-right flex-shrink-0 font-weight-bold pl-1">
                   {{ formatTimeAgo(activity.timestamp) }}
@@ -280,6 +280,8 @@ const formatLastUpdate = computed(() => {
   return lastUpdate.value.toLocaleTimeString();
 });
 
+const customListNameMap = ref<Record<string, string>>({});
+
 const filteredActivities = computed(() => {
   const currentStudentId = userStore.student?.id;
 
@@ -343,6 +345,106 @@ watch(
   },
   { deep: true }
 );
+
+
+// ---- Custom list name mapping -----------------------------------------------
+async function fetchCustomListNames() {
+  try {
+    // adjust endpoint if yours differs
+    const res = await api.get("/vocab-lists/");
+    const rows = Array.isArray(res.data) ? res.data : (res.data?.results || []);
+    console.log("Fetched custom list names:", rows);
+    const map: Record<string, string> = {};
+    for (const r of rows) {
+      const id = String(r.id ?? "").trim();
+      const name = String(r.name ?? "").trim();
+      if (id && name) map[id] = name;
+    }
+    customListNameMap.value = map;
+    console.log("Custom list name map:", map);
+  } catch (e) {
+    console.warn("Could not load custom list names", e);
+  }
+}
+
+function isUuidLike(v: string): boolean {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(v);
+}
+
+function normalizeKey(v: string): string {
+  return String(v ?? "").trim();
+}
+
+function humanizeListKey(raw: string): string {
+  const k = normalizeKey(raw);
+  if (!k) return "Unknown list";
+
+  // direct exact key lookup
+  if (customListNameMap.value[k]) return customListNameMap.value[k];
+
+  // composite "<listKey>::<term>"
+  if (k.includes("::")) {
+    const [left] = k.split("::");
+    const leftKey = normalizeKey(left);
+    if (customListNameMap.value[leftKey]) return customListNameMap.value[leftKey];
+    // for hardcoded list keys in composite
+    if (!isUuidLike(leftKey)) return leftKey.replace(/_/g, " ").replace(/\b\w/g, (m) => m.toUpperCase());
+  }
+
+  // UUID with no match (map may be filtered by teacher scope)
+  if (isUuidLike(k)) return k; // keep as-is if unknown, avoids bad beautification
+
+  // hardcoded key prettify
+  return k.replace(/_/g, " ").replace(/\b\w/g, (m) => m.toUpperCase());
+}
+
+/**
+ * Replace any UUID present in a sentence with friendly custom list name.
+ * Also handles "<uuid>::term" fragments.
+ */
+function replaceListIdsInText(text: string): string {
+  let out = String(text ?? "");
+  if (!out) return out;
+
+  // replace composite first: "<uuid>::something"
+  out = out.replace(
+    /([0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})::([^\s,;]+)/gi,
+    (_m, uuid, tail) => {
+      const pretty = humanizeListKey(uuid);
+      return `${pretty}::${tail}`;
+    }
+  );
+
+  // replace standalone UUIDs
+  out = out.replace(
+    /([0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})/gi,
+    (m) => humanizeListKey(m)
+  );
+
+  return out;
+}
+
+function prettyActivityDescription(a: RecentActivity): string {
+  // 1) start from backend text
+  let d = String(a.description ?? "");
+
+  // 2) replace any UUIDs embedded in description
+  d = replaceListIdsInText(d);
+
+  // 3) if activity_name itself is a list key/id and appears in text, replace it
+  const rawName = String(a.activity_name ?? "").trim();
+  if (rawName) {
+    const prettyName = humanizeListKey(rawName);
+    if (prettyName !== rawName) {
+      d = d.split(rawName).join(prettyName);
+    }
+  }
+
+  // 4) fallback: if description is empty, at least show pretty activity_name
+  if (!d && rawName) return humanizeListKey(rawName);
+
+  return d;
+}
 
 
 // ---- REST fallback / hydration ----------------------------------------------
@@ -550,6 +652,7 @@ function formatTimeAgo(timestamp: string): string {
 // ---- lifecycle ---------------------------------------------------------------
 
 onMounted(() => {
+  void fetchCustomListNames();
   startPolling();
 });
 

@@ -1,7 +1,5 @@
-<!-- VWMyProgressPanel.vue -->
 <template>
   <div class="d-flex flex-column ga-4">
-    
     <!-- Header -->
     <v-row dense>
       <div class="mx-4 mt-8 mb-2">
@@ -12,7 +10,7 @@
       </div>
     </v-row>
 
-        <!-- Top row: active progress only -->
+    <!-- Top row: active progress only -->
     <VWActiveSessionsProgressList
       :rows="activeWorkRows"
       :loading="vw.loadingMyWork"
@@ -42,7 +40,8 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted } from "vue";
+import { computed, onMounted, ref } from "vue";
+import api from "@/axios";
 import { useUserStore } from "@/stores/user";
 import { useVocabWorkoutStore } from "@/stores/vocabWorkout";
 import { vocabLists } from "@/assets/scripts/vocab_workout/VocabListRegistry";
@@ -52,13 +51,6 @@ import VWCompletedThreeTimesCard from "@/components/vocab_workout_scenes/VWCompl
 import VWUnstartedTracksCard from "@/components/vocab_workout_scenes/VWUnstartedTracksCard.vue";
 import VWActiveSessionsProgressList from "@/components/vocab_workout_scenes/VWActiveSessionsProgressList.vue";
 
-type TrackKey = {
-  listKey: string;
-  mode: string;
-  level: string | null;
-  trackKey: string | null;
-};
-
 type TrackBadgeItem = { key: string; title: string };
 
 type UnstartedTrackRow = {
@@ -66,6 +58,7 @@ type UnstartedTrackRow = {
   title: string;
   subtitle: string;
   listKey: string;
+  listName?: string | null;
   level: string | null;
   trackKey: string | null;
 };
@@ -82,9 +75,15 @@ type ActiveWorkRow = {
   canContinue: boolean;
   continueSessionId: number | null;
   listKey: string;
-  listName?: string;
+  listName?: string | null;
   level: string | null;
   trackKey: string | null;
+};
+
+type CustomListLite = {
+  id: string;
+  name: string;
+  domain?: string | null;
 };
 
 const props = withDefaults(
@@ -108,84 +107,29 @@ const emit = defineEmits<{
 const user = useUserStore();
 const vw = useVocabWorkoutStore();
 
+const customVocabLists = ref<CustomListLite[]>([]);
+
 /* =====================================================
-   MODULE FILTERING
+   LOAD CUSTOM LISTS FOR UNSTARTED PANEL (BACKEND-DRIVEN)
 ===================================================== */
 
-const IRREGULAR_MODULE_NAME = "Irregular verbs";
+async function loadAvailableVocabLists() {
+  try {
+    const response = await api.get("/vocab-lists/");
+    const rawData =
+      response.data && typeof response.data === "object" && "results" in response.data
+        ? (response.data as any).results
+        : response.data;
 
-const studentDomain = computed(
-  () => (user.student as any)?.domain ?? null
-);
-
-/** modules allowed (ORDERED) */
-const allowedModules = computed(() => {
-  const modules: string[] = [];
-
-  // always first
-  modules.push(IRREGULAR_MODULE_NAME);
-
-  const dom = (studentDomain.value ?? "").trim();
-
-  if (dom) {
-    const match = Object.values(vocabLists).find(
-      (m: any) =>
-        (m.module ?? "").toLowerCase() === dom.toLowerCase()
-    )?.module;
-
-    if (match && match !== IRREGULAR_MODULE_NAME) {
-      modules.push(match);
-    }
+    customVocabLists.value = (Array.isArray(rawData) ? rawData : []).map((list: any) => ({
+      id: String(list.id),
+      name: String(list.name || "Custom Vocabulary List"),
+      domain: list.domain ?? null,
+    }));
+  } catch (err) {
+    console.error("Failed to load available custom vocab lists:", err);
+    customVocabLists.value = [];
   }
-
-  console.log("Allowed modules:", modules);
-
-  return modules;
-});
-
-
-/** list keys allowed everywhere */
-const allowedListKeys = computed(() => {
-  const allowed = new Set<string>();
-
-  // Loop through your local hardcoded registry options
-  for (const [listKey, metaRaw] of Object.entries(vocabLists)) {
-    const moduleName = (metaRaw as any).module || "General vocab";
-    if (allowedModules.value.includes(moduleName)) {
-      allowed.add(listKey);
-    }
-  }
-
-  // Inject any dynamic list tracking keys currently active inside store datasets
-    if (vw.activeSessions) {
-      for (const s of vw.activeSessions as any[]) {
-        if (s.list_key && !(s.list_key in vocabLists)) {
-          allowed.add(s.list_key); // Auto-allow active DB list IDs
-        }
-      }
-    }
-
-    if (vw.progress) {
-      for (const p of vw.progress as any[]) {
-        if (p.list_key && !(p.list_key in vocabLists)) {
-          allowed.add(p.list_key); // Auto-allow recorded progress DB list IDs
-        }
-      }
-    }
-
-  return allowed;
-});
-
-/** safe checker to handle module rank sorting without breaking on UUID lookups */
-function moduleRank(listKey: string): number {
-  const meta = (vocabLists as any)[listKey];
-  if (!meta) return 2; // Default rank for custom multi-tenant database lists
-
-  const moduleName = meta.module ?? "";
-  if (moduleName === IRREGULAR_MODULE_NAME) return 0;
-  if (moduleName.toLowerCase() === (studentDomain.value ?? "").toLowerCase()) return 1;
-
-  return 99;
 }
 
 /* =====================================================
@@ -205,40 +149,32 @@ function normLevel(v: any): string | null {
 function makeTrackKey(listKey: string, mode: string, level: string | null, trackKey: string | null) {
   return `${listKey}::${mode}::${level ?? "null"}::${normTrackKey(trackKey)}`;
 }
+
 function listTitle(listKey: string): string {
-  // 1. Check local hardcoded script metadata configuration
+  // 1) hardcoded
   const meta: any = (vocabLists as any)[listKey];
   if (meta?.title) return meta.title;
 
-  // 2. Search dynamically through all active sessions fetched from the server
-  const matchingSession = (vw.activeSessions || []).find((s: any) => s.list_key === listKey);
-  if (matchingSession) {
-    // 🌟 FIX: Cast to 'any' to bypass strict property checks on the session type
-    const ms = matchingSession as any;
-
-    const titleCandidates = [
-      ms.list_name,
-      ms.list_title,
-      ms.name,
-      ms.title,
-      ms.session?.list_name,
-      ms.session?.list_title,
-      ms.session?.name
-    ];
-
-    const foundTitle = titleCandidates.find(t => typeof t === "string" && t.trim().length > 0);
-    if (foundTitle) return foundTitle.trim();
+  // 2) progress serializer (preferred, includes list_name)
+  const p: any = (vw.progress || []).find((x: any) => x.list_key === listKey);
+  if (p?.list_name && String(p.list_name).trim()) {
+    return String(p.list_name).trim();
   }
 
-  // 3. Clean up raw database keys if no backend name is exposed
+  // 3) active session fallback
+  const s: any = (vw.activeSessions || []).find((x: any) => x.list_key === listKey);
+  if (s?.list_name && String(s.list_name).trim()) {
+    return String(s.list_name).trim();
+  }
+
+  // 4) pretty fallback for legacy non-UUID keys
   if (listKey && listKey.includes("_") && !listKey.includes("-")) {
     const clearText = listKey.replace(/_/g, " ");
     return clearText.charAt(0).toUpperCase() + clearText.slice(1);
   }
 
-  if (listKey && listKey.includes("-")) {
-    return "Custom Vocabulary Collection";
-  }
+  // 5) UUID fallback
+  if (listKey && listKey.includes("-")) return "Custom Vocabulary Collection";
 
   return listKey;
 }
@@ -263,47 +199,12 @@ function prettyLevel(level: string | null): string {
 }
 
 /* =====================================================
-   BUILD TRACK CATALOG (FILTERED)
-===================================================== */
-
-const allTracksCatalog = computed<TrackKey[]>(() => {
-  const tracks: TrackKey[] = [];
-  const MODES = ["write", "quiz"];
-
-  for (const [listKey, metaRaw] of Object.entries(vocabLists)) {
-    if (!allowedListKeys.value.has(listKey)) continue;
-
-    const meta: any = metaRaw;
-
-    const levels: (string | null)[] =
-      meta.supportsLevels ? ["essential", "advanced"] : [null];
-
-    const trackKeys: (string | null)[] =
-      Array.isArray(meta.trackKeys) && meta.trackKeys.length
-        ? meta.trackKeys.map((k: any) => normTrackKey(k))
-        : ["default"];
-
-    for (const mode of MODES) {
-      for (const level of levels) {
-        for (const trackKey of trackKeys) {
-          tracks.push({ listKey, mode, level, trackKey });
-        }
-      }
-    }
-  }
-
-  return tracks;
-});
-
-/* =====================================================
-   PROGRESS MAPS
+   MAPS
 ===================================================== */
 
 const progressByTrack = computed(() => {
   const map = new Map<string, any>();
   for (const p of vw.progress ?? []) {
-    if (!allowedListKeys.value.has(p.list_key)) continue;
-
     const key = makeTrackKey(p.list_key, p.mode, normLevel(p.level), p.track_key);
     map.set(key, p);
   }
@@ -314,8 +215,6 @@ const activeSessionByTrack = computed(() => {
   const map = new Map<string, any>();
   for (const s of vw.activeSessions ?? []) {
     if (s.status !== "active") continue;
-    if (!allowedListKeys.value.has(s.list_key)) continue;
-
     const key = makeTrackKey(s.list_key, s.mode, normLevel(s.level), s.track_key);
     if (!map.has(key)) map.set(key, s);
   }
@@ -326,79 +225,67 @@ const activeSessionByTrack = computed(() => {
    COMPLETED
 ===================================================== */
 
-function sortByModuleThenTitle(a: any, b: any) {
-  const rankDiff =
-    moduleRank(a.key.split("::")[0]) -
-    moduleRank(b.key.split("::")[0]);
-
-  return rankDiff || a.title.localeCompare(b.title);
-}
-
 const completedOnceItems = computed<TrackBadgeItem[]>(() => {
   const out: TrackBadgeItem[] = [];
 
   for (const p of vw.progress ?? []) {
-    if (!allowedListKeys.value.has(p.list_key)) continue;
     if (Number(p.sessions_finished ?? 0) < 1) continue;
 
     const key = makeTrackKey(p.list_key, p.mode, normLevel(p.level), p.track_key);
-
     out.push({
       key,
-      title: `${listTitle(p.list_key)} • ${prettyMode(p.mode)} • ${prettyLevel(normLevel(p.level))} • ${prettyTrack(p.track_key)}`
+      title: `${listTitle(p.list_key)} • ${prettyMode(p.mode)} • ${prettyLevel(normLevel(p.level))} • ${prettyTrack(p.track_key)}`,
     });
   }
 
-  return out.sort(sortByModuleThenTitle);
+  return out.sort((a, b) => a.title.localeCompare(b.title));
 });
 
 const completedThreeItems = computed<TrackBadgeItem[]>(() => {
   const out: TrackBadgeItem[] = [];
 
   for (const p of vw.progress ?? []) {
-    if (!allowedListKeys.value.has(p.list_key)) continue;
     if (Number(p.sessions_finished ?? 0) < props.completionTarget) continue;
 
     const key = makeTrackKey(p.list_key, p.mode, normLevel(p.level), p.track_key);
-
     out.push({
       key,
-      title: `${listTitle(p.list_key)} • ${prettyMode(p.mode)} • ${prettyLevel(normLevel(p.level))} • ${prettyTrack(p.track_key)}`
+      title: `${listTitle(p.list_key)} • ${prettyMode(p.mode)} • ${prettyLevel(normLevel(p.level))} • ${prettyTrack(p.track_key)}`,
     });
   }
 
-  return out.sort(sortByModuleThenTitle);
+  return out.sort((a, b) => a.title.localeCompare(b.title));
 });
 
 /* =====================================================
-   UNSTARTED (WRITE ONLY)
+   UNSTARTED (WRITE ONLY, CUSTOM LISTS FROM /vocab-lists/)
 ===================================================== */
 
 const unstartedTrackRows = computed<UnstartedTrackRow[]>(() => {
   const out: UnstartedTrackRow[] = [];
 
-  for (const t of allTracksCatalog.value) {
-    if (t.mode !== "write") continue;
+  for (const list of customVocabLists.value) {
+    const started = (vw.progress || []).some(
+      (p: any) =>
+        String(p.list_key) === String(list.id) &&
+        String(p.mode) === "write" &&
+        Number(p.sessions_started ?? 0) > 0
+    );
 
-    const key = makeTrackKey(t.listKey, t.mode, t.level, t.trackKey);
-    const prog = progressByTrack.value.get(key);
-
-    if (Number(prog?.sessions_started ?? 0) > 0) continue;
+    if (started) continue;
 
     out.push({
-      key,
-      title: `${listTitle(t.listKey)} • Write`,
-      subtitle: `${prettyLevel(t.level)} • ${prettyTrack(t.trackKey)}`,
-      listKey: t.listKey,
-      level: t.level,
-      trackKey: normTrackKey(t.trackKey),
+      key: `${list.id}::write::null::default`,
+      title: list.name,
+      subtitle: `${list.domain || "General"} • Default track`,
+      listKey: list.id,
+      listName: list.name,
+      level: null,
+      trackKey: "default",
     });
   }
 
-  return out.sort((a, b) => {
-    const rankDiff = moduleRank(a.listKey) - moduleRank(b.listKey);
-    return rankDiff || a.title.localeCompare(b.title);
-  });
+  return out.sort((a, b) => a.title.localeCompare(b.title));
 });
 
 /* =====================================================
@@ -410,7 +297,6 @@ const activeWorkRows = computed<ActiveWorkRow[]>(() => {
 
   for (const s of vw.activeSessions || []) {
     if (s.status !== "active") continue;
-    if (!allowedListKeys.value.has(s.list_key)) continue;
 
     const key = makeTrackKey(s.list_key, s.mode, normLevel(s.level), s.track_key);
     const prog = progressByTrack.value.get(key);
@@ -421,12 +307,12 @@ const activeWorkRows = computed<ActiveWorkRow[]>(() => {
     const accuracy = attempts ? Math.round((correct / attempts) * 1000) / 10 : 0;
 
     const progressPct =
-      s.all_item_ids && s.mastered_item_ids
+      s.all_item_ids && s.mastered_item_ids && s.all_item_ids.length > 0
         ? Math.round((s.mastered_item_ids.length / s.all_item_ids.length) * 100)
         : 0;
 
-    // 🌟 Compute the title using the resilient multi-layer candidate function
     const resolvedTitle = listTitle(s.list_key);
+    const progressListName = prog?.list_name ? String(prog.list_name).trim() : null;
 
     out.push({
       key,
@@ -440,33 +326,29 @@ const activeWorkRows = computed<ActiveWorkRow[]>(() => {
       canContinue: true,
       continueSessionId: Number(s.session_id),
       listKey: s.list_key,
-      listName: resolvedTitle, // 🌟 Pass the solved title downstream into the expansion panel
+      listName: progressListName || resolvedTitle,
       level: normLevel(s.level),
       trackKey: normTrackKey(s.track_key),
     });
   }
 
   out.sort((a, b) => {
-    const rankDiff = moduleRank(a.listKey) - moduleRank(b.listKey);
-    if (rankDiff) return rankDiff;
-
     return (
       activeSessionByTrack.value
         .get(b.key)
-        ?.last_activity_at?.localeCompare(
-          activeSessionByTrack.value.get(a.key)?.last_activity_at ?? ""
-        ) ?? 0
-      );
+        ?.last_activity_at?.localeCompare(activeSessionByTrack.value.get(a.key)?.last_activity_at ?? "") ?? 0
+    );
   });
 
   return out;
 });
+
 /* =====================================================
    FETCH
 ===================================================== */
 
 async function reload() {
-  await vw.fetchMyWork();
+  await Promise.all([vw.fetchMyWork(), loadAvailableVocabLists()]);
 }
 
 onMounted(reload);
@@ -487,4 +369,3 @@ function onStartFromActiveList(listKey: string, level: string | null, trackKey: 
   emit("start", { listKey, level, trackKey });
 }
 </script>
-

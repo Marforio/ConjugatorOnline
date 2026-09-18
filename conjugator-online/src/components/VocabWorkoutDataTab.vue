@@ -3,7 +3,7 @@
     <v-card class="pa-6 mb-6 student-vocab-header text-white shadow-sm" rounded="xl">
       <div class="d-flex align-center justify-space-between flex-wrap ga-4">
         <div>
-          <div class="text-h4 font-weight-bold">My Vocab Workout Analytics</div>
+          <div class="text-h4 font-weight-bold">My Vocab Training Analytics</div>
           <div class="text-subtitle-1 opacity-90 mt-1">
             See which terms are giving you the most trouble.
           </div>
@@ -22,7 +22,6 @@
           <div class="text-caption font-weight-bold text-slate-500 uppercase tracking-wider mb-3">
             My Vocabulary Lists
           </div>
-
           <div class="scroll-box flex-grow-1 pr-1">
             <v-card
               v-for="list in filteredProgressList"
@@ -32,44 +31,82 @@
               elevation="0"
               @click="focusedListKey = list.list_key"
             >
-              <div class="d-flex align-center justify-space-between flex-wrap ga-2">
-                <div>
-                  <div class="text-body-1 font-weight-black text-slate-900">
-                    {{ list.list_key.replace(/_/g, ' ') }}
+              <div class="d-flex align-center justify-space-between flex-wrap ga-2 mb-2">
+                <div class="min-width-0">
+                  <div class="text-body-1 font-weight-black text-slate-900 text-truncate">
+                    {{ list.list_name }}
                   </div>
                   <div class="text-caption text-slate-500 mt-0.5">
-                    Domain: <span class="font-weight-bold text-slate-700">{{ list.domain || 'General' }}</span> 
-                    <span v-if="list.level" class="ml-2">• Level: {{ list.level }}</span>
+                    <span v-if="list.level">Level: <strong>{{ list.level }}</strong></span>
                   </div>
                 </div>
 
-                <div class="text-right">
-                  <div class="text-body-2 font-weight-black" :class="list.accuracy >= 75 ? 'text-green-darken-2' : 'text-orange-darken-2'">
-                    {{ list.accuracy }}% Accuracy
-                  </div>
-                  <div class="text-caption text-slate-400 mt-0.5">
-                    Sessions: {{ list.sessions_finished }} finished / {{ list.sessions_started }} started
-                  </div>
+                <!-- More prominent completed sessions -->
+                 <div>
+                    <v-chip
+                  size="small"
+                  variant="flat"
+                  class="font-weight-medium"
+                  :color="list.sessions_finished > 0 ? 'teal-darken-2' : 'slate-300'"
+                >
+                  {{ list.sessions_finished }}x completed
+                </v-chip>
+                <v-chip
+                  size="small"
+                  variant="flat"
+                  class="font-weight-medium ms-3"
+                  color="secondary"
+                >
+                  {{ list.sessions_started }}x started
+                </v-chip>
+
+                 </div>
+              
+              </div>
+
+              <!-- Accuracy headline -->
+              <div class="d-flex align-center justify-space-between mt-4 mb-1">
+                <div class="text-caption font-weight-bold text-slate-600 uppercase tracking-wider">
+                  Global Accuracy
+                </div>
+                <div
+                  class="text-body-2 font-weight-black"
+                  :class="
+                    list.accuracy >= 90 ? 'text-blue-darken-2' :
+                    list.accuracy >= 75 ? 'text-green-darken-2' :
+                    list.accuracy >= 50 ? 'text-orange-darken-2' :
+                    'text-yellow-darken-3'
+                  "
+                >
+                  {{ list.accuracy }}%
                 </div>
               </div>
 
               <v-progress-linear
-                :model-value="list.masteryPct"
-                :color="list.masteryPct === 100 ? 'success' : 'teal'"
-                height="6"
-                class="mt-3 rounded-pill"
+                :model-value="list.accuracy"
+                :color="
+                  list.accuracy >= 90 ? 'blue-darken-2' :
+                  list.accuracy >= 75 ? 'green' :
+                  list.accuracy >= 50 ? 'orange' :
+                  'yellow-darken-2'
+                "
+                height="8"
+                rounded
+                class="mb-2"
               />
-              <div class="d-flex justify-space-between text-caption text-slate-500 mt-1" style="font-size: 10px !important;">
-                <span>Mastered: {{ list.masteredCount }} / {{ list.totalCount }} terms</span>
-                <span class="font-weight-black text-teal-darken-3">{{ list.masteryPct }}% Complete</span>
-              </div>
-            </v-card>
 
+              <!-- Optional secondary mastery line (if you still want it) -->
+              <div class="d-flex justify-space-between text-caption text-slate-500 text-caption mt-1">
+                <span>Correct: {{ list.masteredCount }} out of {{ list.totalCount }} attempts</span>
+              </div>
+            </v-card>            
             <div v-if="filteredProgressList.length === 0 && !loading" class="text-center text-slate-400 py-12">
-              <v-icon size="40" class="mb-2 text-slate-300">mdi-text-box-remove-outline</v-icon>
-              <div class="text-body-2">No matches under your current filter.</div>
-            </div>
+                        <v-icon size="40" class="mb-2 text-slate-300">mdi-text-box-remove-outline</v-icon>
+                        <div class="text-body-2">No matches under your current filter.</div>
+                      </div>
           </div>
+
+
         </v-card>
       </v-col>
 
@@ -79,10 +116,10 @@
             The most difficult terms (Error Analysis)
           </div>
 
-          <div v-if="focusedListKey" class="flex-grow-1 d-flex flex-column">
+          <div v-if="focusedListDisplayName" class="flex-grow-1 d-flex flex-column">
             <div class="bg-teal-light border border-teal-soft rounded-xl pa-4 mb-4">
               <div class="text-subtitle-2 font-weight-bold text-teal-darken-4">
-                List: <span class="font-weight-black underline">{{ focusedListKey.replace(/_/g, ' ') }}</span>
+                List: <span class="font-weight-black underline">{{ focusedListDisplayName }}</span>
               </div>
               <div class="text-caption text-teal-darken-3 mt-0.5">
                 These are the terms you answered incorrectly most frequently.
@@ -158,6 +195,7 @@ import api from '@/axios';
 
 interface ProgressListRecord {
   list_key: string;
+  list_name: string;
   domain: string | null;
   mode: string;
   level: string;
@@ -176,6 +214,16 @@ interface ProgressListRecord {
 // UI States
 const loading = ref(false);
 const focusedListKey = ref<string | null>(null);
+  const focusedListRecord = computed(() =>
+  filteredProgressList.value.find(l => l.list_key === focusedListKey.value) || null
+);
+
+const focusedListDisplayName = computed(() =>
+  focusedListRecord.value?.list_name ||
+  focusedListKey.value ||
+  ""
+);
+
 const searchListQuery = ref('');
 
 // Dynamic Data Store Arrays
@@ -201,6 +249,7 @@ const filteredProgressList = computed<ProgressListRecord[]>(() => {
 
     return {
       list_key: p.list_key,
+      list_name: p.list_name,
       domain: p.domain,
       mode: p.mode,
       level: p.level,

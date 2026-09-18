@@ -54,8 +54,7 @@
               <span class="me-2">❌ {{ group.stats.wrong }}</span>
               ({{ group.stats.accuracy }}% acc.)
             </div>
-            <div>There <span v-if="group.rows.length === 1">is </span><span v-else>are </span>{{ group.rows.length }} active <span v-if="group.rows.length === 1">session </span><span v-else>sessions </span> for this list.</div>
-            <div>This list has been completed {{ group.stats.completed }} times.</div>
+            <div class="my-2">There <span v-if="group.rows.length === 1">is </span><span v-else>are </span>{{ group.rows.length }} active <span v-if="group.rows.length === 1">session </span><span v-else>sessions </span> for this list.<span class="ms-2" v-if="group.stats.completed > 0">(This list has been already been completed {{ group.stats.completed }} times.)</span></div>
 
             <!-- Now list the individual session cards -->
             <div class="d-flex flex-column align-center ga-4 w-100">
@@ -83,7 +82,7 @@
                 variant="flat"
                 @click="$emit('continue', row.continueSessionId!)"
               >
-                Continue session
+                Continue this session
               </v-btn>
 
               <v-btn
@@ -91,7 +90,7 @@
                 variant="outlined"
                 @click="$emit('start', row.listKey, row.level, row.trackKey)"
               >
-                Start new session
+                Start a new session
               </v-btn>
             </div>
 
@@ -121,7 +120,7 @@ export type ActiveWorkRow = {
   canContinue: boolean;
   continueSessionId: number | null;
   listKey: string;
-  listName?: string;
+  listName?: string | null;
   level: string | null;
   trackKey: string | null;
 };
@@ -157,42 +156,41 @@ const grouped = computed(() => {
   >();
 
 for (const row of props.rows) {
-    // If the title is missing, is a raw UUID, or matches the generic fallback string, 
-    // try to use a specific listName attribute if mapped, or clean up the text.
-    let displayTitle = row.title;
-    
-    const isGenericPlaceholder = !row.title || 
-      row.title.toLowerCase() === "custom vocabulary collection" ||
-      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(row.title);
+  // Prefer backend-resolved name
+  let displayTitle = (row.listName || "").trim();
 
-    if (isGenericPlaceholder && row.listName) {
-      displayTitle = row.listName;
-    } else if (isGenericPlaceholder && row.listKey && !row.listKey.includes("-")) {
-      // For string keys without hyphens, make them pretty (e.g., phrasal_verbs -> Phrasal verbs)
-      const clearText = row.listKey.replace(/_/g, " ");
-      displayTitle = clearText.charAt(0).toUpperCase() + clearText.slice(1);
-    }
+  // fallback to existing title
+  if (!displayTitle) displayTitle = (row.title || "").trim();
 
-    if (!groups.has(displayTitle)) {
-      groups.set(displayTitle, new Map());
-    }
-
-    const subtitleMap = groups.get(displayTitle)!;
-
-    if (!subtitleMap.has(row.subtitle)) {
-      subtitleMap.set(row.subtitle, {
-        stats: {
-          correct: row.correct,
-          wrong: row.wrong,
-          accuracy: row.accuracy,
-          completed: row.completed
-        },
-        rows: [],
-      });
-    }
-
-    subtitleMap.get(row.subtitle)!.rows.push(row);
+  // final fallback from listKey prettify (for non-UUID hardcoded keys)
+  if (!displayTitle && row.listKey && !row.listKey.includes("-")) {
+    const clearText = row.listKey.replace(/_/g, " ");
+    displayTitle = clearText.charAt(0).toUpperCase() + clearText.slice(1);
   }
+
+  // absolute last fallback
+  if (!displayTitle) displayTitle = row.listKey || "Vocabulary List";
+
+  if (!groups.has(displayTitle)) {
+    groups.set(displayTitle, new Map());
+  }
+
+  const subtitleMap = groups.get(displayTitle)!;
+
+  if (!subtitleMap.has(row.subtitle)) {
+    subtitleMap.set(row.subtitle, {
+      stats: {
+        correct: row.correct,
+        wrong: row.wrong,
+        accuracy: row.accuracy,
+        completed: row.completed
+      },
+      rows: [],
+    });
+  }
+
+  subtitleMap.get(row.subtitle)!.rows.push(row);
+}
 
   return groups;
 });

@@ -489,9 +489,6 @@ function getSelectedListItems(): CustomVocabItem[] {
 /* ----------------------------
    PDF Download
 ---------------------------- */
-/* ----------------------------
-   PDF Download
----------------------------- */
 async function downloadListPdf() {
   if (!selectedListId.value) return;
 
@@ -762,9 +759,10 @@ function getAllowedPairs(listId: string): Pair[] {
       { front: "French", back: "term", label: "French → Infinitive" },
       { front: "German", back: "term", label: "German → Infinitive" },
       { front: "Italian", back: "term", label: "Italian → Infinitive" },
+      { front: "term", back: "past_forms", label: "Infinitive → Both past forms" },
       { front: "term", back: "past_simple", label: "Infinitive → Past simple" },
       { front: "term", back: "present_perfect", label: "Infinitive → Past participle" },
-      { front: "term", back: "past_forms", label: "Infinitive → Both past forms" },
+      
     ];
   }
 
