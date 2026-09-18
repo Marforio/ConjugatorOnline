@@ -461,12 +461,29 @@ const sessionId = computed<number | null>(() =>
 
 const resumeIndex = computed<number>(() => Number(props.gameSettings?.resumeIndex ?? 0));
 
-const mode = computed<string>(() => props.gameSettings?.mode || "cards");
+const modeRaw = computed<string>(() => String(props.gameSettings?.mode || "cards"));
+
+/**
+ * Canonical mode values used by UI + backend logic.
+ * - "quiz" and "multiple_choice" are treated as the same mode family
+ * - keeps backward compatibility with old settings payloads
+ */
+const mode = computed<string>(() => {
+  const m = modeRaw.value.trim().toLowerCase();
+  if (m === "multiple-choice") return "multiple_choice";
+  if (m === "multiplechoice") return "multiple_choice";
+  if (m === "mcq") return "multiple_choice";
+  if (m === "quiz") return "multiple_choice"; // normalize legacy backend/frontend naming
+  return m;
+});
+
 const level = computed<string>(() => props.gameSettings?.level || "all");
 const frontField = computed<FrontField>(() => props.gameSettings?.frontField || "definition");
 const backField = computed<BackField>(() => props.gameSettings?.backField || "past_simple");
 
-const isPersistedMode = computed<boolean>(() => mode.value === "write" || mode.value === "quiz");
+const isPersistedMode = computed<boolean>(() => {
+  return mode.value === "write" || mode.value === "multiple_choice";
+});
 
 const showEntireList = ref(false);
 const showListLabel = computed(() => (showEntireList.value ? "HIDE ENTIRE LIST" : "SHOW ENTIRE LIST"));
@@ -601,6 +618,23 @@ const contextEmptyMessage = ref<string | null>(null);
 const showTypoSnackbar = ref(false);
 const typoSnackbarMessage = ref("");
 
+function normalizeForExact(s: string): string {
+  return String(s || "").trim().toLowerCase().replace(/\s+/g, " ");
+}
+
+function getExactAcceptedTokensForSnackbar(it: VocabItem): string[] {
+  if (isHardcodedListKey(props.gameSettings?.listId)) {
+    if (backField.value === "past_forms") {
+      const ps = getAcceptedAnswers(it, "past_simple");
+      const pp = getAcceptedAnswers(it, "present_perfect");
+      return [...ps, ...pp].map(normalizeForExact).filter(Boolean);
+    }
+    return getAcceptedAnswers(it, backField.value).map(normalizeForExact).filter(Boolean);
+  }
+
+  return getFieldValueFromItem(it, backField.value).map(normalizeForExact).filter(Boolean);
+}
+
 // cache per listKey so we load each JSON once per page visit
 const contextCache = ref<Record<string, ContextIndex>>({});
 
@@ -722,7 +756,6 @@ function highlightInSnippet(snippet: string, term: string): string {
   return text.replace(re, `<mark class="vw-context-mark">$1</mark>`);
 }
 
-
 /* =========================================================
    Pretty labels
 ========================================================= */
@@ -756,13 +789,11 @@ const prettyBackField = computed(() => {
 });
 
 const modeLabel = computed(() => {
-  const m = mode.value;
-  if (m === "cards") return "Cards";
-  if (m === "write") return "Writing";
-  if (m === "multiple_choice") return "Multiple choice";
-  if (m === "quiz") return "Quiz";
-  if (m === "match") return "Match";
-  return m;
+  if (mode.value === "cards") return "Cards";
+  if (mode.value === "write") return "Writing";
+  if (mode.value === "multiple_choice") return "Multiple choice";
+  if (mode.value === "match") return "Match";
+  return mode.value;
 });
 
 const levelLabel = computed(() => {
@@ -979,25 +1010,41 @@ function applyServerState(state: any) {
   const total =
     Number(session?.total_count ?? 0) ||
     (Array.isArray(session?.all_item_ids) ? session.all_item_ids.length : 0);
-  console.log(state)
-  const unseen =
-    Number(state?.unseen_item_ids?.length ?? NaN);
-  const review =
-    Number(state?.review_item_ids?.length ?? NaN);
 
-  // Fallback to session arrays if wrapper counts missing
+  // ✅ correct keys from backend wrapper
+  const unseen = Number(state?.unseen_count ?? NaN);
+  const review = Number(state?.review_count ?? NaN);
+
+  // fallback from session arrays
   const unseenFallback = Array.isArray(session?.unseen_item_ids) ? session.unseen_item_ids.length : 0;
   const reviewFallback = Array.isArray(session?.review_item_ids) ? session.review_item_ids.length : 0;
 
   serverTotalCount.value = Number.isFinite(total) ? total : 0;
   serverUnseenCount.value = Number.isFinite(unseen) ? unseen : unseenFallback;
+  console.log({
+    total,
+    unseen,
+    review,
+    unseenFallback,
+    reviewFallback,
+    serverTotalCount: serverTotalCount.value,
+    serverUnseenCount: serverUnseenCount.value,
+    serverReviewCount: serverReviewCount.value,
+  });
   serverReviewCount.value = Number.isFinite(review) ? review : reviewFallback;
+  console.log({
+    serverTotalCount: serverTotalCount.value,
+    serverUnseenCount: serverUnseenCount.value,
+    serverReviewCount: serverReviewCount.value,
+  });
 
-  if (state?.done || (serverUnseenCount.value === 0 && serverReviewCount.value === 0)) {
+  // trust backend done first
+  if (state?.done === true || (serverUnseenCount.value === 0 && serverReviewCount.value === 0)) {
     phase.value = "done";
     return;
   }
-  if (serverUnseenCount.value != null && serverUnseenCount.value > 0) {
+
+  if ((serverUnseenCount.value ?? 0) > 0) {
     phase.value = "first_pass";
     return;
   }
@@ -1269,27 +1316,39 @@ function refreshMcOptions() {
  * "engine" -> "e _ _ _ _ _"
  * "stroke and bore" -> "s _ _ _ _ _   a _ _   b _ _ _"
  */
+function maskWord(w: string): string {
+  const word = String(w || "");
+  return word
+    .split("")
+    .map((ch, idx) => {
+      if (idx === 0 || ch === "-" || !/[a-zA-Z0-9]/.test(ch)) return ch;
+      return "_";
+    })
+    .join(" ");
+}
+
 const maskedHint = computed(() => {
-  const term = currentItem.value?.term;
+  const it = currentItem.value;
+  if (!it) return "—";
+
+  // Special case: irregular verbs dual-form expected
+  if (isHardcodedListKey(props.gameSettings?.listId) && backField.value === "past_forms") {
+    const ps = getAcceptedAnswers(it, "past_simple")[0] || "";
+    const pp = getAcceptedAnswers(it, "present_perfect")[0] || "";
+
+    const left = ps ? maskWord(ps) : "—";
+    const right = pp ? maskWord(pp) : "—";
+    return `${left}   ${right}`;
+  }
+
+  // default single target hint
+  const term = it.term || "";
   if (!term) return "—";
 
-  // Split into words but preserve hyphens by treating them as distinct non-space splits if needed,
-  // or simply mask letters while skipping non-alphanumeric characters.
   return term
     .split(" ")
-    .map((word) => {
-      return word
-        .split("")
-        .map((char, index) => {
-          // Always show the first character of each word, hyphens, or punctuation marks
-          if (index === 0 || char === "-" || !/[a-zA-Z0-9]/.test(char)) {
-            return char;
-          }
-          return "_";
-        })
-        .join(" "); // Separate each masked underscore with a clear space
-    })
-    .join("    "); // Separate words with wider whitespace tracks
+    .map(maskWord)
+    .join("    ");
 });
 
 /**
@@ -1713,29 +1772,32 @@ async function submitWrite(e?: KeyboardEvent) {
     });
 
     if (correct) {
-      // 🌟 TYPO MATCH EVALUATION
-      // Normalize user answer vs accepted options using standard lower-case matching
-      // If it passed validation, but isn't an *exact* match string, it's a typo rescue!
-      const exactCorrect = acceptedArr.some(
-        (a) => a.trim().toLowerCase() === user.toLowerCase()
-      );
-      
-      if (!exactCorrect) {
-        const primaryTarget = acceptedArr[0] || it.term;
-        typoSnackbarMessage.value = `Typo detected! Accepted close answer for: "${primaryTarget}"`;
-        showTypoSnackbar.value = true;
-      }
+  const listId = String(props.gameSettings?.listId ?? "");
+  const isIrregular = listId.startsWith("irregular_verbs");
 
-      showFloatingFeedback.value = true;
-      setTimeout(() => (showFloatingFeedback.value = false), 800);
+  // Disable typo detector for irregular verbs lists
+  if (!isIrregular) {
+    const normalizedUser = normalizeForExact(user);
+    const exactTokens = getExactAcceptedTokensForSnackbar(it);
+    const exactCorrect = exactTokens.includes(normalizedUser);
 
-      if (isPersistedMode.value) {
-        await advancePersisted();
-      } else {
-        goNext();
-      }
-      return;
+    if (!exactCorrect) {
+      const primaryTarget = exactTokens[0] || normalizeForExact(it.term);
+      typoSnackbarMessage.value = `Typo detected! Accepted close answer for: "${primaryTarget}"`;
+      showTypoSnackbar.value = true;
     }
+  }
+
+  showFloatingFeedback.value = true;
+  setTimeout(() => (showFloatingFeedback.value = false), 800);
+
+  if (isPersistedMode.value) {
+    await advancePersisted();
+  } else {
+    goNext();
+  }
+  return;
+}
 
     lastUserAnswer.value = user || "—";
     lastAcceptedAnswers.value = acceptedArr.join(" / ") || "—";
@@ -1888,6 +1950,12 @@ function recordRound(extra: { user_answer: string; expected?: string; is_correct
 /* =========================================================
    Finish
 ========================================================= */
+function toBackendMode(uiMode: string): string {
+  // If your DRF choices are still ["write", "quiz"], convert here.
+  if (uiMode === "multiple_choice") return "quiz";
+  return uiMode;
+}
+
 async function finishGame() {
   if (completing.value) return;
   completing.value = true;
@@ -1911,7 +1979,7 @@ async function finishGame() {
 
     emit("gameOver", {
       game_name: "VocabWorkout",
-      mode: mode.value,
+      mode: toBackendMode(mode.value),
       level: level.value,
       front_field: frontField.value,
       back_field: backField.value,
