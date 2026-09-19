@@ -107,7 +107,22 @@ const emit = defineEmits<{
 const user = useUserStore();
 const vw = useVocabWorkoutStore();
 
+type CustomVocabList = {
+  id: string;
+  name: string;
+  domain?: string | null;
+};
+
 const customVocabLists = ref<CustomListLite[]>([]);
+
+type ListSourceRow = {
+  id: string;
+  name: string;
+  domain?: string | null;
+  supportsLevels: boolean;
+  source: "custom" | "hardcoded";
+};
+
 
 /* =====================================================
    LOAD CUSTOM LISTS FOR UNSTARTED PANEL (BACKEND-DRIVEN)
@@ -121,16 +136,42 @@ async function loadAvailableVocabLists() {
         ? (response.data as any).results
         : response.data;
 
-    customVocabLists.value = (Array.isArray(rawData) ? rawData : []).map((list: any) => ({
-      id: String(list.id),
-      name: String(list.name || "Custom Vocabulary List"),
-      domain: list.domain ?? null,
-    }));
+    customVocabLists.value = Array.isArray(rawData) ? rawData : [];
   } catch (err) {
-    console.error("Failed to load available custom vocab lists:", err);
+    console.error("Failed to load custom vocab lists:", err);
     customVocabLists.value = [];
   }
 }
+
+const hardcodedVocabListItems = computed<ListSourceRow[]>(() => {
+  return Object.entries(vocabLists as any)
+    .filter(([key]) => key.startsWith("irregular_verbs") || key.startsWith("general"))
+    .map(([key, entry]: [string, any]) => ({
+      id: key,
+      name: entry.title || key,
+      domain: entry.module || "General",
+      supportsLevels: !!entry.supportsLevels, // irregular verbs => true
+      source: "hardcoded" as const,
+    }));
+});
+
+const customVocabListItems = computed<ListSourceRow[]>(() => {
+  return customVocabLists.value.map((list) => ({
+    id: String(list.id),
+    name: String(list.name || "Custom Vocabulary List"),
+    domain: list.domain ?? "Custom",
+    supportsLevels: false,
+    source: "custom" as const,
+  }));
+});
+
+const allVocabListItems = computed<ListSourceRow[]>(() => {
+  const map = new Map<string, ListSourceRow>();
+  [...hardcodedVocabListItems.value, ...customVocabListItems.value].forEach((l) => {
+    if (!map.has(l.id)) map.set(l.id, l);
+  });
+  return Array.from(map.values());
+});
 
 /* =====================================================
    HELPERS
@@ -264,25 +305,29 @@ const completedThreeItems = computed<TrackBadgeItem[]>(() => {
 const unstartedTrackRows = computed<UnstartedTrackRow[]>(() => {
   const out: UnstartedTrackRow[] = [];
 
-  for (const list of customVocabLists.value) {
-    const started = (vw.progress || []).some(
-      (p: any) =>
-        String(p.list_key) === String(list.id) &&
-        String(p.mode) === "write" &&
-        Number(p.sessions_started ?? 0) > 0
-    );
+  for (const list of allVocabListItems.value) {
+    // key requirement:
+    // irregular verbs supports levels => essential and advanced are separate tracks
+    const levels: (string | null)[] = list.supportsLevels ? ["essential", "advanced"] : [null];
 
-    if (started) continue;
+    for (const level of levels) {
+      const mode = "write";
+      const trackKey = "default";
+      const key = makeTrackKey(list.id, mode, level, trackKey);
 
-    out.push({
-      key: `${list.id}::write::null::default`,
-      title: list.name,
-      subtitle: `${list.domain || "General"} • Default track`,
-      listKey: list.id,
-      listName: list.name,
-      level: null,
-      trackKey: "default",
-    });
+      const prog = progressByTrack.value.get(key);
+      if (Number(prog?.sessions_started ?? 0) > 0) continue;
+
+      out.push({
+        key,
+        title: list.name,
+        subtitle: `${level ? `${prettyLevel(level)} • ` : ""}${list.domain || "General"} • Default track`,
+        listKey: list.id,
+        listName: list.name,
+        level,
+        trackKey,
+      });
+    }
   }
 
   return out.sort((a, b) => a.title.localeCompare(b.title));
@@ -348,7 +393,10 @@ const activeWorkRows = computed<ActiveWorkRow[]>(() => {
 ===================================================== */
 
 async function reload() {
-  await Promise.all([vw.fetchMyWork(), loadAvailableVocabLists()]);
+  await Promise.all([
+    vw.fetchMyWork(),
+    loadAvailableVocabLists(),
+  ]);
 }
 
 onMounted(reload);

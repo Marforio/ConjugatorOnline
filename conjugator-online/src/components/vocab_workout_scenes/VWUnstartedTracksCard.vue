@@ -3,7 +3,7 @@
     <div class="d-flex align-center justify-space-between">
       <div>
         <span class="text-h6 font-weight-medium me-3">Still to do</span>
-        <span class="text-subtitle text-medium-emphasis">Lists you haven't started yet. </span>
+        <span class="text-subtitle text-medium-emphasis">Lists you haven't started yet.</span>
         <div class="mt-1 text-caption text-medium-emphasis">
           <v-icon class="me-1">mdi-alert-box</v-icon>
           check with the teacher for the best time to start each list!
@@ -11,13 +11,13 @@
       </div>
 
       <v-chip color="secondary" variant="tonal" class="font-weight-medium">
-        {{ items.length }}
+        {{ normalizedItems.length }}
       </v-chip>
     </div>
 
     <v-divider class="my-3" />
 
-    <div v-if="items.length === 0" class="text-caption text-medium-emphasis">
+    <div v-if="normalizedItems.length === 0" class="text-caption text-medium-emphasis">
       Everything has been started 🎉
     </div>
 
@@ -27,7 +27,7 @@
       style="max-height: 300px; overflow-y: auto;"
     >
       <div
-        v-for="it in items"
+        v-for="it in normalizedItems"
         :key="it.key"
         class="d-flex align-center justify-space-between"
       >
@@ -51,25 +51,26 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from "vue";
+
 export type UnstartedTrackRow = {
   key: string;
   title: string;
   subtitle: string;
   listKey: string;
-  level: string | null;
+  listName?: string | null;
+  level: string | null; // IMPORTANT: irregular verbs uses "essential" and "advanced" as separate tracks
   trackKey: string | null;
 };
 
-// ✅ what SettingsScene wants to receive
 export type StartGamePayload = {
+  // keep old + new for compatibility
+  listId: string;
   listKey: string;
+
   level: string | null;
   trackKey: string | null;
-
-  // ✅ enforce write-only at the source
   mode: "write";
-
-  // ✅ defaults (SettingsScene can overwrite if it wants)
   frontField?: string;
   backField?: string;
   quizCount?: number;
@@ -83,16 +84,20 @@ const emit = defineEmits<{
   (e: "start", payload: StartGamePayload): void;
 }>();
 
-function emitStart(it: UnstartedTrackRow) {
-  // ✅ minimal payload required to start
-  // SettingsScene can merge its selected defaults if preferred
-  emit("start", {
-    listKey: it.listKey,
-    level: it.level,
-    trackKey: it.trackKey,
-    mode: "write",
+const normalizedItems = computed<UnstartedTrackRow[]>(() => {
+  return (props.items || []).map((it) => ({
+    ...it,
+    trackKey: it.trackKey ?? "default",
+  }));
+});
 
-    // sensible defaults (optional, but prevents "missing settings" bugs)
+function emitStart(it: UnstartedTrackRow) {
+  emit("start", {
+    listId: it.listKey,   // compatibility with SceneManager
+    listKey: it.listKey,  // compatibility with other components
+    level: it.level,
+    trackKey: it.trackKey ?? "default",
+    mode: "write",
     frontField: "definition",
     backField: "term",
   });

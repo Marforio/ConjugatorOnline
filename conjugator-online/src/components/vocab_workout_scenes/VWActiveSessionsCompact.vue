@@ -1,12 +1,5 @@
 <template>
-  <v-card class="pa-4" rounded="lg" elevation="2">
-    <div class="d-flex align-center justify-space-between mb-2">
-      <div>
-        <div class="text-subtitle-1 font-weight-bold">Active vocab sessions<span class="text-caption text-medium-emphasis ms-2">Continue your write sessions</span></div>
-      </div>
-    </div>
-
-    <v-divider class="mb-3" />
+  <v-card class="pa-4 bg-light" rounded="lg" elevation="2">
 
     <div v-if="error" class="text-error text-caption mb-2">{{ error }}</div>
 
@@ -25,8 +18,9 @@
         :key="row.key"
         class="pa-3 border rounded-lg"
         elevation="0"
+        min-height="100"
       >
-        <div class="d-flex justify-space-between align-start ga-2 mb-3">
+        <div class="d-flex justify-space-between align-start ga-2 mb-2">
           <div class="min-width-0">
             <div class="text-body-2 font-weight-bold text-truncate">{{ row.title }}<span class="text-caption ms-2 text-medium-emphasis">{{ row.subtitle }}</span></div>
           </div>
@@ -36,6 +30,7 @@
           :model-value="row.progressPct"
           height="7"
           rounded
+          striped
           :color="row.progressPct >= 80 ? 'success' : row.progressPct >= 50 ? 'info' : 'warning'"
         />
 
@@ -49,7 +44,7 @@
               variant="flat"
               @click="continueSession(row.continueSessionId)"
             >
-              Continue
+              Continue this session
             </v-btn>
           </div>
         </div>
@@ -188,7 +183,12 @@ async function reload() {
 }
 
 function continueSession(sessionId: number) {
-  router.push({ name: "vocabworkout", query: { continue_session_id: String(sessionId) } }).catch(() => {});
+  sessionStorage.setItem(
+    "vw_start_payload",
+    JSON.stringify({ resumeSessionId: Number(sessionId) })
+  );
+
+  router.push({ name: "vocabworkout" }).catch(() => {});
 }
 
 function startNew(row: ActiveWorkRow) {
@@ -214,7 +214,7 @@ onMounted(async () => {
 
 <style scoped>
 .sessions-scroll {
-  max-height: 280px;   /* adjust if you want taller/shorter */
+  max-height: 150px;   /* adjust if you want taller/shorter */
   overflow-y: auto;
   padding-right: 2px;
 }

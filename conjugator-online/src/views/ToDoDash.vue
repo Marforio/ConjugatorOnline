@@ -103,34 +103,30 @@
                 class="d-flex ga-3 overflow-x-auto pb-4 activity-horizontal-scroll grab-to-scroll"
                 @mousedown="initiateMouseDragScroll"
               >
-              <div 
+              <div
                 v-for="(activity, index) in activityFeed"
                 :key="index"
                 class="flex-shrink-0"
-                style="min-width: 260px; max-width: 300px;"      
+                style="min-width: 260px;"
               >
-                <div class="d-flex ga-3 align-start border rounded-lg py-2 px-3">
-                  <!-- Dot -->
-                  <div class="flex-shrink-0 pt-1">
-                    <v-avatar 
-                      :color="getActivityColor(activity.type)" 
-                      size="12"
-                      class="flex-shrink-0"
-                    />
-                  </div>
-                  <!-- Content -->
-                  <div class="flex-grow-1 min-width-0">
-                    <div class="text-body-2 font-weight-bold text-slate-800">
-                      {{ activity.title }}
+                <v-btn
+                  block
+                  variant="text"
+                  class="activity-card-btn pa-0 text-none"
+                  rounded="0"
+                  @click="goToActivity(activity)"
+                >
+                  <div class="d-flex ga-3 align-start border rounded-lg py-2 px-3 w-100 text-left">
+                    <div class="flex-shrink-0 pt-1">
+                      <v-avatar :color="getActivityColor(activity.type)" size="12" class="flex-shrink-0" />
                     </div>
-                    <div class="text-caption text-slate-500 mt-0.5 text-wrap">
-                      {{ activity.description.slice(0, 75) }}{{ activity.description.length > 75 ? '...' : '' }}
-                    </div>
-                    <div class="text-xxs text-slate-400 font-monospace mt-1">
-                      {{ formatActivityTime(activity.timestamp) }}
+                    <div class="flex-grow-1 min-width-0">
+                      <div class="text-body-2 font-weight-bold text-slate-800">{{ activity.title }}</div>
+                      <div class="text-caption text-slate-500 mt-0.5">{{ activity.description }}</div>
+                      <div class="text-xxs text-slate-400 font-monospace mt-1">{{ formatActivityTime(activity.timestamp) }}</div>
                     </div>
                   </div>
-                </div>
+                </v-btn>
               </div>
             </div>
           </div>
@@ -189,7 +185,7 @@
                 <div class="d-flex align-center ga-2 mb-3">
                   <v-icon color="brown-darken-2">mdi-progress-clock</v-icon>
                   <span class="text-subtitle-2 font-weight-bold text-brown-darken-2">
-                    Continue Vocabulary Sessions
+                    Continue Active Vocab Training Sessions (write mode)
                   </span>
                 </div>
 
@@ -817,9 +813,43 @@ function goToExerciseDetail(errorCode: string) {
   goToRouteName("exercise-detail", { errorCode });
 }
 
-function goToVocabWorkout() { goToRouteName("vocabworkout"); }
-function goToConjugator() { goToRouteName("conjugator"); }
-function goToGamesHub() { goToRouteName("games"); }
+function goToVocabWorkout() {
+  router.push({
+    name: 'student-data',
+    query: { tab: 'vocabulary' }
+  })
+}
+
+function goToConjugator() { 
+  router.push({
+    name: 'student-data',
+    query: { tab: 'conjugation-game' }
+  })
+}
+function goToGamesHub() { 
+  router.push({
+    name: 'student-data',
+    query: { tab: 'other-games' }
+  })
+}
+function goToFeedback() { 
+  router.push({
+    name: 'student-data',
+    query: { tab: 'grammar-feedback' }
+  })
+}
+function goToExercise() { 
+  router.push({
+    name: 'student-data',
+    query: { tab: 'exercises' }
+  })
+}
+function goToTrophy() { 
+  router.push({
+    name: 'student-data',
+    query: { tab: 'goals' }
+  })
+}
 
 const GAME_ROUTE_HINTS = [
   { routeName: "pronounpractice", keywords: ["pronoun practice", "pronouns"] },
@@ -940,6 +970,16 @@ const conjugationCompletedAssignments = computed(() =>
   conjugationAssignments.value.filter(a => a.status === 'completed')
 )
 
+
+function goToActivity(activity: ActivityItem) {
+  if (activity.type === 'conjugation') return goToConjugator();
+  if (activity.type === 'vocab_workout') return goToVocabWorkout();
+  if (activity.type === 'game') return goToGamesHub();
+  if (activity.type === 'feedback') return goToFeedback();
+  if (activity.type === 'exercise') return goToExercise();
+  if (activity.type === 'achievement') return goToTrophy();
+}
+
 // Games: show ALL pending (no queue)
 const gamesAssignments = computed(() =>
   allAssignments.value.filter(
@@ -1006,19 +1046,25 @@ async function fetchCurrentWorkout() {
 }
 
 onMounted(async () => {
+  // 1) load list-name map first
+  await fetchCustomListNames();
+
+  // 2) only then load activity feed (so formatting can resolve names)
+  await fetchActivityFeed();
+
+  // 3) remaining independent fetches can run in parallel
   await Promise.all([
     fetchAssignments(),
     userStore.fetchLinguisticProfile(),
-    fetchCustomListNames(),
-    fetchActivityFeed(),
     fetchCurrentWorkout(),
-    vw.fetchMyWork(), // single source fetch for compact panel + gate
+    vw.fetchMyWork(),
   ]);
 
   loadingEnrollments.value = true;
   await userStore.fetchEnrollmentBundle(
     userStore.isStaff ? { student: userStore.studentId } : {}
   );
+  loadingEnrollments.value = false;
 });
 </script>
 
@@ -1036,6 +1082,19 @@ onMounted(async () => {
 .display-card {
   border: 1px solid #e2e8f0;
   background-color: #ffffff;
+}
+
+.activity-card-btn {
+  min-height: 80px !important;
+  letter-spacing: normal !important;
+}
+.activity-card-btn :deep(.v-btn__overlay),
+.activity-card-btn :deep(.v-btn__underlay) {
+  opacity: 0 !important;
+}
+.activity-card-btn :deep(.v-btn__content) {
+  width: 100%;
+  justify-content: flex-start;
 }
 
 /* natural scroll limits for history without jumping elements */
