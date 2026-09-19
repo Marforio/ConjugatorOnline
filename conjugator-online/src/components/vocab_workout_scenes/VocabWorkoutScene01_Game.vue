@@ -39,7 +39,7 @@
               <div>
                 <div class="text-caption font-weight-black text-slate-400 text-uppercase tracking-wider">Vocab list</div>
                 <div class="text-subtitle-1 font-weight-black text-slate-900 leading-tight d-flex align-center mt-0.5">
-                  {{ prettyListKey }}
+                  {{ prettyListName }}
                 </div>
               </div>
 
@@ -172,7 +172,7 @@
                 <div class="pa-4 border-b d-flex align-center justify-space-between bg-slate-50" style="height: 64px;">
                   <div class="d-flex align-center">
                     <v-icon color="slate-500" class="mr-2" size="18">mdi-format-list-bulleted</v-icon>
-                    <span class="text-body-2 font-weight-black text-slate-900 text-uppercase tracking-wider">{{ prettyListKey }}</span>
+                    <span class="text-body-2 font-weight-black text-slate-900 text-uppercase tracking-wider">{{ prettyListName }}</span>
                   </div>
                   <v-btn icon="mdi-close" variant="text" size="small" color="slate-400" @click="showEntireList = false" />
                 </div>
@@ -760,7 +760,7 @@ function highlightInSnippet(snippet: string, term: string): string {
    Pretty labels
 ========================================================= */
 const frontCardClass = computed(() =>
-  prettyListKey.value === "ProgrammingSymbols" ? 'text-h4 mx-4 mb-2 font-weight-regular' : 'text-h5 mx-8 mb-2 font-weight-regular font-italic'
+  prettyListName.value === "ProgrammingSymbols" ? 'text-h4 mx-4 mb-2 font-weight-regular' : 'text-h5 mx-8 mb-2 font-weight-regular font-italic'
 )
 
 const resumeIndexDisplay = computed(() => {
@@ -769,16 +769,8 @@ const resumeIndexDisplay = computed(() => {
   return String(Math.min(roundCount.value, Math.max(1, idx + 1)));
 });
 
-const prettyListKey = computed(() => {
-  const id = String(props.gameSettings?.lis ?? "");
-  if (id.startsWith("irregular_verbs")) {
-    // Hardcoded
-    const withSpaces = id.replace(/_/g, " ");
-    return withSpaces.charAt(0).toUpperCase() + withSpaces.slice(1);
-  }
-  // For custom lists, find the name if available
-  const found = props.gameSettings?.listName ?? null;
-  return found || id.slice(0, 8); // show first 8 chars of UUID
+const prettyListName = computed(() => {
+  return String(props.gameSettings?.listName || "Vocabulary List");
 });
 
 const prettyBackField = computed(() => {

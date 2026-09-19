@@ -24,9 +24,7 @@ import { normalizeVocabDatasetWithListKey } from "@/assets/scripts/vocab_workout
 import { buildPool } from "@/assets/scripts/vocab_workout/VocabWorkoutPoolBuilder";
 
 import { useVocabWorkoutStore } from "@/stores/vocabWorkout";
-
 import api from "@/axios";
-
 
 interface NormalizedCustomItem {
   id: string;
@@ -42,9 +40,9 @@ async function loadCustomListItems(listId: string): Promise<NormalizedCustomItem
   try {
     const response = await api.get<any[]>(`/vocab-lists/${listId}/prompts/`);
     const items = Array.isArray(response.data) ? response.data : [];
-    
+
     return items.map((item) => ({
-      id: String(item.id), // Ensure string format for structural matching
+      id: String(item.id),
       term: item.term,
       definition: item.definition,
       part_of_speech: item.part_of_speech,
@@ -60,10 +58,31 @@ async function loadCustomListItems(listId: string): Promise<NormalizedCustomItem
 
 function isHardcodedList(listId: string): boolean {
   return (
-    listId.startsWith("irregular_verbs") || 
-    listId.startsWith("general") || 
+    listId.startsWith("irregular_verbs") ||
+    listId.startsWith("general") ||
     !listId.includes("-")
   );
+}
+
+function resolveListName(
+  listId: string,
+  selections?: any,
+  state?: any,
+  listMeta?: any
+): string | null {
+  const fromSelections = String(selections?.listName ?? "").trim();
+  if (fromSelections) return fromSelections;
+
+  const fromState = String(state?.session?.list_name ?? "").trim();
+  if (fromState) return fromState;
+
+  const fromMeta = String(listMeta?.title ?? "").trim();
+  if (fromMeta) return fromMeta;
+
+  const fromRegistry = String((vocabLists as any)?.[listId]?.title ?? "").trim();
+  if (fromRegistry) return fromRegistry;
+
+  return null;
 }
 
 const vw = useVocabWorkoutStore();
@@ -87,10 +106,6 @@ function changeScene(sceneName: SceneName) {
   if (scenes[sceneName]) currentScene.value = sceneName;
 }
 
-/**
- * Dropdown data from registry:
- * { "Architecture": [{title,value,supportsLevels}, ...], ... }
- */
 const availableLists = computed(() => {
   const out: Record<string, { title: string; value: string; supportsLevels: boolean }[]> = {};
 
@@ -108,36 +123,25 @@ const availableLists = computed(() => {
   return out;
 });
 
-/**
- * Build planItems from a list of ids using normalized dataset lookup.
- * Supports both "listKey::term" ids and plain "term" ids.
- */
-
 function buildPlanItemsFromIds(listKey: string, ids: string[], loadedRawData: any[]): any[] {
   if (!ids || !ids.length) return [];
 
-  // Branch A: Custom multi-tenant lists fetched from backend DB
   if (!isHardcodedList(listKey)) {
     const customMap = new Map(loadedRawData.map((it) => [String(it.id), it]));
     return ids
       .map((rawId) => {
         if (!rawId) return null;
-        
-        // Extract raw database UUID if it is wrapped in composite structure
         const pureUuid = String(rawId).includes("::") ? String(rawId).split("::")[1] : String(rawId);
         const match = customMap.get(pureUuid);
         if (!match) return null;
-
-        // CRITICAL: Proxy the item object to match the compound format synthesized by the game component
         return {
           ...match,
-          id: `${listKey}::${pureUuid}`
+          id: `${listKey}::${pureUuid}`,
         };
       })
       .filter(Boolean);
   }
 
-  // Branch B: Legacy hardcoded client registry mapping
   const listMeta = (vocabLists as any)[listKey];
   if (!listMeta) throw new Error(`Unknown listKey "${listKey}"`);
 
@@ -169,19 +173,16 @@ function getNextItemIdFromState(state: any): string | null {
   return v != null ? String(v) : null;
 }
 
-
 async function handleStartGame(selections: any) {
   try {
-    gameSettings.value = markRaw(selections);
     const normalizedSelections = {
       ...selections,
       listId: selections?.listId ?? selections?.listKey,
       listKey: selections?.listKey ?? selections?.listId,
     };
     gameSettings.value = markRaw(normalizedSelections);
-    // ==========================================
-    // RESUME ACTION SEQUENCE
-    // ==========================================
+
+    // RESUME FLOW
     if (normalizedSelections?.resumeSessionId) {
       const resumeSessionId = Number(normalizedSelections.resumeSessionId);
       const state = await vw.continueSession(resumeSessionId);
@@ -189,26 +190,28 @@ async function handleStartGame(selections: any) {
       const listKey = state?.session?.list_key;
       if (!listKey) throw new Error("Continue session: missing state.session.list_key");
 
-      let planItems_data: any[] = [];
+      let planItemsData: any[] = [];
+      let listMeta: any = null;
+
       if (isHardcodedList(listKey)) {
-        const listMeta = (vocabLists as any)[listKey];
+        listMeta = (vocabLists as any)[listKey];
         if (!listMeta) throw new Error(`Unknown hardcoded listKey "${listKey}"`);
-        planItems_data = normalizeVocabDatasetWithListKey(listKey, listMeta.data).items;
+        planItemsData = normalizeVocabDatasetWithListKey(listKey, listMeta.data).items;
       } else {
-        planItems_data = await loadCustomListItems(listKey);
+        planItemsData = await loadCustomListItems(listKey);
       }
 
       const allIds = getAllItemIdsFromState(state);
       const nextId = getNextItemIdFromState(state);
       const idsToUse = allIds.length ? allIds : nextId ? [nextId] : [];
 
-      // ✅ Map components using the compound format adapter
-      planItems.value = buildPlanItemsFromIds(listKey, idsToUse, planItems_data);
+      planItems.value = buildPlanItemsFromIds(listKey, idsToUse, planItemsData);
 
       gameSettings.value = markRaw({
         ...normalizedSelections,
         listId: listKey,
         listKey,
+        listName: resolveListName(listKey, normalizedSelections, state, listMeta),
         mode: state.session.mode,
         level: state.session.level,
         frontField: state.session.front_field,
@@ -224,70 +227,62 @@ async function handleStartGame(selections: any) {
       return;
     }
 
-    // ==========================================
-    // INITIALIZATION ACTION SEQUENCE (START NEW)
-    // ==========================================
+    // NEW START FLOW
     const listId = normalizedSelections?.listId ?? normalizedSelections?.listKey;
-      if (!listId) {
-        throw new Error(`Missing listId/listKey in startGame payload.`);
-      }
+    if (!listId) {
+      throw new Error("Missing listId/listKey in startGame payload.");
+    }
 
     let listMeta: any = null;
     let isHardcoded = false;
-    let planItems_data: any[] = [];
+    let planItemsData: any[] = [];
 
     if (isHardcodedList(listId)) {
       isHardcoded = true;
       listMeta = (vocabLists as any)[listId];
       if (!listMeta) throw new Error(`Unknown hardcoded listId "${listId}"`);
-      planItems_data = normalizeVocabDatasetWithListKey(listId, listMeta.data).items;
+      planItemsData = normalizeVocabDatasetWithListKey(listId, listMeta.data).items;
     } else {
-      planItems_data = await loadCustomListItems(listId);
+      planItemsData = await loadCustomListItems(listId);
       listMeta = { supportsLevels: false };
     }
 
     const mode: string = normalizedSelections?.mode ?? "write";
     const isPersistedMode = mode === "write" || mode === "quiz";
+    const resolvedListName = resolveListName(listId, normalizedSelections, null, listMeta);
 
     if (isHardcoded && listMeta.supportsLevels) {
       const lvl = normalizedSelections?.level;
       if (lvl !== "essential" && lvl !== "advanced") {
-        throw new Error(`Irregular verbs requires level essential/advanced`);
+        throw new Error("Irregular verbs requires level essential/advanced");
       }
     }
 
-    // ==========================================
-    // 🌟 ARCADE INTERCEPT: ASTEROIDZ GAME MODE
-    // ==========================================
+    // ASTEROIDZ
     if (mode === "asteroidz") {
-      // Build dataset pool matching structural level criteria
-      const pool = buildPool(planItems_data, {
+      const pool = buildPool(planItemsData, {
         level: isHardcoded && listMeta.supportsLevels ? normalizedSelections.level : null,
       });
 
-      // Normalize unique key formats identical to the non-persisted fallback paths
-      if (!isHardcoded) {
-        planItems.value = pool.map((it: any) => ({ ...it, id: `${listId}::${it.id}` }));
-      } else {
-        planItems.value = pool ?? [];
-      }
+      planItems.value = !isHardcoded
+        ? pool.map((it: any) => ({ ...it, id: `${listId}::${it.id}` }))
+        : pool ?? [];
 
-      gameSettings.value = markRaw({ 
-        ...normalizedSelections, 
-        listId, 
+      gameSettings.value = markRaw({
+        ...normalizedSelections,
+        listId,
         listKey: listId,
-        mode: "asteroidz"
+        listName: resolvedListName,
+        mode: "asteroidz",
       });
-      
+
       changeScene("VocabWorkoutScene01_Game");
       return;
     }
 
-    // ==========================================
-    // PERSISTED MODE ACTION SEQUENCE (START NEW)
-    // ==========================================
+    // PERSISTED MODES (WRITE / QUIZ)
     if (isPersistedMode) {
-      const pool = buildPool(planItems_data, {
+      const pool = buildPool(planItemsData, {
         level: isHardcoded && listMeta.supportsLevels ? normalizedSelections.level : null,
       });
 
@@ -311,8 +306,7 @@ async function handleStartGame(selections: any) {
       const stateAllIds = getAllItemIdsFromState(state);
       const idsToUse = stateAllIds.length ? stateAllIds : all_item_ids;
 
-      // ✅ Dynamically inject proxy formatting matching target layout expectations
-      planItems.value = buildPlanItemsFromIds(listId, idsToUse, planItems_data);
+      planItems.value = buildPlanItemsFromIds(listId, idsToUse, planItemsData);
 
       const nextId = getNextItemIdFromState(state);
 
@@ -320,6 +314,7 @@ async function handleStartGame(selections: any) {
         ...normalizedSelections,
         listId,
         listKey: listId,
+        listName: resolveListName(listId, normalizedSelections, state, listMeta) ?? resolvedListName,
         sessionId: state.session.session_id,
         nextItemId: nextId,
         currentItemId: state.session.current_item_id ?? nextId ?? null,
@@ -331,23 +326,23 @@ async function handleStartGame(selections: any) {
       return;
     }
 
-    // ==========================================
-    // STANDARD NON-PERSISTED PATH (Cards / Match)
-    // ==========================================
-    const pool = buildPool(planItems_data, {
+    // NON-PERSISTED (CARDS / MATCH)
+    const pool = buildPool(planItemsData, {
       level: isHardcoded && listMeta.supportsLevels ? normalizedSelections.level : null,
     });
 
-    // Ensure non-persisted custom list tracking works with expected IDs as well
-    if (!isHardcoded) {
-      planItems.value = pool.map((it: any) => ({ ...it, id: `${listId}::${it.id}` }));
-    } else {
-      planItems.value = pool ?? [];
-    }
+    planItems.value = !isHardcoded
+      ? pool.map((it: any) => ({ ...it, id: `${listId}::${it.id}` }))
+      : pool ?? [];
 
-    gameSettings.value = markRaw({ ...normalizedSelections, listId, listKey: listId });
+    gameSettings.value = markRaw({
+      ...normalizedSelections,
+      listId,
+      listKey: listId,
+      listName: resolvedListName,
+    });
+
     changeScene("VocabWorkoutScene01_Game");
-
   } catch (e) {
     console.error("[VocabWorkout] Failed to start:", e);
     planItems.value = [];
@@ -359,7 +354,6 @@ async function handleStartGame(selections: any) {
 async function handleGameOver(payload: any) {
   results.value = payload;
 
-  // ✅ refresh progress so Settings page shows completed
   try {
     await vw.fetchMyWork();
   } catch (e) {
@@ -370,6 +364,4 @@ async function handleGameOver(payload: any) {
 }
 
 defineExpose({ handleStartGame, changeScene });
-
-
 </script>
