@@ -1,7 +1,7 @@
 export const irregularVerbs = {
   be: {
     definition: "to exist or to have a state of being",
-    past_simple: ["was", "were"],
+    past_simple: ["was", "were", "was were", "were was", "was / were"],
     present_perfect: ["been"],
     French: "être",
     German: "sein",

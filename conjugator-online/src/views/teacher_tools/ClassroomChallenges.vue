@@ -404,6 +404,13 @@ let timerInterval: ReturnType<typeof setInterval> | null = null
 const timerProgress = computed(() => (timeLeft.value / 10) * 100)
 const score = computed(() => rightCount.value !== 0 ? ((rightCount.value / totalRounds.value) * 100).toFixed(1) : 0)
 
+const proveItCategoryMap: Record<string, keyof typeof gameData> = {
+  "Essential irregulars past simple": "Essential irregulars past simple",
+  "Advanced irregulars past simple": "Advanced irregulars past simple",
+  "Essential irregulars present perfect": "Essential irregulars present perfect",
+  "Advanced irregulars present perfect": "Advanced irregulars present perfect",
+}
+
 // --------------------------
 // GAME DATA 
 // --------------------------
@@ -1530,6 +1537,8 @@ function startGame() {
   buildPromptQueue()
 
   if (!promptQueue.value.length) {
+    console.log("No prompts found for", props.game)
+    console.log("Prompt queue:", promptQueue.value)
     snackbar.message = `No prompts found for ${props.game}`
     snackbar.color = "error"
     snackbar.show = true
@@ -1544,18 +1553,73 @@ function startGame() {
 function buildPromptQueue() {
   promptQueue.value = [] // always reset first
 
-  const dataset = gameData[props.game]
-  if (!dataset || !dataset.prompts) return
+  // -----------------------------
+  // SPECIAL CASE: Prove it!
+  // -----------------------------
+    if (props.game === "Prove it!") {
+      const selected = (selectedCategory.value || "").trim()
+
+      const selectedData = gameData[selected as keyof typeof gameData] as
+        | { prompts?: Record<string, string[] | [string, string]> }
+        | undefined
+
+      if (!selectedData?.prompts) {
+        console.warn("[ProveIt] selectedData missing or has no prompts for:", selected)
+        return
+      }
+
+      const queue: typeof promptQueue.value = []
+
+      for (const [verb, promptSet] of Object.entries(selectedData.prompts)) {
+        if (!Array.isArray(promptSet) || promptSet.length === 0) continue
+
+        // Present perfect shape: [answer, sentence-with-blank]
+        const isPresentPerfectTuple =
+          promptSet.length === 2 &&
+          typeof promptSet[0] === "string" &&
+          typeof promptSet[1] === "string" &&
+          promptSet[1].includes("_____")
+
+        if (isPresentPerfectTuple) {
+          queue.push({
+            question: promptSet[1],
+            verb,
+            correctAnswers: [promptSet[0]],
+            category: selected
+          })
+        } else {
+          // Past simple shape: ["Q1", "Q2", ...]
+          for (const q of promptSet as string[]) {
+            queue.push({
+              question: q,
+              verb,
+              correctAnswers: [],
+              category: selected
+            })
+          }
+        }
+      }
+
+      promptQueue.value = shuffle(queue).slice(0, totalRounds.value)
+      return
+    }
+
+    // -------------------------games other than "Prove it!"----
+      const dataset = gameData[props.game]
+      if (!dataset || !dataset.prompts) return
+
 
   // -----------------------------
   // SPECIAL CASE: Unfinished Business
   // -----------------------------
   if (props.game === "Unfinished Business") {
     const essentials = gameData["Essential irregulars past simple" as keyof typeof gameData] as any
-    if (!essentials?.prompts) return
+    const ub = gameData["Unfinished Business" as keyof typeof gameData] as any
+
+    if (!essentials?.prompts || !ub?.prompts) return
 
     const verbs = shuffle(Object.keys(essentials.prompts))
-    const timeRefs = essentials.prompts.time_references as string[] | undefined
+    const timeRefs = ub.prompts.time_references as string[] | undefined // ✅ fixed source
     if (!timeRefs?.length) return
 
     const queue: typeof promptQueue.value = []
@@ -1635,7 +1699,7 @@ function buildPromptQueue() {
   }
 
   // -----------------------------
-  // DEFAULT CASE (includes Spelling Bee)
+  // DEFAULT CASE (includes Spelling Bee, Pronunciation, Be Polite!, Numbers Workout)
   // -----------------------------
   const queue: typeof promptQueue.value = []
 
@@ -1666,7 +1730,6 @@ function buildPromptQueue() {
 
   promptQueue.value = shuffle(queue).slice(0, totalRounds.value)
 }
-
 
 function animateSlide() {
   animationClass.value = "slide-out-left"
@@ -1867,12 +1930,12 @@ async function endGame() {
 
 /* Softened Motion Animation Frames Curves */
 .slide-out-left {
-  transform: translateX(-100%) rotate(-4s);
+  transform: translateX(-100%) rotate(-4deg);
   opacity: 0;
 }
 
 .slide-in-right {
-  transform: translateX(100%) rotate(4s);
+  transform: translateX(100%) rotate(4deg);
   opacity: 0;
 }
 
