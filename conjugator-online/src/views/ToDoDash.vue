@@ -77,67 +77,72 @@
     </v-row>
 
     <!-- ACTIVITY FEED: Horizontal timeline with dots -->
-    <v-row v-if="activityFeed.length > 0">
-      <v-col cols="12">
-        <div class="d-flex align-center justify-space-between mb-4">
-          <h2 class="text-h6 font-weight-bold text-slate-900">Recent Activity</h2>
-          <v-chip-group v-model="activityFilter" @update:model-value="fetchActivityFeed" density="compact">
-            <v-chip size="x-small" variant="outlined" value="all">All</v-chip>
-            <v-chip size="x-small" variant="outlined" value="conjugation">Conjugator</v-chip>
-            <v-chip size="x-small" variant="outlined" value="vocab_workout">Vocab</v-chip>
-            <v-chip size="x-small" variant="outlined" value="other_game">Games</v-chip>
-            <v-chip size="x-small" variant="outlined" value="exercise">Exercises</v-chip>
-          </v-chip-group>
-        </div>
+<v-row v-if="activityFeed.length > 0">
+  <v-col cols="12">
+    <div class="d-flex align-center justify-space-between mb-4">
+      <h2 class="text-h6 font-weight-bold text-slate-900">Recent Activity</h2>
+      <v-chip-group v-model="activityFilter" @update:model-value="fetchActivityFeed" density="compact">
+        <v-chip size="x-small" variant="outlined" value="all">All</v-chip>
+        <v-chip size="x-small" variant="outlined" value="conjugation">Conjugator</v-chip>
+        <v-chip size="x-small" variant="outlined" value="vocab_workout">Vocab</v-chip>
+        <v-chip size="x-small" variant="outlined" value="other_game">Games</v-chip>
+        <v-chip size="x-small" variant="outlined" value="exercise">Exercises</v-chip>
+      </v-chip-group>
+    </div>
 
-        <v-card class="overflow-hidden" elevation="0" rounded="xl">
-          <div v-if="loadingActivity" class="pa-8 text-center">
-            <v-progress-circular indeterminate color="indigo" size="40" />
-            <div class="text-caption text-slate-500 mt-2">Loading activity...</div>
-          </div>
+    <v-card class="overflow-hidden" elevation="0" rounded="xl">
+      <div v-if="loadingActivity" class="pa-8 text-center">
+        <v-progress-circular indeterminate color="indigo" size="40" />
+        <div class="text-caption text-slate-500 mt-2">Loading activity...</div>
+      </div>
 
-          <div v-else-if="activityFeed.length > 0" class="pa-2 pt-0 position-relative">
-            <!-- Horizontal scrollable track -->
-            <div
-                ref="activityTrackRef"
-                class="d-flex ga-3 overflow-x-auto pb-4 activity-horizontal-scroll grab-to-scroll"
-                @mousedown="initiateMouseDragScroll"
-              >
-              <div
-                v-for="(activity, index) in activityFeed"
-                :key="index"
-                class="flex-shrink-0"
-                style="min-width: 260px;"
-              >
+      <div v-else-if="activityFeed.length > 0" class="pa-2 pt-0 position-relative">
+        <div
+          ref="activityTrackRef"
+          class="d-flex ga-3 overflow-x-auto pb-4 activity-horizontal-scroll grab-to-scroll"
+          @mousedown="initiateMouseDragScroll"
+        >
+          <div
+            v-for="(activity, index) in activityFeed"
+            :key="index"
+            class="flex-shrink-0"
+            style="min-width: 260px;"
+          >
+            <div class="d-flex ga-3 align-start border rounded-lg py-2 px-3 bg-white">
+              <div class="flex-shrink-0 pt-1">
+                <v-avatar :color="getActivityColor(activity.type)" size="12" class="flex-shrink-0" />
+              </div>
+
+              <div class="flex-grow-1 min-width-0">
+                <div class="text-body-2 font-weight-bold text-slate-800">{{ activity.title }}</div>
+                <div class="text-caption text-slate-500 mt-0.5">{{ activity.description }}</div>
+                <div class="text-xxs text-slate-400 font-monospace mt-1">{{ formatActivityTime(activity.timestamp) }}</div>
+              </div>
+
+              <!-- Small explicit action button -->
+              <div class="flex-shrink-0 d-flex align-center">
                 <v-btn
-                  block
+                  icon="mdi-arrow-right-circle-outline"
+                  size="x-small"
                   variant="text"
-                  class="activity-card-btn pa-0 text-none"
-                  rounded="0"
-                  @click="goToActivity(activity)"
-                >
-                  <div class="d-flex ga-3 align-start border rounded-lg py-2 px-3 w-100 text-left">
-                    <div class="flex-shrink-0 pt-1">
-                      <v-avatar :color="getActivityColor(activity.type)" size="12" class="flex-shrink-0" />
-                    </div>
-                    <div class="flex-grow-1 min-width-0">
-                      <div class="text-body-2 font-weight-bold text-slate-800">{{ activity.title }}</div>
-                      <div class="text-caption text-slate-500 mt-0.5">{{ activity.description }}</div>
-                      <div class="text-xxs text-slate-400 font-monospace mt-1">{{ formatActivityTime(activity.timestamp) }}</div>
-                    </div>
-                  </div>
-                </v-btn>
+                  color="indigo-darken-1"
+                  @mousedown.stop
+                  @click.stop="goToActivity(activity)"
+                  aria-label="View activity"
+                />
               </div>
             </div>
           </div>
+        </div>
+      </div>
 
-          <div v-else class="pa-8 text-center text-slate-400">
-            <v-icon size="40" class="mb-2">mdi-calendar-blank</v-icon>
-            <div class="text-body-2">No activity yet.</div>
-          </div>
-        </v-card>
-      </v-col>
-    </v-row>
+      <div v-else class="pa-8 text-center text-slate-400">
+        <v-icon size="40" class="mb-2">mdi-calendar-blank</v-icon>
+        <div class="text-body-2">No activity yet.</div>
+      </div>
+    </v-card>
+  </v-col>
+</v-row>
 
     <!-- MAIN CONTENT: Assignments (7) + Course Objectives + Completed + Profile (5) -->
     <v-row class="mb-6">

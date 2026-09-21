@@ -353,7 +353,6 @@ async function fetchCustomListNames() {
     // adjust endpoint if yours differs
     const res = await api.get("/vocab-lists/");
     const rows = Array.isArray(res.data) ? res.data : (res.data?.results || []);
-    console.log("Fetched custom list names:", rows);
     const map: Record<string, string> = {};
     for (const r of rows) {
       const id = String(r.id ?? "").trim();
@@ -361,7 +360,6 @@ async function fetchCustomListNames() {
       if (id && name) map[id] = name;
     }
     customListNameMap.value = map;
-    console.log("Custom list name map:", map);
   } catch (e) {
     console.warn("Could not load custom list names", e);
   }

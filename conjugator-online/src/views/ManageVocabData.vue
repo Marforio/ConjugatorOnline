@@ -44,8 +44,8 @@
         <v-col cols="12" md="4">
           <v-select
             v-model="courseModeSlug"
-            :items="courseOptions"
-            item-title="name"
+            :items="prettyCourseOptions"
+            item-title="title"
             item-value="slug"
             label="Select Course"
             prepend-inner-icon="mdi-school-outline"
@@ -86,7 +86,8 @@
                     variant="tonal"
                     class="font-weight-bold bg-teal-tight"
                   >
-                    <span class="text-slate-800 font-weight-black mr-1">{{ list.list_key }}:</span>
+                    <!-- Course table chips -->
+                    <span class="text-slate-800 font-weight-black mr-1">{{ getListDisplayName(list.list_key) }}:</span>
                     {{ list.pct }}% Mastered
                   </v-chip>
                   <span v-if="student.completedLists.length === 0" class="text-caption text-slate-400 italic">
@@ -134,7 +135,8 @@
               @click="focusedListKey = listKey"
             >
               <div class="d-flex align-center justify-space-between w-100">
-                <span class="text-body-2 font-weight-black text-slate-800">{{ listKey }}</span>
+                <!-- Left directory -->
+                  <span class="text-body-2 font-weight-black text-slate-800">{{ getListDisplayName(listKey) }} </span>
                 <v-icon size="16" :color="focusedListKey === listKey ? 'indigo' : 'slate-300'">
                   {{ focusedListKey === listKey ? 'mdi-circle' : 'mdi-chevron-right' }}
                 </v-icon>
@@ -152,7 +154,8 @@
   <div class="bg-indigo-lighten-5 border border-indigo-lighten-4 rounded-xl pa-4 mb-4 d-flex align-center justify-space-between flex-wrap ga-3">
     <div>
       <div class="text-subtitle-2 font-weight-bold text-indigo-darken-4">
-        Vocab List: <span class="font-weight-black underline">{{ focusedListKey }}</span>
+        <!-- Focus header -->
+          Vocab List: <span class="font-weight-black underline">{{ getListDisplayName(focusedListKey) }}</span>
       </div>
       <div class="text-caption text-indigo-darken-3 mt-0.5">
         Displaying vocabulary performance and typical mistake patterns across student sessions.
@@ -255,8 +258,68 @@ const listMetadataWrapper = ref<{ total_completions: number; terms: any[] }>({
   terms: []
 });
 
+const customVocabLists = ref<Array<{ id: string; name: string }>>([]);
+const customListNameMap = computed<Record<string, string>>(() => {
+  const m: Record<string, string> = {};
+  for (const l of customVocabLists.value) {
+    const id = String(l.id || "").trim();
+    const name = String(l.name || "").trim();
+    if (id && name) m[id] = name;
+  }
+  return m;
+});
+
+function prettyLegacyKey(k: string): string {
+  const s = String(k || "");
+  if (!s) return "Vocabulary List";
+  const withSpaces = s.replace(/_/g, " ");
+  return withSpaces.charAt(0).toUpperCase() + withSpaces.slice(1);
+}
+
+function prettyLevel(level: string | null | undefined): string {
+  const v = String(level ?? "").trim().toLowerCase();
+  if (!v) return "";
+  if (v === "essential") return "Essential";
+  if (v === "advanced") return "Advanced";
+  return v.charAt(0).toUpperCase() + v.slice(1);
+}
+
+function getListDisplayName(
+  listKey: string | null | undefined,
+  level?: string | null
+): string {
+  const key = String(listKey || "").trim();
+  if (!key) return "Vocabulary List";
+
+  // base name resolution
+  let baseName = "";
+  if (customListNameMap.value[key]) {
+    baseName = customListNameMap.value[key];
+  } else if (!key.includes("-")) {
+    baseName = prettyLegacyKey(key);
+  } else {
+    baseName = "Custom Vocabulary Collection";
+  }
+
+  // append level only for irregular verbs tracks
+  // e.g. "Irregular Verbs (Essential)"
+  if (key.startsWith("Irregular verbs")) {
+    const lvl = prettyLevel(level);
+    if (lvl) return `${baseName} (${lvl})`;
+  }
+
+  return baseName;
+}
+
+
 // 🌟 REWRITTEN SELECTOR: Derive options cleanly straight from store memory allocations
 const courseOptions = computed(() => userStore.availableTeacherCourses);
+const prettyCourseOptions = computed(() => {
+  return courseOptions.value.map(course => ({
+    slug: course.slug,
+    title: course.title,
+  }));
+});
 
 // Automatically keep selection anchor synchronized with the store array sequences
 watch(courseOptions, (newOptions) => {
@@ -387,18 +450,21 @@ async function initializeDashboardContextData() {
   loading.value = true;
   try {
     // 🚀 Fetch game states in parallel, omitting redundant endpoints
-    const [sessionsRes, progressRes] = await Promise.all([
+    const [sessionsRes, progressRes, listsRes] = await Promise.all([
       api.get('/vocab-workout-sessions/'),
-      api.get('/vocab-workout-sessions/my-work/').catch(() => ({ data: { progress: [] } }))
+      api.get('/vocab-workout-sessions/my-work/').catch(() => ({ data: { progress: [] } })),
+      api.get('/vocab-lists/').catch(() => ({ data: [] })),
     ]);
 
     rawSessionsPool.value = sessionsRes.data?.results || sessionsRes.data || [];
     rawProgressPool.value = progressRes.data?.progress || [];
 
-    console.log("📊 Vocab Analytics Engine initialized successfully:", {
-      sessionsPoolCount: rawSessionsPool.value.length,
-      progressNodesTracked: rawProgressPool.value.length
-    });
+    const rawLists =
+      listsRes.data && typeof listsRes.data === "object" && "results" in listsRes.data
+        ? (listsRes.data as any).results
+        : listsRes.data;
+
+    customVocabLists.value = Array.isArray(rawLists) ? rawLists : [];
 
   } catch (err) {
     console.error("Dashboard context boot cycle exception caught:", err);
