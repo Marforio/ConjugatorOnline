@@ -473,7 +473,6 @@ const mode = computed<string>(() => {
   if (m === "multiple-choice") return "multiple_choice";
   if (m === "multiplechoice") return "multiple_choice";
   if (m === "mcq") return "multiple_choice";
-  if (m === "quiz") return "multiple_choice"; // normalize legacy backend/frontend naming
   return m;
 });
 
@@ -482,7 +481,7 @@ const frontField = computed<FrontField>(() => props.gameSettings?.frontField || 
 const backField = computed<BackField>(() => props.gameSettings?.backField || "past_simple");
 
 const isPersistedMode = computed<boolean>(() => {
-  return mode.value === "write" || mode.value === "multiple_choice";
+  return mode.value === "write" || mode.value === "quiz";
 });
 
 const showEntireList = ref(false);
@@ -832,6 +831,38 @@ const openWiktionary = (word?: string | null) => {
   window.open(`https://en.wiktionary.org/wiki/${encodeURIComponent(w)}`, "_blank");
 };
 
+/**
+ Helpers for multiple choice mode
+ */
+function splitAnswerVariants(raw: string): string[] {
+  return String(raw ?? "")
+    .split(/[|,]/g)               // supports "|" and ","
+    .map((s) => s.trim())
+    .filter(Boolean);
+}
+
+function isChoiceCorrectForCustomItem(item: any, field: string, choice: string): boolean {
+  const picked = String(choice ?? "").trim().toLowerCase();
+  if (!picked) return false;
+
+  const values = getFieldValueFromItem(item, field); // string[]
+  const accepted = values
+    .flatMap((v) => splitAnswerVariants(v))
+    .map((v) => v.toLowerCase());
+
+  return accepted.includes(picked);
+}
+
+function normalizeItemId(v: any): string {
+  return String(v ?? "").trim().toLowerCase();
+}
+
+function extractRawId(v: any): string {
+  const s = String(v ?? "").trim();
+  if (!s) return "";
+  const parts = s.split("::");
+  return (parts.length > 1 ? parts[parts.length - 1] : s).trim().toLowerCase();
+}
 /* =========================================================
    📁 AUTOMATED MIDDLE DRAWER SCROLL CODES
    ========================================================= */
@@ -1802,7 +1833,7 @@ async function submitWrite(e?: KeyboardEvent) {
   }
 }
 
-function submitChoice(choice: string) {
+async function submitChoice(choice: string) {
   const it = currentItem.value;
   if (!it) return;
 
@@ -1810,15 +1841,16 @@ function submitChoice(choice: string) {
   isSubmitting.value = true;
 
   try {
-    let acceptedArr: string[];
-    let correct: boolean;
+    let acceptedArr: string[] = [];
+    let correct = false;
 
     if (isHardcodedListKey(props.gameSettings?.listId)) {
       acceptedArr = getAcceptedAnswers(it, backField.value);
       correct = checkUserAnswer(it, backField.value as any, choice);
     } else {
-      acceptedArr = getFieldValueFromItem(it, backField.value);
-      correct = checkUserAnswerForCustomItem(it, backField.value, choice);
+      const rawValues = getFieldValueFromItem(it, backField.value);
+      acceptedArr = rawValues.flatMap((v) => splitAnswerVariants(v));
+      correct = isChoiceCorrectForCustomItem(it, backField.value, choice);
     }
 
     recordRound({
@@ -1832,7 +1864,7 @@ function submitChoice(choice: string) {
       setTimeout(() => (showFloatingFeedback.value = false), 800);
 
       if (isPersistedMode.value) {
-        void advancePersisted();
+        await advancePersisted();   // <-- critical: await, don’t fire-and-forget
       } else {
         goNext();
       }
