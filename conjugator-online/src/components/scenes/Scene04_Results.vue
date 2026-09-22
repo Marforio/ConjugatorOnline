@@ -64,43 +64,21 @@
                 <v-alert type="info" variant="tonal" class="rounded-xl text-body-2" density="comfortable">No correct answers recorded this round 😢</v-alert>
               </div>
               
-              <div v-else class="carousel-wrapper">
-                <!-- Navigation Controls -->
-                <div class="d-flex align-center justify-space-between mb-4 carousel-controls">
-                  <v-btn
-                    icon="mdi-chevron-left"
-                    variant="outlined"
-                    color="slate-600"
-                    density="comfortable"
-                    :disabled="correctScrollPosition === 0"
-                    @click="scrollCorrect('left')"
-                  />
-                  <span class="text-caption text-slate-500 font-weight-bold flex-grow-1 text-center">
-                    Showing {{ Math.min(visibleCardsCount, correctResults.length) }} of {{ correctResults.length }}
-                  </span>
-                  <v-btn
-                    icon="mdi-chevron-right"
-                    variant="outlined"
-                    color="slate-600"
-                    density="comfortable"
-                    :disabled="cannotScrollCorrectRight"
-                    @click="scrollCorrect('right')"
-                  />
-                </div>
-
-                <!-- Carousel Container with Grid -->
-                <div class="carousel-grid-container">
-                  <div 
-                    class="carousel-grid"
-                    :style="{ transform: `translateX(-${correctScrollPosition * (100 / visibleCardsCount)}%)` }"
+              <div v-else>
+                <v-slide-group
+                  class="results-slide-group"
+                  show-arrows
+                  center-active
+                >
+                  <v-slide-group-item
+                    v-for="(result, index) in correctResults"
+                    :key="'correct-' + index"
                   >
                     <v-card
-                        v-for="(result, index) in correctResults"
-                        :key="'correct-' + index"
-                        class="result-deck-card border rounded-xl pa-4 bg-white carousel-card"
-                        :class="isTypoRound(result) ? 'accent-border-info' : 'accent-border-success'"
-                        flat
-                      >
+                      class="result-deck-card border rounded-xl pa-4 bg-white carousel-card mr-4"
+                      :class="isTypoRound(result) ? 'accent-border-info' : 'accent-border-success'"
+                      flat
+                    >
                       <div class="d-flex align-center justify-space-between mb-2">
                         <span class="text-caption font-weight-black text-slate-400 text-uppercase">
                           Q{{ result.prompt_number }}
@@ -110,7 +88,7 @@
                           {{ result.elapsed_time }}s
                         </v-chip>
                       </div>
-                      
+
                       <div class="text-center bg-slate-50 border rounded-lg py-2 my-2">
                         <div class="text-xxs font-weight-bold text-slate-400 leading-none">Your Answer</div>
                         <div class="text-body-2 font-weight-black mt-1" :class="isTypoRound(result) ? 'text-info' : 'text-success'">
@@ -125,36 +103,34 @@
                         <div class="d-flex justify-space-between mb-0.5"><span class="text-slate-400">Tense:</span><span class="font-weight-bold text-slate-700 text-truncate">{{ result.tense }}</span></div>
                         <div class="d-flex justify-space-between"><span class="text-slate-400">Type:</span><span class="font-weight-bold text-slate-700">{{ result.sentence_type }}</span></div>
                         <div class="d-flex justify-space-between align-center">
-                            <span class="text-slate-400 d-flex align-center ga-1">
-                              Difficulty:
-                              <v-tooltip location="top">
-                                <template #activator="{ props }">
-                                  <v-icon v-bind="props" size="16" color="grey-darken-1" class="cursor-help">
-                                    mdi-help-circle-outline
-                                  </v-icon>
-                                </template>
-                                <div>
-                                  <div><strong>{{ (Number(result.difficulty_score || 0)).toFixed(2) }} / 4.30</strong></div>
-                                  <div>
-                                    Score based on the complexity of the prompt (tense, sentence type, and verb set).
-                                  </div>
-                                </div>
-                              </v-tooltip>
-                            </span>
+                          <span class="text-slate-400 d-flex align-center ga-1">
+                            Difficulty:
+                            <v-tooltip location="top">
+                              <template #activator="{ props }">
+                                <v-icon v-bind="props" size="16" color="grey-darken-1" class="cursor-help">
+                                  mdi-help-circle-outline
+                                </v-icon>
+                              </template>
+                              <div>
+                                <div><strong>{{ (Number(result.difficulty_score || 0)).toFixed(2) }} / 4.30</strong></div>
+                                <div>Score based on the complexity of the prompt (tense, sentence type, and verb set).</div>
+                              </div>
+                            </v-tooltip>
+                          </span>
 
-                            <span class="d-flex align-center ga-2">
-                              <span class="font-weight-bold text-slate-700">
-                                {{ (Number(result.difficulty_score || 0)).toFixed(2) }}
-                              </span>
-                              <v-chip size="x-small" :color="difficultyMeta(result.difficulty_score).color" variant="tonal">
-                                {{ difficultyMeta(result.difficulty_score).label }}
-                              </v-chip>
+                          <span class="d-flex align-center ga-2">
+                            <span class="font-weight-bold text-slate-700">
+                              {{ (Number(result.difficulty_score || 0)).toFixed(2) }}
                             </span>
-                          </div>
+                            <v-chip size="x-small" :color="difficultyMeta(result.difficulty_score).color" variant="tonal">
+                              {{ difficultyMeta(result.difficulty_score).label }}
+                            </v-chip>
+                          </span>
+                        </div>
                       </div>
                     </v-card>
-                  </div>
-                </div>
+                  </v-slide-group-item>
+                </v-slide-group>
               </div>
             </v-expansion-panel-text>
           </v-expansion-panel>
@@ -173,40 +149,18 @@
                 </v-alert>
               </div>
 
-              <div v-else class="carousel-wrapper">
-                <!-- Navigation Controls -->
-                <div class="d-flex align-center justify-space-between mb-4 carousel-controls">
-                  <v-btn
-                    icon="mdi-chevron-left"
-                    variant="outlined"
-                    color="slate-600"
-                    density="comfortable"
-                    :disabled="wrongScrollPosition === 0"
-                    @click="scrollWrong('left')"
-                  />
-                  <span class="text-caption text-slate-500 font-weight-bold flex-grow-1 text-center">
-                    Showing {{ Math.min(visibleCardsCount, wrongResults.length) }} of {{ wrongResults.length }}
-                  </span>
-                  <v-btn
-                    icon="mdi-chevron-right"
-                    variant="outlined"
-                    color="slate-600"
-                    density="comfortable"
-                    :disabled="cannotScrollWrongRight"
-                    @click="scrollWrong('right')"
-                  />
-                </div>
-
-                <!-- Carousel Container with Grid -->
-                <div class="carousel-grid-container">
-                  <div 
-                    class="carousel-grid"
-                    :style="{ transform: `translateX(-${wrongScrollPosition * (100 / visibleCardsCount)}%)` }"
+              <div v-else>
+                <v-slide-group
+                  class="results-slide-group"
+                  show-arrows
+                  center-active
+                >
+                  <v-slide-group-item
+                    v-for="(result, index) in wrongResults"
+                    :key="'wrong-' + index"
                   >
                     <v-card
-                      v-for="(result, index) in wrongResults"
-                      :key="'wrong-' + index"
-                      class="result-deck-card border rounded-xl pa-4 bg-white carousel-card d-flex flex-column"
+                      class="result-deck-card border rounded-xl pa-4 bg-white carousel-card d-flex flex-column mr-4"
                       :class="isTypoRound(result) ? 'accent-border-info' : 'accent-border-error'"
                       flat
                     >
@@ -214,16 +168,11 @@
                         <span class="text-caption font-weight-black text-slate-400 text-uppercase">
                           Q{{ result.prompt_number }}
                         </span>
-                        <v-chip
-                          size="x-small"
-                          :color="isTypoRound(result) ? 'info' : 'error'"
-                          variant="flat"
-                          class="font-weight-bold"
-                        >
+                        <v-chip size="x-small" :color="isTypoRound(result) ? 'info' : 'error'" variant="flat" class="font-weight-bold">
                           {{ isTypoRound(result) ? 'Typo' : 'Wrong' }}
                         </v-chip>
                       </div>
-                      
+
                       <div class="text-center bg-slate-50 border rounded-lg py-2 my-2">
                         <div class="text-xxs font-weight-bold text-slate-400 leading-none">Your Submission</div>
                         <div class="text-body-2 font-weight-black mt-1" :class="isTypoRound(result) ? 'text-info' : 'text-error'">
@@ -232,7 +181,6 @@
                         </div>
                       </div>
 
-                      <!-- Typo Pending Notice -->
                       <div v-if="isTypoRound(result)" class="bg-blue-init-lighten pa-2 rounded-lg text-center mb-2 border border-blue-100">
                         <p class="text-xxs text-slate-600 font-weight-bold ma-0">Typo pending staff review</p>
                         <div v-if="result.typo_lev_min" class="text-xxs text-slate-500 mt-1">
@@ -247,40 +195,37 @@
                         <div class="d-flex justify-space-between mb-0.5"><span class="text-slate-400">Tense:</span><span class="font-weight-bold text-slate-700 text-truncate">{{ result.tense }}</span></div>
                         <div class="d-flex justify-space-between"><span class="text-slate-400">Type:</span><span class="font-weight-bold text-slate-700">{{ result.sentence_type }}</span></div>
                         <div class="d-flex justify-space-between align-center">
-                            <span class="text-slate-400 d-flex align-center ga-1">
-                              Difficulty:
-                              <v-tooltip location="top">
-                                <template #activator="{ props }">
-                                  <v-icon v-bind="props" size="16" color="grey-darken-1" class="cursor-help">
-                                    mdi-help-circle-outline
-                                  </v-icon>
-                                </template>
-                                <div>
-                                  <div><strong>{{ (Number(result.difficulty_score || 0)).toFixed(2) }} / 4.30</strong></div>
-                                  <div>
-                                    Score based on the complexity of the prompt (tense, sentence type, and verb set).
-                                  </div>
-                                </div>
-                              </v-tooltip>
-                            </span>
+                          <span class="text-slate-400 d-flex align-center ga-1">
+                            Difficulty:
+                            <v-tooltip location="top">
+                              <template #activator="{ props }">
+                                <v-icon v-bind="props" size="16" color="grey-darken-1" class="cursor-help">
+                                  mdi-help-circle-outline
+                                </v-icon>
+                              </template>
+                              <div>
+                                <div><strong>{{ (Number(result.difficulty_score || 0)).toFixed(2) }} / 4.30</strong></div>
+                                <div>Score based on the complexity of the prompt (tense, sentence type, and verb set).</div>
+                              </div>
+                            </v-tooltip>
+                          </span>
 
-                            <span class="d-flex align-center ga-2">
-                              <span class="font-weight-bold text-slate-700">
-                                {{ (Number(result.difficulty_score || 0)).toFixed(2) }}
-                              </span>
-                              <v-chip size="x-small" :color="difficultyMeta(result.difficulty_score).color" variant="tonal">
-                                {{ difficultyMeta(result.difficulty_score).label }}
-                              </v-chip>
+                          <span class="d-flex align-center ga-2">
+                            <span class="font-weight-bold text-slate-700">
+                              {{ (Number(result.difficulty_score || 0)).toFixed(2) }}
                             </span>
-                          </div>
+                            <v-chip size="x-small" :color="difficultyMeta(result.difficulty_score).color" variant="tonal">
+                              {{ difficultyMeta(result.difficulty_score).label }}
+                            </v-chip>
+                          </span>
+                        </div>
                       </div>
 
                       <div class="text-xxs text-slate-500 font-weight-medium mb-2">
-                        <span class="font-weight-bold text-slate-700 me-2">Acceptable:</span> 
+                        <span class="font-weight-bold text-slate-700 me-2">Acceptable:</span>
                         <span class="text-success font-weight-bold"><em>{{ result.acceptable_answers.join(', ') }}</em></span>
                       </div>
 
-                      <!-- Error Classification with Tooltip Details -->
                       <div v-if="result.error_details && result.error_details.length" class="text-xxs text-slate-500 mb-2 pb-2 border-b">
                         <span class="font-weight-bold text-slate-700 me-2">Errors:</span>
                         <v-tooltip
@@ -291,15 +236,13 @@
                           content-class="bg-slate-800 text-white rounded text-xxs"
                         >
                           <template #activator="{ props: tooltipProps }">
-                            <span 
+                            <span
                               v-bind="tooltipProps"
                               class="text-slate-600 cursor-help border-slate-300 hover:text-slate-800 hover:border-slate-500 transition-colors duration-150"
                             >
                               {{ errorDetail.type }}{{ Number(i) < result.error_details.length - 1 ? ', ' : '' }}
                             </span>
                           </template>
-                          
-                          <!-- Tooltip Content -->
                           <div class="pa-2">
                             <div class="font-weight-bold mb-1">{{ formatErrorCode(errorDetail.type) }}</div>
                             <div class="text-xs leading-relaxed">{{ errorDetail.label }}</div>
@@ -325,8 +268,8 @@
                         AI Tutor: Why is this wrong?
                       </v-btn>
                     </v-card>
-                  </div>
-                </div>
+                  </v-slide-group-item>
+                </v-slide-group>
               </div>
             </v-expansion-panel-text>
           </v-expansion-panel>
@@ -415,29 +358,9 @@ const props = defineProps({
 
 const emit = defineEmits(['changeScene']);
 
-// Carousel state
-const correctScrollPosition = ref(0);
-const wrongScrollPosition = ref(0);
-const visibleCardsCount = computed(() => {
-  if (window.matchMedia('(min-width: 1920px)').matches) return 4;
-  if (window.matchMedia('(min-width: 1440px)').matches) return 3;
-  if (window.matchMedia('(min-width: 960px)').matches) return 2;
-  return 1;
-});
-
 // AI tutor state
 const aiOpen = ref(false);
 const aiContext = ref<any>(null);
-
-
-const cannotScrollCorrectRight = computed(() => {
-  return correctScrollPosition.value >= correctResults.value.length - visibleCardsCount.value;
-});
-
-const cannotScrollWrongRight = computed(() => {
-  return wrongScrollPosition.value >= wrongResults.value.length - visibleCardsCount.value;
-});
-
 
 const percentIncorrect = computed(() => {
   const total = totalRounds.value;
@@ -445,32 +368,9 @@ const percentIncorrect = computed(() => {
   return ((finalStats.value?.wrong_count || 0) / total * 100).toFixed(0);
 });
 
-
 // Methods
 function goToScene(sceneName: string) {
   emit('changeScene', sceneName);
-}
-
-function scrollCorrect(direction: 'left' | 'right') {
-  if (direction === 'left') {
-    correctScrollPosition.value = Math.max(0, correctScrollPosition.value - 1);
-  } else {
-    correctScrollPosition.value = Math.min(
-      correctResults.value.length - visibleCardsCount.value,
-      correctScrollPosition.value + 1
-    );
-  }
-}
-
-function scrollWrong(direction: 'left' | 'right') {
-  if (direction === 'left') {
-    wrongScrollPosition.value = Math.max(0, wrongScrollPosition.value - 1);
-  } else {
-    wrongScrollPosition.value = Math.min(
-      wrongResults.value.length - visibleCardsCount.value,
-      wrongScrollPosition.value + 1
-    );
-  }
 }
 
 function difficultyMeta(scoreRaw: any) {
@@ -536,6 +436,11 @@ function getErrorLabel(errType: string): string {
 
 function isTypoRound(round: any): boolean {
   return round?.typo === true;
+}
+
+function isTypoAcceptedRound(round: any): boolean {
+  // support both possible flags from backend payloads
+  return round?.typo === true || round?.typo_accepted === true;
 }
 
 async function openTutorForRound(round: any) {
@@ -632,29 +537,31 @@ const finalStats = computed(() =>
   }
 );
 
-const correctResults = computed(() => {
+const allResults = computed(() => {
   const results = backendResults.value?.results || props.results?.results || [];
-  return Array.isArray(results) 
-    ? results.filter((r: any) => r.is_correct === true)
-    : [];
+  return Array.isArray(results) ? results : [];
+});
+
+const correctResults = computed(() => {
+  return allResults.value.filter((r: any) => r.is_correct === true || isTypoAcceptedRound(r));
 });
 
 const wrongResults = computed(() => {
-  const results = backendResults.value?.results || props.results?.results || [];
-  return Array.isArray(results)
-    ? results.filter((r: any) => r.is_correct === false)
-    : [];
+  return allResults.value.filter((r: any) => !(r.is_correct === true || isTypoAcceptedRound(r)));
 });
 
-const totalRounds = computed(() =>
-  (finalStats.value?.correct_count || 0) + (finalStats.value?.wrong_count || 0)
-);
+const totalRounds = computed(() => allResults.value.length);
 
 const percentCorrect = computed(() => {
   const total = totalRounds.value;
   if (!total) return 0;
-  return ((finalStats.value?.correct_count || 0) / total * 100).toFixed(0);
+  return ((correctResults.value.length / total) * 100).toFixed(0);
 });
+
+const chartData = computed(() => [
+  { label: 'Correct', value: correctResults.value.length },
+  { label: 'Wrong', value: wrongResults.value.length },
+]);
 
 const avgTimePerPrompt = computed(() => {
   const total = totalRounds.value;
@@ -663,10 +570,6 @@ const avgTimePerPrompt = computed(() => {
   return (seconds / total).toFixed(1);
 });
 
-const chartData = computed(() => [
-  { label: 'Correct', value: finalStats.value?.correct_count ?? 0 },
-  { label: 'Wrong', value: finalStats.value?.wrong_count ?? 0 },
-]);
 
 function renderPieChart() {
   const container = d3.select('#pie-chart').node() as HTMLElement;
@@ -752,75 +655,17 @@ onMounted(async () => {
 }
 
 /* ==========================================
-   CAROUSEL STYLING WITH CSS GRID
+   RESULTS CARD ACCENT STYLING
    ========================================== */
-.carousel-wrapper {
-  position: relative;
-}
-
-.carousel-controls {
-  gap: 8px;
-}
-
-.carousel-grid-container {
-  overflow: hidden;
-  border-radius: 8px;
+.results-slide-group {
   width: 100%;
-  max-width: 100%;
-}
-
-.carousel-grid {
-  display: grid;
-  grid-auto-flow: column;
-  grid-auto-columns: 1fr;  /* ✅ Fixed: equal width columns */
-  gap: 16px;
-  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  width: calc(100% - 16px);  /* Account for gap */
-  padding: 8px 0;
 }
 
 .carousel-card {
+  width: 280px;
   min-height: 240px;
-  flex-shrink: 0;
-  width: 100%;
-  min-width: 280px;  /* ✅ Minimum card width */
 }
 
-/* Responsive visible cards count */
-@media (min-width: 1920px) {
-  /* 4 cards visible */
-  .carousel-grid-container {
-    max-width: calc((280px * 4) + (16px * 3) + 32px);
-  }
-}
-
-@media (max-width: 1440px) {
-  /* 3 cards visible */
-  .carousel-grid-container {
-    max-width: calc((280px * 3) + (16px * 2) + 32px);
-  }
-}
-
-@media (max-width: 960px) {
-  /* 2 cards visible */
-  .carousel-grid-container {
-    max-width: calc((280px * 2) + 16px + 32px);
-  }
-}
-
-@media (max-width: 600px) {
-  /* 1 card visible */
-  .carousel-grid {
-    grid-auto-columns: 100%;
-  }
-  
-  .carousel-grid-container {
-    max-width: calc(280px + 32px);
-  }
-}
-/* ==========================================
-   RESULTS CARD ACCENT STYLING
-   ========================================== */
 .result-deck-card {
   border-width: 1px !important;
   border-top-width: 5px !important;

@@ -1428,6 +1428,18 @@ export const irregularVerbs = {
     multiple_choice_ps: ["striked", "strack", "strukt"],
     multiple_choice_pp: ["striked", "strucken", "strack"]
   },
+  swear: {
+    definition: "to make a solemn promise, or, to use offensive language",
+    past_simple: ["swore"],
+    present_perfect: ["sworn"],
+    French: "jurer",
+    German: "versprechen; fluchen",
+    Italian: "imprecare",
+    level: "advanced",
+    image: "/images/vocab/swear.jpg",
+    multiple_choice_ps: ["swared", "swor", "sworned"],
+    multiple_choice_pp: ["swared", "swornen", "swor"]
+  },
 
   sweep: {
     definition: "to clean with a brush or broom",
@@ -1438,6 +1450,8 @@ export const irregularVerbs = {
     Italian: "spazzare",
     level: "advanced",
     image: "/images/vocab/sweep.jpg",
+    multiple_choice_ps: ["sweeped", "swepted", "swapt"],
+    multiple_choice_pp: ["sweeped", "swepten", "swapt"]
   },
   tear: {
     definition: "to rip or pull apart by force",

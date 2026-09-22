@@ -105,11 +105,14 @@
           elevation="3"
           :class="animationClass"
         >
-          <div v-if="selectedCategory.includes('present perfect')" class="card-pill-badge-header">
-            <v-chip color="indigo-lighten-2" text-color="indigo-darken-4" size="large" class="font-weight-black uppercase">
-              {{ prompt?.category }}
-            </v-chip>
-          </div>
+          <div
+              v-if="props.game === 'Prove it!' && selectedCategory.includes('present perfect')"
+              class="card-pill-badge-header"
+            >
+              <v-chip color="indigo-lighten-2" text-color="indigo-darken-4" size="large" class="font-weight-black uppercase">
+                {{ prompt?.verb }}
+              </v-chip>
+            </div>
           <div class="flashcard-main-display-text text-slate-800 font-weight-bold">
             {{ prompt?.question }}
           </div>
@@ -1111,78 +1114,78 @@ const gameData: Record<
     description: "Prove your knowledge of past simple irregular verbs.",
     instructions: "Answer the question using the past simple form of the verb in the question.",
     prompts: {
-      "bring": ["What did you bring to school today?", "What did you bring for lunch the other day?"],
-      "eat": ["What did you eat for breakfast this morning?", "what did you eat for dinner last night?"],
-      "go": ["Where did you go last weekend?", "Where did you go on your last holiday?"],
-      "see": ["What did you see at the zoo?", "What did you see on your last trip to the cinema?"],
-      "take": ["What did you take when you went to the mountain?", "What did you take on your last vacation?"],
-      "write": ["What did you write in your last email?", "What did you write by hand last month?"],
-      "come": ["When did you come back from your last holiday?", "When did you come to school this week?"],
-      "do": ["What did you do last Saturday?", "What did you do for fun last summer?"],
-      "have": ["What did you have for lunch yesterday?", "When did you have a great time?"],
-      "make": ["What did you make in the kitchen?", "What did you make in art class?"],
-      "run": [ "Where did you run yesterday?", "When did you run in a race?" ], 
-      "hear": [ "What did you hear on the radio?", "What did you hear at school today?" ], 
-      "break": [ "What did you break last week?", "What did you break by accident at home?" ], 
-      "swim": [ "Where did you swim last summer?", "When did you swim in the ocean?" ], 
-      "sing": [ "What did you sing as a child?", "What did you sing in music class?" ], 
-      "cut": [ "What did you cut with scissors?", "What did you cut in the kitchen?" ], 
-      "buy": [ "What did you buy at the store?", "What did you buy last weekend?" ], 
-      "sell": [ "What did you sell online?", "What did you sell to earn some extra money?" ], 
-      "pay": [ "How much did you pay for lunch?", "How did you pay at the shop yesterday?" ], 
-      "say": [ "What did you say to your friend?", "What did you say in class yesterday?" ], 
-      "speak": [ "What did you speak about in class?", "What did you speak about with your family?" ], 
-      "dig": [ "What did you dig in the garden?", "Where did you dig last year?" ], 
-      "forget": [ "Whose birthday did you forget?", "What did you forget to do last week?" ], 
-      "light": [ "What did you light with a match?", "What did you light in the evening?" ], 
-      "forbid": [ "What did your teacher forbid in class?", "What did your parents forbid you to do?" ], 
-      "send": [ "What did you send in a message?", "What did you send by email last week?" ], 
-      "know": [ "Who from this class did you know previously?", "What did you know before the test?" ], 
-      "understand": [ "What did you understand very well in school?", "What language did you understand as a child?" ], 
-      "think": [ "What did you think about the last Eurovision?", "What did you think about the weather last week?" ], 
-      "catch": [ "When did you catch a ball?", "What did you catch last week?" ],
-      "read": [ "What did you read last night?", "What did you read in class yesterday?" ], 
-      "find": [ "What did you find in the park?", "What did you find at home last week?" ], 
-      "lose": [ "What did you lose yesterday?", "What did you lose on your last trip?" ], 
-      "drive": [ "Where did you drive last weekend?", "When did you drive to school?" ], 
-      "meet": [ "Who did you meet yesterday?", "Who did you meet on your last holiday?" ], 
-      "build": [ "What did you build?", "What did you build with blocks?" ], 
-      "draw": [ "What did you draw in your notebook?", "What did you draw in art class?" ], 
-      "feel": [ "What did you feel when you won?", "What did you feel yesterday morning?" ], 
-      "cost": [ "What did it cost to buy lunch?", "What did the laptop cost?" ], 
-      "wear": [ "What did you wear yesterday?", "What did you wear to the party?" ], 
-      "win": [ "What did you win?", "When did you win a game?" ], 
-      "fall": [ "Where did you fall?", "When did you fall on the ski slope?" ], 
-      "leave": [ "When did you leave school yesterday?", "When did you leave home last weekend?" ], 
-      "begin": [ "What did you begin last month?", "What did you begin in class yesterday?" ], 
-      "teach": [ "What did your teacher teach yesterday?", "What did you teach the children?" ], 
-      "steal": [ "What did the thief steal?", "What did someone steal from the shop?" ], 
-      "throw": [ "What did you throw in the game?", "What did you throw away yesterday?" ], 
-      "spend": [ "What did you spend money on last week?", "What did you spend time doing yesterday?" ], 
-      "fight": [ "What did you fight about yesterday?", "What did the heroes fight in the story?" ], 
-      "hide": [ "Where did you hide yesterday?", "What did you hide in your room?" ], 
-      "rise": [ "When did the sun rise today?", "When did you rise from bed yesterday?" ], 
-      "show": [ "What did you show your friend?", "What did you show in class yesterday?" ], 
-      "mean": [ "What did you mean by that?", "What did the word mean in the story?" ], 
-      "deal": [ "What problem did you deal with yesterday?", "When did you deal cards?" ], 
-      "wake": [ "When did you wake up today?", "When did you wake up last weekend?" ], 
-      "drink": [ "What did you drink for breakfast?", "What did you drink at the party?" ], 
-      "choose": [ "What did you choose for lunch?", "What did you choose in the shop?" ], 
-      "become": [ "When did you become the best?", "What did you become independent?" ], 
-      "freeze": [ "What did you freeze in the freezer?", "When did your toes freeze?" ], 
-      "set": [ "What did you set on the table?", "What did you set up yesterday?" ], 
-      "hit": [ "What did you hit with the racket?", "What did you hit by accident?" ], 
-      "sleep": [ "How many hours did you sleep last night?", "When did you sleep outdoors?" ], 
-      "put": [ "What did you put in your bag?", "What did you put on the desk yesterday?" ], 
-      "lead": [ "When did you lead the race?", "When did you lead a time?" ], 
-      "get": [ "What did you get for your birthday?", "What did you get at the shop yesterday?" ], 
-      "sit": [ "Where did you sit in class?", "Where did you sit last weekend?" ], 
-      "grow": [ "What did you grow in the garden?", "What did you grow last summer?" ], 
-      "hold": [ "What did you hold in your hand?", "What did you hold during the game?" ], 
-      "tell": [ "What did you tell your friend?", "What did you tell your teacher yesterday?" ], 
-      "let": [ "What did you let your friend do?", "What did you let your pet do?" ], 
-      "fly": [ "Where did you fly last summer?", "When did you fly to another city?" ],
-      "give": [ "What did you give to your friend?", "What did you give for Christmas?" ],
+      "bring": ["What did you bring to school today?", "What did you bring for lunch the other day?", "What did you bring to the party last weekend?"],
+      "eat": ["What did you eat for breakfast this morning?", "what did you eat for dinner last night?", "What did you eat for lunch yesterday?"],
+      "go": ["Where did you go last weekend?", "Where did you go on your last holiday?", "Where did you go yesterday?"],
+      "see": ["What did you see at the zoo?", "What did you see on your last trip to the cinema?", "What did you see yesterday?"],
+      "take": ["What did you take when you went to the mountain?", "What did you take on your last vacation?", "What did you take to school yesterday?"],
+      "write": ["What did you write in your last email?", "What did you write by hand last month?", "What did you write in your notebook yesterday?"],
+      "come": ["When did you come back from your last holiday?", "When did you come to school this week?", "When did you come home yesterday?"],
+      "do": ["What did you do last Saturday?", "What did you do for fun last summer?", "What did you do yesterday?"],
+      "have": ["What did you have for lunch yesterday?", "When did you have a great time?", "What did you have for breakfast this morning?"],
+      "make": ["What did you make in the kitchen?", "What did you make in art class?", "What did you make for your friends last week?"],
+      "run": [ "Where did you run yesterday?", "When did you run in a race?", "Where did you run last week?" ], 
+      "hear": [ "What did you hear on the radio?", "What did you hear at school today?", "What did you hear from your friends yesterday?" ], 
+      "break": [ "What did you break last week?", "What did you break by accident at home?", "What did you break at school?" ], 
+      "swim": [ "Where did you swim last summer?", "When did you swim in the ocean?", "Where did you swim yesterday?" ], 
+      "sing": [ "What did you sing as a child?", "What did you sing in music class?", "What did you sing at the party last weekend?" ], 
+      "cut": [ "What did you cut with scissors?", "What did you cut in the kitchen?", "What did you cut at school?" ], 
+      "buy": [ "What did you buy at the store?", "What did you buy last weekend?", "What did you buy online?" ], 
+      "sell": [ "What did you sell online?", "What did you sell to earn some extra money?", "What did you sell at the market?" ], 
+      "pay": [ "How much did you pay for lunch?", "How did you pay at the shop yesterday?", "How much did you pay for your last purchase?" ], 
+      "say": [ "What did you say to your friend?", "What did you say in class yesterday?", "What did you say on the phone last week?" ], 
+      "speak": [ "What did you speak about in class?", "What did you speak about with your family?", "What did you speak about with your friends yesterday?" ], 
+      "dig": [ "What did you dig in the garden?", "Where did you dig last year?", "What did you dig at school?" ], 
+      "forget": [ "Whose birthday did you forget?", "What did you forget to do last week?", "What did you forget at school?" ], 
+      "light": [ "What did you light with a match?", "What did you light in the evening?", "What did you light at the party?" ], 
+      "forbid": [ "What did your teacher forbid in class?", "What did your parents forbid you to do?", "What did the rules forbid you to do?" ], 
+      "send": [ "What did you send in a message?", "What did you send by email last week?", "What did you send to your friends yesterday?" ], 
+      "know": [ "Who from this class did you know previously?", "What did you know before the test?", "What did you know about your friends?" ], 
+      "understand": [ "What did you understand very well in school?", "What language did you understand as a child?", "What did you understand from the lesson yesterday?" ], 
+      "think": [ "What did you think about the last Eurovision?", "What did you think about the weather last week?", "What did you think about your last holiday?" ], 
+      "catch": [ "When did you catch a ball?", "What did you catch last week?", "What did you catch at school?" ],
+      "read": [ "What did you read last night?", "What did you read in class yesterday?", "What did you read on the weekend?" ], 
+      "find": [ "What did you find in the park?", "What did you find at home last week?", "What did you find at school?" ], 
+      "lose": [ "What did you lose yesterday?", "What did you lose on your last trip?", "What did you lose at school?" ], 
+      "drive": [ "Where did you drive last weekend?", "When did you drive to school?", "Where did you drive on your last holiday?" ], 
+      "meet": [ "Who did you meet yesterday?", "Who did you meet on your last holiday?", "Who did you meet at school?" ], 
+      "build": [ "What did you build?", "What did you build with blocks?", "What did you build at school?" ], 
+      "draw": [ "What did you draw in your notebook?", "What did you draw in art class?", "What did you draw at home?" ], 
+      "feel": [ "What did you feel when you won?", "What did you feel yesterday morning?", "What did you feel at school?" ], 
+      "cost": [ "What did it cost to buy lunch?", "What did the laptop cost?", "What did it cost to go on your last trip?" ], 
+      "wear": [ "What did you wear yesterday?", "What did you wear to the party?", "What did you wear to school?" ], 
+      "win": [ "What did you win?", "When did you win a game?", "What did you win at school?" ], 
+      "fall": [ "Where did you fall?", "When did you fall on the ski slope?", "Where did you fall at school?" ], 
+      "leave": [ "When did you leave school yesterday?", "When did you leave home last weekend?", "When did you leave the party last night?" ], 
+      "begin": [ "What did you begin last month?", "What did you begin in class yesterday?", "What did you begin at home?" ], 
+      "teach": [ "What did your teacher teach yesterday?", "What did you teach the children?", "What did you teach at school?" ], 
+      "steal": [ "What did the thief steal?", "What did someone steal from the shop?", "What did someone steal at school?" ], 
+      "throw": [ "What did you throw in the game?", "What did you throw away yesterday?", "What did you throw at school?" ], 
+      "spend": [ "What did you spend money on last week?", "What did you spend time doing yesterday?", "What did you spend at school?" ], 
+      "fight": [ "What did you fight about yesterday?", "What did the heroes fight in the story?", "What did you fight about at school?" ], 
+      "hide": [ "Where did you hide yesterday?", "What did you hide in your room?", "Where did you hide at school?" ], 
+      "rise": [ "When did the sun rise today?", "When did you rise from bed yesterday?", "When did prices rise?" ], 
+      "show": [ "What did you show your friend?", "What did you show in class yesterday?" ,"What did you show at school?" ], 
+      "mean": [ "What did you mean by that?", "What did the word mean in the story?", "What did you mean to say?" ], 
+      "deal": [ "What problem did you deal with yesterday?", "When did you deal cards?", "What did you deal with at school?" ], 
+      "wake": [ "When did you wake up today?", "When did you wake up last weekend?", "When did you wake up at school?" ], 
+      "drink": [ "What did you drink for breakfast?", "What did you drink at the party?", "What did you drink at school?" ], 
+      "choose": [ "What did you choose for lunch?", "What did you choose in the shop?", "What did you choose at school?" ], 
+      "become": [ "When did you become the best?", "What did you become independent?", "What did you become at school?" ], 
+      "freeze": [ "What did you freeze in the freezer?", "When did your toes freeze?", "When did the lake freeze?" ], 
+      "set": [ "What did you set on the table?", "What did you set up yesterday?", "What did you set at school?" ], 
+      "hit": [ "What did you hit with the racket?", "What did you hit by accident?", "What did you hit at school?" ], 
+      "sleep": [ "How many hours did you sleep last night?", "When did you sleep outdoors?", "When did you sleep at school?" ], 
+      "put": [ "What did you put in your bag?", "What did you put on the desk yesterday?", "What did you put in your pocket?" ], 
+      "lead": [ "When did you lead the race?", "When did you lead a team?", "When did you lead the race?" ], 
+      "get": [ "What did you get for your birthday?", "What did you get at the shop yesterday?", "What grades did you get at school?" ], 
+      "sit": [ "Where did you sit in class?", "Where did you sit last weekend?", "Where did you sit at school?" ], 
+      "grow": [ "What did you grow in the garden?", "What did you grow last summer?", "How much did you grow in your 13th year?" ], 
+      "hold": [ "What did you hold in your hand?", "What did you hold during the game?", "When did you hold up a trophy?" ], 
+      "tell": [ "What did you tell your friend?", "What did you tell your teacher yesterday?", "What did you tell a joke?" ], 
+      "let": [ "What did you let your friend do?", "What did you let your pet do?", "What did your team let you down?" ], 
+      "fly": [ "Where did you fly last summer?", "When did you fly to another city?", "When did you fly for the first time?" ],
+      "give": [ "What did you give to your friend?", "What did you give for Christmas?", "When did you give to charity?" ],
     }
   },
     "Advanced irregulars past simple": {
@@ -1226,7 +1229,7 @@ const gameData: Record<
           "What did you broadcast last week?"
         ],
         "cast": [
-          "What metal you cast?",
+          "What metal did you cast?",
           "Which actor did they cast for the role?"
         ],
         "cling": [
@@ -1343,14 +1346,14 @@ const gameData: Record<
         ],
         "weave": [
           "What did you weave in art class?",
-          "What did you weave last summer?"
+          "What did you weave a complicated lie?"
         ],
         "weep": [
-          "When did you weep last year?",
+          "When did you weep?",
           "What did you weep about yesterday?"
         ],
         "wind": [
-          "What did you wind yesterday?",
+          "Why did you wind the wires around the battery?",
           "What did you wind around the pole?"
         ],
         "withdraw": [
@@ -1362,8 +1365,8 @@ const gameData: Record<
           "What did you withstand in the storm?"
         ],
         "flee": [
-          "Where did you flee yesterday?",
-          "What did you flee from last week?"
+          "Why did the zebras flee?",
+          "Why did the soldiers flee?"
         ],
         "undergo": [
           "What did you undergo last year?",
@@ -1375,7 +1378,7 @@ const gameData: Record<
         ],
         "lie": [
           "When did you lie down for a nap?",
-          "Where did you lie down for your nap?"
+          "Where did the dog lie down?"
         ],
         "bind": [
           "What two materials did you bind together?",
@@ -1589,17 +1592,20 @@ function buildPromptQueue() {
           })
         } else {
           // Past simple shape: ["Q1", "Q2", ...]
-          for (const q of promptSet as string[]) {
-            queue.push({
-              question: q,
-              verb,
-              correctAnswers: [],
-              category: selected
-            })
-          }
+          // IMPORTANT: exactly one prompt per verb to avoid repeated target verbs
+          const questions = promptSet as string[]
+          const chosenQuestion = questions[Math.floor(Math.random() * questions.length)]
+
+          queue.push({
+            question: chosenQuestion,
+            verb,
+            correctAnswers: [],
+            category: selected
+          })
         }
       }
 
+      // queue is now verb-unique (one card per target verb)
       promptQueue.value = shuffle(queue).slice(0, totalRounds.value)
       return
     }
