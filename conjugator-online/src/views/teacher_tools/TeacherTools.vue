@@ -244,18 +244,18 @@ const studentOptions = ref<
 
 onMounted(async () => {
   try {
-    const res = await api.get('/students/')
-    studentOptions.value = res.data
-      .filter((s: any) => s.web_id && s.web_id.length <= 20)
-      .sort((a: any, b: any) => a.web_id.localeCompare(b.web_id))
-      .map((s: any) => ({
-        webid: s.web_id,
-        initials: s.initials,
-        label: `${s.web_id} — ${s.initials}`,
-      }))
-  } catch (err) {
-    console.error('Failed to load students:', err)
-  }
+  const res = await api.get('/students/')
+  studentOptions.value = res.data
+    .filter((s: any) => typeof s.web_id === 'string' && s.web_id.trim().length > 0)
+    .sort((a: any, b: any) => a.web_id.localeCompare(b.web_id))
+    .map((s: any) => ({
+      webid: s.web_id,
+      initials: s.initials,
+      label: `${s.web_id} — ${s.initials}`,
+    }))
+} catch (err) {
+  console.error('Failed to load students:', err)
+}
 })
 
 // ---------------------------

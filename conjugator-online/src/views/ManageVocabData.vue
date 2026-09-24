@@ -303,7 +303,7 @@ function getListDisplayName(
 
   // append level only for irregular verbs tracks
   // e.g. "Irregular Verbs (Essential)"
-  if (key.startsWith("Irregular verbs")) {
+  if (key.startsWith("irregular_verbs")) {
     const lvl = prettyLevel(level);
     if (lvl) return `${baseName} (${lvl})`;
   }
