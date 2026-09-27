@@ -322,15 +322,31 @@ function isPublicRoute() {
   return ['home', 'login', 'register', 'forgot-password'].includes(name)
 }
 
-async function syncStudentPresence() {
-  const loggedIn = auth.isLoggedIn; 
+// add near other module vars
+let disconnectTimer = null
 
-  if (!loggedIn || isPublicRoute()) {
-    if (presenceActive) {
-      presence.disconnect()
-      presenceActive = false
-    }
+function hasAnyToken() {
+  return !!(auth.access || auth.refresh)
+}
+
+async function syncStudentPresence() {
+  const loggedContext = hasAnyToken() // <- replaces auth.isLoggedIn transient check
+
+  if (!loggedContext || isPublicRoute()) {
+    if (disconnectTimer) clearTimeout(disconnectTimer)
+    // small grace window avoids route-transition flaps
+    disconnectTimer = setTimeout(() => {
+      if (presenceActive) {
+        presence.disconnect()
+        presenceActive = false
+      }
+    }, 1200)
     return
+  }
+
+  if (disconnectTimer) {
+    clearTimeout(disconnectTimer)
+    disconnectTimer = null
   }
 
   if (!userStore.userLoaded) {
@@ -340,8 +356,10 @@ async function syncStudentPresence() {
   const shouldRun = userStore.isStudentAccount && !userStore.isStaff
 
   if (shouldRun && !presenceActive) {
-    presence.connect()
+    await presence.connect()
     presenceActive = true
+    // ensure current route is emitted right after (re)connect
+    presence.onRouteChanged()
     return
   }
 
@@ -363,6 +381,7 @@ onMounted(async () => {
 })
 
 onBeforeUnmount(() => {
+  if (disconnectTimer) clearTimeout(disconnectTimer)
   window.removeEventListener('auth:token-refreshed', handleTokenRefreshed)
   presence.disconnect()
   presenceActive = false
@@ -371,19 +390,23 @@ onBeforeUnmount(() => {
 watch(
   () => route.fullPath,
   async () => {
-    await syncStudentPresence()
+    if (isPublicRoute()) {
+      if (presenceActive) {
+        presence.disconnect();
+        presenceActive = false;
+      }
+      return;
+    }
+
+    if (!presenceActive) {
+      await syncStudentPresence(); // one-time reconnect if needed
+    }
+
     if (presenceActive) {
-      presence.onRouteChanged()
+      presence.onRouteChanged();
     }
   }
-)
-
-watch(
-  () => auth.access,
-  async () => {
-    await syncStudentPresence()
-  }
-)
+);
 
 // NEW: role/watcher for late user hydration or role switch after load
 watch(

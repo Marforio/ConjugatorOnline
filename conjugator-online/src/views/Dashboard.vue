@@ -131,7 +131,7 @@
                           <v-card-title class="text-caption font-weight-black text-uppercase text-wrap text-grey pa-0">
                             This Semester's Total
                           </v-card-title>
-                          <div class="text-h4 my-2 font-weight-black text-emerald">{{ userStore.totalCorrectCurrentPeriod ?? 0 }}</div>
+                          <div class="text-h4 my-2 font-weight-black text-emerald">{{ totalCorrect ?? 0 }}</div>
                           <div class="text-caption text-medium-emphasis line-height-xs">
                             Correct answers since semester start
                           </div>
@@ -710,7 +710,7 @@ const tutorContext = ref<any>({});
 const gaugeKey = ref(0);
 const typoRequests = ref<Set<number>>(new Set());
 
-const activeTab = ref("grammar-feedback");
+const activeTab = ref("conjugation-game");
 const snackbar = ref({ show: false, text: '', color: 'success' });
 
 // ----- Static Reference Configurations Dictionary Maps -----
@@ -729,10 +729,10 @@ const HEALTH_TIERS: Record<string, [number, number]> = {
 };
 
 const tabItems = [
-  { value: "grammar-feedback", label: "Feedback" },
-  { value: "vocabulary", label: "Vocab" },
   { value: "conjugation-game", label: "Conjugator" },
+  { value: "vocabulary", label: "Vocab" },
   { value: "other-games", label: "Other Games" },
+  { value: "grammar-feedback", label: "Feedback" },
   { value: "exercises", label: "Exercises" },
   { value: "goals", label: "Trophies" }
 ];
@@ -807,7 +807,7 @@ const avgTimePerRound = computed(() => {
 });
 
 const totalRoundsPlayed = computed(() =>
-  sessions.value.reduce((sum, s) => sum + s.rounds.filter((r: Round) => !r.typo).length, 0)
+  sessions.value.reduce((sum, s) => sum + (s.rounds?.length ?? 0), 0)
 );
 
 const totalTypos = computed(() =>
@@ -815,7 +815,7 @@ const totalTypos = computed(() =>
 );
 
 const totalCorrect = computed(() =>
-  sessions.value.reduce((sum, s) => sum + s.rounds.filter((r: Round) => r.is_correct && !r.typo).length, 0)
+  sessions.value.reduce((sum, s) => sum + s.rounds.filter((r: Round) => r.is_correct).length, 0)
 );
 
 const totalIncorrect = computed(() =>

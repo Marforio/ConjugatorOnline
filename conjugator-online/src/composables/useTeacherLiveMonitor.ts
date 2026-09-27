@@ -45,6 +45,7 @@ const liveEvents = ref<ActivityEvent[]>([]);
 
 const maxEvents = 200;
 const AUTH_FAILURE_COOLDOWN_MS = 15000;
+const PAGE_STICKY_MS = 9000;
 
 function wsBase(): string {
   const env = (import.meta.env.VITE_WS_BASE_URL || "").replace(/\/+$/, "");
@@ -134,6 +135,101 @@ export function useTeacherLiveMonitor() {
     }
   }
 
+function mergePresenceSticky(
+  prev: PresenceStudent | undefined,
+  incoming: PresenceStudent
+): PresenceStudent {
+  const now = Date.now();
+  const prevAny = (prev || {}) as any;
+  const incomingAny = (incoming || {}) as any;
+
+  const prevStickyUntil = Number(prevAny._pageStickyUntil || 0);
+  const stickyActive = prevStickyUntil > now;
+
+  const incomingType = String(incoming.last_activity_type || "").toLowerCase();
+  const incomingName = String(incoming.last_activity_name || "");
+  const incomingNameLc = incomingName.toLowerCase();
+  const incomingPage = String(incomingAny.page || "");
+
+  // treat these as "navigation/page-change" signals
+  const incomingIsPageSignal =
+    incomingType === "page_view" ||
+    incomingType === "presence.page" ||
+    incomingType === "route_change" ||
+    incomingType === "navigation" ||
+    incomingNameLc.includes("navigat") ||
+    incomingNameLc.includes("opened") ||
+    (!!incomingPage && incomingPage.startsWith("/"));
+
+  // treat these as heartbeat-ish updates that should not replace sticky label
+  const incomingIsHeartbeatLike =
+    incomingType === "heartbeat" ||
+    incomingType === "presence.ping" ||
+    incomingType === "ping" ||
+    incomingType === "" ||
+    incomingType === "active";
+
+  // base merge first so freshness fields (last_seen/seconds_ago/etc.) always advance
+  const base: any = {
+    ...(prev || {}),
+    ...(incoming || {}),
+  };
+
+  // 1) New page signal => start/refresh sticky window
+  if (incomingIsPageSignal) {
+    const stickyType = incomingType || "page_view";
+    const stickyName =
+      incomingName ||
+      (incomingPage ? `Navigated to ${incomingPage}` : "Navigated");
+
+    return {
+      ...base,
+      last_activity_type: stickyType,
+      last_activity_name: stickyName,
+      _pageStickyUntil: now + 8000, // 8s
+      _stickyType: stickyType,
+      _stickyName: stickyName,
+      _stickyPage: incomingPage || prevAny._stickyPage || "",
+    } as PresenceStudent;
+  }
+
+  // 2) Sticky active + heartbeat-like incoming => preserve sticky label/icon
+  if (stickyActive && incomingIsHeartbeatLike) {
+    return {
+      ...base,
+      last_activity_type: String(prevAny._stickyType || prev?.last_activity_type || "page_view"),
+      last_activity_name: String(prevAny._stickyName || prev?.last_activity_name || "Navigated"),
+      page: (prevAny._stickyPage || prevAny.page || incomingAny.page) as any,
+      _pageStickyUntil: prevStickyUntil,
+      _stickyType: prevAny._stickyType,
+      _stickyName: prevAny._stickyName,
+      _stickyPage: prevAny._stickyPage,
+    } as PresenceStudent;
+  }
+
+  // 3) Sticky active + ambiguous incoming without page context => still preserve sticky
+  if (stickyActive && !incomingPage && !incomingName) {
+    return {
+      ...base,
+      last_activity_type: String(prevAny._stickyType || prev?.last_activity_type || base.last_activity_type),
+      last_activity_name: String(prevAny._stickyName || prev?.last_activity_name || base.last_activity_name),
+      _pageStickyUntil: prevStickyUntil,
+      _stickyType: prevAny._stickyType,
+      _stickyName: prevAny._stickyName,
+      _stickyPage: prevAny._stickyPage,
+    } as PresenceStudent;
+  }
+
+  // 4) Sticky expired (or meaningful non-heartbeat activity arrived) => clear sticky metadata
+  return {
+    ...base,
+    _pageStickyUntil: 0,
+    _stickyType: undefined,
+    _stickyName: undefined,
+    _stickyPage: undefined,
+  } as PresenceStudent;
+}
+
 async function connectInternal() {
   // duplicate guard
   if (socket && (socket.readyState === WebSocket.OPEN || socket.readyState === WebSocket.CONNECTING)) {
@@ -206,17 +302,17 @@ async function connectInternal() {
       }
 
       if (msg.type === "presence.upsert" && msg.presence) {
-        const before = Object.keys(presenceMap.value).length;
-        presenceMap.value[msg.presence.student_id] = msg.presence;
-        const after = Object.keys(presenceMap.value).length;
-        console.log("TEACHER_WS upsert applied", {
-          studentId: msg.presence.student_id,
-          before,
-          after,
-          presence: msg.presence,
-        });
-        return;
-      }
+          const before = Object.keys(presenceMap.value).length;
+          const sid = msg.presence.student_id;
+
+          const prev = presenceMap.value[sid];
+          const merged = mergePresenceSticky(prev, msg.presence);
+
+          presenceMap.value[sid] = merged;
+
+          const after = Object.keys(presenceMap.value).length;
+          return;
+        }
 
       if (msg.type === "presence.remove" && typeof msg.student_id === "number") {
         const before = Object.keys(presenceMap.value).length;
@@ -332,9 +428,10 @@ function bindTokenRefreshListenerOnce() {
 
     // clear auth block only when we actually have a token
     authBlocked = false;
+    lastTokenUsed = current;
 
-    // reconnect only when token actually changed
-    if (changed) {
+    // only reconnect if not already open
+    if (!socket || socket.readyState !== WebSocket.OPEN) {
       disconnect();
       await connect();
     }

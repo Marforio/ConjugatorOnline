@@ -1,4 +1,4 @@
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
 
 type WsLike = WebSocket | null;
@@ -15,6 +15,9 @@ let authBlocked = false;
 let connectInFlight: Promise<void> | null = null;
 let refreshInFlight: Promise<string | null> | null = null;
 let lastAuthFailureAt = 0;
+
+let routerHookBound = false;
+let removeAfterEachHook: null | (() => void) = null;
 
 const PING_MS = 25000;
 const MAX_BACKOFF_MS = 10000;
@@ -53,6 +56,7 @@ function markAuthFailure(reason: string) {
 export function useStudentPresence() {
   const auth = useAuthStore();
   const route = useRoute();
+  const router = useRouter(); 
 
   function getToken() {
     return auth.access || "";
@@ -102,13 +106,30 @@ export function useStudentPresence() {
     });
   }
 
-  function sendPage(page?: string) {
-    sendJson({
-      type: "presence.page",
-      page: page ?? route.fullPath ?? "",
-      timestamp: Date.now(),
-    });
-  }
+function sendPage(page?: string) {
+  sendJson({
+    type: "presence.page",
+    activity_type: "page_view",
+    activity_name: "Navigated",
+    page: page ?? route.fullPath ?? "",
+    timestamp: Date.now(),
+  });
+}
+
+function bindRouterHookOnce() {
+  if (routerHookBound) return;
+  routerHookBound = true;
+
+  const unregister = router.afterEach(() => {
+    // fire after navigation is confirmed
+    if (ws && ws.readyState === WebSocket.OPEN) {
+      sendPage(route.fullPath || "");
+    }
+  });
+
+  // vue-router returns a remove function
+  removeAfterEachHook = unregister;
+}
 
   function cleanupSocketOnly() {
     if (!ws) return;
@@ -193,6 +214,7 @@ export function useStudentPresence() {
   }
 
   async function connect() {
+    bindRouterHookOnce();
     if (connectInFlight) return connectInFlight;
     connectInFlight = (async () => {
       await connectInternal();
@@ -214,17 +236,22 @@ export function useStudentPresence() {
     sendPage(route.fullPath || "");
   }
 
-  async function onTokenRefreshed() {
-    const current = getToken();
-    if (!current) return;
+async function onTokenRefreshed() {
+  const current = getToken();
+  if (!current) return;
 
-    authBlocked = false;
+  authBlocked = false;
+  lastToken = current; // update cached token
 
-    if (current !== lastToken) {
-      disconnect();
-      await connect();
-    }
+  // Do NOT force reconnect if already open
+  if (ws && ws.readyState === WebSocket.OPEN) {
+    return;
   }
+
+  // Reconnect only when not open
+  disconnect();
+  await connect();
+}
 
   return {
     connect,
