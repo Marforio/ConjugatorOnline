@@ -6,6 +6,7 @@ import {
   saveTokens, clearTokens,
   getAccessToken, getRefreshToken
 } from "@/services/auth";
+import { useWelcomeStore } from "@/stores/welcome";
 
 function parseJwt(token: string | null): any | null {
   if (!token) return null;
@@ -21,6 +22,10 @@ export const useAuthStore = defineStore("auth", () => {
   const access = ref<string | null>(null);
   const refresh = ref<string | null>(null);
   const isRestored = ref(false);
+
+  // ---- concurrency guards ----
+  const refreshInFlight = ref<Promise<string> | null>(null);
+  const validateInFlight = ref<Promise<boolean> | null>(null);
 
   function emitTokenRefreshed(newAccessToken: string) {
     window.dispatchEvent(
@@ -62,16 +67,31 @@ export const useAuthStore = defineStore("auth", () => {
     refresh.value = res.data.refresh;
     saveTokens(res.data.access, res.data.refresh);
     isRestored.value = true;
-    return res.data.access;
+    return res.data.access as string;
   }
 
   async function refreshAccessToken() {
     if (!refresh.value) throw new Error("No refresh token");
-    const res = await apiRefresh(refresh.value);
-    access.value = res.data.access;
-    saveTokens(res.data.access, refresh.value);
-    emitTokenRefreshed(res.data.access);
-    return res.data.access;
+
+    // If a refresh is already in progress, wait for it
+    if (refreshInFlight.value) {
+      return await refreshInFlight.value;
+    }
+
+    // Start one shared refresh request
+    refreshInFlight.value = (async () => {
+      const res = await apiRefresh(refresh.value!);
+      access.value = res.data.access;
+      saveTokens(res.data.access, refresh.value!);
+      emitTokenRefreshed(res.data.access);
+      return res.data.access as string;
+    })();
+
+    try {
+      return await refreshInFlight.value;
+    } finally {
+      refreshInFlight.value = null;
+    }
   }
 
   function logout() {
@@ -79,40 +99,58 @@ export const useAuthStore = defineStore("auth", () => {
     refresh.value = null;
     isRestored.value = false;
     clearTokens();
+
+    // reset warm cached welcome data
+    try {
+      const welcomeStore = useWelcomeStore();
+      welcomeStore.resetWelcomeState();
+    } catch {}
+
     emitAuthInvalid();
   }
 
   async function validateSession(): Promise<boolean> {
-    await nextTick();
+  await nextTick()
 
-    if (!isRestored.value) restoreSession();
-    if (!access.value) return false;
+  if (validateInFlight.value) return await validateInFlight.value
 
+  validateInFlight.value = (async () => {
+    if (!isRestored.value) restoreSession()
+    if (!access.value) return false
+
+    // If access token is expired, refresh once
     if (isAccessTokenExpired()) {
       try {
-        await refreshAccessToken();
-        await apiValidateToken();
-        return true;
+        await refreshAccessToken()
+        return true
       } catch {
-        logout();
-        return false;
+        logout()
+        return false
       }
     }
 
+    // Token looks valid locally; optional server validate should be soft
     try {
-      await apiValidateToken();
-      return true;
+      await apiValidateToken()
+      return true
     } catch {
+      // Try one refresh recovery; if that works, allow
       try {
-        await refreshAccessToken();
-        await apiValidateToken();
-        return true;
+        await refreshAccessToken()
+        return true
       } catch {
-        logout();
-        return false;
+        logout()
+        return false
       }
     }
+  })()
+
+  try {
+    return await validateInFlight.value
+  } finally {
+    validateInFlight.value = null
   }
+}
 
   return {
     access,

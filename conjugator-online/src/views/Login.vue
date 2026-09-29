@@ -132,10 +132,12 @@ import { ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
 import { useUserStore } from "@/stores/user";
+import { useWelcomeStore } from "@/stores/welcome";
 import { apiValidateToken } from "@/services/auth";
 
 const auth = useAuthStore();
 const userStore = useUserStore();
+const welcomeStore = useWelcomeStore();
 
 const username = ref("");
 const password = ref("");
@@ -151,64 +153,56 @@ const route = useRoute();
 const router = useRouter();
 
 async function handleLogin() {
-  error.value = "";
-  loading.value = true;
-  loginSuccess.value = false;
-  loginError.value = false;
-  showError.value = false;
-
-  try {
-    // 1) Login -> auth store owns token credentials context
-    await auth.login(username.value, password.value);
-
-    // 2) Optional server validation pass
-    await apiValidateToken();
-
-    // 3) Force blocking profile query so roles are fetched before routing determinations
-    await userStore.ensureUserLoaded();
-
-    loading.value = false;
-    loginSuccess.value = true;
-
-    // Wait briefly for success animation frame confirmation matrices
-    setTimeout(() => {
-      // Prioritize explicit navigation queries
-      if (route.query.redirect) {
-        return router.replace(route.query.redirect as string);
-      }
-
-      // 🛡️ ROLE SPLIT REDIRECTION CRITERIA CALCULATION
-      if (userStore.isStaff) {
-        router.replace("/teacher"); // Admin dashboard root pathway
-      } else {
-        router.replace("/home"); // Student dashboard workspace pathway
-      }
-    }, 1200);
-    
-  } catch (err: any) {
-  error.value =
-    err.response?.status === 401
-      ? "Invalid username or password"
-      : err.message || "Login system error encountered";
-
-  // stop loading overlay immediately
-  loading.value = false;
-
-  // show inline alert immediately
-  showError.value = true;
-
-  // optional: quick "denied" visual pulse only
-  loginError.value = true;
-  setTimeout(() => {
+    error.value = "";
+    loading.value = true;
+    loginSuccess.value = false;
     loginError.value = false;
-  }, 350);
-
-  // auto-hide alert later (optional)
-  setTimeout(() => {
     showError.value = false;
-  }, 4500);
-}
-}
+
+    try {
+      await auth.login(username.value, password.value);
+
+      // Optional validate should be non-fatal
+      try {
+        await apiValidateToken();
+      } catch (e) {
+        console.warn("validate token check failed (non-fatal after login):", e);
+      }
+
+      await userStore.ensureUserLoaded();
+
+      if (!userStore.isStaff) {
+        try {
+          await welcomeStore.fetchWelcomeBundle();
+        } catch (e) {
+          console.warn("welcome preload failed (non-fatal):", e);
+        }
+      }
+
+      loading.value = false;
+      loginSuccess.value = true;
+
+      setTimeout(() => {
+        if (route.query.redirect) {
+          return router.replace(route.query.redirect as string);
+        }
+        return router.replace(userStore.isStaff ? "/teacher" : "/home");
+      }, 1200);
+
+    } catch (err: any) {
+      error.value =
+        err?.response?.status === 401
+          ? "Invalid username or password"
+          : "Login failed. Please try again.";
+
+      loading.value = false;
+      showError.value = true;
+      loginError.value = true;
+
+      setTimeout(() => (loginError.value = false), 350);
+      setTimeout(() => (showError.value = false), 4500);
+    }
+  }
 </script>
 
 <style scoped>

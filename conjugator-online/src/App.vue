@@ -263,6 +263,7 @@ import { useInactivityTimeout } from "@/composables/useInactivityTimeout"
 import { useStudentPresence } from "@/composables/useStudentPresence"
 import { useAuthStore } from './stores/auth'
 import { useUserStore } from './stores/user'
+import { useWelcomeStore } from './stores/welcome'
 
 const siteLogo = '/icons/logo3.png'
 
@@ -270,6 +271,7 @@ const route = useRoute()
 const router = useRouter()
 const auth = useAuthStore()
 const userStore = useUserStore()
+const welcomeStore = useWelcomeStore()
 const presence = useStudentPresence()
 
 const { xs, smAndDown, mdAndUp, lgAndUp } = useDisplay()
@@ -290,6 +292,14 @@ const showNav = computed(() => {
   const name = route.name || ''
   return !isImmersiveMode.value && userStore.isStaff && name !== 'home' && name !== 'login' && mdAndUp.value
 })
+
+async function warmWelcomeIfStudent() {
+  if (!hasAnyToken()) return
+  if (!userStore.userLoaded) await userStore.ensureUserLoaded()
+  if (userStore.isStudentAccount && !userStore.isStaff) {
+    await welcomeStore.fetchWelcomeBundle()
+  }
+}
 
 watch(
   lgAndUp,
@@ -377,6 +387,7 @@ function handleTokenRefreshed() {
 
 onMounted(async () => {
   await syncStudentPresence()
+  await warmWelcomeIfStudent()
   window.addEventListener('auth:token-refreshed', handleTokenRefreshed)
 })
 
@@ -413,6 +424,14 @@ watch(
   () => [userStore.userLoaded, userStore.isStudentAccount, userStore.isStaff],
   async () => {
     await syncStudentPresence()
+  },
+  { deep: false }
+)
+
+watch(
+  () => [auth.access, auth.refresh, userStore.userLoaded, userStore.isStaff],
+  async () => {
+    await warmWelcomeIfStudent()
   },
   { deep: false }
 )

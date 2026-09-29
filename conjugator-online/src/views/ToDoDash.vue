@@ -63,7 +63,7 @@
               <div class="d-flex ga-2 align-center h-100">
                 <v-card class="pa-3 bg-indigo-lighten-5 border-0 flex-grow-1" rounded="lg">
                   <div class="text-xxs font-weight-bold text-indigo-darken-1 uppercase tracking-wider mb-0.5">Pending assignments</div>
-                  <div class="text-h6 font-weight-black text-indigo-darken-2">{{ pendingCount }}</div>
+                  <div class="text-h6 font-weight-black text-indigo-darken-2">{{ welcomeStore.pendingCount }}</div>
                 </v-card>
                 <v-card v-if="currentCourseData" class="pa-3 bg-success-lighten-5 border-0 flex-grow-1" rounded="lg">
                   <div class="text-xxs font-weight-bold text-success-darken-2 uppercase tracking-wider mb-0.5">Progress (objectives)</div>
@@ -77,11 +77,11 @@
     </v-row>
 
     <!-- ACTIVITY FEED: Horizontal timeline with dots -->
-<v-row v-if="activityFeed.length > 0">
+<v-row v-if="welcomeStore.activityFeed.length > 0">
   <v-col cols="12">
     <div class="d-flex align-center justify-space-between mb-4">
       <h2 class="text-h6 font-weight-bold text-slate-900">Recent Activity</h2>
-      <v-chip-group v-model="activityFilter" @update:model-value="fetchActivityFeed" density="compact">
+      <v-chip-group v-model="welcomeStore.activityFilter" @update:model-value="welcomeStore.fetchActivityFeed" density="compact">
         <v-chip size="x-small" variant="outlined" value="all">All</v-chip>
         <v-chip size="x-small" variant="outlined" value="conjugation">Conjugator</v-chip>
         <v-chip size="x-small" variant="outlined" value="vocab_workout">Vocab</v-chip>
@@ -91,19 +91,19 @@
     </div>
 
     <v-card class="overflow-hidden" elevation="0" rounded="xl">
-      <div v-if="loadingActivity" class="pa-8 text-center">
+      <div v-if="welcomeStore.loadingActivity" class="pa-8 text-center">
         <v-progress-circular indeterminate color="indigo" size="40" />
         <div class="text-caption text-slate-500 mt-2">Loading activity...</div>
       </div>
 
-      <div v-else-if="activityFeed.length > 0" class="pa-2 pt-0 position-relative">
+      <div v-else-if="welcomeStore.activityFeed.length > 0" class="pa-2 pt-0 position-relative">
         <div
           ref="activityTrackRef"
           class="d-flex ga-3 overflow-x-auto pb-4 activity-horizontal-scroll grab-to-scroll"
           @mousedown="initiateMouseDragScroll"
         >
           <div
-            v-for="(activity, index) in activityFeed"
+            v-for="(activity, index) in welcomeStore.activityFeed"
             :key="index"
             class="flex-shrink-0"
             style="min-width: 260px;"
@@ -157,12 +157,12 @@
           </v-card-title>
 
           <v-card-text class="pa-6">
-            <div v-if="loading" class="text-center py-10">
+            <div v-if="welcomeStore.loadingAssignments" class="text-center py-10">
               <v-progress-circular indeterminate color="indigo" />
               <div class="text-body-2 text-slate-500 mt-2">Loading assignments...</div>
             </div>
 
-            <div v-else-if="pendingCount === 0" class="text-center py-12">
+            <div v-else-if="welcomeStore.pendingCount === 0" class="text-center py-12">
               <v-avatar color="success-lighten-5" size="80" class="mb-4">
                 <v-icon color="success-darken-2" size="48">mdi-check-all</v-icon>
               </v-avatar>
@@ -199,7 +199,7 @@
 
               
               <!-- Workout Section -->
-              <div v-if="currentWorkout" class="border rounded-xl pa-6 bg-blue-lighten-5">
+              <div v-if="welcomeStore.currentWorkout" class="border rounded-xl pa-6 bg-blue-lighten-5">
                 <div class="d-flex align-center justify-space-between mb-4">
                   <div>
                     <div class="text-subtitle-1 font-weight-bold text-slate-900"><v-icon>mdi-run-fast</v-icon><span class="ms-2">Personal Workout</span></div>
@@ -383,13 +383,13 @@
           </v-col>
 
           <!-- Completed Tasks Card (Collapsible, closed by default) -->
-          <v-col cols="12" v-if="completedCount > 0">
+          <v-col cols="12" v-if="welcomeStore.completedCount > 0">
             <v-expansion-panels v-model="completedTasksPanel">
               <v-expansion-panel value="completed" class="rounded-xl border overflow-hidden">
                 <v-expansion-panel-title class="bg-slate-50 font-weight-bold pa-4">
                   <div class="d-flex align-center ga-2">
                     <v-icon>mdi-check-circle</v-icon>
-                    <span>Completed Assignments ({{ completedCount }})</span>
+                    <span>Completed Assignments ({{ welcomeStore.completedCount }})</span>
                   </div>
                 </v-expansion-panel-title>
                 <v-expansion-panel-text class="pa-4">
@@ -485,6 +485,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import { useUserStore } from "@/stores/user";
+import { useWelcomeStore } from "@/stores/welcome";
 import api from '@/axios';
 import { useRouter } from "vue-router";
 import LinguisticProfileEmbedded from '@/components/LinguisticProfileEmbedded.vue';
@@ -493,6 +494,7 @@ import VWActiveSessionsCompact from '@/components/vocab_workout_scenes/VWActiveS
 
 const userStore = useUserStore();
 const router = useRouter();
+const welcomeStore = useWelcomeStore();
 
 // Tab selector logic pointer (0 = Tasks list view, 1 = Embedded profile breakdown view)
 const activeTab = ref(0);
@@ -523,7 +525,18 @@ interface Assignment {
 }
 
 interface ActivityItem {
-  type: 'conjugation' | 'game' | 'exercise' | 'vocab' | 'vocab_workout' | 'feedback' | 'profile_update' | 'assignment' | 'achievement';
+  type:
+    | 'conjugation'
+    | 'game'
+    | 'other_game'
+    | 'exercise'
+    | 'vocab'
+    | 'vocab_workout'
+    | 'feedback'
+    | 'profile_update'
+    | 'assignment'
+    | 'achievement'
+    | 'workout_drill';
   title: string;
   description: string;
   timestamp: string;
@@ -978,11 +991,11 @@ const conjugationCompletedAssignments = computed(() =>
 
 function goToActivity(activity: ActivityItem) {
   if (activity.type === 'conjugation') return goToConjugator();
-  if (activity.type === 'vocab_workout') return goToVocabWorkout();
-  if (activity.type === 'game') return goToGamesHub();
+  if (activity.type === 'vocab_workout' || activity.type === 'vocab') return goToVocabWorkout();
+  if (activity.type === 'game' || activity.type === 'other_game') return goToGamesHub();
   if (activity.type === 'feedback') return goToFeedback();
   if (activity.type === 'exercise') return goToExercise();
-  if (activity.type === 'achievement') return goToTrophy();
+  if (activity.type === 'achievement' || activity.type === 'assignment') return goToTrophy();
 }
 
 // Games: show ALL pending (no queue)
@@ -1051,26 +1064,8 @@ async function fetchCurrentWorkout() {
 }
 
 onMounted(async () => {
-  // 1) load list-name map first
-  await fetchCustomListNames();
-
-  // 2) only then load activity feed (so formatting can resolve names)
-  await fetchActivityFeed();
-
-  // 3) remaining independent fetches can run in parallel
-  await Promise.all([
-    fetchAssignments(),
-    userStore.fetchLinguisticProfile(),
-    fetchCurrentWorkout(),
-    vw.fetchMyWork(),
-  ]);
-
-  loadingEnrollments.value = true;
-  await userStore.fetchEnrollmentBundle(
-    userStore.isStaff ? { student: userStore.studentId } : {}
-  );
-  loadingEnrollments.value = false;
-});
+  await welcomeStore.fetchWelcomeBundle()
+})
 </script>
 
 <style scoped>

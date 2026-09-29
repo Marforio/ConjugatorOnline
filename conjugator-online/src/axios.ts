@@ -5,14 +5,26 @@ import { getAccessToken } from "./services/auth";
 
 // Create an Axios instance
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL, // must be set in .env
+  baseURL: import.meta.env.VITE_API_BASE_URL,
 });
+
+let isRedirectingToLogin = false;
+
+function isAuthRoute(url?: string) {
+  if (!url) return false;
+  return (
+    url.includes("/login") ||
+    url.includes("/token/") ||
+    url.includes("/token/refresh") ||
+    url.includes("/validate")
+  );
+}
 
 // Request interceptor
 api.interceptors.request.use((config) => {
   const auth = useAuthStore();
 
-  if (config.url?.includes("/login") || config.url?.includes("/token/")) {
+  if (isAuthRoute(config.url)) {
     return config;
   }
 
@@ -24,7 +36,7 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Response interceptor: try refresh on 401
+// Response interceptor: try refresh on 401 (once)
 api.interceptors.response.use(
   (response: AxiosResponse) => response,
   async (error) => {
@@ -32,7 +44,12 @@ api.interceptors.response.use(
       _retry?: boolean;
     };
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    // If request itself is auth-related, do not retry/refresh loop
+    if (isAuthRoute(originalRequest?.url)) {
+      return Promise.reject(error);
+    }
+
+    if (error.response?.status === 401 && !originalRequest?._retry) {
       originalRequest._retry = true;
       const auth = useAuthStore();
 
@@ -42,8 +59,11 @@ api.interceptors.response.use(
         originalRequest.headers.Authorization = `Bearer ${newToken}`;
         return api(originalRequest);
       } catch {
-        auth.logout(); // clears tokens + resets store
-        window.location.href = "/login";
+        auth.logout();
+        if (!isRedirectingToLogin) {
+          isRedirectingToLogin = true;
+          window.location.href = "/login";
+        }
         return Promise.reject(error);
       }
     }

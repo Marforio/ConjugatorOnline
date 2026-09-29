@@ -653,38 +653,38 @@ async function ensureUserLoaded() {
 // =========================================================
 // 🎓 SECURE ENROLLMENT PIPELINE METHOD
 // =========================================================
+let enrollmentsInFlight: Promise<void> | null = null;
+
 async function fetchEnrollments(params: Record<string, any> = {}) {
-  if (!hasAccessToken()) return
-  loadingEnrollments.value = true
-  enrollmentError.value = null
+  if (!hasAccessToken()) return;
+
+  if (enrollmentsInFlight) return enrollmentsInFlight;
+
+  enrollmentsInFlight = (async () => {
+    loadingEnrollments.value = true;
+    enrollmentError.value = null;
+    try {
+      const res = await api.get('/enrollment/', { params });
+      const payload = res.data?.results ?? res.data;
+      const arr = Array.isArray(payload) ? payload : [];
+      enrollments.value = arr.map((e: any) => ({
+        id: e.id,
+        student: typeof e.student === 'string' ? e.student : String(e.student?.web_id ?? ''),
+        course: typeof e.course === 'string' ? e.course : String(e.course?.slug ?? ''),
+        objective_fulfillment: e.objective_fulfillment ?? {},
+      }));
+    } catch (err: any) {
+      enrollmentError.value = 'Failed to load enrollments';
+      enrollments.value = [];
+    } finally {
+      loadingEnrollments.value = false;
+    }
+  })();
 
   try {
-    const res = await api.get('/enrollment/', { params })
-    const payload = res.data?.results ?? res.data
-    const arr = Array.isArray(payload) ? payload : []
-
-    // normalize for consistent downstream use
-    enrollments.value = arr.map((e: any) => ({
-      id: e.id,
-      student:
-        typeof e.student === 'string'
-          ? e.student
-          : String(e.student?.web_id ?? e.student_web_id ?? ''),
-      course:
-        typeof e.course === 'string'
-          ? e.course
-          : String(e.course?.slug ?? e.course_slug ?? ''),
-      objective_fulfillment: e.objective_fulfillment ?? {},
-    }))
-
-    console.log('[userStore.fetchEnrollments] loaded:', enrollments.value.length)
-    console.log('[userStore.fetchEnrollments] sample:', enrollments.value.slice(0, 5))
-  } catch (err: any) {
-    console.error('Failed to fetch enrollments:', err?.response?.status, err?.response?.data || err)
-    enrollmentError.value = 'Failed to load enrollments'
-    enrollments.value = []
+    await enrollmentsInFlight;
   } finally {
-    loadingEnrollments.value = false
+    enrollmentsInFlight = null;
   }
 }
 

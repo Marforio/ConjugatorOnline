@@ -48,9 +48,11 @@
 import { ref, computed } from "vue";
 import { useAuthStore } from "@/stores/auth";
 import { useUserStore } from "@/stores/user";
+import { useWelcomeStore } from "@/stores/welcome";
 
 const auth = useAuthStore();
 const userStore = useUserStore();
+const welcomeStore = useWelcomeStore();
 
 const loggingOut = ref(false);
 const logoutDone = ref(false);
@@ -74,6 +76,7 @@ function logout() {
     setTimeout(() => {
       auth.logout();
       userStore.clearStudent();
+      welcomeStore.resetWelcomeState();
       window.location.href = "/";
     }, 650);
   }, 850);
