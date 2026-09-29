@@ -287,7 +287,7 @@
                       <th class="font-weight-bold text-grey-darken-3">#</th>
                       <th class="font-weight-bold text-grey-darken-3">Game</th>
                       <th v-if="selectedGame === 'Quantifier Quest' || selectedGame === 'Pronoun Practice'" class="font-weight-bold text-grey-darken-3">Picture</th>
-                      <th class="font-weight-bold text-grey-darken-3">User Answer</th>
+                      <th v-if="selectedGame !== 'Numbers Workout'" class="font-weight-bold text-grey-darken-3">User Answer</th>
                       <th class="font-weight-bold text-grey-darken-3">Correct Answer</th>
                       <th class="font-weight-bold text-grey-darken-3 text-center">Status</th>
                       <th class="font-weight-bold text-grey-darken-3 text-center">Typo?</th>
@@ -301,7 +301,7 @@
                       <td v-if="selectedGame === 'Quantifier Quest' || selectedGame === 'Pronoun Practice'">
                         <img :src="(selectedGame === 'Quantifier Quest' ? quantifierImagePath : pronounImagePath) + round.image" alt="Evaluation visual dependency" class="rounded border my-1 max-h-thumb" />
                       </td>
-                      <td class="text-body-2 font-weight-bold text-grey-darken-4">
+                      <td v-if="selectedGame !== 'Numbers Workout'" class="text-body-2 font-weight-bold text-grey-darken-4">
                         <span v-if="round.user_answer">{{ round.user_answer }}</span>
                         <span v-else class="text-caption italic text-error">Timeout</span>
                       </td>
@@ -520,7 +520,9 @@ const GAME_NAMES = [
   "Balanced Opinions",
   "Be Polite!",
   "Comparison",
+  "Graph Generator",
   "Idea Linker",
+  "Numbers Workout",
   "Parallel Universe",  
   "Passive Party",
   "Pronoun Practice",
@@ -543,6 +545,7 @@ const gamePictures: Record<string, string> = {
   "Be Polite!": "/images/banners/BePolite.png",
   "Comparison": "/images/banners/Comparison.png",
   "Idea Linker": "/images/banners/IdeaLinker.png",
+  "Graph Generator": "/images/banners/GraphGenerator.png",
   "Pronoun Practice": "/images/banners/PronounPractice.png",
   "Quantifier Quest": "/images/banners/QuantifierQuest.png",
   "Unfinished Business": "/images/banners/UnfinishedBusiness.png",
@@ -557,7 +560,8 @@ const gamePictures: Record<string, string> = {
   "Pronunciation Challenge": "/images/banners/PronunciationChallenge.png",
   "Reported Speech": "/images/banners/ReportedSpeech.png",
   "Parallel Universe": "/images/banners/ParallelUniverse.png",
-  "Year 2040": "/images/banners/Year2040.png"
+  "Year 2040": "/images/banners/Year2040.png",
+  "Numbers Workout": "/images/banners/NumbersWorkout.png"
 };
 
 const availableGames = computed(() =>

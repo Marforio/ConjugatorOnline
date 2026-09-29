@@ -230,14 +230,14 @@
               </div>
 
               <!-- Assignments by Type -->
-              <div v-if="vocabPendingAssignments.length > 0" class="border rounded-xl pa-4 bg-teal-lighten-5">
+              <div v-if="welcomeStore.vocabPendingAssignments.length > 0" class="border rounded-xl pa-4 bg-teal-lighten-5">
                 <div class="d-flex align-center ga-2 mb-3">
                   <v-icon color="teal-darken-2">mdi-cards-outline</v-icon>
                   <span class="text-subtitle-2 font-weight-bold text-teal-darken-2">Vocabulary</span>
                 </div>
                 <div class="ga-2 d-flex flex-column">
                   <div 
-                    v-for="item in vocabPendingAssignments" 
+                    v-for="item in welcomeStore.vocabPendingAssignments" 
                     :key="item.assignment_id"
                     class="d-flex align-center justify-space-between pa-3 rounded-lg bg-white border border-teal-lighten-3 cursor-pointer hover-elevation-2"
                     @click="goToVocabWorkout"
@@ -252,14 +252,14 @@
               </div>
 
               
-              <div v-if="conjugationPendingAssignments.length > 0" class="border rounded-xl pa-4 bg-indigo-lighten-5">
+              <div v-if="welcomeStore.conjugationPendingAssignments.length > 0" class="border rounded-xl pa-4 bg-indigo-lighten-5">
                 <div class="d-flex align-center ga-2 mb-3">
                   <v-icon color="indigo-darken-2">mdi-controller-classic</v-icon>
                   <span class="text-subtitle-2 font-weight-bold text-indigo-darken-2">Conjugation</span>
                 </div>
                 <div class="ga-2 d-flex flex-column">
                   <div 
-                    v-for="item in conjugationPendingAssignments" 
+                    v-for="item in welcomeStore.conjugationPendingAssignments" 
                     :key="item.assignment_id"
                     class="d-flex align-center justify-space-between pa-3 rounded-lg bg-white border border-indigo-lighten-3 cursor-pointer hover-elevation-2"
                     @click="goToConjugator"
@@ -273,14 +273,14 @@
                 </div>
               </div>
 
-              <div v-if="gamesPendingAssignments.length > 0" class="border rounded-xl pa-4 bg-purple-lighten-5">
+              <div v-if="welcomeStore.gamesPendingAssignments.length > 0" class="border rounded-xl pa-4 bg-purple-lighten-5">
                 <div class="d-flex align-center ga-2 mb-3">
                   <v-icon color="purple-darken-2">mdi-gamepad-circle</v-icon>
                   <span class="text-subtitle-2 font-weight-bold text-purple-darken-2">Other Games</span>
                 </div>
                 <div class="ga-2 d-flex flex-column">
                   <div 
-                    v-for="item in gamesPendingAssignments" 
+                    v-for="item in welcomeStore.gamesPendingAssignments" 
                     :key="item.assignment_id"
                     class="d-flex align-center justify-space-between pa-3 rounded-lg bg-white border border-purple-lighten-3 cursor-pointer hover-elevation-2"
                     @click="goToGameFromAssignment(item)"
@@ -294,14 +294,14 @@
                 </div>
               </div>
 
-              <div v-if="exercisePendingAssignments.length > 0" class="border rounded-xl pa-4 bg-orange-lighten-5">
+              <div v-if="welcomeStore.exercisePendingAssignments.length > 0" class="border rounded-xl pa-4 bg-orange-lighten-5">
                 <div class="d-flex align-center ga-2 mb-3">
                   <v-icon color="orange-darken-2">mdi-book-open-variant</v-icon>
                   <span class="text-subtitle-2 font-weight-bold text-orange-darken-2">Grammar Review (based on your error feedback)</span>
                 </div>
                 <div class="ga-2 d-flex flex-column">
                   <div 
-                    v-for="item in exercisePendingAssignments" 
+                    v-for="item in welcomeStore.exercisePendingAssignments" 
                     :key="item.assignment_id"
                     class="d-flex align-center justify-space-between pa-3 rounded-lg bg-white border border-orange-lighten-3 cursor-pointer hover-elevation-2"
                     @click="goToExerciseDetail(item.trigger_key)"
@@ -395,7 +395,7 @@
                 <v-expansion-panel-text class="pa-4">
                   <v-list density="compact" class="pa-0">
                     <v-list-item 
-                      v-for="item in [...vocabCompletedAssignments, ...conjugationCompletedAssignments, ...gamesCompletedAssignments, ...exerciseCompletedAssignments]" 
+                      v-for="item in [...welcomeStore.vocabCompletedAssignments, ...welcomeStore.conjugationCompletedAssignments, ...welcomeStore.gamesCompletedAssignments, ...welcomeStore.exerciseCompletedAssignments]" 
                       :key="item.assignment_id"
                       class="border-b py-2"
                     >

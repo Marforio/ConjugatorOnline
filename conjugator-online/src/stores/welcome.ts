@@ -146,7 +146,7 @@ export const useWelcomeStore = defineStore('welcome', () => {
       for (const r of arr) {
         const id = String(r.id ?? r.list_id ?? '').trim()
         const name = String(r.name ?? r.title ?? '').trim()
-        if (id && name) map[id.toLowerCase()] = name
+        if (id && name) map[normalizeKey(id)] = name;
       }
       customListNameById.value = map
       customListsReady.value = true
@@ -195,13 +195,17 @@ export const useWelcomeStore = defineStore('welcome', () => {
             )
           : rawData
 
-      activityFeed.value = targetFeed.map((activity: any) => ({
-        type: activity.activity_type,
-        title: activity.activity_name || activity.activity_type || 'Activity',
-        description: resolveActivityDescription(activity),
-        timestamp: activity.timestamp,
-        raw: activity,
-      }))
+      activityFeed.value = targetFeed.map((activity: any) => {
+        const rawTitle = activity.resolved_activity_name || activity.activity_name || activity.activity_type || 'Activity';
+        const rawDesc = activity.resolved_description || activity.description || 'Activity session updated successfully.';
+        return {
+          type: activity.activity_type,
+          title: replaceListIdsInText(rawTitle),
+          description: replaceListIdsInText(rawDesc),
+          timestamp: activity.timestamp,
+          raw: activity,
+        };
+      });
     } catch (err) {
       console.error('[welcomeStore] fetchActivityFeed failed:', err)
       activityFeed.value = []
@@ -259,6 +263,32 @@ export const useWelcomeStore = defineStore('welcome', () => {
   }
 
   // ---- computed slices used by welcome page ----
+
+function normalizeKey(v: string): string {
+  return String(v ?? '').trim().toLowerCase();
+}
+
+function titleCaseWords(s: string): string {
+  return s.replace(/_/g, ' ').replace(/\b\w/g, (m) => m.toUpperCase());
+}
+
+function replaceListIdsInText(text: string): string {
+  let out = String(text ?? '');
+  if (!out) return out;
+
+  // UUID replacement
+  out = out.replace(
+    /\b[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\b/gi,
+    (uuid) => customListNameById.value[normalizeKey(uuid)] || uuid
+  );
+
+  // optional legacy prettifier
+  out = out.replace(/\birregular_verbs(?:_[a-z0-9_]+)?\b/gi, (k) => titleCaseWords(k));
+  return out;
+}
+
+
+
   const pendingAssignments = computed(() =>
     allAssignments.value.filter((a) => a.status === 'pending')
   )
@@ -290,19 +320,71 @@ export const useWelcomeStore = defineStore('welcome', () => {
     exerciseAssignments.value.filter((a) => a.status === 'completed')
   )
 
+function containsWord(hay: string, needle: string): boolean {
+  return String(hay ?? '').toLowerCase().includes(needle.toLowerCase());
+}
+
+function extractNumberFromText(text: string): number {
+  if (!text) return Number.POSITIVE_INFINITY;
+  const m = text.match(/\d+/);
+  return m ? parseInt(m[0], 10) : Number.POSITIVE_INFINITY;
+}
+
+function pickNextBySmallestNumericTarget(list: Assignment[]): Assignment[] {
+  if (!list.length) return [];
+  const sorted = [...list].sort(
+    (a, b) => extractNumberFromText(a.description) - extractNumberFromText(b.description)
+  );
+  return [sorted[0]];
+}
+
   const conjugationAssignments = computed(() =>
     allAssignments.value.filter(
-      (a) =>
+      a =>
         a.task_type === 'achievement' &&
-        (a.trigger_key.includes('correct_prompts') ||
+        (
+          a.trigger_key.includes('correct_prompts') ||
           a.trigger_key.includes('health_tier') ||
           a.trigger_key.includes('discovery') ||
-          a.trigger_key.includes('mastery'))
+          a.trigger_key.includes('mastery')
+        )
     )
-  )
+  );
+
+  const conjugationPendingAll = computed(() =>
+    conjugationAssignments.value.filter(a => a.status === 'pending')
+  );
+
+  // Track 1: health
+  const conjugationHealthPendingAssignments = computed(() => {
+    const list = conjugationPendingAll.value.filter(a =>
+      containsWord(a.trigger_key, 'health') || containsWord(a.description, 'health')
+    );
+    return pickNextBySmallestNumericTarget(list);
+  });
+
+  // Track 2: correct prompts
+  const conjugationCorrectPendingAssignments = computed(() => {
+    const list = conjugationPendingAll.value.filter(a =>
+      containsWord(a.trigger_key, 'correct') || containsWord(a.description, 'correct')
+    );
+    return pickNextBySmallestNumericTarget(list);
+  });
+
+  // Final (max 2)
+  const conjugationPendingAssignments = computed(() => {
+    const merged = [
+      ...conjugationHealthPendingAssignments.value,
+      ...conjugationCorrectPendingAssignments.value,
+    ];
+    const dedup = new Map<string, Assignment>();
+    merged.forEach(a => dedup.set(a.assignment_id, a));
+    return Array.from(dedup.values());
+  });
+
   const conjugationCompletedAssignments = computed(() =>
-    conjugationAssignments.value.filter((a) => a.status === 'completed')
-  )
+    conjugationAssignments.value.filter(a => a.status === 'completed')
+  );
 
   const gamesAssignments = computed(() =>
     allAssignments.value.filter(
@@ -380,7 +462,7 @@ export const useWelcomeStore = defineStore('welcome', () => {
     vocabCompletedAssignments,
     exercisePendingAssignments,
     exerciseCompletedAssignments,
-    conjugationAssignments,
+    conjugationPendingAssignments,
     conjugationCompletedAssignments,
     gamesPendingAssignments,
     gamesCompletedAssignments,
