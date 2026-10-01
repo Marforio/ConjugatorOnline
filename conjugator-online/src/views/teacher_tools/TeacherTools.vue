@@ -94,11 +94,11 @@
     </div>
   </v-col>
 
-  <!-- Numbers workout -->
+  <!-- Numbers Ninja -->
   <v-col cols="12" sm="6" md="4" class="d-flex justify-center">
     <div
       class="image-tile"
-      @click="openDialog('Numbers Workout')"
+      @click="openDialog('Numbers Ninja')"
     >
       <div class="tile-frame">
         <v-img

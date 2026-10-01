@@ -16,8 +16,8 @@
       >
         <div class="d-flex justify-center mb-4">
             <v-img
-              src="/images/banners/NumbersWorkout.png"
-              alt="Numbers Workout"
+              src="/images/banners/NumbersNinja.png"
+              alt="Numbers Ninja"
               cover
               style="max-width: 350px; max-height: 200px;"
             />
