@@ -59,6 +59,21 @@ type Workout = {
   drills: WorkoutDrill[]
 }
 
+type WrongVocabPrompt = {
+  list_key: string
+  list_name: string
+  domain?: string | null
+  item_key: string
+  term: string
+  prompt_field: string
+  answer_field: string
+  prompt_text: string
+  wrong_count: number
+  last_seen_at: string
+  last_user_answer: string | null
+  expected: string[] | null
+}
+
 const STALE_MS = 2 * 60 * 1000 // 2 minutes
 
 export const useWelcomeStore = defineStore('welcome', () => {
@@ -70,6 +85,9 @@ export const useWelcomeStore = defineStore('welcome', () => {
   const loadingActivity = ref(false)
   const loadingWorkout = ref(false)
   const loadingCustomLists = ref(false)
+  const loadingWrongVocab = ref(false)
+
+  const wrongVocabPrompts = ref<WrongVocabPrompt[]>([])
 
   // data
   const allAssignments = ref<Assignment[]>([])
@@ -95,6 +113,7 @@ export const useWelcomeStore = defineStore('welcome', () => {
   function resetWelcomeState() {
     allAssignments.value = []
     activityFeed.value = []
+    wrongVocabPrompts.value = []
     currentWorkout.value = null
     customListNameById.value = {}
     customListsReady.value = false
@@ -121,6 +140,18 @@ export const useWelcomeStore = defineStore('welcome', () => {
     const pretty = customListNameById.value[String(listId)]
     return pretty ? fallback.replace(String(listId), pretty) : fallback
   }
+
+  const wrongVocabCount = computed(() => wrongVocabPrompts.value.length)
+
+  const featuredWrongPrompt = computed<WrongVocabPrompt | null>(() => {
+    if (!wrongVocabPrompts.value.length) return null
+    // prioritize highest wrong_count, then most recent
+    const sorted = [...wrongVocabPrompts.value].sort((a, b) => {
+      if (b.wrong_count !== a.wrong_count) return b.wrong_count - a.wrong_count
+      return new Date(b.last_seen_at).getTime() - new Date(a.last_seen_at).getTime()
+    })
+    return sorted[0] ?? null
+  })
 
   // ---- fetchers ----
   async function fetchCustomListNames() {
@@ -173,6 +204,43 @@ export const useWelcomeStore = defineStore('welcome', () => {
       loadingAssignments.value = false
     }
   }
+
+  async function fetchWrongVocabPrompts() {
+  loadingWrongVocab.value = true
+  try {
+    const params: any = {
+      days: 120,
+      limit: 300,
+      mode: "write",
+    }
+    if (userStore.isStaff && userStore.studentId) params.student = userStore.studentId
+
+    const res = await api.get("/vocab-workout-sessions/wrong-prompts/", { params })
+    const arr = normalizeArrayPayload(res.data)
+
+    wrongVocabPrompts.value = arr
+      .map((r: any) => ({
+        list_key: String(r.list_key ?? ""),
+        list_name: String(r.list_name ?? ""),
+        domain: r.domain ?? null,
+        item_key: String(r.item_key ?? ""),
+        term: String(r.term ?? ""),
+        prompt_field: String(r.prompt_field ?? ""),
+        answer_field: String(r.answer_field ?? ""),
+        prompt_text: String(r.prompt_text ?? ""),
+        wrong_count: Number(r.wrong_count ?? 0),
+        last_seen_at: String(r.last_seen_at ?? ""),
+        last_user_answer: r.last_user_answer != null ? String(r.last_user_answer) : null,
+        expected: Array.isArray(r.expected) ? r.expected.map(String) : null,
+      }))
+      .sort(() => Math.random() - 0.5); // shuffle each load
+  } catch (err) {
+    console.error("[welcomeStore] fetchWrongVocabPrompts failed:", err)
+    wrongVocabPrompts.value = []
+  } finally {
+    loadingWrongVocab.value = false
+  }
+}
 
   async function fetchActivityFeed() {
     loadingActivity.value = true
@@ -245,6 +313,7 @@ export const useWelcomeStore = defineStore('welcome', () => {
       await Promise.all([
         fetchAssignments(),
         fetchCurrentWorkout(),
+        fetchWrongVocabPrompts(),
         userStore.fetchLinguisticProfile(),
         userStore.fetchEnrollmentBundle(
           userStore.isStaff ? { student: userStore.studentId } : {}
@@ -433,6 +502,7 @@ function pickNextBySmallestNumericTarget(list: Assignment[]): Assignment[] {
     loadingBundle,
     loadingAssignments,
     loadingActivity,
+    loadingWrongVocab,
     loadingWorkout,
     loadingCustomLists,
     loadedOnce,
@@ -443,6 +513,9 @@ function pickNextBySmallestNumericTarget(list: Assignment[]): Assignment[] {
     currentWorkout,
     customListNameById,
     customListsReady,
+    wrongVocabPrompts,
+    wrongVocabCount,
+    featuredWrongPrompt,
 
     // actions
     fetchCustomListNames,

@@ -49,6 +49,9 @@
                 <div class="text-caption font-weight-black text-primary d-flex align-center leading-none">
                   {{ currentVectorDirectionLabel }}
                 </div>
+                <div class="text-caption font-weight-black text-primary d-flex align-center leading-none">
+                  {{ variantLabel }}
+                </div>
               </div>
             </div>
 
@@ -1442,6 +1445,18 @@ const currentVectorDirectionLabel = computed(() => {
   return `${from} ➔ ${to}`;
 });
 
+const variantLabel = computed(() => {
+  const tk = String(props.gameSettings?.trackKey || "").trim();
+  const map: Record<string, string> = {
+    to_infinitive: "Definition/Translation → Infinitive",
+    to_term: "Definition/Translation → Term",
+    to_past_simple: "Infinitive → Past simple",
+    to_past_particple: "Infinitive → Past participle",
+    to_past_participle: "Infinitive → Past participle",
+    to_past_forms: "Infinitive → Both past forms",
+  };
+  return map[tk] || `${frontLabel.value} → ${backLabel.value}`;
+});
 
 /* =========================================================
    Dialogs / feedback

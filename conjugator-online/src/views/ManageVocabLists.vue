@@ -1109,7 +1109,9 @@ camshaft,a shaft in an engine that controls valve timing,noun,The mechanic repla
           </div>
 
           <div v-else class="d-flex flex-column ga-2">
-            <v-card v-for="rule in currentAvailabilities" :key="rule.id" variant="flat" border class="pa-3 rounded-xl bg-white border-slate-200 shadow-sm">
+            <v-card
+  v-for="rule in currentAvailabilities.filter(r => String((typeof r.vocab_list === 'string' ? r.vocab_list : r.vocab_list?.id)) === String(selectedListForAvailability?.id))"
+  :key="rule.id" variant="flat" border class="pa-3 rounded-xl bg-white border-slate-200 shadow-sm">
               <div class="d-flex align-center justify-space-between w-100">
                 <div class="d-flex align-center">
                   <v-avatar :color="rule.course ? 'indigo-lighten-5' : 'emerald-lighten-5'" size="36" class="me-3">
@@ -1312,13 +1314,21 @@ async function openAvailabilityConsole(list: any) {
 async function fetchAvailabilitiesForList(listId: string) {
   availabilityListLoading.value = true
   try {
-    // 🌟 Changed endpoint to singular 'vocab-list-availability'
-    const res = await api.get('/vocab-list-availability/', {
-      params: { vocab_list: listId }
+    const res = await api.get("/vocab-list-availability/")
+    const rows = Array.isArray(res.data) ? res.data : (res.data?.results || [])
+
+    // strict filter for selected list only
+    currentAvailabilities.value = rows.filter((r: any) => {
+      const rowListId =
+        typeof r.vocab_list === "string"
+          ? r.vocab_list
+          : r.vocab_list?.id
+
+      return String(rowListId) === String(listId)
     })
-    currentAvailabilities.value = res.data || []
   } catch (err) {
     console.error("Failed loading list permission logs:", err)
+    currentAvailabilities.value = []
   } finally {
     availabilityListLoading.value = false
   }

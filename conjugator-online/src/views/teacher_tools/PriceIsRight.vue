@@ -403,32 +403,38 @@ function onGuessInput(playerId: string, raw: string) {
 }
 
 function formatByQuestionType(raw: string, type: QuestionType): string {
+  const hasMinus = raw.trim().startsWith("-")
   const cleaned = raw.replace(/[^0-9.]/g, "")
-  if (!cleaned) return ""
+  if (!cleaned) return hasMinus ? "-" : ""
 
   const [intRaw, decRaw = ""] = cleaned.split(".")
-  const intNoLeading = intRaw.replace(/^0+(?=\d)/, "")
+  const intNoLeading = intRaw.replace(/^0+(?=\d)/, "") || "0"
 
   if (type === "year") {
-    return intNoLeading.slice(0, 4)
+    const y = intNoLeading.slice(0, 4)
+    return `${hasMinus ? "-" : ""}${y}`
   }
 
   const grouped = intNoLeading.replace(/\B(?=(\d{3})+(?!\d))/g, "'")
+  const sign = hasMinus ? "-" : ""
 
-  if (type === "integer") return grouped
-  if (type === "money") return `${grouped}${decRaw.length ? "." + decRaw.slice(0, 2) : ""}`
-  return `${grouped}${decRaw.length ? "." + decRaw.slice(0, 3) : ""}` // decimal
+  if (type === "integer") return `${sign}${grouped}`
+  if (type === "money") return `${sign}${grouped}${decRaw.length ? "." + decRaw.slice(0, 2) : ""}`
+  return `${sign}${grouped}${decRaw.length ? "." + decRaw.slice(0, 3) : ""}` // decimal
 }
 
 function parseGuess(input: string, type: QuestionType): number | null {
   if (!input) return null
   const normalized = input.replace(/'/g, "").trim()
-  if (!normalized) return null
+  if (!normalized || normalized === "-") return null
+
+  // allow leading minus, but reject weird forms
+  if (!/^-?\d+(\.\d+)?$/.test(normalized)) return null
 
   const n = Number(normalized)
   if (!Number.isFinite(n)) return null
 
-  if (type === "year" && (!Number.isInteger(n) || normalized.length > 4)) return null
+  if (type === "year" && (!Number.isInteger(n) || normalized.replace("-", "").length > 4)) return null
   if (type === "integer" && !Number.isInteger(n)) return null
   return n
 }
@@ -440,12 +446,23 @@ function evaluateRound() {
 
   const lines: { playerId: string; name: string; guess: number; deviationPct: number; absError: number }[] = []
 
+  // Parse all guesses
   for (const p of orderedPlayersForRound.value) {
     const n = parseGuess(roundGuesses[p.id], type)
     if (n === null) return
     const absError = Math.abs(n - actual)
     const deviationPct = actual === 0 ? 0 : (absError / Math.abs(actual)) * 100
     lines.push({ playerId: p.id, name: p.name, guess: n, deviationPct, absError })
+  }
+
+  // Disallow identical numeric guesses in the same round
+  const seen = new Set<number>()
+  for (const line of lines) {
+    if (seen.has(line.guess)) {
+      alert("Two or more players entered the same guess. Please enter unique answers.")
+      return
+    }
+    seen.add(line.guess)
   }
 
   lines.sort((a, b) => a.absError - b.absError)

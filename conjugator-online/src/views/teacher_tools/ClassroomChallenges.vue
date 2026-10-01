@@ -355,7 +355,7 @@ import api from "@/axios"
 
 
 const props = defineProps<{
-  game: "Spelling Bee" | "Pronunciation Challenge" | "Prove it!" | "Be Polite!" | "Balanced Opinions" | "Unfinished Business" | "Verb Mixer Classroom Edition" | "Numbers Workout",
+  game: "Spelling Bee" | "Pronunciation Challenge" | "Prove it!" | "Be Polite!" | "Balanced Opinions" | "Unfinished Business" | "Verb Mixer Classroom Edition" | "Numbers Ninja" | "Chemical Substances",
   student: string
 }>()
 
@@ -370,7 +370,8 @@ const BANNERS = {
   "Balanced Opinions": "/images/banners/BalancedOpinions.png",
   "Unfinished Business": "/images/banners/UnfinishedBusiness.png",
   "Verb Mixer Classroom Edition": "/images/banners/VerbMixer.png",
-  "Numbers Workout": "/images/banners/NumbersWorkout.png"
+  "Numbers Ninja": "/images/banners/NumbersNinja.png",
+  "Chemical Substances": "/images/banners/ChemicalSubstances.png"
 }
 
 const selectedCategory = ref<string>("") 
@@ -390,7 +391,7 @@ const promptQueue = ref<{ question: string; verb: string; correctAnswers: string
 const shownPrompts = ref<{ question: string; verb: string; correctAnswers: string[]; category: string; is_correct: boolean | null }[]>([])
 
 const totalRounds = computed(() =>
-  props.game === "Spelling Bee" ? 8 : props.game === "Balanced Opinions" ? 12 : props.game === "Unfinished Business" ? 24 : props.game === "Verb Mixer Classroom Edition" ? 28 : 30
+  props.game === "Spelling Bee" ? 8 : props.game === "Balanced Opinions" ? 12 : props.game === "Unfinished Business" ? 24 : props.game === "Verb Mixer Classroom Edition" ? 28 : props.game === "Chemical Substances" ? 24 : 30
 )
 const remainingCount = ref(totalRounds.value)
 const snackbar = reactive({ show: false, message: "", color: "success" })
@@ -422,7 +423,7 @@ type PromptGroup =
   | string[] // e.g. spelling/pronunciation groups
   | {
       weight: number
-      prompts: Record<string, string> // e.g. Numbers Workout weighted maps
+      prompts: Record<string, string> // e.g. Numbers Ninja weighted maps
     }
 
 const gameData: Record<
@@ -433,7 +434,7 @@ const gameData: Record<
     prompts: Record<string, PromptGroup>
   }
 > =  { 
-  "Numbers Workout": {
+  "Numbers Ninja": {
     description: "Practice number-related vocabulary and expressions",
     instructions: "A card will show a number-related question. Answer the question aloud. The teacher will validate the response.",
     prompts: {     
@@ -747,6 +748,101 @@ const gameData: Record<
       "pairs": ["desert (Sahara) vs dessert (cake)", "lead (to guide) vs lead (the metal)", "wind (air movement) vs wind (to turn)", "tear (rip) vs tear (from the eye)", "quiet (shhh!) vs quite ('quite good')", "suit (clothing) vs suite (set of rooms)", "choose vs chose", "live (to reside) vs live (not recorded)", "bass (fish) vs bass (low frequency sound)"],
     }
   },
+  "Chemical Substances": {
+  description: "Practice pronunciation of chemistry-related words, elements, and suffix patterns.",
+  instructions: "A card will appear with a chemistry term or pronunciation cue. The student says it aloud. The teacher validates pronunciation as correct, incorrect, or unsure.",
+  prompts: {
+    "chem- ": [
+      "chemistry",
+      "chemist",
+      "chemical",
+      "biochemistry",
+      "electrochemical",
+      "petrochemical",
+      "stochastic",
+      "stoichiometry"
+    ],
+    "difficult elements": [
+      "lead (Pb)",
+      "aluminium (Al)",
+      "iron (Fe)",
+    ],
+    "prefix di- ": [
+      "diethyl ether",
+      "carbon dioxide",
+      "diatomic",
+      "dioxide",
+      "dichloride",
+      "dialysis",
+      "diaphragm",
+      "divergence"
+    ],
+    "suffix -ide": [
+      "bromide",
+      "chloride",
+      "sulfide",
+      "carbon monoxide",
+      "oxide",
+      "nitride",
+      "fluoride",
+      "hydride"
+    ],
+    "suffix -ane / -aine": [
+      "methane",
+      "propane",
+      "butane",
+      "ethane",
+      "cocaine",
+      "butane",
+    ],
+    "suffix -ene": [
+      "neoprene",
+      "carotene",
+      "ethylene",
+      "benzene",
+      "propene",
+      "butadiene",
+      "hexene",
+    ],
+    "suffix -ine": [
+      "bromine",
+      "pyridine",
+      "dopamine",
+      "morphine",
+      "chlorine",
+      "aniline",
+      "caffeine",
+      "alkaline",
+      "iodine"
+    ],
+    "suffix -on": [
+      "radon",
+      "boron",
+      "proton",
+      "micron",
+      "neutron",
+      "argon"
+    ],
+    "plurals": [
+      "syntheses",
+      "analyses",
+      "theses",
+      "crises",
+      "matrices",
+      "parentheses",
+      "hypotheses"
+    ], 
+    "'yur' sound": [
+      "sulfuric",
+      "cure",
+      "urea",
+      "uracil",
+      "uranyl",
+      "uranium",
+      "urine",
+    ]
+  }
+},
     "Balanced Opinions": {
     description: "Practice giving balanced opinions with contrast/linking words.",
     instructions:
@@ -1705,7 +1801,7 @@ function buildPromptQueue() {
   }
 
   // -----------------------------
-  // DEFAULT CASE (includes Spelling Bee, Pronunciation, Be Polite!, Numbers Workout)
+  // DEFAULT CASE (includes Spelling Bee, Pronunciation, Be Polite!, Numbers Ninja)
   // -----------------------------
   const queue: typeof promptQueue.value = []
 

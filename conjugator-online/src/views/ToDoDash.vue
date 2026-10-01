@@ -322,6 +322,13 @@
       <!-- Right: Sidebar - Course Objectives + Completed + Profile (5 cols) -->
       <v-col cols="12" lg="5">
         <v-row class="ga-6">
+           <!-- {{ welcomeStore.wrongVocabPrompts }} -->
+          <v-col cols="12">
+            <VWWrongVocabFlip
+              :loading="welcomeStore.loadingWrongVocab"
+              :items="welcomeStore.wrongVocabPrompts"
+            />
+          </v-col>
           <!-- Course Objectives Card -->
           <v-col cols="12" v-if="currentCourseData">
             <v-card class="h-100" elevation="0" rounded="xl" border>
@@ -491,6 +498,7 @@ import { useRouter } from "vue-router";
 import LinguisticProfileEmbedded from '@/components/LinguisticProfileEmbedded.vue';
 import { useVocabWorkoutStore } from "@/stores/vocabWorkout";
 import VWActiveSessionsCompact from '@/components/vocab_workout_scenes/VWActiveSessionsCompact.vue';
+import VWWrongVocabFlip from '@/components/vocab_workout_scenes/VWWrongVocabFlip.vue';
 
 const userStore = useUserStore();
 const router = useRouter();

@@ -82,7 +82,7 @@
         <RouterLink :to="{ name: 'numbers-workout' }" class="image-tile">
           <div class="tile-frame">
             <v-img
-              src="/images/banners/NumbersWorkout.png"
+              src="/images/banners/NumbersNinja.png"
               alt="Numbers Workout"
               cover
               class="tile-image"

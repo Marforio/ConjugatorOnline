@@ -102,7 +102,7 @@
     >
       <div class="tile-frame">
         <v-img
-          src="/images/banners/NumbersWorkout.png"
+          src="/images/banners/NumbersNinja.png"
           class="tile-image"
           cover
         />
@@ -166,6 +166,21 @@
     <div class="tile-frame">
       <v-img
         src="/images/banners/GraphGenerator.png"
+        class="tile-image"
+        cover
+      />
+    </div>
+  </div>
+</v-col>
+
+<v-col cols="12" sm="6" md="4" class="d-flex justify-center">
+  <div
+    class="image-tile"
+    @click="openDialog('Chemical Substances')"
+  >
+    <div class="tile-frame">
+      <v-img
+        src="/images/banners/ChemicalSubstances.png"
         class="tile-image"
         cover
       />

@@ -37,7 +37,7 @@
         </span>
         
         <span class="text-grey-lighten-3 mr-2">
-          {{ displayActivity.last_activity_name }}
+          {{ displayActivityLabel }}
         </span>
 
         <v-chip
@@ -54,7 +54,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue';
+import { computed, ref, onMounted, onUnmounted } from 'vue';
 import api from '@/axios';
 
 // Replace this mock with your actual store definition hook
@@ -126,9 +126,73 @@ async function fetchLatestPulse() {
   }
 }
 
+const customListNameMap = ref<Record<string, string>>({});
+
+function isUuidLike(v: string): boolean {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(String(v || ""));
+}
+
+function normalizeKey(v: string): string {
+  return String(v ?? "").trim();
+}
+
+function humanizeListKey(raw: string): string {
+  const k = normalizeKey(raw);
+  if (!k) return "Unknown list";
+  if (customListNameMap.value[k]) return customListNameMap.value[k];
+
+  if (k.includes("::")) {
+    const [left] = k.split("::");
+    const leftKey = normalizeKey(left);
+    if (customListNameMap.value[leftKey]) return customListNameMap.value[leftKey];
+  }
+
+  if (isUuidLike(k)) return k;
+  return k.replace(/_/g, " ").replace(/\b\w/g, (m) => m.toUpperCase());
+}
+
+function replaceListIdsInText(text: string): string {
+  let out = String(text ?? "");
+  if (!out) return out;
+
+  out = out.replace(
+    /([0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})::([^\s,;]+)/gi,
+    (_m, uuid, tail) => `${humanizeListKey(uuid)}::${tail}`
+  );
+
+  out = out.replace(
+    /([0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})/gi,
+    (m) => humanizeListKey(m)
+  );
+
+  return out;
+}
+
+async function fetchCustomListNames() {
+  try {
+    const res = await api.get("/vocab-lists/");
+    const rows = Array.isArray(res.data) ? res.data : (res.data?.results || []);
+    const map: Record<string, string> = {};
+    for (const r of rows) {
+      const id = String(r.id ?? "").trim();
+      const name = String(r.name ?? "").trim();
+      if (id && name) map[id] = name;
+    }
+    customListNameMap.value = map;
+  } catch (e) {
+    console.warn("Could not load custom list names", e);
+  }
+}
+
+const displayActivityLabel = computed(() => {
+  const raw = displayActivity.value?.last_activity_name || "";
+  return replaceListIdsInText(raw);
+});
+
 onMounted(() => {
   if (userStore.user?.is_staff) {
     fetchLatestPulse();
+    fetchCustomListNames();
     networkTimer = window.setInterval(fetchLatestPulse, 60000);
     secondsTicker = window.setInterval(() => {
       if (displayActivity.value) {

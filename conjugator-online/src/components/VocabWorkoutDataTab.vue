@@ -27,9 +27,9 @@
               v-for="list in filteredProgressList"
               :key="list.list_key"
               class="mb-3 pa-4 border rounded-xl cursor-pointer transition-all position-relative"
-              :class="focusedListKey === list.list_key ? 'border-teal bg-teal-tight shadow-xs' : 'bg-white hover-slate'"
+              :class="focusedRowKey === makeFocusKey(list) ? 'border-teal bg-teal-tight shadow-xs' : 'bg-white hover-slate'"
               elevation="0"
-              @click="focusedListKey = list.list_key"
+              @click="focusProgressRow(list)"
             >
               <div class="d-flex align-center justify-space-between flex-wrap ga-2 mb-2">
                 <div class="min-width-0">
@@ -38,6 +38,8 @@
                   </div>
                   <div class="text-caption text-slate-500 mt-0.5">
                     <span v-if="list.level">Level: <strong>{{ list.level }}</strong></span>
+                    <span class="mx-1">•</span>
+                    <span>Variant: <strong>{{ list.variantLabel }}</strong></span>
                   </div>
                 </div>
 
@@ -94,6 +96,16 @@
                 rounded
                 class="mb-2"
               />
+              <!-- <v-btn
+                size="small"
+                color="amber-darken-2"
+                variant="flat"
+                class="text-none font-weight-bold mt-2"
+                @click.stop="focusProgressRow(list); openWrongReviewForFocusedVariant()"
+              >
+                <v-icon start size="16">mdi-lightbulb-on-outline</v-icon>
+                Review my wrong answers
+              </v-btn> -->
 
               <!-- Optional secondary mastery line (if you still want it) -->
               <div class="d-flex justify-space-between text-caption text-slate-500 text-caption mt-1">
@@ -186,7 +198,69 @@
         </v-card>
       </v-col>
     </v-row>
+
+    <v-dialog v-model="reviewDialog" persistent max-width="760">
+  <v-card>
+    <v-card-title class="d-flex justify-space-between align-center">
+      <span class="font-weight-bold">Wrong-answer review: {{ reviewListLabel }}</span>
+      <v-btn icon="mdi-close" variant="text" @click="reviewDialog = false" />
+    </v-card-title>
+
+    <v-card-text>
+      <div v-if="reviewLoading" class="text-center py-8">
+        <v-progress-circular indeterminate color="amber-darken-2" />
+        <div class="text-caption mt-2">Generating your review questions... Please wait about 30 seconds...</div>
+      </div>
+
+      <div v-else-if="!reviewFinished && reviewRounds.length">
+        <div class="text-caption mb-2">Question {{ reviewIndex + 1 }} / {{ reviewRounds.length }}</div>
+        <div class="text-body-1 font-weight-bold mb-4">{{ reviewRounds[reviewIndex].question }}</div>
+        <v-text-field
+          v-model="reviewInput"
+          label="Your answer"
+          @keydown.enter.prevent="submitReviewAnswer"
+        />
+      </div>
+
+      <div v-else-if="reviewFinished">
+        <div class="text-h6 font-weight-bold">Done! Score: {{ reviewScore }}%</div>
+        <div class="text-caption mt-1">
+          {{ reviewResults.filter(r => r.correct).length }} / {{ reviewResults.length }} correct
+        </div>
+      </div>
+
+      <div v-else class="text-caption text-slate-500">
+        No reviewable wrong prompts found for this list.
+      </div>
+    </v-card-text>
+
+    <v-card-actions>
+      <v-spacer />
+      <v-btn
+          v-if="!reviewFinished && reviewRounds.length && !roundFeedback"
+          color="primary"
+          @click="submitReviewAnswer"
+        >
+          Submit
+        </v-btn>
+
+        <v-btn
+          v-if="!reviewFinished && reviewRounds.length && roundFeedback"
+          color="primary"
+          @click="nextReviewQuestion"
+        >
+          {{ reviewIndex >= reviewRounds.length - 1 ? "Finish" : "Next" }}
+        </v-btn>
+      <v-btn variant="text" @click="reviewDialog = false">Close</v-btn>
+    </v-card-actions>
+  </v-card>
+</v-dialog>
   </v-container>
+  <v-alert v-if="roundFeedback" :type="roundFeedback.correct ? 'success' : 'error'" variant="tonal" class="mt-3">
+  <div><strong>{{ roundFeedback.correct ? "Correct" : "Not quite" }}</strong></div>
+  <div>Your answer: {{ roundFeedback.user || "—" }}</div>
+  <div>Expected: {{ roundFeedback.expected.join(" / ") }}</div>
+</v-alert>
 </template>
 
 <script setup lang="ts">
@@ -194,36 +268,98 @@ import { ref, computed, onMounted, watch } from 'vue';
 import api from '@/axios';
 
 interface ProgressListRecord {
-  list_key: string;
-  list_name: string;
-  domain: string | null;
-  mode: string;
-  level: string;
-  track_key: string;
-  sessions_started: number;
-  sessions_finished: number;
-  total_attempts: number;
-  correct_count: number;
-  wrong_count: number;
-  accuracy: number;
-  masteredCount: number;
-  totalCount: number;
-  masteryPct: number;
+  list_key: string
+  list_name: string
+  domain: string | null
+  mode: string
+  level: string | null
+  track_key: string
+  sessions_started: number
+  sessions_finished: number
+  total_attempts: number
+  correct_count: number
+  wrong_count: number
+  accuracy: number
+  masteredCount: number
+  totalCount: number
+  masteryPct: number
+  variantLabel: string
 }
+
+interface WrongPromptRow {
+  list_key: string
+  list_name: string
+  domain: string | null
+  item_key: string
+  term: string
+  prompt_field: string
+  answer_field: string
+  prompt_text: string
+  wrong_count: number
+  last_seen_at: string
+  last_user_answer: string | null
+  expected: string[]
+}
+
+interface AIReviewQuestion {
+  item_key: string
+  question: string
+}
+
+interface ReviewRoundRow {
+  item_key: string
+  term: string
+  prompt_field: string
+  prompt_text: string
+  expected: string[]
+  question: string
+}
+
+type ReviewPromptContext = {
+  list_name: string
+  track_key: string
+  level: string | null
+  variant_label: string
+}
+
+const reviewDialog = ref(false)
+const reviewLoading = ref(false)
+const reviewRounds = ref<ReviewRoundRow[]>([])
+const reviewIndex = ref(0)
+const reviewInput = ref("")
+const reviewFinished = ref(false)
+const reviewResults = ref<ReviewResult[]>([])
+
+type ReviewResult = {
+  item_key: string
+  term: string
+  question: string
+  expected: string[]
+  user_answer: string
+  correct: boolean
+}
+const reviewListLabel = ref("")
 
 // UI States
 const loading = ref(false);
-const focusedListKey = ref<string | null>(null);
-  const focusedListRecord = computed(() =>
-  filteredProgressList.value.find(l => l.list_key === focusedListKey.value) || null
-);
+
+const focusedListRecord = computed(() =>
+  filteredProgressList.value.find(r => makeFocusKey(r) === focusedRowKey.value) || null
+)
 
 const focusedListDisplayName = computed(() =>
-  focusedListRecord.value?.list_name ||
-  focusedListKey.value ||
-  ""
-);
+  focusedListRecord.value?.list_name || ""
+)
 
+function makeFocusKey(row: { list_key: string; track_key?: string; level?: string | null }) {
+  return `${row.list_key}::${row.track_key || "none"}::${row.level || "all"}`
+}
+
+const focusedRowKey = ref<string | null>(null)
+
+const focusedVariantLabel = computed(() =>
+  variantLabelFromTrackKey(focusedListRecord.value?.track_key || "")
+)
 const searchListQuery = ref('');
 
 // Dynamic Data Store Arrays
@@ -250,6 +386,7 @@ const filteredProgressList = computed<ProgressListRecord[]>(() => {
     return {
       list_key: p.list_key,
       list_name: p.list_name,
+      variantLabel: p.variant_label || variantLabelFromTrackKey(p.track_key),
       domain: p.domain,
       mode: p.mode,
       level: p.level,
@@ -271,27 +408,247 @@ const filteredProgressList = computed<ProgressListRecord[]>(() => {
     .sort((a, b) => a.list_key.localeCompare(b.list_key, undefined, { numeric: true, sensitivity: 'base' }));
 });
 
-// Reactively fetch new aggregated data blocks whenever list focuses change
-watch(focusedListKey, async (newKey) => {
-  if (!newKey) {
-    highErrorTerms.value = { total_completions: 0, terms: [] };
-    return;
+function focusProgressRow(row: ProgressListRecord) {
+  focusedRowKey.value = makeFocusKey(row)
+}
+
+
+function variantLabelFromTrackKey(tk: string): string {
+  const k = String(tk || "").trim();
+  const map: Record<string, string> = {
+    to_infinitive: "Definition/Translation → Infinitive",
+    to_term: "Definition/Translation → Term",
+    to_past_simple: "Infinitive → Past simple",
+    to_past_particple: "Infinitive → Past participle",
+    to_past_participle: "Infinitive → Past participle",
+    to_past_forms: "Infinitive → Both past forms",
+  };
+  return map[k] || (k ? k.replace(/_/g, " ") : "Unspecified variant");
+}
+
+async function buildAIWrongReviewQuestions(
+  rows: WrongPromptRow[],
+  ctx: ReviewPromptContext
+): Promise<AIReviewQuestion[]> {
+  const prompt = `
+Return JSON only (no markdown), using EXACT schema:
+{
+  "questions": [
+    { "item_key": "string", "question": "string" }
+  ]
+}
+
+Context:
+- list_name: ${ctx.list_name}
+- variant_track_key: ${ctx.track_key}
+- variant_label: ${ctx.variant_label}
+- level: ${ctx.level || "all"}
+
+Rules:
+- IMPORTANT: Output MUST be raw JSON only. Do not use markdown fences. Do not add commentary.
+- You are returning questions for a vocabulary review quiz. The target audience is intermediate English learners.
+- If prompt_field is "definition", the question must include two distinct clues.
+- If prompt_field is "French", "Italian", or "German", ask in that language for the English translation.
+- Do NOT return answers.
+
+INPUT_ROWS:
+${JSON.stringify(rows.map(r => ({
+  item_key: r.item_key,
+  term: r.term,
+  prompt_field: r.prompt_field,
+  prompt_text: r.prompt_text
+})))}
+`.trim()
+
+  const res = await api.post("/llm/chat/", {
+    model: "google/gemma-4-31B-turbo-TEE",
+    messages: [
+      { role: "system", content: "Return strict JSON only." },
+      { role: "user", content: prompt }
+    ],
+    max_tokens: 1200,
+    temperature: 0.3,
+    stream: false,
+  })
+
+  const raw = String(res.data?.content || "").trim()
+
+  function safeExtractJson(text: string): any {
+    try { return JSON.parse(text) } catch {}
+
+    const fenced = text.match(/```json\s*([\s\S]*?)\s*```/i) || text.match(/```\s*([\s\S]*?)\s*```/i)
+    if (fenced?.[1]) {
+      try { return JSON.parse(fenced[1]) } catch {}
+    }
+
+    const firstBrace = text.indexOf("{")
+    const lastBrace = text.lastIndexOf("}")
+    if (firstBrace >= 0 && lastBrace > firstBrace) {
+      try { return JSON.parse(text.slice(firstBrace, lastBrace + 1)) } catch {}
+    }
+
+    throw new Error("AI did not return valid JSON")
   }
 
-  loading.value = true;
+  const parsed = safeExtractJson(raw)
+  return Array.isArray(parsed?.questions) ? parsed.questions as AIReviewQuestion[] : []
+}
+
+function shuffleInPlace<T>(arr: T[]): T[] {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[arr[i], arr[j]] = [arr[j], arr[i]]
+  }
+  return arr
+}
+
+function fallbackQuestion(r: WrongPromptRow): string {
+  if (r.prompt_field?.toLowerCase() === "french") {
+    return `Quelle est la traduction anglaise de « ${r.prompt_text} » ?`
+  }
+  if (r.prompt_field?.toLowerCase() === "german") {
+    return `Was ist die englische Übersetzung von „${r.prompt_text}“?`
+  }
+  if (r.prompt_field?.toLowerCase() === "italian") {
+    return `Qual è la traduzione inglese di « ${r.prompt_text} »?`
+  }
+  return `What is the correct term for: ${r.prompt_text || r.term}?`
+}
+
+async function openWrongReviewForFocusedVariant() {
+  const rec = focusedListRecord.value
+  if (!rec) return
+
+  reviewDialog.value = true
+  reviewLoading.value = true
+  reviewFinished.value = false
+  reviewResults.value = []
+  reviewRounds.value = []
+  reviewIndex.value = 0
+  reviewInput.value = ""
+  roundFeedback.value = null
+
+  try {
+    const r = await api.get("/vocab-workout-sessions/wrong-prompts/", {
+      params: {
+        list_key: rec.list_key,
+        track_key: rec.track_key || undefined,
+        level: rec.level || undefined,
+        mode: "write",
+        days: 180,
+        limit: 60,
+      }
+    })
+
+    const rows: WrongPromptRow[] = Array.isArray(r.data) ? r.data : []
+    const clean = rows.filter(x => {
+      const t = String(x.prompt_text ?? "").trim()
+      return t !== "" && !/^[—-]+$/.test(t)
+    })
+
+    const capped = shuffleInPlace([...clean]).slice(0, 12)
+
+    let aiQs: AIReviewQuestion[] = []
+    try {
+      aiQs = await buildAIWrongReviewQuestions(capped, {
+        list_name: rec.list_name,
+        track_key: rec.track_key || "",
+        level: rec.level || null,
+        variant_label: focusedVariantLabel.value,
+      })
+    } catch (e) {
+      console.warn("AI question generation failed, falling back:", e)
+      aiQs = capped.map(r => ({ item_key: r.item_key, question: fallbackQuestion(r) }))
+    }
+
+    const qMap = new Map(aiQs.map(q => [q.item_key, q.question]))
+    reviewRounds.value = capped.map((r) => ({
+      item_key: r.item_key,
+      term: r.term,
+      prompt_field: r.prompt_field,
+      prompt_text: r.prompt_text,
+      expected: Array.isArray(r.expected) && r.expected.length ? r.expected : [r.term],
+      question: qMap.get(r.item_key) || fallbackQuestion(r),
+    }))
+  } catch (e) {
+    console.error("Failed opening review:", e)
+    reviewRounds.value = []
+  } finally {
+    reviewLoading.value = false
+  }
+}
+
+
+const roundFeedback = ref<null | {
+  correct: boolean
+  expected: string[]
+  user: string
+}>(null)
+
+function normalizeAnswer(s: string) {
+  return String(s ?? "").trim().toLowerCase()
+}
+
+function submitReviewAnswer() {
+  const row = reviewRounds.value[reviewIndex.value]
+  if (!row) return
+
+  const user = reviewInput.value
+  const ok = row.expected.some(a => normalizeAnswer(a) === normalizeAnswer(user))
+
+  roundFeedback.value = { correct: ok, expected: row.expected, user }
+
+  reviewResults.value.push({
+    item_key: row.item_key,
+    term: row.term,
+    question: row.question,
+    expected: row.expected,
+    user_answer: user,
+    correct: ok
+  })
+}
+
+function nextReviewQuestion() {
+  roundFeedback.value = null
+  reviewInput.value = ""
+
+  if (reviewIndex.value >= reviewRounds.value.length - 1) {
+    reviewFinished.value = true
+  } else {
+    reviewIndex.value += 1
+  }
+}
+
+const reviewScore = computed(() => {
+  if (!reviewResults.value.length) return 0
+  const c = reviewResults.value.filter(r => r.correct).length
+  return Math.round((c * 100) / reviewResults.value.length)
+})
+
+
+// Reactively fetch new aggregated data blocks whenever list focuses change
+watch(focusedListRecord, async (rec) => {
+  if (!rec) {
+    highErrorTerms.value = { total_completions: 0, terms: [] }
+    return
+  }
+  loading.value = true
   try {
     const response = await api.get('/vocab-workout-sessions/list-errors/', {
-      params: { list_key: newKey }
-    });
-    // Unpack object formatted wrapper data matching the custom SQL aggregation endpoint paths
-    highErrorTerms.value = response.data || { total_completions: 0, terms: [] };
+      params: {
+        list_key: rec.list_key,
+        track_key: rec.track_key || undefined,
+        level: rec.level || undefined,
+      }
+    })
+    highErrorTerms.value = response.data || { total_completions: 0, terms: [] }
   } catch (err) {
-    console.error("Failed to fetch custom aggregated error breakdown metrics for student:", err);
-    highErrorTerms.value = { total_completions: 0, terms: [] };
+    console.error("Failed to fetch error breakdown:", err)
+    highErrorTerms.value = { total_completions: 0, terms: [] }
   } finally {
-    loading.value = false;
+    loading.value = false
   }
-});
+}, { immediate: true })
 
 // Primary dataset setup loop initialization loader
 async function fetchStudentWorkoutDataProfile() {
@@ -302,9 +659,9 @@ async function fetchStudentWorkoutDataProfile() {
     progressRecordsPool.value = response.data?.progress || [];
     activeSessionsPool.value = response.data?.active_sessions || [];
     
-    if (filteredProgressList.value.length > 0) {
-      focusedListKey.value = filteredProgressList.value[0].list_key;
-    }
+    if (filteredProgressList.value.length) {
+  focusProgressRow(filteredProgressList.value[0])
+}
   } catch (err) {
     console.error("Failed to unpack my-work portfolio records:", err);
   } finally {
