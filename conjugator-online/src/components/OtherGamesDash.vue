@@ -654,7 +654,9 @@ onMounted(async () => {
     const sessionsPromise = api.get<OtherGameSession[]>("/other-games-sessions/", { params });
 
     const [, res] = await Promise.all([achievementsPromise, sessionsPromise]);
-    const sessions = res.data;
+    const sessions = (res.data || []).filter(
+      (s) => Number(s.correct_count ?? 0) > 0
+    );
 
     const grouped: Record<string, GroupedGameData> = {};
     for (const name of GAME_NAMES) {

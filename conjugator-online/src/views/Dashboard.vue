@@ -1000,7 +1000,10 @@ const fetchConjGameSessionsDashboardData = async (): Promise<void> => {
       params.student = userStore.studentId;
     }
     const response = await api.get<GameSession[]>("/conj-game-sessions/", { params });
-    sessions.value = response.data;
+    // Keep only sessions with > 0 correct answers
+    sessions.value = (response.data || []).filter(
+      (s) => Number(s.correct_count ?? 0) > 0
+    );
   } catch (err: any) {
     console.error("Conjugator sessions load crashed:", err);
     conjGameError.value = "Failed to load conjugator timeline history datasets.";

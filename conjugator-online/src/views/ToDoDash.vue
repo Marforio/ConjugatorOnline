@@ -323,8 +323,8 @@
       <v-col cols="12" lg="5">
         <v-row class="ga-6">
            <!-- {{ welcomeStore.wrongVocabPrompts }} -->
-          <v-col cols="12">
-            <VWWrongVocabFlip
+          <v-col v-if="welcomeStore.wrongVocabPrompts.length > 2" cols="12">
+            <VWWrongVocabFlip 
               :loading="welcomeStore.loadingWrongVocab"
               :items="welcomeStore.wrongVocabPrompts"
             />

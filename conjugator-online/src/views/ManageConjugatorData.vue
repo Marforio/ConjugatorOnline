@@ -40,6 +40,37 @@
 
     <div v-else-if="dashboard" class="animate-fade-in">
       <div class="row g-3 mb-4">
+        <div class="col-md-4">
+          <v-select
+            v-model="selectedCourse"
+            :items="courseOptions"
+            item-title="name"
+            item-value="id"
+            label="Filter by Course"
+            prepend-icon="mdi-book-open-variant"
+            variant="outlined"
+            density="compact"
+          />
+        </div>
+        <div class="col-md-3">
+          <v-select
+            v-model="timelineGranularity"
+            :items="[
+              { title: 'Per day', value: 'day' },
+              { title: 'Per week', value: 'week' },
+              { title: 'Per month', value: 'month' }
+            ]"
+            item-title="title"
+            item-value="value"
+            label="Timeline Granularity"
+            prepend-icon="mdi-chart-timeline-variant"
+            variant="outlined"
+            density="compact"
+          />
+        </div>
+      </div>
+
+      <div class="row g-3 mb-4">
         <div v-for="(card, key) in cardList" :key="key" class="col-md-3">
           <div class="card h-100 border-0 shadow-sm metric-card border-start border-4" :class="card.color">
             <div class="card-body d-flex justify-content-between align-items-center">
@@ -407,6 +438,7 @@
 import { ref, computed, nextTick, onMounted, watch } from 'vue';
 import Chart from 'chart.js/auto';
 import api from '@/axios';
+import { useUserStore } from '@/stores/user';
 
 // Operational Data Contracts
 interface DashboardData {
@@ -417,6 +449,8 @@ interface DashboardData {
   leaderboard_accuracy: Array<{ username: string; initials: string; total: number; correct: number; accuracy: number }>;
   leaderboard_health: Array<{ username: string; initials: string; health: number }>;
   timeline_labels: string[];
+  timeline_rounds: number[];
+  timeline_hours: number[];
   timeline_counts: number[];
   error_labels: string[];
   error_counts: number[];
@@ -455,6 +489,16 @@ interface VerbStatItem {
   correct: number;
   incorrect: number;
 }
+
+const userStore = useUserStore();
+
+const selectedCourse = ref<string>('all');
+const timelineGranularity = ref<'day' | 'week' | 'month'>('week');
+
+const courseOptions = computed(() => ([
+  { id: 'all', name: 'All Courses' },
+  ...userStore.availableTeacherCourses.map(c => ({ id: c.slug, name: c.title }))
+]));
 
 // Reactive Component State
 const dashboard = ref<DashboardData | null>(null);
@@ -515,7 +559,13 @@ async function loadDashboardData() {
   loading.value = true;
   error.value = null;
   try {
-    const response = await api.get<DashboardData>('/conjugator-dashboard/summary/');
+    const response = await api.get<DashboardData>('/conjugator-dashboard/summary/', {
+      params: {
+        course: selectedCourse.value,
+        bucket: timelineGranularity.value,
+        combo_min_errors: 2
+      }
+    });
     dashboard.value = response.data;
     await nextTick();
     renderChartGraphics();
@@ -594,7 +644,8 @@ const fetchCombinationExamples = async (combo: any) => {
         verb: combo.verb,
         tense: combo.tense,
         person: combo.person,
-        sentence_type: combo.sentence_type
+        sentence_type: combo.sentence_type,
+        course: selectedCourse.value
       }
     });
     targetedExamplesList.value = res.data.examples || [];
@@ -618,9 +669,49 @@ function renderChartGraphics() {
       type: 'line',
       data: {
         labels: dashboard.value.timeline_labels,
-        datasets: [{ label: 'Rounds Played', data: dashboard.value.timeline_counts, borderColor: '#da3316', backgroundColor: 'rgba(218, 51, 22, 0.06)', fill: true, tension: 0.2, borderWidth: 2.5 }]
+        datasets: [
+          {
+            label: 'Rounds Played',
+            data: dashboard.value.timeline_rounds,
+            yAxisID: 'yRounds',
+            borderColor: '#da3316',
+            backgroundColor: 'rgba(218, 51, 22, 0.10)',
+            fill: true,
+            tension: 0.25,
+            borderWidth: 2.5
+          },
+          {
+            label: 'Hours Played',
+            data: dashboard.value.timeline_hours,
+            yAxisID: 'yHours',
+            borderColor: '#2563eb',
+            backgroundColor: 'rgba(37, 99, 235, 0.06)',
+            fill: false,
+            tension: 0.25,
+            borderWidth: 2.2
+          }
+        ]
       },
-      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: true } },
+        scales: {
+          yRounds: {
+            type: 'linear',
+            position: 'left',
+            beginAtZero: true,
+            title: { display: true, text: 'Rounds' }
+          },
+          yHours: {
+            type: 'linear',
+            position: 'right',
+            beginAtZero: true,
+            grid: { drawOnChartArea: false },
+            title: { display: true, text: 'Hours' }
+          }
+        }
+      }
     });
   }
 
@@ -694,7 +785,12 @@ watch(verbSearchQuery, (newVal) => {
   }
 });
 
-onMounted(() => { 
+watch([selectedCourse, timelineGranularity], () => {
+  loadDashboardData();
+});
+
+onMounted(async () => {
+  await userStore.ensureUserLoaded();  
   loadDashboardData(); 
   fetchLocalVerbLexicon(); 
 });
