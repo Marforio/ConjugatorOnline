@@ -14,6 +14,27 @@
               <v-slider v-model="roundCount" min="8" max="15" step="1" thumb-label color="indigo" />
               <div class="text-caption">Selected: {{ roundCount }} rounds</div>
             </v-col>
+            <v-col cols="12" md="6">
+              <v-select
+                v-model="selectedPack"
+                :items="[
+                  { title: 'Pack 1', value: 'pack1' },
+                  { title: 'Pack 2', value: 'pack2' },
+                  { title: 'Pack 3', value: 'pack3' },
+                  { title: 'Pack 4', value: 'pack4' },
+                  { title: 'Pack 5', value: 'pack5' },
+                  { title: 'Pack 6', value: 'pack6' },
+                  { title: 'Pack 7', value: 'pack7' },
+                  { title: 'Pack 8', value: 'pack8' },
+                  { title: 'Pack 9', value: 'pack9' },
+                  { title: 'Pack 10', value: 'pack10' },
+                  { title: 'Pack 11', value: 'pack11' },
+                  { title: 'Pack 12', value: 'pack12' },
+                ]"
+                label="Question pack"
+                variant="outlined"
+              />
+            </v-col>
           </v-row>
           <v-divider class="my-4" />
           <v-row dense>
@@ -50,7 +71,9 @@
         <v-divider />
         <v-card-text v-if="lastRoundResult">
           <v-alert type="success" variant="tonal" class="mb-3">
-            🏅 Winner: <strong>{{ lastRoundResult.winnerName }}</strong> (+1 point)
+            🏅 Winner{{ lastRoundResult.winnerNames.length > 1 ? 's' : '' }}:
+            <strong>{{ lastRoundResult.winnerNames.join(", ") }}</strong>
+            (+1 point each)
           </v-alert>
           <div class="mb-2">Correct value: <strong>{{ formatByType(lastRoundResult.actual, lastRoundResult.type) }}</strong></div>
           <v-list density="comfortable" bg-color="transparent" class="rounded-lg border">
@@ -187,7 +210,19 @@
 import { computed, reactive, ref } from "vue"
 
 type QuestionType = "year" | "integer" | "money" | "decimal"
-type QItem = { id: string; prompt: string; value: number; unitHint?: string; image: string; type: QuestionType }
+type PackId =
+  | "pack1" | "pack2" | "pack3" | "pack4" | "pack5" | "pack6"
+  | "pack7" | "pack8" | "pack9" | "pack10" | "pack11" | "pack12"
+
+type QItem = {
+  id: string
+  prompt: string
+  value: number
+  unitHint?: string
+  image: string
+  type: QuestionType
+  pack: PackId
+}
 type Player = {
   id: string; name: string; points: number; deviations: number[]; avgDeviationPct: number;
   orderIndex: number; combinedScore: number; color: string; colorHex: string
@@ -202,6 +237,7 @@ const gameComplete = ref(false)
 const playerCount = ref(2)
 const roundCount = ref(10)
 const playerNames = ref(["Player 1", "Player 2", "Player 3", "Player 4"])
+const selectedPack = ref<PackId>("pack1")
 const visiblePlayerNames = computed(() => playerNames.value.slice(0, Math.min(4, Math.max(1, playerCount.value))))
 
 const currentRound = ref(1)
@@ -212,7 +248,7 @@ const currentQuestion = ref<QItem | null>(null)
 const questionPool = ref<QItem[]>([])
 
 const lastRoundResult = ref<null | {
-  winnerName: string
+  winnerNames: string[]
   actual: number
   type: QuestionType
   lines: { playerId: string; name: string; guess: number; deviationPct: number }[]
@@ -226,108 +262,135 @@ const palette = [
 ]
 
 const questions: QItem[] = [
-  { id: "q1", prompt: "Population of Canada (2026)", value: 41000000, unitHint: "people", image: "/images/price-is-right/q1.jpg", type: "integer" },
-  { id: "q2", prompt: "Length of the Nile", value: 6650, unitHint: "km", image: "/images/price-is-right/q2.jpg", type: "integer" },
-  { id: "q3", prompt: "Melting point of gold", value: 1064, unitHint: "°C", image: "/images/price-is-right/q3.jpg", type: "integer" },
-  { id: "q4", prompt: "Year the Berlin Wall fell", value: 1989, unitHint: "year", image: "/images/price-is-right/q4.jpg", type: "year" },
-  { id: "q5", prompt: "Year the first iPhone was released", value: 2007, unitHint: "year", image: "/images/price-is-right/q5.jpg", type: "year" },
-  { id: "q6", prompt: "Approximate GDP of Canada", value: 2200000000000, unitHint: "USD", image: "/images/price-is-right/q1.jpg", type: "integer" },
-  { id: "q7", prompt: "Length of a marathon, in miles", value: 26.219, unitHint: "miles", image: "/images/price-is-right/q7.jpg", type: "decimal" },
-  { id: "q8", prompt: "Year the UN was founded", value: 1945, unitHint: "year", image: "/images/price-is-right/q8.jpg", type: "year" },
+  // PACK 1
+  { id: "q1", pack: "pack1", prompt: "Population of Canada (2026)", value: 41000000, unitHint: "people", image: "/images/price-is-right/q1.jpg", type: "integer" },
+  { id: "q4", pack: "pack1", prompt: "Year the Berlin Wall fell", value: 1989, unitHint: "year", image: "/images/price-is-right/q4.jpg", type: "year" },
+  { id: "q12", pack: "pack1", prompt: "Speed of light", value: 299792458, unitHint: "m/s", image: "/images/price-is-right/q12.jpg", type: "integer" },
+  { id: "q13", pack: "pack1", prompt: "Population of Japan (2026)", value: 124000000, unitHint: "people", image: "/images/price-is-right/q13.jpg", type: "integer" },
+  { id: "q21", pack: "pack1", prompt: "Area of Argentina", value: 2780400, unitHint: "km²", image: "/images/price-is-right/q21.jpg", type: "integer" },
+  { id: "q24", pack: "pack1", prompt: "Year the Internet became publicly available", value: 1991, unitHint: "year", image: "/images/price-is-right/q24.jpg", type: "year" },
+  { id: "q27", pack: "pack1", prompt: "Year the first Star Wars movie was released", value: 1977, unitHint: "year", image: "/images/price-is-right/q27.jpg", type: "year" },
+  { id: "q52", pack: "pack1", prompt: "Length of the Aare River", value: 295, unitHint: "km", image: "/images/price-is-right/q52.jpg", type: "integer" },
+  { id: "q54", pack: "pack1", prompt: "Height of the Dufourspitze (highest peak in Switzerland)", value: 4634, unitHint: "m", image: "/images/price-is-right/q54.jpg", type: "integer" },
+  { id: "q62", pack: "pack1", prompt: "Year Windows Vista was released", value: 2007, unitHint: "year", image: "/images/price-is-right/q62.jpg", type: "year" },
+  { id: "q69", pack: "pack1", prompt: "Year Spotify launched", value: 2006, unitHint: "year", image: "/images/price-is-right/q69.jpg", type: "year" },
+  { id: "q82", pack: "pack1", prompt: "Transfer fee for Kylian Mbappé to PSG (2018)", value: 180000000, unitHint: "EUR", image: "/images/price-is-right/q82.jpg", type: "integer" },
+  { id: "q83", pack: "pack1", prompt: "Transfer fee for Philippe Coutinho to Barcelona (2018)", value: 145000000, unitHint: "EUR", image: "/images/price-is-right/q83.jpg", type: "integer" },
+  { id: "q104", pack: "pack1", prompt: "Melting point of silver", value: 962, unitHint: "°C", image: "/images/price-is-right/q104.jpg", type: "integer" },
+  { id: "q109", pack: "pack1", prompt: "Melting point of zinc", value: 420, unitHint: "°C", image: "/images/price-is-right/q109.jpg", type: "integer" },
+  { id: "q32", pack: "pack1", prompt: "Population of Brazil (2026)", value: 214000000, unitHint: "people", image: "/images/price-is-right/q32.jpg", type: "integer" },
 
-  // --- Added items ---
-  { id: "q9", prompt: "Height of Mount Everest", value: 8848, unitHint: "m", image: "/images/price-is-right/q9.jpg", type: "integer" },
-  { id: "q10", prompt: "Distance from Earth to the Moon", value: 384400, unitHint: "km", image: "/images/price-is-right/q10.jpg", type: "integer" },
-  { id: "q11", prompt: "Year the Titanic sank", value: 1912, unitHint: "year", image: "/images/price-is-right/q11.jpg", type: "year" },
-  { id: "q12", prompt: "Speed of light", value: 299792458, unitHint: "m/s", image: "/images/price-is-right/q12.jpg", type: "integer" },
-  { id: "q13", prompt: "Population of Japan (2026)", value: 124000000, unitHint: "people", image: "/images/price-is-right/q13.jpg", type: "integer" },
-  { id: "q14", prompt: "Length of the Amazon River", value: 6400, unitHint: "km", image: "/images/price-is-right/q14.jpg", type: "integer" },
-  { id: "q15", prompt: "Height of Mount Fuji", value: 3776, unitHint: "m", image: "/images/price-is-right/q15.jpg", type: "integer" },
-  { id: "q16", prompt: "Year the Canton of Fribourg joined the Confederation", value: 1481, unitHint: "year", image: "/images/price-is-right/q16.jpg", type: "year" },
-  { id: "q17", prompt: "Number of bones in the adult human body", value: 206, unitHint: "bones", image: "/images/price-is-right/q17.jpg", type: "integer" },
-  { id: "q18", prompt: "Area of France", value: 551695, unitHint: "km²", image: "/images/price-is-right/q18.jpg", type: "integer" },
-  { id: "q19", prompt: "Height of the Eiffel Tower", value: 330, unitHint: "m", image: "/images/price-is-right/q19.jpg", type: "integer" },
-  { id: "q20", prompt: "Area of Australia", value: 7692024, unitHint: "km²", image: "/images/price-is-right/q20.jpg", type: "integer" },
-  { id: "q21", prompt: "Area of Argentina", value: 2780400, unitHint: "km²", image: "/images/price-is-right/q21.jpg", type: "integer" },
-  { id: "q22", prompt: "Depth of the Mariana Trench (deepest point in the ocean)", value: 10994, unitHint: "m", image: "/images/price-is-right/q22.jpg", type: "integer" },
-  { id: "q23", prompt: "Population of Australia (2026)", value: 27000000, unitHint: "people", image: "/images/price-is-right/q23.jpg", type: "integer" },
-  { id: "q24", prompt: "Year the Internet became publicly available", value: 1991, unitHint: "year", image: "/images/price-is-right/q24.jpg", type: "year" },
-  { id: "q25", prompt: "Diameter of Earth", value: 12742, unitHint: "km", image: "/images/price-is-right/q25.jpg", type: "integer" },
-  { id: "q26", prompt: "Price of an ounce of gold at the end of 2025", value: 4320, unitHint: "USD", image: "/images/price-is-right/q26.jpg", type: "integer" },
-  { id: "q27", prompt: "Year the first Star Wars movie was released", value: 1977, unitHint: "year", image: "/images/price-is-right/q27.jpg", type: "year" },
-  { id: "q28", prompt: "Length of the Great Wall of China", value: 21196, unitHint: "km", image: "/images/price-is-right/q28.jpg", type: "integer" },
-  { id: "q29", prompt: "Average distance Earth travels around the Sun per year", value: 940000000, unitHint: "km", image: "/images/price-is-right/q29.jpg", type: "integer" },
-  { id: "q30", prompt: "Area of Egypt", value: 1002450, unitHint: "km²", image: "/images/price-is-right/q30.jpg", type: "integer" },
-  { id: "q31", prompt: "Height of Mount Kilimanjaro", value: 5895, unitHint: "m", image: "/images/price-is-right/q31.jpg", type: "integer" },
-  { id: "q32", prompt: "Population of Brazil (2026)", value: 214000000, unitHint: "people", image: "/images/price-is-right/q32.jpg", type: "integer" },
-  { id: "q33", prompt: "Capacity of BCF Arena (Fribourg, Switzerland)", value: 9372, unitHint: "people", image: "/images/price-is-right/q33.jpg", type: "integer" },
-  { id: "q34", prompt: "Speed of sound in air", value: 343, unitHint: "m/s", image: "/images/price-is-right/q34.jpg", type: "integer" },
-  { id: "q35", prompt: "Number of countries in the world (2026)", value: 195, unitHint: "countries", image: "/images/price-is-right/q35.jpg", type: "integer" },
-  { id: "q36", prompt: "Year the first commercial airplane flight took place", value: 1914, unitHint: "year", image: "/images/price-is-right/q36.jpg", type: "year" },
-  { id: "q37", prompt: "Number of cows in the world (2026)", value: 1550000000, unitHint: "cows", image: "/images/price-is-right/q37.jpg", type: "integer" },
-  { id: "q38", prompt: "Population of Germany (2026)", value: 84000000, unitHint: "people", image: "/images/price-is-right/q38.jpg", type: "integer" },
-  { id: "q39", prompt: "Area of the canton of Valais", value: 5226, unitHint: "km²", image: "/images/price-is-right/q39.jpg", type: "integer" },
-  { id: "q40", prompt: "Circumference of Earth", value: 40075, unitHint: "km", image: "/images/price-is-right/q25.jpg", type: "integer" },
-  { id: "q41", prompt: "Number of moons orbiting Jupiter", value: 115, unitHint: "moons", image: "/images/price-is-right/q41.jpg", type: "integer" },
-  { id: "q42", prompt: "Year the first vaccine was developed", value: 1796, unitHint: "year", image: "/images/price-is-right/q42.jpg", type: "year" },
-  { id: "q43", prompt: "Height of the Burj Khalifa", value: 828, unitHint: "m", image: "/images/price-is-right/q43.jpg", type: "integer" },
-  { id: "q44", prompt: "Population of Mexico (2026)", value: 130000000, unitHint: "people", image: "/images/price-is-right/q44.jpg", type: "integer" },
-  { id: "q45", prompt: "Year of Napoleon's death", value: 1821, unitHint: "year", image: "/images/price-is-right/q45.jpg", type: "year" },
-  { id: "q46", prompt: "Total population of Bengal tigers in the wild (2026)", value: 3000, unitHint: "tigers", image: "/images/price-is-right/q46.jpg", type: "integer" },
-  { id: "q47", prompt: "Atomic number of the element molybdenum", value: 42, unitHint: "atomic number", image: "/images/price-is-right/q47.jpg", type: "integer" },
-  { id: "q48", prompt: "Atomic number of the element silver", value: 47, unitHint: "atomic number", image: "/images/price-is-right/q48.jpg", type: "integer" },
-  { id: "q49", prompt: "Distance from Earth to the Sun", value: 149600000, unitHint: "km", image: "/images/price-is-right/q29.jpg", type: "integer" },
-  { id: "q50", prompt: "Height of the Statue of Liberty", value: 93, unitHint: "m", image: "/images/price-is-right/q50.jpg", type: "integer" },
-  // --- Swiss rivers, mountains, areas, and pi ---
-  { id: "q51", prompt: "Length of the Rhine River within Switzerland", value: 375, unitHint: "km", image: "/images/price-is-right/q51.jpg", type: "integer" },
-  { id: "q52", prompt: "Length of the Aare River", value: 295, unitHint: "km", image: "/images/price-is-right/q52.jpg", type: "integer" },
-  { id: "q53", prompt: "Height of the Matterhorn", value: 4478, unitHint: "m", image: "/images/price-is-right/q53.jpg", type: "integer" },
-  { id: "q54", prompt: "Height of the Dufourspitze (highest peak in Switzerland)", value: 4634, unitHint: "m", image: "/images/price-is-right/q54.jpg", type: "integer" },
-  { id: "q55", prompt: "Area of Switzerland", value: 41285, unitHint: "km²", image: "/images/price-is-right/q55.jpg", type: "integer" },
-  { id: "q56", prompt: "Area of Lake Geneva", value: 580, unitHint: "km²", image: "/images/price-is-right/q56.jpg", type: "integer" },
-  { id: "q57", prompt: "Height of the Jungfrau", value: 4158, unitHint: "m", image: "/images/price-is-right/q57.jpg", type: "integer" },
-  { id: "q58", prompt: "Length of Lake Neuchâtel", value: 38.3, unitHint: "km", image: "/images/price-is-right/q58.jpg", type: "decimal" },
-  { id: "q59", prompt: "Population of Zurich (city proper, 2026)", value: 440000, unitHint: "people", image: "/images/price-is-right/q59.jpg", type: "integer" },
-  { id: "q60", prompt: "Value of pi (π) to 10 decimal places", value: 3.1415926535, unitHint: "", image: "/images/price-is-right/q60.jpg", type: "decimal" },
-  { id: "q61", prompt: "Year Google was founded", value: 1998, unitHint: "year", image: "/images/price-is-right/q61.jpg", type: "year" },
-  { id: "q62", prompt: "Year Windows Vista was released", value: 2007, unitHint: "year", image: "/images/price-is-right/q62.jpg", type: "year" },
-  { id: "q63", prompt: "Year Amazon was founded", value: 1994, unitHint: "year", image: "/images/price-is-right/q63.jpg", type: "year" },
-  { id: "q64", prompt: "Year Facebook launched", value: 2004, unitHint: "year", image: "/images/price-is-right/q64.jpg", type: "year" },
-  { id: "q65", prompt: "Year Nestlé was founded", value: 1866, unitHint: "year", image: "/images/price-is-right/q65.jpg", type: "year" },
-  { id: "q66", prompt: "Price of Crédit Suisse acquisition by UBS (2023)", value: 3000000000, unitHint: "CHF", image: "/images/price-is-right/q66.jpg", type: "decimal" },
-  { id: "q67", prompt: "Year Nintendo released the original Game Boy", value: 1989, unitHint: "year", image: "/images/price-is-right/q67.jpg", type: "year" },
-  { id: "q68", prompt: "Year Apple released the first MacBook Air", value: 2008, unitHint: "year", image: "/images/price-is-right/q68.jpg", type: "year" },
-  { id: "q69", prompt: "Year Spotify launched", value: 2006, unitHint: "year", image: "/images/price-is-right/q69.jpg", type: "year" },
-  { id: "q70", prompt: "Year Adobe Photoshop was first released", value: 1990, unitHint: "year", image: "/images/price-is-right/q70.jpg", type: "year" },
-  { id: "q81", prompt: "Transfer fee for Neymar to PSG (2017)", value: 222000000, unitHint: "EUR", image: "/images/price-is-right/q81.jpg", type: "integer" },
-  { id: "q82", prompt: "Transfer fee for Kylian Mbappé to PSG (2018)", value: 180000000, unitHint: "EUR", image: "/images/price-is-right/q82.jpg", type: "integer" },
-  { id: "q83", prompt: "Transfer fee for Philippe Coutinho to Barcelona (2018)", value: 145000000, unitHint: "EUR", image: "/images/price-is-right/q83.jpg", type: "integer" },
-  { id: "q84", prompt: "Transfer fee for João Félix to Atlético Madrid (2019)", value: 126000000, unitHint: "EUR", image: "/images/price-is-right/q84.jpg", type: "integer" },
-  { id: "q85", prompt: "Transfer fee for Enzo Fernández to Chelsea (2023)", value: 121000000, unitHint: "EUR", image: "/images/price-is-right/q85.jpg", type: "integer" },
-  { id: "q86", prompt: "Transfer fee for Jack Grealish to Manchester City (2021)", value: 117000000, unitHint: "EUR", image: "/images/price-is-right/q86.jpg", type: "integer" },
-  { id: "q87", prompt: "Transfer fee for Cristiano Ronaldo to Real Madrid (2009)", value: 94000000, unitHint: "EUR", image: "/images/price-is-right/q87.jpg", type: "integer" },
-  { id: "q88", prompt: "Transfer fee for Gareth Bale to Real Madrid (2013)", value: 101000000, unitHint: "EUR", image: "/images/price-is-right/q88.jpg", type: "integer" },
-  { id: "q89", prompt: "Transfer fee for Paul Pogba to Manchester United (2016)", value: 105000000, unitHint: "EUR", image: "/images/price-is-right/q89.jpg", type: "integer" },
-  { id: "q90", prompt: "Transfer fee for Ousmane Dembélé to Barcelona (2017)", value: 105000000, unitHint: "EUR", image: "/images/price-is-right/q90.jpg", type: "integer" },
-  { id: "q91", prompt: "Boiling point of oxygen at sea level", value: -183, unitHint: "°C", image: "/images/price-is-right/q91.jpg", type: "integer" },
-{ id: "q92", prompt: "Boiling point of nitrogen at sea level", value: -196, unitHint: "°C", image: "/images/price-is-right/q92.jpg", type: "integer" },
-{ id: "q93", prompt: "Boiling point of helium at sea level", value: -269, unitHint: "°C", image: "/images/price-is-right/q93.jpg", type: "integer" },
-{ id: "q94", prompt: "Boiling point of hydrogen at sea level", value: -253, unitHint: "°C", image: "/images/price-is-right/q94.jpg", type: "integer" },
-{ id: "q95", prompt: "Area of the Canton of Fribourg", value: 1672, unitHint: "km²", image: "/images/price-is-right/q16.jpg", type: "integer" },
-{ id: "q96", prompt: "Boiling point of ethanol", value: 78, unitHint: "°C", image: "/images/price-is-right/q96.jpg", type: "integer" },
-{ id: "q97", prompt: "Boiling point of mercury", value: 357, unitHint: "°C", image: "/images/price-is-right/q97.jpg", type: "integer" },
-{ id: "q98", prompt: "Boiling point of carbon dioxide (at 1 atm)", value: -78, unitHint: "°C", image: "/images/price-is-right/q98.jpg", type: "integer" },
-{ id: "q101", prompt: "Depth of Lake Baikal at its deepest point", value: 1642, unitHint: "m", image: "/images/price-is-right/q101.jpg", type: "integer" },
-{ id: "q102", prompt: "Melting point of iron", value: 1538, unitHint: "°C", image: "/images/price-is-right/q102.jpg", type: "integer" },
-{ id: "q103", prompt: "Population of Luxembourg (2026)", value: 690000, unitHint: "people", image: "/images/price-is-right/q103.jpg", type: "integer" },
-{ id: "q104", prompt: "Melting point of silver", value: 962, unitHint: "°C", image: "/images/price-is-right/q104.jpg", type: "integer" },
-{ id: "q105", prompt: "Melting point of copper", value: 1085, unitHint: "°C", image: "/images/price-is-right/q105.jpg", type: "integer" },
-{ id: "q106", prompt: "Melting point of aluminum", value: 660, unitHint: "°C", image: "/images/price-is-right/q106.jpg", type: "integer" },
-{ id: "q107", prompt: "Melting point of lead", value: 327, unitHint: "°C", image: "/images/price-is-right/q107.jpg", type: "integer" },
-{ id: "q108", prompt: "Melting point of tin", value: 232, unitHint: "°C", image: "/images/price-is-right/q108.jpg", type: "integer" },
-{ id: "q109", prompt: "Melting point of zinc", value: 420, unitHint: "°C", image: "/images/price-is-right/q109.jpg", type: "integer" },
-{ id: "q110", prompt: "Melting point of platinum", value: 1768, unitHint: "°C", image: "/images/price-is-right/q110.jpg", type: "integer" },
-];
+  // PACK 2 - 14
+  { id: "q8", pack: "pack2", prompt: "Year the UN was founded", value: 1945, unitHint: "year", image: "/images/price-is-right/q8.jpg", type: "year" },
+  { id: "q15", pack: "pack2", prompt: "Height of Mount Fuji", value: 3776, unitHint: "m", image: "/images/price-is-right/q15.jpg", type: "integer" },
+  { id: "q25", pack: "pack2", prompt: "Diameter of Earth", value: 12742, unitHint: "km", image: "/images/price-is-right/q25.jpg", type: "integer" },
+  { id: "q33", pack: "pack2", prompt: "Capacity of BCF Arena (Fribourg, Switzerland)", value: 9372, unitHint: "people", image: "/images/price-is-right/q33.jpg", type: "integer" },
+  { id: "q35", pack: "pack2", prompt: "Number of countries in the world (2026)", value: 195, unitHint: "countries", image: "/images/price-is-right/q35.jpg", type: "integer" },
+  { id: "q38", pack: "pack2", prompt: "Population of Germany (2026)", value: 84000000, unitHint: "people", image: "/images/price-is-right/q38.jpg", type: "integer" },
+  { id: "q45", pack: "pack2", prompt: "Year of Napoleon's death", value: 1821, unitHint: "year", image: "/images/price-is-right/q45.jpg", type: "year" },
+  { id: "q47", pack: "pack2", prompt: "Atomic number of the element molybdenum", value: 42, unitHint: "atomic number", image: "/images/price-is-right/q47.jpg", type: "integer" },
+  { id: "q50", pack: "pack2", prompt: "Height of the Statue of Liberty", value: 93, unitHint: "m", image: "/images/price-is-right/q50.jpg", type: "integer" },
+  { id: "q65", pack: "pack2", prompt: "Year Nestlé was founded", value: 1866, unitHint: "year", image: "/images/price-is-right/q65.jpg", type: "year" },
+  { id: "q84", pack: "pack2", prompt: "Transfer fee for João Félix to Atlético Madrid (2019)", value: 126000000, unitHint: "EUR", image: "/images/price-is-right/q84.jpg", type: "integer" },
+  { id: "q86", pack: "pack2", prompt: "Transfer fee for Jack Grealish to Manchester City (2021)", value: 117000000, unitHint: "EUR", image: "/images/price-is-right/q86.jpg", type: "integer" },
+  { id: "q96", pack: "pack2", prompt: "Boiling point of ethanol", value: 78, unitHint: "°C", image: "/images/price-is-right/q96.jpg", type: "integer" },
+  { id: "q107", pack: "pack2", prompt: "Melting point of lead", value: 327, unitHint: "°C", image: "/images/price-is-right/q107.jpg", type: "integer" },
+
+  // PACK 3
+  { id: "q2", pack: "pack3", prompt: "Length of the Nile", value: 6650, unitHint: "km", image: "/images/price-is-right/q2.jpg", type: "integer" },
+  { id: "q3", pack: "pack3", prompt: "Melting point of gold", value: 1064, unitHint: "°C", image: "/images/price-is-right/q3.jpg", type: "integer" },
+  { id: "q5", pack: "pack3", prompt: "Year the first iPhone was released", value: 2007, unitHint: "year", image: "/images/price-is-right/q5.jpg", type: "year" },
+  { id: "q6", pack: "pack3", prompt: "Approximate GDP of Canada", value: 2200000000000, unitHint: "USD", image: "/images/price-is-right/q1.jpg", type: "integer" },
+  { id: "q7", pack: "pack3", prompt: "Length of a marathon, in miles", value: 26.219, unitHint: "miles", image: "/images/price-is-right/q7.jpg", type: "decimal" },
+  { id: "q16", pack: "pack3", prompt: "Year the Canton of Fribourg joined the Confederation", value: 1481, unitHint: "year", image: "/images/price-is-right/q16.jpg", type: "year" },
+  { id: "q17", pack: "pack3", prompt: "Number of bones in the adult human body", value: 206, unitHint: "bones", image: "/images/price-is-right/q17.jpg", type: "integer" },
+  { id: "q20", pack: "pack3", prompt: "Area of Australia", value: 7692024, unitHint: "km²", image: "/images/price-is-right/q20.jpg", type: "integer" },
+  { id: "q26", pack: "pack3", prompt: "Price of an ounce of gold at the end of 2025", value: 4320, unitHint: "USD", image: "/images/price-is-right/q26.jpg", type: "integer" },
+  { id: "q40", pack: "pack3", prompt: "Circumference of Earth", value: 40075, unitHint: "km", image: "/images/price-is-right/q25.jpg", type: "integer" },
+  { id: "q67", pack: "pack3", prompt: "Year Nintendo released the original Game Boy", value: 1989, unitHint: "year", image: "/images/price-is-right/q67.jpg", type: "year" },
+  { id: "q81", pack: "pack3", prompt: "Transfer fee for Neymar to PSG (2017)", value: 222000000, unitHint: "EUR", image: "/images/price-is-right/q81.jpg", type: "integer" },
+  { id: "q87", pack: "pack3", prompt: "Transfer fee for Cristiano Ronaldo to Real Madrid (2009)", value: 94000000, unitHint: "EUR", image: "/images/price-is-right/q87.jpg", type: "integer" },
+  { id: "q105", pack: "pack3", prompt: "Melting point of copper", value: 1085, unitHint: "°C", image: "/images/price-is-right/q105.jpg", type: "integer" },
+  { id: "q110", pack: "pack3", prompt: "Melting point of platinum", value: 1768, unitHint: "°C", image: "/images/price-is-right/q110.jpg", type: "integer" },
+
+  // PACK 4
+  { id: "q9", pack: "pack4", prompt: "Height of Mount Everest", value: 8848, unitHint: "m", image: "/images/price-is-right/q9.jpg", type: "integer" },
+  { id: "q10", pack: "pack4", prompt: "Distance from Earth to the Moon", value: 384400, unitHint: "km", image: "/images/price-is-right/q10.jpg", type: "integer" },
+  { id: "q11", pack: "pack4", prompt: "Year the Titanic sank", value: 1912, unitHint: "year", image: "/images/price-is-right/q11.jpg", type: "year" },
+  { id: "q14", pack: "pack4", prompt: "Length of the Amazon River", value: 6400, unitHint: "km", image: "/images/price-is-right/q14.jpg", type: "integer" },
+  { id: "q18", pack: "pack4", prompt: "Area of France", value: 551695, unitHint: "km²", image: "/images/price-is-right/q18.jpg", type: "integer" },
+  { id: "q22", pack: "pack4", prompt: "Depth of the Mariana Trench (deepest point in the ocean)", value: 10994, unitHint: "m", image: "/images/price-is-right/q22.jpg", type: "integer" },
+  { id: "q23", pack: "pack4", prompt: "Population of Australia (2026)", value: 27000000, unitHint: "people", image: "/images/price-is-right/q23.jpg", type: "integer" },
+  
+  { id: "q37", pack: "pack4", prompt: "Number of cows in the world (2026)", value: 1550000000, unitHint: "cows", image: "/images/price-is-right/q37.jpg", type: "integer" },
+  { id: "q42", pack: "pack4", prompt: "Year the first vaccine was developed", value: 1796, unitHint: "year", image: "/images/price-is-right/q42.jpg", type: "year" },
+  { id: "q89", pack: "pack4", prompt: "Transfer fee for Paul Pogba to Manchester United (2016)", value: 105000000, unitHint: "EUR", image: "/images/price-is-right/q89.jpg", type: "integer" },
+  { id: "q90", pack: "pack4", prompt: "Transfer fee for Ousmane Dembélé to Barcelona (2017)", value: 105000000, unitHint: "EUR", image: "/images/price-is-right/q90.jpg", type: "integer" },
+  { id: "q94", pack: "pack4", prompt: "Boiling point of hydrogen at sea level", value: -253, unitHint: "°C", image: "/images/price-is-right/q94.jpg", type: "integer" },
+  { id: "q102", pack: "pack4", prompt: "Melting point of iron", value: 1538, unitHint: "°C", image: "/images/price-is-right/q102.jpg", type: "integer" },
+  { id: "q106", pack: "pack4", prompt: "Melting point of aluminum", value: 660, unitHint: "°C", image: "/images/price-is-right/q106.jpg", type: "integer" },
+  { id: "q602", pack: "pack4", prompt: "Value of pi (π) to 10 decimal places", value: 3.1415926535, unitHint: "", image: "/images/price-is-right/q60.jpg", type: "decimal" },
+
+  // PACK 5
+  { id: "q28", pack: "pack5", prompt: "Length of the Great Wall of China", value: 21196, unitHint: "km", image: "/images/price-is-right/q28.jpg", type: "integer" },
+  { id: "q29", pack: "pack5", prompt: "Average distance Earth travels around the Sun per year", value: 940000000, unitHint: "km", image: "/images/price-is-right/q29.jpg", type: "integer" },
+  { id: "q30", pack: "pack5", prompt: "Area of Egypt", value: 1002450, unitHint: "km²", image: "/images/price-is-right/q30.jpg", type: "integer" },
+  { id: "q31", pack: "pack5", prompt: "Height of Mount Kilimanjaro", value: 5895, unitHint: "m", image: "/images/price-is-right/q31.jpg", type: "integer" },
+  { id: "q39", pack: "pack5", prompt: "Area of the canton of Valais", value: 5226, unitHint: "km²", image: "/images/price-is-right/q39.jpg", type: "integer" },
+  { id: "q48", pack: "pack5", prompt: "Atomic number of the element silver", value: 47, unitHint: "atomic number", image: "/images/price-is-right/q48.jpg", type: "integer" },
+  { id: "q53", pack: "pack5", prompt: "Height of the Matterhorn", value: 4478, unitHint: "m", image: "/images/price-is-right/q53.jpg", type: "integer" },
+  { id: "q58", pack: "pack5", prompt: "Length of Lake Neuchâtel", value: 38.3, unitHint: "km", image: "/images/price-is-right/q58.jpg", type: "decimal" },
+  { id: "q61", pack: "pack5", prompt: "Year Google was founded", value: 1998, unitHint: "year", image: "/images/price-is-right/q61.jpg", type: "year" },
+  { id: "q68", pack: "pack5", prompt: "Year Apple released the first MacBook Air", value: 2008, unitHint: "year", image: "/images/price-is-right/q68.jpg", type: "year" },
+  { id: "q85", pack: "pack5", prompt: "Transfer fee for Enzo Fernández to Chelsea (2023)", value: 121000000, unitHint: "EUR", image: "/images/price-is-right/q85.jpg", type: "integer" },
+  { id: "q88", pack: "pack5", prompt: "Transfer fee for Gareth Bale to Real Madrid (2013)", value: 101000000, unitHint: "EUR", image: "/images/price-is-right/q88.jpg", type: "integer" },
+  { id: "q92", pack: "pack5", prompt: "Boiling point of nitrogen at sea level", value: -196, unitHint: "°C", image: "/images/price-is-right/q92.jpg", type: "integer" },
+  { id: "q95", pack: "pack5", prompt: "Area of the Canton of Fribourg", value: 1672, unitHint: "km²", image: "/images/price-is-right/q16.jpg", type: "integer" },
+  { id: "q108", pack: "pack5", prompt: "Melting point of tin", value: 232, unitHint: "°C", image: "/images/price-is-right/q108.jpg", type: "integer" },
+  { id: "q601", pack: "pack5", prompt: "Value of pi (π) to 10 decimal places", value: 3.1415926535, unitHint: "", image: "/images/price-is-right/q60.jpg", type: "decimal" },
+
+  // PACK 6  - 12
+  { id: "q34", pack: "pack6", prompt: "Speed of sound in air", value: 343, unitHint: "m/s", image: "/images/price-is-right/q34.jpg", type: "integer" },
+  { id: "q41", pack: "pack6", prompt: "Number of moons orbiting Jupiter", value: 115, unitHint: "moons", image: "/images/price-is-right/q41.jpg", type: "integer" },
+  { id: "q43", pack: "pack6", prompt: "Height of the Burj Khalifa", value: 828, unitHint: "m", image: "/images/price-is-right/q43.jpg", type: "integer" },
+  { id: "q44", pack: "pack6", prompt: "Population of Mexico (2026)", value: 130000000, unitHint: "people", image: "/images/price-is-right/q44.jpg", type: "integer" },
+  { id: "q46", pack: "pack6", prompt: "Total population of Bengal tigers in the wild (2026)", value: 3000, unitHint: "tigers", image: "/images/price-is-right/q46.jpg", type: "integer" },
+  { id: "q56", pack: "pack6", prompt: "Area of Lake Geneva", value: 580, unitHint: "km²", image: "/images/price-is-right/q56.jpg", type: "integer" },
+  { id: "q60", pack: "pack6", prompt: "Value of pi (π) to 10 decimal places", value: 3.1415926535, unitHint: "", image: "/images/price-is-right/q60.jpg", type: "decimal" },
+  { id: "q63", pack: "pack6", prompt: "Year Amazon was founded", value: 1994, unitHint: "year", image: "/images/price-is-right/q63.jpg", type: "year" },
+  { id: "q66", pack: "pack6", prompt: "Price of Crédit Suisse acquisition by UBS (2023)", value: 3000000000, unitHint: "CHF", image: "/images/price-is-right/q66.jpg", type: "decimal" },
+  { id: "q70", pack: "pack6", prompt: "Year Adobe Photoshop was first released", value: 1990, unitHint: "year", image: "/images/price-is-right/q70.jpg", type: "year" },
+  { id: "q97", pack: "pack6", prompt: "Boiling point of mercury", value: 357, unitHint: "°C", image: "/images/price-is-right/q97.jpg", type: "integer" },
+  { id: "q101", pack: "pack6", prompt: "Depth of Lake Baikal at its deepest point", value: 1642, unitHint: "m", image: "/images/price-is-right/q101.jpg", type: "integer" },
+
+  // PACK 7  - 12
+  { id: "q55", pack: "pack7", prompt: "Area of Switzerland", value: 41285, unitHint: "km²", image: "/images/price-is-right/q55.jpg", type: "integer" },
+  { id: "q57", pack: "pack7", prompt: "Height of the Jungfrau", value: 4158, unitHint: "m", image: "/images/price-is-right/q57.jpg", type: "integer" },
+  { id: "q59", pack: "pack7", prompt: "Population of Zurich (city proper, 2026)", value: 440000, unitHint: "people", image: "/images/price-is-right/q59.jpg", type: "integer" },
+  { id: "q64", pack: "pack7", prompt: "Year Facebook launched", value: 2004, unitHint: "year", image: "/images/price-is-right/q64.jpg", type: "year" },
+  { id: "q36", pack: "pack2", prompt: "Year the first commercial airplane flight took place", value: 1914, unitHint: "year", image: "/images/price-is-right/q36.jpg", type: "year" },
+  { id: "q65", pack: "pack7", prompt: "Population of Geneva (2026) (canton)", value: 210000, unitHint: "people", image: "/images/price-is-right/q65.jpg", type: "integer" },
+  { id: "q49", pack: "pack7", prompt: "Distance from Earth to the Sun", value: 149600000, unitHint: "km", image: "/images/price-is-right/q29.jpg", type: "integer" },
+  { id: "q51", pack: "pack7", prompt: "Length of the Rhine River within Switzerland", value: 375, unitHint: "km", image: "/images/price-is-right/q51.jpg", type: "integer" },
+  { id: "q91", pack: "pack7", prompt: "Boiling point of oxygen at sea level", value: -183, unitHint: "°C", image: "/images/price-is-right/q91.jpg", type: "integer" },
+  { id: "q19", pack: "pack7", prompt: "Height of the Eiffel Tower", value: 330, unitHint: "m", image: "/images/price-is-right/q19.jpg", type: "integer" },
+  { id: "q113", pack: "pack7", prompt: "Distance from New York to London by air", value: 5555, unitHint: "km", image: "/images/price-is-right/q113.jpg", type: "integer" },
+  { id: "q114", pack: "pack7", prompt: "Market capitalization of Tesla at the end of 2025", value: 1600000000, unitHint: "USD", image: "/images/price-is-right/q114.jpg", type: "integer" },
+  { id: "q115", pack: "pack7", prompt: "Market capitalization of Nestlé at the end of 2025", value: 202500000, unitHint: "CHF", image: "/images/price-is-right/q65.jpg", type: "integer" },
+
+  // PACK 8
+  { id: "q110", pack: "pack8", prompt: "Year the HEIA-FR (Haute École d'Ingénierie et d'Architecture Fribourg) was founded", value: 1896, unitHint: "year", image: "/images/price-is-right/q110.jpg", type: "year" },
+  { id: "q111", pack: "pack8", prompt: "Height of the highest mountain in Britain (Ben Nevis)", value: 1345, unitHint: "m", image: "/images/price-is-right/q111.jpg", type: "integer" },
+  { id: "q112", pack: "pack8", prompt: "Height of the highest building in Switzerland (Roche Tower 2)", value: 205, unitHint: "m", image: "/images/price-is-right/q112.jpg", type: "integer" },
+  { id: "q115", pack: "pack8", prompt: "Market capitalization of Apple at the end of 2025", value: 4150000000, unitHint: "USD", image: "/images/price-is-right/q115.jpg", type: "integer" },
+  { id: "q116", pack: "pack8", prompt: "Distance from Paris to Berlin by air", value: 857, unitHint: "km", image: "/images/price-is-right/q116.jpg", type: "integer" },
+  
+
+ // PACK 9
+
+ { id: "q118", pack: "pack9", prompt: "Distance from Los Angeles to New York by air", value: 3935, unitHint: "km", image: "/images/price-is-right/q117.jpg", type: "integer" }
+  //  add questions about CEO salaries, flight distance from point a to b, 
+]
 
 
 const orderedPlayersForRound = computed(() => {
@@ -393,7 +456,12 @@ function startGame() {
   gameComplete.value = false
   currentRound.value = 1
   usedQuestionIds.value = new Set()
-  questionPool.value = shuffle([...questions])
+  const packQuestions = questions.filter(q => q.pack === selectedPack.value)
+    if (packQuestions.length < roundCount.value) {
+      alert(`Selected pack has only ${packQuestions.length} questions. Reduce rounds or choose another pack.`)
+      return
+    }
+    questionPool.value = shuffle([...packQuestions]).slice(0, roundCount.value)
   pickNextQuestion()
   resetInputs()
 }
@@ -456,19 +524,27 @@ function evaluateRound() {
   }
 
   // Disallow identical numeric guesses in the same round
-  const seen = new Set<number>()
-  for (const line of lines) {
-    if (seen.has(line.guess)) {
-      alert("Two or more players entered the same guess. Please enter unique answers.")
-      return
+  // Only enforce unique guesses for non-year questions
+    if (type !== "year") {
+      const seen = new Set<number>()
+      for (const line of lines) {
+        if (seen.has(line.guess)) {
+          alert("Duplicate guesses are only allowed for year questions. Please enter unique answers.")
+          return
+        }
+        seen.add(line.guess)
+      }
     }
-    seen.add(line.guess)
-  }
 
   lines.sort((a, b) => a.absError - b.absError)
-  const winner = lines[0]
-  const winnerPlayer = players.value.find(p => p.id === winner.playerId)
-  if (winnerPlayer) winnerPlayer.points += 1
+
+  const bestAbsError = lines[0].absError
+  const winners = lines.filter(l => l.absError === bestAbsError)
+
+  winners.forEach(w => {
+    const wp = players.value.find(p => p.id === w.playerId)
+    if (wp) wp.points += 1
+  })
 
   lines.forEach(line => {
     const pl = players.value.find(p => p.id === line.playerId)
@@ -478,7 +554,7 @@ function evaluateRound() {
   })
 
   lastRoundResult.value = {
-    winnerName: winner.name,
+    winnerNames: winners.map(w => w.name),
     actual,
     type,
     lines: lines.map(l => ({ playerId: l.playerId, name: l.name, guess: l.guess, deviationPct: l.deviationPct })),

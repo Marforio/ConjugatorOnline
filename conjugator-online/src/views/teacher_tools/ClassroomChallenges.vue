@@ -744,8 +744,8 @@ const gameData: Record<
       "ch-": ['cheap', 'choose', 'chair', 'challenge', 'charm', 'chocolate', 'cheer', 'chop', "cheep sheep", "choose you shoes", "chilly cheese", "charming child", "chasing chickens", "chubby cheeks", "chocolate chunk", "cheerful chant", "chopping cherries", "chewing chocolate", "chasing cheetahs"],
       "ci-ce": ['special', 'cinema', 'certain', 'cereal', 'celebrate'],
       "hard": ["parentheses", "indices", "the mirror", "my clothes", "apostrophe", "emphasis", "analysis", "symthesis", "rural", "hierarchy", "iron", "phenomenon"],
-      "strange": ["diesel engine", "Easter island", "a kitchen island", "Is Iceland an island?", "dollar", "gauge", "vineyard", "comfortable", "Wednesday", "February", "women", "debt", "aisle", "recipe", "cupboard", "4-stroke engine"],
-      "pairs": ["desert (Sahara) vs dessert (cake)", "lead (to guide) vs lead (the metal)", "wind (air movement) vs wind (to turn)", "tear (rip) vs tear (from the eye)", "quiet (shhh!) vs quite ('quite good')", "suit (clothing) vs suite (set of rooms)", "choose vs chose", "live (to reside) vs live (not recorded)", "bass (fish) vs bass (low frequency sound)"],
+      //"strange": ["diesel engine", "Easter island", "a kitchen island", "Is Iceland an island?", "dollar", "gauge", "vineyard", "comfortable", "Wednesday", "February", "women", "debt", "aisle", "recipe", "cupboard", "4-stroke engine"],
+      //"pairs": ["desert (Sahara) vs dessert (cake)", "lead (to guide) vs lead (the metal)", "wind (air movement) vs wind (to turn)", "tear (rip) vs tear (from the eye)", "quiet (shhh!) vs quite ('quite good')", "suit (clothing) vs suite (set of rooms)", "choose vs chose", "live (to reside) vs live (not recorded)", "bass (fish) vs bass (low frequency sound)"],
     }
   },
   "Chemical Substances": {
