@@ -1,6 +1,6 @@
 <template>
   <v-container fluid class="mt-5 pa-4 px-6 max-width-management-container">
-<v-row class="mb-6 d-flex align-center">
+<v-row class="mb-3 d-flex align-center">
       <v-col cols="12" sm="8">
         <h1 class="text-h4 font-weight-black text-slate-900 d-flex align-center">
           <v-icon icon="mdi-bookshelf" color="indigo" class="mr-5" />
@@ -144,6 +144,17 @@
                             <v-tooltip activator="parent" location="top">Download PDF</v-tooltip>
                           </v-btn>
                           <v-btn
+                            variant="tonal"
+                            size="small"
+                            color="deep-purple"
+                            class="mr-3"
+                            :loading="presentationLoadingListId === list.id"
+                            @click="openPresentationPreview(list)"
+                          >
+                            <v-icon icon="mdi-presentation-play" />
+                            <v-tooltip activator="parent" location="top">Presentation Preview</v-tooltip>
+                          </v-btn>
+                          <v-btn
                             size="small"
                             variant="tonal"
                             color="indigo"
@@ -240,6 +251,17 @@
                             Manage Access
                           </v-btn>
                         </td>
+                        <v-btn
+                          size="small"
+                          variant="tonal"
+                          color="deep-purple"
+                          class="rounded-lg font-weight-bold text-none text-xs px-3 me-3"
+                          prepend-icon="mdi-presentation-play"
+                          :loading="presentationLoadingListId === list.id"
+                          @click="openPresentationPreview(list)"
+                        >
+                          Preview
+                        </v-btn>
                       </tr>
                     </tbody>
                   </v-table>
@@ -1138,7 +1160,13 @@ camshaft,a shaft in an engine that controls valve timing,noun,The mechanic repla
         </v-card-text>
       </v-card>
     </v-dialog>
+    <VWPresentationMode
+      v-model="presentationOpen"
+      :items="presentationItems"
+      :list-name="presentationListName"
+    />
   </v-container>
+
 </template>
 
 <script setup lang="ts">
@@ -1146,6 +1174,7 @@ import { ref, reactive, onMounted, computed } from "vue"
 import api from "@/axios"
 import { exportVocabListPdf } from "@/utils/vocabListPdf"
 import { useUserStore } from "@/stores/user"
+import VWPresentationMode from "@/components/vocab_workout_scenes/VWPresentationMode.vue"
 
 const userStore = useUserStore()
 
@@ -1194,6 +1223,11 @@ const wizardRowData = ref<ManualVocabRow | null>(null)
 const formMetadata = reactive({ name: "", domain: "" })
 
 const pdfLoadingListId = ref<string | null>(null)
+
+const presentationOpen = ref(false)
+const presentationItems = ref<any[]>([])
+const presentationListName = ref<string>("Vocabulary Preview")
+const presentationLoadingListId = ref<string | null>(null)
 
 // SEARCH FOR YOUR TOP-LEVEL COMPONENT STATE VARIABLES, AND ADD:
 const activeManagementTab = ref("categories")
@@ -1298,6 +1332,22 @@ const vocabListsByCourse = computed(() => {
     .sort((a, b) => a.slug.localeCompare(b.slug))
 })
 
+
+async function openPresentationPreview(list: any) {
+  presentationLoadingListId.value = list.id
+  try {
+    const res = await api.get(`/vocab-lists/${list.id}/prompts/`)
+    presentationItems.value = Array.isArray(res.data) ? res.data : []
+    presentationListName.value = list.name || "Vocabulary Preview"
+    presentationOpen.value = true
+  } catch (err) {
+    console.error("Failed loading presentation preview:", err)
+    alert("Failed to load this list for presentation preview.")
+    presentationItems.value = []
+  } finally {
+    presentationLoadingListId.value = null
+  }
+}
 
 async function openAvailabilityConsole(list: any) {
   selectedListForAvailability.value = list

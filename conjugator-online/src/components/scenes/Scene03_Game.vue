@@ -85,8 +85,17 @@
       <v-btn icon="mdi-arrow-left" variant="tonal" size="small" color="slate-600" class="rounded-lg bg-white border" @click="goBack" />
       
       <v-tooltip text="Summary of tense keywords" location="top">
-        <template v-slot:activator="{ props: helperProps }">
-          <v-btn icon="mdi-lifebuoy" variant="tonal" size="small" color="slate-600" class="rounded-lg bg-white border" v-bind="helperProps" href="https://book.language-labs.ch/ch4#tense-keyword-summary" target='_blank' />
+        <template #activator="{ props }">
+          <v-btn
+            size="small"
+            icon
+            class="bg-white border elevation-1"
+            v-bind="props"
+            href="https://book.language-labs.ch/ch4#tense-keyword-summary"
+            target="_blank"
+          >
+            <v-icon color="primary">mdi-lifebuoy</v-icon>
+          </v-btn>
         </template>
       </v-tooltip>
 
@@ -123,13 +132,20 @@
 
         <div class="d-flex align-center mt-8 pa-4 rounded-xl bg-slate-50 border">
           <span class="text-body-1 font-weight-medium text-slate-700 ms-4 me-8">Do you need to review the grammar first? 👉👉👉</span>
-          <v-tooltip text="Summary of tense keywords" location="top">
-            <template v-slot:activator="{ props: helpProps }">
-              <v-btn size="large" icon class="bg-white border elevation-1" v-bind="helpProps" href="https://book.language-labs.ch/ch4#tense-keyword-summary" target='_blank'>
-                <v-icon color="primary">mdi-lifebuoy</v-icon>
-              </v-btn>
-            </template>
-          </v-tooltip>
+            <v-tooltip text="Summary of tense keywords" location="top">
+              <template #activator="{ props }">
+                <v-btn
+                  size="large"
+                  icon
+                  class="bg-white border elevation-1"
+                  v-bind="props"
+                  href="https://book.language-labs.ch/ch4#tense-keyword-summary"
+                  target="_blank"
+                >
+                  <v-icon color="primary">mdi-lifebuoy</v-icon>
+                </v-btn>
+              </template>
+            </v-tooltip>
         </div>
 
         <div class="d-flex justify-center mt-10">
@@ -301,7 +317,7 @@
           height="8"
           color="primary"
           rounded
-          class="mt-8 mb-4"
+          class="mt-5 mb-3"
           :style="{ maxWidth: $vuetify.display.mdAndUp ? '460px' : '320px' }"
         ></v-progress-linear>
 

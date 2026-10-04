@@ -20,7 +20,7 @@ export type BackField =
   | "German"
   | "Italian";
 
-export type GameMode = "cards" | "write" | "multiple_choice" | "quiz" | "match";
+export type GameMode = "cards" | "write" | "multiple_choice" | "quiz" | "match" | "presentation";
 
 export type RawVocabItem = {
   definition?: string;
@@ -144,19 +144,44 @@ export function isCorrectAnswer(accepted: string[], user: string): boolean {
 }
 
 export function getFrontText(item: VocabItem | any, front: FrontField): string {
-  // For custom items with additional_data
-  if (item.additional_data) {
-    if (front === "term") return item.term;
-    const data = item.additional_data;
-    const value = data[front];
-    if (Array.isArray(value)) return value[0] || "—";
-    return value ? String(value) : "—";
+  if (!item) return "—";
+
+  // Always support term directly
+  if (front === "term") {
+    return String(item.term ?? "").trim() || "—";
   }
 
-  // For hardcoded items with fields
-  if (front === "term") return item.term;
+  // 1) Custom items: definition is usually top-level
+  if (front === "definition") {
+    const topDef = String(item.definition ?? "").trim();
+    if (topDef) return topDef;
+  }
+
+  // 2) Custom items: try additional_data
+  const data = item.additional_data;
+  if (data && typeof data === "object") {
+    const v = data[front];
+    if (Array.isArray(v)) {
+      const first = String(v[0] ?? "").trim();
+      if (first) return first;
+    } else {
+      const s = String(v ?? "").trim();
+      if (s) return s;
+    }
+  }
+
+  // 3) Hardcoded normalized items: fields map
   const arr = item.fields?.[front] || [];
-  return arr[0] || "—";
+  if (Array.isArray(arr) && arr.length) {
+    const first = String(arr[0] ?? "").trim();
+    if (first) return first;
+  }
+
+  // 4) Last fallback for any shape that stores front field top-level
+  const top = String(item?.[front] ?? "").trim();
+  if (top) return top;
+
+  return "—";
 }
 
 export function getAcceptedAnswers(item: VocabItem | any, field: BackField): string[] {

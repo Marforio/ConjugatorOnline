@@ -54,78 +54,89 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, onMounted, onUnmounted } from 'vue';
-import api from '@/axios';
+import { computed, ref, onMounted, onUnmounted } from "vue";
+import api from "@/axios";
 
-// Replace this mock with your actual store definition hook
 const userStore = {
-  user: { is_staff: true }
+  user: { is_staff: true },
 };
 
-interface OnlineStudent {
-  student_id: number;
-  initials: string;
-  web_id: string;
-  last_activity_type: string;
-  last_activity_name: string;
-  last_seen: string;
-  seconds_ago: number;
+interface RecentActivity {
+  id: number;
+  student: number;
+  student_initials: string;
+  activity_type: string;
+  activity_name: string;
+  description: string;
+  timestamp: string;
 }
 
-const displayActivity = ref<OnlineStudent | null>(null);
+type TickerItem = {
+  id: number;
+  initials: string;
+  last_activity_type: string;
+  last_activity_name: string;
+  seconds_ago: number;
+};
+
+const displayActivity = ref<TickerItem | null>(null);
+const recentQueue = ref<TickerItem[]>([]);
 let networkTimer: number | null = null;
+let rotateTimer: number | null = null;
 let secondsTicker: number | null = null;
+
+const POLL_MS = 15000;        // faster refresh (was 60000)
+const ROTATE_MS = 3000;       // rotate visible ticker item
+const MAX_ITEMS = 10;         // show up to last 10
+const MAX_AGE_SEC = 10 * 60;  // only <= 10 min old
+
+function nowSec() {
+  return Math.floor(Date.now() / 1000);
+}
+
+function toSecondsAgo(ts: string): number {
+  const t = new Date(ts).getTime();
+  if (Number.isNaN(t)) return 999999;
+  return Math.max(0, Math.floor((Date.now() - t) / 1000));
+}
 
 function getActivityIcon(type: string): string {
   const icons: Record<string, string> = {
-    'conjugation': 'mdi-controller',
-    'other_game': 'mdi-gamepad-variant',
-    'exercise': 'mdi-weight-lifter',
-    'vocab_workout': 'mdi-cards-outline',
-    'achievement': 'mdi-trophy',
-    'profile_update': 'mdi-account-voice',
-    'feedback': 'mdi-comment-alert',
+    conjugation: "mdi-controller",
+    other_game: "mdi-gamepad-variant",
+    exercise: "mdi-weight-lifter",
+    vocab_workout: "mdi-cards-outline",
+    achievement: "mdi-trophy",
+    profile_update: "mdi-account-voice",
+    feedback: "mdi-comment-alert",
+    page_view: "mdi-file-document-outline",
+    heartbeat: "mdi-pulse",
   };
-  return icons[type] || 'mdi-lightning-bolt';
+  return icons[type] || "mdi-lightning-bolt";
 }
 
 function getActivityColor(type: string): string {
   const colors: Record<string, string> = {
-    'conjugation': 'blue-accent-2',
-    'other_game': 'purple-accent-2',
-    'exercise': 'orange-accent-2',
-                'vocab_workout': 'teal-accent-2',
-    'achievement': 'amber-accent-2',
-    'profile_update': 'indigo-accent-2',
-    'feedback': 'red-accent-2',
+    conjugation: "blue-accent-2",
+    other_game: "purple-accent-2",
+    exercise: "orange-accent-2",
+    vocab_workout: "teal-accent-2",
+    achievement: "amber-accent-2",
+    profile_update: "indigo-accent-2",
+    feedback: "red-accent-2",
+    page_view: "cyan-accent-2",
+    heartbeat: "grey-lighten-1",
   };
-  return colors[type] || 'white';
+  return colors[type] || "white";
 }
 
 function formatSecondsAgo(secs: number): string {
-  if (secs < 60) return 'Just now';
+  if (secs < 60) return "Just now";
   const mins = Math.floor(secs / 60);
   return `${mins}m ago`;
 }
 
-async function fetchLatestPulse() {
-  try {
-    const response = await api.get('/online-students/');
-    const students = response.data.students || [];
-    
-    if (students.length > 0) {
-      displayActivity.value = students[0];
-      // 🚀 Dynamically notify the whole DOM that the ticker is active and takes 36px space
-      document.documentElement.style.setProperty('--ticker-height', '36px');
-    } else {
-      displayActivity.value = null;
-      document.documentElement.style.setProperty('--ticker-height', '0px');
-    }
-  } catch (error) {
-    console.error('Ticker sync failed:', error);
-  }
-}
-
+// ---- custom list id -> name mapping ----
 const customListNameMap = ref<Record<string, string>>({});
 
 function isUuidLike(v: string): boolean {
@@ -189,23 +200,83 @@ const displayActivityLabel = computed(() => {
   return replaceListIdsInText(raw);
 });
 
-onMounted(() => {
-  if (userStore.user?.is_staff) {
-    fetchLatestPulse();
-    fetchCustomListNames();
-    networkTimer = window.setInterval(fetchLatestPulse, 60000);
-    secondsTicker = window.setInterval(() => {
-      if (displayActivity.value) {
-        displayActivity.value.seconds_ago += 1;
-      }
-    }, 1000);
+async function fetchLatestActivities() {
+  try {
+    const params: any = {
+      limit: 50,
+      include_heartbeats: "false",
+      managed_only: "true",
+    };
+
+    const res = await api.get("/student-activities/", { params });
+    const rows: RecentActivity[] = res.data?.results ? res.data.results : (res.data || []);
+
+    const filtered = rows
+      .map((r) => ({
+        id: r.id,
+        initials: r.student_initials || "??",
+        last_activity_type: r.activity_type || "heartbeat",
+        last_activity_name: r.description || r.activity_name || "Activity",
+        seconds_ago: toSecondsAgo(r.timestamp),
+      }))
+      .filter((x) => x.seconds_ago <= MAX_AGE_SEC)
+      .slice(0, MAX_ITEMS);
+
+    recentQueue.value = filtered;
+
+    if (!displayActivity.value && filtered.length > 0) {
+      displayActivity.value = filtered[0];
+      document.documentElement.style.setProperty("--ticker-height", "36px");
+    }
+
+    if (filtered.length === 0) {
+      displayActivity.value = null;
+      document.documentElement.style.setProperty("--ticker-height", "0px");
+    }
+  } catch (error) {
+    console.error("Ticker sync failed:", error);
   }
+}
+
+function rotateTickerItem() {
+  if (recentQueue.value.length === 0) return;
+
+  const currentId = displayActivity.value?.id;
+  const idx = recentQueue.value.findIndex((x) => x.id === currentId);
+  const nextIdx = idx < 0 ? 0 : (idx + 1) % recentQueue.value.length;
+  displayActivity.value = recentQueue.value[nextIdx];
+}
+
+onMounted(() => {
+  if (!userStore.user?.is_staff) return;
+
+  void fetchCustomListNames();
+  void fetchLatestActivities();
+
+  networkTimer = window.setInterval(() => {
+    void fetchLatestActivities();
+  }, POLL_MS);
+
+  rotateTimer = window.setInterval(() => {
+    rotateTickerItem();
+  }, ROTATE_MS);
+
+  secondsTicker = window.setInterval(() => {
+    if (displayActivity.value) displayActivity.value.seconds_ago += 1;
+    for (const item of recentQueue.value) item.seconds_ago += 1;
+    // drop stale (>10 min) as time advances
+    recentQueue.value = recentQueue.value.filter((x) => x.seconds_ago <= MAX_AGE_SEC);
+    if (displayActivity.value && displayActivity.value.seconds_ago > MAX_AGE_SEC) {
+      displayActivity.value = recentQueue.value[0] || null;
+    }
+  }, 1000);
 });
 
 onUnmounted(() => {
   if (networkTimer) clearInterval(networkTimer);
+  if (rotateTimer) clearInterval(rotateTimer);
   if (secondsTicker) clearInterval(secondsTicker);
-  document.documentElement.style.setProperty('--ticker-height', '0px');
+  document.documentElement.style.setProperty("--ticker-height", "0px");
 });
 </script>
 

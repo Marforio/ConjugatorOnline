@@ -2,7 +2,7 @@
   <v-container fluid class="pa-6 dashboard-bg" :class="userStore.isStaff ? 'mt-0' : 'mt-4'">
     
     <!-- HERO SECTION: Welcome + Buttons (left) + Stats (right) -->
-    <v-row class="mb-6" align="center">
+    <v-row align="center">
       <v-col cols="12">
         <v-card class="pa-6 welcome-banner" elevation="0" rounded="xl">
           <v-row align="center">
@@ -79,8 +79,8 @@
     <!-- ACTIVITY FEED: Horizontal timeline with dots -->
 <v-row v-if="welcomeStore.activityFeed.length > 0">
   <v-col cols="12">
-    <div class="d-flex align-center justify-space-between mb-4">
-      <h2 class="text-h6 font-weight-bold text-slate-900">Recent Activity</h2>
+    <div class="d-flex align-center justify-space-between mb-3">
+      <h2 class="text-h6 ms-3 font-weight-bold text-slate-900">Recent Activity</h2>
       <v-chip-group v-model="welcomeStore.activityFilter" @update:model-value="welcomeStore.fetchActivityFeed" density="compact">
         <v-chip size="x-small" variant="outlined" value="all">All</v-chip>
         <v-chip size="x-small" variant="outlined" value="conjugation">Conjugator</v-chip>

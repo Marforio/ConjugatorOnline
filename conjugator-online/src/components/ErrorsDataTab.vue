@@ -79,50 +79,50 @@
         :key="feedback.feedback_id || index"
       >
         <v-expansion-panel-title>
-          {{ feedback.feedback_id || 'Unknown' }}
+          <div class="d-flex align-center justify-space-between w-100 pr-2">
+            <!-- Left side: same info as table headers -->
+            <div class="d-flex flex-wrap align-center ga-2">
+              <!-- Feedback ID + template_id -->
+              <div class="font-weight-bold text-indigo-darken-3">
+                {{ feedback.feedback_id || 'Unknown' }}
+              </div>
+
+              <v-chip size="x-small" variant="tonal" color="primary">
+                {{ getTemplateIdFromFeedbackGroup(feedback) }}
+              </v-chip>
+
+              <v-chip size="x-small" variant="outlined">
+                {{ String(getCourseFromFeedbackGroup(feedback) || '').toUpperCase() || 'N/A' }}
+              </v-chip>
+
+              <span class="text-caption text-slate-600">
+                {{ getDateFromFeedbackGroup(feedback) || 'No date' }}
+              </span>
+            </div>
+
+            <!-- Right side: action button -->
+            <div class="d-flex align-center ga-1">
+              <v-btn
+                icon="mdi-file-pdf-box"
+                size="small"
+                color="error"
+                variant="text"
+                title="Generate Report PDF"
+                @click.stop="generateLocalPdfSummary(getRawFeedbackFromGroup(feedback))"
+              />
+            </div>
+          </div>
         </v-expansion-panel-title>
 
         <v-expansion-panel-text>
+          <!-- your existing error list -->
           <v-list dense>
             <v-list-item
               v-for="(error, i) in feedback.errors"
               :key="error.error_id || i"
               class="py-2"
             >
-              <v-list-item-content>
-                <!-- Error title -->
-                <v-list-item-title class="mb-2" style="white-space: normal;">
-                  <strong>{{ error.error_code }}:</strong>
-                  {{ errorData[error.error_code]?.description || 'No description available' }}
-                  - <span class="text-medium-emphasis">Error detected {{ error.times }} time(s)</span>
-                </v-list-item-title>
-
-                <!-- Bullet list for evidence and reference -->
-                <ul class="ms-3" style="padding-left: 1em; margin: 0; list-style-type: disc;">
-                  <li style="white-space: normal;">
-                    Specifically, you said: <em>{{ error.evidence || 'No evidence provided' }}</em>
-                  </li>
-                  <li style="white-space: normal;">
-                    To understand this error, see
-                    <span v-html="errorData[error.error_code]?.reference || 'No reference available'"></span>
-                    or ask the AI tutor <v-icon class="ms-1" size="14">mdi-arrow-right</v-icon>
-                    <v-tooltip text="Ask AI tutor">
-                      <template #activator="{ props }">
-                        <v-btn
-                          v-bind="props"
-                          size="x-small"
-                          variant="text"
-                          class="ms-1"
-                          @click.stop="openErrorTutor(error)"
-                          aria-label="Ask AI tutor"
-                        >
-                          <v-icon size="18">mdi-robot-outline</v-icon>
-                        </v-btn>
-                      </template>
-                    </v-tooltip>
-                  </li>
-                </ul>
-              </v-list-item-content>
+              ...
             </v-list-item>
           </v-list>
         </v-expansion-panel-text>
@@ -300,6 +300,27 @@ function openErrorTutor(err: ErrorItem) {
   tutorOpen.value = true;
 }
 
+function getRawFeedbackFromGroup(group: any): any | null {
+  const first = group?.errors?.[0]
+  if (!first) return null
+  return typeof first.feedback === 'object' ? first.feedback : null
+}
+
+function getTemplateIdFromFeedbackGroup(group: any): string {
+  const raw = getRawFeedbackFromGroup(group)
+  return raw?.content?.template_id || 'no-template'
+}
+
+function getCourseFromFeedbackGroup(group: any): string {
+  const raw = getRawFeedbackFromGroup(group)
+  return raw?.course?.name || raw?.course || ''
+}
+
+function getDateFromFeedbackGroup(group: any): string {
+  const raw = getRawFeedbackFromGroup(group)
+  return raw?.date || ''
+}
+
 async function openErrorTutorFromChart(payload: any) {
   tutorOpen.value = false;
   await nextTick();
@@ -367,196 +388,217 @@ const fetchImpressiveData = async () => {
 };
 
 // ---------------- Client-Side PDF Generation Engine ----------------
-const generateLocalPdfSummary = async () => {
-  if (errors.value.length === 0) return;
-  exportLoading.value = true;
+const generateLocalPdfSummary = async (feedbackItem?: any) => {
+  const sourceErrors = feedbackItem
+    ? errors.value.filter((e: any) => {
+        const fb = typeof e.feedback === "string" ? e.feedback : e.feedback?.feedback_id
+        return fb === feedbackItem.feedback_id
+      })
+    : errors.value
+
+  if (sourceErrors.length === 0) return
+  exportLoading.value = true
 
   try {
-    // Sync store profiles to gather matching contextual meta tags
-    await Promise.all([
-      userStore.fetchLinguisticProfile?.(),
-      userStore.fetchCurrentWorkout?.({ user_id: userStore.studentId ?? undefined })
-    ].filter(Boolean));
+    await Promise.all(
+      [
+        userStore.fetchLinguisticProfile?.(),
+        userStore.fetchCurrentWorkout?.({ user_id: userStore.studentId ?? undefined }),
+      ].filter(Boolean)
+    )
 
-    const activeStudentId = userStore.studentId || "Student";
-    const initials = (userStore as any).studentInitials || (userStore.user?.username?.substring(0, 2).toUpperCase()) || "ST";
-    const courseLabel = (userStore as any).currentCourseName || "General Practice English";
+    const activeStudentId = userStore.studentId || "Student"
+    const initials =
+      (userStore as any).studentInitials ||
+      (userStore.user?.username?.substring(0, 2).toUpperCase()) ||
+      "ST"
 
-    const aggregatedMap = new Map<string, { error_code: string; total_times: number; evidence_samples: string[] }>();
-    
-    errors.value.forEach(err => {
+    const titleSuffix = feedbackItem
+      ? ` — ${feedbackItem.feedback_id}${
+          feedbackItem?.content?.template_id ? ` · ${feedbackItem.content.template_id}` : ""
+        }`
+      : ""
+
+    const aggregatedMap = new Map<
+      string,
+      { error_code: string; total_times: number; evidence_samples: string[] }
+    >()
+
+    sourceErrors.forEach((err: any) => {
       if (!aggregatedMap.has(err.error_code)) {
         aggregatedMap.set(err.error_code, {
           error_code: err.error_code,
           total_times: 0,
-          evidence_samples: []
-        });
+          evidence_samples: [],
+        })
       }
-      const existing = aggregatedMap.get(err.error_code)!;
-      existing.total_times += (err.times || 1);
-      if (err.evidence) {
-        existing.evidence_samples.push(err.evidence);
-      }
-    });
+      const existing = aggregatedMap.get(err.error_code)!
+      existing.total_times += err.times || 1
+      if (err.evidence) existing.evidence_samples.push(err.evidence)
+    })
 
-    const sortedErrorsArray = Array.from(aggregatedMap.values())
-      .sort((a, b) => b.total_times - a.total_times);
+    const sortedErrorsArray = Array.from(aggregatedMap.values()).sort(
+      (a, b) => b.total_times - a.total_times
+    )
 
-    const topErrors = sortedErrorsArray.slice(0, 8);
-    const primaryErrorsTableData = sortedErrorsArray.slice(0, 10);
-    const remainingErrors = sortedErrorsArray.slice(10);
+    const topErrors = sortedErrorsArray.slice(0, 8)
+    const primaryErrorsTableData = sortedErrorsArray.slice(0, 10)
+    const remainingErrors = sortedErrorsArray.slice(10)
 
-    const doc = new jsPDF({ orientation: "portrait", unit: "pt", format: "a4" });
-    const pageWidth = doc.internal.pageSize.getWidth();
-    const margin = 40;
-    const contentWidth = pageWidth - margin * 2;
-    let currentY = 40;
+    const doc = new jsPDF({ orientation: "portrait", unit: "pt", format: "a4" })
+    const pageWidth = doc.internal.pageSize.getWidth()
+    const margin = 40
+    const contentWidth = pageWidth - margin * 2
+    let currentY = 40
 
-    doc.setFillColor(0, 150, 136); 
-    doc.rect(margin, currentY, contentWidth, 6, "F");
-    currentY += 20;
+    doc.setFillColor(0, 150, 136)
+    doc.rect(margin, currentY, contentWidth, 6, "F")
+    currentY += 20
 
-    doc.setFontSize(18);
-    doc.setTextColor(44, 62, 80);
-    doc.setFont("helvetica", "bold");
-    doc.text(`Error report for ${initials}`, margin, currentY);
+    doc.setFontSize(18)
+    doc.setTextColor(44, 62, 80)
+    doc.setFont("helvetica", "bold")
+    doc.text(`Error report for ${initials}${titleSuffix}`, margin, currentY)
 
-    doc.setTextColor(120, 130, 140);
-    doc.setFontSize(9);
-    doc.setFont("helvetica", "normal");
-    currentY += 15;
-    doc.text(`Generated on ${new Date().toLocaleDateString()}`, margin, currentY);
+    doc.setTextColor(120, 130, 140)
+    doc.setFontSize(9)
+    doc.setFont("helvetica", "normal")
+    currentY += 15
+    doc.text(`Generated on ${new Date().toLocaleDateString()}`, margin, currentY)
 
-    currentY += 15;
-    const totalAnomaliesCount = sortedErrorsArray.reduce((acc, curr) => acc + curr.total_times, 0);
-    
+    currentY += 15
+    const totalAnomaliesCount = sortedErrorsArray.reduce((acc, curr) => acc + curr.total_times, 0)
+
     autoTable(doc, {
       startY: currentY,
       margin: { left: margin, right: margin },
       head: [["Key Stats", "Value"]],
       body: [
         ["Domain", userStore.studentDomainLabel || "General Practice"],
-        ["Total Documented Errors", `${totalAnomaliesCount}`],
+        ["Total Errors", `${totalAnomaliesCount}`],
         ["Unique Errors", `${sortedErrorsArray.length} items`],
-        ["Feedbacks", `${feedbackGroups.value.length}`]
+        ["Scope", feedbackItem ? "Single Feedback" : "All Feedbacks"],
       ],
       theme: "striped",
       headStyles: { fillColor: [0, 150, 136], textColor: 255, fontStyle: "bold" },
-      styles: { fontSize: 9, cellPadding: 5 }
-    });
+      styles: { fontSize: 9, cellPadding: 5 },
+    })
 
-    currentY = (doc as any).lastAutoTable.finalY + 25;
+    currentY = (doc as any).lastAutoTable.finalY + 25
 
     if (topErrors.length > 0) {
-      doc.setFontSize(11);
-      doc.setFont("helvetica", "bold");
-      doc.setTextColor(44, 62, 80);
-      doc.text("Your Top Error Types", margin, currentY);
-      currentY += 15;
+      doc.setFontSize(11)
+      doc.setFont("helvetica", "bold")
+      doc.setTextColor(44, 62, 80)
+      doc.text("Your Top Error Types", margin, currentY)
+      currentY += 15
 
       try {
-        const renderWidth = 1200;
-        const renderHeight = 500;
-        const offscreenCanvas = document.createElement("canvas");
-        offscreenCanvas.width = renderWidth;
-        offscreenCanvas.height = renderHeight;
-        offscreenCanvas.style.backgroundColor = "#FFFFFF"; 
-        const offscreenCtx = offscreenCanvas.getContext("2d");
+        const renderWidth = 1200
+        const renderHeight = 500
+        const offscreenCanvas = document.createElement("canvas")
+        offscreenCanvas.width = renderWidth
+        offscreenCanvas.height = renderHeight
+        offscreenCanvas.style.backgroundColor = "#FFFFFF"
+        const offscreenCtx = offscreenCanvas.getContext("2d")
 
         if (offscreenCtx) {
-          offscreenCtx.save();
-          offscreenCtx.globalCompositeOperation = "source-over";
-          offscreenCtx.fillStyle = "#FFFFFF"; // hard white paint
-          offscreenCtx.fillRect(0, 0, renderWidth, renderHeight);
-          offscreenCtx.restore();
+          offscreenCtx.save()
+          offscreenCtx.globalCompositeOperation = "source-over"
+          offscreenCtx.fillStyle = "#FFFFFF"
+          offscreenCtx.fillRect(0, 0, renderWidth, renderHeight)
+          offscreenCtx.restore()
 
           const offscreenCtxInstance = new Chart(offscreenCtx, {
             type: "bar",
             data: {
-              labels: topErrors.map(e => e.error_code),
-              datasets: [{
-                  data: topErrors.map(e => e.total_times),
+              labels: topErrors.map((e) => e.error_code),
+              datasets: [
+                {
+                  data: topErrors.map((e) => e.total_times),
                   backgroundColor: "rgba(0, 150, 136, 0.72)",
                   borderColor: "rgba(0, 150, 136, 1)",
                   borderWidth: 1.5,
                   borderRadius: 5,
-                  categoryPercentage: 0.62, // slimmer category occupancy
-                  barPercentage: 0.72        // slimmer bars
-                }]
+                  categoryPercentage: 0.62,
+                  barPercentage: 0.72,
+                },
+              ],
             },
             options: {
-                responsive: false,
-                maintainAspectRatio: false,
-                animation: false,
-                devicePixelRatio: 2, // sharper output in PDF
-                layout: {
-                  padding: { top: 18, bottom: 8, left: 8, right: 12 }
-                },
-                plugins: {
-                  legend: { display: false },
-                  tooltip: { enabled: false } // no tooltips needed for export
-                },
-                scales: {
-                  x: {
-                    grid: { display: false },
-                    ticks: {
-                      color: "#2C3E50",
-                      font: { size: 13, weight: 600, family: "helvetica" },
-                      maxRotation: 0,
-                      minRotation: 0
-                    }
+              responsive: false,
+              maintainAspectRatio: false,
+              animation: false,
+              devicePixelRatio: 2,
+              layout: { padding: { top: 18, bottom: 8, left: 8, right: 12 } },
+              plugins: {
+                legend: { display: false },
+                tooltip: { enabled: false },
+              },
+              scales: {
+                x: {
+                  grid: { display: false },
+                  ticks: {
+                    color: "#2C3E50",
+                    font: { size: 13, weight: 600, family: "helvetica" },
+                    maxRotation: 0,
+                    minRotation: 0,
                   },
-                  y: {
-                    beginAtZero: true,
-                    grid: { color: "rgba(44, 62, 80, 0.12)" },
-                    ticks: {
-                      precision: 0,
-                      color: "#5F6B7A",
-                      font: { size: 11, family: "helvetica" }
-                    }
-                  }
-                }
-              }
-          });
+                },
+                y: {
+                  beginAtZero: true,
+                  grid: { color: "rgba(44, 62, 80, 0.12)" },
+                  ticks: {
+                    precision: 0,
+                    color: "#5F6B7A",
+                    font: { size: 11, family: "helvetica" },
+                  },
+                },
+              },
+            },
+          })
 
-          const cleanChartImgBase64 = offscreenCanvas.toDataURL("image/png");
-          const pdfImageHeight = 170; 
-          
-          doc.addImage(cleanChartImgBase64, "PNG", margin, currentY, contentWidth, pdfImageHeight);
-          currentY += pdfImageHeight + 30;
-          offscreenCtxInstance.destroy();
+          const cleanChartImgBase64 = offscreenCanvas.toDataURL("image/png")
+          const pdfImageHeight = 170
+          doc.addImage(cleanChartImgBase64, "PNG", margin, currentY, contentWidth, pdfImageHeight)
+          currentY += pdfImageHeight + 30
+          offscreenCtxInstance.destroy()
         }
       } catch (canvasErr) {
-        console.error("Offscreen canvas compilation trace failed:", canvasErr);
-        currentY += 15;
+        console.error("Offscreen canvas compilation trace failed:", canvasErr)
+        currentY += 15
       }
     }
 
     if (primaryErrorsTableData.length > 0) {
-      if (currentY > doc.internal.pageSize.getHeight() - 120) { doc.addPage(); currentY = 40; }
-      
-      doc.setFontSize(11);
-      doc.setFont("helvetica", "bold");
-      doc.setTextColor(44, 62, 80);
-      doc.text("Error Breakdown & Explanations (Primary Items)", margin, currentY);
-      currentY += 12;
+      if (currentY > doc.internal.pageSize.getHeight() - 120) {
+        doc.addPage()
+        currentY = 40
+      }
 
-      const errorRows = primaryErrorsTableData.map(e => {
-        const metadata = errorData[e.error_code];
-        const descriptionText = metadata?.description || "Review needed for this syntax grouping pattern.";
-        const cleanReference = (metadata?.reference || "").replace(/<[^>]*>/g, ""); 
-        
-        const samples = e.evidence_samples && e.evidence_samples.length > 0
-          ? e.evidence_samples.slice(0, 2).map(sample => `• "${sample}"`).join("\n")
-          : "No structural phrase snippets saved.";
+      doc.setFontSize(11)
+      doc.setFont("helvetica", "bold")
+      doc.setTextColor(44, 62, 80)
+      doc.text("Error Breakdown & Explanations (Primary Items)", margin, currentY)
+      currentY += 12
+
+      const errorRows = primaryErrorsTableData.map((e) => {
+        const metadata = errorData[e.error_code]
+        const descriptionText = metadata?.description || "Review needed for this syntax grouping pattern."
+        const cleanReference = (metadata?.reference || "").replace(/<[^>]*>/g, "")
+
+        const samples =
+          e.evidence_samples && e.evidence_samples.length > 0
+            ? e.evidence_samples.slice(0, 2).map((sample) => `• "${sample}"`).join("\n")
+            : "No structural phrase snippets saved."
 
         return [
           e.error_code,
           String(e.total_times),
-          `${descriptionText}${cleanReference ? '\n\nTip: ' + cleanReference : ''}`,
-          samples
-        ];
-      });
+          `${descriptionText}${cleanReference ? "\n\nTip: " + cleanReference : ""}`,
+          samples,
+        ]
+      })
 
       autoTable(doc, {
         startY: currentY,
@@ -564,55 +606,64 @@ const generateLocalPdfSummary = async () => {
         head: [["Code", "Count", "What to watch out for", "Your Examples"]],
         body: errorRows,
         theme: "grid",
-        headStyles: { fillColor: [239, 83, 80], textColor: 255 }, 
+        headStyles: { fillColor: [239, 83, 80], textColor: 255 },
         styles: { fontSize: 8, cellPadding: 5, overflow: "linebreak", valign: "top" },
         columnStyles: {
           0: { cellWidth: 50, fontStyle: "bold" },
           1: { cellWidth: 40, halign: "center" },
           2: { cellWidth: 235 },
-          3: { cellWidth: 190, fontStyle: "italic" }
-        }
-      });
+          3: { cellWidth: 190, fontStyle: "italic" },
+        },
+      })
 
-      currentY = (doc as any).lastAutoTable.finalY + 20;
+      currentY = (doc as any).lastAutoTable.finalY + 20
 
       if (remainingErrors.length > 0) {
-        if (currentY > doc.internal.pageSize.getHeight() - 60) { doc.addPage(); currentY = 40; }
-        
-        doc.setFontSize(10);
-        doc.setFont("helvetica", "bold");
-        doc.setTextColor(100, 110, 120);
-        doc.text("Other minor items to keep an eye on:", margin, currentY);
-        currentY += 15;
-        
-        doc.setFont("helvetica", "normal");
-        doc.setTextColor(110, 110, 110);
-        doc.setFontSize(8.5);
-        
-        remainingErrors.forEach(e => {
-          const metadata = errorData[e.error_code];
-          const desc = metadata?.description || "Grammar evaluation checkpoint pattern check.";
-          const bulletText = `•  Code ${e.error_code} (${e.total_times}x): ${desc}`;
-          const lines = doc.splitTextToSize(bulletText, contentWidth);
-          
+        if (currentY > doc.internal.pageSize.getHeight() - 60) {
+          doc.addPage()
+          currentY = 40
+        }
+
+        doc.setFontSize(10)
+        doc.setFont("helvetica", "bold")
+        doc.setTextColor(100, 110, 120)
+        doc.text("Other minor items to keep an eye on:", margin, currentY)
+        currentY += 15
+
+        doc.setFont("helvetica", "normal")
+        doc.setTextColor(110, 110, 110)
+        doc.setFontSize(8.5)
+
+        remainingErrors.forEach((e) => {
+          const metadata = errorData[e.error_code]
+          const desc = metadata?.description || "Grammar evaluation checkpoint pattern check."
+          const bulletText = `•  Code ${e.error_code} (${e.total_times}x): ${desc}`
+          const lines = doc.splitTextToSize(bulletText, contentWidth)
+
           lines.forEach((line: string) => {
-            if (currentY > doc.internal.pageSize.getHeight() - 40) { doc.addPage(); currentY = 40; }
-            doc.text(line, margin + 5, currentY);
-            currentY += 12;
-          });
-        });
+            if (currentY > doc.internal.pageSize.getHeight() - 40) {
+              doc.addPage()
+              currentY = 40
+            }
+            doc.text(line, margin + 5, currentY)
+            currentY += 12
+          })
+        })
       }
     }
 
-    const sanitizedFilename = `Error_Summary_${initials}_${activeStudentId}.pdf`.replace(/[^a-z0-9_.-]/gi, "_");
-    doc.save(sanitizedFilename);
-
+    const suffix = feedbackItem ? feedbackItem.feedback_id : "ALL"
+    const sanitizedFilename = `Error_Summary_${initials}_${activeStudentId}_${suffix}.pdf`.replace(
+      /[^a-z0-9_.-]/gi,
+      "_"
+    )
+    doc.save(sanitizedFilename)
   } catch (err) {
-    console.error("Frontend compilation sequence failed:", err);
+    console.error("Frontend compilation sequence failed:", err)
   } finally {
-    exportLoading.value = false;
+    exportLoading.value = false
   }
-};
+}
 
 // ---------------- Computed Metrics & Transformations ----------------
 const extractDateFromString = (s: string): string | null => {
@@ -623,6 +674,15 @@ const extractDateFromString = (s: string): string | null => {
   const d = match[1].slice(6, 8);
   return `${y}-${m}-${d}`;
 };
+
+function getTemplateIdFromFeedback(item: any): string {
+  return item?.content?.template_id || 'no-template';
+}
+
+function getFeedbackTitle(item: any): string {
+  return `${getTemplateIdFromFeedback(item)} (${item.feedback_id})`;
+}
+
 
 const processedErrors = computed(() =>
   errors.value.map(({ error_code, times, evidence, feedback }) => {

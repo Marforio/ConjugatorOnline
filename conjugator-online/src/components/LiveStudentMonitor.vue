@@ -137,8 +137,20 @@
       </v-col>
 
       <v-col cols="12" md="5" class="pl-md-4 mt-6 mt-md-0">
-        <div class="text-overline font-weight-black text-slate-400 tracking-wider mb-4 px-1">
-          Latest events
+        <div class="d-flex align-center justify-space-between mb-4 px-1">
+          <div class="text-overline font-weight-black text-slate-400 tracking-wider">
+            Latest events
+          </div>
+
+          <v-btn
+            icon="mdi-refresh"
+            size="x-small"
+            variant="text"
+            color="primary"
+            :loading="eventsRefreshing"
+            :disabled="eventsRefreshing"
+            @click="refreshLatestEvents"
+          />
         </div>
 
         <v-text-field
@@ -258,7 +270,7 @@ const onlineStudents = ref<OnlineStudent[]>([]);
 const recentActivities = ref<RecentActivity[]>([]);
 const activitySearchQuery = ref("");
 const lastUpdate = ref<Date | null>(null);
-
+const eventsRefreshing = ref(false);
 // Keep your existing toggle semantics (monitor on/off)
 const isPolling = ref(true);
 
@@ -515,6 +527,17 @@ async function fetchRecentActivities() {
   }
 }
 
+async function refreshLatestEvents() {
+  if (eventsRefreshing.value) return;
+  eventsRefreshing.value = true;
+  try {
+    await fetchRecentActivities();
+    lastUpdate.value = new Date();
+  } finally {
+    eventsRefreshing.value = false;
+  }
+}
+
 function startLocalClocks() {
   if (localClockTimer) clearInterval(localClockTimer);
   localClockTimer = window.setInterval(() => {
@@ -637,14 +660,15 @@ function formatSecondsAgo(seconds: number): string {
 
 function formatTimeAgo(timestamp: string): string {
   const date = new Date(timestamp);
-  const now = new Date();
-  const diffSec = Math.floor((now.getTime() - date.getTime()) / 1000);
+  if (Number.isNaN(date.getTime())) return "";
 
-  if (diffSec < 10) return "just now";
-  if (diffSec < 60) return `${diffSec}s ago`;
-  if (diffSec < 300) return `${Math.floor(diffSec / 60)}m ago`;
-
-  return date.toLocaleTimeString();
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",   // Jun
+    day: "numeric",   // 26
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,    // 14:32 (set true if you prefer 2:32 PM)
+  }).format(date);
 }
 
 // ---- lifecycle ---------------------------------------------------------------

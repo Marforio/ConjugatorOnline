@@ -47,9 +47,6 @@
               <div class="bg-white border rounded-lg px-3 py-2 w-100 w-sm-auto">
                 <div class="text-xxs font-weight-black text-slate-400 text-uppercase tracking-wider leading-none mb-1">Transformation</div>
                 <div class="text-caption font-weight-black text-primary d-flex align-center leading-none">
-                  {{ currentVectorDirectionLabel }}
-                </div>
-                <div class="text-caption font-weight-black text-primary d-flex align-center leading-none">
                   {{ variantLabel }}
                 </div>
               </div>
@@ -105,7 +102,7 @@
             
             <!-- MODE MODULE CONTEXT A: DISCOVER BLOCKS (FLIP CARDS LAB) -->
             <template v-if="mode === 'cards'">
-              <div class="d-flex flex-column align-center position-relative my-4">
+              <div class="d-flex flex-column align-center position-relative my-1">
                 
                 <!-- STANDALONE CENTER CARD STAGE CANVAS -->
                 <div class="card-stage-canvas-box">
@@ -202,7 +199,7 @@
             </template>
 
             <template v-else-if="mode === 'write'">
-              <div class="d-flex justify-center my-4 animate-fade-in">
+              <div class="d-flex justify-center my-1 animate-fade-in">
                 <v-card class="border rounded-xl pa-5 bg-white w-100 max-width-card-hub" flat>
                   <div class="d-flex flex-column align-center justify-center bg-slate-50 rounded-xl border pa-4 mb-4" style="height: 240px;">
                     <div class="d-flex justify-space-between mt-1" style="width: 95%;">
@@ -281,6 +278,17 @@
               />
             </template>
 
+            <template v-else-if="mode === 'presentation'">
+              <VWPresentationMode
+                v-model="presentationOpen"
+                :items="planItems"
+                :list-name="prettyListName"
+                :start-index="currentIndex"
+                @indexChange="(i) => { currentIndex = i; }"
+                @close="goToSettings"
+              />
+            </template>
+
             <template v-else>
               <div class="pa-8 border rounded-xl text-center bg-slate-50 text-caption font-weight-medium text-slate-400">
                 Mode template target string validation signature identity block "{{ mode }}" is currently unassigned in this session view.
@@ -288,11 +296,12 @@
             </template>
           </div>
 
+          <!-- Footer navigation 
           <div class="d-flex justify-center mt-3">
             <v-btn @click="goToSettings" icon elevation="0" class="ms-3">
               <v-icon color="grey-darken-3">mdi-arrow-left-circle</v-icon>
             </v-btn>
-          </div>
+          </div>-->
         </template>
       </div>
 
@@ -397,6 +406,7 @@ import { buildMultipleChoiceOptions, checkUserAnswer, checkUserAnswerForCustomIt
 import { useVocabWorkoutStore } from "@/stores/vocabWorkout";
 import type { VWAttempt } from "@/stores/vocabWorkout";
 import VWSessionAttemptsTable from "@/components/vocab_workout_scenes/VWSessionAttemptsTable.vue"
+import VWPresentationMode from "@/components/vocab_workout_scenes/VWPresentationMode.vue";
 
 import type { ContextIndex, ContextHit } from "@/assets/scripts/vocab_workout/vocabWorkoutContextRegistry";
 import { contextByListKey, normalizeContextKey, contextApprovedListKeys } from "@/assets/scripts/vocab_workout/vocabWorkoutContextRegistry";
@@ -476,6 +486,7 @@ const mode = computed<string>(() => {
   if (m === "multiple-choice") return "multiple_choice";
   if (m === "multiplechoice") return "multiple_choice";
   if (m === "mcq") return "multiple_choice";
+  if (m === "presentation-mode") return "presentation";
   return m;
 });
 
@@ -619,6 +630,7 @@ const contextError = ref<string | null>(null);
 const contextEmptyMessage = ref<string | null>(null);
 const showTypoSnackbar = ref(false);
 const typoSnackbarMessage = ref("");
+const presentationOpen = ref(false);
 
 function normalizeForExact(s: string): string {
   return String(s || "").trim().toLowerCase().replace(/\s+/g, " ");
@@ -786,6 +798,7 @@ const modeLabel = computed(() => {
   if (mode.value === "cards") return "Cards";
   if (mode.value === "write") return "Writing";
   if (mode.value === "multiple_choice") return "Multiple choice";
+  if (mode.value === "presentation") return "Presentation";
   if (mode.value === "match") return "Match";
   return mode.value;
 });
@@ -1723,6 +1736,9 @@ async function begin() {
 
   remaining.value = roundCount.value - currentIndex.value;
   gameStarted.value = true;
+  if (mode.value === "presentation") {
+  presentationOpen.value = true;
+}
 
   userAnswer.value = "";
   resetToDefaultSide();

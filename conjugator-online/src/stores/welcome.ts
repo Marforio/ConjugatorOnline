@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import api from '@/axios'
 import { useUserStore } from '@/stores/user'
+import { useVocabWorkoutStore } from '@/stores/vocabWorkout'
 
 type Assignment = {
   assignment_id: string
@@ -78,6 +79,7 @@ const STALE_MS = 2 * 60 * 1000 // 2 minutes
 
 export const useWelcomeStore = defineStore('welcome', () => {
   const userStore = useUserStore()
+  const vocabWorkoutStore = useVocabWorkoutStore()
 
   // loading flags
   const loadingBundle = ref(false)
@@ -318,6 +320,7 @@ export const useWelcomeStore = defineStore('welcome', () => {
         userStore.fetchEnrollmentBundle(
           userStore.isStaff ? { student: userStore.studentId } : {}
         ),
+        !userStore.isStaff ? vocabWorkoutStore.fetchMyWork() : Promise.resolve(),
       ])
 
       loadedOnce.value = true

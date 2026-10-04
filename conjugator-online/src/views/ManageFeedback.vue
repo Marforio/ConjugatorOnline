@@ -180,7 +180,7 @@
       </thead>
       <tbody>
         <tr v-for="item in filteredFeedbackHistoryLog" :key="item.feedback_id">
-          <td class="font-weight-medium text-indigo-darken-3 text-body-2">{{ item.feedback_id }}</td>
+          <td class="font-weight-medium text-indigo-darken-3 text-body-2">{{ getFeedbackTitle(item) }}</td>
           <td>
           <v-chip size="small" color="primary" variant="tonal" class="font-weight-bold">
             {{ resolveStudentDisplayName(item.student) }}
@@ -229,7 +229,7 @@
     <v-toolbar color="indigo" dark>
       <v-btn icon="mdi-close" @click="showFeedbackDialog = false" />
       <v-toolbar-title>
-        Feedback for {{ selectedStudent?.initials }} ({{ selectedCourse?.toUpperCase() }})
+        Feedback for {{ selectedStudent?.initials}} ({{ selectedStudent?.web_id }}) in {{ selectedCourse?.toUpperCase() }}
       </v-toolbar-title>
     </v-toolbar>
 
@@ -399,6 +399,21 @@ interface HistoricalFeedback {
   content: any;    // JSON dictionary structure mapping
 }
 
+type TemplateComponent = {
+  id: string
+  type: string
+  label?: string
+  text?: string
+  rows?: number
+  options?: string[]
+}
+
+type FeedbackTemplateShape = {
+  template_id: string
+  name: string
+  structure: { components: TemplateComponent[] }
+}
+
 const userStore = useUserStore()
 
 // UI Control States
@@ -560,11 +575,12 @@ async function executeSubmitFeedback() {
     }
 
     const payload = {
-      student_web_id: selectedStudent.value.web_id,
-      course_slug: selectedCourse.value,
+      student: selectedStudent.value.web_id,
+      course: selectedCourse.value,
       date: new Date().toLocaleDateString('en-CA'), // YYYY-MM-DD format
       content: comprehensiveJSONContent // Submitted directly into Django's upgraded JSONField
     }
+    console.log('feedback payload', payload)
     
     if (editingFeedbackId.value) {
         await api.patch(`/feedback/${editingFeedbackId.value}/`, payload) // or put
@@ -581,6 +597,73 @@ async function executeSubmitFeedback() {
   console.error('POST /feedback failed:', err?.response?.status, err?.response?.data || err)
   showToast("Submission failed.", "error")
 } finally { submitting.value = false }
+}
+
+function getTemplateIdFromFeedback(item: any): string {
+  return item?.content?.template_id || 'no-template';
+}
+
+function getFeedbackTitle(item: any): string {
+  return `${getTemplateIdFromFeedback(item)} (${item.feedback_id})`;
+}
+
+async function seedMockTemplateBlueprints() {
+  const hardcoded: FeedbackTemplateShape[] = [
+    {
+      template_id: "tpl_presentation_v1",
+      name: "Presentation",
+      structure: {
+        components: [
+          { id: "topic", type: "select", label: "Project Topic", options: ["My professional project", "Story of a startup", "Present a research paper"] },
+          { id: "positives", type: "checkbox_group", label: "Demonstrated Skills", options: ["Excellent use of target vocabulary.", "Good visual support.", "Good use of target grammar."] },
+          { id: "notes", type: "textarea", label: "Comments" },
+          { id: "errors", type: "error_matrix" },
+          { id: "vocab", type: "vocab_notebook" },
+          { id: "impressive", type: "impressive_matrix" },
+          { id: "comments", type: "comment_block" }
+        ]
+      }
+    },
+    {
+      template_id: "tpl_midterm_v1",
+      name: "Mid-Semester Performance",
+      structure: {
+        components: [
+          { id: "p1", type: "paragraph", text: "Use this field to give feedback." },
+          { id: "overall_assessment", type: "textarea", label: "General Summary", rows: 4 },
+          { id: "errors", type: "error_matrix" }
+        ]
+      }
+    }
+  ]
+
+  try {
+    const res = await api.get("/feedback-templates/")
+    const payload = res.data?.results ?? res.data ?? []
+    const teacherTemplatesRaw = Array.isArray(payload) ? payload : []
+
+    const teacherTemplates: FeedbackTemplateShape[] = teacherTemplatesRaw.map((t: any) => ({
+      template_id: String(t.template_id ?? t.id ?? crypto.randomUUID()),
+      name: String(t.name ?? "Untitled Template"),
+      structure: t.structure && Array.isArray(t.structure.components)
+        ? t.structure
+        : { components: [] }
+    }))
+
+    // hardcoded first, then teacher templates; dedupe by template_id (teacher wins)
+    const merged = new Map<string, FeedbackTemplateShape>()
+    hardcoded.forEach(t => merged.set(t.template_id, t))
+    teacherTemplates.forEach(t => merged.set(t.template_id, t))
+
+    availableTemplates.value = Array.from(merged.values())
+  } catch (err: any) {
+    console.error("Failed to load /feedback-templates/. Falling back to hardcoded templates.", err?.response?.data || err)
+    availableTemplates.value = hardcoded
+  }
+
+  if (availableTemplates.value.length > 0 && !activeTemplateId.value) {
+    activeTemplateId.value = availableTemplates.value[0].template_id
+  }
 }
 
 function loadHistoricalFeedbackIntoForm(item: HistoricalFeedback) {
@@ -843,37 +926,6 @@ function showToast(m: string, color = 'success') {
   snackbarMessage.value = m; snackbarColor.value = color; snackbar.value = true
 }
 
-function seedMockTemplateBlueprints() {
-  availableTemplates.value = [
-    {
-      template_id: "tpl_presentation_v1",
-      name: "Standard Oral Presentation",
-      structure: {
-        components: [
-          { id: "topic", type: "select", label: "Project Topic", options: ["My professional project", "Story of a startup", "Present a research paper"] },
-          { id: "positives", type: "checkbox_group", label: "Demonstrated Skills", options: ["Excellent use of target vocabulary.", "Good visual support.", "Good use of target grammar."] },
-          { id: "notes", type: "textarea", label: "Comments" },
-          { id: "errors", type: "error_matrix" },
-          { id: "vocab", type: "vocab_notebook" },
-          { id: "impressive", type: "impressive_matrix" },
-          { id: "comments", type: "comment_block" }
-        ]
-      }
-    },
-    {
-      template_id: "tpl_midterm_v1",
-      name: "Mid-Semester Performance",
-      structure: {
-        components: [
-          { id: "p1", type: "paragraph", text: "Use this field to give feedback." },
-          { id: "overall_assessment", type: "textarea", label: "General Summary", rows: 4 },
-          { id: "errors", type: "error_matrix" }
-        ]
-      }
-    }
-  ]
-  if (availableTemplates.value.length > 0) activeTemplateId.value = availableTemplates.value[0].template_id
-}
 
 onMounted(async () => {
   await fetchStudents()

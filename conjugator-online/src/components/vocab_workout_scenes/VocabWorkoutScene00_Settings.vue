@@ -168,6 +168,16 @@
                   <div class="mb-4">
                     <div class="text-overline font-weight-bold text-slate-400 tracking-wider mb-1">Study Mode</div>
                     <v-chip-group v-model="selectedMode" mandatory color="primary" column class="ma-0 chip-matrix-row">
+                      <v-chip
+                        value="presentation"
+                        filter
+                        variant="tonal"
+                        size="comfortable"
+                        class="font-weight-bold rounded-lg px-4 py-1"
+                        prepend-icon="mdi-presentation-play"
+                      >
+                        Presentation
+                      </v-chip>
                       <v-chip value="cards" filter variant="tonal" size="comfortable" class="font-weight-bold rounded-lg px-4 py-1">Cards</v-chip>
                       <v-chip value="multiple_choice" filter variant="tonal" size="comfortable" class="font-weight-bold rounded-lg px-4 py-1">Multiple Choice</v-chip>
                       
@@ -197,7 +207,7 @@
 
                   <v-divider class="my-4 border-opacity-40"></v-divider>
 
-                  <div v-if="selectedMode" class="mb-4 bg-slate-50 border rounded-xl pa-3 animate-fade-in">
+                  <div v-if="selectedMode && selectedMode !== 'presentation'" class="mb-4 bg-slate-50 border rounded-xl pa-3 animate-fade-in">
                     <div class="text-overline font-weight-bold text-slate-400 tracking-wider mb-2 d-flex align-center">
                       <v-icon size="14" class="mr-2" color="slate-400">mdi-swap-horizontal</v-icon> Study Pair
                     </div>
@@ -246,8 +256,14 @@
                   <div v-if="!valid" class="text-caption font-weight-bold text-error mb-2 d-flex align-center">
                     <v-icon size="14" class="mr-1">mdi-lock-outline</v-icon>
                     <template v-if="!selectedListId">Please choose a vocab list from Step 1.</template>
+                    <template v-else-if="!selectedMode">Please choose a study mode.</template>
                     <template v-else-if="listSupportsLevels && !selectedLevel">Please choose a level.</template>
-                    <template v-else-if="selectedMode === 'write' && !computedTrackKey">Writing progress is only tracked for specific study pairs.</template>
+                    <template v-else-if="selectedMode !== 'presentation' && selectedMode === 'write' && !computedTrackKey">
+                      Writing progress is only tracked for specific study pairs.
+                    </template>
+                    <template v-else-if="selectedMode !== 'presentation' && !computedTrackKey">
+                      Please choose a valid study pair.
+                    </template>
                     <template v-else>Please try different settings.</template>
                   </div>
 
@@ -297,7 +313,7 @@ import autoTable from "jspdf-autotable";
 
 const COMPLETION_TARGET = 3;
 
-type VWMode = "cards" | "write" | "multiple_choice" | "quiz" | "match" | null;
+type VWMode = "presentation" | "cards" | "write" | "multiple_choice" | "quiz" | "match" | null;
 type VWLevel = "essential" | "advanced" | null;
 
 interface CustomVocabList {
@@ -926,12 +942,17 @@ function startNewSessionForList(
 ---------------------------- */
 const valid = computed(() => {
   if (!selectedListId.value) return false;
+  if (!selectedMode.value) return false;
 
   if (listSupportsLevels.value) {
     if (selectedLevel.value !== "essential" && selectedLevel.value !== "advanced")
       return false;
   }
 
+  // Presentation is passive: no tracking pair required
+  if (selectedMode.value === "presentation") return true;
+
+  // Existing behavior for tracked modes
   return !!computedTrackKey.value;
 });
 

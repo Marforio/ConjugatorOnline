@@ -108,7 +108,7 @@
             <v-expansion-panel-text class="pt-2 bg-slate-50/50">
               <v-row>
                 <!-- Left Column: Unified Course Roster Management -->
-                <v-col cols="12" :md="course.objectives && course.objectives.length > 0 ? '4' : '12'">
+                <v-col cols="12" :md="course.objectives && course.objectives.length > 0 ? '5' : '12'">
                   <v-card variant="outlined" class="bg-white border-slate-200 rounded-xl">
                     <v-card-title class="text-subtitle-2 font-weight-bold text-slate-800 d-flex align-center pt-3 px-4">
                       <v-icon icon="mdi-account-graduation-outline" color="primary" class="mr-2" size="small" />
@@ -121,12 +121,16 @@
                       <thead>
                         <tr>
                           <th class="font-weight-bold">Student</th>
+                          <th class="text-center font-weight-bold" style="width: 60px;">Health</th>
                           <th class="text-center font-weight-bold" style="width: 60px;">Action</th>
                         </tr>
                       </thead>
                       <tbody>
                         <tr v-for="student in course.students" :key="student.id">
                           <td class="font-weight-black text-slate-700">{{ student.initials }} <span class="text-caption">({{ student.web_id }})</span></td>
+                          <td class="text-center">
+                            {{ student.health_score }}
+                          </td>
                           <td class="text-center">
                             <!-- 🔄 Explicit Unenroll Action per Student -->
                             <v-btn 
@@ -150,7 +154,7 @@
                   </v-card>
                 </v-col>
 
-                <v-col cols="12" md="8" v-if="course.objectives && course.objectives.length > 0">
+                <v-col cols="12" md="7" v-if="course.objectives && course.objectives.length > 0">
                   <div class="d-flex flex-column gap-3">
                     
                     <div class="text-subtitle-2 font-weight-black text-indigo-darken-3 px-2 d-flex align-center">
