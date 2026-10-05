@@ -78,13 +78,251 @@
               </span>
               <span class="clock-countdown-msg">{{ nyseClock.message }}</span>
             </div>
-
           </div>
         </v-col>
-
       </v-row>
-
     </header>
+
+    <v-row class="px-6">
+        <v-col cols="12" class="d-flex justify-center">
+          <v-card rounded="lg" elevation="2" class="pa-4 h-100 mb-5" style="width: 85%">
+            <div class="d-flex align-center justify-space-between mb-3">
+              <div class="text-h6 font-weight-bold">Active Portfolios 💼</div>
+                <v-btn size="small" color="primary" variant="tonal" @click="isCreateModalActive = true">Create New Portfolio</v-btn>
+              </div>
+
+              <div class="portfolios-list" v-if="portfolios.length > 0">
+                <div v-for="portfolio in portfolios" :key="portfolio.id" class="portfolio-row" :class="portfolio.competition ? 'bg-warning-subtle' : 'bg-secondary-subtle'">
+                  <div class="portfolio-meta">
+                    <h3>{{ portfolio.name }}</h3>
+
+                    <!-- compact status/icon row -->
+                    <div class="d-flex align-center ga-1 mb-1">
+                      <!-- Independent vs Competition -->
+                      <v-tooltip location="top">
+                        <template #activator="{ props }">
+                          <v-chip
+                            v-bind="props"
+                            size="x-small"
+                            variant="tonal"
+                            :color="!portfolio.competition ? 'indigo' : 'deep-purple'"
+                            class="px-1"
+                          >
+                            <v-icon size="14">{{ !portfolio.competition ? 'mdi-account' : 'mdi-school' }}</v-icon>
+                          </v-chip>
+                        </template>
+                        <span>{{ !portfolio.competition ? 'Independent Portfolio' : 'Teacher-Created Competition' }}</span>
+                      </v-tooltip>
+
+                      <!-- Static / Dynamic -->
+                      <v-tooltip location="top">
+                        <template #activator="{ props }">
+                          <v-chip
+                            v-bind="props"
+                            size="x-small"
+                            variant="tonal"
+                            :color="portfolio.portfolio_type === 'DYNAMIC' ? 'teal' : 'blue-grey'"
+                            class="px-1"
+                          >
+                            <v-icon size="14">
+                              {{ portfolio.portfolio_type === 'DYNAMIC' ? 'mdi-sync' : 'mdi-lock-outline' }}
+                            </v-icon>
+                          </v-chip>
+                        </template>
+                        <span>{{ portfolio.portfolio_type === 'DYNAMIC' ? 'Dynamic Mode' : 'Static Mode' }}</span>
+                      </v-tooltip>
+
+                      <!-- Trading status -->
+                      <v-tooltip location="top">
+                        <template #activator="{ props }">
+                          <v-chip
+                            v-bind="props"
+                            size="x-small"
+                            variant="tonal"
+                            :color="portfolio.trading_is_open ? 'success' : 'warning'"
+                            class="px-1"
+                          >
+                            <v-icon size="14">
+                              {{ portfolio.trading_is_open ? 'mdi-lightning-bolt' : 'mdi-lock' }}
+                            </v-icon>
+                          </v-chip>
+                        </template>
+                        <span>{{ portfolio.trading_is_open ? 'Trading Active' : 'Trading Locked' }}</span>
+                      </v-tooltip>
+
+                      <!-- Level -->
+                      <v-tooltip location="top">
+                        <template #activator="{ props }">
+                          <v-chip
+                            v-bind="props"
+                            size="x-small"
+                            variant="tonal"
+                            :color="portfolio.trading_level === 'ADVANCED' ? 'deep-orange' : 'green'"
+                            class="px-1"
+                          >
+                            <v-icon size="14">
+                              {{ portfolio.trading_level === 'ADVANCED' ? 'mdi-speedometer' : 'mdi-leaf' }}
+                            </v-icon>
+                          </v-chip>
+                        </template>
+                        <span>{{ portfolio.trading_level === 'ADVANCED' ? 'Advanced Level' : 'Basic Level' }}</span>
+                      </v-tooltip>
+                    </div>
+
+                    <!-- always show timeline -->
+                    <div class="text-caption text-slate-500 mt-1">
+                      <span>🕒 Start: {{ formatDate(portfolio.start_time) || '—' }}</span>
+                      <span class="mx-1">•</span>
+                      <span v-if="portfolio.trade_cutoff_time">Cutoff: {{ formatDate(portfolio.trade_cutoff_time) }} • </span>
+                      <span>End: {{ formatDate(portfolio.end_time) || '—' }}</span>
+                    </div>
+                  </div>
+
+                  <div class="portfolio-stats">
+                    <div class="mb-1">
+                      <span class="label me-1">Total Value</span>
+                      <span class="value">
+                        ${{ Number(portfolio.net_equity ?? 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
+                      </span>
+                    </div>
+
+                    <div class="mb-1">
+                      <span class="label me-1">PnL</span>
+                      <span
+                        class="value"
+                        :class="Number(portfolio.pnl_value || 0) >= 0 ? 'text-emerald-600' : 'text-rose-600'"
+                      >
+                        {{ Number(portfolio.pnl_value || 0) >= 0 ? '+' : '' }}${{
+                          Math.abs(Number(portfolio.pnl_value || 0)).toLocaleString('en-US', {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2
+                          })
+                        }}
+                        <span class="text-caption ms-1">
+                          ({{ Number(portfolio.pnl_pct || 0) >= 0 ? '+' : '' }}{{ Number(portfolio.pnl_pct || 0).toFixed(2) }}%)
+                        </span>
+                      </span>
+                    </div>
+
+                    <div>
+                      <span class="label">Cash</span>
+                      <span class="value">
+                        ${{ Number(portfolio.cash_balance || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
+                      </span>
+                    </div>
+                  </div>
+                  
+
+                  <div class="portfolio-actions d-flex align-center ga-1">
+                    <!-- delete only if independent -->
+                    <v-btn
+                      v-if="!portfolio.competition"
+                      color="red"
+                      variant="tonal"
+                      size="x-small"
+                      class="font-weight-bold mt-2 me-4"
+                      icon="mdi-trash-can"
+                      @click="promptDeletePortfolio(portfolio)"
+                    >
+                    </v-btn>
+                    <button class="btn btn-primary" @click="inspectPortfolio(portfolio.id)">View</button>
+                  </div>
+                </div>
+              </div>
+
+            <div v-else class="empty-state"><p>You haven't initialized an investment portfolio yet.</p></div>
+        </v-card>
+        </v-col>
+
+        <v-col cols="12" class="d-flex justify-center">
+          <v-card rounded="lg" elevation="2" class="pa-4 h-100 mb-5" style="width: 85%">
+            <div class="d-flex align-center justify-space-between mb-3">
+              <div class="text-h6 font-weight-bold">Competition Standings 🏆</div>
+              <v-chip size="x-small" color="indigo" variant="tonal">
+                {{ activeCompetitionStandings.length }} Competitions
+              </v-chip>
+            </div>
+
+            <div v-if="activeCompetitionStandings.length === 0" class="text-medium-emphasis text-body-2">
+              You are not currently participating in a competition.
+            </div>
+
+            <v-expansion-panels v-else variant="accordion">
+              <v-expansion-panel
+                v-for="comp in activeCompetitionStandings"
+                :key="comp.competition.id"
+                rounded="lg"
+              >
+                <v-expansion-panel-title>
+                  <div class="d-flex w-100 align-center justify-space-between">
+                    <div>
+                      <div class="font-weight-bold">{{ comp.competition.name }}</div>
+                      <div class="text-caption text-medium-emphasis">
+                        {{ formatDate(comp.competition.start_time) }} → {{ formatDate(comp.competition.end_time) }}
+                      </div>
+                    </div>
+                    <v-chip
+                      size="x-small"
+                      :color="comp.competition.trading_is_open ? 'success' : 'warning'"
+                      variant="tonal"
+                    >
+                      {{ comp.competition.trading_is_open ? 'Trading Open' : 'Trading Closed' }}
+                    </v-chip>
+                  </div>
+                </v-expansion-panel-title>
+
+                <v-expansion-panel-text>
+                  <v-alert
+                    v-if="comp.my_position"
+                    density="compact"
+                    variant="tonal"
+                    color="primary"
+                    class="mb-2"
+                  >
+                    Your Rank: <strong>#{{ comp.my_position.rank }}</strong>
+                    • PnL:
+                    <strong :class="comp.my_position.pnl_value >= 0 ? 'text-emerald-600' : 'text-rose-600'">
+                      {{ comp.my_position.pnl_value >= 0 ? '+' : '' }}${{ Math.abs(comp.my_position.pnl_value).toFixed(2) }}
+                      ({{ comp.my_position.pnl_pct >= 0 ? '+' : '' }}{{ comp.my_position.pnl_pct.toFixed(2) }}%)
+                    </strong>
+                  </v-alert>
+
+                  <v-table density="compact">
+                    <thead>
+                      <tr>
+                        <th>#</th>
+                        <th>Student</th>
+                        <th>Portfolio</th>
+                        <th class="text-right">Net Equity</th>
+                        <th class="text-right">PnL</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr
+                        v-for="row in comp.standings"
+                        :key="row.portfolio_id"
+                        :class="row.is_me ? 'bg-blue-lighten-5' : ''"
+                      >
+                        <td class="font-weight-bold">#{{ row.rank }}</td>
+                        <td>{{ row.student_name }}</td>
+                        <td>{{ row.portfolio_name }}</td>
+                        <td class="text-right">${{ Number(row.net_equity).toLocaleString() }}</td>
+                        <td
+                          class="text-right font-weight-bold"
+                          :class="row.pnl_value >= 0 ? 'text-emerald-600' : 'text-rose-600'"
+                        >
+                          {{ row.pnl_value >= 0 ? '+' : '' }}${{ Math.abs(Number(row.pnl_value)).toFixed(2) }}
+                          <span class="text-caption">({{ row.pnl_pct >= 0 ? '+' : '' }}{{ Number(row.pnl_pct).toFixed(2) }}%)</span>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </v-table>
+                </v-expansion-panel-text>
+              </v-expansion-panel>
+            </v-expansion-panels>
+          </v-card>
+        </v-col>
+      </v-row>
 
     <section class="watchlist-section">
       <div class="watchlist-header">
@@ -197,7 +435,7 @@
 <!-- 🧭 COMPACT DISCOVERY HUB -->
     <section class="watchlist-section mt-2">
       <div class="watchlist-header pb-2">
-        <h2>Suggested Assets 💡</h2>
+        <h2>Suggested Watchlist Assets 💡</h2>
         <p class="empty-msg ma-0" style="font-size: 0.75rem;">Click the green plus (+) to quickly add assets to your watchlist</p>
       </div>
 
@@ -244,237 +482,7 @@
       </div>
     </section>
 
-      <v-row class="px-6">
-        <v-col cols="12" lg="6">
-          <v-card rounded="lg" elevation="2" class="pa-4 h-100">
-            <div class="d-flex align-center justify-space-between mb-3">
-              <div class="text-h6 font-weight-bold">Active Portfolios 💼</div>
-                <v-btn size="small" color="primary" variant="tonal" @click="isCreateModalActive = true">Create New Portfolio</v-btn>
-              </div>
-
-              <div class="portfolios-list" v-if="portfolios.length > 0">
-                <div v-for="portfolio in portfolios" :key="portfolio.id" class="portfolio-row" :class="portfolio.competition ? 'bg-warning-subtle' : 'bg-secondary-subtle'">
-                  <div class="portfolio-meta">
-                    <h3>{{ portfolio.name }}</h3>
-
-                    <!-- compact status/icon row -->
-                    <div class="d-flex align-center ga-1 mb-1">
-                      <!-- Independent vs Competition -->
-                      <v-tooltip location="top">
-                        <template #activator="{ props }">
-                          <v-chip
-                            v-bind="props"
-                            size="x-small"
-                            variant="tonal"
-                            :color="!portfolio.competition ? 'indigo' : 'deep-purple'"
-                            class="px-1"
-                          >
-                            <v-icon size="14">{{ !portfolio.competition ? 'mdi-account' : 'mdi-school' }}</v-icon>
-                          </v-chip>
-                        </template>
-                        <span>{{ !portfolio.competition ? 'Independent Portfolio' : 'Teacher Competition Portfolio' }}</span>
-                      </v-tooltip>
-
-                      <!-- Static / Dynamic -->
-                      <v-tooltip location="top">
-                        <template #activator="{ props }">
-                          <v-chip
-                            v-bind="props"
-                            size="x-small"
-                            variant="tonal"
-                            :color="portfolio.portfolio_type === 'DYNAMIC' ? 'teal' : 'blue-grey'"
-                            class="px-1"
-                          >
-                            <v-icon size="14">
-                              {{ portfolio.portfolio_type === 'DYNAMIC' ? 'mdi-sync' : 'mdi-lock-outline' }}
-                            </v-icon>
-                          </v-chip>
-                        </template>
-                        <span>{{ portfolio.portfolio_type === 'DYNAMIC' ? 'Dynamic Mode' : 'Static Mode' }}</span>
-                      </v-tooltip>
-
-                      <!-- Trading status -->
-                      <v-tooltip location="top">
-                        <template #activator="{ props }">
-                          <v-chip
-                            v-bind="props"
-                            size="x-small"
-                            variant="tonal"
-                            :color="portfolio.trading_is_open ? 'success' : 'warning'"
-                            class="px-1"
-                          >
-                            <v-icon size="14">
-                              {{ portfolio.trading_is_open ? 'mdi-lightning-bolt' : 'mdi-lock' }}
-                            </v-icon>
-                          </v-chip>
-                        </template>
-                        <span>{{ portfolio.trading_is_open ? 'Trading Active' : 'Trading Locked' }}</span>
-                      </v-tooltip>
-
-                      <!-- Level -->
-                      <v-tooltip location="top">
-                        <template #activator="{ props }">
-                          <v-chip
-                            v-bind="props"
-                            size="x-small"
-                            variant="tonal"
-                            :color="portfolio.trading_level === 'ADVANCED' ? 'deep-orange' : 'green'"
-                            class="px-1"
-                          >
-                            <v-icon size="14">
-                              {{ portfolio.trading_level === 'ADVANCED' ? 'mdi-speedometer' : 'mdi-leaf' }}
-                            </v-icon>
-                          </v-chip>
-                        </template>
-                        <span>{{ portfolio.trading_level === 'ADVANCED' ? 'Advanced Level' : 'Basic Level' }}</span>
-                      </v-tooltip>
-                    </div>
-
-                    <!-- always show timeline -->
-                    <div class="text-caption text-slate-500 mt-1">
-                      <span>🕒 Start: {{ formatDate(portfolio.start_time) || '—' }}</span>
-                      <span class="mx-1">•</span>
-                      <span v-if="portfolio.trade_cutoff_time">Cutoff: {{ formatDate(portfolio.trade_cutoff_time) }} • </span>
-                      <span>End: {{ formatDate(portfolio.end_time) || '—' }}</span>
-                    </div>
-                  </div>
-
-                  <div class="portfolio-stats">
-                    <div class="mb-1">
-                      <span class="label me-1">PnL</span>
-                      <span
-                        class="value"
-                        :class="Number(portfolio.pnl_value || 0) >= 0 ? 'text-emerald-600' : 'text-rose-600'"
-                      >
-                        {{ Number(portfolio.pnl_value || 0) >= 0 ? '+' : '' }}${{
-                          Math.abs(Number(portfolio.pnl_value || 0)).toLocaleString('en-US', {
-                            minimumFractionDigits: 2,
-                            maximumFractionDigits: 2
-                          })
-                        }}
-                        <span class="text-caption ms-1">
-                          ({{ Number(portfolio.pnl_pct || 0) >= 0 ? '+' : '' }}{{ Number(portfolio.pnl_pct || 0).toFixed(0) }}%)
-                        </span>
-                      </span>
-                    </div>
-
-                    <div>
-                      <span class="label">Cash</span>
-                      <span class="value">
-                        ${{ Number(portfolio.cash_balance || 0).toLocaleString('en-US', { minimumFractionDigits: 0 }) }}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div class="portfolio-actions d-flex align-center ga-1">
-                    <!-- delete only if independent -->
-                    <v-btn
-                      v-if="!portfolio.competition"
-                      color="red"
-                      variant="tonal"
-                      size="x-small"
-                      class="font-weight-bold mt-2 me-4"
-                      icon="mdi-trash-can"
-                      @click="promptDeletePortfolio(portfolio)"
-                    >
-                    </v-btn>
-                    <button class="btn btn-primary" @click="inspectPortfolio(portfolio.id)">View</button>
-                  </div>
-                </div>
-              </div>
-
-            <div v-else class="empty-state"><p>You haven't initialized an investment portfolio yet.</p></div>
-        </v-card>
-        </v-col>
-        <v-col cols="12" lg="6">
-          <v-card rounded="lg" elevation="2" class="pa-4 h-100">
-            <div class="d-flex align-center justify-space-between mb-3">
-              <div class="text-h6 font-weight-bold">Competition Standings 🏆</div>
-              <v-chip size="x-small" color="indigo" variant="tonal">
-                {{ activeCompetitionStandings.length }} Competitions
-              </v-chip>
-            </div>
-
-            <div v-if="activeCompetitionStandings.length === 0" class="text-medium-emphasis text-body-2">
-              You are not currently participating in a competition.
-            </div>
-
-            <v-expansion-panels v-else variant="accordion">
-              <v-expansion-panel
-                v-for="comp in activeCompetitionStandings"
-                :key="comp.competition.id"
-                rounded="lg"
-              >
-                <v-expansion-panel-title>
-                  <div class="d-flex w-100 align-center justify-space-between">
-                    <div>
-                      <div class="font-weight-bold">{{ comp.competition.name }}</div>
-                      <div class="text-caption text-medium-emphasis">
-                        {{ formatDate(comp.competition.start_time) }} → {{ formatDate(comp.competition.end_time) }}
-                      </div>
-                    </div>
-                    <v-chip
-                      size="x-small"
-                      :color="comp.competition.trading_is_open ? 'success' : 'warning'"
-                      variant="tonal"
-                    >
-                      {{ comp.competition.trading_is_open ? 'Trading Open' : 'Trading Closed' }}
-                    </v-chip>
-                  </div>
-                </v-expansion-panel-title>
-
-                <v-expansion-panel-text>
-                  <v-alert
-                    v-if="comp.my_position"
-                    density="compact"
-                    variant="tonal"
-                    color="primary"
-                    class="mb-2"
-                  >
-                    Your Rank: <strong>#{{ comp.my_position.rank }}</strong>
-                    • PnL:
-                    <strong :class="comp.my_position.pnl_value >= 0 ? 'text-emerald-600' : 'text-rose-600'">
-                      {{ comp.my_position.pnl_value >= 0 ? '+' : '' }}${{ Math.abs(comp.my_position.pnl_value).toFixed(2) }}
-                      ({{ comp.my_position.pnl_pct >= 0 ? '+' : '' }}{{ comp.my_position.pnl_pct.toFixed(2) }}%)
-                    </strong>
-                  </v-alert>
-
-                  <v-table density="compact">
-                    <thead>
-                      <tr>
-                        <th>#</th>
-                        <th>Student</th>
-                        <th>Portfolio</th>
-                        <th class="text-right">Net Equity</th>
-                        <th class="text-right">PnL</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr
-                        v-for="row in comp.standings"
-                        :key="row.portfolio_id"
-                        :class="row.is_me ? 'bg-blue-lighten-5' : ''"
-                      >
-                        <td class="font-weight-bold">#{{ row.rank }}</td>
-                        <td>{{ row.student_name }}</td>
-                        <td>{{ row.portfolio_name }}</td>
-                        <td class="text-right">${{ Number(row.net_equity).toLocaleString() }}</td>
-                        <td
-                          class="text-right font-weight-bold"
-                          :class="row.pnl_value >= 0 ? 'text-emerald-600' : 'text-rose-600'"
-                        >
-                          {{ row.pnl_value >= 0 ? '+' : '' }}${{ Math.abs(Number(row.pnl_value)).toFixed(2) }}
-                          <span class="text-caption">({{ row.pnl_pct >= 0 ? '+' : '' }}{{ Number(row.pnl_pct).toFixed(2) }}%)</span>
-                        </td>
-                      </tr>
-                    </tbody>
-                  </v-table>
-                </v-expansion-panel-text>
-              </v-expansion-panel>
-            </v-expansion-panels>
-          </v-card>
-        </v-col>
-      </v-row>
+      
     
     <div v-if="isCreateModalActive" class="dialog-overlay" @click.self="isCreateModalActive = false">
       <div class="dialog-box upgraded scrollable-dialog">
@@ -921,242 +929,272 @@
           </v-col>
 
           <v-col cols="12" lg="7" class="pa-4 pa-lg-6 dialog-col-right">
-            <v-card variant="outlined" class="bg-white mb-4 rounded-lg pa-3">
-              <div class="d-flex justify-space-between align-center mb-2">
-                <h3 class="text-subtitle-2 font-weight-bold text-slate-700">📊 Portfolio Visualizations</h3>
-                <v-chip size="x-small" color="indigo" variant="flat">Learning Mode</v-chip>
-              </div>
+  <v-card variant="outlined" class="bg-white mb-4 rounded-lg pa-3">
+    <div class="d-flex justify-space-between align-center mb-2">
+      <h3 class="text-subtitle-2 font-weight-bold text-slate-700">📊 Portfolio Visualizations</h3>
+      <v-chip size="x-small" color="indigo" variant="flat">Learning Mode</v-chip>
+    </div>
 
-              <v-row>
-                <v-col cols="12" md="6">
-                  <div class="text-caption font-weight-bold mb-1">Asset Allocation</div>
-                  <div style="height:180px;"><canvas ref="allocationChartRef"></canvas></div>
-                </v-col>
-                <v-col cols="12" md="6">
-                  <div class="text-caption font-weight-bold mb-1">Cash vs Invested</div>
-                  <div style="height:180px;"><canvas ref="cashVsAssetsChartRef"></canvas></div>
-                </v-col>
-              </v-row>
+    <v-row>
+      <v-col cols="12" md="6">
+        <div class="text-caption font-weight-bold mb-1">Asset Allocation</div>
+        <div style="height:180px;"><canvas ref="allocationChartRef"></canvas></div>
+      </v-col>
+      <v-col cols="12" md="6">
+        <div class="text-caption font-weight-bold mb-1">Cash vs Invested</div>
+        <div style="height:180px;"><canvas ref="cashVsAssetsChartRef"></canvas></div>
+      </v-col>
+    </v-row>
 
-              <v-row>
-                <v-col cols="12">
-                  <div class="text-caption font-weight-bold mb-1">Asset Contribution (Estimated)</div>
-                  <div style="height:220px;"><canvas ref="contribChartRef"></canvas></div>
-                </v-col>
-              </v-row>
-            </v-card>
+    <v-row>
+      <v-col cols="12">
+        <div class="text-caption font-weight-bold mb-1">Asset Contribution (Estimated)</div>
+        <div style="height:220px;"><canvas ref="contribChartRef"></canvas></div>
+      </v-col>
+    </v-row>
+  </v-card>
 
-          <!-- PERFORMANCE CARD (place above your existing available capital card) -->
-          <v-card
-            variant="flat"
-            class="mb-4 pa-4 text-white rounded-lg"
-            :style="{ background: performanceCardBg }"
-          >
-            <v-row no-gutters align="center">
-              <v-col cols="8">
-                <div class="text-overline font-weight-bold opacity-80 tracking-wide">Portfolio Performance</div>
-                <div class="text-h4 font-weight-black">
-                  {{ performancePctText }}
-                </div>
-                <div class="text-caption opacity-90 mt-1">
-                  Since initialization
-                </div>
-              </v-col>
+  <!-- PERFORMANCE CARD -->
+  <v-card
+    variant="flat"
+    class="mb-4 pa-4 text-white rounded-lg"
+    :style="{ background: performanceCardBg }"
+  >
+    <v-row no-gutters align="center">
+      <v-col cols="8">
+        <div class="text-overline font-weight-bold opacity-80 tracking-wide">Portfolio Performance</div>
+        <div class="text-h4 font-weight-black">
+          {{ Number(selectedPortfolio?.pnl_pct || 0) >= 0 ? '+' : '' }}{{ Number(selectedPortfolio?.pnl_pct || 0).toFixed(2) }}%
+        </div>
+        <div class="text-caption opacity-90 mt-1">
+          Since initialization
+        </div>
+      </v-col>
 
-              <v-col cols="4" class="text-right">
-                <v-chip
-                  :color="performancePct >= 0 ? 'emerald-lighten-4' : 'red-lighten-4'"
-                  variant="tonal"
-                  size="small"
-                  class="font-weight-bold"
-                >
-                  {{ performancePct >= 0 ? '📈 Gain' : '📉 Loss' }}
-                </v-chip>
-                <div class="text-caption mt-1">
-                  {{ performanceValueText }}
-                </div>
-              </v-col>
-            </v-row>
-          </v-card>
+      <v-col cols="4" class="text-right">
+        <v-chip
+          :color="Number(selectedPortfolio?.pnl_pct || 0) >= 0 ? 'emerald-lighten-4' : 'red-lighten-4'"
+          variant="tonal"
+          size="small"
+          class="font-weight-bold"
+        >
+          {{ Number(selectedPortfolio?.pnl_pct || 0) >= 0 ? '📈 Gain' : '📉 Loss' }}
+        </v-chip>
+        <div class="text-caption mt-1">
+          {{ Number(selectedPortfolio?.pnl_value || 0) >= 0 ? '+' : '' }}${{
+            Math.abs(Number(selectedPortfolio?.pnl_value || 0)).toLocaleString(undefined, {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2
+            })
+          }}
+        </div>
+      </v-col>
+    </v-row>
+  </v-card>
 
-            <v-card 
-              v-if="!canUseAdvancedActions"
-              variant="flat" 
-              color="teal-darken-4" 
-              dark 
-              class="mb-6 pa-4 text-white rounded-lg"
+  <!-- BASIC MODE CARD -->
+  <v-card
+    v-if="!canUseAdvancedActions"
+    variant="flat"
+    color="teal-darken-4"
+    dark
+    class="mb-6 pa-4 text-white rounded-lg"
+  >
+    <v-row no-gutters align="center">
+      <v-col cols="7">
+        <div class="text-overline font-weight-bold opacity-70 tracking-wide">Available Cash Capital</div>
+        <div class="text-h4 font-weight-black text-emerald-accent-2">
+          ${{ Number(selectedPortfolio?.cash_balance || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
+        </div>
+      </v-col>
+      <v-col cols="5" class="text-right">
+        <v-chip color="emerald-lighten-4" variant="tonal" size="small" class="font-weight-bold text-uppercase">
+          🟢 Cash Account
+        </v-chip>
+        <div class="text-caption text-teal-lighten-3 mt-1 font-italic" style="font-size: 0.7rem;">
+          Leverage & Shorting Disabled
+        </div>
+      </v-col>
+    </v-row>
+
+    <v-divider class="my-3 border-opacity-30" color="white"></v-divider>
+    <div class="text-caption d-flex justify-space-between">
+      <span>Net Equity</span>
+      <strong>${{ Number(selectedPortfolio?.net_equity || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}</strong>
+    </div>
+  </v-card>
+
+  <!-- ADVANCED MODE CARD -->
+  <v-card
+    v-else
+    variant="flat"
+    color="slate-900"
+    dark
+    class="mb-6 pa-4 text-white rounded-lg"
+    style="background: #0f172a;"
+  >
+    <v-row no-gutters>
+      <v-col cols="6">
+        <div class="text-overline font-weight-bold opacity-70 tracking-wide">Liquid Cash</div>
+        <div class="text-h4 font-weight-black text-emerald-accent-3">
+          ${{ Number(selectedPortfolio?.cash_balance || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
+        </div>
+      </v-col>
+      <v-col cols="6" class="text-right">
+        <div class="text-overline font-weight-bold opacity-70 tracking-wide">Total Buying Power</div>
+        <div class="text-h5 font-weight-bold text-blue-lighten-3">
+          ${{ Number(maxPurchasingPower || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
+        </div>
+      </v-col>
+    </v-row>
+
+    <v-divider class="my-3 border-opacity-30" color="white"></v-divider>
+
+    <v-row no-gutters class="text-caption mb-3">
+      <v-col cols="6">
+        <span>Active Margin Debt:</span>
+        <span class="font-weight-black ml-1 text-orange-lighten-3">
+          ${{ Number(selectedPortfolio?.borrowed_funds_balance || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
+        </span>
+      </v-col>
+      <v-col cols="6" class="text-right">
+        <span>Gross Exposure:</span>
+        <span class="font-weight-bold ml-1">
+          ${{ Number(selectedPortfolio?.total_exposure || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
+        </span>
+      </v-col>
+    </v-row>
+
+    <v-row no-gutters class="text-caption mb-3">
+      <v-col cols="12" class="text-right">
+        <span>Net Equity:</span>
+        <span class="font-weight-bold ml-1">
+          ${{ Number(selectedPortfolio?.net_equity || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
+        </span>
+      </v-col>
+    </v-row>
+
+    <div class="mb-1 d-flex justify-space-between text-caption font-weight-bold">
+      <span class="d-flex align-center gap-1">⚠️ Account Health Capacity</span>
+      <span :class="healthStatusColor">{{ (liveMarginRatio * 100).toFixed(1) }}% Ratio</span>
+    </div>
+
+    <v-progress-linear
+      :model-value="liveMarginRatio * 100"
+      :color="healthBarColor"
+      height="8"
+      rounded
+      striped
+      :max="100"
+    ></v-progress-linear>
+
+    <div class="d-flex justify-space-between text-slate-400 mt-1" style="font-size: 0.65rem;">
+      <span class="text-rose-400 font-weight-bold">10% Forced Liquidation Drop Limit</span>
+      <span>100% Fully Collateralized</span>
+    </div>
+  </v-card>
+
+  <h3 class="text-subtitle-2 font-weight-bold text-slate-700 mb-2">📦 Open Positions</h3>
+  <div v-if="selectedPortfolio?.assets?.length">
+    <v-card
+      v-for="holding in selectedPortfolio.assets"
+      :key="`${holding.ticker}-${holding.position_type}`"
+      class="pa-4 mb-3 rounded-lg border"
+      variant="flat"
+    >
+      <div class="d-flex justify-space-between align-center">
+        <div>
+          <div class="font-weight-black">{{ holding.ticker }}</div>
+          <div class="text-caption text-slate-500">
+            {{ holding.position_type }} · Qty {{ Number(holding.quantity).toFixed(4) }}
+          </div>
+        </div>
+        <v-chip size="x-small" :color="holding.position_type === 'SHORT' ? 'deep-orange' : 'indigo'" variant="flat">
+          {{ holding.position_type }}
+        </v-chip>
+      </div>
+
+      <v-row class="mt-2">
+        <v-col cols="6" class="py-1 text-caption">
+          Avg Entry: <strong>${{ Number(holding.average_buy_price).toFixed(2) }}</strong>
+        </v-col>
+        <v-col cols="6" class="py-1 text-caption text-right">
+          Live: <strong>${{ Number(getAssetLivePrice(holding.ticker) || holding.average_buy_price || 0).toFixed(2) }}</strong>
+        </v-col>
+        <v-col cols="6" class="py-1 text-caption">
+          Mkt Value: <strong>${{ Number(getHoldingMarketValue(holding)).toFixed(2) }}</strong>
+        </v-col>
+        <v-col cols="6" class="py-1 text-caption text-right">
+          P&L:
+          <strong :class="getHoldingPnL(holding) >= 0 ? 'text-emerald-600' : 'text-rose-600'">
+            {{ getHoldingPnL(holding) >= 0 ? '+' : '' }}${{ Number(getHoldingPnL(holding)).toFixed(2) }}
+            ({{ getHoldingPnLPct(holding) >= 0 ? '+' : '' }}{{ Number(getHoldingPnLPct(holding)).toFixed(2) }}%)
+          </strong>
+        </v-col>
+      </v-row>
+
+      <div class="text-caption mt-2">
+        48h:
+        <strong :class="Number(trendByTicker[holding.ticker]?.performance_pct_48h || 0) >= 0 ? 'text-emerald-600' : 'text-rose-600'">
+          {{ trendByTicker[holding.ticker]?.performance_pct_48h ?? 'N/A' }}<span v-if="trendByTicker[holding.ticker]?.performance_pct_48h">%</span>
+        </strong>
+      </div>
+    </v-card>
+  </div>
+
+  <div class="d-flex justify-space-between align-center mb-2 mt-4">
+    <h3 class="text-subtitle-2 font-weight-bold text-slate-700">⏳ Pending or Limit Orders</h3>
+    <v-chip size="x-small" color="amber-darken-3" variant="flat" class="font-weight-bold">
+      {{ selectedPortfolio?.open_orders?.length || 0 }} Orders Pending
+    </v-chip>
+  </div>
+
+  <v-card variant="outlined" class="bg-white mb-6 rounded-lg">
+    <v-table density="comfortable" class="text-caption">
+      <thead>
+        <tr class="bg-grey-lighten-4">
+          <th class="font-weight-bold text-left">Ticker</th>
+          <th class="font-weight-bold text-left">Class</th>
+          <th class="font-weight-bold text-center">Units</th>
+          <th class="font-weight-bold text-center">Target Price</th>
+          <th class="font-weight-bold text-right">Live Price</th>
+          <th class="font-weight-bold text-center">Cancel</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="order in selectedPortfolio?.open_orders" :key="order.id" class="align-center">
+          <td class="font-weight-black text-slate-800">{{ order.ticker }}</td>
+          <td>
+            <v-chip size="x-small" :color="['BUY', 'COVER'].includes(order.transaction_type) ? 'emerald' : 'rose'" variant="flat">
+              {{ order.order_type }} {{ order.transaction_type }}
+            </v-chip>
+          </td>
+          <td class="text-center">{{ Number(order.quantity).toFixed(4) }}</td>
+          <td class="text-center font-weight-bold text-amber-800" v-if="order.target_price !== null">${{ Number(order.target_price).toFixed(2) }}</td>
+          <td class="text-center font-weight-bold text-amber-800" v-else>—</td>
+          <td class="text-right font-weight-bold">${{ getLivePrice(order.ticker) }}</td>
+          <td class="text-center">
+            <v-btn
+              variant="text"
+              color="rose-darken-2"
+              icon="mdi-close-circle-outline"
+              density="compact"
+              class="font-weight-black"
+              style="font-size: 1.15rem; line-height: 1;"
+              @click="killWorkingOrder(order.id)"
             >
-              <v-row no-gutters align="center">
-                <v-col cols="7">
-                  <div class="text-overline font-weight-bold opacity-70 tracking-wide">Available Cash Capital</div>
-                  <div class="text-h4 font-weight-black text-emerald-accent-2">
-                    ${{ parseFloat(selectedPortfolio?.cash_balance || 0).toLocaleString(undefined, {minimumFractionDigits: 2}) }}
-                  </div>
-                </v-col>
-                <v-col cols="5" class="text-right">
-                  <v-chip color="emerald-lighten-4" variant="tonal" size="small" class="font-weight-bold text-uppercase">
-                    🟢 Cash Account
-                  </v-chip>
-                  <div class="text-caption text-teal-lighten-3 mt-1 font-italic" style="font-size: 0.7rem;">
-                    Leverage & Shorting Disabled
-                  </div>
-                </v-col>
-              </v-row>
-            </v-card>
-
-            <v-card 
-              v-else
-              variant="flat" 
-              color="slate-900" 
-              dark 
-              class="mb-6 pa-4 text-white rounded-lg"
-              style="background: #0f172a;"
-            >
-              <v-row no-gutters>
-                <v-col cols="6">
-                  <div class="text-overline font-weight-bold opacity-70 tracking-wide">Liquid Cash</div>
-                  <div class="text-h4 font-weight-black text-emerald-accent-3">
-                    ${{ parseFloat(selectedPortfolio?.cash_balance || 0).toLocaleString(undefined, {minimumFractionDigits: 2}) }}
-                  </div>
-                </v-col>
-                <v-col cols="6" class="text-right">
-                  <div class="text-overline font-weight-bold opacity-70 tracking-wide">Total Buying Power</div>
-                  <div class="text-h5 font-weight-bold text-blue-lighten-3">
-                    ${{ maxPurchasingPower.toLocaleString(undefined, {minimumFractionDigits: 2}) }}
-                  </div>
-                </v-col>
-              </v-row>
-
-              <v-divider class="my-3 border-opacity-30" color="white"></v-divider>
-
-              <v-row no-gutters class="text-caption mb-3">
-                <v-col cols="6">
-                  <span>Active Margin Debt:</span>
-                  <span class="font-weight-black ml-1 text-orange-lighten-3">
-                    ${{ parseFloat(selectedPortfolio?.borrowed_funds_balance || 0).toFixed(2) }}
-                  </span>
-                </v-col>
-                <v-col cols="6" class="text-right">
-                  <span>Max Available Credit:</span>
-                  <span class="font-weight-bold ml-1">${{ maxBorrowLimit.toFixed(2) }}</span>
-                </v-col>
-              </v-row>
-
-              <div class="mb-1 d-flex justify-space-between text-caption font-weight-bold">
-                <span class="d-flex align-center gap-1">
-                  ⚠️ Account Health Capacity
-                </span>
-                <span :class="healthStatusColor">{{ (liveMarginRatio * 100).toFixed(1) }}% Ratio</span>
-              </div>
-              
-              <v-progress-linear
-                :model-value="liveMarginRatio * 100"
-                :color="healthBarColor"
-                height="8"
-                rounded
-                striped
-                :max="100"
-              ></v-progress-linear>
-              
-              <div class="d-flex justify-space-between text-slate-400 mt-1" style="font-size: 0.65rem;">
-                <span class="text-rose-400 font-weight-bold">10% Forced Liquidation Drop Limit</span>
-                <span>100% Fully Collateralized</span>
-              </div>
-            </v-card>
-
-            <h3 class="text-subtitle-2 font-weight-bold text-slate-700 mb-2">📦 Open Positions</h3>
-            <div v-if="selectedPortfolio?.assets?.length">
-              <v-card
-                v-for="holding in selectedPortfolio.assets"
-                :key="`${holding.ticker}-${holding.position_type}`"
-                class="pa-4 mb-3 rounded-lg border"
-                variant="flat"
-              >
-                <div class="d-flex justify-space-between align-center">
-                  <div>
-                    <div class="font-weight-black">{{ holding.ticker }}</div>
-                    <div class="text-caption text-slate-500">{{ holding.position_type }} · Qty {{ Number(holding.quantity).toFixed(1) }}</div>
-                  </div>
-                  <v-chip size="x-small" :color="holding.position_type === 'SHORT' ? 'deep-orange' : 'indigo'" variant="flat">
-                    {{ holding.position_type }}
-                  </v-chip>
-                </div>
-
-                <v-row class="mt-2">
-                  <v-col cols="6" class="py-1 text-caption">Avg Entry: <strong>${{ Number(holding.average_buy_price).toFixed(2) }}</strong></v-col>
-                  <v-col cols="6" class="py-1 text-caption text-right">Live: <strong>${{ getAssetLivePrice(holding.ticker).toFixed(2) }}</strong></v-col>
-                  <v-col cols="6" class="py-1 text-caption">Mkt Value: <strong>${{ getHoldingMarketValue(holding).toFixed(2) }}</strong></v-col>
-                  <v-col cols="6" class="py-1 text-caption text-right">
-                    P&L:
-                    <strong :class="getHoldingPnL(holding) >= 0 ? 'text-emerald-600' : 'text-rose-600'">
-                      {{ getHoldingPnL(holding) >= 0 ? '+' : '' }}${{ getHoldingPnL(holding).toFixed(2) }}
-                      ({{ getHoldingPnLPct(holding) >= 0 ? '+' : '' }}{{ getHoldingPnLPct(holding).toFixed(2) }}%)
-                    </strong>
-                  </v-col>
-                </v-row>
-
-                <div class="text-caption mt-2">
-                  48h:
-                  <strong :class="Number(trendByTicker[holding.ticker]?.performance_pct_48h || 0) >= 0 ? 'text-emerald-600' : 'text-rose-600'">
-                    {{ trendByTicker[holding.ticker]?.performance_pct_48h ?? 'N/A' }}<span v-if="trendByTicker[holding.ticker]?.performance_pct_48h">%</span>
-                  </strong>
-                </div>
-              </v-card>
-            </div>
-
-            <div class="d-flex justify-space-between align-center mb-2 mt-4">
-              <h3 class="text-subtitle-2 font-weight-bold text-slate-700">⏳ Pending or Limit Orders</h3>
-              <v-chip size="x-small" color="amber-darken-3" variant="flat" class="font-weight-bold">
-                {{ selectedPortfolio?.open_orders?.length || 0 }} Orders Pending
-              </v-chip>
-            </div>
-
-            <v-card variant="outlined" class="bg-white mb-6 rounded-lg">
-              <v-table density="comfortable" class="text-caption">
-                <thead>
-                  <tr class="bg-grey-lighten-4">
-                    <th class="font-weight-bold text-left">Ticker</th>
-                    <th class="font-weight-bold text-left">Class</th>
-                    <th class="font-weight-bold text-center">Units</th>
-                    <th class="font-weight-bold text-center">Target Price</th>
-                    <th class="font-weight-bold text-right">Live Price</th>
-                    <th class="font-weight-bold text-center">Cancel</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr v-for="order in selectedPortfolio?.open_orders" :key="order.id" class="align-center">
-                    <td class="font-weight-black text-slate-800">{{ order.ticker }}</td>
-                    <td>
-                      <v-chip size="x-small" :color="['BUY', 'COVER'].includes(order.transaction_type) ? 'emerald' : 'rose'" variant="flat">
-                        LIMIT {{ order.transaction_type }}
-                      </v-chip>
-                    </td>
-                    <td class="text-center">{{ parseFloat(order.quantity).toFixed(4) }}</td>
-                    <td class="text-center font-weight-bold text-amber-800" v-if="order.target_price !== null">${{ parseFloat(order.target_price).toFixed(2) }}</td>
-                    <td class="text-center font-weight-bold text-amber-800" v-else>—</td>
-                    <td class="text-right font-weight-bold">${{ getLivePrice(order.ticker) }}</td>
-                    <td class="text-center">
-                      <v-btn 
-                        variant="text" 
-                        color="rose-darken-2" 
-                        icon="mdi-close-circle-outline" 
-                        density="compact"
-                        class="font-weight-black"
-                        style="font-size: 1.15rem; line-height: 1;"
-                        @click="killWorkingOrder(order.id)"
-                      >
-                        ×
-                      </v-btn>
-                    </td>
-                  </tr>
-                  <tr v-if="!selectedPortfolio?.open_orders?.length">
-                    <td colspan="6" class="text-center text-slate-400 py-4 font-italic">
-                      No limit orders in your portfolio.
-                    </td>
-                  </tr>
-                </tbody>
-              </v-table>
-            </v-card>
+              ×
+            </v-btn>
+          </td>
+        </tr>
+        <tr v-if="!selectedPortfolio?.open_orders?.length">
+          <td colspan="6" class="text-center text-slate-400 py-4 font-italic">
+            No limit orders in your portfolio.
+          </td>
+        </tr>
+      </tbody>
+    </v-table>
+  </v-card>
 
             <h3 class="text-subtitle-2 font-weight-bold text-slate-700 mb-2">📜 Transaction History</h3>
             <v-card variant="outlined" class="bg-white">
@@ -1308,6 +1346,33 @@ const pnlSeriesByTicker = ref({})
 const sparklineRefs = ref({})
 const sparklineCharts = ref({})
 
+const effectiveNetEquity = computed(() => {
+  const p = selectedPortfolio.value
+  if (!p) return 0
+
+  // 1) backend source of truth if provided
+  if (p.net_equity !== undefined && p.net_equity !== null) {
+    return Number(p.net_equity)
+  }
+
+  // 2) fallback local reconstruction (only if backend field missing)
+  const cash = Number(p.cash_balance || 0)
+  const debt = Number(p.borrowed_funds_balance || 0)
+  let longValue = 0
+  let shortValue = 0
+
+  for (const h of (p.assets || [])) {
+    const live = getAssetLivePrice(h.ticker)
+    const px = live > 0 ? live : Number(h.average_buy_price || 0)
+    const qty = Number(h.quantity || 0)
+    const mv = px * qty
+    if (h.position_type === 'LONG') longValue += mv
+    else if (h.position_type === 'SHORT') shortValue += mv
+  }
+
+  return cash + longValue - shortValue - debt
+})
+
 let allocationChart = null
 let cashVsAssetsChart = null
 let contribChart = null
@@ -1316,6 +1381,8 @@ const getLivePriceNumber = (ticker) => {
   const hit = marketPrices.value.find(p => String(p.ticker).toUpperCase() === String(ticker).toUpperCase())
   return hit ? Number(hit.current_price || 0) : 0
 }
+
+
 
 const computePortfolioVizData = (portfolio) => {
   if (!portfolio) return null
@@ -1961,32 +2028,24 @@ const removeFromWatchlist = async (tick) => {
   }
 }
 
-const portfolioMarketValue = computed(() => {
-  const p = selectedPortfolio.value
-  if (!p) return 0
 
-  const assets = p.assets || []
-  const assetsValue = assets.reduce((sum, a) => {
-    const qty = Number(a.quantity || 0)
-    const live = getLivePriceNumber(a.ticker) || Number(a.average_buy_price || 0)
-    return sum + (qty * live)
-  }, 0)
-
-  return Number(p.cash_balance || 0) + assetsValue
-})
-
-// Prefer backend field if available; fallback to current cash as baseline
 const initialCapital = computed(() => {
   const p = selectedPortfolio.value
   if (!p) return 0
   return Number(p.initial_budget || p.starting_budget || p.initial_cash || p.cash_balance || 0)
 })
 
-const performancePct = computed(() => {
-  const base = initialCapital.value
-  if (!base || base <= 0) return 0
-  return ((portfolioMarketValue.value - base) / base) * 100
-})
+// Replace your current performance-related computed block with this:
+
+const serializerPnlPct = computed(() =>
+  Number(selectedPortfolio.value?.pnl_pct ?? 0)
+)
+
+const serializerPnlValue = computed(() =>
+  Number(selectedPortfolio.value?.pnl_value ?? 0)
+)
+
+const performancePct = computed(() => serializerPnlPct.value)
 
 const performancePctText = computed(() => {
   const v = performancePct.value
@@ -1995,9 +2054,12 @@ const performancePctText = computed(() => {
 })
 
 const performanceValueText = computed(() => {
-  const delta = portfolioMarketValue.value - initialCapital.value
+  const delta = serializerPnlValue.value
   const sign = delta > 0 ? '+' : ''
-  return `${sign}$${Math.abs(delta).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+  return `${sign}$${Math.abs(delta).toLocaleString(undefined, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  })}`
 })
 
 const performanceCardBg = computed(() => {
@@ -2163,7 +2225,7 @@ const updateNYSECountdownClock = () => {
   
   // 🔒 CASE B: It's the weekend
   if (isWeekend) {
-    nyseClock.value.message = 'Market closed for the weekend.'
+    nyseClock.value.message = 'Closed for the weekend.'
     return
   }
   
@@ -2177,7 +2239,7 @@ const updateNYSECountdownClock = () => {
   } 
   // 🔒 CASE D: Weekday post 04:00 PM closing bell
   else {
-    nyseClock.value.message = 'Market closed. Reopens tomorrow.'
+    nyseClock.value.message = 'Reopens tomorrow.'
   }
 }
 
@@ -2583,7 +2645,7 @@ onBeforeUnmount(() => {
   }
 }
 
-.watchlist-section { max-width: 1160px; background: white; margin: 0 auto 30px auto; padding: 20px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+.watchlist-section { max-width: 1160px; background: white; margin: 30px auto 30px auto; padding: 20px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
 .watchlist-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #f4f6f7; padding-bottom: 12px; margin-bottom: 15px; }
 .watchlist-header h2 { margin: 0; font-size: 1.2rem; color: #2c3e50; }
 .watchlist-add-form { display: flex; gap: 12px; width: 100%; max-width: 650px; align-items: center; }

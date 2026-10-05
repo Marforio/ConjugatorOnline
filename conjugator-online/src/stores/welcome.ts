@@ -75,6 +75,32 @@ type WrongVocabPrompt = {
   expected: string[] | null
 }
 
+type PortfolioLite = {
+  id: number
+  name: string
+  competition?: number | null
+  competition_detail?: {
+    id: number
+    name: string
+    is_active?: boolean
+    trading_is_open?: boolean
+    end_time?: string | null
+  } | null
+  trading_is_open?: boolean
+  end_time?: string | null
+}
+
+type PortfolioTickerItem = {
+  id: number
+  name: string
+  isCompetition: boolean
+  hasAssets: boolean
+  netValue: number
+  pnlPct: number | null
+  direction: 'up' | 'down' | 'neutral'
+  ctaInviteOnly: boolean
+}
+
 const STALE_MS = 2 * 60 * 1000 // 2 minutes
 
 export const useWelcomeStore = defineStore('welcome', () => {
@@ -112,10 +138,16 @@ export const useWelcomeStore = defineStore('welcome', () => {
     return Date.now() - lastLoadedAt.value > STALE_MS
   })
 
+  // Market masters portfolios
+  const loadingPortfolioStatus = ref(false)
+  const portfolios = ref<PortfolioLite[]>([])
+
+
   function resetWelcomeState() {
     allAssignments.value = []
     activityFeed.value = []
     wrongVocabPrompts.value = []
+    portfolios.value = []
     currentWorkout.value = null
     customListNameById.value = {}
     customListsReady.value = false
@@ -244,6 +276,20 @@ export const useWelcomeStore = defineStore('welcome', () => {
   }
 }
 
+// add fetcher near other fetchers
+async function fetchPortfolioStatus() {
+  loadingPortfolioStatus.value = true
+  try {
+    const res = await api.get('/market-masters/hub/')
+    portfolios.value = Array.isArray(res.data?.portfolios) ? res.data.portfolios : []
+  } catch (err) {
+    console.warn('[welcomeStore] fetchPortfolioStatus failed (non-fatal):', err)
+    portfolios.value = []
+  } finally {
+    loadingPortfolioStatus.value = false
+  }
+}
+
   async function fetchActivityFeed() {
     loadingActivity.value = true
     try {
@@ -321,6 +367,7 @@ export const useWelcomeStore = defineStore('welcome', () => {
           userStore.isStaff ? { student: userStore.studentId } : {}
         ),
         !userStore.isStaff ? vocabWorkoutStore.fetchMyWork() : Promise.resolve(),
+        !userStore.isStaff ? fetchPortfolioStatus() : Promise.resolve(),
       ])
 
       loadedOnce.value = true
@@ -358,6 +405,71 @@ function replaceListIdsInText(text: string): string {
   out = out.replace(/\birregular_verbs(?:_[a-z0-9_]+)?\b/gi, (k) => titleCaseWords(k));
   return out;
 }
+
+const openPortfolios = computed(() =>
+  portfolios.value.filter((p) => {
+    const tradingOpen = p.trading_is_open ?? p.competition_detail?.trading_is_open ?? false
+    const end = p.end_time ?? p.competition_detail?.end_time ?? null
+    const notEnded = end ? new Date(end).getTime() > Date.now() : true
+    return tradingOpen && notEnded
+  })
+)
+
+const hasOpenPortfolio = computed(() => openPortfolios.value.length > 0)
+const primaryOpenPortfolio = computed(() => openPortfolios.value[0] ?? null)
+
+function num(v: any, fallback = 0): number {
+  const n = Number(v)
+  return Number.isFinite(n) ? n : fallback
+}
+
+// add computed near your other computed slices
+const portfolioTickerItems = computed<PortfolioTickerItem[]>(() => {
+  const rows = Array.isArray(portfolios.value) ? portfolios.value : []
+
+  return rows
+    .map((p: any) => {
+      const assets = Array.isArray(p.assets) ? p.assets : []
+      const hasAssets = assets.length > 0
+      const isCompetition = Boolean(p.competition)
+
+      // show invite banner only when competition portfolio exists but has no assets
+      const ctaInviteOnly = isCompetition && !hasAssets
+
+      // net value best-effort (serializer often exposes net_equity)
+      const netValue =
+        num(p.net_equity, NaN) === num(p.net_equity, NaN)
+          ? num(p.net_equity)
+          : num(p.cash_balance)
+
+      // pnl best-effort: pnl_pct may or may not exist on this endpoint
+      const rawPnlPct = p.pnl_pct
+      const pnlPct = rawPnlPct === null || rawPnlPct === undefined ? null : num(rawPnlPct, 0)
+
+      let direction: 'up' | 'down' | 'neutral' = 'neutral'
+      if (pnlPct !== null) {
+        if (pnlPct > 0) direction = 'up'
+        else if (pnlPct < 0) direction = 'down'
+      }
+
+      return {
+        id: num(p.id),
+        name: String(p.name ?? `Portfolio #${p.id}`),
+        isCompetition,
+        hasAssets,
+        netValue,
+        pnlPct,
+        direction,
+        ctaInviteOnly,
+      } as PortfolioTickerItem
+    })
+    // visibility rule:
+    // - show if has assets
+    // - or if competition invite (no assets yet)
+    .filter((x) => x.hasAssets || x.ctaInviteOnly)
+})
+
+
 
 
 
@@ -519,6 +631,9 @@ function pickNextBySmallestNumericTarget(list: Assignment[]): Assignment[] {
     wrongVocabPrompts,
     wrongVocabCount,
     featuredWrongPrompt,
+    loadingPortfolioStatus,
+    portfolios,
+    portfolioTickerItems,
 
     // actions
     fetchCustomListNames,
@@ -528,6 +643,7 @@ function pickNextBySmallestNumericTarget(list: Assignment[]): Assignment[] {
     fetchWelcomeBundle,
     refreshWelcomeBundle,
     resetWelcomeState,
+    fetchPortfolioStatus,
 
     // computed
     pendingAssignments,

@@ -311,10 +311,10 @@
             </div>
             <v-row v-for="(imp, iIdx) in impressiveList" :key="iIdx" dense class="mb-2 align-center">
               <v-col cols="12" md="5">
-                <v-textarea v-model="imp.content" label="Advanced Phrase / Nuanced Construction used" variant="outlined" rows="1" auto-grow density="compact" bg-color="white" hide-details />
+                <v-textarea v-model="imp.content" label="Impressive Phrase / Construction used" variant="outlined" rows="1" auto-grow density="compact" bg-color="white" hide-details />
               </v-col>
               <v-col cols="12" md="6">
-                <v-textarea v-model="imp.comment" label="Praise Notes / Semantic Context Details" variant="outlined" rows="1" auto-grow density="compact" bg-color="white" hide-details />
+                <v-textarea v-model="imp.comment" label="Praise Notes / Context" variant="outlined" rows="1" auto-grow density="compact" bg-color="white" hide-details />
               </v-col>
               <v-col cols="12" md="1" class="text-center">
                 <v-btn icon="mdi-delete" size="small" color="error" variant="text" @click="impressiveList.splice(iIdx, 1)" />
@@ -423,6 +423,7 @@ const loadingHistory = ref(false)
 const snackbar = ref(false)
 const snackbarMessage = ref('')
 const snackbarColor = ref('success')
+const exportLoading = ref(false)
 
 // Data Repositories
 const studentsRawPool = ref<Student[]>([])
@@ -713,199 +714,246 @@ const filteredFeedbackHistoryLog = computed(() => {
 });
 
 // Unified client-side generation pipeline engine
-function generateClientSidePdfReport(historicalItem: HistoricalFeedback | null = null) {
-  let targetInitials = ""
-  let targetWebId = ""
-  let targetCourse = ""
-  let targetDate = ""
-  let targetStructureComponents: any[] = []
-  let activeDataSnapshot: Record<string, any> = {}
-  let activeErrors: any[] = []
-  let activeVocab: any[] = []
-  let activeImpressive: any[] = []
-  let activeComments: any[] = []
+const generateClientSidePdfReport = async (feedbackItem: any) => {
+  if (!feedbackItem) return
+  exportLoading.value = true
 
-  if (historicalItem) {
-    // Reading data from the backend JSON object matrix logs
-    targetInitials = historicalItem.student
-    targetWebId = historicalItem.student
-    targetCourse = historicalItem.course.toUpperCase()
-    targetDate = historicalItem.date
+  try {
+    const doc = new jsPDF({ orientation: "portrait", unit: "pt", format: "a4" })
+    const margin = 40
+    const pageWidth = doc.internal.pageSize.getWidth()
+    const contentWidth = pageWidth - margin * 2
+    let currentY = 40
 
-    const contents = historicalItem.content || {}
-    activeDataSnapshot = contents.form_data_snapshot || {}
-    activeErrors = contents.errors || []
-    activeVocab = contents.vocab || []
-    activeImpressive = contents.impressive || []
-    activeComments = contents.comments || []
+    // ---------- Resolve metadata robustly ----------
+    const targetWebId =
+      feedbackItem?.student_web_id ||
+      feedbackItem?.student?.web_id ||
+      String(feedbackItem?.student || "unknown-student")
 
-    const templateMatch = availableTemplates.value.find(t => t.template_id === contents.template_id)
-    targetStructureComponents = templateMatch ? templateMatch.structure.components : [
-      { id: 'errors', type: 'error_matrix' },
-      { id: 'vocab', type: 'vocab_notebook' },
-      { id: 'impressive', type: 'impressive_matrix' },
-      { id: 'comments', type: 'comment_block' }
-    ]
-  } else {
-    // Fetch live parameters out of active component memory bounds tracking fields
-    if (!selectedStudent.value || !loadedTemplateStructure.value) return
-    targetInitials = selectedStudent.value.initials
-    targetWebId = selectedStudent.value.web_id
-    targetCourse = selectedCourse.value.toUpperCase()
-    targetDate = new Date().toLocaleDateString()
-    targetStructureComponents = loadedTemplateStructure.value.components
-    
-    activeDataSnapshot = formDataValues.value
-    activeErrors = errorsList.value.filter(e => e.code)
-    activeVocab = vocabList.value.filter(v => v.correct)
-    activeImpressive = impressiveList.value.filter(i => i.content)
-    activeComments = commentsList.value.filter(c => c.comment.trim())
-  }
+    const targetInitials =
+      feedbackItem?.student?.initials ||
+      feedbackItem?.student_initials ||
+      userStore.student?.initials ||
+      userStore.teacherRoster?.find((s: any) => s.web_id === targetWebId)?.initials ||
+      userStore.user?.username?.slice(0, 2).toUpperCase() ||
+      "ST"
 
-  const doc = new jsPDF({ orientation: 'portrait', unit: 'pt', format: 'a4' })
-  const margin = 40
-  const pageWidth = doc.internal.pageSize.getWidth()
-  const contentWidth = pageWidth - (margin * 2)
-  let currentY = 50
+    const targetCourse =
+      feedbackItem?.course_slug ||
+      feedbackItem?.course?.slug ||
+      String(feedbackItem?.course || "unknown-course")
 
-  // Header design rules
-  doc.setFillColor(63, 81, 181) 
-  doc.rect(margin, currentY, contentWidth, 6, 'F')
-  currentY += 25
+    const targetDate =
+      feedbackItem?.date ||
+      new Date().toISOString().slice(0, 10)
 
-  doc.setFontSize(20)
-  doc.setTextColor(30, 41, 59)
-  doc.setFont('helvetica', 'bold')
-  doc.text(`Performance Feedback Report`, margin, currentY)
-  
-  currentY += 16
-  doc.setFontSize(9)
-  doc.setFont('helvetica', 'normal')
-  doc.setTextColor(100, 116, 139)
-  doc.text(`Student ID: ${targetInitials} (${targetWebId}) | Course: ${targetCourse} | Issued: ${targetDate}`, margin, currentY)
-  currentY += 25
+    const targetTemplateId =
+      feedbackItem?.content?.template_id || "no-template"
 
-  targetStructureComponents.forEach((comp: any) => {
-    if (currentY > doc.internal.pageSize.getHeight() - 80) { doc.addPage(); currentY = 50; }
+    const content = feedbackItem?.content || {}
+    const errorsList = Array.isArray(content.errors) ? content.errors : []
+    const vocabList = Array.isArray(content.vocab) ? content.vocab : []
+    const commentsList = Array.isArray(content.comments) ? content.comments : []
+    const impressiveList =
+      Array.isArray(content.impressive) ? content.impressive :
+      Array.isArray(content.impressives) ? content.impressives : []
 
-    if (comp.type === 'paragraph') {
-      doc.setFontSize(9.5)
-      doc.setFont('helvetica', 'italic')
-      doc.setTextColor(71, 85, 105)
-      const lines = doc.splitTextToSize(comp.text, contentWidth)
-      lines.forEach((l: string) => { doc.text(l, margin, currentY); currentY += 14; })
-      currentY += 8
-    }
+    // ---------- Header ----------
+    doc.setFillColor(33, 150, 243)
+    doc.rect(margin, currentY, contentWidth, 6, "F")
+    currentY += 20
 
-    else if (comp.type === 'textarea' || comp.type === 'text_input') {
-      const value = activeDataSnapshot[comp.id]
-      if (!value) return
-      
-      doc.setFontSize(10.5)
-      doc.setFont('helvetica', 'bold')
-      doc.setTextColor(30, 41, 59)
-      doc.text(comp.label, margin, currentY)
-      currentY += 14
+    doc.setFont("helvetica", "bold")
+    doc.setFontSize(16)
+    doc.setTextColor(33, 33, 33)
+    doc.text(`Feedback Report (${targetTemplateId})`, margin, currentY)
+    currentY += 16
 
-      doc.setFontSize(9.5)
-      doc.setFont('helvetica', 'normal')
-      doc.setTextColor(51, 65, 85)
-      const textLines = doc.splitTextToSize(value, contentWidth)
-      textLines.forEach((l: string) => { doc.text(l, margin + 5, currentY); currentY += 13; })
-      currentY += 10
-    }
+    doc.setFont("helvetica", "normal")
+    doc.setFontSize(10)
+    doc.setTextColor(90, 90, 90)
+    doc.text(
+      `Student: ${targetInitials} (${targetWebId}) | Course: ${targetCourse} | Issued: ${targetDate}`,
+      margin,
+      currentY
+    )
+    currentY += 18
 
-    else if (comp.type === 'select') {
-      const value = activeDataSnapshot[comp.id]
-      if (!value) return
-      doc.setFontSize(10); doc.setFont('helvetica', 'bold'); doc.setTextColor(51, 65, 85)
-      doc.text(`${comp.label}: ${value}`, margin, currentY)
-      currentY += 16
-    }
+    // ---------- Overview ----------
+    autoTable(doc, {
+      startY: currentY,
+      margin: { left: margin, right: margin },
+      head: [["Section", "Count"]],
+      body: [
+        ["Errors", String(errorsList.length)],
+        ["Vocabulary Notes", String(vocabList.length)],
+        ["Impressive Language", String(impressiveList.length)],
+        ["Comments", String(commentsList.length)],
+      ],
+      theme: "striped",
+      headStyles: { fillColor: [33, 150, 243], textColor: 255, fontStyle: "bold" },
+      styles: { fontSize: 9, cellPadding: 5 },
+    })
 
-    else if (comp.type === 'checkbox_group') {
-      const checked: string[] = activeDataSnapshot[comp.id] || []
-      if (checked.length === 0) return
+    currentY = (doc as any).lastAutoTable.finalY + 16
 
-      doc.setFontSize(10.5); doc.setFont('helvetica', 'bold'); doc.setTextColor(30, 41, 59)
-      doc.text(comp.label, margin, currentY)
-      currentY += 14
+    // ---------- Errors ----------
+    if (errorsList.length > 0) {
+      if (currentY > doc.internal.pageSize.getHeight() - 120) {
+        doc.addPage()
+        currentY = 40
+      }
 
-      doc.setFontSize(9.5); doc.setFont('helvetica', 'normal'); doc.setTextColor(51, 65, 85)
-      checked.forEach(item => {
-        const lines = doc.splitTextToSize(`• ${item}`, contentWidth - 10)
-        lines.forEach((l: string) => { doc.text(l, margin + 10, currentY); currentY += 13; })
-      })
-      currentY += 8
-    }
-
-    else if (comp.type === 'error_matrix' && activeErrors.length > 0) {
-      currentY += 10
-      doc.setFontSize(11); doc.setFont('helvetica', 'bold'); doc.setTextColor(185, 28, 28)
-      doc.text("Grammar Errors Identified", margin, currentY)
+      doc.setFont("helvetica", "bold")
+      doc.setFontSize(12)
+      doc.setTextColor(44, 62, 80)
+      doc.text("Errors", margin, currentY)
       currentY += 10
 
-      const rows = activeErrors.map(e => [e.code, `${e.times}x`, e.evidence])
+      const rows = errorsList.map((e: any) => [
+        String(e.code || e.error_code || ""),
+        String(e.times ?? 1),
+        String(e.evidence || ""),
+      ])
+
       autoTable(doc, {
-        startY: currentY, margin: { left: margin, right: margin },
-        head: [['Error Code', 'Frequency', 'Evidence']],
-        body: rows, theme: 'grid',
-        headStyles: { fillColor: [239, 68, 68] }, styles: { fontSize: 8.5 }
+        startY: currentY,
+        margin: { left: margin, right: margin },
+        head: [["Code", "Times", "Evidence"]],
+        body: rows,
+        theme: "grid",
+        headStyles: { fillColor: [239, 83, 80], textColor: 255 },
+        styles: { fontSize: 8.5, cellPadding: 5, overflow: "linebreak", valign: "top" },
+        columnStyles: {
+          0: { cellWidth: 70, fontStyle: "bold" },
+          1: { cellWidth: 55, halign: "center" },
+          2: { cellWidth: contentWidth - 125 },
+        },
       })
-      currentY = (doc as any).lastAutoTable.finalY + 18
+
+      currentY = (doc as any).lastAutoTable.finalY + 14
     }
 
-    else if (comp.type === 'vocab_notebook' && activeVocab.length > 0) {
-      if (currentY > doc.internal.pageSize.getHeight() - 100) { doc.addPage(); currentY = 50; }
-      doc.setFontSize(11); doc.setFont('helvetica', 'bold'); doc.setTextColor(63, 81, 181)
-      doc.text("Vocabulary Practice Recommendations", margin, currentY)
+    // ---------- Vocabulary ----------
+    if (vocabList.length > 0) {
+      if (currentY > doc.internal.pageSize.getHeight() - 120) {
+        doc.addPage()
+        currentY = 40
+      }
+
+      doc.setFont("helvetica", "bold")
+      doc.setFontSize(12)
+      doc.setTextColor(44, 62, 80)
+      doc.text("Vocabulary Notes", margin, currentY)
       currentY += 10
 
-      const rows = activeVocab.map(v => [v.correct, v.incorrect || '—', v.comment || '—'])
+      const rows = vocabList.map((v: any) => [
+        String(v.correct || ""),
+        String(v.incorrect || ""),
+        String(v.comment || ""),
+        String(v.times ?? 1),
+      ])
+
       autoTable(doc, {
-        startY: currentY, margin: { left: margin, right: margin },
-        head: [['Recommended Usage', 'Incorrect Form used', 'Usage Context Notes']],
-        body: rows, theme: 'striped',
-        headStyles: { fillColor: [63, 81, 181] }, styles: { fontSize: 8.5 }
+        startY: currentY,
+        margin: { left: margin, right: margin },
+        head: [["Correct", "Incorrect", "Comment", "Times"]],
+        body: rows,
+        theme: "grid",
+        headStyles: { fillColor: [0, 150, 136], textColor: 255 },
+        styles: { fontSize: 8.5, cellPadding: 5, overflow: "linebreak", valign: "top" },
+        columnStyles: {
+          0: { cellWidth: 120 },
+          1: { cellWidth: 120 },
+          2: { cellWidth: contentWidth - 280 },
+          3: { cellWidth: 40, halign: "center" },
+        },
       })
-      currentY = (doc as any).lastAutoTable.finalY + 18
+
+      currentY = (doc as any).lastAutoTable.finalY + 14
     }
 
-    else if (comp.type === 'impressive_matrix' && activeImpressive.length > 0) {
-      if (currentY > doc.internal.pageSize.getHeight() - 100) { doc.addPage(); currentY = 50; }
-      doc.setFontSize(11); doc.setFont('helvetica', 'bold'); doc.setTextColor(16, 185, 129)
-      doc.text("Advanced Language & Phrases Highlighted", margin, currentY)
+    // ---------- Impressive ----------
+    if (impressiveList.length > 0) {
+      if (currentY > doc.internal.pageSize.getHeight() - 120) {
+        doc.addPage()
+        currentY = 40
+      }
+
+      doc.setFont("helvetica", "bold")
+      doc.setFontSize(12)
+      doc.setTextColor(44, 62, 80)
+      doc.text("Impressive Language", margin, currentY)
       currentY += 10
 
-      const rows = activeImpressive.map(i => [i.content, i.comment || '—'])
+      const rows = impressiveList.map((i: any) => [
+        String(i.content || ""),
+        String(i.comment || ""),
+        String(i.times ?? 1),
+      ])
+
       autoTable(doc, {
-        startY: currentY, margin: { left: margin, right: margin },
-        head: [['Advanced Language / Structures', 'Analysis & Recommendations']],
-        body: rows, theme: 'striped',
-        headStyles: { fillColor: [16, 185, 129] }, styles: { fontSize: 8.5 }
+        startY: currentY,
+        margin: { left: margin, right: margin },
+        head: [["Content", "Comment", "Times"]],
+        body: rows,
+        theme: "grid",
+        headStyles: { fillColor: [76, 175, 80], textColor: 255 },
+        styles: { fontSize: 8.5, cellPadding: 5, overflow: "linebreak", valign: "top" },
+        columnStyles: {
+          0: { cellWidth: contentWidth - 180 },
+          1: { cellWidth: 140 },
+          2: { cellWidth: 40, halign: "center" },
+        },
       })
-      currentY = (doc as any).lastAutoTable.finalY + 18
+
+      currentY = (doc as any).lastAutoTable.finalY + 14
     }
 
-    else if (comp.type === 'comment_block' && activeComments.length > 0) {
-      if (currentY > doc.internal.pageSize.getHeight() - 100) { doc.addPage(); currentY = 50; }
-      doc.setFontSize(11); doc.setFont('helvetica', 'bold'); doc.setTextColor(71, 85, 105)
-      doc.text("Teacher Feedback Remarks", margin, currentY)
+    // ---------- Comments ----------
+    if (commentsList.length > 0) {
+      if (currentY > doc.internal.pageSize.getHeight() - 80) {
+        doc.addPage()
+        currentY = 40
+      }
+
+      doc.setFont("helvetica", "bold")
+      doc.setFontSize(12)
+      doc.setTextColor(44, 62, 80)
+      doc.text("Teacher Comments", margin, currentY)
       currentY += 12
 
-      doc.setFontSize(9.5); doc.setFont('helvetica', 'normal'); doc.setTextColor(51, 65, 85)
-      activeComments.forEach(item => {
-        const textLines = doc.splitTextToSize(`• ${item.comment}`, contentWidth)
-        textLines.forEach((l: string) => { 
-          if (currentY > doc.internal.pageSize.getHeight() - 40) { doc.addPage(); currentY = 50; }
-          doc.text(l, margin, currentY); currentY += 13; 
-        })
-      })
-      currentY += 8
-    }
-  })
+      doc.setFont("helvetica", "normal")
+      doc.setFontSize(10)
+      doc.setTextColor(70, 70, 70)
 
-  doc.save(`Feedback_Report_${targetInitials}_${targetCourse}.pdf`)
+      commentsList.forEach((c: any, idx: number) => {
+        const text = String(c.comment || c || "")
+        if (!text.trim()) return
+
+        const lines = doc.splitTextToSize(`• ${text}`, contentWidth)
+        lines.forEach((line: string) => {
+          if (currentY > doc.internal.pageSize.getHeight() - 40) {
+            doc.addPage()
+            currentY = 40
+          }
+          doc.text(line, margin, currentY)
+          currentY += 13
+        })
+
+        if (idx < commentsList.length - 1) currentY += 2
+      })
+    }
+
+    const filename = `Feedback_${targetInitials}_${targetWebId}_${targetDate}.pdf`
+      .replace(/[^a-z0-9_.-]/gi, "_")
+    doc.save(filename)
+  } catch (err) {
+    console.error("PDF generation failed:", err)
+  } finally {
+    exportLoading.value = false
+  }
 }
 
 function recreatePdfFromHistoricalLogs(item: HistoricalFeedback) {

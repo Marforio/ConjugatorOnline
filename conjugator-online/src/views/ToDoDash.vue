@@ -197,8 +197,7 @@
                 <VWActiveSessionsCompact />
               </div>
 
-              
-              <!-- Workout Section -->
+                            <!-- Workout Section -->
               <div v-if="welcomeStore.currentWorkout" class="border rounded-xl pa-6 bg-blue-lighten-5">
                 <div class="d-flex align-center justify-space-between mb-4">
                   <div>
@@ -228,6 +227,39 @@
                   </div>
                 </div>
               </div>
+
+              <!-- Market Masters ticker -->
+              <div
+                v-if="welcomeStore.portfolioTickerItems.length"
+                class="portfolio-ticker-wrap cursor-pointer"
+                @click="goToMarketMasters"
+                title="Open Market Masters"
+              >
+                <div class="portfolio-ticker-track">
+                  <template
+                    v-for="(p, i) in [...welcomeStore.portfolioTickerItems, ...welcomeStore.portfolioTickerItems]"
+                    :key="`${p.id}-${i}`"
+                  >
+                    <span
+                      class="portfolio-ticker-item"
+                      :class="p.ctaInviteOnly ? 'invite' : p.direction"
+                    >
+                      <template v-if="p.ctaInviteOnly">
+                        🎯 New Competition: "{{ p.name }}" — You are invited to participate in a fun and friendly investment competition! Click this bar to start!
+                      </template>
+                      <template v-else>
+                        Your "{{ p.name }}" Portfolio is now worth ${{ Number(p.netValue).toLocaleString() }}!
+                        <span v-if="p.pnlPct !== null">
+                          ({{ p.pnlPct >= 0 ? '+' : '' }}{{ p.pnlPct.toFixed(1) }}%)
+                        </span>
+                        <span v-if="p.direction === 'up'"> ▲</span>
+                        <span v-else-if="p.direction === 'down'"> ▼</span>
+                      </template>
+                    </span>
+                  </template>
+                </div>
+              </div>
+            
 
               <!-- Assignments by Type -->
               <div v-if="welcomeStore.vocabPendingAssignments.length > 0" class="border rounded-xl pa-4 bg-teal-lighten-5">
@@ -603,7 +635,7 @@ const courseProgressPercentage = computed(
 const showProfileDialog = ref(false);
 const completedTasksPanel = ref<string | string[]>([]);
 
-function getActivityIcon(type: string): string {
+  function getActivityIcon(type: string): string {
   const icons: Record<string, string> = {
     'conjugation': 'mdi-controller',
     'other_game': 'mdi-gamepad-variant',
@@ -668,6 +700,10 @@ function normalizeKey(v: string): string {
 
 function titleCaseWords(s: string): string {
   return s.replace(/_/g, " ").replace(/\b\w/g, (m) => m.toUpperCase());
+}
+
+function goToMarketMasters() {
+  router.push({ name: 'market-masters' })
 }
 
 async function fetchCustomListNames() {
@@ -1218,4 +1254,56 @@ onMounted(async () => {
   cursor: grabbing !important;
   scroll-behavior: auto !important; /* Temporarily suspends inertia rules to match cursor delta */
 }
+
+.portfolio-ticker-wrap {
+  height: 34px;
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background: #0f172a;
+  display: flex;
+  align-items: center;
+}
+.portfolio-ticker-track {
+  white-space: nowrap;
+  padding-left: 100%;
+  animation: portfolio-ticker-slide 45s linear infinite;
+}
+.portfolio-ticker-wrap:hover .portfolio-ticker-track {
+  animation-play-state: paused;
+}
+.portfolio-ticker-item {
+  display: inline-block;
+  margin-right: 36px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+.portfolio-ticker-item.up { color: #34d399; }
+.portfolio-ticker-item.down { color: #f87171; }
+.portfolio-ticker-item.neutral { color: #cbd5e1; }
+.portfolio-ticker-item.invite { color: #fcd34d; }
+
+@keyframes portfolio-ticker-slide {
+  0% { transform: translate3d(0,0,0); }
+  100% { transform: translate3d(-100%,0,0); }
+}
+
+.portfolio-ticker-item.up {
+  color: #22c55e; /* green */
+}
+
+.portfolio-ticker-item.down {
+  color: #ef4444; /* red */
+}
+
+.portfolio-ticker-item.neutral {
+  color: #cbd5e1; /* slate light */
+}
+
+.portfolio-ticker-item.invite {
+  color: #facc15; /* amber */
+}
+
+.portfolio-ticker-item.up span:last-child { color: #22c55e; }
+.portfolio-ticker-item.down span:last-child { color: #ef4444; }
 </style>

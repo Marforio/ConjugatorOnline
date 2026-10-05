@@ -1,7 +1,7 @@
 <template>
   <v-container fluid class="bg-grey-lighten-4 min-h-screen pa-6">
     <!-- Header -->
-    <v-row class="mb-6">
+    <v-row class="mb-2">
       <v-col cols="12">
         <h1 class="text-h4 font-weight-black text-slate-800 mb-1">Market Masters: Teacher Panel 🎓</h1>
         <p class="text-subtitle-1 text-slate-500">
@@ -181,7 +181,7 @@
               v-model="enrollmentForm.student_ids"
               label="Select Students (Multi-select)"
               :items="userStore.teacherRoster"
-              :item-title="item => `${item.first_name} ${item.last_name} (${item.initials})`"
+              :item-title="item => `${item.web_id} (${item.initials})`"
               item-value="id"
               variant="outlined"
               density="comfortable"

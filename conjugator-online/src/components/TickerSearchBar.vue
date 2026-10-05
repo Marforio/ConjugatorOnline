@@ -59,40 +59,81 @@ const isDropdownOpen = ref(false)
 const filteredSuggestions = ref([])
 const wrapperRef = ref(null)
 
+// ⭐ Featured assets shown first / boosted in ranking
+const FEATURED_TICKERS = new Set([
+  'XAU/USD', 'BTC/USD', 'ETH/USD', 'SOL/USD',
+  'AAPL', 'MSFT', 'NVDA', 'TSLA', 'SPCX', 'AMZN', 'GOOG', 'META', 'AMD', 'NKE', 'CRM', 'SOFI', 'UBER',
+  'SPY', 'QQQ', 'VTI', 'GLD', 'USO', 'EWL', 'V', 'GS', 'JPM', 'BAC', 'NFLX', 'DIS', 'SPOT'
+])
+
+const allAssets = Object.entries(marketDirectory).map(([ticker, details]) => ({
+  ticker,
+  name: details?.name || ticker,
+  type: details?.type || 'STOCK',
+  featured: FEATURED_TICKERS.has(String(ticker).toUpperCase())
+}))
+
+const rankAsset = (asset, q, mode) => {
+  const ticker = asset.ticker.toUpperCase()
+  const name = asset.name.toUpperCase()
+
+  // lower score = higher priority
+  let score = 1000
+
+  if (mode === 'ticker') {
+    if (ticker === q) score = 0
+    else if (ticker.startsWith(q)) score = 1
+    else if (ticker.includes(q)) score = 2
+    else return null
+  } else {
+    if (name === q) score = 0
+    else if (name.startsWith(q)) score = 1
+    else if (name.includes(q)) score = 2
+    else if (ticker.startsWith(q)) score = 3 // fallback convenience
+    else return null
+  }
+
+  // featured boost
+  if (asset.featured) score -= 0.5
+
+  return score
+}
+
 const changeMode = (mode) => {
   searchMode.value = mode
   handleSearchInput()
 }
 
+const showFeaturedDefault = () => {
+  filteredSuggestions.value = allAssets
+    .filter(a => a.featured)
+    .sort((a, b) => a.ticker.localeCompare(b.ticker))
+    .slice(0, 14)
+}
+
 const handleSearchInput = () => {
-  const query = searchQuery.value.trim().toUpperCase()
-  if (!query) {
-    filteredSuggestions.value = []
+  const raw = searchQuery.value.trim()
+  const q = raw.toUpperCase()
+
+  if (!q) {
+    showFeaturedDefault()
     return
   }
 
-  const results = []
-  
-  for (const [ticker, details] of Object.entries(marketDirectory)) {
-    let isMatched = false
-    
-    if (searchMode.value === 'ticker') {
-      isMatched = ticker.toUpperCase().includes(query)
-    } else {
-      isMatched = details.name.toUpperCase().includes(query)
-    }
-    
-    if (isMatched) {
-      results.push({
-        ticker: ticker,
-        name: details.name,
-        type: details.type
-      })
-    }
-    if (results.length >= 10) break
+  const scored = []
+  for (const asset of allAssets) {
+    const score = rankAsset(asset, q, searchMode.value)
+    if (score !== null) scored.push({ ...asset, _score: score })
   }
-  
-  filteredSuggestions.value = results
+
+  scored.sort((a, b) => {
+    if (a._score !== b._score) return a._score - b._score
+    // tie-break: shorter ticker first, then alphabetic
+    if (a.ticker.length !== b.ticker.length) return a.ticker.length - b.ticker.length
+    return a.ticker.localeCompare(b.ticker)
+  })
+
+  filteredSuggestions.value = scored.slice(0, 20).map(({ _score, ...rest }) => rest)
 }
 
 const selectAsset = (item) => {
@@ -112,8 +153,14 @@ const clickOutsideTracker = (e) => {
   }
 }
 
-onMounted(() => { window.addEventListener('click', clickOutsideTracker) })
-onBeforeUnmount(() => { window.removeEventListener('click', clickOutsideTracker) })
+onMounted(() => {
+  showFeaturedDefault()
+  window.addEventListener('click', clickOutsideTracker)
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('click', clickOutsideTracker)
+})
 
 defineExpose({ clearInput })
 </script>
