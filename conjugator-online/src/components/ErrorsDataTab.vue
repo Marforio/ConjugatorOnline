@@ -83,20 +83,20 @@
             <!-- Left side: same info as table headers -->
             <div class="d-flex flex-wrap align-center ga-2">
               <!-- Feedback ID + template_id -->
-              <div class="font-weight-bold text-indigo-darken-3">
-                {{ feedback.feedback_id || 'Unknown' }}
+              <div class="font-weight-bold text-indigo-darken-3 me-3">
+                {{ getTemplateLabelFromFeedbackGroup(feedback) }}
               </div>
 
-              <v-chip size="x-small" variant="tonal" color="primary">
-                {{ getTemplateIdFromFeedbackGroup(feedback) }}
+              <v-chip size="x-small" variant="tonal" color="primary" class="me-3">
+                uploaded {{ getDateFromFeedbackGroup(feedback) || 'No date' }}
               </v-chip>
 
-              <v-chip size="x-small" variant="outlined">
+              <v-chip size="x-small" variant="outlined" class="me-3">
                 {{ String(getCourseFromFeedbackGroup(feedback) || '').toUpperCase() || 'N/A' }}
               </v-chip>
 
               <span class="text-caption text-slate-600">
-                {{ getDateFromFeedbackGroup(feedback) || 'No date' }}
+                Feedback ID: {{ feedback.feedback_id || 'Unknown' }}
               </span>
             </div>
 
@@ -115,15 +115,54 @@
         </v-expansion-panel-title>
 
         <v-expansion-panel-text>
-          <!-- your existing error list -->
-          <v-list dense>
-            <v-list-item
-              v-for="(error, i) in feedback.errors"
-              :key="error.error_id || i"
-              class="py-2"
-            >
-              ...
+        <v-list density="comfortable">
+          <v-list-item
+            v-for="(error, i) in feedback.errors"
+            :key="error.error_id || i"
+            class="py-2"
+          >
+            <v-list-item-title class="mb-2" style="white-space: normal;">
+              <strong class="text-body-1">Error {{ error.error_code }}</strong>:
+              {{ errorData[error.error_code]?.description || "No description available" }}
+              <span class="text-medium-emphasis"> — detected {{ error.times || 1 }} time(s)</span>
+            </v-list-item-title>
+
+            <v-list-item-subtitle style="white-space: normal;" class="mb-1">
+              <strong>Examples of your errors:</strong>
+              <em> "{{ error.evidence || "No evidence provided" }}" </em>
+            </v-list-item-subtitle>
+
+            <v-list-item-subtitle class="wrap-subtitle" style="white-space: normal;">
+                <strong>How to fix the error:</strong>
+                {{ errorData[error.error_code]?.recommendation || "No recommendation available." }}
+                <template v-if="errorData[error.error_code]?.examples">
+                  For example, {{ errorData[error.error_code]?.examples }}.
+                </template>
+              </v-list-item-subtitle>
+
+              <v-list-item-subtitle class="wrap-subtitle" style="white-space: normal;">
+                <strong>For a complete explanation</strong>
+                <template v-if="errorData[error.error_code]?.reference">
+                  , see
+                  <span v-html="errorData[error.error_code]?.reference"></span>
+                </template>
+              </v-list-item-subtitle>
+
+              <template #append>
+                <v-btn
+                  size="small"
+                  variant="text"
+                  color="primary"
+                  class="ms-2"
+                  @click.stop="openErrorTutor(error)"
+                >
+                  Ask AI tutor
+                  <v-icon size="18" class="ms-1">mdi-robot-outline</v-icon>
+                </v-btn>
+              </template>
+              <v-divider class="my-3"/>
             </v-list-item>
+
           </v-list>
         </v-expansion-panel-text>
       </v-expansion-panel>
@@ -223,11 +262,17 @@ interface ErrorItem {
 }
 
 interface Feedback {
-  feedback_id: string;
-  student?: { id?: number; name?: string };
-  course?: { name?: string };
-  date?: string;
-  content?: string;
+  feedback_id: string
+  date?: string
+  course?: { slug?: string; name?: string } | string
+  content?: Record<string, any>
+}
+
+interface FeedbackRef {
+  feedback_id?: string
+  date?: string
+  course?: { slug?: string; name?: string } | string
+  content?: Record<string, any>
 }
 
 // add interface
@@ -244,6 +289,8 @@ interface ImpressiveItem {
 const userStore = useUserStore();
 const { xs } = useDisplay();
 
+const feedbackById = ref<Record<string, any>>({});
+const templateNameById = ref<Record<string, string>>({})
 const errors = ref<ErrorItem[]>([]);
 const loading = ref(true);
 const exportLoading = ref(false); // Tracks client-side PDF document generation state
@@ -253,7 +300,7 @@ const errorData = errorsData;
 const tutorOpen = ref(false);
 const selectedError = ref<ErrorItem | null>(null);
 
-  const impressiveDialog = ref(false);
+const impressiveDialog = ref(false);
 const impressives = ref<ImpressiveItem[]>([]);
 
 
@@ -301,24 +348,22 @@ function openErrorTutor(err: ErrorItem) {
 }
 
 function getRawFeedbackFromGroup(group: any): any | null {
-  const first = group?.errors?.[0]
-  if (!first) return null
-  return typeof first.feedback === 'object' ? first.feedback : null
+  return group?.feedbackObj || null;
 }
 
-function getTemplateIdFromFeedbackGroup(group: any): string {
-  const raw = getRawFeedbackFromGroup(group)
-  return raw?.content?.template_id || 'no-template'
+function getTemplateLabelFromFeedbackGroup(group: any): string {
+  const raw = getRawFeedbackFromGroup(group);
+  return raw?.template_name || raw?.content?.template_id || "No template";
 }
 
 function getCourseFromFeedbackGroup(group: any): string {
-  const raw = getRawFeedbackFromGroup(group)
-  return raw?.course?.name || raw?.course || ''
+  const raw = getRawFeedbackFromGroup(group);
+  return raw?.course || "";
 }
 
 function getDateFromFeedbackGroup(group: any): string {
-  const raw = getRawFeedbackFromGroup(group)
-  return raw?.date || ''
+  const raw = getRawFeedbackFromGroup(group);
+  return raw?.date || "";
 }
 
 async function openErrorTutorFromChart(payload: any) {
@@ -347,6 +392,7 @@ function buildErrorTutorInitialUserMessage(ctx: any) {
     .join("\n");
 }
 
+
 // ---------------- API Actions  ----------------
 const fetchErrorDashboardData = async () => {
   loading.value = true;
@@ -354,21 +400,57 @@ const fetchErrorDashboardData = async () => {
 
   try {
     const params: any = {};
-    
-    // ✨ FIX 1: Secure the endpoint payload parameter constraints!
-    // Even if this is a student tab view, if accessed by a staff profile, 
-    // it MUST attach the target student parameter to prevent Django's get_queryset from falling through to .all()
-    if (userStore.isStaff && userStore.studentId) {
-      params.student = userStore.studentId;
-    }
+    if (userStore.isStaff && userStore.studentId) params.student = userStore.studentId;
 
     const response = await api.get<ErrorItem[]>("/errors/", { params });
-    errors.value = response.data;
+
+    console.log("[ErrorsDataTab] /errors/ status:", response.status);
+    console.log("[ErrorsDataTab] /errors/ count:", Array.isArray(response.data) ? response.data.length : "not-array");
+    console.log("[ErrorsDataTab] /errors/ first 3 rows:", (response.data || []).slice(0, 3));
+    console.log("[ErrorsDataTab] /errors/ feedback types:",
+      (response.data || []).slice(0, 10).map((r: any) => ({
+        error_id: r.error_id,
+        feedback_type: typeof r.feedback,
+        feedback_value: r.feedback
+      }))
+    );
+
+    errors.value = response.data || [];
   } catch (err: any) {
-    console.error("Failed to fetch errors:", err);
+    console.error("[ErrorsDataTab] Failed to fetch errors:", err?.response?.status, err?.response?.data || err);
     errorsError.value = "Failed to fetch errors.";
   } finally {
     loading.value = false;
+  }
+};
+
+const fetchFeedbackDetailsForErrors = async () => {
+  try {
+    const ids = Array.from(
+      new Set(
+        errors.value
+          .map((e: any) => (typeof e.feedback === "string" ? e.feedback : e.feedback?.feedback_id))
+          .filter(Boolean)
+      )
+    );
+
+    if (ids.length === 0) {
+      feedbackById.value = {};
+      return;
+    }
+
+    // If your backend supports ?feedback_id__in=...
+    const res = await api.get("/feedback/", {
+      params: { feedback_id__in: ids.join(",") }
+    });
+
+    const rows = Array.isArray(res.data) ? res.data : (res.data?.results || []);
+    feedbackById.value = Object.fromEntries(rows.map((f: any) => [f.feedback_id, f]));
+
+    console.log("[ErrorsDataTab] feedbackById keys:", Object.keys(feedbackById.value));
+  } catch (err: any) {
+    console.error("[ErrorsDataTab] Failed feedback details fetch:", err?.response?.status, err?.response?.data || err);
+    feedbackById.value = {};
   }
 };
 
@@ -387,6 +469,18 @@ const fetchImpressiveData = async () => {
   }
 };
 
+const fetchTemplateNames = async () => {
+  try {
+    const res = await api.get("/feedback-templates/")
+    const rows = Array.isArray(res.data) ? res.data : (res.data?.results || [])
+    templateNameById.value = Object.fromEntries(
+      rows.map((t: any) => [String(t.template_id), String(t.name || t.template_id)])
+    )
+  } catch (e) {
+    console.warn("[ErrorsDataTab] template fetch failed", e)
+    templateNameById.value = {}
+  }
+}
 // ---------------- Client-Side PDF Generation Engine ----------------
 const generateLocalPdfSummary = async (feedbackItem?: any) => {
   const sourceErrors = feedbackItem
@@ -726,41 +820,20 @@ const processedErrors = computed(() =>
 );
 
 const feedbackGroups = computed(() => {
-  const map = new Map<string, { feedback_id: string; date?: string; errors: ErrorItem[] }>();
+  const map = new Map<string, { feedback_id: string; feedbackObj: any; errors: ErrorItem[] }>();
 
   for (const e of errors.value) {
-    const rawId = typeof e.feedback === "string" ? e.feedback : e.feedback?.feedback_id || "Unknown";
-    let formattedDate: string | undefined = undefined;
+    const fb = typeof e.feedback === "object" ? e.feedback : null;
+    const fbid = fb?.feedback_id || String(e.feedback || "Unknown");
 
-    if (typeof e.feedback === "object" && e.feedback?.date) {
-      formattedDate = extractDateFromString(e.feedback.date) ?? undefined;
-    }
-
-    if (!formattedDate) {
-      formattedDate = extractDateFromString(rawId) ?? undefined;
-    }
-
-    let processedId = rawId;
-    if (rawId.startsWith("P")) {
-      processedId = "Errors in Feedback on Presentation";
-    } else if (rawId.startsWith("E")) {
-      processedId = "Errors in Feedback on Exercises";
-    }
-
-    if (formattedDate) {
-      processedId = `${processedId}, created ${formattedDate}`;
-    } else {
-      processedId = `${processedId} (${rawId})`;
-    }
-
-    if (!map.has(processedId)) {
-      map.set(processedId, {
-        feedback_id: processedId,
-        date: formattedDate,
+    if (!map.has(fbid)) {
+      map.set(fbid, {
+        feedback_id: fbid,
+        feedbackObj: fb,
         errors: [e],
       });
     } else {
-      map.get(processedId)!.errors.push(e);
+      map.get(fbid)!.errors.push(e);
     }
   }
 
@@ -776,9 +849,19 @@ const cardStyle = computed(() => ({
 
 // ---------------- Lifecycle ----------------
 onMounted(async () => {
-  await Promise.all([
-    fetchErrorDashboardData(),
-    fetchImpressiveData(),
-  ]);
+  await fetchErrorDashboardData();
+  await fetchImpressiveData();
 });
 </script>
+
+<style scoped>
+.wrap-subtitle {
+  white-space: normal !important;
+  overflow: visible !important;
+  text-overflow: unset !important;
+  display: block !important;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  line-height: 1.45;
+}
+</style>

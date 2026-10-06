@@ -96,6 +96,8 @@ type PortfolioTickerItem = {
   isCompetition: boolean
   hasAssets: boolean
   netValue: number
+  initialBudget: number
+  pnlValue: number | null
   pnlPct: number | null
   direction: 'up' | 'down' | 'neutral'
   ctaInviteOnly: boolean
@@ -436,20 +438,29 @@ const portfolioTickerItems = computed<PortfolioTickerItem[]>(() => {
       // show invite banner only when competition portfolio exists but has no assets
       const ctaInviteOnly = isCompetition && !hasAssets
 
-      // net value best-effort (serializer often exposes net_equity)
-      const netValue =
-        num(p.net_equity, NaN) === num(p.net_equity, NaN)
-          ? num(p.net_equity)
-          : num(p.cash_balance)
+      // Canonical baseline for PnL
+        const initialBudget = num(p.initial_budget, 0)
+        const netValue =
+          num(p.net_equity, NaN) === num(p.net_equity, NaN)
+            ? num(p.net_equity)
+            : num(p.cash_balance)
 
-      // pnl best-effort: pnl_pct may or may not exist on this endpoint
-      const rawPnlPct = p.pnl_pct
-      const pnlPct = rawPnlPct === null || rawPnlPct === undefined ? null : num(rawPnlPct, 0)
+        const pnlValue =
+          p.pnl_value !== null && p.pnl_value !== undefined
+            ? num(p.pnl_value, 0)
+            : (initialBudget > 0 ? netValue - initialBudget : 0)
 
+        // IMPORTANT: do not round here
+        const pnlPct =
+          p.pnl_pct !== null && p.pnl_pct !== undefined
+            ? num(p.pnl_pct, 0)
+            : (initialBudget > 0 ? (pnlValue / initialBudget) * 100 : 0)
+
+      // Direction from pnlValue (more stable than tiny rounded pct)
       let direction: 'up' | 'down' | 'neutral' = 'neutral'
-      if (pnlPct !== null) {
-        if (pnlPct > 0) direction = 'up'
-        else if (pnlPct < 0) direction = 'down'
+      if (pnlValue !== null) {
+        if (pnlValue > 0) direction = 'up'
+        else if (pnlValue < 0) direction = 'down'
       }
 
       return {
@@ -458,6 +469,8 @@ const portfolioTickerItems = computed<PortfolioTickerItem[]>(() => {
         isCompetition,
         hasAssets,
         netValue,
+        initialBudget,
+        pnlValue,
         pnlPct,
         direction,
         ctaInviteOnly,
@@ -468,7 +481,6 @@ const portfolioTickerItems = computed<PortfolioTickerItem[]>(() => {
     // - or if competition invite (no assets yet)
     .filter((x) => x.hasAssets || x.ctaInviteOnly)
 })
-
 
 
 

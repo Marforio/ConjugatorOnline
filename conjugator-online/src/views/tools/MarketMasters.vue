@@ -85,7 +85,7 @@
 
     <v-row class="px-6">
         <v-col cols="12" class="d-flex justify-center">
-          <v-card rounded="lg" elevation="2" class="pa-4 h-100 mb-5" style="width: 85%">
+          <v-card rounded="lg" elevation="2" class="pa-4 h-100 mb-5" style="width: 86%">
             <div class="d-flex align-center justify-space-between mb-3">
               <div class="text-h6 font-weight-bold">Active Portfolios 💼</div>
                 <v-btn size="small" color="primary" variant="tonal" @click="isCreateModalActive = true">Create New Portfolio</v-btn>
@@ -187,20 +187,10 @@
                     </div>
 
                     <div class="mb-1">
-                      <span class="label me-1">PnL</span>
-                      <span
-                        class="value"
-                        :class="Number(portfolio.pnl_value || 0) >= 0 ? 'text-emerald-600' : 'text-rose-600'"
-                      >
-                        {{ Number(portfolio.pnl_value || 0) >= 0 ? '+' : '' }}${{
-                          Math.abs(Number(portfolio.pnl_value || 0)).toLocaleString('en-US', {
-                            minimumFractionDigits: 2,
-                            maximumFractionDigits: 2
-                          })
-                        }}
-                        <span class="text-caption ms-1">
-                          ({{ Number(portfolio.pnl_pct || 0) >= 0 ? '+' : '' }}{{ Number(portfolio.pnl_pct || 0).toFixed(2) }}%)
-                        </span>
+                      <span class="label me-2">PnL</span>
+                      <span class="value" :class="pnlClass(portfolio)">
+                        {{ formatSignedMoney(rowPnl(portfolio)) }}
+                        <span class="text-caption ms-1">({{ formatSignedPct(rowPnlPct(portfolio)) }})</span>
                       </span>
                     </div>
 
@@ -235,7 +225,7 @@
         </v-col>
 
         <v-col cols="12" class="d-flex justify-center">
-          <v-card rounded="lg" elevation="2" class="pa-4 h-100 mb-5" style="width: 85%">
+          <v-card rounded="lg" elevation="2" class="pa-4 h-100 mb-5" style="width: 86%">
             <div class="d-flex align-center justify-space-between mb-3">
               <div class="text-h6 font-weight-bold">Competition Standings 🏆</div>
               <v-chip size="x-small" color="indigo" variant="tonal">
@@ -2507,6 +2497,43 @@ const cancelQuoteConfirmation = () => {
 
 // portfolio health calculations
 // DYNAMIC FINANCIAL CALCULATORS
+const money2 = (n) =>
+  Number(n || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+
+const rowInitial = (p) => Number(p?.initial_budget ?? 0)
+const rowEquity  = (p) => Number(p?.net_equity ?? 0)
+
+// round to cents first to kill -0.00 / floating noise
+const rowPnl = (p) => {
+  const v = rowEquity(p) - rowInitial(p)
+  return Math.round(v * 100) / 100
+}
+
+const rowPnlPct = (p) => {
+  const base = rowInitial(p)
+  if (!base) return 0
+  return (rowPnl(p) / base) * 100
+}
+
+const formatSignedMoney = (v) => {
+  const n = Math.round(Number(v || 0) * 100) / 100
+  if (Object.is(n, -0) || n === 0) return `$${money2(0)}`
+  return `${n > 0 ? '+' : '-'}$${money2(Math.abs(n))}`
+}
+const pnlClass = (p) => (rowPnl(p) >= 0 ? 'text-green-darken-2' : 'text-red-darken-2')
+
+const formatSignedPct = (v) => {
+  const n = Number(v || 0)
+  if (!Number.isFinite(n)) return '0.0000%'
+  const abs = Math.abs(n)
+
+  // show 4 decimals when very small so it doesn't look stuck
+  const digits = abs < 0.01 ? 4 : 2
+  const shown = abs.toFixed(digits)
+
+  if (abs === 0) return `${shown}%`
+  return `${n > 0 ? '+' : '-'}${shown}%`
+}
 
 // 1. Computes total spending potential based on the account's cash balance and leverage multiplier
 const maxPurchasingPower = computed(() => {

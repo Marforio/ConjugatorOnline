@@ -242,18 +242,28 @@
                   >
                     <span
                       class="portfolio-ticker-item"
-                      :class="p.ctaInviteOnly ? 'invite' : p.direction"
+                      :class="p.ctaInviteOnly ? 'invite' : 'neutral'"
                     >
                       <template v-if="p.ctaInviteOnly">
                         🎯 New Competition: "{{ p.name }}" — You are invited to participate in a fun and friendly investment competition! Click this bar to start!
                       </template>
+
                       <template v-else>
-                        Your "{{ p.name }}" Portfolio is now worth ${{ Number(p.netValue).toLocaleString() }}!
-                        <span v-if="p.pnlPct !== null">
-                          ({{ p.pnlPct >= 0 ? '+' : '' }}{{ p.pnlPct.toFixed(1) }}%)
+                        Your '{{ p.name }}' trading portfolio is now worth ${{ Number(p.netValue).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
+                        · PnL
+                        <span :class="Number(p.pnlValue || 0) > 0 ? 'up' : Number(p.pnlValue || 0) < 0 ? 'down' : 'neutral'" class="ms-1">
+                          {{ Number(p.pnlValue || 0) > 0 ? '+' : Number(p.pnlValue || 0) < 0 ? '-' : '' }}${{
+                            Math.abs(Number(p.pnlValue || 0)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+                          }}
                         </span>
-                        <span v-if="p.direction === 'up'"> ▲</span>
-                        <span v-else-if="p.direction === 'down'"> ▼</span>
+                        <!--<span :class="Number(p.pnlValue || 0) > 0 ? 'up' : Number(p.pnlValue || 0) < 0 ? 'down' : 'neutral'">
+                          ({{ Number(p.pnlPct || 0) > 0 ? '+' : Number(p.pnlPct || 0) < 0 ? '-' : '' }}{{ Math.abs(Number(p.pnlPct || 0)) < 0.01
+                              ? Math.abs(Number(p.pnlPct || 0)).toFixed(4)
+                              : Math.abs(Number(p.pnlPct || 0)).toFixed(2)
+                            }}%)
+                        </span>-->
+                        <span v-if="p.direction === 'up'" :class="Number(p.pnlValue || 0) > 0 ? 'up' : Number(p.pnlValue || 0) < 0 ? 'down' : 'neutral'"> ▲</span>
+                        <span v-else-if="p.direction === 'down'" :class="Number(p.pnlValue || 0) > 0 ? 'up' : Number(p.pnlValue || 0) < 0 ? 'down' : 'neutral'"> ▼</span>  
                       </template>
                     </span>
                   </template>
@@ -486,7 +496,7 @@
     </v-row>
 
     <!-- PROFILE DIALOG: Full Linguistic Profile -->
-    <v-dialog v-model="showProfileDialog" max-width="600" fullscreen-mobile>
+    <v-dialog v-model="showProfileDialog" max-width="1200" fullscreen-mobile>
       <v-card rounded="xl">
         <v-card-title class="bg-indigo-lighten-5 border-b pa-6 d-flex align-center justify-space-between">
           <div class="d-flex align-center ga-2">
@@ -1296,8 +1306,20 @@ onMounted(async () => {
   color: #ef4444; /* red */
 }
 
+/* base line color */
 .portfolio-ticker-item.neutral {
-  color: #cbd5e1; /* slate light */
+  color: #cbd5e1;
+}
+
+/* force pnl colors inside ticker item */
+.portfolio-ticker-item span.up {
+  color: #22c55e !important;
+}
+.portfolio-ticker-item span.down {
+  color: #ef4444 !important;
+}
+.portfolio-ticker-item span.neutral {
+  color: #cbd5e1 !important;
 }
 
 .portfolio-ticker-item.invite {
