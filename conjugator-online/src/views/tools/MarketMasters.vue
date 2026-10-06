@@ -954,7 +954,7 @@
       <v-col cols="8">
         <div class="text-overline font-weight-bold opacity-80 tracking-wide">Portfolio Performance</div>
         <div class="text-h4 font-weight-black">
-          {{ Number(selectedPortfolio?.pnl_pct || 0) >= 0 ? '+' : '' }}{{ Number(selectedPortfolio?.pnl_pct || 0).toFixed(2) }}%
+          {{ formatSignedPct(rowPnlPct(selectedPortfolio)) }}
         </div>
         <div class="text-caption opacity-90 mt-1">
           Since initialization
@@ -963,20 +963,15 @@
 
       <v-col cols="4" class="text-right">
         <v-chip
-          :color="Number(selectedPortfolio?.pnl_pct || 0) >= 0 ? 'emerald-lighten-4' : 'red-lighten-4'"
+          :color="rowPnl(selectedPortfolio) >= 0 ? 'emerald-lighten-4' : 'red-lighten-4'"
           variant="tonal"
           size="small"
           class="font-weight-bold"
         >
-          {{ Number(selectedPortfolio?.pnl_pct || 0) >= 0 ? '📈 Gain' : '📉 Loss' }}
+          {{ rowPnl(selectedPortfolio) >= 0 ? '📈 Gain' : '📉 Loss' }}
         </v-chip>
         <div class="text-caption mt-1">
-          {{ Number(selectedPortfolio?.pnl_value || 0) >= 0 ? '+' : '' }}${{
-            Math.abs(Number(selectedPortfolio?.pnl_value || 0)).toLocaleString(undefined, {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2
-            })
-          }}
+          {{ formatSignedMoney(rowPnl(selectedPortfolio)) }}
         </div>
       </v-col>
     </v-row>
@@ -1435,16 +1430,56 @@ const renderPortfolioVizCharts = async () => {
   if (allocationChartRef.value && token === renderToken) {
     const ctx = allocationChartRef.value.getContext('2d')
     if (ctx && heldAssets.length) {
-      allocationChart = new Chart(ctx, {/* ... */})
+      allocationChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: heldAssets.map(r => `${r.ticker} (${r.position_type})`),
+          datasets: [{
+            data: heldAssets.map(r => Number(r.marketValueAbs || 0)),
+          }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+      })
     }
   }
 
   if (cashVsAssetsChartRef.value && token === renderToken) {
-    const ctx = cashVsAssetsChartRef.value.getContext('2d')
-    if (ctx) {
-      cashVsAssetsChart = new Chart(ctx, {/* ... */})
-    }
+  const ctx = cashVsAssetsChartRef.value.getContext('2d')
+  if (ctx) {
+    const cashVal = Number(data.cash || 0)
+    const investedVal = Number(data.investedTotal || 0)
+
+    cashVsAssetsChart = new Chart(ctx, {
+      type: 'pie',
+      data: {
+        labels: ['Cash', 'Invested'],
+        datasets: [{
+          data: [cashVal, investedVal],
+          backgroundColor: ['#10b981', '#3b82f6'], // green cash, blue invested
+          borderColor: '#ffffff',
+          borderWidth: 2
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { position: 'bottom' },
+          tooltip: {
+            callbacks: {
+              label: (context) => {
+                const value = Number(context.raw || 0)
+                const total = cashVal + investedVal
+                const pct = total > 0 ? ((value / total) * 100).toFixed(1) : '0.0'
+                return `${context.label}: $${value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} (${pct}%)`
+              }
+            }
+          }
+        }
+      }
+    })
   }
+}
 
   if (contribChartRef.value && token === renderToken) {
     const ctx = contribChartRef.value.getContext('2d')
@@ -1454,9 +1489,22 @@ const renderPortfolioVizCharts = async () => {
     if (!portfolioId) return
 
     const res = await api.get(`/market-masters/portfolios/${portfolioId}/pnl-timeseries/`)
-    if (token !== renderToken) return // stale async response
+    if (token !== renderToken) return
 
-    contribChart = new Chart(ctx, {/* ... */})
+    const pts = Array.isArray(res.data?.portfolio) ? res.data.portfolio : []
+    contribChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: pts.map(p => p.t),
+        datasets: [{
+          label: 'Portfolio PnL',
+          data: pts.map(p => Number(p.pnl || 0)),
+          tension: 0.3,
+          pointRadius: 0
+        }]
+      },
+      options: { responsive: true, maintainAspectRatio: false }
+    })
   }
 }
 
@@ -2035,7 +2083,15 @@ const serializerPnlValue = computed(() =>
   Number(selectedPortfolio.value?.pnl_value ?? 0)
 )
 
-const performancePct = computed(() => serializerPnlPct.value)
+const performancePct = computed(() =>
+  selectedPortfolio.value ? rowPnlPct(selectedPortfolio.value) : 0
+)
+
+const performanceCardBg = computed(() =>
+  performancePct.value >= 0
+    ? 'linear-gradient(135deg, #065f46 0%, #10b981 100%)'
+    : 'linear-gradient(135deg, #7f1d1d 0%, #ef4444 100%)'
+)
 
 const performancePctText = computed(() => {
   const v = performancePct.value
@@ -2051,13 +2107,6 @@ const performanceValueText = computed(() => {
     maximumFractionDigits: 2
   })}`
 })
-
-const performanceCardBg = computed(() => {
-  return performancePct.value >= 0
-    ? 'linear-gradient(135deg, #065f46 0%, #10b981 100%)'
-    : 'linear-gradient(135deg, #7f1d1d 0%, #ef4444 100%)'
-})
-
 
 const submitNewPortfolio = async () => {
   const f = newPortfolioForm.value
@@ -2247,21 +2296,21 @@ const clearOrderFields = () => {
   tradeForm.value.targetPrice = null
   tradeForm.value.requestedLeverage = 1
   tradeForm.value.stopLossPrice = null
-  if (tradeFormRef.value) {
-    tradeFormRef.value.resetValidation()
-  }
+
+  // optionally keep order type as-is; or force MARKET:
+  // tradeForm.value.orderType = 'MARKET'
+
+  tradeFormRef.value?.resetValidation()
 }
 
 // AUTOMATIC CLEANER: Clears input state when tabs are switched
 watch(() => tradeForm.value.action, (newAction) => {
-  // If an advanced tab is active but the portfolio doesn't allow leverage, force-reset to BUY
   if (['SHORT', 'COVER'].includes(newAction) && !canUseAdvancedActions.value) {
     tradeForm.value.action = 'BUY'
+    return
   }
   clearOrderFields()
-  if (tradeFormRef.value) {
-    tradeFormRef.value.reset()
-  }
+  tradeFormRef.value?.resetValidation()
 })
 
 watch(
