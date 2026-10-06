@@ -1369,37 +1369,58 @@ const getLivePriceNumber = (ticker) => {
 
 
 
+// --- replace computePortfolioVizData with this ---
 const computePortfolioVizData = (portfolio) => {
   if (!portfolio) return null
 
   const cash = Number(portfolio.cash_balance || 0)
   const assets = portfolio.assets || []
+  const isAdvanced = String(portfolio.trading_level || 'BASIC') === 'ADVANCED'
 
   const allocationRows = []
-  let investedTotal = 0
+  let investedLongTotal = 0
+  let shortExposureTotal = 0
 
   for (const a of assets) {
     const qty = Number(a.quantity || 0)
     const px = getLivePriceNumber(a.ticker) || Number(a.average_buy_price || 0)
-    const mvSigned = qty * px
-    const mvAbs = Math.abs(mvSigned)
+    const mv = qty * px
+    const mvAbs = Math.abs(mv)
 
-    investedTotal += mvAbs
-
-    allocationRows.push({
-      ticker: a.ticker,
-      position_type: a.position_type,
-      qty,
-      price: px,
-      marketValueAbs: mvAbs,
-      pnlEstimate: (px - Number(a.average_buy_price || 0)) * qty
-    })
+    const posType = normalizePositionType(a)
+    console.log('asset type debug', a.ticker, a.position_type, posType)
+    if (posType === 'SHORT') {
+      shortExposureTotal += mvAbs
+      allocationRows.push({
+        ticker: a.ticker,
+        position_type: 'SHORT',
+        qty,
+        price: px,
+        marketValueAbs: mvAbs,
+        pnlEstimate: (Number(a.average_buy_price || 0) - px) * qty // short pnl sign
+      })
+    } else {
+      investedLongTotal += mvAbs
+      allocationRows.push({
+        ticker: a.ticker,
+        position_type: 'LONG',
+        qty,
+        price: px,
+        marketValueAbs: mvAbs,
+        pnlEstimate: (px - Number(a.average_buy_price || 0)) * qty
+      })
+    }
   }
+
+  const grossExposure = investedLongTotal + shortExposureTotal
 
   return {
     cash,
-    investedTotal,
-    allocationRows
+    isAdvanced,
+    allocationRows,
+    investedLongTotal,
+    shortExposureTotal,
+    grossExposure
   }
 }
 
@@ -1409,6 +1430,27 @@ const destroyVizCharts = () => {
   allocationChart?.destroy(); allocationChart = null
   cashVsAssetsChart?.destroy(); cashVsAssetsChart = null
   contribChart?.destroy(); contribChart = null
+}
+
+const normalizePositionType = (asset) => {
+  const candidates = [
+    asset?.position_type,
+    asset?.transaction_type,
+    asset?.side,
+    asset?.direction,
+  ]
+    .filter(Boolean)
+    .map(v => String(v).trim().toUpperCase())
+
+  const joined = candidates.join(' | ')
+
+  if (
+    joined.includes('SHORT') ||
+    joined.includes('SHORT SELL') ||
+    joined.includes('SELL SHORT')
+  ) return 'SHORT'
+
+  return 'LONG'
 }
 
 const renderPortfolioVizCharts = async () => {
@@ -1428,34 +1470,41 @@ const renderPortfolioVizCharts = async () => {
   const heldAssets = (data.allocationRows || []).filter(r => Number(r.marketValueAbs || 0) > 0)
 
   if (allocationChartRef.value && token === renderToken) {
-    const ctx = allocationChartRef.value.getContext('2d')
-    if (ctx && heldAssets.length) {
-      allocationChart = new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-          labels: heldAssets.map(r => `${r.ticker} (${r.position_type})`),
-          datasets: [{
-            data: heldAssets.map(r => Number(r.marketValueAbs || 0)),
-          }]
-        },
-        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
-      })
-    }
-  }
-
-  if (cashVsAssetsChartRef.value && token === renderToken) {
-  const ctx = cashVsAssetsChartRef.value.getContext('2d')
+  const ctx = allocationChartRef.value.getContext('2d')
   if (ctx) {
-    const cashVal = Number(data.cash || 0)
-    const investedVal = Number(data.investedTotal || 0)
+    // LONG ONLY for "Asset Allocation"
+    const longOnly = (data.allocationRows || []).filter(
+      r => String(r.position_type || '').toUpperCase() === 'LONG' && Number(r.marketValueAbs || 0) > 0
+    )
 
-    cashVsAssetsChart = new Chart(ctx, {
-      type: 'pie',
+    // If no long assets, render a neutral placeholder slice
+    const values = longOnly.length
+      ? longOnly.map(r => Number(r.marketValueAbs || 0))
+      : [1]
+
+    const total = values.reduce((s, v) => s + v, 0)
+
+    const labels = longOnly.length
+      ? longOnly.map((r, i) => {
+          const pct = total > 0 ? ((values[i] / total) * 100).toFixed(1) : '0.0'
+          return `${r.ticker} (${pct}%)`
+        })
+      : ['No long holdings']
+
+    const colors = longOnly.length
+      ? [
+          '#3b82f6', '#6366f1', '#8b5cf6', '#0ea5e9', '#14b8a6',
+          '#22c55e', '#84cc16', '#eab308', '#f59e0b', '#f97316'
+        ]
+      : ['#cbd5e1']
+
+    allocationChart = new Chart(ctx, {
+      type: 'doughnut',
       data: {
-        labels: ['Cash', 'Invested'],
+        labels,
         datasets: [{
-          data: [cashVal, investedVal],
-          backgroundColor: ['#10b981', '#3b82f6'], // green cash, blue invested
+          data: values,
+          backgroundColor: colors.slice(0, values.length),
           borderColor: '#ffffff',
           borderWidth: 2
         }]
@@ -1463,15 +1512,19 @@ const renderPortfolioVizCharts = async () => {
       options: {
         responsive: true,
         maintainAspectRatio: false,
+        cutout: '58%',
         plugins: {
           legend: { position: 'bottom' },
           tooltip: {
             callbacks: {
               label: (context) => {
-                const value = Number(context.raw || 0)
-                const total = cashVal + investedVal
-                const pct = total > 0 ? ((value / total) * 100).toFixed(1) : '0.0'
-                return `${context.label}: $${value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} (${pct}%)`
+                if (!longOnly.length) return 'No long holdings'
+                const v = Number(context.raw || 0)
+                const pct = total > 0 ? ((v / total) * 100).toFixed(1) : '0.0'
+                return `${context.label}: $${v.toLocaleString(undefined, {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2
+                })}`
               }
             }
           }
@@ -1480,6 +1533,60 @@ const renderPortfolioVizCharts = async () => {
     })
   }
 }
+
+  if (cashVsAssetsChartRef.value && token === renderToken) {
+    const ctx = cashVsAssetsChartRef.value.getContext('2d')
+    if (ctx) {
+      const cash = Number(data.cash || 0)
+      const longExp = Number(data.investedLongTotal || 0)
+      const shortExp = Number(data.shortExposureTotal || 0)
+
+      const slices = []
+
+      // always show cash
+      slices.push({ label: 'Cash', value: cash, color: '#10b981' })
+
+      if (data.isAdvanced) {
+        if (longExp > 0) slices.push({ label: 'Long Exposure', value: longExp, color: '#3b82f6' })
+        if (shortExp > 0) slices.push({ label: 'Short Exposure', value: shortExp, color: '#ef4444' })
+      } else {
+        const invested = longExp // BASIC should only be long
+        if (invested > 0) slices.push({ label: 'Invested', value: invested, color: '#3b82f6' })
+      }
+
+      const values = slices.map(s => s.value)
+
+      cashVsAssetsChart = new Chart(ctx, {
+        type: 'pie',
+        data: {
+          labels: slices.map(s => s.label),
+          datasets: [{
+            data: values,
+            backgroundColor: slices.map(s => s.color),
+            borderColor: '#ffffff',
+            borderWidth: 2
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { position: 'bottom' },
+            tooltip: {
+              callbacks: {
+                label: (context) => {
+                  const v = Number(context.raw || 0)
+                  const total = values.reduce((a, b) => a + Number(b || 0), 0)
+                  const pct = total > 0 ? ((v / total) * 100).toFixed(1) : '0.0'
+                  return `${context.label}: $${v.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} (${pct}%)`
+                }
+              }
+            }
+          }
+        }
+      })
+    }
+  }
 
   if (contribChartRef.value && token === renderToken) {
     const ctx = contribChartRef.value.getContext('2d')
@@ -1523,6 +1630,7 @@ const newPortfolioForm = ref({
   customBudget: 100000,
   trading_level: 'BASIC',      // 'BASIC' | 'ADVANCED'
   portfolio_type: 'DYNAMIC',   // 'DYNAMIC' | 'STATIC'
+  leverage_setting: 1, 
   start_time: '',
   trade_cutoff_time: '',       // required when portfolio_type === 'STATIC'
   end_time: ''
@@ -2119,6 +2227,9 @@ const submitNewPortfolio = async () => {
       custom_budget: f.customBudget,                 // backend expects custom_budget
       portfolio_type: f.portfolio_type,              // "DYNAMIC" | "STATIC"
       trading_level: f.trading_level,                // "BASIC" | "ADVANCED"
+      leverage_setting: f.trading_level === 'ADVANCED'
+        ? Number(f.leverage_setting || 1)
+        : 1,
       start_time: f.start_time || null,              // datetime-local string
       trade_cutoff_time: f.trade_cutoff_time || null,
       end_time: f.end_time || null
@@ -2137,8 +2248,9 @@ const submitNewPortfolio = async () => {
     newPortfolioForm.value = {
       name: '',
       customBudget: 100000,
-      portfolio_type: 'DYNAMIC',
       trading_level: 'BASIC',
+      leverage_setting: 1,   
+      portfolio_type: 'DYNAMIC',
       start_time: '',
       trade_cutoff_time: '',
       end_time: ''
