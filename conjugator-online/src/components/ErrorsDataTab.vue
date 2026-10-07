@@ -26,7 +26,7 @@
   <div v-else>
     <!-- ✨ TOP CONTROL ACTION BAR: Frontend PDF Report Exporter -->
     <div class="d-flex justify-end ga-3 mb-4 px-4" style="max-width: 95%;">
-      <v-btn
+      <v-btn v-if="!loading && feedbackGroups.length > 1"
         color="red-lighten-2"
         variant="elevated"
         prepend-icon="mdi-file-pdf-box"
@@ -71,6 +71,11 @@
         </v-card-text>
       </v-card>
     </div>
+    <div >
+      <h3 class="text-h6 ms-5 font-weight-bold mt-5">
+        Feedback Reports
+      </h3>
+    </div>
 
     <!-- Expansion Panels for each feedback -->
     <v-expansion-panels multiple class="m-3" style="max-width: 95%;">
@@ -108,7 +113,7 @@
                 color="error"
                 variant="text"
                 title="Generate Report PDF"
-                @click.stop="generateLocalPdfSummary(getRawFeedbackFromGroup(feedback))"
+                @click.stop="generateFeedbackInstancePdf(feedback)"
               />
             </div>
           </div>
@@ -230,11 +235,10 @@ import api from "@/axios";
 import { useUserStore } from "@/stores/user";
 import { errorsData } from "@/assets/scripts/errorsData";
 
-// Client-Side PDF Engineering dependencies
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 
-// 📈 FIX: Import Chart.js core features and register them for the canvas instance
+// Chart.js core features 
 import { 
   Chart, 
   BarController, 
@@ -246,7 +250,6 @@ import {
 
 Chart.register(BarController, BarElement, CategoryScale, LinearScale);
 
-// Components are automatically registered when imported in <script setup>
 import ErrorBarChart from "./charts/ErrorBarChart.vue";
 import ErrorHorizontalBarChart from "./charts/ErrorHorizontalBarChart.vue";
 import InitialsText from "./InitialsText.vue";
@@ -275,7 +278,6 @@ interface FeedbackRef {
   content?: Record<string, any>
 }
 
-// add interface
 interface ImpressiveItem {
   impressive_id: string;
   content: string;
@@ -482,6 +484,289 @@ const fetchTemplateNames = async () => {
   }
 }
 // ---------------- Client-Side PDF Generation Engine ----------------
+const generateFeedbackInstancePdf = async (group: any) => {
+  const feedbackItem = getRawFeedbackFromGroup(group)
+  if (!feedbackItem) {
+    console.warn("[ErrorsDataTab] No feedback object available for group", group)
+    return
+  }
+
+  exportLoading.value = true
+  try {
+    const doc = new jsPDF({ orientation: "portrait", unit: "pt", format: "a4" })
+    const margin = 40
+    const pageWidth = doc.internal.pageSize.getWidth()
+    const contentWidth = pageWidth - margin * 2
+    let currentY = 40
+
+    // Metadata
+    const targetWebId =
+      feedbackItem?.student_web_id ||
+      feedbackItem?.student?.web_id ||
+      (typeof feedbackItem?.student === "string" ? feedbackItem.student : null) ||
+      String(feedbackItem?.student || userStore.studentId || "unknown-student")
+
+    const rawInitials = userStore.student?.initials
+    const targetInitials =
+      typeof rawInitials === "string"
+        ? rawInitials
+        : rawInitials && typeof rawInitials === "object"
+          ? String((rawInitials as any).value || (rawInitials as any).initials || "")
+          : ""
+
+    const addSectionIntro = (text: string) => {
+      doc.setFont("helvetica", "normal")
+      doc.setFontSize(10)
+      doc.setTextColor(95, 105, 115)
+      const lines = doc.splitTextToSize(text, contentWidth)
+      doc.text(lines, margin, currentY)
+      currentY += lines.length * 12 + 8
+    }
+
+    const targetCourse =
+      feedbackItem?.course?.slug ||
+      feedbackItem?.course?.name ||
+      feedbackItem?.course ||
+      "unknown-course"
+
+    const targetDate = feedbackItem?.date || new Date().toISOString().slice(0, 10)
+    const targetTemplateName =
+      feedbackItem?.template_name ||
+      feedbackItem?.content?.template_name ||
+      "Feedback Template"
+
+    const targetTemplateId =
+      feedbackItem?.template_id ||
+      feedbackItem?.content?.template_id ||
+      "no-template"
+
+    const templateTitleLabel =
+      targetTemplateName !== "Feedback Template"
+        ? targetTemplateName
+        : targetTemplateId
+
+    // Source rows from this expansion group
+    const errorsForThisFeedback: ErrorItem[] = Array.isArray(group?.errors) ? group.errors : []
+
+    // Optional rich sections from feedback.content if backend includes them
+    const content = feedbackItem?.content || {}
+    const vocabList = Array.isArray(content.vocab) ? content.vocab : []
+    const commentsList = Array.isArray(content.comments) ? content.comments : []
+    const impressiveList =
+      Array.isArray(content.impressive) ? content.impressive :
+      Array.isArray(content.impressives) ? content.impressives : []
+
+    // Header
+    doc.setFillColor(33, 150, 243)
+    doc.rect(margin, currentY, contentWidth, 6, "F")
+    currentY += 30
+
+    doc.setFont("helvetica", "bold")
+    doc.setFontSize(16)
+    doc.setTextColor(33, 33, 33)
+    doc.text(`Feedback Report for ${targetTemplateName}`, margin, currentY)
+    currentY += 16
+
+    doc.setFont("helvetica", "normal")
+    doc.setFontSize(10)
+    doc.setTextColor(90, 90, 90)
+    doc.text(
+      `Student: ${targetInitials} (${targetWebId}) | Course: ${targetCourse} | Issued: ${targetDate}`,
+      margin,
+      currentY
+    )
+    currentY += 28
+
+    // Friendly intro (replaces overview table)
+    doc.setFont("helvetica", "normal")
+    doc.setFontSize(11)
+    doc.setTextColor(60, 70, 80)
+    const intro =
+      "Hello! Here are some of the errors and vocabulary usage noticed by your teacher. " +
+      "Thank you for participating in the English course!"
+    const introLines = doc.splitTextToSize(intro, contentWidth)
+    doc.text(introLines, margin, currentY)
+    currentY += introLines.length * 14 + 14
+
+    // Impressive section (if present)
+    if (impressiveList.length > 0) {
+      if (currentY > doc.internal.pageSize.getHeight() - 120) {
+        doc.addPage()
+        currentY = 40
+      }
+
+      doc.setFont("helvetica", "bold")
+      doc.setFontSize(12)
+      doc.setTextColor(44, 62, 80)
+      doc.text("Impressive Language", margin, currentY)
+      currentY += 25
+      addSectionIntro("The teacher was impressed (bravo!) when you said this:")
+
+      const rows = impressiveList.map((i: any) => [
+        String(`"${i.content}"` || ""),
+        String(i.comment || ""),
+        String(i.times ?? 1),
+      ])
+
+      autoTable(doc, {
+        startY: currentY,
+        margin: { left: margin, right: margin },
+        head: [["What you said", "Teacher's comment", "Times"]],
+        body: rows,
+        theme: "grid",
+        headStyles: { fillColor: [76, 175, 80], textColor: 255 },
+        styles: { fontSize: 8.5, cellPadding: 5, overflow: "linebreak", valign: "top" },
+      })
+
+      currentY = (doc as any).lastAutoTable.finalY + 30
+    }
+
+    // Errors section (always available from /errors/)
+if (errorsForThisFeedback.length > 0) {
+  if (currentY > doc.internal.pageSize.getHeight() - 120) {
+    doc.addPage()
+    currentY = 40
+  }
+
+  doc.setFont("helvetica", "bold")
+  doc.setFontSize(12)
+  doc.setTextColor(44, 62, 80)
+  doc.text("Errors", margin, currentY)
+  currentY += 25
+  addSectionIntro("Here are some of the grammar or pronunciation errors noticed by the teacher.")
+
+  const extractHref = (html: string): string => {
+    const m = String(html || "").match(/href=["']([^"']+)["']/i)
+    return m?.[1] || ""
+  }
+
+  const rows = errorsForThisFeedback.map((e: any) => {
+    const meta = errorData?.[e.error_code] || {}
+    const description = String(meta.description || "No description available")
+    const referenceUrl = extractHref(String(meta.reference || "")) // keeps only URL
+    const referenceLabel = referenceUrl ? "Open grammar reference" : "-"
+
+    return [
+      String(e.error_code || ""),
+      String(e.times ?? 1),
+      String(e.evidence || ""),
+      description,
+      referenceLabel,   // visible cell label
+      referenceUrl,     // hidden helper value for click binding
+    ]
+  })
+
+  autoTable(doc, {
+    startY: currentY,
+    margin: { left: margin, right: margin },
+    head: [["Code", "Times", "Evidence (What you said)", "What this means", "Reference"]],
+    body: rows.map(r => r.slice(0, 5)), // render only visible columns
+    theme: "grid",
+    headStyles: { fillColor: [239, 83, 80], textColor: 255 },
+    styles: { fontSize: 8.2, cellPadding: 5, overflow: "linebreak", valign: "top" },
+    columnStyles: {
+      0: { cellWidth: 45, fontStyle: "bold" },
+      1: { cellWidth: 38, halign: "center" },
+      2: { cellWidth: 130 },
+      3: { cellWidth: contentWidth - 45 - 38 - 130 - 95 },
+      4: { cellWidth: 95, textColor: [25, 118, 210], fontStyle: "bold" },
+    },
+    didDrawCell: (data: any) => {
+      // body + Reference column
+      if (data.section === "body" && data.column.index === 4) {
+        const rowIndex = data.row.index
+        const url = rows[rowIndex]?.[5] // helper URL
+        if (url && /^https?:\/\//i.test(url)) {
+          doc.link(data.cell.x, data.cell.y, data.cell.width, data.cell.height, { url })
+        }
+      }
+    },
+  })
+
+  currentY = (doc as any).lastAutoTable.finalY + 30
+}
+
+    // Vocab section (if present in feedback.content)
+    if (vocabList.length > 0) {
+      if (currentY > doc.internal.pageSize.getHeight() - 120) {
+        doc.addPage()
+        currentY = 40
+      }
+
+      doc.setFont("helvetica", "bold")
+      doc.setFontSize(12)
+      doc.setTextColor(44, 62, 80)
+      doc.text("Vocabulary Notes", margin, currentY)
+      currentY += 25
+      addSectionIntro("Here are some vocabulary notes and corrections provided by the teacher.")
+
+      const rows = vocabList.map((v: any) => [
+        String(v.correct || ""),
+        String(v.incorrect || ""),
+        String(v.comment || ""),
+        String(v.times ?? 1),
+      ])
+
+      autoTable(doc, {
+        startY: currentY,
+        margin: { left: margin, right: margin },
+        head: [["Correct Form", "Incorrect Form (what you said)", "Comment", "Times"]],
+        body: rows,
+        theme: "grid",
+        headStyles: { fillColor: [0, 150, 136], textColor: 255 },
+        styles: { fontSize: 8.5, cellPadding: 5, overflow: "linebreak", valign: "top" },
+      })
+
+      currentY = (doc as any).lastAutoTable.finalY + 30
+    }
+
+
+    // Comments section (if present)
+    if (commentsList.length > 0) {
+      addSectionIntro("Here are other comments by the teacher.")
+      if (currentY > doc.internal.pageSize.getHeight() - 80) {
+        doc.addPage()
+        currentY = 40
+      }
+
+      doc.setFont("helvetica", "bold")
+      doc.setFontSize(12)
+      doc.setTextColor(44, 62, 80)
+      doc.text("Teacher Comments", margin, currentY)
+      currentY += 12
+
+      doc.setFont("helvetica", "normal")
+      doc.setFontSize(10)
+      doc.setTextColor(70, 70, 70)
+
+      commentsList.forEach((c: any, idx: number) => {
+        const text = String(c.comment || c || "")
+        if (!text.trim()) return
+        const lines = doc.splitTextToSize(`• ${text}`, contentWidth)
+        lines.forEach((line: string) => {
+          if (currentY > doc.internal.pageSize.getHeight() - 40) {
+            doc.addPage()
+            currentY = 40
+          }
+          doc.text(line, margin, currentY)
+          currentY += 13
+        })
+        if (idx < commentsList.length - 1) currentY += 2
+      })
+    }
+
+    const filename = `Feedback_${targetInitials}_${targetWebId}_${targetDate}.pdf`.replace(
+      /[^a-z0-9_.-]/gi,
+      "_"
+    )
+    doc.save(filename)
+  } catch (err) {
+    console.error("[ErrorsDataTab] per-feedback PDF generation failed:", err)
+  } finally {
+    exportLoading.value = false
+  }
+}
+
 const generateLocalPdfSummary = async (feedbackItem?: any) => {
   const sourceErrors = feedbackItem
     ? errors.value.filter((e: any) => {

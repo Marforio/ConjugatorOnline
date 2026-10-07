@@ -752,9 +752,10 @@ const generateClientSidePdfReport = async (feedbackItem: any) => {
       feedbackItem?.content?.template_id || "no-template"
 
     const content = feedbackItem?.content || {}
-    const errorsList = Array.isArray(content.errors) ? content.errors : []
     const vocabList = Array.isArray(content.vocab) ? content.vocab : []
     const commentsList = Array.isArray(content.comments) ? content.comments : []
+    // render sections only when length > 0
+    const errorsList = Array.isArray(content.errors) ? content.errors : []
     const impressiveList =
       Array.isArray(content.impressive) ? content.impressive :
       Array.isArray(content.impressives) ? content.impressives : []
@@ -780,23 +781,18 @@ const generateClientSidePdfReport = async (feedbackItem: any) => {
     )
     currentY += 18
 
-    // ---------- Overview ----------
-    autoTable(doc, {
-      startY: currentY,
-      margin: { left: margin, right: margin },
-      head: [["Section", "Count"]],
-      body: [
-        ["Errors", String(errorsList.length)],
-        ["Vocabulary Notes", String(vocabList.length)],
-        ["Impressive Language", String(impressiveList.length)],
-        ["Comments", String(commentsList.length)],
-      ],
-      theme: "striped",
-      headStyles: { fillColor: [33, 150, 243], textColor: 255, fontStyle: "bold" },
-      styles: { fontSize: 9, cellPadding: 5 },
-    })
+    // Introduction Text
+    doc.setFont("helvetica", "normal")
+    doc.setFontSize(11)
+    doc.setTextColor(60, 70, 80)
 
-    currentY = (doc as any).lastAutoTable.finalY + 16
+    const introText =
+      "Hello! Here are some of the errors and vocabulary usage noticed by your teacher. " +
+      "Thank you for participating in the English course — keep going, you're making progress."
+
+    const introLines = doc.splitTextToSize(introText, contentWidth)
+    doc.text(introLines, margin, currentY)
+    currentY += introLines.length * 14 + 14
 
     // ---------- Errors ----------
     if (errorsList.length > 0) {
