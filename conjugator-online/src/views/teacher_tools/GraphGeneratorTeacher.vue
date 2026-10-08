@@ -76,21 +76,21 @@
 
       <v-card class="mx-auto rounded-2xl border border-slate-200 mb-6 overflow-hidden" elevation="3">
         <v-row no-gutters>
-          <v-col cols="12" md="7" class="pa-6 bg-white d-flex flex-column justify-center align-center position-relative" style="min-height: 380px;">
+          <v-col cols="12" md="8" class="pa-6 bg-white d-flex flex-column justify-center align-center position-relative" style="min-height: 380px;">
             <div class="w-100 position-relative" style="height: 280px;">
               <canvas ref="chartCanvasRef"></canvas>
             </div>
             
             <div class="w-100 mt-2 bg-slate-900 text-white py-2 px-4 rounded-xl d-flex align-center justify-between shadow-sm">
               <div class="d-flex align-center ga-2">
-                <v-icon icon="mdi-clock-outline" size="small" color="amber" />
-                <span class="text-xxs font-weight-black uppercase tracking-wider text-slate-400">Time frame:</span>
+                <v-icon icon="mdi-clock-outline" size="small" color="amber-darken-2" />
+                <span class="text-uppercase tracking-wider text-amber-darken-2">Time frame:</span>
               </div>
-              <span class="font-monospace font-weight-black text-body-2 text-amber-lighten-2 tracking-wide uppercase">{{ activeTimelineLabel }}</span>
+              <span class="ms-4 font-monospace font-weight-black text-h4 text-amber-darken-2 tracking-wide uppercase">{{ activeTimelineLabel }}</span>
             </div>
           </v-col>
 
-          <v-col cols="12" md="5" class="pa-6 bg-slate-50 border-s border-slate-100 d-flex flex-column justify-center">
+          <v-col cols="12" md="4" class="pa-6 bg-slate-50 border-s border-slate-100 d-flex flex-column justify-center">
             <div class="text-overline font-weight-bold text-slate-400 tracking-widest mb-1">Target Language</div>
             <div class="mb-4">
               <span class="text-xxs font-weight-black text-slate-400 uppercase d-block mb-3">Verb</span>
@@ -156,7 +156,7 @@
 
         <div v-if="flaggedPrompts.length" class="text-left mb-6">
           <div class="text-overline font-weight-black text-rose-500 tracking-wider mb-2 d-flex align-center">
-            <v-icon icon="mdi-alert-circle-outline" size="small" class="mr-1" /> Flagged Items for Immediate Review
+            <v-icon icon="mdi-alert-circle-outline" size="small" class="mr-1" /> Flagged Items for Review
           </div>
           <v-card variant="flat" border max-height="180" class="overflow-y-auto rounded-lg border-slate-200 bg-slate-50 pa-1">
             <v-list density="compact" bg-color="transparent">
@@ -229,23 +229,13 @@ let timerInterval: ReturnType<typeof setInterval> | null = null
 
 const timerProgress = computed(() => (timeLeft.value / 25) * 100)
 const progressValue = computed(() => (promptCounter.value / totalRounds.value) * 100)
-const score = computed(() => rightCount.value !== 0 ? ((rightCount.value / totalRounds.value) * 100).toFixed(1) : 0)
+const score = computed(() => ((rightCount.value / totalRounds.value) * 100).toFixed(1))
 const flaggedPrompts = computed(() => shownPrompts.value.filter(p => p.is_correct !== true))
 const snackbar = reactive({ show: false, message: "", color: "success" })
 
 const activeTimelineLabel = computed(() => prompt.value?.correctAnswers[1] || "")
 
-function generateIsolatedChartData(vectorType: string) {
-  const data = Array(6).fill(null)
-  let val1 = Math.floor(Math.random() * 40) + 45
-  let val2 = val1
-  if (vectorType === "verbs_up") val2 = val1 + Math.floor(Math.random() * 25) + 15
-  else if (vectorType === "verbs_down") val2 = val1 - Math.floor(Math.random() * 25) - 15
-  else val2 = val1 + (Math.floor(Math.random() * 10) - 5)
-  if (val2 < 5) val2 = 12
-  data[1] = val1; data[4] = val2
-  return { dataset: data, initial: val1, terminal: val2 }
-}
+
 
 async function renderDynamicGraph(theme: any, verb: string, chartType: 'line' | 'bar') {
   await nextTick()
@@ -284,28 +274,252 @@ function startGame() {
   buildPromptQueue(); loadNextPrompt()
 }
 
+// --- replace generateIsolatedChartData with this ---
+function generateChartPattern(
+  vectorType: "verbs_up" | "verbs_down" | "verbs_flat",
+  level: "easy" | "hard"
+) {
+  const points = Array(6).fill(null) as (number | null)[]
+
+  // anchor values
+  let start = Math.floor(Math.random() * 40) + 45 // 45..84
+  const volatility = level === "hard" ? 8 : 5
+
+  const clamp = (n: number, min = 5, max = 140) => Math.max(min, Math.min(max, n))
+  const rand = (a: number, b: number) => Math.floor(Math.random() * (b - a + 1)) + a
+
+  // pattern library per vector
+  // visible points at indexes 1..4 (A/C/F remain null to preserve style)
+  const patternId =
+    vectorType === "verbs_up"
+      ? pickOne(["steady_up", "late_surge", "early_surge", "staircase_up"])
+      : vectorType === "verbs_down"
+      ? pickOne(["steady_down", "sudden_drop", "early_drop", "staircase_down"])
+      : pickOne(["noisy_flat", "dip_recovery", "peak_return", "tight_range"])
+
+  let p1 = start
+  let p2 = start
+  let p3 = start
+  let p4 = start
+
+  if (vectorType === "verbs_up") {
+    if (patternId === "steady_up") {
+      p2 = p1 + rand(6, 12)
+      p3 = p2 + rand(6, 12)
+      p4 = p3 + rand(6, 12)
+    } else if (patternId === "late_surge") {
+      p2 = p1 + rand(1, 6)
+      p3 = p2 + rand(2, 8)
+      p4 = p3 + rand(15, 28)
+    } else if (patternId === "early_surge") {
+      p2 = p1 + rand(14, 26)
+      p3 = p2 + rand(2, 8)
+      p4 = p3 + rand(2, 8)
+    } else {
+      // staircase_up
+      p2 = p1 + rand(5, 10)
+      p3 = p2 + rand(-2, 3)
+      p4 = p3 + rand(10, 18)
+    }
+  } else if (vectorType === "verbs_down") {
+    if (patternId === "steady_down") {
+      p2 = p1 - rand(6, 12)
+      p3 = p2 - rand(6, 12)
+      p4 = p3 - rand(6, 12)
+    } else if (patternId === "sudden_drop") {
+      p2 = p1 - rand(1, 6)
+      p3 = p2 - rand(15, 28)
+      p4 = p3 - rand(2, 8)
+    } else if (patternId === "early_drop") {
+      p2 = p1 - rand(14, 26)
+      p3 = p2 - rand(2, 8)
+      p4 = p3 - rand(2, 8)
+    } else {
+      // staircase_down
+      p2 = p1 - rand(5, 10)
+      p3 = p2 + rand(-3, 2)
+      p4 = p3 - rand(10, 18)
+    }
+  } else {
+    // verbs_flat
+    if (patternId === "noisy_flat") {
+      p2 = p1 + rand(-volatility, volatility)
+      p3 = p1 + rand(-volatility, volatility)
+      p4 = p1 + rand(-volatility, volatility)
+    } else if (patternId === "dip_recovery") {
+      p2 = p1 - rand(5, 12)
+      p3 = p2 + rand(3, 9)
+      p4 = p1 + rand(-4, 4)
+    } else if (patternId === "peak_return") {
+      p2 = p1 + rand(5, 12)
+      p3 = p2 - rand(3, 9)
+      p4 = p1 + rand(-4, 4)
+    } else {
+      // tight_range
+      p2 = p1 + rand(-4, 4)
+      p3 = p1 + rand(-4, 4)
+      p4 = p1 + rand(-4, 4)
+    }
+  }
+
+  p1 = clamp(p1); p2 = clamp(p2); p3 = clamp(p3); p4 = clamp(p4)
+
+  points[1] = p1
+  points[2] = p2
+  points[3] = p3
+  points[4] = p4
+
+  return {
+    dataset: points,
+    initial: p1,
+    terminal: p4,
+    patternId
+  }
+}
+
+// --- add these helpers (near shuffle) ---
+function pickOne<T>(arr: T[]): T {
+  return arr[Math.floor(Math.random() * arr.length)]
+}
+
+function pickWithCooldown<T, K>(
+  pool: T[],
+  recent: T[],
+  keyFn: (x: T) => K,
+  fallbackPool: T[] = pool
+): T {
+  const recentKeys = new Set(recent.map(keyFn))
+  const filtered = pool.filter(item => !recentKeys.has(keyFn(item)))
+  if (filtered.length) return pickOne(filtered)
+  return pickOne(fallbackPool.length ? fallbackPool : pool)
+}
+
+function pushRecent<T>(recent: T[], item: T, maxSize: number) {
+  recent.push(item)
+  if (recent.length > maxSize) recent.shift()
+}
+
+function buildBalancedVectorPlan(rounds: number): ("verbs_up" | "verbs_down" | "verbs_flat")[] {
+  const base: ("verbs_up" | "verbs_down" | "verbs_flat")[] = ["verbs_up", "verbs_down", "verbs_flat"]
+  const out: ("verbs_up" | "verbs_down" | "verbs_flat")[] = []
+
+  // even spread
+  while (out.length < rounds) out.push(base[out.length % base.length])
+
+  // shuffle but prevent long streaks
+  const shuffled = shuffle(out)
+  for (let i = 2; i < shuffled.length; i++) {
+    if (shuffled[i] === shuffled[i - 1] && shuffled[i - 1] === shuffled[i - 2]) {
+      // swap with next different if possible
+      const j = shuffled.findIndex((v, idx) => idx > i && v !== shuffled[i])
+      if (j !== -1) [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
+    }
+  }
+  return shuffled
+}
+
+// --- replace buildPromptQueue with this ---
 function buildPromptQueue() {
-  const queue = []; const randomizedThemes = shuffle([...CHART_THEMES])
-  for (let i = 0; i < totalRounds.value; i++) {
-    const theme = randomizedThemes[i % randomizedThemes.length]
-    const vectorGroup = (STRUCTURAL_VERBS as any)[theme.vector]
-    const list = vectorGroup[selectedLevel.value] || vectorGroup["easy"]
-    const verbObj = list[Math.floor(Math.random() * list.length)]
-    const isFinishedTime = Math.random() > 0.5
-    const categoryKey = isFinishedTime ? "finished" : "unfinished"
-    const chosenTimeFrameLabel = TIME_FRAMES[categoryKey][Math.floor(Math.random() * TIME_FRAMES[categoryKey].length)]
-    const chartCalculations = generateIsolatedChartData(theme.vector)
-    const targetedChartType = Math.random() > 0.5 ? 'line' : 'bar'
+  const queue: any[] = []
+  const rounds = totalRounds.value
+  const vectorPlan = buildBalancedVectorPlan(rounds)
+
+  // caches / cooldown trackers
+  const recentThemeTitles: { title: string }[] = [] 
+  const recentThemes: any[] = []
+  const recentVerbs: any[] = []      // verb objects
+  const recentTimeLabels: string[] = []
+  const recentChartTypes: ("line" | "bar")[] = []
+
+  let finishedCount = 0
+  let unfinishedCount = 0
+
+  const themesByVector = {
+    verbs_up: CHART_THEMES.filter(t => t.vector === "verbs_up"),
+    verbs_down: CHART_THEMES.filter(t => t.vector === "verbs_down"),
+    verbs_flat: CHART_THEMES.filter(t => t.vector === "verbs_flat")
+  }
+
+  for (let i = 0; i < rounds; i++) {
+    const vector = vectorPlan[i]
+
+    // theme with cooldown
+    const themePool = themesByVector[vector]
+    const theme = pickWithCooldown(themePool, recentThemes, (t) => t.title, themePool)
+    pushRecent(recentThemes, theme, 3)
+    pushRecent(recentThemeTitles, theme.title, 3)
+
+    // verbs from selected level with cooldown
+    const vectorGroup = (STRUCTURAL_VERBS as any)[vector]
+    const verbList = vectorGroup[selectedLevel.value] || vectorGroup["easy"]
+    const verbObj = pickWithCooldown(verbList, recentVerbs, (v) => v.inf, verbList)
+      pushRecent(recentVerbs, verbObj, 3)
+    pushRecent(recentVerbs, verbObj.inf, 3)
+
+    // soft balance finished/unfinished
+    // target near 50/50 while avoiding streaks
+    const needFinished = finishedCount < Math.floor((i + 1) / 2)
+    const categoryKey: "finished" | "unfinished" =
+      needFinished ? "finished" : "unfinished"
+
+    // small random flip (hard mode slightly more unpredictable)
+    const flipChance = selectedLevel.value === "hard" ? 0.35 : 0.2
+    const maybeFlipped =
+      Math.random() < flipChance
+        ? (categoryKey === "finished" ? "unfinished" : "finished")
+        : categoryKey
+
+    const chosenCategory = maybeFlipped
+    if (chosenCategory === "finished") finishedCount++
+    else unfinishedCount++
+
+    // timeframe label with cooldown
+    const labelPool = TIME_FRAMES[chosenCategory]
+    const chosenTimeFrameLabel = pickWithCooldown(
+      labelPool,
+      recentTimeLabels,
+      (s: string) => s,
+      labelPool
+    )
+    pushRecent(recentTimeLabels, chosenTimeFrameLabel, 2)
+
+    // richer chart pattern generation
+    const chartCalculations = generateChartPattern(vector, selectedLevel.value)
+
+    // chart type with anti-repeat
+    let targetedChartType: "line" | "bar" = Math.random() < 0.6 ? "line" : "bar"
+    if (
+      recentChartTypes.length >= 2 &&
+      recentChartTypes[recentChartTypes.length - 1] === targetedChartType &&
+      recentChartTypes[recentChartTypes.length - 2] === targetedChartType
+    ) {
+      targetedChartType = targetedChartType === "line" ? "bar" : "line"
+    }
+    pushRecent(recentChartTypes, targetedChartType, 3)
 
     queue.push({
-      question: theme.title, verb: verbObj.inf,
-      correctAnswers: [theme.yAxis, chosenTimeFrameLabel], category: categoryKey.toUpperCase(),
-      verbMetadata: verbObj, themeMetadata: { ...theme, xAxisLabels: ["A", "Initial", "C", "D", "Current", "F"], generatedPoints: chartCalculations.dataset },
-      plottedValues: { initial: chartCalculations.initial, terminal: chartCalculations.terminal }, chartType: targetedChartType
+      question: theme.title,
+      verb: verbObj.inf, // keep UI compatible; you can later add tense sampling here
+      correctAnswers: [theme.yAxis, chosenTimeFrameLabel],
+      category: chosenCategory.toUpperCase(),
+      verbMetadata: verbObj,
+      themeMetadata: {
+        ...theme,
+        xAxisLabels: ["A", "Initial", "C", "D", "Current", "F"],
+        generatedPoints: chartCalculations.dataset
+      },
+      plottedValues: {
+        initial: chartCalculations.initial,
+        terminal: chartCalculations.terminal
+      },
+      chartType: targetedChartType,
+      patternId: chartCalculations.patternId
     })
   }
+
   promptQueue.value = queue
 }
+
 
 function loadNextPrompt() {
   if (!promptQueue.value.length || promptCounter.value >= totalRounds.value) { endGame(); return }

@@ -601,6 +601,9 @@ function normalizeGameName(name: string): string {
   if (name.startsWith("Pronoun Practice")) return "Pronoun Practice";
   if (name.startsWith("Prove it!")) return "Prove it!";
   if (name.startsWith("Pronunciation Challenge")) return "Pronunciation Challenge";
+  if (name.startsWith("Reported Speech")) return "Reported Speech";
+  if (name.startsWith("Verb Mixer") && name != "Verb Mixer Classroom Edition") return "Verb Mixer";
+
   return name;
 }
 
