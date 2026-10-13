@@ -1,6 +1,5 @@
 <template>
   <div class="market-masters-container">
-    
     <div class="market-ticker-wrap" v-if="marketPrices.length > 0">
       <div class="ticker-moving">
         <template v-for="(asset, index) in [...marketPrices, ...marketPrices]" :key="`${asset.ticker}-${index}`">
@@ -82,6 +81,118 @@
         </v-col>
       </v-row>
     </header>
+
+          <section class="watchlist-section mb-3">
+        <div class="watchlist-header">
+          <h2>Find a price chart 📉</h2>
+          <div class="watchlist-add-form">
+            <TickerSearchBar ref="chartSearchRef" @selected="handleChartSearchSelection" />
+            <button class="btn btn-primary" @click="openChartFromSearch">Open Chart</button>
+          </div>
+        </div>
+      </section>
+
+    <section class="watchlist-section">
+      <div class="watchlist-header">
+        <h2>My Personal Watchlist 👀 ({{ currentWatchlist.length }} / 15)</h2>
+        <div class="watchlist-add-form">
+          <TickerSearchBar ref="watchlistSearchRef" @selected="handleWatchlistSelection" />
+          <button @click="submitWatchlistAdd" :disabled="isActionProcessing || currentWatchlist.length >= 15" class="btn btn-primary">
+            {{ isActionProcessing ? 'Verifying...' : 'Add Asset' }}
+          </button>
+        </div>
+      </div>
+      
+      <div class="watchlist-grid" v-if="currentWatchlist.length > 0">
+        <div
+          v-for="ticker in currentWatchlist"
+          :key="ticker"
+          class="watchlist-tile"
+        >
+          <div class="tile-identity">
+            <span class="tile-ticker">{{ ticker }}</span>
+            <span class="tile-company-name">
+              {{ getAssetName(ticker) }}
+            </span>
+          </div>
+
+          <div class="tile-meta-pricing">
+            <span class="tile-price" :class="getDirection(ticker)">
+              ${{ getLivePrice(ticker) }}
+            </span>
+            <span class="tile-timestamp">
+              Updated: {{ getLastUpdatedTime(ticker) }}
+            </span>
+          </div>
+
+          <div class="d-flex align-center ga-2 mt-2">
+            <v-btn
+              size="x-small"
+              variant="tonal"
+              color="primary"
+              @click="openAssetExplorer(ticker)"
+            >
+              View Chart
+            </v-btn>
+
+            <button class="remove-btn" @click.stop="removeFromWatchlist(ticker)">
+              &times;
+            </button>
+          </div>
+        </div>
+      </div>
+      <p v-else class="empty-msg">Your watchlist is currently empty. Add assets above to monitor their performance.</p>
+    </section>
+
+    <!-- 🧭 COMPACT DISCOVERY HUB -->
+        <section class="watchlist-section mt-2">
+          <div class="watchlist-header pb-2">
+            <h2>Suggested Watchlist Assets 💡</h2>
+            <p class="empty-msg ma-0" style="font-size: 0.75rem;">Click the green plus (+) to quickly add assets to your watchlist</p>
+          </div>
+
+          <!-- Ultra-dense multi-column layout wrapper -->
+          <div class="sectors-grid-columns">
+            <div v-for="(sector, sectorKey) in sectorDirectory" :key="sectorKey" class="sector-column-box">
+              <div class="sector-column-header">
+                {{ sector.label }}
+              </div>
+              
+              <div class="sector-mini-pills-list">
+                <v-tooltip 
+                  v-for="asset in sector.assets" 
+                  :key="asset.ticker" 
+                  location="top"
+                  open-delay="100"
+                >
+                  <template v-slot:activator="{ props }">
+                    <div class="sector-mini-pill" v-bind="props">
+                      <div class="mini-pill-meta">
+                        <span class="mini-ticker">{{ asset.ticker }}</span>
+                        <span class="mini-name">{{ asset.shortName }}</span>
+                      </div>
+                      
+                      <button 
+                        class="mini-add-btn" 
+                        :disabled="currentWatchlist.includes(asset.ticker)"
+                        @click.stop="quickAddFromDiscovery(asset.ticker)"
+                      >
+                        {{ currentWatchlist.includes(asset.ticker) ? '✓' : '+' }}
+                      </button>
+                    </div>
+                  </template>
+
+                  <!-- Dense contextual metric pricing fallback payload -->
+                  <div class="vuetify-tooltip-content">
+                    <strong>{{ asset.name }}</strong> ({{ asset.ticker }})
+                    <v-divider class="my-1 border-opacity-50" color="white"></v-divider>
+                    Live Feed: <span :class="getDirection(asset.ticker)">${{ getLivePrice(asset.ticker) }}</span>
+                  </div>
+                </v-tooltip>
+              </div>
+            </div>
+          </div>
+        </section>
 
     <v-row class="px-6">
         <v-col cols="12" class="d-flex justify-center">
@@ -271,9 +382,9 @@
                   >
                     Your Rank: <strong>#{{ comp.my_position.rank }}</strong>
                     • PnL:
-                    <strong :class="comp.my_position.pnl_value >= 0 ? 'text-emerald-600' : 'text-rose-600'">
-                      {{ comp.my_position.pnl_value >= 0 ? '+' : '' }}${{ Math.abs(comp.my_position.pnl_value).toFixed(2) }}
-                      ({{ comp.my_position.pnl_pct >= 0 ? '+' : '' }}{{ comp.my_position.pnl_pct.toFixed(2) }}%)
+                    <strong :class="Number(comp.my_position.pnl_value) >= 0 ? 'text-success' : 'text-error'">
+                      {{ Number(comp.my_position.pnl_value) >= 0 ? '+' : '-' }}${{ Math.abs(Number(comp.my_position.pnl_value)).toFixed(2) }}
+                      ({{ Number(comp.my_position.pnl_pct) >= 0 ? '+' : '-' }}{{ Math.abs(Number(comp.my_position.pnl_pct)).toFixed(2) }}%)
                     </strong>
                   </v-alert>
 
@@ -282,7 +393,6 @@
                       <tr>
                         <th>#</th>
                         <th>Student</th>
-                        <th>Portfolio</th>
                         <th class="text-right">Net Equity</th>
                         <th class="text-right">PnL</th>
                       </tr>
@@ -291,18 +401,25 @@
                       <tr
                         v-for="row in comp.standings"
                         :key="row.portfolio_id"
-                        :class="row.is_me ? 'bg-blue-lighten-5' : ''"
+                        :class="row.is_me ? 'bg-red-lighten-5' : ''"
                       >
                         <td class="font-weight-bold">#{{ row.rank }}</td>
                         <td>{{ row.student_name }}</td>
-                        <td>{{ row.portfolio_name }}</td>
-                        <td class="text-right">${{ Number(row.net_equity).toLocaleString() }}</td>
                         <td
                           class="text-right font-weight-bold"
-                          :class="row.pnl_value >= 0 ? 'text-emerald-600' : 'text-rose-600'"
+                          :class="Number(row.pnl_value) >= 1 ? 'text-success' : Number(row.pnl_value) == 0 ? '' : 'text-warning'"
                         >
-                          {{ row.pnl_value >= 0 ? '+' : '' }}${{ Math.abs(Number(row.pnl_value)).toFixed(2) }}
-                          <span class="text-caption">({{ row.pnl_pct >= 0 ? '+' : '' }}{{ Number(row.pnl_pct).toFixed(2) }}%)</span>
+                          {{ Number(row.pnl_value) >= 1 ? '+' : Number(row.pnl_value) == 0 ? '' : '' }}${{ Math.abs(Number(row.net_equity)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
+                        </td>
+
+                        <td
+                          class="text-right font-weight-bold"
+                          :class="Number(row.pnl_value) >= 1 ? 'text-success' : Number(row.pnl_value) == 0 ? '' : 'text-warning'"
+                        >
+                          {{ Number(row.pnl_value) >= 1 ? '+' : Number(row.pnl_value) == 0 ? '' : '-' }}${{ Math.abs(Number(row.pnl_value)).toFixed(2) }}
+                          <span class="text-caption">
+                            ({{ Number(row.pnl_pct) >= 0 ? '+' : '-' }}{{ Math.abs(Number(row.pnl_pct)).toFixed(2) }}%)
+                          </span>
                         </td>
                       </tr>
                     </tbody>
@@ -313,991 +430,855 @@
           </v-card>
         </v-col>
       </v-row>
+          
+        
+        <div v-if="isCreateModalActive" class="dialog-overlay" @click.self="isCreateModalActive = false">
+          <div class="dialog-box upgraded scrollable-dialog">
+            <div class="dialog-header">
+              <h2>Create Your Personal Trading Portfolio</h2>
+              <button class="close-x" @click="isCreateModalActive = false">&times;</button>
+            </div>
 
-    <section class="watchlist-section">
-      <div class="watchlist-header">
-        <h2>My Personal Watchlist 👀 ({{ currentWatchlist.length }} / 15)</h2>
-        <div class="watchlist-add-form">
-          <TickerSearchBar ref="watchlistSearchRef" @selected="handleWatchlistSelection" />
-          <button @click="submitWatchlistAdd" :disabled="isActionProcessing || currentWatchlist.length >= 15" class="btn btn-primary">
-            {{ isActionProcessing ? 'Verifying...' : 'Add Asset' }}
-          </button>
-        </div>
-      </div>
-      
-      <div class="watchlist-grid" v-if="currentWatchlist.length > 0">
-        <v-menu 
-          v-for="ticker in currentWatchlist" 
-          :key="ticker"
-          open-on-hover 
-          :close-on-content-click="false" 
-          location="top center" 
-          transition="fade-transition"
-          @update:model-value="(isOpen) => isOpen && handleLoadChartHistory(ticker)"
-        >
-          <template v-slot:activator="{ props }">
-            <div class="watchlist-tile cursor-pointer" v-bind="props">
-              
-              <div class="tile-identity">
-                <span class="tile-ticker">{{ ticker }}</span>
-                <span class="tile-company-name">
-                  {{ getAssetName(ticker) }}
-                </span>
+            <div class="dialog-body">
+              <div class="form-group">
+                <label>Portfolio Name</label>
+                <input
+                  type="text"
+                  v-model="newPortfolioForm.name"
+                  placeholder="e.g., Up Only"
+                  class="form-control"
+                />
+                <label>This portfolio is independent from teacher competitions.</label>
               </div>
-              
-              <div class="tile-meta-pricing">
-                <span class="tile-price" :class="getDirection(ticker)">
-                  ${{ getLivePrice(ticker) }}
-                </span>
-                <span class="tile-timestamp">
-                  Updated: {{ getLastUpdatedTime(ticker) }}
-                </span>
+
+              <div class="form-group">
+                <label>Starting Capital</label>
+                <input
+                  type="text"
+                  :value="uiCustomBudget"
+                  @input="onBudgetInput"
+                  @blur="onBudgetBlur"
+                  inputmode="decimal"
+                  placeholder="Default: 100'000"
+                  class="form-control"
+                />
+                <span class="input-hint">Define your starting capital</span>
               </div>
-              
-              <button class="remove-btn" @click.stop="removeFromWatchlist(ticker)">
-                &times;
+
+              <!-- NEW: Trading level -->
+              <div class="form-group">
+                <label>Trading Level</label>
+                <div class="radio-group-box">
+                  <label class="radio-label">
+                    <input type="radio" value="BASIC" v-model="newPortfolioForm.trading_level" />
+                    <span class="ms-2"><strong>Basic:</strong> BUY / SELL only</span>
+                  </label>
+                  <label class="radio-label">
+                    <input type="radio" value="ADVANCED" v-model="newPortfolioForm.trading_level" />
+                    <span class="ms-2"><strong>Advanced:</strong> BUY / SELL / SHORT / COVER</span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="form-group" v-if="newPortfolioForm.trading_level === 'ADVANCED'">
+                <label>Max Leverage</label>
+                <input
+                  type="number"
+                  v-model.number="newPortfolioForm.leverage_setting"
+                  min="1"
+                  max="5"
+                  step="1"
+                  class="form-control"
+                  style="width: 80px;"
+                />
+                <span class="input-hint">Allowed range: 1x to 5x</span>
+              </div>
+
+              <!-- Portfolio mode -->
+              <div class="form-group">
+                <label>Portfolio Mode</label>
+                <div class="radio-group-box">
+                  <label class="radio-label">
+                    <input type="radio" value="DYNAMIC" v-model="newPortfolioForm.portfolio_type" />
+                    <span class="ms-2"><strong>Dynamic:</strong> Trading allowed until close date</span>
+                  </label>
+                  <label class="radio-label">
+                    <input type="radio" value="STATIC" v-model="newPortfolioForm.portfolio_type" />
+                    <span class="ms-2"><strong>Static:</strong> Trading locks at cutoff date</span>
+                  </label>
+                </div>
+              </div>
+
+              <!-- NEW: timeline -->
+              <div class="form-group">
+                <label>Start Time</label>
+                <input type="datetime-local" v-model="newPortfolioForm.start_time" class="form-control" />
+              </div>
+
+              <div class="form-group" v-if="newPortfolioForm.portfolio_type === 'STATIC'">
+                <label>Trade Cutoff Time (Static only)</label>
+                <input type="datetime-local" v-model="newPortfolioForm.trade_cutoff_time" class="form-control" />
+                <span class="input-hint">Trading locks after this timestamp</span>
+              </div>
+
+              <div class="form-group">
+                <label>End Time (Competition/Portfolio Close)</label>
+                <input type="datetime-local" v-model="newPortfolioForm.end_time" class="form-control" />
+              </div>
+
+              <button class="btn btn-secondary full-width margin-top" @click="submitNewPortfolio" :disabled="isActionProcessing">
+                {{ isActionProcessing ? 'Creating...' : 'Create Portfolio' }}
               </button>
             </div>
-          </template>
-
-          <v-card width="340" class="pa-4 bg-slate-900 rounded-lg elevation-16 border border-slate-700" style="background: #0f172a; color: white;">
-            <div class="vuetify-tooltip-content">
-              <div class="tooltip-header d-flex justify-space-between align-center">
-                <div>
-                  <strong class="text-subtitle-2 font-weight-black">{{ getAssetName(ticker) }}</strong>
-                  <span class="text-caption text-slate-400 ml-1">({{ ticker }})</span>
-                </div>
-              </div>
-
-              <v-divider class="my-2 border-opacity-30" color="white"></v-divider>
-
-              <div class="tooltip-body mb-3">
-                <div class="d-flex justify-start align-center mb-2">
-                  <span class="text-caption text-slate-400 font-weight-bold me-3">48h Performance: </span>
-                  <span
-                    class="text-subtitle-2 font-weight-black tracking-tight"
-                    :class="getPerformanceColorClass(trendByTicker[ticker]?.performance_pct_48h)"
-                  >
-                    {{
-                      trendByTicker[ticker]?.performance_pct_48h
-                        ? trendByTicker[ticker].performance_pct_48h + '%'
-                        : 'Insufficient 48h data - Please wait 48h for data to accumulate'
-                    }}
-                  </span>
-                </div>
-
-                <div class="d-flex justify-space-between align-center text-caption text-slate-400 mb-1">
-                  <span class="font-weight-medium">
-                    Price since
-                    {{
-                      trendByTicker[ticker]?.history_since
-                        ? new Date(trendByTicker[ticker].history_since).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' })
-                        : 'N/A'
-                    }} :
-                  </span>
-                </div>
-
-                <div class="relative-chart-wrapper rounded" style="position: relative; height: 110px; width: 100%;">
-                  <div v-if="chartLoadingByTicker[ticker]" class="d-flex justify-center align-center h-100">
-                    <v-progress-circular indeterminate color="sky-lighten-2" size="20"></v-progress-circular>
-                  </div>
-
-                  <div
-                    v-else-if="!trendByTicker[ticker]?.prices?.length"
-                    class="d-flex justify-center align-center h-100 text-slate-500 font-italic text-caption"
-                  >
-                    No historical data available.
-                  </div>
-
-                  <canvas
-                    v-show="!chartLoadingByTicker[ticker] && trendByTicker[ticker]?.prices?.length"
-                    :ref="el => { if (el) chartRefs[ticker] = el }"
-                  ></canvas>
-                </div>
-              </div>
-            </div>
-          </v-card>
-        </v-menu>
-      </div>
-      <p v-else class="empty-msg">Your watchlist is currently empty. Add assets above to monitor their performance.</p>
-    </section>
-
-<!-- 🧭 COMPACT DISCOVERY HUB -->
-    <section class="watchlist-section mt-2">
-      <div class="watchlist-header pb-2">
-        <h2>Suggested Watchlist Assets 💡</h2>
-        <p class="empty-msg ma-0" style="font-size: 0.75rem;">Click the green plus (+) to quickly add assets to your watchlist</p>
-      </div>
-
-      <!-- Ultra-dense multi-column layout wrapper -->
-      <div class="sectors-grid-columns">
-        <div v-for="(sector, sectorKey) in sectorDirectory" :key="sectorKey" class="sector-column-box">
-          <div class="sector-column-header">
-            {{ sector.label }}
-          </div>
-          
-          <div class="sector-mini-pills-list">
-            <v-tooltip 
-              v-for="asset in sector.assets" 
-              :key="asset.ticker" 
-              location="top"
-              open-delay="100"
-            >
-              <template v-slot:activator="{ props }">
-                <div class="sector-mini-pill" v-bind="props">
-                  <div class="mini-pill-meta">
-                    <span class="mini-ticker">{{ asset.ticker }}</span>
-                    <span class="mini-name">{{ asset.shortName }}</span>
-                  </div>
-                  
-                  <button 
-                    class="mini-add-btn" 
-                    :disabled="currentWatchlist.includes(asset.ticker)"
-                    @click.stop="quickAddFromDiscovery(asset.ticker)"
-                  >
-                    {{ currentWatchlist.includes(asset.ticker) ? '✓' : '+' }}
-                  </button>
-                </div>
-              </template>
-
-              <!-- Dense contextual metric pricing fallback payload -->
-              <div class="vuetify-tooltip-content">
-                <strong>{{ asset.name }}</strong> ({{ asset.ticker }})
-                <v-divider class="my-1 border-opacity-50" color="white"></v-divider>
-                Live Feed: <span :class="getDirection(asset.ticker)">${{ getLivePrice(asset.ticker) }}</span>
-              </div>
-            </v-tooltip>
-          </div>
+          </div>      
         </div>
-      </div>
-    </section>
-
       
-    
-    <div v-if="isCreateModalActive" class="dialog-overlay" @click.self="isCreateModalActive = false">
-      <div class="dialog-box upgraded scrollable-dialog">
-        <div class="dialog-header">
-          <h2>Create Your Personal Trading Portfolio</h2>
-          <button class="close-x" @click="isCreateModalActive = false">&times;</button>
-        </div>
-
-        <div class="dialog-body">
-          <div class="form-group">
-            <label>Portfolio Name</label>
-            <input
-              type="text"
-              v-model="newPortfolioForm.name"
-              placeholder="e.g., Up Only"
-              class="form-control"
-            />
-            <label>This portfolio is independent from teacher competitions.</label>
-          </div>
-
-          <div class="form-group">
-            <label>Starting Capital</label>
-            <input
-              type="text"
-              :value="uiCustomBudget"
-              @input="onBudgetInput"
-              @blur="onBudgetBlur"
-              inputmode="decimal"
-              placeholder="Default: 100'000"
-              class="form-control"
-            />
-            <span class="input-hint">Define your starting capital</span>
-          </div>
-
-          <!-- NEW: Trading level -->
-          <div class="form-group">
-            <label>Trading Level</label>
-            <div class="radio-group-box">
-              <label class="radio-label">
-                <input type="radio" value="BASIC" v-model="newPortfolioForm.trading_level" />
-                <span class="ms-2"><strong>Basic:</strong> BUY / SELL only</span>
-              </label>
-              <label class="radio-label">
-                <input type="radio" value="ADVANCED" v-model="newPortfolioForm.trading_level" />
-                <span class="ms-2"><strong>Advanced:</strong> BUY / SELL / SHORT / COVER</span>
-              </label>
-            </div>
-          </div>
-
-          <div class="form-group" v-if="newPortfolioForm.trading_level === 'ADVANCED'">
-            <label>Max Leverage</label>
-            <input
-              type="number"
-              v-model.number="newPortfolioForm.leverage_setting"
-              min="1"
-              max="5"
-              step="1"
-              class="form-control"
-              style="width: 80px;"
-            />
-            <span class="input-hint">Allowed range: 1x to 5x</span>
-          </div>
-
-          <!-- Portfolio mode -->
-          <div class="form-group">
-            <label>Portfolio Mode</label>
-            <div class="radio-group-box">
-              <label class="radio-label">
-                <input type="radio" value="DYNAMIC" v-model="newPortfolioForm.portfolio_type" />
-                <span class="ms-2"><strong>Dynamic:</strong> Trading allowed until close date</span>
-              </label>
-              <label class="radio-label">
-                <input type="radio" value="STATIC" v-model="newPortfolioForm.portfolio_type" />
-                <span class="ms-2"><strong>Static:</strong> Trading locks at cutoff date</span>
-              </label>
-            </div>
-          </div>
-
-          <!-- NEW: timeline -->
-          <div class="form-group">
-            <label>Start Time</label>
-            <input type="datetime-local" v-model="newPortfolioForm.start_time" class="form-control" />
-          </div>
-
-          <div class="form-group" v-if="newPortfolioForm.portfolio_type === 'STATIC'">
-            <label>Trade Cutoff Time (Static only)</label>
-            <input type="datetime-local" v-model="newPortfolioForm.trade_cutoff_time" class="form-control" />
-            <span class="input-hint">Trading locks after this timestamp</span>
-          </div>
-
-          <div class="form-group">
-            <label>End Time (Competition/Portfolio Close)</label>
-            <input type="datetime-local" v-model="newPortfolioForm.end_time" class="form-control" />
-          </div>
-
-          <button class="btn btn-secondary full-width margin-top" @click="submitNewPortfolio" :disabled="isActionProcessing">
-            {{ isActionProcessing ? 'Creating...' : 'Create Portfolio' }}
-          </button>
-        </div>
-      </div>
-    </div>
 
 
-    <v-dialog v-model="portfolioDialog.isOpen" fullscreen transition="dialog-bottom-transition">
-      <v-card color="grey-lighten-4" class="d-flex flex-column h-screen">
-        
-        <v-toolbar color="slate-900" dark class="px-4" density="compact" flat style="background: #0f172a; color: white;">
-          <v-toolbar-title class="text-subtitle-1 font-weight-black tracking-wide">
-            PORTFOLIO TERMINAL — {{ selectedPortfolio?.name || `PORTFOLIO ${selectedPortfolio?.id || ''}` }}
-
-            <span class="text-body-2" style="margin-left: 8%;">Ends {{ formatDate(portfolioMeta.endTime) }}</span>
+        <v-dialog v-model="portfolioDialog.isOpen" fullscreen transition="dialog-bottom-transition">
+          <v-card color="grey-lighten-4" class="d-flex flex-column h-screen">
             
-            <v-chip size="x-small" class="ms-4" :color="portfolioMeta.tradingIsOpen ? 'success' : 'warning'" variant="tonal">
-              <template v-if="portfolioMeta.cutoffTime">
-                {{ portfolioMeta.tradingIsOpen ? 'Trading Open until ' + formatDate(portfolioMeta.cutoffTime) : 'Trading Closed on ' + formatDate(portfolioMeta.endTime) }}
-              </template>
-              <template v-else>
-                {{ portfolioMeta.tradingIsOpen ? 'Trading Open' : 'Trading Closed' }}
-              </template>
-            </v-chip>
-          </v-toolbar-title>
-          
-          <v-btn icon variant="text" @click="portfolioDialog.isOpen = false">×</v-btn>
-        </v-toolbar>
+            <v-toolbar color="slate-900" dark class="px-4" density="compact" flat style="background: #0f172a; color: white;">
+              <v-toolbar-title class="text-subtitle-1 font-weight-black tracking-wide">
+                PORTFOLIO TERMINAL — {{ selectedPortfolio?.name || `PORTFOLIO ${selectedPortfolio?.id || ''}` }}
 
-        <v-row no-gutters class="flex-grow-1 dialog-content-row">
-          
-          <v-col cols="12" lg="5" class="bg-white pa-4 pa-lg-6 dialog-col-left border-e">
-            <div class="d-flex justify-between align-center mb-2">
-              <h2 class="text-h6 font-weight-bold text-slate-800">Order Entry</h2>
-              <v-btn variant="text" color="secondary" size="small" class="font-weight-bold" @click="clearOrderFields">
-                Clear Fields
-              </v-btn>
-              <v-btn variant="tonal" color="primary" size="small" class="font-weight-bold ml-2" @click="isRulesDialogOpen = true">
-                Rules
-              </v-btn>
-            </div>
+                <span class="text-body-2" style="margin-left: 8%;">Ends {{ formatDate(portfolioMeta.endTime) }}</span>
+                
+                <v-chip size="x-small" class="ms-4" :color="portfolioMeta.tradingIsOpen ? 'success' : 'warning'" variant="tonal">
+                  <template v-if="portfolioMeta.cutoffTime">
+                    {{ portfolioMeta.tradingIsOpen ? 'Trading Open until ' + formatDate(portfolioMeta.cutoffTime) : 'Trading Closed on ' + formatDate(portfolioMeta.endTime) }}
+                  </template>
+                  <template v-else>
+                    {{ portfolioMeta.tradingIsOpen ? 'Trading Open' : 'Trading Closed' }}
+                  </template>
+                </v-chip>
+              </v-toolbar-title>
+              
+              <v-btn icon variant="text" @click="portfolioDialog.isOpen = false">×</v-btn>
+            </v-toolbar>
 
-            <p class="text-caption text-slate-500 mb-6">
-              Fees: <strong>$10.00 per transaction</strong> | Frequency Cap: <strong>2 trades/min</strong>, <strong>30 trades/day</strong>.
-            </p>
-
-            <v-tabs v-model="tradeForm.action" color="primary" class="mb-4 border-b" grow density="compact">
-              <v-tab value="BUY">📈 BUY</v-tab>
-              <v-tab value="SELL">📉 SELL</v-tab>
-              <v-tab v-if="canUseAdvancedActions" value="SHORT">🐻 SHORT SELL</v-tab>
-              <v-tab v-if="canUseAdvancedActions" value="COVER">🛡️ BUY TO COVER</v-tab>
-            </v-tabs>
-
-            <v-alert
-              v-if="isTradingLocked"
-              type="warning"
-              variant="tonal"
-              class="mb-4"
-              icon="mdi-lock"
-            >
-              Trading is locked for this portfolio.
-              <span v-if="portfolioMeta.cutoffTime">
-                Cutoff was {{ new Date(portfolioMeta.cutoffTime).toLocaleString() }}.
-              </span>
-            </v-alert>
-
-            <v-form ref="tradeFormRef" @submit.prevent="submitOrder">
-              <v-row class="mb-2">
-                <v-col cols="8">
-                  <div class="text-caption text-slate-600 mb-1 font-weight-bold">Search Asset</div>
-
-                  <div v-show="['SELL','COVER'].includes(tradeForm.action)">
-                    <v-select
-                      v-model="tradeForm.ticker"
-                      :items="tradeForm.action === 'SELL' ? longPositions : shortPositions"
-                      item-title="ticker"
-                      item-value="ticker"
-                      :placeholder="tradeForm.action === 'SELL' ? 'Select a LONG position' : 'Select a SHORT position to cover'"
-                      variant="outlined"
-                      density="comfortable"
-                      hide-details
-                      @update:model-value="clearQuantityField"
-                    >
-                      <template #item="{ props, item }">
-                        <v-list-item
-                          v-bind="props"
-                          :title="item.raw.ticker"
-                          :subtitle="tradeForm.action === 'SELL'
-                            ? `LONG | Qty: ${parseFloat(item.raw.quantity).toFixed(4)} | Entry: $${parseFloat(item.raw.average_buy_price).toFixed(2)}`
-                            : `SHORT | Qty: ${parseFloat(item.raw.quantity).toFixed(4)} | Avg Short: $${parseFloat(item.raw.average_buy_price).toFixed(2)}`"
-                        />
-                      </template>
-                    </v-select>
-                  </div>
-
-                  <div v-show="!['SELL','COVER'].includes(tradeForm.action)">
-                    <TickerSearchBar ref="watchlistSearchRef" @selected="handleTerminalAssetSelection" />
-                  </div>
-
-                  <div v-if="tradeForm.ticker" class="text-caption text-primary mt-1 font-weight-bold">
-                    Active Target: {{ tradeForm.ticker }}
-                  </div>
-                </v-col>
-
-                <v-col cols="4">
-                  <div class="d-flex align-center text-caption text-slate-600 mb-1 font-weight-bold">
-                    Execution Class
-                    <v-tooltip location="top" max-width="320">
-                      <template #activator="{ props }">
-                        <v-icon v-bind="props" size="16" class="ml-1">mdi-help-circle-outline</v-icon>
-                      </template>
-                      <span>
-                        MARKET executes immediately at live price. LIMIT waits until your target price is reached.
-                      </span>
-                    </v-tooltip>
-                  </div>
-                  <v-select
-                    v-model="tradeForm.orderType"
-                    :items="['MARKET', 'LIMIT']"
-                    variant="outlined"
-                    density="comfortable"
-                    hide-details
-                    max-width="150"
-                  />
-                </v-col>
-              </v-row>
-
-              <v-row class="mb-2">
-                <v-col cols="6">
-                  <v-text-field
-                    v-model.number="tradeForm.quantity"
-                    :label="quantityLabel"
-                    type="number"
-                    step="any"
-                    min="0.000001"
-                    variant="outlined"
-                    density="comfortable"
-                    :hint="tradeForm.action === 'SELL'
-                      ? `Max available: ${maxAllowedQuantity.toFixed(4)}`
-                      : tradeForm.action === 'COVER'
-                        ? `Max short available to cover: ${maxAllowedQuantity.toFixed(4)}`
-                        : ''"
-                    persistent-hint
-                    :rules="[
-                      v => !!v && v > 0 || 'Quantity must be positive.',
-                      v => !['SELL','COVER'].includes(tradeForm.action) || v <= maxAllowedQuantity || (
-                        tradeForm.action === 'SELL'
-                          ? 'Exceeds maximum shares owned.'
-                          : 'Exceeds maximum short quantity available to cover.'
-                      )
-                    ]"
-                  />
-                </v-col>
-
-                <v-col cols="6">
-                  <div class="d-flex align-center">
-                    <v-text-field
-                      v-model.number="tradeForm.targetPrice"
-                      :label="targetPriceLabel"
-                      type="number"
-                      step="0.01"
-                      variant="outlined"
-                      density="comfortable"
-                      :disabled="tradeForm.orderType === 'MARKET'"
-                      :rules="tradeForm.orderType === 'LIMIT' ? [v => !!v && v > 0 || 'Limit price is required.'] : []"
-                    />
-                    <v-tooltip v-if="tradeForm.orderType === 'LIMIT'" location="top" max-width="320">
-                      <template #activator="{ props }">
-                        <v-icon v-bind="props" size="16" class="ml-2 mt-n4">mdi-help-circle-outline</v-icon>
-                      </template>
-                      <span>
-                        LIMIT target price controls when the order can execute.
-                      </span>
-                    </v-tooltip>
-                  </div>
-                </v-col>
-              </v-row>
-              <v-expand-transition>
-                <div v-if="tradeForm.action === 'BUY' && canUseAdvancedActions && selectedPortfolio.leverage_setting !== 1" class="mb-4">
-                  <v-alert type="info" variant="tonal" icon="mdi-finance" class="text-caption">
-                    <div class="d-flex justify-space-between flex-wrap ga-2">
-                      <span><strong>Cash:</strong> ${{ Number(selectedPortfolio?.cash_balance || 0).toFixed(2) }}</span>
-                      <span><strong>Leverage:</strong> {{ selectedPortfolio?.leverage_setting || 1 }}x</span>
-                      <span><strong>Buying Power:</strong> ${{ buyPowerDisplay.toFixed(0) }}</span>
-                      <span><strong>Borrow Limit:</strong> ${{ Number(maxBorrowLimit || 0).toFixed(0) }}</span>
-                      <span><strong>Post-Order Headroom:</strong> ${{ buyHeadroomDisplay.toFixed(0) }}</span>
-                    </div>
-                    <div class="mt-2">
-                      <strong>Live Margin Health:</strong>
-                      <span :class="healthStatusColor"> {{ (liveMarginRatio * 100).toFixed(1) }}% </span>
-                    </div>
-                    <v-progress-linear
-                      :model-value="liveMarginRatio * 100"
-                      :color="healthBarColor"
-                      height="8"
-                      rounded
-                      class="mt-1"
-                    />
-                  </v-alert>
+            <v-row no-gutters class="flex-grow-1 dialog-content-row">
+              
+              <v-col cols="12" lg="5" class="bg-white pa-4 pa-lg-6 dialog-col-left border-e">
+                <div class="d-flex justify-between align-center mb-2">
+                  <h2 class="text-h6 font-weight-bold text-slate-800">Order Entry</h2>
+                  <v-btn variant="text" color="secondary" size="small" class="font-weight-bold" @click="clearOrderFields">
+                    Clear Fields
+                  </v-btn>
+                  <v-btn variant="tonal" color="primary" size="small" class="font-weight-bold ml-2" @click="isRulesDialogOpen = true">
+                    Rules
+                  </v-btn>
                 </div>
-              </v-expand-transition>
 
-              <!-- NEW: Advanced controls for SHORT -->
-              <v-expand-transition>
-                <div v-if="tradeForm.action === 'SHORT' && !selectedPortfolio.leverage_setting === 1">
+                <p class="text-caption text-slate-500 mb-6">
+                  Fees: <strong>$10.00 per transaction</strong> | Frequency Cap: <strong>2 trades/min</strong>, <strong>30 trades/day</strong>.
+                </p>
+
+                <v-tabs v-model="tradeForm.action" color="primary" class="mb-4 border-b" grow density="compact">
+                  <v-tab value="BUY">📈 BUY</v-tab>
+                  <v-tab value="SELL">📉 SELL</v-tab>
+                  <v-tab v-if="canUseAdvancedActions" value="SHORT">🐻 SHORT SELL</v-tab>
+                  <v-tab v-if="canUseAdvancedActions" value="COVER">🛡️ BUY TO COVER</v-tab>
+                </v-tabs>
+
+                <v-alert
+                  v-if="isTradingLocked"
+                  type="warning"
+                  variant="tonal"
+                  class="mb-4"
+                  icon="mdi-lock"
+                >
+                  Trading is locked for this portfolio.
+                  <span v-if="portfolioMeta.cutoffTime">
+                    Cutoff was {{ new Date(portfolioMeta.cutoffTime).toLocaleString() }}.
+                  </span>
+                </v-alert>
+
+                <v-form ref="tradeFormRef" @submit.prevent="submitOrder">
                   <v-row class="mb-2">
-                    <v-col cols="12" md="6">
-                      <div class="d-flex align-center text-caption text-slate-600 mb-2 font-weight-bold">
-                        Desired Leverage (x)
-                        <v-tooltip location="top" max-width="340">
-                          <template #activator="{ props }">
-                            <v-icon v-bind="props" size="16" class="ml-1">mdi-help-circle-outline</v-icon>
+                    <v-col cols="8">
+                      <div class="text-caption text-slate-600 mb-1 font-weight-bold">Search Asset</div>
+
+                      <div v-show="['SELL','COVER'].includes(tradeForm.action)">
+                        <v-select
+                          v-model="tradeForm.ticker"
+                          :items="tradeForm.action === 'SELL' ? longPositions : shortPositions"
+                          item-title="ticker"
+                          item-value="ticker"
+                          :placeholder="tradeForm.action === 'SELL' ? 'Select a LONG position' : 'Select a SHORT position to cover'"
+                          variant="outlined"
+                          density="comfortable"
+                          hide-details
+                          @update:model-value="clearQuantityField"
+                        >
+                          <template #item="{ props, item }">
+                            <v-list-item
+                              v-bind="props"
+                              :title="item.raw.ticker"
+                              :subtitle="tradeForm.action === 'SELL'
+                                ? `LONG | Qty: ${parseFloat(item.raw.quantity).toFixed(4)} | Entry: $${parseFloat(item.raw.average_buy_price).toFixed(2)}`
+                                : `SHORT | Qty: ${parseFloat(item.raw.quantity).toFixed(4)} | Avg Short: $${parseFloat(item.raw.average_buy_price).toFixed(2)}`"
+                            />
                           </template>
-                          <span>
-                            Leverage is like a magic booster. With 3x leverage, your $1 acts like $3 when you make a trade.
-                          </span>
-                        </v-tooltip>
+                        </v-select>
                       </div>
 
-                      <v-slider
-                        v-model="tradeForm.requestedLeverage"
-                        :min="1"
-                        :max="selectedPortfolio?.leverage_setting || 1"
-                        step="1"
-                        thumb-label="always"
-                        color="primary"
-                        hide-details
-                      />
+                      <div v-show="!['SELL','COVER'].includes(tradeForm.action)">
+                        <TickerSearchBar ref="watchlistSearchRef" @selected="handleTerminalAssetSelection" />
+                      </div>
 
-                      <div class="text-caption text-slate-500 mt-1">
-                        Portfolio max: {{ selectedPortfolio?.leverage_setting || 1 }}x
+                      <div v-if="tradeForm.ticker" class="text-caption text-primary mt-1 font-weight-bold">
+                        Active Target: {{ tradeForm.ticker }}
                       </div>
                     </v-col>
 
-                    <v-col cols="12" md="6">
+                    <v-col cols="4">
                       <div class="d-flex align-center text-caption text-slate-600 mb-1 font-weight-bold">
-                        Stop-Loss Price (Optional)
-                        <v-tooltip location="top" max-width="360">
+                        Execution Class
+                        <v-tooltip location="top" max-width="320">
                           <template #activator="{ props }">
                             <v-icon v-bind="props" size="16" class="ml-1">mdi-help-circle-outline</v-icon>
                           </template>
                           <span>
-                            For SHORT positions, stop-loss is a safety threshold above entry.
-                            If market price rises to this level, risk controls can force close to limit losses.
+                            MARKET executes immediately at live price. LIMIT waits until your target price is reached.
                           </span>
                         </v-tooltip>
                       </div>
-
-                      <v-text-field
-                        v-model.number="tradeForm.stopLossPrice"
-                        type="number"
-                        step="0.01"
-                        min="0.01"
+                      <v-select
+                        v-model="tradeForm.orderType"
+                        :items="['MARKET', 'LIMIT']"
                         variant="outlined"
                         density="comfortable"
-                        placeholder="e.g. 145.00"
-                        :rules="[
-                          v => v === null || v === '' || Number(v) > 0 || 'Stop-loss must be positive.'
-                        ]"
+                        hide-details
+                        max-width="150"
                       />
                     </v-col>
                   </v-row>
-                </div>
-              </v-expand-transition>
 
-              <!-- NEW: explanatory hint for COVER -->
-              <v-expand-transition>
-                <div v-if="tradeForm.action === 'COVER'" class="mb-3">
-                  <v-alert type="info" variant="tonal" density="comfortable" icon="mdi-shield-check-outline">
-                    BUY TO COVER reduces or closes an existing short position.
-                  </v-alert>
-                </div>
-              </v-expand-transition>
+                  <v-row class="mb-2">
+                    <v-col cols="6">
+                      <v-text-field
+                        v-model.number="tradeForm.quantity"
+                        :label="quantityLabel"
+                        type="number"
+                        step="any"
+                        min="0.000001"
+                        variant="outlined"
+                        density="comfortable"
+                        :hint="tradeForm.action === 'SELL'
+                          ? `Max available: ${maxAllowedQuantity.toFixed(4)}`
+                          : tradeForm.action === 'COVER'
+                            ? `Max short available to cover: ${maxAllowedQuantity.toFixed(4)}`
+                            : ''"
+                        persistent-hint
+                        :rules="[
+                          v => !!v && v > 0 || 'Quantity must be positive.',
+                          v => !['SELL','COVER'].includes(tradeForm.action) || v <= maxAllowedQuantity || (
+                            tradeForm.action === 'SELL'
+                              ? 'Exceeds maximum shares owned.'
+                              : 'Exceeds maximum short quantity available to cover.'
+                          )
+                        ]"
+                      />
+                    </v-col>
 
-              <v-expand-transition>
-                <div
-                  v-if="tradeForm.ticker && !marketPrices.some(p => p.ticker.toUpperCase() === tradeForm.ticker.toUpperCase())"
-                  class="mb-4"
-                >
-                  <v-alert type="amber" variant="tonal" density="compact" icon="mdi-cloud-search-outline" class="text-caption">
-                    ✨ <strong>Uncached Asset:</strong> Price will be verified from live market feeds when you press Submit.
-                  </v-alert>
-                </div>
-              </v-expand-transition>
-
-              <v-card variant="flat" color="grey-lighten-4" class="pa-4 mb-4 border">
-                <h3 class="text-caption font-weight-bold text-slate-600 mb-2 uppercase tracking-wider">
-                  {{ tradeForm.action === 'SELL' ? 'Fees' : 'Cost Summary' }}
-                </h3>
-
-                <div class="d-flex justify-space-between text-subtitle-2 mb-1">
-                  <span>Recovered Principal:</span>
-                  <span class="font-weight-bold">${{ (computedGrossPrincipal || 0).toFixed(2) }}</span>
-                </div>
-
-                <div class="d-flex justify-space-between text-subtitle-2 mb-1">
-                  <span>Processing Fee:</span>
-                  <span :class="tradeForm.action === 'SELL' ? 'text-rose-600 font-weight-bold' : 'text-amber-700 font-weight-bold'">
-                    {{ tradeForm.action === 'SELL' ? '-' : '+' }}$10.00
-                  </span>
-                </div>
-
-                <v-divider class="my-2" />
-
-                <div class="d-flex justify-space-between text-subtitle-1 mb-2">
-                  <span class="font-weight-bold text-slate-700">
-                    {{ tradeForm.action === 'SELL' ? 'Net Cash Recovered:' : 'Total Order Impact:' }}
-                  </span>
-                  <span :class="tradeForm.action === 'SELL' ? 'text-emerald-600 font-weight-black' : 'text-primary font-weight-black'">
-                    {{ tradeForm.action === 'SELL' ? '+' : '' }}${{ (computedTotalImpact || 0).toFixed(2) }}
-                  </span>
-                </div>
-
-                <v-expand-transition>
-                  <div v-if="tradeForm.action === 'SELL' && computedTotalImpact > 0" class="mt-2 pt-2 border-t border-slate-300">
-                    <v-alert type="success" variant="tonal" density="compact" icon="mdi-cash-plus" class="text-caption pa-2 ma-0">
-                      On execution, the fee will be subtracted from your asset sale value. <strong>${{ computedTotalImpact.toFixed(2) }}</strong> will be added back into your capital balance.
-                    </v-alert>
-                  </div>
-                </v-expand-transition>
-
-                <v-expand-transition>
-                  <div v-if="marginLoanRequired > 0" class="mt-2 pt-2 border-t border-dashed border-slate-300">
-                    <div class="d-flex justify-space-between text-caption text-rose-600 font-weight-bold mb-1">
-                      <span>⚠️ Requires Margin Financing:</span>
-                      <span>+${{ marginLoanRequired.toFixed(2) }}</span>
+                    <v-col cols="6">
+                      <div class="d-flex align-center">
+                        <v-text-field
+                          v-model.number="tradeForm.targetPrice"
+                          :label="targetPriceLabel"
+                          type="number"
+                          step="0.01"
+                          variant="outlined"
+                          density="comfortable"
+                          :disabled="tradeForm.orderType === 'MARKET'"
+                          :rules="tradeForm.orderType === 'LIMIT' ? [v => !!v && v > 0 || 'Limit price is required.'] : []"
+                        />
+                        <v-tooltip v-if="tradeForm.orderType === 'LIMIT'" location="top" max-width="320">
+                          <template #activator="{ props }">
+                            <v-icon v-bind="props" size="16" class="ml-2 mt-n4">mdi-help-circle-outline</v-icon>
+                          </template>
+                          <span>
+                            LIMIT target price controls when the order can execute.
+                          </span>
+                        </v-tooltip>
+                      </div>
+                    </v-col>
+                  </v-row>
+                  <v-expand-transition>
+                    <div v-if="tradeForm.action === 'BUY' && canUseAdvancedActions && selectedPortfolio.leverage_setting !== 1" class="mb-4">
+                      <v-alert type="info" variant="tonal" icon="mdi-finance" class="text-caption">
+                        <div class="d-flex justify-space-between flex-wrap ga-2">
+                          <span><strong>Cash:</strong> ${{ Number(selectedPortfolio?.cash_balance || 0).toFixed(2) }}</span>
+                          <span><strong>Leverage:</strong> {{ selectedPortfolio?.leverage_setting || 1 }}x</span>
+                          <span><strong>Buying Power:</strong> ${{ buyPowerDisplay.toFixed(0) }}</span>
+                          <span><strong>Borrow Limit:</strong> ${{ Number(maxBorrowLimit || 0).toFixed(0) }}</span>
+                          <span><strong>Post-Order Headroom:</strong> ${{ buyHeadroomDisplay.toFixed(0) }}</span>
+                        </div>
+                        <div class="mt-2">
+                          <strong>Live Margin Health:</strong>
+                          <span :class="healthStatusColor"> {{ (liveMarginRatio * 100).toFixed(1) }}% </span>
+                        </div>
+                        <v-progress-linear
+                          :model-value="liveMarginRatio * 100"
+                          :color="healthBarColor"
+                          height="8"
+                          rounded
+                          class="mt-1"
+                        />
+                      </v-alert>
                     </div>
-                    <div class="text-caption text-slate-500 line-height-1">
-                      This order exceeds your liquid cash. The balance will be handled via broker debt using your portfolio's
-                      <strong>{{ selectedPortfolio?.leverage_setting }}x leverage tier</strong>.
-                    </div>
-                  </div>
-                </v-expand-transition>
-              </v-card>
+                  </v-expand-transition>
 
-              <v-btn
-                type="submit"
-                :disabled="isTradingLocked"
-                :color="tradeForm.action === 'SELL' ? 'emerald' : 'primary'"
-                block
-                size="large"
-                class="font-weight-bold"
-                :loading="isTradeProcessing"
-              >
-                {{ isTradingLocked ? 'Trading Locked' : (tradeForm.action === 'SELL' ? 'Liquidate Asset' : 'Submit Order') }}
-              </v-btn>
-            </v-form>
+                  <!-- NEW: Advanced controls for SHORT -->
+                  <v-expand-transition>
+                    <div v-if="tradeForm.action === 'SHORT' && !selectedPortfolio.leverage_setting === 1">
+                      <v-row class="mb-2">
+                        <v-col cols="12" md="6">
+                          <div class="d-flex align-center text-caption text-slate-600 mb-2 font-weight-bold">
+                            Desired Leverage (x)
+                            <v-tooltip location="top" max-width="340">
+                              <template #activator="{ props }">
+                                <v-icon v-bind="props" size="16" class="ml-1">mdi-help-circle-outline</v-icon>
+                              </template>
+                              <span>
+                                Leverage is like a magic booster. With 3x leverage, your $1 acts like $3 when you make a trade.
+                              </span>
+                            </v-tooltip>
+                          </div>
+
+                          <v-slider
+                            v-model="tradeForm.requestedLeverage"
+                            :min="1"
+                            :max="selectedPortfolio?.leverage_setting || 1"
+                            step="1"
+                            thumb-label="always"
+                            color="primary"
+                            hide-details
+                          />
+
+                          <div class="text-caption text-slate-500 mt-1">
+                            Portfolio max: {{ selectedPortfolio?.leverage_setting || 1 }}x
+                          </div>
+                        </v-col>
+
+                        <v-col cols="12" md="6">
+                          <div class="d-flex align-center text-caption text-slate-600 mb-1 font-weight-bold">
+                            Stop-Loss Price (Optional)
+                            <v-tooltip location="top" max-width="360">
+                              <template #activator="{ props }">
+                                <v-icon v-bind="props" size="16" class="ml-1">mdi-help-circle-outline</v-icon>
+                              </template>
+                              <span>
+                                For SHORT positions, stop-loss is a safety threshold above entry.
+                                If market price rises to this level, risk controls can force close to limit losses.
+                              </span>
+                            </v-tooltip>
+                          </div>
+
+                          <v-text-field
+                            v-model.number="tradeForm.stopLossPrice"
+                            type="number"
+                            step="0.01"
+                            min="0.01"
+                            variant="outlined"
+                            density="comfortable"
+                            placeholder="e.g. 145.00"
+                            :rules="[
+                              v => v === null || v === '' || Number(v) > 0 || 'Stop-loss must be positive.'
+                            ]"
+                          />
+                        </v-col>
+                      </v-row>
+                    </div>
+                  </v-expand-transition>
+
+                  <!-- NEW: explanatory hint for COVER -->
+                  <v-expand-transition>
+                    <div v-if="tradeForm.action === 'COVER'" class="mb-3">
+                      <v-alert type="info" variant="tonal" density="comfortable" icon="mdi-shield-check-outline">
+                        BUY TO COVER reduces or closes an existing short position.
+                      </v-alert>
+                    </div>
+                  </v-expand-transition>
+
+                  <v-expand-transition>
+                    <div
+                      v-if="tradeForm.ticker && !marketPrices.some(p => p.ticker.toUpperCase() === tradeForm.ticker.toUpperCase())"
+                      class="mb-4"
+                    >
+                      <v-alert type="amber" variant="tonal" density="compact" icon="mdi-cloud-search-outline" class="text-caption">
+                        ✨ <strong>Uncached Asset:</strong> Price will be verified from live market feeds when you press Submit.
+                      </v-alert>
+                    </div>
+                  </v-expand-transition>
+
+                  <v-card variant="flat" color="grey-lighten-4" class="pa-4 mb-4 border">
+                    <h3 class="text-caption font-weight-bold text-slate-600 mb-2 uppercase tracking-wider">
+                      {{ tradeForm.action === 'SELL' ? 'Fees' : 'Cost Summary' }}
+                    </h3>
+
+                    <div class="d-flex justify-space-between text-subtitle-2 mb-1">
+                      <span>Recovered Principal:</span>
+                      <span class="font-weight-bold">${{ (computedGrossPrincipal || 0).toFixed(2) }}</span>
+                    </div>
+
+                    <div class="d-flex justify-space-between text-subtitle-2 mb-1">
+                      <span>Processing Fee:</span>
+                      <span :class="tradeForm.action === 'SELL' ? 'text-rose-600 font-weight-bold' : 'text-amber-700 font-weight-bold'">
+                        {{ tradeForm.action === 'SELL' ? '-' : '+' }}$10.00
+                      </span>
+                    </div>
+
+                    <v-divider class="my-2" />
+
+                    <div class="d-flex justify-space-between text-subtitle-1 mb-2">
+                      <span class="font-weight-bold text-slate-700">
+                        {{ tradeForm.action === 'SELL' ? 'Net Cash Recovered:' : 'Total Order Impact:' }}
+                      </span>
+                      <span :class="tradeForm.action === 'SELL' ? 'text-emerald-600 font-weight-black' : 'text-primary font-weight-black'">
+                        {{ tradeForm.action === 'SELL' ? '+' : '' }}${{ (computedTotalImpact || 0).toFixed(2) }}
+                      </span>
+                    </div>
+
+                    <v-expand-transition>
+                      <div v-if="tradeForm.action === 'SELL' && computedTotalImpact > 0" class="mt-2 pt-2 border-t border-slate-300">
+                        <v-alert type="success" variant="tonal" density="compact" icon="mdi-cash-plus" class="text-caption pa-2 ma-0">
+                          On execution, the fee will be subtracted from your asset sale value. <strong>${{ computedTotalImpact.toFixed(2) }}</strong> will be added back into your capital balance.
+                        </v-alert>
+                      </div>
+                    </v-expand-transition>
+
+                    <v-expand-transition>
+                      <div v-if="marginLoanRequired > 0" class="mt-2 pt-2 border-t border-dashed border-slate-300">
+                        <div class="d-flex justify-space-between text-caption text-rose-600 font-weight-bold mb-1">
+                          <span>⚠️ Requires Margin Financing:</span>
+                          <span>+${{ marginLoanRequired.toFixed(2) }}</span>
+                        </div>
+                        <div class="text-caption text-slate-500 line-height-1">
+                          This order exceeds your liquid cash. The balance will be handled via broker debt using your portfolio's
+                          <strong>{{ selectedPortfolio?.leverage_setting }}x leverage tier</strong>.
+                        </div>
+                      </div>
+                    </v-expand-transition>
+                  </v-card>
+
+                  <v-btn
+                    type="submit"
+                    :disabled="isTradingLocked"
+                    :color="tradeForm.action === 'SELL' ? 'emerald' : 'primary'"
+                    block
+                    size="large"
+                    class="font-weight-bold"
+                    :loading="isTradeProcessing"
+                  >
+                    {{ isTradingLocked ? 'Trading Locked' : (tradeForm.action === 'SELL' ? 'Liquidate Asset' : 'Submit Order') }}
+                  </v-btn>
+                </v-form>
+              </v-col>
+
+              <v-col cols="12" lg="7" class="pa-4 pa-lg-6 dialog-col-right">
+      <v-card variant="outlined" class="bg-white mb-4 rounded-lg pa-3">
+        <div class="d-flex justify-space-between align-center mb-2">
+          <h3 class="text-subtitle-2 font-weight-bold text-slate-700">📊 Portfolio Visualizations</h3>
+          <v-chip size="x-small" color="indigo" variant="flat">Learning Mode</v-chip>
+        </div>
+
+        <v-row>
+          <v-col cols="12" md="6">
+            <div class="text-caption font-weight-bold mb-1">Asset Allocation</div>
+            <div style="height:180px;"><canvas ref="allocationChartRef"></canvas></div>
           </v-col>
+          <v-col cols="12" md="6">
+            <div class="text-caption font-weight-bold mb-1">Cash vs Invested</div>
+            <div style="height:180px;"><canvas ref="cashVsAssetsChartRef"></canvas></div>
+          </v-col>
+        </v-row>
 
-          <v-col cols="12" lg="7" class="pa-4 pa-lg-6 dialog-col-right">
-  <v-card variant="outlined" class="bg-white mb-4 rounded-lg pa-3">
-    <div class="d-flex justify-space-between align-center mb-2">
-      <h3 class="text-subtitle-2 font-weight-bold text-slate-700">📊 Portfolio Visualizations</h3>
-      <v-chip size="x-small" color="indigo" variant="flat">Learning Mode</v-chip>
-    </div>
-
-    <v-row>
-      <v-col cols="12" md="6">
-        <div class="text-caption font-weight-bold mb-1">Asset Allocation</div>
-        <div style="height:180px;"><canvas ref="allocationChartRef"></canvas></div>
-      </v-col>
-      <v-col cols="12" md="6">
-        <div class="text-caption font-weight-bold mb-1">Cash vs Invested</div>
-        <div style="height:180px;"><canvas ref="cashVsAssetsChartRef"></canvas></div>
-      </v-col>
-    </v-row>
-
-    <v-row>
-      <v-col cols="12">
-        <div class="text-caption font-weight-bold mb-1">Asset Contribution (Estimated)</div>
-        <div style="height:220px;"><canvas ref="contribChartRef"></canvas></div>
-      </v-col>
-    </v-row>
-  </v-card>
-
-  <!-- PERFORMANCE CARD -->
-  <v-card
-    variant="flat"
-    class="mb-4 pa-4 text-white rounded-lg"
-    :style="{ background: performanceCardBg }"
-  >
-    <v-row no-gutters align="center">
-      <v-col cols="8">
-        <div class="text-overline font-weight-bold opacity-80 tracking-wide">Portfolio Performance</div>
-        <div class="text-h4 font-weight-black">
-          {{ formatSignedPct(rowPnlPct(selectedPortfolio)) }}
-        </div>
-        <div class="text-caption opacity-90 mt-1">
-          Since initialization
-        </div>
-      </v-col>
-
-      <v-col cols="4" class="text-right">
-        <v-chip
-          :color="rowPnl(selectedPortfolio) >= 0 ? 'emerald-lighten-4' : 'red-lighten-4'"
-          variant="tonal"
-          size="small"
-          class="font-weight-bold"
-        >
-          {{ rowPnl(selectedPortfolio) >= 0 ? '📈 Gain' : '📉 Loss' }}
-        </v-chip>
-        <div class="text-caption mt-1">
-          {{ formatSignedMoney(rowPnl(selectedPortfolio)) }}
-        </div>
-      </v-col>
-    </v-row>
-  </v-card>
-
-  <!-- BASIC MODE CARD -->
-  <v-card
-    v-if="!canUseAdvancedActions"
-    variant="flat"
-    color="teal-darken-4"
-    dark
-    class="mb-6 pa-4 text-white rounded-lg"
-  >
-    <v-row no-gutters align="center">
-      <v-col cols="7">
-        <div class="text-overline font-weight-bold opacity-70 tracking-wide">Available Cash Capital</div>
-        <div class="text-h4 font-weight-black text-emerald-accent-2">
-          ${{ Number(selectedPortfolio?.cash_balance || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
-        </div>
-      </v-col>
-      <v-col cols="5" class="text-right">
-        <v-chip color="emerald-lighten-4" variant="tonal" size="small" class="font-weight-bold text-uppercase">
-          🟢 Cash Account
-        </v-chip>
-        <div class="text-caption text-teal-lighten-3 mt-1 font-italic" style="font-size: 0.7rem;">
-          Leverage & Shorting Disabled
-        </div>
-      </v-col>
-    </v-row>
-
-    <v-divider class="my-3 border-opacity-30" color="white"></v-divider>
-    <div class="text-caption d-flex justify-space-between">
-      <span>Net Equity</span>
-      <strong>${{ Number(selectedPortfolio?.net_equity || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}</strong>
-    </div>
-  </v-card>
-
-  <!-- ADVANCED MODE CARD -->
-  <v-card
-    v-else
-    variant="flat"
-    color="slate-900"
-    dark
-    class="mb-6 pa-4 text-white rounded-lg"
-    style="background: #0f172a;"
-  >
-    <v-row no-gutters>
-      <v-col cols="6">
-        <div class="text-overline font-weight-bold opacity-70 tracking-wide">Liquid Cash</div>
-        <div class="text-h4 font-weight-black text-emerald-accent-3">
-          ${{ Number(selectedPortfolio?.cash_balance || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
-        </div>
-      </v-col>
-      <v-col cols="6" class="text-right">
-        <div class="text-overline font-weight-bold opacity-70 tracking-wide">Total Buying Power</div>
-        <div class="text-h5 font-weight-bold text-blue-lighten-3">
-          ${{ Number(maxPurchasingPower || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
-        </div>
-      </v-col>
-    </v-row>
-
-    <v-divider class="my-3 border-opacity-30" color="white"></v-divider>
-
-    <v-row no-gutters class="text-caption mb-3">
-      <v-col cols="6">
-        <span>Active Margin Debt:</span>
-        <span class="font-weight-black ml-1 text-orange-lighten-3">
-          ${{ Number(selectedPortfolio?.borrowed_funds_balance || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
-        </span>
-      </v-col>
-      <v-col cols="6" class="text-right">
-        <span>Gross Exposure:</span>
-        <span class="font-weight-bold ml-1">
-          ${{ Number(selectedPortfolio?.total_exposure || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
-        </span>
-      </v-col>
-    </v-row>
-
-    <v-row no-gutters class="text-caption mb-3">
-      <v-col cols="12" class="text-right">
-        <span>Net Equity:</span>
-        <span class="font-weight-bold ml-1">
-          ${{ Number(selectedPortfolio?.net_equity || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
-        </span>
-      </v-col>
-    </v-row>
-
-    <div class="mb-1 d-flex justify-space-between text-caption font-weight-bold">
-      <span class="d-flex align-center gap-1">⚠️ Account Health Capacity</span>
-      <span :class="healthStatusColor">{{ (liveMarginRatio * 100).toFixed(1) }}% Ratio</span>
-    </div>
-
-    <v-progress-linear
-      :model-value="liveMarginRatio * 100"
-      :color="healthBarColor"
-      height="8"
-      rounded
-      striped
-      :max="100"
-    ></v-progress-linear>
-
-    <div class="d-flex justify-space-between text-slate-400 mt-1" style="font-size: 0.65rem;">
-      <span class="text-rose-400 font-weight-bold">10% Forced Liquidation Drop Limit</span>
-      <span>100% Fully Collateralized</span>
-    </div>
-  </v-card>
-
-  <h3 class="text-subtitle-2 font-weight-bold text-slate-700 mb-2">📦 Open Positions</h3>
-  <div v-if="selectedPortfolio?.assets?.length">
-    <v-card
-      v-for="holding in selectedPortfolio.assets"
-      :key="`${holding.ticker}-${holding.position_type}`"
-      class="pa-4 mb-3 rounded-lg border"
-      variant="flat"
-    >
-      <div class="d-flex justify-space-between align-center">
-        <div>
-          <div class="font-weight-black">{{ holding.ticker }}</div>
-          <div class="text-caption text-slate-500">
-            {{ holding.position_type }} · Qty {{ Number(holding.quantity).toFixed(4) }}
-          </div>
-        </div>
-        <v-chip size="x-small" :color="holding.position_type === 'SHORT' ? 'deep-orange' : 'indigo'" variant="flat">
-          {{ holding.position_type }}
-        </v-chip>
-      </div>
-
-      <v-row class="mt-2">
-        <v-col cols="6" class="py-1 text-caption">
-          Avg Entry: <strong>${{ Number(holding.average_buy_price).toFixed(2) }}</strong>
-        </v-col>
-        <v-col cols="6" class="py-1 text-caption text-right">
-          Live: <strong>${{ Number(getAssetLivePrice(holding.ticker) || holding.average_buy_price || 0).toFixed(2) }}</strong>
-        </v-col>
-        <v-col cols="6" class="py-1 text-caption">
-          Mkt Value: <strong>${{ Number(getHoldingMarketValue(holding)).toFixed(2) }}</strong>
-        </v-col>
-        <v-col cols="6" class="py-1 text-caption text-right">
-          P&L:
-          <strong :class="getHoldingPnL(holding) >= 0 ? 'text-emerald-600' : 'text-rose-600'">
-            {{ getHoldingPnL(holding) >= 0 ? '+' : '' }}${{ Number(getHoldingPnL(holding)).toFixed(2) }}
-            ({{ getHoldingPnLPct(holding) >= 0 ? '+' : '' }}{{ Number(getHoldingPnLPct(holding)).toFixed(2) }}%)
-          </strong>
-        </v-col>
-      </v-row>
-
-      <div class="text-caption mt-2">
-        48h:
-        <strong :class="Number(trendByTicker[holding.ticker]?.performance_pct_48h || 0) >= 0 ? 'text-emerald-600' : 'text-rose-600'">
-          {{ trendByTicker[holding.ticker]?.performance_pct_48h ?? 'N/A' }}<span v-if="trendByTicker[holding.ticker]?.performance_pct_48h">%</span>
-        </strong>
-      </div>
-    </v-card>
-  </div>
-
-  <div class="d-flex justify-space-between align-center mb-2 mt-4">
-    <h3 class="text-subtitle-2 font-weight-bold text-slate-700">⏳ Pending or Limit Orders</h3>
-    <v-chip size="x-small" color="amber-darken-3" variant="flat" class="font-weight-bold">
-      {{ selectedPortfolio?.open_orders?.length || 0 }} Orders Pending
-    </v-chip>
-  </div>
-
-  <v-card variant="outlined" class="bg-white mb-6 rounded-lg">
-    <v-table density="comfortable" class="text-caption">
-      <thead>
-        <tr class="bg-grey-lighten-4">
-          <th class="font-weight-bold text-left">Ticker</th>
-          <th class="font-weight-bold text-left">Class</th>
-          <th class="font-weight-bold text-center">Units</th>
-          <th class="font-weight-bold text-center">Target Price</th>
-          <th class="font-weight-bold text-right">Live Price</th>
-          <th class="font-weight-bold text-center">Cancel</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="order in selectedPortfolio?.open_orders" :key="order.id" class="align-center">
-          <td class="font-weight-black text-slate-800">{{ order.ticker }}</td>
-          <td>
-            <v-chip size="x-small" :color="['BUY', 'COVER'].includes(order.transaction_type) ? 'emerald' : 'rose'" variant="flat">
-              {{ order.order_type }} {{ order.transaction_type }}
-            </v-chip>
-          </td>
-          <td class="text-center">{{ Number(order.quantity).toFixed(4) }}</td>
-          <td class="text-center font-weight-bold text-amber-800" v-if="order.target_price !== null">${{ Number(order.target_price).toFixed(2) }}</td>
-          <td class="text-center font-weight-bold text-amber-800" v-else>—</td>
-          <td class="text-right font-weight-bold">${{ getLivePrice(order.ticker) }}</td>
-          <td class="text-center">
-            <v-btn
-              variant="text"
-              color="rose-darken-2"
-              icon="mdi-close-circle-outline"
-              density="compact"
-              class="font-weight-black"
-              style="font-size: 1.15rem; line-height: 1;"
-              @click="killWorkingOrder(order.id)"
-            >
-              ×
-            </v-btn>
-          </td>
-        </tr>
-        <tr v-if="!selectedPortfolio?.open_orders?.length">
-          <td colspan="6" class="text-center text-slate-400 py-4 font-italic">
-            No limit orders in your portfolio.
-          </td>
-        </tr>
-      </tbody>
-    </v-table>
-  </v-card>
-
-            <h3 class="text-subtitle-2 font-weight-bold text-slate-700 mb-2">📜 Transaction History</h3>
-            <v-card variant="outlined" class="bg-white">
-              <v-table density="compact" class="text-caption">
-                <thead>
-                  <tr class="bg-grey-lighten-4">
-                    <th class="font-weight-bold">Execution Date</th>
-                    <th class="font-weight-bold">Asset</th>
-                    <th class="font-weight-bold">Action</th>
-                    <th class="font-weight-bold">Units</th>
-                    <th class="font-weight-bold text-right">Unit Price</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr v-for="tx in selectedPortfolio?.transactions" :key="tx.id">
-                    <td class="text-slate-400" style="font-size: 0.68rem;">{{ new Date(tx.timestamp).toLocaleString() }}</td>
-                    <td class="font-weight-bold">{{ tx.ticker }}</td>
-                    <td>
-                      <v-chip size="x-small" :color="['BUY', 'COVER'].includes(tx.transaction_type) ? 'emerald' : 'rose'" variant="flat">
-                        {{ tx.transaction_type }}
-                      </v-chip>
-                    </td>
-                    <td>{{ parseFloat(tx.quantity).toFixed(2) }}</td>
-                    <td class="text-right font-weight-bold">${{ parseFloat(tx.price_per_unit).toFixed(2) }}</td>
-                  </tr>
-                  <tr v-if="!selectedPortfolio?.transactions?.length">
-                    <td colspan="5" class="text-center text-slate-400 py-4">No recent trade operations completed.</td>
-                  </tr>
-                </tbody>
-              </v-table>
-            </v-card>
+        <v-row>
+          <v-col cols="12">
+            <div class="text-caption font-weight-bold mb-1">Portfolio Performance</div>
+            <div style="height:220px;"><canvas ref="contribChartRef"></canvas></div>
           </v-col>
         </v-row>
       </v-card>
-  </v-dialog>
 
-    <div v-if="errorModal.active" class="dialog-overlay alert-z" @click.self="errorModal.active = false">
-      <div class="dialog-box alert-box">
-        <div class="dialog-header alert-red">
-          <h2>⚠️ System Exception</h2>
-          <button class="close-x" @click="errorModal.active = false">&times;</button>
+      <!-- PERFORMANCE CARD -->
+      <v-card
+        variant="flat"
+        class="mb-4 pa-4 text-white rounded-lg"
+        :style="{ background: performanceCardBg }"
+      >
+        <v-row no-gutters align="center">
+          <v-col cols="6">
+            <div class="text-overline font-weight-bold opacity-80 tracking-wide">Portfolio Performance</div>
+            <div class="text-h4 font-weight-black">
+              {{ formatSignedPct(rowPnlPct(selectedPortfolio)) }}
+            </div>
+            <div class="text-caption opacity-90 mt-1">
+              Since initialization
+            </div>
+          </v-col>
+
+          <v-col cols="6" class="text-right">
+            <v-chip
+              :color="rowPnl(selectedPortfolio) >= 0 ? 'emerald-lighten-4' : 'red-lighten-4'"
+              variant="tonal"
+              size="big"
+              class="font-weight-bold py-1 px-4 mb-2"
+            >
+              {{ rowPnl(selectedPortfolio) >= 0 ? '📈 Gain' : '📉 Loss' }}
+            </v-chip>
+            <div class="text-body-1 font-weight-bold mt-1">
+              {{ formatSignedMoney(rowPnl(selectedPortfolio)) }}
+            </div>
+          </v-col>
+        </v-row>
+      </v-card>
+
+      <!-- BASIC MODE CARD -->
+      <v-card
+        v-if="!canUseAdvancedActions"
+        variant="flat"
+        color="teal-darken-4"
+        dark
+        class="mb-6 pa-4 text-white rounded-lg"
+      >
+        <v-row no-gutters align="center">
+          <v-col cols="7">
+            <div class="text-overline font-weight-bold opacity-70 tracking-wide">Available Cash Capital</div>
+            <div class="text-h4 font-weight-black text-emerald-accent-2">
+              ${{ Number(selectedPortfolio?.cash_balance || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
+            </div>
+          </v-col>
+          <v-col cols="5" class="text-right">
+            <v-chip color="emerald-lighten-4" variant="tonal" size="small" class="font-weight-bold text-uppercase">
+              🟢 Cash Account
+            </v-chip>
+            <div class="text-caption text-teal-lighten-3 mt-1 font-italic" style="font-size: 0.7rem;">
+              Leverage & Shorting Disabled
+            </div>
+          </v-col>
+        </v-row>
+
+        <v-divider class="my-3 border-opacity-30" color="white"></v-divider>
+        <div class="text-overline d-flex justify-space-between">
+          <span>Net Equity</span>
+          <strong class="text-h6">${{ Number(selectedPortfolio?.net_equity || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}</strong>
         </div>
-        <div class="dialog-body">
-          <p class="error-modal-msg">{{ errorModal.message }}</p>
-          <button class="btn btn-danger full-width" @click="errorModal.active = false">Accept</button>
+      </v-card>
+
+      <!-- ADVANCED MODE CARD -->
+      <v-card
+        v-else
+        variant="flat"
+        color="slate-900"
+        dark
+        class="mb-6 pa-4 text-white rounded-lg"
+        style="background: #0f172a;"
+      >
+        <v-row no-gutters>
+          <v-col cols="6">
+            <div class="text-overline font-weight-bold opacity-70 tracking-wide">Liquid Cash</div>
+            <div class="text-h4 font-weight-black text-emerald-accent-3">
+              ${{ Number(selectedPortfolio?.cash_balance || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
+            </div>
+          </v-col>
+          <v-col cols="6" class="text-right">
+            <div class="text-overline font-weight-bold opacity-70 tracking-wide">Total Buying Power</div>
+            <div class="text-h5 font-weight-bold text-blue-lighten-3">
+              ${{ Number(maxPurchasingPower || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
+            </div>
+          </v-col>
+        </v-row>
+
+        <v-divider class="my-3 border-opacity-30" color="white"></v-divider>
+
+        <v-row no-gutters class="text-caption mb-3">
+          <v-col cols="6">
+            <span>Active Margin Debt:</span>
+            <span class="font-weight-black ml-1 text-orange-lighten-3">
+              ${{ Number(selectedPortfolio?.borrowed_funds_balance || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
+            </span>
+          </v-col>
+          <v-col cols="6" class="text-right">
+            <span>Gross Exposure:</span>
+            <span class="font-weight-bold ml-1">
+              ${{ Number(selectedPortfolio?.total_exposure || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
+            </span>
+          </v-col>
+        </v-row>
+
+        <v-row no-gutters class="text-overline mb-3">
+          <v-col cols="12" class="text-right">
+            <span>Net Equity:</span>
+            <span class="font-weight-bold ml-1">
+              ${{ Number(selectedPortfolio?.net_equity || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
+            </span>
+          </v-col>
+        </v-row>
+
+        <div class="mb-1 d-flex justify-space-between text-caption font-weight-bold">
+          <span class="d-flex align-center gap-1">⚠️ Account Health Capacity</span>
+          <span :class="healthStatusColor">{{ (liveMarginRatio * 100).toFixed(1) }}% Ratio</span>
         </div>
+
+        <v-progress-linear
+          :model-value="liveMarginRatio * 100"
+          :color="healthBarColor"
+          height="8"
+          rounded
+          striped
+          :max="100"
+        ></v-progress-linear>
+
+        <div class="d-flex justify-space-between text-slate-400 mt-1" style="font-size: 0.65rem;">
+          <span class="text-rose-400 font-weight-bold">10% Forced Liquidation Drop Limit</span>
+          <span>100% Fully Collateralized</span>
+        </div>
+      </v-card>
+
+      <h3 class="text-subtitle-2 font-weight-bold text-slate-700 mb-2">📦 Open Positions</h3>
+      <div v-if="selectedPortfolio?.assets?.length">
+        <v-card
+          v-for="holding in selectedPortfolio.assets"
+          :key="`${holding.ticker}-${holding.position_type}`"
+          class="pa-4 mb-3 rounded-lg border"
+          variant="flat"
+        >
+          <div class="d-flex justify-space-between align-center">
+            <div>
+              <div class="font-weight-black">{{ holding.ticker }}</div>
+              <div class="text-caption text-slate-500">
+                {{ holding.position_type }} · Qty {{ Number(holding.quantity).toFixed(4) }}
+              </div>
+            </div>
+            <v-chip size="x-small" :color="holding.position_type === 'SHORT' ? 'deep-orange' : 'indigo'" variant="flat">
+              {{ holding.position_type }}
+            </v-chip>
+          </div>
+
+          <v-row class="mt-2">
+            <v-col cols="6" class="py-1 text-caption">
+              Avg Entry: <strong>${{ Number(holding.average_buy_price).toFixed(2) }}</strong>
+            </v-col>
+            <v-col cols="6" class="py-1 text-caption text-right">
+              Live: <strong>${{ Number(getAssetLivePrice(holding.ticker) || holding.average_buy_price || 0).toFixed(2) }}</strong>
+            </v-col>
+            <v-col cols="6" class="py-1 text-caption">
+              Mkt Value: <strong>${{ Number(getHoldingMarketValue(holding)).toFixed(2) }}</strong>
+            </v-col>
+            <v-col cols="6" class="py-1 text-caption text-right">
+              P&L:
+              <strong :class="getHoldingPnL(holding) >= 0 ? 'text-emerald-600' : 'text-rose-600'">
+                {{ getHoldingPnL(holding) >= 0 ? '+' : '' }}${{ Number(getHoldingPnL(holding)).toFixed(2) }}
+                ({{ getHoldingPnLPct(holding) >= 0 ? '+' : '' }}{{ Number(getHoldingPnLPct(holding)).toFixed(2) }}%)
+              </strong>
+            </v-col>
+          </v-row>
+
+          <v-btn
+            size="x-small"
+            variant="tonal"
+            color="indigo"
+            class="mt-4"
+            @click="openAssetExplorer(holding.ticker)"
+          >
+            📈 History
+          </v-btn>
+        </v-card>
       </div>
-    </div>
+
+      <div class="d-flex justify-space-between align-center mb-2 mt-4">
+        <h3 class="text-subtitle-2 font-weight-bold text-slate-700">⏳ Pending or Limit Orders</h3>
+        <v-chip size="x-small" color="amber-darken-3" variant="flat" class="font-weight-bold">
+          {{ selectedPortfolio?.open_orders?.length || 0 }} Orders Pending
+        </v-chip>
+      </div>
+
+      <v-card variant="outlined" class="bg-white mb-6 rounded-lg">
+        <v-table density="comfortable" class="text-caption">
+          <thead>
+            <tr class="bg-grey-lighten-4">
+              <th class="font-weight-bold text-left">Ticker</th>
+              <th class="font-weight-bold text-left">Class</th>
+              <th class="font-weight-bold text-center">Units</th>
+              <th class="font-weight-bold text-center">Target Price</th>
+              <th class="font-weight-bold text-right">Live Price</th>
+              <th class="font-weight-bold text-center">History</th>
+              <th class="font-weight-bold text-center">Cancel</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="order in selectedPortfolio?.open_orders" :key="order.id" class="align-center">
+              <td class="font-weight-black text-slate-800">{{ order.ticker }}</td>
+              <td>
+                <v-chip size="x-small" :color="['BUY', 'COVER'].includes(order.transaction_type) ? 'emerald' : 'rose'" variant="flat">
+                  {{ order.order_type }} {{ order.transaction_type }}
+                </v-chip>
+              </td>
+              <td class="text-center">{{ Number(order.quantity).toFixed(4) }}</td>
+              <td class="text-center font-weight-bold text-amber-800" v-if="order.target_price !== null">${{ Number(order.target_price).toFixed(2) }}</td>
+              <td class="text-center font-weight-bold text-amber-800" v-else>—</td>
+              <td class="text-right font-weight-bold">${{ getLivePrice(order.ticker) }}</td>
+              <td class="text-center">
+                <v-btn
+                  size="x-small"
+                  variant="tonal"
+                  color="indigo"
+                  class="mt-2"
+                  @click="openAssetExplorer(order.ticker)"
+                >
+                  📈 History
+                </v-btn>
+              </td>
+              <td class="text-center">
+                <v-btn
+                  variant="text"
+                  color="rose-darken-2"
+                  icon="mdi-close-circle-outline"
+                  density="compact"
+                  class="font-weight-black"
+                  style="font-size: 1.15rem; line-height: 1;"
+                  @click="killWorkingOrder(order.id)"
+                >
+                  ×
+                </v-btn>
+              </td>
+            </tr>
+            <tr v-if="!selectedPortfolio?.open_orders?.length">
+              <td colspan="7" class="text-center text-slate-400 py-4 font-italic">
+                No limit orders in your portfolio.
+              </td>
+            </tr>
+          </tbody>
+        </v-table>
+      </v-card>
+
+                <h3 class="text-subtitle-2 font-weight-bold text-slate-700 mb-2">📜 Transaction History</h3>
+                <v-card variant="outlined" class="bg-white">
+                  <v-table density="compact" class="text-caption">
+                    <thead>
+                      <tr class="bg-grey-lighten-4">
+                        <th class="font-weight-bold">Execution Date</th>
+                        <th class="font-weight-bold">Asset</th>
+                        <th class="font-weight-bold">Action</th>
+                        <th class="font-weight-bold">Units</th>
+                        <th class="font-weight-bold text-right">Unit Price</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr v-for="tx in selectedPortfolio?.transactions" :key="tx.id">
+                        <td class="text-slate-400" style="font-size: 0.68rem;">{{ new Date(tx.timestamp).toLocaleString() }}</td>
+                        <td class="font-weight-bold">{{ tx.ticker }}</td>
+                        <td>
+                          <v-chip size="x-small" :color="['BUY', 'COVER'].includes(tx.transaction_type) ? 'emerald' : 'rose'" variant="flat">
+                            {{ tx.transaction_type }}
+                          </v-chip>
+                        </td>
+                        <td>{{ parseFloat(tx.quantity).toFixed(2) }}</td>
+                        <td class="text-right font-weight-bold">${{ parseFloat(tx.price_per_unit).toFixed(2) }}</td>
+                      </tr>
+                      <tr v-if="!selectedPortfolio?.transactions?.length">
+                        <td colspan="5" class="text-center text-slate-400 py-4">No recent trade operations completed.</td>
+                      </tr>
+                    </tbody>
+                  </v-table>
+                </v-card>
+              </v-col>
+            </v-row>
+          </v-card>
+      </v-dialog>
+
+        <div v-if="errorModal.active" class="dialog-overlay alert-z" @click.self="errorModal.active = false">
+          <div class="dialog-box alert-box">
+            <div class="dialog-header alert-red">
+              <h2>⚠️ System Exception</h2>
+              <button class="close-x" @click="errorModal.active = false">&times;</button>
+            </div>
+            <div class="dialog-body">
+              <p class="error-modal-msg">{{ errorModal.message }}</p>
+              <button class="btn btn-danger full-width" @click="errorModal.active = false">Accept</button>
+            </div>
+          </div>
+        </div>
+
+      <v-dialog v-model="isQuoteModalActive" max-width="520">
+        <v-card class="pa-4 rounded-lg">
+          <h3 class="text-h6 font-weight-bold mb-3">Confirm Order</h3>
+
+          <div v-if="quoteData">
+            <div><strong>{{ quoteData.order_type }}</strong> {{ quoteData.trade_type }} {{ quoteData.quantity }} {{ quoteData.ticker }}</div>
+            <div>Live Price: ${{ quoteData.live_price.toFixed(4) }}</div>
+            <div>Gross: ${{ quoteData.gross_principal.toFixed(2) }}</div>
+            <div>Fee: ${{ quoteData.tx_fee.toFixed(2) }}</div>
+            <div class="mt-2"><strong>Estimated Impact: ${{ quoteData.total_impact.toFixed(2) }}</strong></div>
+          </div>
+
+          <div class="d-flex justify-end mt-4">
+            <v-btn variant="text" @click="cancelQuoteConfirmation">Cancel</v-btn>
+            <v-btn color="primary" :loading="isTradeProcessing" @click="confirmAndRouteOrder">
+              Confirm & Submit
+            </v-btn>
+          </div>
+        </v-card>
+      </v-dialog>
+
+        <v-dialog v-model="deleteDialog.active" max-width="460">
+        <v-card class="pa-4 rounded-lg">
+          <h3 class="text-h6 font-weight-bold mb-2">Delete Portfolio?</h3>
+          <p class="text-body-2 mb-4">
+            This action cannot be undone.
+            <br />
+            <strong>{{ deleteDialog.target?.name }}</strong> will be permanently removed.
+          </p>
+
+          <div class="d-flex justify-end ga-2">
+            <v-btn variant="text" @click="deleteDialog.active = false">Cancel</v-btn>
+            <v-btn color="error" :loading="deleteDialog.loading" @click="confirmDeletePortfolio">
+              Delete
+            </v-btn>
+          </div>
+        </v-card>
+      </v-dialog>
+
+      <v-dialog v-model="isRulesDialogOpen" max-width="760">
+        <v-card>
+          <v-card-title class="text-h6 font-weight-bold">Market Masters — Leverage & Liquidation Rules</v-card-title>
+          <v-card-text class="text-body-2">
+            <ul class="pl-4">
+              <li>You can place normal BUY/SELL trades using available cash.</li>
+              <li>Leverage is enabled only in ADVANCED portfolios (leverage &gt; 1x).</li>
+              <li>SHORT and BUY TO COVER are disabled in BASIC mode.</li>
+              <li>Every trade has a $10 transaction fee.</li>
+              <li>Net Equity = Cash + Long Value − Short Value − Borrowed Funds.</li>
+              <li>Gross Exposure = Long Value + Short Value.</li>
+              <li>Margin Ratio = Net Equity / Gross Exposure.</li>
+              <li><strong>Forced liquidation triggers when Margin Ratio &lt; 10% (0.10).</strong></li>
+              <li>Liquidation closes positions immediately; in this simulation it is effectively game over for that portfolio.</li>
+            </ul>
+          </v-card-text>
+          <v-card-actions>
+            <v-spacer />
+            <v-btn color="primary" variant="flat" @click="isRulesDialogOpen = false">Got it</v-btn>
+          </v-card-actions>
+        </v-card>
+    </v-dialog>
+
+      <AssetExplorer
+        :open="isAssetExplorerOpen"
+        :ticker="assetExplorerTicker"
+        @close="isAssetExplorerOpen = false"
+      />
 
   </div>
-
-  <v-dialog v-model="isQuoteModalActive" max-width="520">
-    <v-card class="pa-4 rounded-lg">
-      <h3 class="text-h6 font-weight-bold mb-3">Confirm Order</h3>
-
-      <div v-if="quoteData">
-        <div><strong>{{ quoteData.order_type }}</strong> {{ quoteData.trade_type }} {{ quoteData.quantity }} {{ quoteData.ticker }}</div>
-        <div>Live Price: ${{ quoteData.live_price.toFixed(4) }}</div>
-        <div>Gross: ${{ quoteData.gross_principal.toFixed(2) }}</div>
-        <div>Fee: ${{ quoteData.tx_fee.toFixed(2) }}</div>
-        <div class="mt-2"><strong>Estimated Impact: ${{ quoteData.total_impact.toFixed(2) }}</strong></div>
-      </div>
-
-      <div class="d-flex justify-end mt-4">
-        <v-btn variant="text" @click="cancelQuoteConfirmation">Cancel</v-btn>
-        <v-btn color="primary" :loading="isTradeProcessing" @click="confirmAndRouteOrder">
-          Confirm & Submit
-        </v-btn>
-      </div>
-    </v-card>
-  </v-dialog>
-
-    <v-dialog v-model="deleteDialog.active" max-width="460">
-    <v-card class="pa-4 rounded-lg">
-      <h3 class="text-h6 font-weight-bold mb-2">Delete Portfolio?</h3>
-      <p class="text-body-2 mb-4">
-        This action cannot be undone.
-        <br />
-        <strong>{{ deleteDialog.target?.name }}</strong> will be permanently removed.
-      </p>
-
-      <div class="d-flex justify-end ga-2">
-        <v-btn variant="text" @click="deleteDialog.active = false">Cancel</v-btn>
-        <v-btn color="error" :loading="deleteDialog.loading" @click="confirmDeletePortfolio">
-          Delete
-        </v-btn>
-      </div>
-    </v-card>
-  </v-dialog>
-
-  <v-dialog v-model="isRulesDialogOpen" max-width="760">
-  <v-card>
-    <v-card-title class="text-h6 font-weight-bold">Market Masters — Leverage & Liquidation Rules</v-card-title>
-    <v-card-text class="text-body-2">
-      <ul class="pl-4">
-        <li>You can place normal BUY/SELL trades using available cash.</li>
-        <li>Leverage is enabled only in ADVANCED portfolios (leverage &gt; 1x).</li>
-        <li>SHORT and BUY TO COVER are disabled in BASIC mode.</li>
-        <li>Every trade has a $10 transaction fee.</li>
-        <li>Net Equity = Cash + Long Value − Short Value − Borrowed Funds.</li>
-        <li>Gross Exposure = Long Value + Short Value.</li>
-        <li>Margin Ratio = Net Equity / Gross Exposure.</li>
-        <li><strong>Forced liquidation triggers when Margin Ratio &lt; 10% (0.10).</strong></li>
-        <li>Liquidation closes positions immediately; in this simulation it is effectively game over for that portfolio.</li>
-      </ul>
-    </v-card-text>
-    <v-card-actions>
-      <v-spacer />
-      <v-btn color="primary" variant="flat" @click="isRulesDialogOpen = false">Got it</v-btn>
-    </v-card-actions>
-  </v-card>
-</v-dialog>
 </template>
 
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
 import api from "@/axios"
 import TickerSearchBar from "@/components/TickerSearchBar.vue"
+import AssetExplorer from "@/components/MarketMasters/AssetExplorer.vue"
 import marketDirectory from '@/assets/data/marketDirectory.json'
 import Chart from 'chart.js/auto'
 
@@ -1330,6 +1311,16 @@ const portfolioPnlSeries = ref([])
 const pnlSeriesByTicker = ref({})
 const sparklineRefs = ref({})
 const sparklineCharts = ref({})
+
+const isAssetExplorerOpen = ref(false)
+const assetExplorerTicker = ref('')
+
+const openAssetExplorer = (ticker) => {
+  const t = String(ticker || '').trim().toUpperCase()
+  if (!t) return
+  assetExplorerTicker.value = t
+  isAssetExplorerOpen.value = true
+}
 
 const effectiveNetEquity = computed(() => {
   const p = selectedPortfolio.value
@@ -1369,6 +1360,25 @@ const getLivePriceNumber = (ticker) => {
 
 
 
+const chartSearchRef = ref(null)
+const chartSearchSelectedTicker = ref('')
+
+const handleChartSearchSelection = (tickerData) => {
+  if (!tickerData) return
+  if (typeof tickerData === 'string') chartSearchSelectedTicker.value = tickerData.toUpperCase()
+  else if (tickerData.ticker) chartSearchSelectedTicker.value = String(tickerData.ticker).toUpperCase()
+  else if (tickerData.symbol) chartSearchSelectedTicker.value = String(tickerData.symbol).toUpperCase()
+}
+
+const openChartFromSearch = () => {
+  if (!chartSearchSelectedTicker.value) {
+    triggerToast('Please select a ticker first.', 'warning')
+    return
+  }
+  openAssetExplorer(chartSearchSelectedTicker.value)
+}
+
+
 // --- replace computePortfolioVizData with this ---
 const computePortfolioVizData = (portfolio) => {
   if (!portfolio) return null
@@ -1388,7 +1398,6 @@ const computePortfolioVizData = (portfolio) => {
     const mvAbs = Math.abs(mv)
 
     const posType = normalizePositionType(a)
-    console.log('asset type debug', a.ticker, a.position_type, posType)
     if (posType === 'SHORT') {
       shortExposureTotal += mvAbs
       allocationRows.push({
@@ -1610,7 +1619,36 @@ const renderPortfolioVizCharts = async () => {
           pointRadius: 0
         }]
       },
-      options: { responsive: true, maintainAspectRatio: false }
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: true }
+        },
+        scales: {
+          x: {
+            grid: { display: false },
+            ticks: {
+              autoSkip: true,
+              maxTicksLimit: 7,
+              maxRotation: 0,
+              minRotation: 0,
+              callback: (_v, i) => {
+                const raw = pts[i]?.t
+                if (!raw) return ''
+                const d = new Date(raw)
+                if (Number.isNaN(d.getTime())) return String(raw)
+                return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+              }
+            }
+          },
+          y: {
+            ticks: {
+              callback: (v) => `$${Number(v).toLocaleString()}`
+            }
+          }
+        }
+      }
     })
   }
 }
@@ -1861,75 +1899,12 @@ const fetchPortfolioPnlSeries = async (portfolioId) => {
   }
 }
 
-//  for historical price charts
-const chartRefs = ref({})                 // { [ticker]: HTMLCanvasElement }
-const chartInstances = ref({})            // { [ticker]: Chart instance }
-const chartLoadingByTicker = ref({})      // { [ticker]: boolean }
-const trendByTicker = ref({})             // { [ticker]: api response }
-
 // Helper utility to match performance numbers cleanly to colors
 const getPerformanceColorClass = (pctStr) => {
   if (!pctStr) return 'text-slate-400'
   return pctStr.startsWith('-') ? 'text-rose-400 font-weight-bold' : 'text-emerald-400 font-weight-bold'
 }
 
-// 🔄 CHARTS HYDRATION CORE ENGINE HANDLER
-// 🔄 UPDATED SCRIPT SEGMENT: Captures a completely generic string variable safely
-const handleLoadChartHistory = async (targetTicker) => {
-  if (!targetTicker) return
-  const key = String(targetTicker).toUpperCase()
-
-  chartLoadingByTicker.value[key] = true
-  trendByTicker.value[key] = null
-
-  // destroy only this ticker's old chart
-  if (chartInstances.value[key]) {
-    chartInstances.value[key].destroy()
-    delete chartInstances.value[key]
-  }
-
-  try {
-    const res = await api.get(`/market-masters/assets/history/?ticker=${encodeURIComponent(key)}`)
-    trendByTicker.value[key] = res.data
-
-    if (!res.data?.prices?.length) return
-
-    await nextTick()
-
-    const canvasElement = chartRefs.value[key]
-    if (!canvasElement) return
-
-    const ctx = canvasElement.getContext('2d')
-    const isBearishTrend = String(res.data?.performance_pct || '').startsWith('-')
-    const primaryLineColor = isBearishTrend ? '#f43f5e' : '#10b981'
-
-    chartInstances.value[key] = new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels: res.data.labels || [],
-        datasets: [{
-          data: res.data.prices || [],
-          borderColor: primaryLineColor,
-          borderWidth: 2,
-          pointRadius: 0,
-          pointHoverRadius: 4,
-          fill: false,
-          tension: 0.25
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: { legend: { display: false }, tooltip: { enabled: true } },
-        scales: { x: { display: false }, y: { display: false } }
-      }
-    })
-  } catch (err) {
-    console.error("Historical rendering error:", err)
-  } finally {
-    chartLoadingByTicker.value[key] = false
-  }
-}
 
 const portfolioMeta = computed(() => {
   const p = selectedPortfolio.value ?? {}
@@ -2798,9 +2773,6 @@ onBeforeUnmount(() => {
 
   Object.values(sparklineCharts.value || {}).forEach(c => { try { c?.destroy?.() } catch {} })
   sparklineCharts.value = {}
-
-  Object.values(chartInstances.value || {}).forEach(c => { try { c?.destroy?.() } catch {} })
-  chartInstances.value = {}
 })
 
 

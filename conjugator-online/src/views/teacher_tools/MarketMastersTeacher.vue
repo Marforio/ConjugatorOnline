@@ -180,7 +180,7 @@
             <v-select
               v-model="enrollmentForm.student_ids"
               label="Select Students (Multi-select)"
-              :items="userStore.teacherRoster"
+              :items="sortedTeacherRoster"
               :item-title="item => `${item.web_id} (${item.initials})`"
               item-value="id"
               variant="outlined"
@@ -291,28 +291,54 @@
                   <tr class="bg-grey-lighten-4">
                     <th class="font-weight-bold">Student Code</th>
                     <th class="font-weight-bold">Initials</th>
-                    <th class="font-weight-bold">Available Cash</th>
-                    <th class="font-weight-bold">Outstanding Debt</th>
-                    <th class="font-weight-bold text-right">Portfolio Value</th>
+                    <th class="font-weight-bold text-right">Net Equity</th>
+                    <th class="font-weight-bold text-right">PnL</th>
+                    <th
+                      v-if="selectedCompDetails?.trading_level === 'ADVANCED'"
+                      class="font-weight-bold text-right"
+                    >
+                      Outstanding Debt
+                    </th>
                     <th class="font-weight-bold text-center">Assets Held</th>
                   </tr>
                 </thead>
+
                 <tbody>
                   <tr v-if="!selectedCompDetails.portfolios?.length">
-                    <td colspan="6" class="text-center text-slate-400 py-4">
+                    <td :colspan="selectedCompDetails?.trading_level === 'ADVANCED' ? 6 : 5" class="text-center text-slate-400 py-4">
                       No student portfolios enrolled in this competition.
                     </td>
                   </tr>
-                  <tr v-for="portfolio in selectedCompDetails.portfolios || []" :key="portfolio.id">
+
+                  <tr v-for="(portfolio, idx) in rankedPortfolios" :key="portfolio.id">
                     <td class="font-mono text-primary font-weight-bold">{{ portfolio.student_web_id }}</td>
                     <td>{{ portfolio.student_initials }}</td>
-                    <td class="font-mono">${{ Number(portfolio.cash_balance || 0).toLocaleString() }}</td>
-                    <td class="font-mono" :class="Number(portfolio.borrowed_funds_balance || 0) > 0 ? 'text-rose-600 font-weight-bold' : 'text-slate-400'">
+
+                    <td
+                      class="font-mono font-weight-bold text-right"
+                      :class="netEquity(portfolio) > startingBudget(selectedCompDetails) ? 'text-success' : pnlValue(portfolio, selectedCompDetails) === 0 ? '' : 'text-error'"
+                    >
+                      ${{ netEquity(portfolio).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
+                    </td>
+
+                    <td
+                      class="font-mono font-weight-bold text-right"
+                      :class="pnlValue(portfolio, selectedCompDetails) > 0 ? 'text-success' : pnlValue(portfolio, selectedCompDetails) === 0 ? '' : 'text-error'"
+                    >
+                      {{ pnlValue(portfolio, selectedCompDetails) > 0 ? '+' : pnlValue(portfolio, selectedCompDetails) === 0 ? '' : '-' }}${{ Math.abs(pnlValue(portfolio, selectedCompDetails)).toFixed(2) }}
+                      <span class="text-caption">
+                        ({{ pnlPct(portfolio, selectedCompDetails) > 0 ? '+' : pnlValue(portfolio, selectedCompDetails) === 0 ? '' : '-' }}{{ Math.abs(pnlPct(portfolio, selectedCompDetails)).toFixed(2) }}%)
+                      </span>
+                    </td>
+
+                    <td
+                      v-if="selectedCompDetails?.trading_level === 'ADVANCED'"
+                      class="font-mono text-right"
+                      :class="Number(portfolio.borrowed_funds_balance || 0) > 0 ? 'text-error font-weight-bold' : 'text-medium-emphasis'"
+                    >
                       ${{ Number(portfolio.borrowed_funds_balance || 0).toFixed(2) }}
                     </td>
-                    <td class="font-mono font-weight-black text-right text-slate-900">
-                      ${{ calculatePortfolioValue(portfolio) }}
-                    </td>
+
                     <td class="text-center">
                       <v-chip
                         size="x-small"
@@ -359,6 +385,52 @@ const snackbar = ref({
   show: false,
   text: '',
   color: 'success'
+})
+
+const startingBudget = (comp) => Number(comp?.budget || 0)
+
+const netEquity = (portfolio) => {
+  // Prefer backend-provided field if present
+  if (portfolio?.net_equity != null) return Number(portfolio.net_equity)
+
+  // Fallback estimate: cash + long - short - borrowed
+  const cash = Number(portfolio?.cash_balance || 0)
+  const longValue = Number(portfolio?.long_value || 0)
+  const shortLiability = Number(portfolio?.short_liability || 0)
+  const borrowed = Number(portfolio?.borrowed_funds_balance || 0)
+  return cash + longValue - shortLiability - borrowed
+}
+
+const pnlValue = (portfolio, comp) => netEquity(portfolio) - startingBudget(comp)
+
+const pnlPct = (portfolio, comp) => {
+  const base = startingBudget(comp)
+  if (!base) return 0
+  return (pnlValue(portfolio, comp) / base) * 100
+}
+
+const rankedPortfolios = computed(() => {
+  const rows = Array.isArray(selectedCompDetails.value?.portfolios)
+    ? [...selectedCompDetails.value.portfolios]
+    : []
+
+  return rows
+    .map((p) => {
+      const base = Number(selectedCompDetails.value?.budget || 0)
+      const net =
+        p?.net_equity != null
+          ? Number(p.net_equity)
+          : Number(p?.cash_balance || 0) +
+            Number(p?.long_value || 0) -
+            Number(p?.short_liability || 0) -
+            Number(p?.borrowed_funds_balance || 0)
+
+      const pnl = p?.pnl_value != null ? Number(p.pnl_value) : net - base
+      const pnlPct = p?.pnl_pct != null ? Number(p.pnl_pct) : (base ? (pnl / base) * 100 : 0)
+
+      return { ...p, _net: net, _pnl: pnl, _pnlPct: pnlPct }
+    })
+    .sort((a, b) => b._pnl - a._pnl) // highest PnL first
 })
 
 const showToast = (text, color = 'success') => {
@@ -411,6 +483,15 @@ const parseFormattedMoney = (raw) => {
   const n = Number(cleaned)
   return Number.isFinite(n) ? n : NaN
 }
+
+const sortedTeacherRoster = computed(() => {
+  const arr = Array.isArray(userStore.teacherRoster) ? [...userStore.teacherRoster] : []
+  return arr.sort((a, b) => {
+    const aKey = `${a.web_id ?? ''}`.toLowerCase()
+    const bKey = `${b.web_id ?? ''}`.toLowerCase()
+    return aKey.localeCompare(bKey, undefined, { numeric: true, sensitivity: 'base' })
+  })
+})
 
 watch(uiCustomBudget, (v) => {
   uiCustomBudget.value = formatWithApostrophes(v, "money")
