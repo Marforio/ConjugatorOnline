@@ -624,10 +624,10 @@
                       </div>
 
                       <div v-show="!['SELL','COVER'].includes(tradeForm.action)">
-                        <TickerSearchBar ref="watchlistSearchRef" @selected="handleTerminalAssetSelection" />
+                        <TickerSearchBar ref="terminalSearchRef" @selected="handleTerminalAssetSelection" />
                       </div>
 
-                      <div v-if="tradeForm.ticker" class="text-caption text-primary mt-1 font-weight-bold">
+                      <div v-if="tradeForm.ticker && !marketPrices.some(p => tickerEq(p.ticker, tradeForm.ticker))" class="text-caption text-primary mt-1 font-weight-bold">
                         Active Target: {{ tradeForm.ticker }}
                       </div>
                     </v-col>
@@ -1287,6 +1287,7 @@ const portfolios = ref([])
 const currentWatchlist = ref([])
 const marketPrices = ref([])
 
+const terminalSearchRef = ref(null)
 const watchlistSearchRef = ref(null)
 const watchlistSelectedTicker = ref('')
 const isActionProcessing = ref(false)
@@ -1798,6 +1799,13 @@ watch(() => newPortfolioForm.value.trading_level, (level) => {
   if (level === 'BASIC') newPortfolioForm.value.leverage_setting = 1
 })
 
+watch(() => portfolioDialog.value.isOpen, (open) => {
+  if (!open) {
+    resetTerminalTransactionState({ keepAction: false, keepOrderType: false })
+    selectedPortfolio.value = null
+  }
+})
+
 // before submit:
 const parsedBudget = parseFormattedNumber(uiCustomBudget.value)
 newPortfolioForm.value.customBudget = parsedBudget
@@ -1954,8 +1962,9 @@ const targetPriceLabel = computed(() => {
 })
 
 const getAssetLivePrice = (ticker) => {
-  const m = marketPrices.value?.find(p => p.ticker?.toUpperCase() === ticker?.toUpperCase())
-  return Number(m?.current_price || 0)
+  const key = normalizeTicker(ticker)
+  const match = marketPrices.value.find(p => tickerEq(p.ticker, key))
+  return Number(match?.current_price || 0)
 }
 
 const getHoldingMarketValue = (h) => getAssetLivePrice(h.ticker) * Number(h.quantity || 0)
@@ -2053,10 +2062,12 @@ const quickAddFromDiscovery = async (ticker) => {
   
   isActionProcessing.value = true
   try {
-    const checkRes = await api.get(`/market-masters/search/?ticker=${ticker}`)
+    const t = normalizeTicker(ticker)
+  const checkRes = await api.get(`/market-masters/search/?ticker=${encodeURIComponent(t)}`)
+
     if (checkRes.data) {
-      await api.post('/market-masters/watchlist/add/', { ticker: ticker })
-      triggerToast(`Successfully added [${ticker}] towatchlist.`, "success")
+      await api.post('/market-masters/watchlist/add/', { ticker: t })
+      triggerToast(`Successfully added [${t}] towatchlist.`, "success")
       await fetchDashboardData()
     }
   } catch (err) {
@@ -2066,7 +2077,12 @@ const quickAddFromDiscovery = async (ticker) => {
     isActionProcessing.value = false
   }
 }
-const normalizeTicker = (raw) => String(raw || '').trim().toUpperCase()
+const normalizeTicker = (raw) => {
+  const s = String(raw || '').trim().toUpperCase().replace(/\s+/g, '')
+  if (!s) return ''
+  return s
+}
+const tickerEq = (a, b) => normalizeTicker(a) === normalizeTicker(b)
 
 const submitWatchlistAdd = async () => {
   const ticker = normalizeTicker(watchlistSelectedTicker.value)
@@ -2191,6 +2207,31 @@ const performanceValueText = computed(() => {
   })}`
 })
 
+const resetTerminalTransactionState = (opts = { keepAction: false, keepOrderType: false }) => {
+  const prevAction = tradeForm.value.action
+  const prevOrderType = tradeForm.value.orderType
+
+  tradeForm.value = {
+    ticker: '',
+    action: opts.keepAction ? prevAction : 'BUY',
+    orderType: opts.keepOrderType ? prevOrderType : 'MARKET',
+    quantity: null,
+    targetPrice: null,
+    requestedLeverage: 1,
+    stopLossPrice: null
+  }
+
+  quoteData.value = null
+  isQuoteModalActive.value = false
+  isTradeProcessing.value = false
+
+  nextTick(() => {
+    tradeFormRef.value?.resetValidation?.()
+    terminalSearchRef.value?.clearInput?.()
+  })
+}
+
+
 const submitNewPortfolio = async () => {
   const f = newPortfolioForm.value
   const cleanName = (f.name || '').trim()
@@ -2243,10 +2284,8 @@ const submitNewPortfolio = async () => {
 const maxSellableQuantity = computed(() => {
   if (!selectedPortfolio.value || !tradeForm.value.ticker || typeof tradeForm.value.ticker !== 'string') return 0
   
-  const searchTicker = tradeForm.value.ticker.toUpperCase().trim()
-  const match = selectedPortfolio.value.assets.find(
-    a => a.ticker.toUpperCase().trim() === searchTicker
-  )
+  const searchTicker = normalizeTicker(tradeForm.value.ticker)
+  const match = selectedPortfolio.value.assets.find(a => tickerEq(a.ticker, searchTicker))
   return match ? parseFloat(match.quantity) : 0
 })
 
@@ -2273,11 +2312,15 @@ const clearQuantityField = () => {
 }
 
 const getLivePrice = (ticker) => {
-  const match = marketPrices.value.find(p => p.ticker.toUpperCase() === ticker.toUpperCase())
-  return match ? parseFloat(match.current_price).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '---'
+  const key = normalizeTicker(ticker)
+  const match = marketPrices.value.find(p => tickerEq(p.ticker, key))
+  return match
+    ? parseFloat(match.current_price).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+    : '---'
 }
 const getDirection = (ticker) => {
-  const match = marketPrices.value.find(p => p.ticker.toUpperCase() === ticker.toUpperCase())
+  const key = normalizeTicker(ticker)
+  const match = marketPrices.value.find(p => tickerEq(p.ticker, key))
   return match ? match.direction : 'neutral'
 }
 const getDirectionClass = (ticker) => {
@@ -2288,7 +2331,8 @@ const getDirectionClass = (ticker) => {
 // 🕒 NEW: Resolves a clean, localized timestamp for when the asset record was modified
 const getLastUpdatedTime = (ticker) => {
   if (!ticker) return '---'
-  const match = marketPrices.value.find(p => p.ticker.toUpperCase() === ticker.toUpperCase())
+  const key = normalizeTicker(ticker)
+  const match = marketPrices.value.find(p => tickerEq(p.ticker, key))
   
   if (match && match.updated_at) {
     const dateObj = new Date(match.updated_at)
@@ -2378,16 +2422,7 @@ const isRulesDialogOpen = ref(false)
 
 // 🧼 Reset fields back to clean baseline parameters
 const clearOrderFields = () => {
-  tradeForm.value.ticker = ''
-  tradeForm.value.quantity = null
-  tradeForm.value.targetPrice = null
-  tradeForm.value.requestedLeverage = 1
-  tradeForm.value.stopLossPrice = null
-
-  // optionally keep order type as-is; or force MARKET:
-  // tradeForm.value.orderType = 'MARKET'
-
-  tradeFormRef.value?.resetValidation()
+  resetTerminalTransactionState({ keepAction: true, keepOrderType: true })
 }
 
 // AUTOMATIC CLEANER: Clears input state when tabs are switched
@@ -2600,7 +2635,7 @@ const confirmAndRouteOrder = async () => {
 
     isQuoteModalActive.value = false
     quoteData.value = null
-    clearOrderFields()
+    resetTerminalTransactionState({ keepAction: false, keepOrderType: false })
     await fetchDashboardData()
     manuallyRefreshPortfolio(payload.portfolio_id)
   } catch (err) {
@@ -2627,6 +2662,8 @@ const confirmAndRouteOrder = async () => {
 const cancelQuoteConfirmation = () => {
   isQuoteModalActive.value = false
   quoteData.value = null
+  isTradeProcessing.value = false
+  nextTick(() => tradeFormRef.value?.resetValidation?.())
 }
 
 

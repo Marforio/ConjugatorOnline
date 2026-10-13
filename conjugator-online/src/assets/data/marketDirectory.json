@@ -51157,6 +51157,12 @@
     "SOL/USD": {"name": "Solana / US Dollar", "type": "CRYPTO"},
     "ZEC/USD": {"name": "Zcash / US Dollar", "type": "CRYPTO"},
     "XAU/USD": {"name": "Gold Spot Price", "type": "COMMODITY"},
+    "TAO/USD": {"name": "Tao (Bittensor) / US Dollar", "type": "CRYPTO"},
+    "AVAX/USD": {"name": "Avalanche / US Dollar", "type": "CRYPTO"},
+    "SUI/USD": {"name": "Sui / US Dollar", "type": "CRYPTO"},
+    "DOGE/USD": {"name": "Dogecoin / US Dollar", "type": "CRYPTO"},
+    "NEAR/USD": {"name": "Near Protocol / US Dollar", "type": "CRYPTO"},
+    "HYPE/USD": {"name": "Hyperliquid / US Dollar", "type": "CRYPTO"},
     "LVMUY": {"name": "LVMH Moët Hennessy Louis Vuitton (US ADR)", "type": "STOCK"},
     "SIEGY": {"name": "Siemens AG (US ADR)", "type": "STOCK"},
     "BASFY": {"name": "BASF SE (US ADR)", "type": "STOCK"},
@@ -51164,6 +51170,6 @@
     "RHHBY": {"name": "Roche Holding AG (US ADR)", "type": "STOCK"},
     "MBGYY": {"name": "Mercedes-Benz Group AG (US ADR)", "type": "STOCK"},
     "VWAGY": {"name": "Volkswagen AG (US ADR)", "type": "STOCK"},
-    "XAG": {"name": "Silver Spot Price Proxy", "type": "COMMODITY"}
+    "XAG/USD": {"name": "Silver Spot Price", "type": "COMMODITY"}
 
 }
