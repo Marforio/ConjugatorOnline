@@ -218,7 +218,7 @@
               v-for="comp in competitions"
               :key="comp.id"
               :active="selectedCompId === comp.id"
-              active-color="primary"
+              color="primary"
               class="border-b last-border-0 pa-4"
             >
               <div class="d-flex justify-space-between align-center w-100">
@@ -250,15 +250,15 @@
             </v-list-item>
           </v-list>
 
-          <v-expand-transition>
-            <div v-if="selectedCompDetails" class="border-t-2 pt-4 mt-4">
-              <div class="d-flex justify-space-between align-center mb-3">
-                <h3 class="text-subtitle-1 font-weight-bold text-slate-800">
-                  Performance in {{ selectedCompDetails.name }}
-                </h3>
-                <div class="d-flex align-center gap-2">
+          <v-dialog v-model="rankingDialogOpen" max-width="1200" scrollable>
+            <v-card class="pa-2">
+              <v-card-title class="d-flex justify-space-between align-center">
+                <span class="text-subtitle-1 font-weight-bold text-slate-800">
+                  Performance in {{ selectedCompDetails?.name }}
+                </span>
+                <div class="d-flex align-center ga-2">
                   <v-btn
-                    v-if="!selectedCompDetails.is_finalized"
+                    v-if="selectedCompDetails && !selectedCompDetails.is_finalized"
                     color="deep-purple"
                     size="small"
                     class="font-weight-bold"
@@ -267,93 +267,95 @@
                   >
                     Finalize Winner
                   </v-btn>
-                  <v-btn variant="text" color="error" size="small" @click="selectedCompDetails = null">Clear</v-btn>
+                  <v-btn variant="text" color="error" size="small" @click="closeRankingDialog">Close</v-btn>
                 </div>
-              </div>
+              </v-card-title>
 
-              <v-alert
-                v-if="selectedCompDetails.is_finalized"
-                type="success"
-                variant="tonal"
-                class="mb-3"
-              >
-                Winner declared
-                <strong v-if="selectedCompDetails.winner_portfolio">
-                  (Portfolio ID: {{ selectedCompDetails.winner_portfolio }})
-                </strong>
-                <span v-if="selectedCompDetails.winner_declared_at">
-                  on {{ formatDate(selectedCompDetails.winner_declared_at) }}.
-                </span>
-              </v-alert>
+              <v-card-text>
+                <v-alert
+                  v-if="selectedCompDetails?.is_finalized"
+                  type="success"
+                  variant="tonal"
+                  class="mb-3"
+                >
+                  Winner declared
+                  <strong v-if="selectedCompDetails?.winner_portfolio">
+                    (Portfolio ID: {{ selectedCompDetails.winner_portfolio }})
+                  </strong>
+                  <span v-if="selectedCompDetails?.winner_declared_at">
+                    on {{ formatDate(selectedCompDetails.winner_declared_at) }}.
+                  </span>
+                </v-alert>
 
-              <v-table density="comfortable" class="border rounded text-caption">
-                <thead>
-                  <tr class="bg-grey-lighten-4">
-                    <th class="font-weight-bold">Student Code</th>
-                    <th class="font-weight-bold">Initials</th>
-                    <th class="font-weight-bold text-right">Net Equity</th>
-                    <th class="font-weight-bold text-right">PnL</th>
-                    <th
-                      v-if="selectedCompDetails?.trading_level === 'ADVANCED'"
-                      class="font-weight-bold text-right"
-                    >
-                      Outstanding Debt
-                    </th>
-                    <th class="font-weight-bold text-center">Assets Held</th>
-                  </tr>
-                </thead>
-
-                <tbody>
-                  <tr v-if="!selectedCompDetails.portfolios?.length">
-                    <td :colspan="selectedCompDetails?.trading_level === 'ADVANCED' ? 6 : 5" class="text-center text-slate-400 py-4">
-                      No student portfolios enrolled in this competition.
-                    </td>
-                  </tr>
-
-                  <tr v-for="(portfolio, idx) in rankedPortfolios" :key="portfolio.id">
-                    <td class="font-mono text-primary font-weight-bold">{{ portfolio.student_web_id }}</td>
-                    <td>{{ portfolio.student_initials }}</td>
-
-                    <td
-                      class="font-mono font-weight-bold text-right"
-                      :class="netEquity(portfolio) > startingBudget(selectedCompDetails) ? 'text-success' : pnlValue(portfolio, selectedCompDetails) === 0 ? '' : 'text-error'"
-                    >
-                      ${{ netEquity(portfolio).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
-                    </td>
-
-                    <td
-                      class="font-mono font-weight-bold text-right"
-                      :class="pnlValue(portfolio, selectedCompDetails) > 0 ? 'text-success' : pnlValue(portfolio, selectedCompDetails) === 0 ? '' : 'text-error'"
-                    >
-                      {{ pnlValue(portfolio, selectedCompDetails) > 0 ? '+' : pnlValue(portfolio, selectedCompDetails) === 0 ? '' : '-' }}${{ Math.abs(pnlValue(portfolio, selectedCompDetails)).toFixed(2) }}
-                      <span class="text-caption">
-                        ({{ pnlPct(portfolio, selectedCompDetails) > 0 ? '+' : pnlValue(portfolio, selectedCompDetails) === 0 ? '' : '-' }}{{ Math.abs(pnlPct(portfolio, selectedCompDetails)).toFixed(2) }}%)
-                      </span>
-                    </td>
-
-                    <td
-                      v-if="selectedCompDetails?.trading_level === 'ADVANCED'"
-                      class="font-mono text-right"
-                      :class="Number(portfolio.borrowed_funds_balance || 0) > 0 ? 'text-error font-weight-bold' : 'text-medium-emphasis'"
-                    >
-                      ${{ Number(portfolio.borrowed_funds_balance || 0).toFixed(2) }}
-                    </td>
-
-                    <td class="text-center">
-                      <v-chip
-                        size="x-small"
-                        :color="(portfolio.assets?.length || 0) < selectedCompDetails.min_assets_required ? 'warning' : 'success'"
-                        variant="flat"
-                        class="font-weight-bold"
+                <v-table density="comfortable" class="border rounded text-caption">
+                  <thead>
+                    <tr class="bg-grey-lighten-4">
+                      <th class="font-weight-bold">Student Code</th>
+                      <th class="font-weight-bold">Initials</th>
+                      <th class="font-weight-bold text-right">Net Equity</th>
+                      <th class="font-weight-bold text-right">PnL</th>
+                      <th
+                        v-if="selectedCompDetails?.trading_level === 'ADVANCED'"
+                        class="font-weight-bold text-right"
                       >
-                        {{ portfolio.assets?.length || 0 }} / {{ selectedCompDetails.min_assets_required }}
-                      </v-chip>
-                    </td>
-                  </tr>
-                </tbody>
-              </v-table>
-            </div>
-          </v-expand-transition>
+                        Outstanding Debt
+                      </th>
+                      <th class="font-weight-bold text-center">Assets Held</th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    <tr v-if="!selectedCompDetails?.portfolios?.length">
+                      <td :colspan="selectedCompDetails?.trading_level === 'ADVANCED' ? 6 : 5" class="text-center text-slate-400 py-4">
+                        No student portfolios enrolled in this competition.
+                      </td>
+                    </tr>
+
+                    <tr v-for="portfolio in rankedPortfolios" :key="portfolio.id">
+                      <td class="font-mono text-primary font-weight-bold">{{ portfolio.student_web_id }}</td>
+                      <td>{{ portfolio.student_initials }}</td>
+
+                      <td
+                        class="font-mono font-weight-bold text-right"
+                        :class="netEquity(portfolio) > startingBudget(selectedCompDetails) ? 'text-success' : pnlValue(portfolio, selectedCompDetails) === 0 ? '' : 'text-error'"
+                      >
+                        ${{ netEquity(portfolio).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
+                      </td>
+
+                      <td
+                        class="font-mono font-weight-bold text-right"
+                        :class="pnlValue(portfolio, selectedCompDetails) > 0 ? 'text-success' : pnlValue(portfolio, selectedCompDetails) === 0 ? '' : 'text-error'"
+                      >
+                        {{ pnlValue(portfolio, selectedCompDetails) > 0 ? '+' : pnlValue(portfolio, selectedCompDetails) === 0 ? '' : '-' }}${{ Math.abs(pnlValue(portfolio, selectedCompDetails)).toFixed(2) }}
+                        <span class="text-caption">
+                          ({{ pnlPct(portfolio, selectedCompDetails) > 0 ? '+' : pnlValue(portfolio, selectedCompDetails) === 0 ? '' : '-' }}{{ Math.abs(pnlPct(portfolio, selectedCompDetails)).toFixed(2) }}%)
+                        </span>
+                      </td>
+
+                      <td
+                        v-if="selectedCompDetails?.trading_level === 'ADVANCED'"
+                        class="font-mono text-right"
+                        :class="Number(portfolio.borrowed_funds_balance || 0) > 0 ? 'text-error font-weight-bold' : 'text-medium-emphasis'"
+                      >
+                        ${{ Number(portfolio.borrowed_funds_balance || 0).toFixed(2) }}
+                      </td>
+
+                      <td class="text-center">
+                        <v-chip
+                          size="x-small"
+                          :color="(portfolio.assets?.length || 0) < selectedCompDetails.min_assets_required ? 'warning' : 'success'"
+                          variant="flat"
+                          class="font-weight-bold"
+                        >
+                          {{ portfolio.assets?.length || 0 }} / {{ selectedCompDetails.min_assets_required }}
+                        </v-chip>
+                      </td>
+                    </tr>
+                  </tbody>
+                </v-table>
+              </v-card-text>
+            </v-card>
+          </v-dialog>
         </v-card>
       </v-col>
     </v-row>
@@ -497,6 +499,8 @@ watch(uiCustomBudget, (v) => {
   uiCustomBudget.value = formatWithApostrophes(v, "money")
 })
 
+const rankingDialogOpen = ref(false)
+
 const fetchCompetitions = async () => {
   try {
     const res = await api.get('/market-masters/competitions/')
@@ -512,10 +516,17 @@ const fetchCompetitionDetails = async (id) => {
   try {
     const res = await api.get(`/market-masters/competitions/${id}/`)
     selectedCompDetails.value = res.data
+    rankingDialogOpen.value = true // <-- open modal here
   } catch (err) {
     console.error('Failed to load competition metrics payload:', err)
     showToast('Unable to load competition metrics.', 'error')
   }
+}
+
+const closeRankingDialog = () => {
+  rankingDialogOpen.value = false
+  selectedCompDetails.value = null
+  selectedCompId.value = null
 }
 
 onMounted(async () => {

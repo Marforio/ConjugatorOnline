@@ -82,27 +82,26 @@
       </v-row>
     </header>
 
-          <section class="watchlist-section mb-3">
-        <div class="watchlist-header">
-          <h2>Find a price chart 📉</h2>
-          <div class="watchlist-add-form">
-            <TickerSearchBar ref="chartSearchRef" @selected="handleChartSearchSelection" />
-            <button class="btn btn-primary" @click="openChartFromSearch">Open Chart</button>
-          </div>
-        </div>
-      </section>
-
     <section class="watchlist-section">
       <div class="watchlist-header">
         <h2>My Personal Watchlist 👀 ({{ currentWatchlist.length }} / 15)</h2>
+
         <div class="watchlist-add-form">
-          <TickerSearchBar ref="watchlistSearchRef" @selected="handleWatchlistSelection" />
-          <button @click="submitWatchlistAdd" :disabled="isActionProcessing || currentWatchlist.length >= 15" class="btn btn-primary">
+          <TickerSearchBar ref="unifiedSearchRef" @selected="handleUnifiedSelection" />
+
+          <button class="btn btn-secondary" @click="openChartFromUnified">
+            Open Chart
+          </button>
+
+          <button
+            class="btn btn-primary"
+            @click="addToWatchlistFromUnified"
+            :disabled="isActionProcessing || currentWatchlist.length >= 15"
+          >
             {{ isActionProcessing ? 'Verifying...' : 'Add Asset' }}
           </button>
         </div>
       </div>
-      
       <div class="watchlist-grid" v-if="currentWatchlist.length > 0">
         <div
           v-for="ticker in currentWatchlist"
@@ -141,7 +140,9 @@
           </div>
         </div>
       </div>
-      <p v-else class="empty-msg">Your watchlist is currently empty. Add assets above to monitor their performance.</p>
+      <p v-else class="empty-msg">
+        Your watchlist is currently empty. Add assets above to monitor their performance.
+      </p>
     </section>
 
     <!-- 🧭 COMPACT DISCOVERY HUB -->
@@ -582,6 +583,17 @@
                 </v-tabs>
 
                 <v-alert
+                  v-if="isActionBlockedByCashRule"
+                  type="warning"
+                  variant="tonal"
+                  density="comfortable"
+                  class="mb-3"
+                  icon="mdi-cash-remove"
+                >
+                  {{ cashRuleMessage }}
+                </v-alert>
+
+                <v-alert
                   v-if="isTradingLocked"
                   type="warning"
                   variant="tonal"
@@ -658,28 +670,35 @@
                   <v-row class="mb-2">
                     <v-col cols="6">
                       <v-text-field
-                        v-model.number="tradeForm.quantity"
-                        :label="quantityLabel"
-                        type="number"
-                        step="any"
-                        min="0.000001"
-                        variant="outlined"
-                        density="comfortable"
-                        :hint="tradeForm.action === 'SELL'
-                          ? `Max available: ${maxAllowedQuantity.toFixed(4)}`
-                          : tradeForm.action === 'COVER'
-                            ? `Max short available to cover: ${maxAllowedQuantity.toFixed(4)}`
-                            : ''"
-                        persistent-hint
-                        :rules="[
-                          v => !!v && v > 0 || 'Quantity must be positive.',
-                          v => !['SELL','COVER'].includes(tradeForm.action) || v <= maxAllowedQuantity || (
-                            tradeForm.action === 'SELL'
-                              ? 'Exceeds maximum shares owned.'
-                              : 'Exceeds maximum short quantity available to cover.'
-                          )
-                        ]"
-                      />
+                          v-model.number="tradeForm.quantity"
+                          :label="quantityLabel"
+                          type="number"
+                          step="any"
+                          min="0.000001"
+                          variant="outlined"
+                          density="comfortable"
+                          persistent-hint
+                          :hint="maxQtyHint"
+                          :rules="[
+                            v => !!v && v > 0 || 'Quantity must be positive.',
+                            v => !['SELL','COVER'].includes(tradeForm.action) || v <= maxAllowedQuantity || (
+                              tradeForm.action === 'SELL'
+                                ? 'Exceeds maximum shares owned.'
+                                : 'Exceeds maximum short quantity available to cover.'
+                            )
+                          ]"
+                        >
+                          <template #details>
+                            <div
+                              v-if="['SELL','COVER'].includes(tradeForm.action)"
+                              class="text-caption text-primary cursor-pointer font-weight-bold"
+                              @click="fillMaxQuantity"
+                              style="user-select:none;"
+                            >
+                              {{ maxQtyHint }} (click to use)
+                            </div>
+                          </template>
+                        </v-text-field>
                     </v-col>
 
                     <v-col cols="6">
@@ -865,7 +884,7 @@
 
                   <v-btn
                     type="submit"
-                    :disabled="isTradingLocked"
+                    :disabled="isTradingLocked || isActionBlockedByCashRule"
                     :color="tradeForm.action === 'SELL' ? 'emerald' : 'primary'"
                     block
                     size="large"
@@ -899,6 +918,13 @@
           <v-col cols="12">
             <div class="text-caption font-weight-bold mb-1">Portfolio Performance</div>
             <div style="height:220px;"><canvas ref="contribChartRef"></canvas></div>
+          </v-col>
+        </v-row>
+
+        <v-row>
+          <v-col cols="12">
+            <div class="text-caption font-weight-bold mb-1">Asset Contribution to P&L</div>
+            <div style="height:240px;"><canvas ref="assetContribChartRef"></canvas></div>
           </v-col>
         </v-row>
       </v-card>
@@ -1045,10 +1071,14 @@
           :key="`${holding.ticker}-${holding.position_type}`"
           class="pa-4 mb-3 rounded-lg border"
           variant="flat"
+          :style="holdingCardStyle(holding)"
         >
           <div class="d-flex justify-space-between align-center">
             <div>
-              <div class="font-weight-black">{{ holding.ticker }}</div>
+              <div class="font-weight-black">
+                {{ holding.ticker }}
+                <span class="text-caption text-slate-500 ms-1">— {{ getAssetName(holding.ticker) }}</span>
+              </div>
               <div class="text-caption text-slate-500">
                 {{ holding.position_type }} · Qty {{ Number(holding.quantity).toFixed(4) }}
               </div>
@@ -1288,8 +1318,8 @@ const currentWatchlist = ref([])
 const marketPrices = ref([])
 
 const terminalSearchRef = ref(null)
-const watchlistSearchRef = ref(null)
-const watchlistSelectedTicker = ref('')
+const unifiedSearchRef = ref(null)
+const unifiedSelectedTicker = ref('')
 const isActionProcessing = ref(false)
 const isCreateModalActive = ref(false)
 
@@ -1305,6 +1335,8 @@ const tradeFormRef = ref(null)
 const allocationChartRef = ref(null)
 const cashVsAssetsChartRef = ref(null)
 const contribChartRef = ref(null)
+const assetContribChartRef = ref(null)
+let assetContribChart = null
 
 const activeCompetitionStandings = ref([])
 
@@ -1321,6 +1353,122 @@ const openAssetExplorer = (ticker) => {
   if (!t) return
   assetExplorerTicker.value = t
   isAssetExplorerOpen.value = true
+}
+
+
+const TX_FEE = 10
+
+const availableCash = computed(() =>
+  Number(selectedPortfolio.value?.cash_balance || 0)
+)
+
+const canAffordFee = computed(() =>
+  availableCash.value >= TX_FEE
+)
+
+// your requested rule:
+// - no buying when cash < 10
+// - liquidation should still be possible
+const isBuyBlockedByLowCash = computed(() =>
+  tradeForm.value.action === 'BUY' && !canAffordFee.value
+)
+
+const isCoverBlockedByLowCash = computed(() =>
+  tradeForm.value.action === 'COVER' && !canAffordFee.value
+)
+
+const isActionBlockedByCashRule = computed(() =>
+  isBuyBlockedByLowCash.value || isCoverBlockedByLowCash.value
+)
+
+const cashRuleMessage = computed(() => {
+  if (isBuyBlockedByLowCash.value) {
+    return 'Insufficient cash for BUY (minimum $10 fee required). You can still SELL to raise cash.'
+  }
+  if (isCoverBlockedByLowCash.value) {
+    return 'Insufficient cash for COVER (minimum $10 fee required). You can SELL other holdings to raise cash.'
+  }
+  return ''
+})
+
+const maxQtyHint = computed(() => {
+  if (tradeForm.value.action === 'SELL') {
+    return `Max available: ${Number(maxAllowedQuantity.value || 0).toFixed(4)}`
+  }
+  if (tradeForm.value.action === 'COVER') {
+    return `Max short available to cover: ${Number(maxAllowedQuantity.value || 0).toFixed(4)}`
+  }
+  return ''
+})
+
+const fillMaxQuantity = () => {
+  if (!['SELL', 'COVER'].includes(tradeForm.value.action)) return
+  const max = Number(maxAllowedQuantity.value || 0)
+  if (max > 0) {
+    tradeForm.value.quantity = Number(max.toFixed(6))
+    nextTick(() => tradeFormRef.value?.validate?.())
+  }
+}
+
+const requiredCashNow = computed(() => {
+  const fee = 10
+  const gross = Number(computedGrossPrincipal.value || 0)
+
+  if (tradeForm.value.action === 'BUY') return gross + fee
+  if (tradeForm.value.action === 'COVER') return gross + fee
+  if (tradeForm.value.action === 'SHORT') return fee // if your backend only charges fee upfront
+  if (tradeForm.value.action === 'SELL') return fee  // sell needs fee only, proceeds come in
+  return 0
+})
+
+
+const handleUnifiedSelection = (tickerData) => {
+  if (!tickerData) return
+  if (typeof tickerData === 'string') unifiedSelectedTicker.value = normalizeTicker(tickerData)
+  else if (tickerData.ticker) unifiedSelectedTicker.value = normalizeTicker(tickerData.ticker)
+  else if (tickerData.symbol) unifiedSelectedTicker.value = normalizeTicker(tickerData.symbol)
+}
+
+const openChartFromUnified = () => {
+  if (!unifiedSelectedTicker.value) {
+    triggerToast('Please select a ticker first.', 'warning')
+    return
+  }
+  openAssetExplorer(unifiedSelectedTicker.value)
+}
+
+const addToWatchlistFromUnified = async () => {
+  const ticker = normalizeTicker(unifiedSelectedTicker.value)
+  if (!ticker) {
+    triggerToast("Please select a valid ticker.", "warning")
+    return
+  }
+
+  const alreadyTracked = (currentWatchlist.value || []).some(t => tickerEq(t, ticker))
+  if (alreadyTracked) {
+    triggerToast(`[${ticker}] is already in your watchlist.`, "warning")
+    return
+  }
+
+  if ((currentWatchlist.value || []).length >= 15) {
+    triggerErrorModal("Watchlist limit reached (15). Remove one before adding another.")
+    return
+  }
+
+  isActionProcessing.value = true
+  try {
+    await api.get(`/market-masters/search/?ticker=${encodeURIComponent(ticker)}`)
+    await api.post('/market-masters/watchlist/add/', { ticker })
+    triggerToast(`Added [${ticker}] to your watchlist.`, "success")
+    await fetchDashboardData()
+    unifiedSearchRef.value?.clearInput?.()
+    unifiedSelectedTicker.value = ''
+  } catch (err) {
+    const msg = err?.response?.data?.error || "Could not add ticker to watchlist."
+    triggerErrorModal(`Watchlist add failed: ${msg}`)
+  } finally {
+    isActionProcessing.value = false
+  }
 }
 
 const effectiveNetEquity = computed(() => {
@@ -1360,9 +1508,6 @@ const getLivePriceNumber = (ticker) => {
 }
 
 
-
-const chartSearchRef = ref(null)
-const chartSearchSelectedTicker = ref('')
 
 const handleChartSearchSelection = (tickerData) => {
   if (!tickerData) return
@@ -1440,6 +1585,7 @@ const destroyVizCharts = () => {
   allocationChart?.destroy(); allocationChart = null
   cashVsAssetsChart?.destroy(); cashVsAssetsChart = null
   contribChart?.destroy(); contribChart = null
+  assetContribChart?.destroy(); assetContribChart = null
 }
 
 const normalizePositionType = (asset) => {
@@ -1529,12 +1675,14 @@ const renderPortfolioVizCharts = async () => {
             callbacks: {
               label: (context) => {
                 if (!longOnly.length) return 'No long holdings'
+                const row = longOnly[context.dataIndex]
                 const v = Number(context.raw || 0)
                 const pct = total > 0 ? ((v / total) * 100).toFixed(1) : '0.0'
-                return `${context.label}: $${v.toLocaleString(undefined, {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2
-                })}`
+                const name = getAssetName(row.ticker)
+                const pnl = Number(row.pnlEstimate || 0)
+                const pnlText = `${pnl >= 0 ? '+' : '-'}$${Math.abs(pnl).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+
+                return ` ${name}`
               }
             }
           }
@@ -1651,6 +1799,83 @@ const renderPortfolioVizCharts = async () => {
         }
       }
     })
+  }
+
+  if (assetContribChartRef.value && token === renderToken) {
+    const ctx = assetContribChartRef.value.getContext('2d')
+    if (ctx) {
+      const rows = (selectedPortfolio.value?.assets || []).map(h => {
+        const pnl = Number(getHoldingPnL(h) || 0)
+        return {
+          ticker: h.ticker,
+          name: getAssetName(h.ticker),
+          pnl
+        }
+      })
+
+      // keep non-zero, sorted by absolute contribution
+      const filtered = rows
+        .filter(r => Math.abs(r.pnl) > 0.0001)
+        .sort((a, b) => Math.abs(b.pnl) - Math.abs(a.pnl))
+        .slice(0, 12)
+
+      const labels = filtered.length
+        ? filtered.map(r => r.ticker)
+        : ['No active contribution']
+
+      const values = filtered.length
+        ? filtered.map(r => r.pnl)
+        : [0]
+
+      const colors = filtered.length
+        ? filtered.map(r => r.pnl >= 0 ? 'rgba(16,185,129,0.75)' : 'rgba(239,68,68,0.75)')
+        : ['rgba(148,163,184,0.5)']
+
+      assetContribChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels,
+          datasets: [{
+            label: 'PnL Contribution ($)',
+            data: values,
+            backgroundColor: colors,
+            borderRadius: 6,
+            borderSkipped: false
+          }]
+        },
+        options: {
+          indexAxis: 'y',
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                title: (items) => {
+                  const i = items?.[0]?.dataIndex ?? 0
+                  return filtered[i] ? `${filtered[i].ticker} — ${filtered[i].name}` : labels[i]
+                },
+                label: (ctx) => {
+                  const v = Number(ctx.raw || 0)
+                  return `Contribution: ${v >= 0 ? '+' : '-'}$${Math.abs(v).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                }
+              }
+            }
+          },
+          scales: {
+            x: {
+              ticks: {
+                callback: (v) => `$${Number(v).toLocaleString()}`
+              },
+              grid: { color: 'rgba(148,163,184,0.2)' }
+            },
+            y: {
+              grid: { display: false }
+            }
+          }
+        }
+      })
+    }
   }
 }
 
@@ -1961,6 +2186,26 @@ const targetPriceLabel = computed(() => {
   return 'Target Limit Price ($)'
 })
 
+const holdingCardStyle = (holding) => {
+  const pnl = Number(getHoldingPnL(holding) || 0)
+  if (pnl > 0) {
+    return {
+      background: 'linear-gradient(180deg, rgba(16,185,129,0.08) 0%, rgba(16,185,129,0.03) 100%)',
+      borderColor: 'rgba(16,185,129,0.28)'
+    }
+  }
+  if (pnl < 0) {
+    return {
+      background: 'linear-gradient(180deg, rgba(239,68,68,0.08) 0%, rgba(239,68,68,0.03) 100%)',
+      borderColor: 'rgba(239,68,68,0.28)'
+    }
+  }
+  return {
+    background: 'linear-gradient(180deg, rgba(148,163,184,0.06) 0%, rgba(148,163,184,0.02) 100%)',
+    borderColor: 'rgba(148,163,184,0.22)'
+  }
+}
+
 const getAssetLivePrice = (ticker) => {
   const key = normalizeTicker(ticker)
   const match = marketPrices.value.find(p => tickerEq(p.ticker, key))
@@ -2130,14 +2375,27 @@ const getAssetName = (ticker) => {
   const clean = normalizeTicker(ticker)
   if (!clean) return 'Market Security'
 
-  const liveMatch = (marketPrices.value || []).find(
-    p => normalizeTicker(p?.ticker) === clean
-  )
-  if (liveMatch?.name && liveMatch.name !== 'Global Market Security') {
-    return liveMatch.name
-  }
+  // 1) trusted local directory first
+  const dirName = marketDirectory?.[clean]?.name
+  if (dirName && dirName !== clean) return dirName
 
-  return marketDirectory?.[clean]?.name || 'Market Security'
+  // 2) live payload fallback
+  const liveMatch = (marketPrices.value || []).find(p => tickerEq(p?.ticker, clean))
+  const liveName = String(liveMatch?.name || '').trim()
+  if (liveName && liveName !== clean && liveName !== 'Global Market Security') return liveName
+
+  // 3) slash alias fallback (XAG <-> XAG/USD etc)
+  const aliasMap = {
+    'XAG': 'XAG/USD',
+    'XAU': 'XAU/USD',
+    'BTCUSD': 'BTC/USD',
+    'ETHUSD': 'ETH/USD',
+    'SOLUSD': 'SOL/USD'
+  }
+  const aliased = aliasMap[clean]
+  if (aliased && marketDirectory?.[aliased]?.name) return marketDirectory[aliased].name
+
+  return clean
 }
 
 const truncateString = (str, limit = 24) => {
@@ -2551,47 +2809,85 @@ const submitOrder = async () => {
   const { valid } = await tradeFormRef.value.validate()
   if (!valid) return
 
-  const targetTicker = (tradeForm.value.ticker || "").toUpperCase().trim()
-  if (!targetTicker) return
+  if (isActionBlockedByCashRule.value) {
+    triggerErrorModal(cashRuleMessage.value || 'Insufficient cash for this action.')
+    return
+  }
+
+  const action = String(tradeForm.value.action || '').toUpperCase()
+  const targetTicker = normalizeTicker(tradeForm.value.ticker)
+  if (!targetTicker) {
+    triggerToast('Please select an asset.', 'warning')
+    return
+  }
+
+  const qty = Number(tradeForm.value.quantity || 0)
+  if (!Number.isFinite(qty) || qty <= 0) {
+    triggerToast('Quantity must be positive.', 'warning')
+    return
+  }
+
+  // Local quantity guards (server still remains source of truth)
+  if (action === 'SELL' && qty > Number(maxSellableQuantity.value || 0)) {
+    triggerErrorModal(`Cannot sell more than held. Max: ${Number(maxSellableQuantity.value || 0).toFixed(6)}`)
+    return
+  }
+  if (action === 'COVER' && qty > Number(maxClosableQuantity.value || 0)) {
+    triggerErrorModal(`Cannot cover more than short position. Max: ${Number(maxClosableQuantity.value || 0).toFixed(6)}`)
+    return
+  }
 
   isTradeProcessing.value = true
   try {
-    // Use your search endpoint to resolve/provision live quote preview
     const res = await api.get(`/market-masters/search/?ticker=${encodeURIComponent(targetTicker)}`)
 
     const livePrice = Number(res.data?.current_price || 0)
-    const qty = Number(tradeForm.value.quantity || 0)
+    if (!Number.isFinite(livePrice) || livePrice <= 0) {
+      triggerErrorModal('Live price unavailable for this symbol.')
+      return
+    }
+
     const fee = 10
     const gross = livePrice * qty
 
-    const isCredit = ['SELL', 'SHORT'].includes(tradeForm.value.action)
+    // cash semantics by action:
+    // BUY/COVER require cash outlay; SELL/SHORT are credit operations
+    const isCredit = ['SELL', 'SHORT'].includes(action)
     const totalImpact = isCredit ? (gross - fee) : (gross + fee)
+
+    // IMPORTANT: do NOT apply BUY affordability checks to SELL.
+    // Optional local soft-checks (backend will enforce final):
+    const cash = Number(selectedPortfolio.value?.cash_balance || 0)
+    if (action === 'COVER' && cash < totalImpact) {
+      triggerErrorModal(`Insufficient cash to cover. Need $${totalImpact.toFixed(2)}, available $${cash.toFixed(2)}.`)
+      return
+    }
 
     quoteData.value = {
       ticker: targetTicker,
-      name: res.data?.name || targetTicker,
+      name: res.data?.name || getAssetName(targetTicker) || targetTicker,
       live_price: livePrice,
       quantity: qty,
       tx_fee: fee,
       gross_principal: gross,
       total_impact: totalImpact,
-      trade_type: tradeForm.value.action,
+      trade_type: action,
       order_type: tradeForm.value.orderType,
       target_price: tradeForm.value.orderType === 'LIMIT'
         ? Number(tradeForm.value.targetPrice || 0)
         : null,
-      requested_leverage: tradeForm.value.action === 'SHORT'
+      requested_leverage: action === 'SHORT'
         ? Number(tradeForm.value.requestedLeverage || 1)
         : null,
-      stop_loss_price: tradeForm.value.action === 'SHORT' && tradeForm.value.stopLossPrice
+      stop_loss_price: action === 'SHORT' && tradeForm.value.stopLossPrice
         ? Number(tradeForm.value.stopLossPrice)
         : null
     }
 
     isQuoteModalActive.value = true
   } catch (err) {
-    console.error("Quote precheck failed:", err?.response?.data || err)
-    triggerErrorModal(err?.response?.data?.error || "Unable to fetch quote for this symbol.")
+    console.error('Quote precheck failed:', err?.response?.data || err)
+    triggerErrorModal(err?.response?.data?.error || 'Unable to fetch quote for this symbol.')
   } finally {
     isTradeProcessing.value = false
   }
@@ -2724,9 +3020,10 @@ const maxBorrowLimit = computed(() => {
 
 // 3. Detects if an active order entry will require debt financing
 const marginLoanRequired = computed(() => {
-  const cash = parseFloat(selectedPortfolio.value?.cash_balance || 0)
-  if (computedTotalImpact.value <= cash) return 0
-  return computedTotalImpact.value - cash
+  if (tradeForm.value.action !== 'BUY') return 0
+  const cash = Number(selectedPortfolio.value?.cash_balance || 0)
+  const need = Number(requiredCashNow.value || 0)
+  return need > cash ? (need - cash) : 0
 })
 
 // 4. Calculates the live margin profile safety ratio (Matching backend loops)
