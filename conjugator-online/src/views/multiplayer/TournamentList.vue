@@ -100,7 +100,7 @@ import { useRouter } from 'vue-router';
 import api from '@/axios';
 import { useUserStore } from '@/stores/user';
 import { gameMeta, defaultSettingsFor } from './multiplayerMeta';
-import GameSettingsForm from '@/components/games/GameSettingsForm.vue';
+import GameSettingsForm from '@/views/multiplayer/GameSettingsForm.vue';
 import { prettySlug, statusLabel, statusColor } from './tournamentMeta';
 
 const router = useRouter();
