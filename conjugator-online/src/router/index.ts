@@ -82,6 +82,12 @@ const routes = [
       name: 'MultiplayerResults',
       component: () => import('@/views/multiplayer/MultiplayerResults.vue'), meta: { requiresAuth: true },
     },
+    {
+      path: '/multiplayer/stats',
+      name: 'MultiplayerStats',
+      component: () => import('@/views/multiplayer/MultiplayerStats.vue'),
+      meta: { requiresAuth: true }, 
+    },
 
 ]
 

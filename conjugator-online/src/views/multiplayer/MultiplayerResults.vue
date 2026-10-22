@@ -75,6 +75,9 @@
           <v-btn variant="outlined" size="large" rounded="xl" @click="router.push({ name: 'MultiplayerLobby' })">
             Back to lobby
           </v-btn>
+          <v-btn variant="tonal" rounded="lg" prepend-icon="mdi-chart-box" :to="{ name: 'MultiplayerStats' }">
+            My stats
+          </v-btn>
         </div>
       </template>
     </div>

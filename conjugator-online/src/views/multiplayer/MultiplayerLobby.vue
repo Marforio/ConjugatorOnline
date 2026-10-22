@@ -8,6 +8,9 @@
             {{ isTeacher ? 'Host a game for your class.' : 'Challenge your classmates in real time.' }}
           </p>
         </div>
+        <v-btn variant="tonal" rounded="xl" size="x-large" prepend-icon="mdi-chart-box" :to="{ name: 'MultiplayerStats' }">
+          Stats
+        </v-btn>
         <v-btn color="primary" size="x-large" rounded="xl" class="font-weight-bold"
                prepend-icon="mdi-plus-circle" @click="openCreate">
           {{ isTeacher ? 'Host a Game' : 'Create Arena' }}
