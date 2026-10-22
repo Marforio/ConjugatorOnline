@@ -969,74 +969,53 @@ function onCourseChanged() {
     loadGlobalClassMatrix(); 
   }
 }
+
+function normalizeCourseKey(input: any): string {
+  if (input == null) return "";
+  if (typeof input === "string" || typeof input === "number") return String(input).trim().toLowerCase();
+  return String(input.slug ?? input.title ?? input.name ?? "").trim().toLowerCase();
+}
+
 function getStudentIdsInSelectedCourse(): string[] {
-  if (!selectedCourseId.value) {
-    console.log('[getStudentIdsInSelectedCourse] No selectedCourseId.')
-    return []
+  if (!selectedCourseId.value) return [];
+
+  const selected = normalizeCourseKey(selectedCourseId.value);
+
+  // 1) Resolve selected course object
+  const matchedCourse = (userStore.availableTeacherCourses || []).find((c: any) => {
+    return [normalizeCourseKey(c.slug), normalizeCourseKey(c.title)].includes(selected);
+  });
+
+  const accepted = new Set<string>(
+    [selected, normalizeCourseKey(matchedCourse?.slug), normalizeCourseKey(matchedCourse?.title)].filter(Boolean)
+  );
+
+  // 2) FIRST: use teacherRoster.domain (this is what your UI already trusts)
+  const rosterMatches = (userStore.teacherRoster || [])
+    .filter((s: any) => accepted.has(normalizeCourseKey(s.domain)))
+    .map((s: any) => String(s.web_id || "").trim())
+    .filter(Boolean);
+
+  if (rosterMatches.length > 0) {
+    return rosterMatches;
   }
 
-  const selected = String(selectedCourseId.value).trim().toLowerCase()
-  console.log('[getStudentIdsInSelectedCourse] selectedCourseId(raw):', selectedCourseId.value)
-  console.log('[getStudentIdsInSelectedCourse] selected(normalized):', selected)
-
-  const availableCourses = userStore.availableTeacherCourses || []
-  console.log('[getStudentIdsInSelectedCourse] availableTeacherCourses count:', availableCourses.length)
-  console.log('[getStudentIdsInSelectedCourse] availableTeacherCourses sample:', availableCourses.slice(0, 5))
-
-  const matchedCourse = availableCourses.find((c) => {
-    const title = String(c.title ?? '').trim().toLowerCase()
-    const slug = String(c.slug ?? '').trim().toLowerCase()
-    return selected === title || selected === slug
-  })
-
-  console.log('[getStudentIdsInSelectedCourse] matchedCourse:', matchedCourse)
-
-  const acceptedCourseKeys = new Set<string>([
-    selected,
-    String(matchedCourse?.slug ?? '').trim().toLowerCase(),
-    String(matchedCourse?.title ?? '').trim().toLowerCase(),
-  ].filter(Boolean))
-
-  console.log('[getStudentIdsInSelectedCourse] acceptedCourseKeys:', Array.from(acceptedCourseKeys))
-
-  const enrollmentPool = userStore.enrollments || []
-  console.log('[getStudentIdsInSelectedCourse] enrollments count:', enrollmentPool.length)
-  console.log('[getStudentIdsInSelectedCourse] enrollments sample:', enrollmentPool.slice(0, 5))
-
-  const filteredEnrollments = enrollmentPool.filter((e: any) => {
-    const rawCourse = e.course
-    const courseKeys = [
-      (typeof rawCourse === 'string' || typeof rawCourse === 'number')
-        ? String(rawCourse)
-        : String(rawCourse?.slug ?? rawCourse?.title ?? ''),
-      String(e.course_slug ?? ''),
-    ].map((v) => v.trim().toLowerCase()).filter(Boolean)
-
-    const isMatch = courseKeys.some((k) => acceptedCourseKeys.has(k))
-
-    console.log('[getStudentIdsInSelectedCourse] enrollment check:', {
-      enrollment: e,
-      derivedCourseKeys: courseKeys,
-      isMatch,
+  // 3) FALLBACK: enrollments
+  return (userStore.enrollments || [])
+    .filter((e: any) => {
+      const keys = [
+        normalizeCourseKey(e.course),
+        normalizeCourseKey(e.course_slug),
+        normalizeCourseKey(e.course_title),
+      ].filter(Boolean);
+      return keys.some((k: string) => accepted.has(k));
     })
-
-    return isMatch
-  })
-
-  console.log('[getStudentIdsInSelectedCourse] filteredEnrollments count:', filteredEnrollments.length)
-
-  const studentIds = filteredEnrollments
     .map((e: any) => {
-      const s = e.student
-      if (typeof s === 'string' || typeof s === 'number') return String(s).trim()
-      if (s && typeof s === 'object') return String(s.web_id ?? s.id ?? '').trim()
-      return String(e.student_id ?? '').trim()
+      const s = e.student;
+      if (typeof s === "string" || typeof s === "number") return String(s).trim();
+      return String(s?.web_id ?? s?.id ?? e.student_id ?? "").trim();
     })
-    .filter(Boolean)
-
-  console.log('[getStudentIdsInSelectedCourse] resolved student identifiers:', studentIds)
-
-  return studentIds
+    .filter(Boolean);
 }
 
 // Data Fetching Functions
@@ -1074,6 +1053,7 @@ async function refreshAssignmentLogs() {
     loadingData.value = false;
   }
 }
+
 async function loadGlobalClassMatrix() {
   if (!selectedCourseId.value) return;
   loadingMatrix.value = true;
@@ -1304,7 +1284,7 @@ async function archiveWorkoutPlan(id: number) {
 async function issueAssignmentTask() {
   console.log('🚀 [issueAssignmentTask] Function triggered');
   dispatching.value = true;
-  
+
   try {
     let targetsListIds: number[] = [];
 
@@ -1315,34 +1295,54 @@ async function issueAssignmentTask() {
       selectedTemplatesCount: selectedTemplatesList.value?.length || 0,
     });
 
+    // 1) Resolve target students
     if (targetScope.value === 'student' && selectedStudentId.value) {
-      targetsListIds.push(selectedStudentId.value);
+      targetsListIds = [selectedStudentId.value];
     } else if (targetScope.value === 'course' && selectedCourseId.value) {
-      const courseStudentWebIds = getStudentIdsInSelectedCourse();
-      console.log('📚 [issueAssignmentTask] Course student web IDs fetched:', courseStudentWebIds);
+      const selected = String(selectedCourseId.value).trim().toLowerCase();
 
+      // Primary path: match against roster domain (same source your overview UI trusts)
       targetsListIds = studentsList.value
-        .filter(s => courseStudentWebIds.includes(String(s.web_id)))
-        .map(s => s.id);
+        .filter((s: any) => String(s.domain || '').trim().toLowerCase() === selected)
+        .map((s: any) => Number(s.id))
+        .filter((id: number) => Number.isFinite(id));
+
+      // Fallback path: enrollment-based resolver
+      if (targetsListIds.length === 0) {
+        const courseStudentWebIds = getStudentIdsInSelectedCourse();
+        console.log('📚 [issueAssignmentTask] Fallback web_ids from enrollments:', courseStudentWebIds);
+
+        targetsListIds = studentsList.value
+          .filter((s: any) => courseStudentWebIds.includes(String(s.web_id)))
+          .map((s: any) => Number(s.id))
+          .filter((id: number) => Number.isFinite(id));
+      }
+
+      console.log('[course-assign] selectedCourseId=', selectedCourseId.value);
+      console.log('[course-assign] resolved targetsListIds=', targetsListIds);
     } else {
       console.warn('⚠️ [issueAssignmentTask] Target scope condition not met or missing selected IDs!');
     }
 
-    console.log('👥 [issueAssignmentTask] Resolved Target Student IDs:', targetsListIds);
-    console.log('📋 [issueAssignmentTask] Selected Templates:', selectedTemplatesList.value);
-
+    // 2) Validate targets/templates
     if (targetsListIds.length === 0) {
-      console.warn('⚠️ [issueAssignmentTask] No target student IDs resolved. Loop will not execute.');
+      triggerAlert('No students found in selected course.', 'error');
+      return;
     }
 
     if (!selectedTemplatesList.value || selectedTemplatesList.value.length === 0) {
-      console.warn('⚠️ [issueAssignmentTask] No templates selected. Loop will not execute.');
+      triggerAlert('Please select at least one assignment template.', 'error');
+      return;
     }
 
+    console.log('👥 [issueAssignmentTask] Final Target Student IDs:', targetsListIds);
+    console.log('📋 [issueAssignmentTask] Selected Templates:', selectedTemplatesList.value);
+
+    // 3) Build and send requests
     const batchRequests: Array<Promise<any>> = [];
 
-    targetsListIds.forEach(studentId => {
-      selectedTemplatesList.value.forEach(template => {
+    targetsListIds.forEach((studentId) => {
+      selectedTemplatesList.value.forEach((template) => {
         const payload = {
           student: studentId,
           task_type: template.task_type,
@@ -1350,29 +1350,37 @@ async function issueAssignmentTask() {
           description: template.description,
           required_sessions: template.required_sessions,
           min_days_between_sessions: template.task_type === 'achievement' ? 0 : 1,
-          manually_created: true
+          manually_created: true,
         };
 
-        console.log('✉️ [issueAssignmentTask] Pushing API call to batchRequests:', payload);
-
+        console.log('✉️ [issueAssignmentTask] Queue payload:', payload);
         batchRequests.push(api.post('/assignment/', payload));
       });
     });
 
-    console.log(`📦 [issueAssignmentTask] Total batch requests created: ${batchRequests.length}`);
+    console.log(`📦 [issueAssignmentTask] Total batch requests: ${batchRequests.length}`);
 
     if (batchRequests.length === 0) {
-      console.error('❌ [issueAssignmentTask] Zero batch requests generated! Skipping Promise.all.');
+      triggerAlert('Nothing to assign with current selection.', 'error');
       return;
     }
 
     console.log('⏳ [issueAssignmentTask] Sending Promise.all batch requests...');
-    const responses = await Promise.all(batchRequests);
-    console.log('✅ [issueAssignmentTask] All API requests completed successfully:', responses);
+    await Promise.all(batchRequests);
+    console.log('✅ [issueAssignmentTask] All API requests completed successfully');
 
-    triggerAlert(`Successfully deployed ${selectedTemplatesList.value.length} assignment(s).`, 'success');
+    const totalAssignments = targetsListIds.length * selectedTemplatesList.value.length;
+    triggerAlert(
+      `Successfully assigned ${selectedTemplatesList.value.length} template(s) to ${targetsListIds.length} student(s) (${totalAssignments} total assignments).`,
+      'success'
+    );
+
     selectedTemplatesList.value = [];
     await refreshAssignmentLogs();
+
+    if (targetScope.value === 'course' && rightPanelTab.value === 1) {
+      await loadGlobalClassMatrix();
+    }
   } catch (err) {
     console.error('💥 [issueAssignmentTask] Batch deployment failed:', err);
     triggerAlert('Batch deployment failed.', 'error');

@@ -33,6 +33,18 @@
     </div>
   </v-col>
 
+  <!-- Multiplayer Arena -->
+  <v-col cols="12" sm="6" md="4" class="d-flex justify-center">
+    <RouterLink
+      :to="{ name: 'MultiplayerLobby' }"
+      class="image-tile"
+    >
+      <div class="tile-frame">
+        <div class="d-flex justify-center align-center flex-column mt-5">Multiplayer Arena<v-icon size="64" color="primary">mdi-stadium-variant</v-icon></div>
+      </div>
+    </RouterLink>
+  </v-col>
+
   <!-- Market Masters -->
   <v-col cols="12" sm="6" md="4" class="d-flex justify-center">
         <RouterLink

@@ -1322,6 +1322,7 @@ const unifiedSearchRef = ref(null)
 const unifiedSelectedTicker = ref('')
 const isActionProcessing = ref(false)
 const isCreateModalActive = ref(false)
+const orderEntryOpen = ref([0]) // open by default
 
 const isQuoteModalActive = ref(false)
 const quoteData = ref(null)

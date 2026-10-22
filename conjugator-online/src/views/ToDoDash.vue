@@ -464,30 +464,106 @@
             </v-expansion-panels>
           </v-col>
 
-          <!-- Linguistic Profile Card (Clickable preview, opens dialog) -->
+          <!-- Linguistic Profile Card -->
           <v-col cols="12">
-            <v-card 
-              class="h-100 cursor-pointer transition-all hover-elevation-4"
-              elevation="0" 
-              rounded="xl" 
-              border
-              @click="showProfileDialog = true"
-            >
+            <v-card class="h-100" elevation="0" rounded="xl" border>
               <v-card-title class="bg-indigo-lighten-5 border-b pa-4">
-                <div class="d-flex align-center ga-2 justify-space-between">
+                <div class="d-flex align-center ga-2 justify-space-between w-100">
                   <div class="d-flex align-center ga-2">
                     <v-icon color="indigo-darken-2">mdi-badge-account-outline</v-icon>
                     <span class="text-indigo-darken-2">Language Profile</span>
                   </div>
-                  <v-icon size="20" color="indigo-darken-2">mdi-arrow-top-right</v-icon>
+                  <v-chip
+                    size="x-small"
+                    :color="userStore.hasLinguisticProfile ? 'success' : 'grey'"
+                    variant="tonal"
+                  >
+                    {{ userStore.hasLinguisticProfile ? 'Available' : 'Not yet available' }}
+                  </v-chip>
                 </div>
               </v-card-title>
 
               <v-card-text class="pa-5">
-                <div class="text-center py-6 text-slate-500">
-                  <v-icon size="32" class="mb-2 d-block">mdi-information-outline</v-icon>
-                  <div class="text-caption">Click to view your full language profile</div>
-                </div>
+                <template v-if="userStore.hasLinguisticProfile && userStore.linguisticProfile">
+                  <div class="d-flex flex-column ga-3 mb-4">
+                    <div>
+                      <div class="d-flex justify-space-between text-caption mb-1">
+                        <span class="text-slate-600 font-weight-medium">Linguistic Precision</span>
+                        <strong class="text-indigo-darken-2">{{ userStore.linguisticProfile.linguistic_precision ?? 0 }}</strong>
+                      </div>
+                      <v-progress-linear
+                        :model-value="(userStore.linguisticProfile.linguistic_precision ?? 0) * 10"
+                        color="indigo"
+                        bg-color="indigo-lighten-5"
+                        height="8"
+                        rounded
+                      />
+                    </div>
+
+                    <div>
+                      <div class="d-flex justify-space-between text-caption mb-1">
+                        <span class="text-slate-600 font-weight-medium"">Phonetic Clarity</span>
+                        <strong class="text-teal-darken-2">{{ userStore.linguisticProfile.phonetic_clarity ?? 0 }}</strong>
+                      </div>
+                      <v-progress-linear
+                        :model-value="(userStore.linguisticProfile.phonetic_clarity ?? 0) * 10"
+                        color="teal"
+                        bg-color="teal-lighten-5"
+                        height="8"
+                        rounded
+                      />
+                    </div>
+
+                    <div>
+                      <div class="d-flex justify-space-between text-caption mb-1">
+                        <span class="text-slate-600 font-weight-medium"">Communicative Flow</span>
+                        <strong class="text-purple-darken-2">{{ userStore.linguisticProfile.communicative_flow ?? 0 }}</strong>
+                      </div>
+                      <v-progress-linear
+                        :model-value="(userStore.linguisticProfile.communicative_flow ?? 0) * 10"
+                        color="purple"
+                        bg-color="purple-lighten-5"
+                        height="8"
+                        rounded
+                      />
+                    </div>
+
+                    <div>
+                      <div class="d-flex justify-space-between text-caption mb-1">
+                        <span class="text-slate-600 font-weight-medium">Expressive Range</span>
+                        <strong class="text-amber-darken-3">{{ userStore.linguisticProfile.expressive_range ?? 0 }}</strong>
+                      </div>
+                      <v-progress-linear
+                        :model-value="(userStore.linguisticProfile.expressive_range ?? 0) * 10"
+                        color="amber-darken-1"
+                        bg-color="amber-lighten-5"
+                        height="8"
+                        rounded
+                      />
+                    </div>
+                  </div>
+
+                  <v-btn
+                    color="indigo-darken-1"
+                    variant="tonal"
+                    rounded="lg"
+                    block
+                    @click="showProfileDialog = true"
+                  >
+                    <v-icon start>mdi-open-in-new</v-icon>
+                    Read full profile
+                  </v-btn>
+                </template>
+
+                <template v-else>
+                  <div class="text-center py-4 text-slate-500">
+                    <v-icon size="28" class="mb-2">mdi-clock-outline</v-icon>
+                    <div class="text-body-2 font-weight-medium">No language profile yet</div>
+                    <div class="text-caption mt-1">
+                      Your teacher hasn’t published your profile yet.
+                    </div>
+                  </div>
+                </template>
               </v-card-text>
             </v-card>
           </v-col>

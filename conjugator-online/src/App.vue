@@ -39,7 +39,7 @@
         />
       </div>
 
-      <v-list nav density="comfortable" class="px-3 mt-3 bg-white">
+      <v-list nav density="comfortable" class="px-3 mt-1 bg-white">
         
         <template v-if="userStore.isStaff">
           
@@ -111,7 +111,7 @@
             rounded="lg"
             color="primary"
             @click="closeDrawerBelowLg"
-            class="mb-3"
+            class="mb-1"
           />
 
           <v-sheet border rounded="lg" class="group-sheet position-relative mb-2 pt-2 px-2 pb-1">
@@ -161,6 +161,15 @@
               slim
               prepend-icon="mdi-gamepad-circle"
               title="Other Games"
+              rounded="lg"
+              color="primary"
+              @click="closeDrawerBelowLg"
+            />
+            <v-list-item
+              :to="{ name: 'MultiplayerLobby' }"
+              slim
+              prepend-icon="mdi-stadium-variant"
+              title="Multiplayer"
               rounded="lg"
               color="primary"
               @click="closeDrawerBelowLg"
