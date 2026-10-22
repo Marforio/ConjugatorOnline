@@ -57,38 +57,14 @@ const routes = [
   { path: '/teacher/vocab-data', name: 'manage-vocab-data', component: () => import('@/views/ManageVocabData.vue'), meta: { requiresAuth: true, requiresAdmin: true } },
   { path: '/teacher/manage-vocab-lists', name: 'manage-vocab-lists', component: () => import('@/views/ManageVocabLists.vue'), meta: { requiresAuth: true, requiresAdmin: true } },
   //{ path: '/ws-test', name: 'ws-test', component: () => import('@/views/WSTest.vue'), meta: { requiresAuth: false } }
-  {
-      path: '/multiplayer/lobby',
-      name: 'MultiplayerLobby',
-      component: () => import('@/views/multiplayer/MultiplayerLobby.vue'), meta: { requiresAuth: true }
-    },
-    {
-      path: '/multiplayer/arena/:arenaId',
-      name: 'MultiplayerArena',
-      component: () => import('@/views/multiplayer/MultiplayerArena.vue'), meta: { requiresAuth: true }
-    },
-    {
-      path: '/multiplayer/game/:arenaId',
-      name: 'MultiplayerGame',
-      component: () => import('@/views/multiplayer/MultiplayerGame.vue'), meta: { requiresAuth: true }
-    },
-    {
-      path: '/multiplayer/gamecast/:arenaId',
-      name: 'MultiplayerGamecast',
-      component: () => import('@/views/multiplayer/MultiplayerGamecast.vue'), meta: { requiresAuth: true }
-    },
-    {
-      path: '/multiplayer/results/:arenaId',
-      name: 'MultiplayerResults',
-      component: () => import('@/views/multiplayer/MultiplayerResults.vue'), meta: { requiresAuth: true },
-    },
-    {
-      path: '/multiplayer/stats',
-      name: 'MultiplayerStats',
-      component: () => import('@/views/multiplayer/MultiplayerStats.vue'),
-      meta: { requiresAuth: true }, 
-    },
-
+  { path: '/multiplayer/lobby', name: 'MultiplayerLobby', component: () => import('@/views/multiplayer/MultiplayerLobby.vue'), meta: { requiresAuth: true }},
+  { path: '/multiplayer/arena/:arenaId', name: 'MultiplayerArena', component: () => import('@/views/multiplayer/MultiplayerArena.vue'), meta: { requiresAuth: true }},
+  {path: '/multiplayer/game/:arenaId', name: 'MultiplayerGame', component: () => import('@/views/multiplayer/MultiplayerGame.vue'), meta: { requiresAuth: true } },
+  { path: '/multiplayer/gamecast/:arenaId', name: 'MultiplayerGamecast', component: () => import('@/views/multiplayer/MultiplayerGamecast.vue'), meta: { requiresAuth: true }},
+  { path: '/multiplayer/results/:arenaId', name: 'MultiplayerResults', component: () => import('@/views/multiplayer/MultiplayerResults.vue'), meta: { requiresAuth: true },},
+  { path: '/multiplayer/stats', name: 'MultiplayerStats', component: () => import('@/views/multiplayer/MultiplayerStats.vue'), meta: { requiresAuth: true },},
+  { path: '/multiplayer/tournaments', name: 'TournamentList', component: () => import('@/views/multiplayer/TournamentList.vue'), meta: { requiresAuth: true } },
+  { path: '/multiplayer/tournaments/:id', name: 'TournamentView', component: () => import('@/views/multiplayer/TournamentView.vue'), meta: { requiresAuth: true } },
 ]
 
 const router = createRouter({

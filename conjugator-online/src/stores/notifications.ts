@@ -6,7 +6,9 @@ import api from '@/axios';
 
 interface Notification {
   id: number;
-  notification_type: 'achievement' | 'assignment_completed' | 'feedback_received' | 'profile_updated';
+  notification_type: 'achievement' | 'assignment_completed' | 'feedback_received' | 'profile_updated'
+  | 'tournament_invite' | 'tournament_started' | 'tournament_round' | 'tournament_result';
+  tournament: string | null;   // expose tournament_id in NotificationSerializer
   title: string;
   message: string;
   achievement: number | null;

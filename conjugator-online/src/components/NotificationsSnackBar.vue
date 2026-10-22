@@ -1,4 +1,3 @@
-<!-- components/NotificationSnackbar.vue -->
 <template>
   <div>
     <!-- Snackbar for new notifications -->
@@ -6,12 +5,20 @@
       v-model="showSnackbar"
       :timeout="10000"
       location="top right"
-      :color="currentNotification?.notification_type === 'achievement' ? 'amber-darken-2' : 'success'"
+      :color="snackbarColor(currentNotification?.notification_type)"
       elevation="8"
       rounded="lg"
       multi-line
     >
-      <div class="d-flex align-items-start">
+      <!-- clickable content -->
+      <div
+        class="d-flex align-items-start clickable-snackbar"
+        role="button"
+        tabindex="0"
+        @click="openNotificationTarget"
+        @keydown.enter.prevent="openNotificationTarget"
+        @keydown.space.prevent="openNotificationTarget"
+      >
         <v-icon size="32" class="mr-3">
           {{ getNotificationIcon(currentNotification?.notification_type) }}
         </v-icon>
@@ -22,36 +29,24 @@
           <div class="text-body-2 mt-1">
             {{ currentNotification?.message }}
           </div>
+          <div class="text-caption mt-2 text-white">
+            Click to open
+          </div>
         </div>
       </div>
-      
+
       <template v-slot:actions>
-        <v-btn
-          variant="text"
-          size="small"
-          @click="viewDetails"
-        >
-          View
-        </v-btn>
-        <v-btn
-          variant="text"
-          size="small"
-          icon="mdi-close"
-          @click="dismissSnackbar"
-        />
+        <v-btn variant="text" size="small" @click="viewDetails">View</v-btn>
+        <v-btn variant="text" size="small" icon="mdi-close" @click="dismissSnackbar" />
       </template>
     </v-snackbar>
 
     <!-- Details Dialog -->
-    <v-dialog
-      v-model="showDialog"
-      max-width="500"
-      :scrim="true"
-    >
+    <v-dialog v-model="showDialog" max-width="500" :scrim="true">
       <v-card v-if="currentNotification" rounded="lg">
         <v-card-title class="d-flex align-items-center pa-6 pb-4">
-          <v-icon 
-            size="40" 
+          <v-icon
+            size="40"
             :color="currentNotification.notification_type === 'achievement' ? 'amber' : 'success'"
             class="mr-3"
           >
@@ -61,10 +56,7 @@
         </v-card-title>
 
         <v-card-text class="pa-6 pt-2">
-          <div class="text-body-1">
-            {{ currentNotification.message }}
-          </div>
-          
+          <div class="text-body-1">{{ currentNotification.message }}</div>
           <div class="text-caption text-medium-emphasis mt-4">
             <v-icon size="14" class="mr-1">mdi-clock-outline</v-icon>
             {{ formatDate(currentNotification.created_at) }}
@@ -72,24 +64,12 @@
         </v-card-text>
 
         <v-card-actions class="pa-6 pt-0">
-        <!-- Show "See my trophies" button only for achievement notifications -->
-        <v-btn
-          v-if="currentNotification.notification_type === 'achievement'"
-          color="secondary"
-          variant="elevated"
-          @click="goToTrophies"
-        >
-          See my trophies
-        </v-btn>
-        <v-spacer />
-        <v-btn
-          color="primary"
-          variant="elevated"
-          @click="closeDialog"
-        >
-          Got it!
-        </v-btn>
-      </v-card-actions>
+          <v-btn color="secondary" variant="elevated" @click="openNotificationTarget">
+            Open
+          </v-btn>
+          <v-spacer />
+          <v-btn color="primary" variant="elevated" @click="closeDialog">Got it!</v-btn>
+        </v-card-actions>
       </v-card>
     </v-dialog>
   </div>
@@ -109,21 +89,14 @@ const currentNotification = ref<any>(null);
 const notificationQueue = ref<any[]>([]);
 const isShowingNotification = ref(false);
 
-// Watch for new unread notifications
 watch(
   () => notificationStore.unreadNotifications,
   (newNotifications, oldNotifications) => {
-    // Find truly new notifications (not in old list)
     const oldIds = new Set(oldNotifications?.map(n => n.id) || []);
     const newOnes = newNotifications.filter(n => !oldIds.has(n.id));
-    
     if (newOnes.length > 0) {
-      // Add to queue
       notificationQueue.value.push(...newOnes);
-      // Show next if not already showing
-      if (!isShowingNotification.value) {
-        showNextNotification();
-      }
+      if (!isShowingNotification.value) showNextNotification();
     }
   },
   { deep: true }
@@ -134,16 +107,12 @@ function showNextNotification() {
     isShowingNotification.value = false;
     return;
   }
-  
   isShowingNotification.value = true;
   currentNotification.value = notificationQueue.value.shift();
   showSnackbar.value = true;
-  
-  // Auto-mark as read after showing
+
   setTimeout(() => {
-    if (currentNotification.value) {
-      notificationStore.markAsRead(currentNotification.value.id);
-    }
+    if (currentNotification.value) notificationStore.markAsRead(currentNotification.value.id);
   }, 1000);
 }
 
@@ -154,47 +123,52 @@ function viewDetails() {
 
 function dismissSnackbar() {
   showSnackbar.value = false;
-  if (currentNotification.value) {
-    notificationStore.dismiss(currentNotification.value.id);
-  }
-  // Show next notification after a short delay
-  setTimeout(() => {
-    showNextNotification();
-  }, 500);
+  if (currentNotification.value) notificationStore.dismiss(currentNotification.value.id);
+  setTimeout(showNextNotification, 500);
 }
 
 function closeDialog() {
   showDialog.value = false;
   currentNotification.value = null;
-  // Show next notification
-  setTimeout(() => {
-    showNextNotification();
-  }, 500);
+  setTimeout(showNextNotification, 500);
 }
 
-function goToTrophies() {
-  // Close dialog first
+function snackbarColor(type?: string) {
+  if (type === 'achievement') return 'amber-darken-2';
+  if (type?.startsWith('tournament_')) return 'deep-purple-darken-1';
+  return 'success';
+}
+
+function openNotificationTarget() {
+  const n = currentNotification.value;
+  if (!n) return;
+
+  showSnackbar.value = false;
   showDialog.value = false;
+
+  // Route by type; tournament takes priority if present
+  if (n.tournament) {
+    router.push({ name: 'TournamentView', params: { id: n.tournament } });
+  } else if (n.notification_type === 'achievement') {
+    router.push({ path: '/dashboard', query: { tab: 'goals' } });
+  } else {
+    router.push({ path: '/dashboard' });
+  }
+
   currentNotification.value = null;
-  
-  // Navigate to dashboard with goals tab
-  router.push({ 
-    path: '/dashboard', 
-    query: { tab: 'goals' } 
-  });
-  
-  // Show next notification if any
-  setTimeout(() => {
-    showNextNotification();
-  }, 500);
+  setTimeout(showNextNotification, 500);
 }
 
 function getNotificationIcon(type: string | undefined): string {
   const icons: Record<string, string> = {
-    'achievement': 'mdi-trophy',
-    'assignment_completed': 'mdi-check-circle',
-    'feedback_received': 'mdi-comment-alert',
-    'profile_updated': 'mdi-account-voice',
+    achievement: 'mdi-trophy',
+    assignment_completed: 'mdi-check-circle',
+    feedback_received: 'mdi-comment-alert',
+    profile_updated: 'mdi-account-voice',
+    tournament_invite: 'mdi-tournament',
+    tournament_started: 'mdi-sitemap',
+    tournament_round: 'mdi-sword-cross',
+    tournament_result: 'mdi-podium-gold',
   };
   return icons[type || ''] || 'mdi-bell';
 }
@@ -202,15 +176,20 @@ function getNotificationIcon(type: string | undefined): string {
 function formatDate(dateString: string): string {
   const date = new Date(dateString);
   const now = new Date();
-  const diffMs = now.getTime() - date.getTime();
-  const diffMins = Math.floor(diffMs / 60000);
-  
+  const diffMins = Math.floor((now.getTime() - date.getTime()) / 60000);
   if (diffMins < 1) return 'Just now';
   if (diffMins < 60) return `${diffMins} minute${diffMins > 1 ? 's' : ''} ago`;
-  
   const diffHours = Math.floor(diffMins / 60);
   if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
-  
   return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 }
 </script>
+
+<style scoped>
+.clickable-snackbar {
+  cursor: pointer;
+}
+.clickable-snackbar:hover {
+  opacity: 0.95;
+}
+</style>

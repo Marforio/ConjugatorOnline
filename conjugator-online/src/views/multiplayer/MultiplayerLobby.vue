@@ -15,6 +15,9 @@
                prepend-icon="mdi-plus-circle" @click="openCreate">
           {{ isTeacher ? 'Host a Game' : 'Create Arena' }}
         </v-btn>
+        <v-btn variant="tonal" rounded="xl" size="x-large" prepend-icon="mdi-tournament" :to="{ name: 'TournamentList' }">
+          Tournaments
+        </v-btn>
       </div>
 
       <v-slide-y-transition>
