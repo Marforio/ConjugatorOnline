@@ -179,6 +179,7 @@ interface Arena {
   course?: string | null;
   host_is_player?: boolean;
   created_by_teacher?: boolean;
+  tournament_id?: string | null;
 }
 
 const router = useRouter();
@@ -269,7 +270,11 @@ async function fetchArenas() {
   }
 }
 
-function returnToArena(a: { arena_id: string; status: string }) {
+function returnToArena(a: { arena_id: string; status: string; tournament_id?: string | null }) {
+  if (a.tournament_id) {
+    router.push({ name: 'TournamentView', params: { id: a.tournament_id } });
+    return;
+  }
   router.push({
     name: a.status === 'in_progress' ? 'MultiplayerGame' : 'MultiplayerArena',
     params: { arenaId: a.arena_id },

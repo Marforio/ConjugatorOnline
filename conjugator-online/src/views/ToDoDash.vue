@@ -197,37 +197,6 @@
                 <VWActiveSessionsCompact />
               </div>
 
-                            <!-- Workout Section -->
-              <div v-if="welcomeStore.currentWorkout" class="border rounded-xl pa-6 bg-blue-lighten-5">
-                <div class="d-flex align-center justify-space-between mb-4">
-                  <div>
-                    <div class="text-subtitle-1 font-weight-bold text-slate-900"><v-icon>mdi-run-fast</v-icon><span class="ms-2">Personal Workout</span></div>
-                    <div class="text-caption text-slate-600 ms-3">Book a 5-minute session with your teacher to do your workout!</div>
-                  </div>
-                  <v-chip size="small" :color="workoutProgressColor" variant="flat" class="text-white font-weight-bold">
-                    {{ workoutCompletionPercentage }}%
-                  </v-chip>
-                </div>
-                <div class="ga-2 d-flex flex-column">
-                  <div 
-                    v-for="drill in [...inProgressDrills, ...notStartedDrills]" 
-                    :key="drill.id" 
-                    class="d-flex align-center justify-space-between pa-3 rounded-lg border bg-white"
-                  >
-                    <div class="d-flex align-center ga-3 flex-grow-1">
-                      <v-icon size="18" :color="drill.completed_sessions > 0 ? 'warning' : 'slate-300'">
-                        {{ drill.completed_sessions > 0 ? 'mdi-progress-clock' : 'mdi-circle-outline' }}
-                      </v-icon>
-                      <div>
-                        <div class="text-body-2 font-weight-bold text-slate-800">{{ drill.name }}</div>
-                        <div class="text-caption text-slate-500">{{ drill.completed_sessions }} / {{ drill.target_sessions || 1 }} sessions</div>
-                      </div>
-                    </div>
-                    <v-chip size="x-small" variant="outlined" color="slate-400">{{ drill.type }}</v-chip>
-                  </div>
-                </div>
-              </div>
-
               <!-- Market Masters ticker -->
               <div
                 v-if="welcomeStore.portfolioTickerItems.length"
@@ -359,6 +328,37 @@
             </div>
           </v-card-text>
         </v-card>
+
+                      <!-- Workout Section -->
+              <div v-if="welcomeStore.currentWorkout" class="border rounded-xl pa-6 bg-blue-lighten-5">
+                <div class="d-flex align-center justify-space-between mb-4">
+                  <div>
+                    <div class="text-subtitle-1 font-weight-bold text-slate-900"><v-icon>mdi-run-fast</v-icon><span class="ms-2">Personal Workout</span></div>
+                    <div class="text-caption text-slate-600 ms-3">Book a 5-minute session with your teacher to do your workout!</div>
+                  </div>
+                  <v-chip size="small" :color="workoutProgressColor" variant="flat" class="text-white font-weight-bold">
+                    {{ workoutCompletionPercentage }}%
+                  </v-chip>
+                </div>
+                <div class="ga-2 d-flex flex-column">
+                  <div 
+                    v-for="drill in [...inProgressDrills, ...notStartedDrills]" 
+                    :key="drill.id" 
+                    class="d-flex align-center justify-space-between pa-3 rounded-lg border bg-white"
+                  >
+                    <div class="d-flex align-center ga-3 flex-grow-1">
+                      <v-icon size="18" :color="drill.completed_sessions > 0 ? 'warning' : 'slate-300'">
+                        {{ drill.completed_sessions > 0 ? 'mdi-progress-clock' : 'mdi-circle-outline' }}
+                      </v-icon>
+                      <div>
+                        <div class="text-body-2 font-weight-bold text-slate-800">{{ drill.name }}</div>
+                        <div class="text-caption text-slate-500">{{ drill.completed_sessions }} / {{ drill.target_sessions || 1 }} sessions</div>
+                      </div>
+                    </div>
+                    <v-chip size="x-small" variant="outlined" color="slate-400">{{ drill.type }}</v-chip>
+                  </div>
+                </div>
+              </div>
       </v-col>
 
       <!-- Right: Sidebar - Course Objectives + Completed + Profile (5 cols) -->
