@@ -332,18 +332,14 @@ onMounted(async () => {
   }
 });
 
-watch(myPromptIndex, (idx) => {
-  if (phase.value === 'playing' || phase.value === 'loading' || phase.value === 'countdown') {
-    if (idx !== currentIndex.value) {
-      currentIndex.value = idx;
-      submitted.value = false;
-      answer.value = '';
-      feedback.value = null;
-      roundResults.value = [];
-      // optionally re-deal card only when actively playing
-      if (phase.value === 'playing') dealCard();
-    }
-  }
+watch(() => store.myPromptIndex, (idx) => {
+  if (phase.value !== 'playing') return;
+  if (submitted.value || feedback.value) return;   
+  if (idx === currentIndex.value) return;
+  currentIndex.value = idx;
+  answer.value = '';
+  roundResults.value = [];
+  dealCard();
 });
 
 onBeforeUnmount(() => {
