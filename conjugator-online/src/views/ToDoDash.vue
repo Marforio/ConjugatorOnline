@@ -114,8 +114,8 @@
               </div>
 
               <div class="flex-grow-1 min-width-0">
-                <div class="text-body-2 font-weight-bold text-slate-800">{{ activity.title }}</div>
-                <div class="text-caption text-slate-500 mt-0.5">{{ activity.description }}</div>
+                <div class="text-body-2 font-weight-bold text-slate-800">{{ activity.title.length > 35 ? activity.title.slice(0, 35) + '...' : activity.title }}</div>
+                <div class="text-caption text-slate-500 mt-0.5">{{ activity.description.length > 50 ? activity.description.slice(0, 45) + '...' : activity.description }}</div>
                 <div class="text-xxs text-slate-400 font-monospace mt-1">{{ formatActivityTime(activity.timestamp) }}</div>
               </div>
 
@@ -325,11 +325,8 @@
                   </div>
                 </div>
               </div>
-            </div>
-          </v-card-text>
-        </v-card>
 
-                      <!-- Workout Section -->
+              <!-- Workout Section -->
               <div v-if="welcomeStore.currentWorkout" class="border rounded-xl pa-6 bg-blue-lighten-5">
                 <div class="d-flex align-center justify-space-between mb-4">
                   <div>
@@ -359,6 +356,12 @@
                   </div>
                 </div>
               </div>
+
+            </div>
+          </v-card-text>
+        </v-card>
+
+
       </v-col>
 
       <!-- Right: Sidebar - Course Objectives + Completed + Profile (5 cols) -->

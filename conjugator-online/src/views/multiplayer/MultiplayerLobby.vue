@@ -5,18 +5,20 @@
         <div>
           <h1 class="text-h3 font-weight-black hero-title">🎮 Multiplayer Arena</h1>
           <p class="text-body-1 text-medium-emphasis">
-            {{ isTeacher ? 'Host a game for your class.' : 'Challenge your classmates in real time.' }}
+            {{ isTeacher ? 'Host a game for your class.' : 'Challenge your classmates in real time!' }}
           </p>
         </div>
+      </div>
+      <div class="d-flex align-center justify-end flex-wrap ga-4 mb-6">
         <v-btn variant="tonal" rounded="xl" size="x-large" prepend-icon="mdi-chart-box" :to="{ name: 'MultiplayerStats' }">
           Stats
+        </v-btn>
+        <v-btn variant="tonal" rounded="xl" size="x-large" prepend-icon="mdi-tournament" :to="{ name: 'TournamentList' }">
+          Tournaments
         </v-btn>
         <v-btn color="primary" size="x-large" rounded="xl" class="font-weight-bold"
                prepend-icon="mdi-plus-circle" @click="openCreate">
           {{ isTeacher ? 'Host a Game' : 'Create Arena' }}
-        </v-btn>
-        <v-btn variant="tonal" rounded="xl" size="x-large" prepend-icon="mdi-tournament" :to="{ name: 'TournamentList' }">
-          Tournaments
         </v-btn>
       </div>
 

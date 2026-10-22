@@ -272,6 +272,11 @@
                     <span class="text-subtitle-2 font-weight-black text-indigo-darken-3">
                       {{ session.correct_count }} / {{ session.total_rounds }} questions correct
                     </span>
+                    <span v-if="session.source === 'multiplayer'" class="text-caption text-medium-emphasis">
+                      <v-chip size="small" color="primary" variant="tonal">
+                        {{ session.source }}
+                      </v-chip>
+                    </span>
                     <span class="text-caption text-medium-emphasis">
                       <v-icon size="12" class="me-1">mdi-clock-outline</v-icon>
                       {{ new Date(session.started_at).toLocaleString() }}
@@ -453,6 +458,7 @@ interface OtherGameSession {
   session_id: number;
   student: { id: number; user: { username: string } };
   game_name: string;
+  source: string;
   total_rounds: number;
   correct_count: number;
   rounds?: OtherGameRound[];

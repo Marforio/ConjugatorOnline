@@ -70,17 +70,23 @@
         <div class="text-subtitle-2 font-weight-bold mt-4 mb-1">
           Invite classmates ({{ totalPlayers }}/16, minimum 4 to start)
         </div>
-        <v-list density="compact" max-height="220" class="overflow-y-auto border rounded-lg">
-          <v-list-item v-for="s in classmates" :key="s.user_id" :disabled="s.is_me || blocked(s)">
-            <template #prepend>
-              <v-checkbox-btn v-model="form.invitee_ids" :value="s.user_id" :disabled="s.is_me || blocked(s)" />
-            </template>
-            <v-list-item-title>{{ s.username }}</v-list-item-title>
-            <v-list-item-subtitle v-if="blocked(s)">
-              {{ s.blocked_active_tournament ? 'In another tournament' : 'In an active arena' }}
-            </v-list-item-subtitle>
-          </v-list-item>
-          <div v-if="!classmates.length" class="pa-3 text-caption">No classmates found.</div>
+        <v-list max-height="340" style="min-height: 200px;" class="overflow-y-auto border rounded-lg">
+            <v-list-item v-for="s in classmates" :key="s.user_id" :disabled="s.is_me || blocked(s)">
+                <template #prepend>
+                <v-checkbox-btn v-model="form.invitee_ids" :value="s.user_id" :disabled="s.is_me || blocked(s)" />
+                <v-avatar size="28" color="primary" variant="tonal" class="ml-2 mr-3">
+                    <span class="text-caption font-weight-bold">{{ s.initials || s.username.slice(0, 2).toUpperCase() }}</span>
+                </v-avatar>
+                </template>
+                <v-list-item-title>
+                {{ s.username }}
+                <span v-if="s.initials" class="text-medium-emphasis">({{ s.initials }})</span>
+                </v-list-item-title>
+                <v-list-item-subtitle v-if="blocked(s)">
+                {{ s.blocked_active_tournament ? 'In another tournament' : 'In an active arena' }}
+                </v-list-item-subtitle>
+            </v-list-item>
+            <div v-if="!classmates.length" class="pa-3 text-caption text-center">No classmates found.</div>
         </v-list>
 
         <v-alert v-if="error" type="error" variant="tonal" class="mt-3">{{ error }}</v-alert>

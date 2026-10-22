@@ -449,11 +449,16 @@
                       <template #default>
                         <div class="d-flex flex-column flex-sm-row align-sm-center justify-space-between w-100 pe-4 gap-2">
                           <span class="text-subtitle-2 font-weight-black text-indigo-darken-3">
-                            🎯 {{ session.correct_count }} correct out of {{ session.total_rounds }}
+                            🎯 {{ session.correct_count }} out of {{ session.total_rounds }}
+                          </span>
+                          <span v-if="session.source === 'multiplayer'" class="text-caption text-medium-emphasis">
+                            <v-chip size="small" color="primary" variant="tonal">
+                              {{ session.source }}
+                            </v-chip>
                           </span>
                           <span class="text-caption text-medium-emphasis">
                             {{ new Date(session.started_at).toLocaleString() }} &bull; 
-                            <strong class="text-grey-darken-2 ms-1 text-wrap font-code">{{ session.tenses.join(', ').slice(0, 100) }}</strong>
+                            <strong class="text-grey-darken-2 ms-1 text-wrap font-code">{{ session.tenses.length === 6 ? 'All Tenses' : session.tenses.join(', ').slice(0, 100) }}</strong>
                           </span>
                         </div>
                       </template>
@@ -672,6 +677,7 @@ interface GameSession {
   wrong_count: number;
   avg_time_per_prompt: number;
   rounds: Round[];
+  source: string;
 }
 
 interface TenseStats {
