@@ -10,7 +10,7 @@
     "vuedraggable": "^4.1.0"
   },
   "devDependencies": {
-    "@types/node": "^22.14.1",
+    "@types/node": ">=24.22.1",
     "@vue/runtime-core": "^3.5.13",
     "@vue/runtime-dom": "^3.5.13"
   }
