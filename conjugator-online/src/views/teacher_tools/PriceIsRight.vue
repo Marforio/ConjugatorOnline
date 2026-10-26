@@ -222,6 +222,7 @@ type QItem = {
   image: string
   type: QuestionType
   pack: PackId
+  maxDecimals?: number
 }
 type Player = {
   id: string; name: string; points: number; deviations: number[]; avgDeviationPct: number;
@@ -329,7 +330,7 @@ const questions: QItem[] = [
   { id: "q94", pack: "pack4", prompt: "Boiling point of hydrogen at sea level", value: -253, unitHint: "°C", image: "/images/price-is-right/q94.jpg", type: "integer" },
   { id: "q102", pack: "pack4", prompt: "Melting point of iron", value: 1538, unitHint: "°C", image: "/images/price-is-right/q102.jpg", type: "integer" },
   { id: "q106", pack: "pack4", prompt: "Melting point of aluminum", value: 660, unitHint: "°C", image: "/images/price-is-right/q106.jpg", type: "integer" },
-  { id: "q602", pack: "pack4", prompt: "Value of pi (π) to 10 decimal places", value: 3.1415926535, unitHint: "", image: "/images/price-is-right/q60.jpg", type: "decimal" },
+  { id: "q602", pack: "pack4", prompt: "Value of pi (π) to 10 decimal places", value: 3.1415926535, unitHint: "", image: "/images/price-is-right/q60.jpg", type: "decimal", maxDecimals: 10 },
 
   // PACK 5
   { id: "q28", pack: "pack5", prompt: "Length of the Great Wall of China", value: 21196, unitHint: "km", image: "/images/price-is-right/q28.jpg", type: "integer" },
@@ -404,7 +405,10 @@ const inputPlaceholder = computed(() => {
   switch (currentQuestion.value?.type) {
     case "year": return "e.g. 1999"
     case "money": return "e.g. 2'060.00"
-    case "decimal": return "e.g. 48.795"
+    case "decimal": {
+      const d = currentQuestion.value?.maxDecimals ?? 3
+      return d === 10 ? "e.g. 5.523415535" : "e.g. 48.795"
+    }
     default: return "e.g. 41'000'000"
   }
 })
@@ -488,7 +492,9 @@ function formatByQuestionType(raw: string, type: QuestionType): string {
 
   if (type === "integer") return `${sign}${grouped}`
   if (type === "money") return `${sign}${grouped}${decRaw.length ? "." + decRaw.slice(0, 2) : ""}`
-  return `${sign}${grouped}${decRaw.length ? "." + decRaw.slice(0, 3) : ""}` // decimal
+
+  const maxDecimals = currentQuestion.value?.maxDecimals ?? 3
+  return `${sign}${grouped}${decRaw.length ? "." + decRaw.slice(0, maxDecimals) : ""}`
 }
 
 function parseGuess(input: string, type: QuestionType): number | null {

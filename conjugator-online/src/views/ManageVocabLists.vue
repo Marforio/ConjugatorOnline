@@ -250,8 +250,7 @@
                           >
                             Manage Access
                           </v-btn>
-                        </td>
-                        <v-btn
+                          <v-btn
                           size="small"
                           variant="tonal"
                           color="deep-purple"
@@ -262,6 +261,7 @@
                         >
                           Preview
                         </v-btn>
+                        </td>
                       </tr>
                     </tbody>
                   </v-table>
@@ -1195,6 +1195,7 @@ const selectedListForAvailability = ref<any>(null)
 const currentAvailabilities = ref<any[]>([])
 const availableCourses = computed(() => userStore.availableTeacherCourses)
 const availableStudents = computed(() => userStore.availableTeacherStudents)
+const allAvailabilities = ref<any[]>([])
 
 const newAvailabilityScopeType = ref<"course" | "student">("course")
 const newAvailabilityTargetId = ref<string | null>(null)
@@ -1287,52 +1288,6 @@ const groupedVocabLists = computed(() => {
     }))
 })
 
-/**
- *  Re-maps vocab list assets 
- * straight into their matching assigned course deployment rows.
- */
-const vocabListsByCourse = computed(() => {
-  const courseMap: Record<string, any[]> = {}
-  
-  // 1. Initialize empty arrays for the true structural courses loaded from your store
-  if (userStore.availableTeacherCourses && Array.isArray(userStore.availableTeacherCourses)) {
-    userStore.availableTeacherCourses.forEach((course: any) => {
-      if (course && course.slug) {
-        // Enforce lowercase lookups for matching safety across the mapping table
-        courseMap[course.slug.trim().toLowerCase()] = []
-      }
-    })
-  }
-
-  // 2. Distribute vocabulary datasets by evaluating their VocabListAvailability rules
-  vocabLists.value.forEach(list => {
-    if (list.availabilities && Array.isArray(list.availabilities)) {
-      list.availabilities.forEach((availability: any) => {
-        if (availability.course) {
-          const targetSlug = availability.course.trim().toLowerCase()
-          
-          // Verify that this course bucket actually exists in the teacher's current scope
-          if (courseMap[targetSlug] !== undefined) {
-            // Deduplicate lists so we don't accidentally display duplicates in a single course panel
-            if (!courseMap[targetSlug].some(item => item.id === list.id)) {
-              courseMap[targetSlug].push(list)
-            }
-          }
-        }
-      })
-    }
-  })
-
-  // 3. Output standard structured objects designed for reactive UI table rendering
-  return Object.entries(courseMap)
-    .map(([slug, items]) => ({
-      slug: slug,
-      items: items.sort((a, b) => a.name.localeCompare(b.name))
-    }))
-    .sort((a, b) => a.slug.localeCompare(b.slug))
-})
-
-
 async function openPresentationPreview(list: any) {
   presentationLoadingListId.value = list.id
   try {
@@ -1400,12 +1355,15 @@ async function submitNewAvailabilityRule() {
       payload.student = newAvailabilityTargetId.value
     }
 
-    // 🌟 Changed endpoint to singular 'vocab-list-availability'
     await api.post("/vocab-list-availability/", payload)
     newAvailabilityTargetId.value = null
     
+    // refresh dialog list
     await fetchAvailabilitiesForList(selectedListForAvailability.value.id)
-    await fetchVocabLists() 
+    // refresh By Course tab source
+    await fetchAllAvailabilities()
+    // optional if list metadata might have changed
+    // await fetchVocabLists()
   } catch (err: any) {
     console.error("Failed executing permission rule insertion:", err)
     alert(err.response?.data?.detail || "Could not authorize this permission.")
@@ -1420,10 +1378,13 @@ async function removeAvailabilityRule(ruleId: string) {
   
   availabilityActionLoading.value = true
   try {
-    // 🌟 Changed endpoint to singular 'vocab-list-availability'
     await api.delete(`/vocab-list-availability/${ruleId}/`)
+    // refresh dialog list
     await fetchAvailabilitiesForList(selectedListForAvailability.value.id)
-    await fetchVocabLists()
+    // refresh By Course tab source
+    await fetchAllAvailabilities()
+    // optional if list metadata might have changed
+    // await fetchVocabLists()
   } catch (err) {
     console.error("Failed wiping selected list visibility parameters:", err)
   } finally {
@@ -1450,6 +1411,54 @@ function isIrregularVerbList(items: any[]) {
   return items.some(item =>
     item?.additional_data?.past_simple || item?.additional_data?.present_perfect
   )
+}
+
+
+async function fetchAllAvailabilities() {
+  try {
+    const res = await api.get("/vocab-list-availability/")
+    allAvailabilities.value = Array.isArray(res.data) ? res.data : (res.data?.results || [])
+  } catch (err) {
+    console.error("Failed loading availability rules:", err)
+    allAvailabilities.value = []
+  }
+}
+
+const vocabListsByCourse = computed(() => {
+  const courseMap: Record<string, any[]> = {}
+
+  for (const c of userStore.availableTeacherCourses || []) {
+    if (c?.slug) courseMap[c.slug.trim().toLowerCase()] = []
+  }
+
+  const listsById = new Map(vocabLists.value.map((l) => [String(l.id), l]))
+
+  for (const rule of allAvailabilities.value) {
+    if (!rule?.course || !rule?.vocab_list) continue
+    const slug = String(rule.course).trim().toLowerCase() // course PK == slug
+    const listId = String(typeof rule.vocab_list === "string" ? rule.vocab_list : rule.vocab_list?.id)
+    const list = listsById.get(listId)
+
+    if (list && courseMap[slug] && !courseMap[slug].some((x) => x.id === list.id)) {
+      courseMap[slug].push(list)
+    }
+  }
+
+  return Object.entries(courseMap)
+    .map(([slug, items]) => ({
+      slug,
+      items: items.sort((a, b) => a.name.localeCompare(b.name))
+    }))
+    .sort((a, b) => a.slug.localeCompare(b.slug))
+})
+
+async function refreshManagementData() {
+  loading.value = true
+  try {
+    await Promise.all([fetchVocabLists(), fetchAllAvailabilities()])
+  } finally {
+    loading.value = false
+  }
 }
 
 async function downloadListPdf(list: any) {
@@ -1880,7 +1889,7 @@ function formatDate(isoString: string) {
   })
 }
 
-onMounted(() => fetchVocabLists())
+onMounted(() => refreshManagementData())
 </script>
 
 <style scoped>
