@@ -507,7 +507,9 @@ const portfolioTickerItems = computed<PortfolioTickerItem[]>(() => {
   )
 
   const exerciseAssignments = computed(() =>
-    allAssignments.value.filter((a) => a.task_type === 'exercise')
+    allAssignments.value.filter((a) => 
+        a.trigger_key.length === 4
+)
   )
   const exercisePendingAssignments = computed(() =>
     exerciseAssignments.value.filter((a) => a.status === 'pending')
@@ -537,13 +539,11 @@ function pickNextBySmallestNumericTarget(list: Assignment[]): Assignment[] {
   const conjugationAssignments = computed(() =>
     allAssignments.value.filter(
       a =>
-        a.task_type === 'achievement' &&
-        (
           a.trigger_key.includes('correct_prompts') ||
           a.trigger_key.includes('health_tier') ||
           a.trigger_key.includes('discovery') ||
-          a.trigger_key.includes('mastery')
-        )
+          a.trigger_key.includes('Discover') ||
+          a.trigger_key.includes('Master')
     )
   );
 
@@ -585,7 +585,6 @@ function pickNextBySmallestNumericTarget(list: Assignment[]): Assignment[] {
   const gamesAssignments = computed(() =>
     allAssignments.value.filter(
       (a) =>
-        a.task_type === 'achievement' &&
         !a.trigger_key.includes('vw_write_complete') &&
         !a.trigger_key.includes('correct_prompts') &&
         !a.trigger_key.includes('health_tier') &&

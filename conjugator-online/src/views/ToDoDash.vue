@@ -294,7 +294,7 @@
                     v-for="item in welcomeStore.gamesPendingAssignments" 
                     :key="item.assignment_id"
                     class="d-flex align-center justify-space-between pa-3 rounded-lg bg-white border border-purple-lighten-3 cursor-pointer hover-elevation-2"
-                    @click="goToGameFromAssignment(item)"
+                    @click="goToGamesHub()"
                   >
                     <div class="flex-grow-1">
                       <div class="text-body-2 font-weight-medium text-slate-800">{{ item.description }}</div>
@@ -964,23 +964,38 @@ function goToExerciseDetail(errorCode: string) {
   goToRouteName("exercise-detail", { errorCode });
 }
 
-function goToVocabWorkout() {
+function goToVocabWorkoutData() {
   router.push({
     name: 'student-data',
     query: { tab: 'vocabulary' }
   })
 }
+function goToVocabWorkout() { 
+  router.push({
+    name: 'vocabworkout'
+  })
+}
 
-function goToConjugator() { 
+function goToConjugatorData() { 
   router.push({
     name: 'student-data',
     query: { tab: 'conjugation-game' }
   })
 }
-function goToGamesHub() { 
+function goToConjugator() { 
+  router.push({
+    name: 'conjugator'
+  })
+}
+function goToGamesHubData() { 
   router.push({
     name: 'student-data',
     query: { tab: 'other-games' }
+  })
+}
+function goToGamesHub() { 
+  router.push({
+    name: 'games',
   })
 }
 function goToFeedback() { 
@@ -1000,37 +1015,6 @@ function goToTrophy() {
     name: 'student-data',
     query: { tab: 'goals' }
   })
-}
-
-const GAME_ROUTE_HINTS = [
-  { routeName: "pronounpractice", keywords: ["pronoun practice", "pronouns"] },
-  { routeName: "comparison", keywords: ["comparison", "comparatives", "superlatives"] },
-  { routeName: "idealinker", keywords: ["idea linker", "idea-linker"] },
-  { routeName: "quantifierquest", keywords: ["quantifier quest", "quantifier-quest", "quantifiers"] },
-  { routeName: "verbmixer", keywords: ["verb mixer", "verb-mixer"] },
-  { routeName: "passiveparty", keywords: ["passive party", "passive-party", "passive"] },
-  { routeName: "trickytranslator", keywords: ["tricky translator", "tricky-translator", "translator"] },
-  { routeName: "regretmachine", keywords: ["regret machine", "regret-machine", "regrets"] },
-  { routeName: "wordfamilies", keywords: ["word families", "word-families"] },
-  { routeName: "reportedspeech", keywords: ["reported speech", "reported-speech"] },
-  { routeName: "year2040", keywords: ["year 2040", "2040"] },
-  { routeName: "paralleluniverse", keywords: ["parallel universe", "parallel-universe"] },
-  { routeName: "auxiliaryuses", keywords: ["uses of auxiliaries", "auxiliaries"] },
-];
-
-function inferGameRouteNameFromText(text: string | null | undefined): string | null {
-  const t = String(text ?? "").toLowerCase();
-  if (!t) return null;
-  for (const entry of GAME_ROUTE_HINTS) {
-    if (entry.keywords.some((k) => t.includes(k))) return entry.routeName;
-  }
-  return null;
-}
-
-function goToGameFromAssignment(assignment: any) {
-  const routeName = inferGameRouteNameFromText(assignment?.description);
-  if (routeName) goToRouteName(routeName);
-  else goToGamesHub();
 }
 
 const formatDate = (dateString: string | null) => {
@@ -1123,9 +1107,9 @@ const conjugationCompletedAssignments = computed(() =>
 
 
 function goToActivity(activity: ActivityItem) {
-  if (activity.type === 'conjugation') return goToConjugator();
-  if (activity.type === 'vocab_workout' || activity.type === 'vocab') return goToVocabWorkout();
-  if (activity.type === 'game' || activity.type === 'other_game') return goToGamesHub();
+  if (activity.type === 'conjugation') return goToConjugatorData();
+  if (activity.type === 'vocab_workout' || activity.type === 'vocab') return goToVocabWorkoutData();
+  if (activity.type === 'game' || activity.type === 'other_game') return goToGamesHubData();
   if (activity.type === 'feedback') return goToFeedback();
   if (activity.type === 'exercise') return goToExercise();
   if (activity.type === 'achievement' || activity.type === 'assignment') return goToTrophy();
