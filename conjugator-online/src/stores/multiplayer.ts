@@ -9,7 +9,8 @@ export type WsStatus = 'idle' | 'connecting' | 'open' | 'reconnecting' | 'closed
 export type ServerMessage = { type: string; [key: string]: any };
 type Listener = (msg: ServerMessage) => void;
 
-const FATAL_CLOSE_CODES = new Set([4001, 4003, 4004]); // unauthenticated / no arena / not participant
+// Added 1006 (Abnormal Close) and 1011 (Internal Error) to prevent retry spam on server crash
+const FATAL_CLOSE_CODES = new Set([1006, 1011, 4001, 4003, 4004]);
 const MAX_RETRIES = 8;
 
 function wsBase() {
@@ -179,12 +180,14 @@ export const useMultiplayerStore = defineStore('multiplayer', () => {
     wsStatus.value = retries > 0 ? 'reconnecting' : 'connecting';
 
     if (tokenNeedsRefresh(auth.access)) {
-      try {
-        await auth.refreshAccessToken();
-      } catch {
-        /* fall through: the handshake will fail and we retry */
-      }
-    }
+          try {
+            await auth.refreshAccessToken();
+          } catch {
+            wsStatus.value = 'closed';
+            lastError.value = 'Session expired. Please log in again.';
+            return; // Abort connection attempt immediately
+          }
+        }
 
     const url = `${wsBase()}/ws/multiplayer-arena/${arenaId.value}/?token=${encodeURIComponent(auth.access || '')}`;
     const ws = new WebSocket(url);

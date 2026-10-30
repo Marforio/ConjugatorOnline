@@ -15,10 +15,6 @@
               <span v-if="asset.direction === 'down'" class="arrow">▼</span>
             </span>
           </span>
-
-          <span v-if="(index + 1) % 15 === 0" class="ticker-system-broadcast-message">
-            ⚡ Prices update every 30 min during market hours ⚡
-          </span>
           
         </template>
       </div>
@@ -2695,20 +2691,11 @@ watch(() => tradeForm.value.action, (newAction) => {
 })
 
 watch(
-  () => selectedPortfolio.value,
-  async (val) => {
-    if (val) await renderPortfolioVizCharts()
+  () => selectedPortfolio.value?.id,
+  async (newId) => {
+    if (newId) await renderPortfolioVizCharts()
     else destroyVizCharts()
-  },
-  { deep: true }
-)
-
-watch(
-  () => marketPrices.value,
-  async () => {
-    if (selectedPortfolio.value) await renderPortfolioVizCharts()
-  },
-  { deep: true }
+  }
 )
 
 // INTERCEPTOR: Receives ticker strings from custom TickerSearchBar selections safely
@@ -3096,6 +3083,12 @@ let dashboardIntervalId = null
 onMounted(() => {
   fetchDashboardData()
   dashboardIntervalId = setInterval(fetchDashboardData, 60000)
+  // Render charts every 5 minutes (300000 ms) if a portfolio is open
+    setInterval(() => {
+      if (selectedPortfolio.value && portfolioDialog.value.isOpen) {
+        renderPortfolioVizCharts()
+      }
+    }, 300000)
   updateNYSECountdownClock()
   clockIntervalId = setInterval(updateNYSECountdownClock, 1000)
 })
@@ -3193,7 +3186,7 @@ onBeforeUnmount(() => {
 .ticker-moving { 
   display: inline-block; 
   padding-left: 100%; 
-  animation: ticker-slide 600s linear infinite; 
+  animation: ticker-slide 1500s linear infinite; 
 }
 
 .ticker-item { 
