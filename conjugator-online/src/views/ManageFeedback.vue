@@ -280,7 +280,7 @@
               </div>
 
             <v-row v-for="(err, eIdx) in errorsList" :key="eIdx" dense class="mb-2 align-center">
-              <v-col cols="12" md="4"><v-select v-model="err.code" :items="errorCodes" label="Error Code" variant="outlined" density="compact" bg-color="white" hide-details /></v-col>
+              <v-col cols="12" md="4"><v-select v-model="err.code" :items="errorCodes" label="Error Code" variant="outlined" density="compact" bg-color="white" hide-details style="width: 500px; max-width: 100%;" :menu-props="{ maxWidth: '500px' }" /></v-col>
               <v-col cols="12" md="6"><v-textarea v-model="err.evidence" @input="calculateAutoErrorCount(eIdx)" label="Evidence (separate items with semicolons)" variant="outlined" rows="1" auto-grow density="compact" bg-color="white" hide-details /></v-col>
               <v-col cols="12" md="1" class="text-center font-weight-black text-amber-darken-4">{{ err.times }}x</v-col>
               <v-col cols="12" md="1" class="text-center"><v-btn icon="mdi-delete" size="small" color="error" variant="text" @click="errorsList.splice(eIdx, 1)" /></v-col>

@@ -2079,13 +2079,29 @@ const fetchPortfolioPnlSeries = async (portfolioId) => {
     const res = await api.get(`/market-masters/portfolios/${portfolioId}/pnl-timeseries/`)
     const payload = res?.data || {}
 
-    // expected shape:
-    // payload = { portfolio: [{t, pnl}], assets: { AAPL: [{t,pnl}], TSLA: [{t,pnl}] } }
-
     portfolioPnlSeries.value = payload.portfolio || []
     pnlSeriesByTicker.value = payload.assets || {}
 
-    // wait for DOM to paint canvases in open-position cards
+    // --- NEW: INJECT LIVE CANONICAL PNL ---
+    // This forces the right-most point of the graph to perfectly match the UI cards
+    const now = new Date().toISOString()
+    
+    // Append Live Portfolio PnL
+    const livePortfolioPnl = rowPnl(selectedPortfolio.value)
+    portfolioPnlSeries.value.push({ t: now, pnl: livePortfolioPnl })
+
+    // Append Live Asset PnL for the contribution charts
+    if (selectedPortfolio.value?.assets) {
+      for (const holding of selectedPortfolio.value.assets) {
+        const liveAssetPnl = getHoldingPnL(holding)
+        if (!pnlSeriesByTicker.value[holding.ticker]) {
+          pnlSeriesByTicker.value[holding.ticker] = []
+        }
+        pnlSeriesByTicker.value[holding.ticker].push({ t: now, pnl: liveAssetPnl })
+      }
+    }
+    // --------------------------------------
+
     await nextTick()
 
     for (const [ticker, pts] of Object.entries(pnlSeriesByTicker.value)) {

@@ -249,11 +249,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRouter, RouterLink } from 'vue-router'
 import api from '@/axios'
+import { useUserStore } from '@/stores/user'
 
 const router = useRouter()
+const userStore = useUserStore()
 
 // ---------------------------
 // STATE
@@ -265,14 +267,10 @@ const selectedStudent = ref<string | null>(null)
 // ---------------------------
 // STUDENT LIST
 // ---------------------------
-const studentOptions = ref<
-  { webid: string; initials: string; label: string }[]
->([])
-
-onMounted(async () => {
-  try {
-  const res = await api.get('/students/')
-  studentOptions.value = res.data
+const studentOptions = computed(() => {
+  const students = userStore.availableTeacherStudents || []
+  
+  return [...students] // Shallow copy to prevent mutating the store array during sort
     .filter((s: any) => typeof s.web_id === 'string' && s.web_id.trim().length > 0)
     .sort((a: any, b: any) => a.web_id.localeCompare(b.web_id))
     .map((s: any) => ({
@@ -280,9 +278,6 @@ onMounted(async () => {
       initials: s.initials,
       label: `${s.web_id} — ${s.initials}`,
     }))
-} catch (err) {
-  console.error('Failed to load students:', err)
-}
 })
 
 // ---------------------------

@@ -150,15 +150,22 @@ function normalizeKey(v: string): string {
 function humanizeListKey(raw: string): string {
   const k = normalizeKey(raw);
   if (!k) return "Unknown list";
+
+  // Exact map lookup (handles both UUIDs and integer/string IDs)
   if (customListNameMap.value[k]) return customListNameMap.value[k];
 
+  // Composite keys like "<listKey>::<term>"
   if (k.includes("::")) {
-    const [left] = k.split("::");
+    const [left, tail] = k.split("::");
     const leftKey = normalizeKey(left);
-    if (customListNameMap.value[leftKey]) return customListNameMap.value[leftKey];
+    const prettyLeft = customListNameMap.value[leftKey] || humanizeListKey(leftKey);
+    return `${prettyLeft}::${tail}`;
   }
 
+  // Unmapped UUIDs: keep as-is or provide a fallback label
   if (isUuidLike(k)) return k;
+
+  // Format snake_case hardcoded keys
   return k.replace(/_/g, " ").replace(/\b\w/g, (m) => m.toUpperCase());
 }
 
@@ -166,22 +173,45 @@ function replaceListIdsInText(text: string): string {
   let out = String(text ?? "");
   if (!out) return out;
 
+  // 1. Replace composite key patterns "<uuid_or_id>::<term>"
   out = out.replace(
-    /([0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})::([^\s,;]+)/gi,
-    (_m, uuid, tail) => `${humanizeListKey(uuid)}::${tail}`
+    /([0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}|\b\d+\b)::([^\s,;]+)/gi,
+    (_m, id, tail) => `${humanizeListKey(id)}::${tail}`
   );
 
+  // 2. Replace standalone UUIDs or numeric IDs present in the lookup map
   out = out.replace(
-    /([0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})/gi,
-    (m) => humanizeListKey(m)
+    /([0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}|\b\d+\b)/gi,
+    (m) => (customListNameMap.value[m] ? customListNameMap.value[m] : humanizeListKey(m))
   );
 
   return out;
 }
 
+function prettyActivityDescription(item: TickerItem | null): string {
+  if (!item) return "";
+
+  let d = String(item.last_activity_name ?? "");
+
+  // Replace any embedded UUIDs or list IDs in text
+  d = replaceListIdsInText(d);
+
+  // Direct lookup check if the name itself is an ID or list key
+  const prettyName = humanizeListKey(item.last_activity_name);
+  if (prettyName !== item.last_activity_name) {
+    d = d.split(item.last_activity_name).join(prettyName);
+  }
+
+  return d || prettyName || "Activity";
+}
+
+const displayActivityLabel = computed(() => {
+  return prettyActivityDescription(displayActivity.value);
+});
+
 async function fetchCustomListNames() {
   try {
-    const res = await api.get("/vocab-lists/");
+    const res = await api.get("/vocab-lists/", { params: { limit: 1000 } }); // Ensure pagination doesn't omit lists
     const rows = Array.isArray(res.data) ? res.data : (res.data?.results || []);
     const map: Record<string, string> = {};
     for (const r of rows) {
@@ -194,11 +224,6 @@ async function fetchCustomListNames() {
     console.warn("Could not load custom list names", e);
   }
 }
-
-const displayActivityLabel = computed(() => {
-  const raw = displayActivity.value?.last_activity_name || "";
-  return replaceListIdsInText(raw);
-});
 
 async function fetchLatestActivities() {
   try {
