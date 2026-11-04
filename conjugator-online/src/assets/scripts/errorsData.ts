@@ -914,6 +914,13 @@ export const errorsData: Record<string, ErrorEntry> = {
         "recommendation": "review the correct usage of prepositions with temporal circumstances",
         "examples": "I was born in summer; more precisely, on June 12th, 1975, at midnight."
     },
+    "1025":{
+        "short_slug": "prep-composition",
+        "description": "incorrect preposition to describe composition",
+        "reference": "<a href='https://book.language-labs.ch/ch10#e1025' target='_blank'>error 1025</a>",
+        "recommendation": "use 'of' when describing the composition of something",
+        "examples": "say 'a wall made of wood', not 'in wood'; and 'a cake made of flour and sugar', not 'a cake made from flour and sugar'"
+    },
     "1030":{
         "short_slug": "prep-purpose",
         "description": "incorrect combination of preposition and verb to express intention or purpose",
@@ -1039,6 +1046,13 @@ export const errorsData: Record<string, ErrorEntry> = {
         "reference": "<a href='https://book.language-labs.ch/ch12#e1210' target='_blank'>error 1210</a>",
         "recommendation": "remember that the use of possessive 's is the standard way of indicating that a person possesses something",
         "examples": "John's car (not 'the car of John'); my friend's chalet (not 'the chalet of my friend')"
+    },
+    "1211":{
+        "short_slug": "possessive-s-time",
+        "description": "not using possessive 's with a time expression",
+        "reference": "<a href='https://book.language-labs.ch/ch12#e1211' target='_blank'>error 1211</a>",
+        "recommendation": "remember that the use of possessive 's is a standard way of indicating the time associated with an event",
+        "examples": "yesterday's meeting (not 'the meeting of yesterday'); last week's schedule (not 'the schedule of last week')"
     },
     "1220":{
         "short_slug": "possessive-s-unusual",

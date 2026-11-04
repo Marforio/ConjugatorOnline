@@ -10452,20 +10452,14 @@ export const exerciseData = {
         ]
     },
     3: {
-        type: "checkbox",
-        question: "Identify the correct subject/object pairs:",
-        answers: [
-            ["I / Me", true, "Correct!"],
-            ["She / Her", true, "Correct!"],
-            ["They / Them", true, "Correct!"],
-            ["We / Us", true, "Correct!"],
-            ["He / His", false, "Wrong. ('His' is possessive; 'Him' is object)."]
-        ]
+        type: "text_multi",
+        question: "Fill in the blank with a pronoun: 'I saw ______ [Bill] yesterday.'",
+        answers: ["him"]
     },
     4: {
         type: "text_multi",
-        question: "Correct the error: 'Him and me went to the park.'",
-        answers: ["He and I went to the park"]
+        question: "Fill in the blank with a pronoun: 'I met ______ [Sarah] yesterday.'",
+        answers: ["her"]
     },
     5: {
         type: "radio",
@@ -10493,7 +10487,7 @@ export const exerciseData = {
     },
     8: {
         type: "text_multi",
-        question: "What is the object pronoun for 'it'?",
+        question: "Fill in the blank: 'I saw ___ [the cloud] yesterday.'",
         answers: ["it"]
     },
     9: {
@@ -10504,16 +10498,6 @@ export const exerciseData = {
             ["Yes.", false, "Wrong."]
         ]
     },
-    10: {
-        type: "checkbox",
-        question: "Identify the SUBJECT pronouns:",
-        answers: [
-            ["I", true, "Correct!"],
-            ["Them", false, "Wrong."],
-            ["She", true, "Correct!"],
-            ["Us", false, "Wrong."]
-        ]
-    },
     11: {
         type: "radio",
         question: "True or False: The object pronoun is used after a preposition (e.g., with me, for him).",
@@ -10522,104 +10506,6 @@ export const exerciseData = {
             ["False", false, "Wrong."]
         ]
     },
-    12: {
-        type: "text_multi",
-        question: "Fix this: 'Mary told I a secret.'",
-        answers: ["Mary told me a secret"]
-    }
-},
-
-// 0915 Its vs It's
-"0915": {
-    1: {
-        type: "radio",
-        question: "Which form is the possessive adjective (meaning 'belonging to it')?",
-        answers: [
-            ["Its", true, "Correct!"],
-            ["It's", false, "Wrong (It's = It is)."]
-        ]
-    },
-    2: {
-        type: "radio",
-        question: "Which form is the contraction for 'it is' or 'it has'?",
-        answers: [
-            ["It's", true, "Correct!"],
-            ["Its", false, "Wrong."]
-        ]
-    },
-    3: {
-        type: "checkbox",
-        question: "Identify the correct usage:",
-        answers: [
-            ["The dog wagged its tail.", true, "Correct!"],
-            ["It's a beautiful day.", true, "Correct!"],
-            ["The company changed it's logo.", false, "Wrong (No apostrophe for possession)."]
-        ]
-    },
-    4: {
-        type: "text_multi",
-        question: "Correct the error: 'The bird hurt it's wing.'",
-        answers: ["The bird hurt its wing"]
-    },
-    5: {
-        type: "radio",
-        question: "Fill in the blank: '______ raining outside.'",
-        answers: [
-            ["It's", true, "Correct!"],
-            ["Its", false, "Wrong."]
-        ]
-    },
-    6: {
-        type: "radio",
-        question: "Fill in the blank: 'The phone lost ______ signal.'",
-        answers: [
-            ["its", true, "Correct!"],
-            ["it's", false, "Wrong."]
-        ]
-    },
-    7: {
-        type: "radio",
-        question: "Does the possessive 'its' ever have an apostrophe?",
-        answers: [
-            ["No, never.", true, "Correct! (Just like 'his', 'hers', and 'ours')."],
-            ["Yes.", false, "Wrong."]
-        ]
-    },
-    8: {
-        type: "text_multi",
-        question: "What is the missing word: '____ been a long time.'",
-        answers: ["It's"]
-    },
-    9: {
-        type: "radio",
-        question: "Which is correct?",
-        answers: [
-            ["Every country has its own flag.", true, "Correct!"],
-            ["Every country has it's own flag.", false, "Wrong."]
-        ]
-    },
-    10: {
-        type: "checkbox",
-        question: "Identify correct 'It is' contractions:",
-        answers: [
-            ["It's cold.", true, "Correct!"],
-            ["It's mine.", true, "Correct!"],
-            ["The tree lost it's leaves.", false, "Wrong."]
-        ]
-    },
-    11: {
-        type: "radio",
-        question: "True or False: If you can replace the word with 'it is', you need the apostrophe.",
-        answers: [
-            ["True", true, "Correct!"],
-            ["False", false, "Wrong."]
-        ]
-    },
-    12: {
-        type: "text_multi",
-        question: "Fix this: 'The car has it's engine in the back.'",
-        answers: ["The car has its engine in the back"]
-    }
 },
 
 // 0920 Gendered Pronouns for Objects (It)
@@ -10629,37 +10515,42 @@ export const exerciseData = {
         question: "In English, what pronoun do we use for an object like a table or a car?",
         answers: [
             ["It", true, "Correct!"],
-            ["He or She", false, "Wrong (Objects have no gender)."]
+            ["She", false, "Wrong (Objects have no gender)."]
         ]
     },
     2: {
         type: "radio",
-        question: "Is 'I have a new boat. She is very fast' correct?",
+        question: "Is 'I have a new boat. He is very fast' correct?",
         answers: [
-            ["It is common for sailors, but 'It' is the standard rule.", true, "Correct!"],
-            ["No, it's always wrong.", false, "Wrong."]
+            ["No, it should be 'It is very fast'.", true, "Correct!"],
+            ["Yes.", false, "Wrong."]
         ]
     },
     3: {
         type: "checkbox",
         question: "Identify correct object references:",
         answers: [
-            ["Look at that building. It is huge.", true, "Correct!"],
+            ["Look at that house. She is huge.", false, "Wrong!"],
             ["Where is the hammer? He is in the box.", false, "Wrong."],
             ["I love this watch. It was a gift.", true, "Correct!"]
         ]
     },
     4: {
-        type: "text_multi",
-        question: "Correct the error: 'I like your car. How much did he cost?'",
-        answers: ["How much did it cost?"]
+        type: "radio",
+        question: "True or false: 'the most common error with pronouns is to use the possessive 'his' or 'her' for objects.'",
+        answers: [
+            ["True", true, "Correct! The correct possessive for objects is 'its'."],
+            ["False", false, "Wrong. The correct possessive for objects is 'its'."]
+        ]
     },
     5: {
         type: "radio",
-        question: "Fill in the blank: 'The sun is hot. ______ is shining brightly.'",
+        question: "Fill in the blank: 'That car is so fast. ______ top speed is 429 km/h.'",
         answers: [
-            ["It", true, "Correct!"],
-            ["He", false, "Wrong."]
+            ["her", false, "Wrong."],
+            ["its", true, "Correct!"],
+            ["his", false, "Wrong."],
+            ["it's", false, "Wrong. 'It's' is the wrong spelling."]
         ]
     },
     6: {
@@ -10667,16 +10558,15 @@ export const exerciseData = {
         question: "Fill in the blank: 'The wall lost ______ paint.'",
         answers: [
             ["its", true, "Correct!"],
-            ["his", false, "Wrong."]
+            ["his", false, "Wrong."],
+            ["it's", false, "Wrong. 'It's' is the wrong spelling."],
+            ["her", false, "Wrong."]
         ]
     },
     7: {
-        type: "radio",
-        question: "Which is the standard pronoun for an animal whose gender you don't know?",
-        answers: [
-            ["It", true, "Correct!"],
-            ["She", false, "Wrong."]
-        ]
+        type: "text_multi",
+        question: "Fill in the blank: 'The master bedroom has ___ own bathroom.'",
+        answers: ["Its", "its"]
     },
     8: {
         type: "text_multi",
@@ -10688,7 +10578,8 @@ export const exerciseData = {
         question: "Is 'This machine changes his color' correct?",
         answers: [
             ["No, use 'its'.", true, "Correct!"],
-            ["Yes.", false, "Wrong."]
+            ["No, use 'her'.", false, "Wrong. The correct answer is 'its'"],
+            ["Yes.", false, "Wrong. The correct answer is 'its'"]
         ]
     },
     10: {
@@ -10697,7 +10588,7 @@ export const exerciseData = {
         answers: [
             ["Give the book to her.", false, "Correct (if 'her' is a person)."],
             ["The book? He is on the table.", true, "Incorrect."],
-            ["My country and her history.", true, "Correct (metaphorical/poetic, but 'its' is better for grammar)."]
+            ["My country and her history.", false, "Incorrect."]
         ]
     },
     11: {
@@ -10710,8 +10601,8 @@ export const exerciseData = {
     },
     12: {
         type: "text_multi",
-        question: "Fix this: 'I found your keys. Here they are.' (Wait, this is plural). Fix: 'I found your key. Here he is.'",
-        answers: ["Here it is"]
+        question: "Fix this: 'I found your key. Here she is.'",
+        answers: ["Here it is", "Here it", "it"]
     }
 },
 
@@ -11680,15 +11571,15 @@ export const exerciseData = {
     },
     4: {
         type: "text_multi",
-        question: "Correct the error: 'We traveled in Spain last summer.' (meaning the trip to the country)",
-        answers: ["We traveled to Spain"]
+        question: "Fill in the blank: 'We traveled ____ Spain last summer.'",
+        answers: ["to"]
     },
     5: {
         type: "radio",
         question: "What is the exception for the word 'home'?",
         answers: [
             ["You don't use 'to' (e.g., I'm going home).", true, "Correct! 'Home' doesn't take 'to'."],
-            ["You must use 'at'.", false, "Wrong."]
+            ["You must use 'at'.", false, "Wrong. 'Home' acts like a pseudo-preposition and doesn't take 'at'."]
         ]
     },
     6: {
@@ -11696,7 +11587,8 @@ export const exerciseData = {
         question: "Fill in the blank: 'She moved ______ London in 2010.'",
         answers: [
             ["to", true, "Correct!"],
-            ["at", false, "Wrong."]
+            ["at", false, "Wrong."],
+            ["in", false, "Wrong. Use 'to' for movement towards a place."]
         ]
     },
     7: {
@@ -11709,15 +11601,15 @@ export const exerciseData = {
     },
     8: {
         type: "text_multi",
-        question: "What is the missing preposition: 'I walked ____ the station.'",
+        question: "What is the missing preposition: 'I flew ____ Bali.'",
         answers: ["to"]
     },
     9: {
         type: "radio",
-        question: "Is 'I arrived to the hotel' correct?",
+        question: "Is 'I drove home' correct?",
         answers: [
-            ["No, 'arrive' is an exception and uses 'at' or 'in'.", true, "Correct!"],
-            ["Yes.", false, "Wrong."]
+            ["No, 'home' is an exception and doesn't take 'to'.", true, "Correct!"],
+            ["Yes.", false, "Wrong. 'Home' is a destination that doesn't take 'to'."]
         ]
     },
     10: {
@@ -11726,12 +11618,12 @@ export const exerciseData = {
         answers: [
             ["Fly to New York", true, "Correct!"],
             ["Return to work", true, "Correct!"],
-            ["Get to the car", true, "Correct!"]
+            ["Go in Paris", false, "Wrong. Use 'to' for movement towards a place."]
         ]
     },
     11: {
         type: "radio",
-        question: "True or False: Using 'in' instead of 'to' is a common error for speakers of Romance languages.",
+        question: "True or False: Using 'in' instead of 'to' is a common error for speakers of French.",
         answers: [
             ["True", true, "Correct!"],
             ["False", false, "Wrong."]
@@ -11740,7 +11632,7 @@ export const exerciseData = {
     12: {
         type: "text_multi",
         question: "Fix this: 'We are going in the mountains this weekend.'",
-        answers: ["We are going to the mountains"]
+        answers: ["to the mountains", "to", "going to", "we are going to the mountains this weekend", "we are going to"]
     }
 },
 
@@ -11751,7 +11643,10 @@ export const exerciseData = {
         question: "Which preposition describes the *amount* of a change?",
         answers: [
             ["By (e.g., increased by 10%)", true, "Correct!"],
-            ["To", false, "Wrong. 'To' describes the final target."]
+            ["To (e.g. increased to 10%)", false, "Wrong. 'To' describes the final target."],
+            ["Of (e.g., increased of 10%)", false, "Wrong. Use 'by' for the amount of change."],
+            ["From (e.g., increased from 10%)", false, "Wrong. 'From' describes the starting point, not the amount of change."]
+
         ]
     },
     2: {
@@ -11759,7 +11654,9 @@ export const exerciseData = {
         question: "Which preposition describes the *final result* of a change?",
         answers: [
             ["To (e.g., rose to $100)", true, "Correct!"],
-            ["By", false, "Wrong."]
+            ["By (e.g., rose by $10)", false, "Wrong. 'By' describes the amount of change, not the final result."],
+            ["Of (e.g., rose of $10)", false, "Wrong. Use 'by' for the amount of change."],
+            ["From (e.g., rose from $10)", false, "Wrong. 'From' describes the starting point, not the final result."]
         ]
     },
     3: {
@@ -11774,7 +11671,7 @@ export const exerciseData = {
     4: {
         type: "text_multi",
         question: "Correct the error: 'Sales grew of 20%.'",
-        answers: ["Sales grew by 20%"]
+        answers: ["Sales grew by 20%", "by 20%", "by", "Sales grew by", "Sales grew by 20 percent"]
     },
     5: {
         type: "radio",
@@ -11788,6 +11685,8 @@ export const exerciseData = {
         type: "radio",
         question: "Fill in the blank: 'We cut our costs ______ 15 percent.'",
         answers: [
+            ["from", false, "Wrong. 'From' describes the starting point, not the amount of change."],
+            ["of", false, "Wrong. Use 'by' for the amount of change."],
             ["by", true, "Correct!"],
             ["to", false, "Wrong (unless the costs are now exactly 15%)."]
         ]
@@ -11802,12 +11701,12 @@ export const exerciseData = {
     },
     8: {
         type: "text_multi",
-        question: "What is the preposition for the target: 'The population grew ____ 1 million.'",
+        question: "What is the preposition for the target of 1 million in 'The population grew ____ 1 million.'",
         answers: ["to"]
     },
     9: {
         type: "radio",
-        question: "Is 'It increased from $500' correct to describe the gap?",
+        question: "Is 'It increased from $500' correct to describe the difference or gap between start and end point?",
         answers: [
             ["No, use 'by $500'.", true, "Correct!"],
             ["Yes.", false, "Wrong."]
@@ -11833,7 +11732,7 @@ export const exerciseData = {
     12: {
         type: "text_multi",
         question: "Fix this: 'The stock price dropped to 5 dollars.' (The drop was 5 dollars).",
-        answers: ["dropped by 5 dollars"]
+        answers: ["dropped by 5 dollars", "by", "by 5 dollars", "dropped by", "dropped by 5", "The stock price dropped by 5 dollars"]
     }
 },
 
@@ -11843,17 +11742,18 @@ export const exerciseData = {
         type: "radio",
         question: "Which preposition is used for specific times of day (e.g., 5 PM, noon)?",
         answers: [
-            ["At", true, "Correct!"],
-            ["On", false, "Wrong."],
-            ["In", false, "Wrong."]
+            ["At ('at 5 PM', 'at noon')", true, "Correct!"],
+            ["On ('on 5 PM', 'on noon')", false, "Wrong. Use 'at' for specific times of day."],
+            ["In ('in 5 PM', 'in noon')", false, "Wrong. Use 'at' for specific times of day."]
         ]
     },
     2: {
         type: "radio",
         question: "Which preposition is used for days and specific dates (e.g., Monday, July 4th)?",
         answers: [
-            ["On", true, "Correct!"],
-            ["In", false, "Wrong."]
+            ["At ('at Monday', 'at July 4th')", false, "Wrong. Use 'on' for days and specific dates."],
+            ["On ('on Monday', 'on July 4th')", true, "Correct!"],
+            ["In ('in Monday', 'in July 4th')", false, "Wrong. Use 'on' for days and specific dates."]
         ]
     },
     3: {
@@ -11868,15 +11768,16 @@ export const exerciseData = {
     },
     4: {
         type: "text_multi",
-        question: "Correct the error: 'I was born at 1985.'",
-        answers: ["I was born in 1985"]
+        question: "Fill in the blank: 'I was born ___ 1985.'",
+        answers: ["in"]
     },
     5: {
         type: "radio",
         question: "What do we use for seasons (Summer, Winter)?",
         answers: [
-            ["In", true, "Correct!"],
-            ["On", false, "Wrong."]
+            ["At", false, "Wrong. We use 'in' for longer periods, including seasons."],
+            ["In", true, "Correct! We use 'in' for longer time periods, including seasons."],
+            ["On", false, "Wrong. We use 'in' for longer periods, including seasons."]
         ]
     },
     6: {
@@ -11892,8 +11793,9 @@ export const exerciseData = {
         type: "radio",
         question: "Which is correct?",
         answers: [
-            ["In the morning", true, "Correct!"],
-            ["At the morning", false, "Wrong."]
+            ["In the morning", true, "Correct! We use 'in' for parts of the day except 'night'."],
+            ["At the morning", false, "Wrong. We use 'in' for parts of the day except 'night'."   ],
+            ["On the morning", false, "Wrong. We use 'in' for parts of the day except 'night'."]
         ]
     },
     8: {
@@ -11928,10 +11830,87 @@ export const exerciseData = {
     },
     12: {
         type: "text_multi",
-        question: "Fix this: 'The shop opens in 8 o'clock.'",
-        answers: ["at 8 o'clock"]
+        question: "Fill in the blank: 'The shop opens ___ 8 o'clock.'",
+        answers: ["at"]
     }
 },
+
+// 1025 Preposition of Composition (Of vs In)
+"1025": {
+    1: {
+        type: "radio",
+        question: "Which is correct?",
+        answers: [
+            ["The interior is made in wood", false, "Wrong. Use 'of' instead of 'in'."],
+            ["The interior is made of wood", true, "Correct!"],
+            ["The interior is made from wood", false, "Wrong. Use 'of' instead of 'from' for composition."],
+        ]
+    },
+    2: {
+        type: "radio",
+        question: "Which is correct?",
+        answers: [
+            ["The table is made of metal", true, "Correct!"],
+            ["The table is made in metal", false, "Wrong. Use 'of' instead of 'in'."],
+            ["The table is made from metal", false, "Wrong. Use 'of' instead of 'from' for composition."]
+        ]
+    },
+    3: {
+        type: "radio",
+        question: "True or false: we use 'in' to describe material composition.",
+        answers: [
+            ["True", false, "Wrong. We use 'of' for material composition."],
+            ["False", true, "Correct!"]
+        ]
+    },
+    4: {
+        type: "radio",
+        question: "Fill in the blank: 'The house is made ___ concrete.'",
+        answers: [
+            ["of", true, "Correct!"],
+            ["in", false, "Wrong. Use 'of' for material composition."],
+            ["from", false, "Wrong. Use 'of' for material composition."]
+        ]
+    },
+    5: {
+        type: "radio",
+        question: "Is this correct: 'The house is in wood.'",
+        answers: [
+            ["True", false, "Wrong. Use ' made of' for material composition."],
+            ["False", true, "Correct!"]
+        ]
+    },
+    6: {
+        type: "checkbox",
+        question: "What is a correct translation of 'une maison en bois'? Check all that apply.",
+        answers: [
+            ["A house in wood", false, "Wrong. Use 'made of' for material composition."],
+            ["A house from wood", false, "Wrong. Use 'made of' for material composition."],
+            ["A wood house", true, "Correct!"],
+            ["A house made of wood", true, "Correct!"],
+
+        ]
+    },
+    7: {
+        type: "checkbox",
+        question: "Which of these are correct translations of 'le revêtement est en plastique'? Check all that apply.",
+        answers: [
+            ["The coating is in plastic", false, "Wrong. Use 'made of' for material composition."],
+            ["It is a plastic coating", true, "Correct!"],
+            ["The coating is from plastic", false, "Wrong. Use 'made of' for material composition."],
+            ["The coating is made of plastic", true, "Correct!"]
+        ]
+    },
+    8: {
+        type: "radio",
+        question: "True or false: compound words such as 'wood house' and 'steel frame' are an excellent way to describe material composition.",
+        answers: [
+            ["True", true, "Correct! Compound words are often used to describe material composition."],
+            ["False", false, "Wrong. Compound words are indeed an excellent way to describe material composition."]
+        ]
+    }
+},
+
 
 // 1030 Preposition of Purpose (To vs For)
 "1030": {
@@ -11945,10 +11924,10 @@ export const exerciseData = {
     },
     2: {
         type: "radio",
-        question: "Can you use 'for' to express purpose?",
+        question: "Which form is correct?",
         answers: [
-            ["Only with a noun (e.g., for a coffee) or a gerund (for buying).", true, "Correct!"],
-            ["Yes, with any verb form.", false, "Wrong."]
+            ["I came here for learn engineering.", true, "Correct!"],
+            ["I cam here to learn engineering.", false, "Wrong. Use 'for' with a gerund or a noun."]
         ]
     },
     3: {
@@ -11962,31 +11941,31 @@ export const exerciseData = {
     },
     4: {
         type: "text_multi",
-        question: "Correct the error: 'I am here for learn English.'",
-        answers: ["I am here to learn English"]
+        question: "Fill in the blank: 'I am here ____ learn English.'",
+        answers: ["to"]
     },
     5: {
         type: "radio",
-        question: "Fill in the blank: 'We use a knife ______ bread.'",
+        question: "Fill in the blank: 'Knives are used ______ cutting bread.'",
         answers: [
-            ["to cut", true, "Correct!"],
-            ["for to cut", false, "Wrong."]
+            ["to", false, "Wrong. We use 'for' with a gerund (-ing) verb form."],
+            ["for", true, "Correct! We use 'for' with a gerund (-ing) verb form."]
         ]
     },
     6: {
         type: "radio",
-        question: "Which is the correct way to say you traveled for a specific reason?",
+        question: "What is the difference between 'to' and 'for' when expressing purpose?",
         answers: [
-            ["I traveled to see the world.", true, "Correct!"],
-            ["I traveled for see the world.", false, "Wrong."]
+            ["'for + gerund' is used to describe general purpose or utility; 'to + infinitive' expresses a specific purpose.", true, "Correct!"],
+            ["There is no clear difference between 'to' and 'for'.", false, "Wrong. There is a clear difference: 'for + gerund' is used for general purpose; 'to + infinitive' is used for specific purpose."]
         ]
     },
     7: {
         type: "radio",
-        question: "Which is correct?",
+        question: "Fill in the blank: 'Grinding machines are used ____ shape metal parts.'",
         answers: [
-            ["I came here for a meeting.", true, "Correct! (For + Noun)."],
-            ["I came here to a meeting.", false, "Wrong."]
+            ["to", true, "Correct! We use 'to' with an infinitive to express specific purpose."],
+            ["for", false, "Wrong. Use 'to' with an infinitive to express specific purpose."]
         ]
     },
     8: {
@@ -12013,7 +11992,7 @@ export const exerciseData = {
     },
     11: {
         type: "radio",
-        question: "True or False: Using 'for' + infinitive is a very common error for speakers of languages where the preposition 'for' (like 'pour' or 'für') is used this way.",
+        question: "True or False: Using 'for' + infinitive is a very common error for speakers of French or Italian (who translate 'pour faire' or 'per fare').",
         answers: [
             ["True", true, "Correct!"],
             ["False", false, "Wrong."]
@@ -12021,8 +12000,8 @@ export const exerciseData = {
     },
     12: {
         type: "text_multi",
-        question: "Fix this: 'I stop at the bank for get some cash.'",
-        answers: ["to get some cash"]
+        question: "Fix this: 'I stopped at the bank for get some cash.'",
+        answers: ["to get some cash", "to get cash", "to get", "to", "I stopped at the bank to get some cash"]
     }
 },
 
@@ -12060,7 +12039,7 @@ export const exerciseData = {
     },
     5: {
         type: "radio",
-        question: "Fill in the blank: 'The garden is fifteen ______ twenty meters.'",
+        question: "Fill in the blank: 'The garden is fifteen ______ twenty meters, for a total of 300 square meters.'",
         answers: [
             ["by", true, "Correct!"],
             ["to", false, "Wrong."]
@@ -12095,15 +12074,6 @@ export const exerciseData = {
             ["Yes.", false, "Wrong."]
         ]
     },
-    10: {
-        type: "checkbox",
-        question: "Identify correct dimension phrases:",
-        answers: [
-            ["Side by side", true, "Correct!"],
-            ["Bit by bit", true, "Correct!"],
-            ["Three by five index card", true, "Correct!"]
-        ]
-    },
     11: {
         type: "radio",
         question: "True or False: In dimensions, 'by' essentially represents the 'x' (multiplication) symbol.",
@@ -12112,11 +12082,6 @@ export const exerciseData = {
             ["False", false, "Wrong."]
         ]
     },
-    12: {
-        type: "text_multi",
-        question: "Fix this: 'The scale of the map is one by fifty thousand.'",
-        answers: ["one to fifty thousand"]
-    }
 },
 
 // 1040 No Future Tense in Time Clauses (Will)
@@ -12125,8 +12090,8 @@ export const exerciseData = {
         type: "radio",
         question: "In a time clause (starting with 'when', 'as soon as', 'before'), which tense should you use for the future?",
         answers: [
-            ["Present Simple", true, "Correct! (e.g., When I arrive)."],
-            ["Future Simple", false, "Wrong. (e.g., When I will arrive)."]
+            ["Present Simple (e.g., When I arrive)", true, "Correct! We use the present simple in time clauses for future events."],
+            ["Future Simple (e.g., When I will arrive)", false, "Wrong. We do not use the future simple in time clauses."]
         ]
     },
     2: {
@@ -12134,7 +12099,7 @@ export const exerciseData = {
         question: "Is 'I will tell him when I will see him' correct?",
         answers: [
             ["True", false, "Wrong. Should be 'when I see him'."],
-            ["False", true, "Correct!"]
+            ["False", true, "Correct! We avoid using 'will' in time clauses."]
         ]
     },
     3: {
@@ -12155,8 +12120,9 @@ export const exerciseData = {
         type: "radio",
         question: "Fill in the blank: 'We ______ until the sun ______.'",
         answers: [
+            ["wait / sets", false, "Wrong. The correct form is 'will wait / sets'."],
             ["will wait / sets", true, "Correct!"],
-            ["wait / will set", false, "Wrong."]
+            ["will wait / will set", false, "Wrong."]
         ]
     },
     6: {
@@ -12169,10 +12135,11 @@ export const exerciseData = {
     },
     7: {
         type: "radio",
-        question: "Can we use 'will' in the main part of the sentence?",
+        question: "Why is it wrong to use 'will' in time clauses?",
         answers: [
-            ["Yes, only the 'time clause' part loses the 'will'.", true, "Correct!"],
-            ["No.", false, "Wrong."]
+            ["Because the future is already expressed in the main clause (no need to use 'will' twice).", true, "Correct!"],
+            ["Because 'will' is never used in English.", false, "Wrong. 'Will' is used in the main clause, just not in the time clause."],
+            ["Because life is hard.", false, "Wrong. This is not a grammatical reason."]
         ]
     },
     8: {
@@ -12182,15 +12149,15 @@ export const exerciseData = {
     },
     9: {
         type: "radio",
-        question: "Is 'When I am older, I will be famous' correct?",
+        question: "Is it a good thing if I say 'will' two times in a sentence, once in the main clause and once in the time clause?",
         answers: [
-            ["True", true, "Correct!"],
-            ["False", false, "Wrong."]
+            ["No", true, "Correct! We avoid using 'will' in time clauses."],
+            ["Yes", false, "Wrong. 'Will' should not be used in time clauses."]
         ]
     },
     10: {
         type: "checkbox",
-        question: "Identify incorrect time clauses:",
+        question: "Identify INCORRECT time clauses:",
         answers: [
             ["If I will go", true, "Incorrect (Conditionals follow the same rule)."],
             ["When I will go", true, "Incorrect."],
@@ -12199,33 +12166,31 @@ export const exerciseData = {
     },
     11: {
         type: "radio",
-        question: "True or False: Using 'will' in time clauses is a common error for speakers of languages where the future is used in both parts.",
+        question: "True or False: Using 'will' in time clauses is a common error for speakers of languages where the future is used in both parts, like French.",
         answers: [
             ["True", true, "Correct!"],
             ["False", false, "Wrong."]
         ]
     },
-    12: {
-        type: "text_multi",
-        question: "Fix this: 'As soon as the flight will land, I'll text you.'",
-        answers: ["As soon as the flight lands"]
-    }
+
 },
 
 // 1041 Preposition of Static Position (Under vs Down)
 "1041": {
     1: {
-        type: "radio",
-        question: "Which preposition describes a static location below something else?",
+        type: "checkbox",
+        question: "Which prepositions describe a static location below something else?",
         answers: [
             ["Under", true, "Correct!"],
-            ["Down", false, "Wrong. 'Down' implies movement or direction."]
+            ["Down", false, "Wrong. 'Down' implies movement or direction."],
+            ["Below", true, "Correct!"],
         ]
     },
     2: {
         type: "radio",
         question: "Which preposition describes a direction of movement?",
         answers: [
+            ["Below", false, "Wrong. 'Below' describes a static position, not movement."],
             ["Down", true, "Correct! (e.g., walk down the hill)."],
             ["Under", false, "Wrong."]
         ]
@@ -12235,14 +12200,14 @@ export const exerciseData = {
         question: "Identify correct static positions:",
         answers: [
             ["The cat is under the table.", true, "Correct!"],
-            ["The village is under the mountain.", true, "Correct!"],
-            ["The keys are down the table.", false, "Wrong."]
+            ["The village is below the mountain.", true, "Correct!"],
+            ["The keys are down the table.", false, "Wrong. Don't use 'down' for static positions; use 'under' or 'below'."]
         ]
     },
     4: {
         type: "text_multi",
-        question: "Correct the error: 'He lives down the street.' (Wait, this is an idiom). Correct: 'The submarine is down the water.'",
-        answers: ["The submarine is under the water"]
+        question: "Fill in the blank with DOWN or UNDER: 'The submarine is ____ the water.'",
+        answers: ["under"]
     },
     5: {
         type: "radio",
@@ -12253,56 +12218,56 @@ export const exerciseData = {
         ]
     },
     6: {
-        type: "radio",
-        question: "Which is correct for a level in a building?",
-        answers: [
-            ["Downstairs", true, "Correct!"],
-            ["Understairs", false, "Wrong."]
-        ]
-    },
-    7: {
-        type: "radio",
-        question: "Which is correct?",
-        answers: [
-            ["He is below me in the rankings.", true, "Correct!"],
-            ["He is down me in the rankings.", false, "Wrong."]
-        ]
-    },
-    8: {
-        type: "text_multi",
-        question: "What is the missing preposition: 'The boat sank ____ the surface.'",
-        answers: ["under", "below"]
-    },
-    9: {
-        type: "radio",
-        question: "Is 'Look down!' a movement or static direction?",
-        answers: [
-            ["Direction.", true, "Correct!"],
-            ["Static position.", false, "Wrong."]
-        ]
-    },
-    10: {
-        type: "checkbox",
-        question: "Identify correct usage:",
-        answers: [
-            ["Under pressure", true, "Correct!"],
-            ["Under control", true, "Correct!"],
-            ["Down the bridge", false, "Wrong (unless moving)."]
-        ]
-    },
-    11: {
-        type: "radio",
-        question: "True or False: Avoid 'down' for stationary objects; use 'under' or 'below'.",
-        answers: [
-            ["True", true, "Correct!"],
-            ["False", false, "Wrong."]
-        ]
-    },
-    12: {
-        type: "text_multi",
-        question: "Fix this: 'The monster is down the bed.'",
-        answers: ["The monster is under the bed"]
-    }
+            type: "checkbox",
+            question: "Which prepositions describe a static location higher than something else?",
+            answers: [
+                ["Over", true, "Correct!"],
+                ["Up", false, "Wrong. 'Up' implies upward movement or direction."],
+                ["Above", true, "Correct!"]
+            ]
+        },
+        7: {
+            type: "radio",
+            question: "Which preposition describes a direction of upward movement?",
+            answers: [
+                ["Above", false, "Wrong. 'Above' describes a static position, not movement."],
+                ["Up", true, "Correct! (e.g., walk up the stairs)."],
+            ]
+        },
+        8: {
+            type: "checkbox",
+            question: "Identify correct static positions:",
+            answers: [
+                ["The picture hangs above the fireplace.", true, "Correct!"],
+                ["A storm cloud was seen over the city.", true, "Correct!"],
+                ["The picture hangs up the fireplace.", false, "Wrong. Don't use 'up' for static positions; use 'above' or 'over'."]
+            ]
+        },
+        9: {
+            type: "text_multi",
+            question: "Fill in the blank with UP or ABOVE: 'The mirror is hanging ____ the sink.'",
+            answers: ["above"]
+        },
+        10: {
+            type: "radio",
+            question: "Fill in the blank: 'We walked ______ the hill to get to the top.'",
+            answers: [
+                ["up", true, "Correct!"],
+                ["above", false, "Wrong."]
+            ]
+        },
+        11: {
+            type: "checkbox",
+            question: "Select all prepositions that indicate a movement:",
+            answers: [
+                ["Above", false, "Wrong. 'Above' indicates a static position."],
+                ["Up", true, "Correct! 'Up' indicates movement."],
+                ["Down", true, "Correct! 'Down' indicates movement."],
+                ["Below", false, "Wrong. 'Below' indicates a static position."]
+            ]
+        }
+
+
 },
 
 // 1042 Part of a Whole (Top vs Above)
@@ -12312,7 +12277,7 @@ export const exerciseData = {
         question: "Which word describes the actual 'highest part' of an object?",
         answers: [
             ["Top", true, "Correct! (e.g., top of the page)."],
-            ["Above", false, "Wrong. 'Above' means higher than the object, but not touching it."]
+            ["Above", false, "Wrong. 'Above' means higher than the object, but not part of it."]
         ]
     },
     2: {
@@ -12320,7 +12285,7 @@ export const exerciseData = {
         question: "Which word describes the 'lowest part' of an object?",
         answers: [
             ["Bottom", true, "Correct! (e.g., bottom of the cup)."],
-            ["Under", false, "Wrong. 'Under' means below the object."]
+            ["Under", false, "Wrong. 'Under' means below the object (not part of it)."]
         ]
     },
     3: {
@@ -12329,21 +12294,22 @@ export const exerciseData = {
         answers: [
             ["The top of the mountain", true, "Correct!"],
             ["The above of the mountain", false, "Wrong."],
-            ["The front of the house", true, "Correct!"],
+            ["The under of the house", false, "Wrong. (The underside of the house would be better)."],
             ["The upper of the house", false, "Wrong."]
         ]
     },
     4: {
         type: "text_multi",
-        question: "Correct the error: 'Write your name on the upper of the form.'",
-        answers: ["the top of the form"]
+        question: "Fill in the blank: 'Write your name on the ___ of the form.'",
+        answers: ["bottom", "top"]
     },
     5: {
         type: "radio",
-        question: "Fill in the blank: 'There is a bird ______ the roof.'",
+        question: "Fill in the blank: 'The village is located ___ the hill.'",
         answers: [
-            ["on top of", true, "Correct!"],
-            ["above", false, "Wrong (that would mean it's flying over it)."]
+            ["down", false, "Wrong. 'Down' indicates movement."],
+            ["bottom", false, "Wrong. 'Bottom' indicates that the village is part of the hill."],
+            ["below", true, "Correct!"]
         ]
     },
     6: {
@@ -12369,10 +12335,10 @@ export const exerciseData = {
     },
     9: {
         type: "radio",
-        question: "Is 'The upper part' correct?",
+        question: "What is the correct way to use 'upper' and 'lower'?",
         answers: [
-            ["Yes, 'upper' and 'lower' can be adjectives for parts.", true, "Correct!"],
-            ["No.", false, "Wrong."]
+            ["As nouns: 'the upper of the house' and 'the lower of the house'.", false, "Wrong. 'Upper' and 'lower' are adjectives, not nouns."],
+            ["As adjectives: 'the upper PART of the house' and 'the lower PART of the house'.", true, "Correct! 'Upper' and 'lower' should describe parts of the house, not stand alone."]
         ]
     },
     10: {
@@ -12386,17 +12352,13 @@ export const exerciseData = {
     },
     11: {
         type: "radio",
-        question: "True or False: 'Above' and 'Below' are for comparing two separate objects, not parts of one object.",
+        question: "True or False: 'Above' and 'Below' are for comparing two separate objects (position-wise), not parts of one object.",
         answers: [
-            ["True", true, "Correct!"],
-            ["False", false, "Wrong."]
+            ["True", true, "Correct! For example, 'The lamp is above the table.' refers to the lamp's position relative to the table."],
+            ["False", false, "Wrong. 'Above' and 'Below' are used to compare positions of separate objects, not parts of one object."]
         ]
     },
-    12: {
-        type: "text_multi",
-        question: "Fix this: 'He stood on the above of the hill.'",
-        answers: ["the top of the hill"]
-    }
+
 },
 
 // 1050 Collocations (Interested in, Depend on)
@@ -12431,31 +12393,31 @@ export const exerciseData = {
     },
     4: {
         type: "text_multi",
-        question: "Correct the error: 'I am bad in cooking.'",
-        answers: ["I am bad at cooking"]
+        question: "Fill in the blank: 'I am bad ____ cooking.'",
+        answers: ["at"]
     },
     5: {
         type: "radio",
         question: "Fill in the blank: 'Are you afraid ______ the dark?'",
         answers: [
             ["of", true, "Correct!"],
-            ["at", false, "Wrong."]
+            ["from", false, "Wrong."]
         ]
     },
     6: {
         type: "radio",
-        question: "Fill in the blank: 'She is married ______ a doctor.'",
+        question: "Fill in the blank: 'She is responsible ______ the project.'",
         answers: [
-            ["to", true, "Correct!"],
-            ["with", false, "Wrong."]
+            ["for", true, "Correct!"],
+            ["of", false, "Wrong."]
         ]
     },
     7: {
         type: "radio",
         question: "Which is correct?",
         answers: [
-            ["I apologize for the delay.", true, "Correct!"],
-            ["I apologize at the delay.", false, "Wrong."]
+            ["I participated on the event.", false, "Wrong. (Participate in)."],
+            ["I participated in the event.", true, "Correct!"]
         ]
     },
     8: {
@@ -12478,12 +12440,12 @@ export const exerciseData = {
             ["Listen to music", true, "Correct!"],
             ["Look at the sky", true, "Correct!"],
             ["Agree with me", true, "Correct!"],
-            ["Think at it", false, "Wrong. (Think about/of)."]
+            ["It depends of many things", false, "Wrong. (depends on)."]
         ]
     },
     11: {
         type: "radio",
-        question: "True or False: Collocations are fixed pairs that often don't follow a logical rule and must be memorized.",
+        question: "True or False: Collocations are fixed word pairs that often don't follow a logical rule and must be memorized.",
         answers: [
             ["True", true, "Correct!"],
             ["False", false, "Wrong."]
@@ -12491,8 +12453,8 @@ export const exerciseData = {
     },
     12: {
         type: "text_multi",
-        question: "Fix this: 'It depends of my boss.'",
-        answers: ["It depends on my boss"]
+        question: "Fill in the blank: 'It depends ____ my boss.'",
+        answers: ["on"]
     }
 },
 
@@ -13529,7 +13491,7 @@ export const exerciseData = {
         type: "radio",
         question: "What is the standard way to show possession for people?",
         answers: [
-            ["Possessive 's (e.g., John's car).", true, "Correct!"],
+            ["Possessive 's (e.g., John's car).", true, "Correct! Possessive 's is used for people."],
             ["Of structure (e.g., the car of John).", false, "Wrong (unnatural for people)."]
         ]
     },
@@ -13551,9 +13513,13 @@ export const exerciseData = {
         ]
     },
     4: {
-        type: "text_multi",
-        question: "Correct the error: 'The book of Peter is long.'",
-        answers: ["Peter's book is long"]
+        type: "radio",
+        question: "Correct the error: 'The book of Peter is missing.'",
+        answers: [
+            ["Peter's book is missing.", true, "Correct!"],
+            ["Peter his book is missing.", false, "Wrong (unnatural for people)."],
+            ["The book von Peter is missing.", false, "Wrong (unnatural for people)."]
+        ]
     },
     5: {
         type: "radio",
@@ -13580,15 +13546,19 @@ export const exerciseData = {
         ]
     },
     8: {
-        type: "text_multi",
+        type: "radio",
         question: "What is the possessive form of 'the child'?",
-        answers: ["the child's"]
+        answers: [
+            ["the child's", true, "Correct!"],
+            ["the child'", false, "Wrong."],
+            ["the childs'", false, "Wrong."]
+        ]
     },
     9: {
         type: "radio",
         question: "Is 'The dog's bone' correct?",
         answers: [
-            ["True", true, "Correct! (Animals also use 's)."],
+            ["True", true, "Correct!."],
             ["False", false, "Wrong."]
         ]
     },
@@ -13596,127 +13566,106 @@ export const exerciseData = {
         type: "checkbox",
         question: "Identify correct 's usage:",
         answers: [
-            ["Yesterday's news.", true, "Correct!"],
-            ["A month's salary.", true, "Correct!"],
-            ["The car's of my neighbors.", false, "Wrong."]
+            ["John's feet.", true, "Correct!"],
+            ["The car's speed", true, "Correct!"],
+            ["The car of my neighbors.", false, "Wrong."]
         ]
     },
     11: {
         type: "radio",
-        question: "True or False: Using 'the ... of ...' for people is a common direct translation from languages like French.",
+        question: "True or false: we can describe the attributes or properties of inanimate objects using possessive 's.",
         answers: [
-            ["True", true, "Correct!"],
-            ["False", false, "Wrong."]
+            ["True. 'The table's color' is correct.", true, "Correct!"],
+            ["False. 'The table's color' is not correct.", false, "Wrong. This use of possessive -s is allowed."]
         ]
     },
     12: {
-        type: "text_multi",
-        question: "Fix this: 'The bicycle of the girl is pink.'",
-        answers: ["The girl's bicycle is pink"]
+        type: "radio",
+        question: "True or false: the attributes or properties of things can be described using possessive 's OR the 'of' structure.",
+        answers: [
+            ["True. 'the weight of the laptop' and 'the laptop's weight' are both correct.", true, "Correct! Feel free to use both constructions."],
+            ["False. 'the laptop's weight' is not correct.", false, "Wrong. This use of possessive -s is allowed."]
+        ]
     }
+
 },
 
-// 1220 Unusual 's (Inanimate objects)
-"1220": {
+// 1211 Possessive 's with time
+"1211": {
     1: {
         type: "radio",
-        question: "Which structure is usually better for inanimate objects?",
+        question: "Is 'yesterday's meeting' correct?",
         answers: [
-            ["Of structure (e.g., the roof of the house).", true, "Correct!"],
-            ["Possessive 's (e.g., the house's roof).", false, "Less common/unnatural."]
+            ["True", true, "Correct! We usually use possessive 's with time expressions."],
+            ["False", false, "Wrong. We usually use possessive 's with time expressions."]
         ]
     },
     2: {
         type: "radio",
-        question: "Is 'the table's leg' the most natural form?",
+        question: "Is 'tomorrow's event' correct?",
         answers: [
-            ["No, 'the leg of the table' or 'the table leg' is better.", true, "Correct!"],
-            ["Yes.", false, "Wrong."]
+            ["True", true, "Correct! We usually use possessive 's with time expressions."],
+            ["False", false, "Wrong. We usually use possessive 's with time expressions."]
         ]
     },
     3: {
-        type: "checkbox",
-        question: "Identify the better choice for inanimate objects:",
-        answers: [
-            ["The back of the chair.", true, "Correct!"],
-            ["The chair's back.", false, "Less natural."],
-            ["The end of the movie.", true, "Correct!"]
-        ]
+        type: "text_multi",
+        question: "Translate into English: 'La séance de lundi'",
+        answers: ["Monday's session", "monday's session", "Monday's meeting", "monday's meeting"]
     },
     4: {
-        type: "text_multi",
-        question: "Correct the error: 'The book's page is torn.'",
-        answers: ["The page of the book", "the book page"]
+        type: "radio",
+        question: "Is 'next Monday's meeting' correct?",
+        answers: [
+            ["True", true, "Correct! We usually use possessive 's with time expressions."],
+            ["False", false, "Wrong. We usually use possessive 's with time expressions."]
+        ]
     },
     5: {
         type: "radio",
-        question: "Fill in the blank: 'What is the ______?'",
+        question: "Which option is the most elegant way to express time?",
         answers: [
-            ["name of the street", true, "Correct!"],
-            ["street's name", false, "Wrong."]
+            ["The meeting of next Monday is cancelled", false, "Wrong! We usually use possessive 's with time expressions."],
+            ["Next Monday's meeting is cancelled", true, "Correct! We usually use possessive 's with time expressions."]
         ]
     },
+
     6: {
-        type: "radio",
-        question: "Fill in the blank: 'The ______ was locked.'",
-        answers: [
-            ["door of the car", true, "Correct!"],
-            ["car's door", false, "Less natural (though common for vehicles)."]
-        ]
-    },
-    7: {
-        type: "radio",
-        question: "Which is correct?",
-        answers: [
-            ["The capital of France.", true, "Correct!"],
-            ["France's capital.", true, "Correct! (Countries are an exception)."]
-        ]
-    },
-    8: {
-        type: "text_multi",
-        question: "What is the missing part: 'The bottom ____ the ocean.'",
-        answers: ["of"]
-    },
-    9: {
-        type: "radio",
-        question: "Can we use 's for organizations (e.g., the company's policy)?",
-        answers: [
-            ["Yes, organizations are treated like groups of people.", true, "Correct!"],
-            ["No.", false, "Wrong."]
-        ]
-    },
-    10: {
         type: "checkbox",
-        question: "Identify the better 'Of' usage:",
+        question: "Identify correct 's usage:",
         answers: [
-            ["The color of the sky.", true, "Correct!"],
-            ["The sky's color.", false, "Less natural."],
-            ["The result of the test.", true, "Correct!"]
+            ["Yesterday's news.", true, "Correct!"],
+            ["A month's salary.", true, "Correct!"],
+            ["The car of my neighbors.", false, "Wrong."]
         ]
     },
-    11: {
+        7: {
         type: "radio",
-        question: "True or False: We generally avoid 's for inanimate objects unless they are time expressions or countries.",
+        question: "Is 'the meeting of next Tuesday' correct?",
         answers: [
-            ["True", true, "Correct!"],
-            ["False", false, "Wrong."]
+            ["True", false, "Wrong. We usually use possessive 's with time expressions."],
+            ["False", true, "Correct! We usually use possessive 's with time expressions."]
         ]
     },
-    12: {
-        type: "text_multi",
-        question: "Fix this: 'The day's time is 2 PM.'",
-        answers: ["The time of day is 2 PM"]
+        8: {
+        type: "radio",
+        question: "True or false: we can use possessive 's with time expressions.",
+        answers: [
+            ["True. 'Yesterday's meeting' is correct.", true, "Correct! We usually use possessive 's with time expressions."],
+            ["False. 'Yesterday's meeting' is not correct.", false, "Wrong. This use of possessive -s is allowed."]
+        ]
+            
     }
 },
 
-// 1230 Plural Possessive (Friends' car)
-"1230": {
+// 1220 Unusual use of possessive 's, including incorrect Plural Possessive (Friends' car)
+"1220": {
     1: {
         type: "radio",
-        question: "Where do you put the apostrophe for a plural noun ending in -s (e.g., friends)?",
+        question: "Where do you put the apostrophe for a plural noun ending in -s (e.g., friends in 'the idea of my friends')?",
         answers: [
-            ["After the -s (e.g., friends').", true, "Correct!"],
-            ["Before the -s (e.g., friend's).", false, "Wrong (that is singular)."]
+            ["After the -s (e.g., my friends' idea).", true, "Correct!"],
+            ["Before the -s (e.g., my friend's idea).", false, "Wrong (that is singular)."]
         ]
     },
     2: {
@@ -13739,7 +13688,7 @@ export const exerciseData = {
     4: {
         type: "text_multi",
         question: "Correct the error: 'The two dogs's bones.'",
-        answers: ["the two dogs' bones"]
+        answers: ["the two dogs' bones", "dogs'", "dogs' bones", "the two dogs'", "two dogs'"]
     },
     5: {
         type: "radio",
@@ -13762,7 +13711,7 @@ export const exerciseData = {
         question: "Which is correct for an irregular plural like 'men'?",
         answers: [
             ["The men's room.", true, "Correct! (If it doesn't end in -s, use 's)."],
-            ["The mens' room.", false, "Wrong."]
+            ["The mens' room.", false, "Wrong. We add 's unless the plural already ends in -s, which is not the case for 'men'."]
         ]
     },
     8: {
@@ -13774,8 +13723,8 @@ export const exerciseData = {
         type: "radio",
         question: "Is 'The ladies' bags' correct?",
         answers: [
-            ["True", true, "Correct!"],
-            ["False", false, "Wrong."]
+            ["True", true, "Correct! This is a valid plural possessive."],
+            ["False", false, "Wrong. It is a valid plural possessive." ]
         ]
     },
     10: {
@@ -13796,11 +13745,93 @@ export const exerciseData = {
         ]
     },
     12: {
+        type: "radio",
+        question: "True or false: if a plural ends in -s, you only add an apostrophe for the possessive.",
+        answers: [
+            ["True.", true, "Correct! (e.g., the dogs' toys)."],
+            ["False.", false, "Wrong. For plurals ending in -s, we just add an apostrophe."]
+        ]
+}
+},
+
+// 1230 incorrect apostrophe in a possessive adjective (it's vs its)
+"1230": {
+    1: {
+        type: "radio",
+        question: "True or False: 'It's' is the possessive form of 'it'.",
+        answers: [
+            ["True", false, "Wrong. 'It's' is a contraction for 'it is' or 'it has'."],
+            ["False", true, "Correct! The possessive form is 'its'."]
+        ]
+    },
+    2: {
+        type: "radio",
+        question: "True or false: one of the most common mistakes is confusing 'it's' and 'its'.",
+        answers: [
+            ["True", true, "Correct!"],
+            ["False", false, "Wrong."]
+        ]
+    },
+    3: {
+        type: "radio",
+        question: "True of false: 'it's' can be both 'it is' or the possessive form of 'it'.",
+        answers: [
+            ["True", false, "Wrong. 'It's' is only a contraction for 'it is' or 'it has'."],
+            ["False", true, "Correct! The possessive form is 'its', not 'it's'."]
+        ]
+    },
+    4: {
+        type: "checkbox",
+        question: "Choose any correct form(s):",
+        answers: [
+            ["It's a beautiful day.", true, "Correct!"],
+            ["Its a beautiful day.", false, "Wrong. 'It's' is the correct form here."],
+            ["The cat licked its paw.", true, "Correct!"],
+            ["The cat licked it's paw.", false, "Wrong. 'Its' is the correct possessive form here."]
+        ]
+    },
+    5: {
+        type: "radio",
+        question: "Is this correct: 'The house façade is losing it's color.'",
+        answers: [
+            ["Yes", false, "Wrong. The correct form is 'its' for the possessive."],
+            ["No", true, "Correct! It should be 'its color'."]
+        ]
+    },
+    6: {
+        type: "radio",
+        question: "Is this correct: 'The dog wagged it's tail.'",
+        answers: [
+            ["Yes", false, "Wrong. The correct form is 'its' for the possessive."],
+            ["No", true, "Correct! It should be 'its tail'."]
+        ]
+    },
+    7: {
+        type: "radio",
+        question: "Is this correct: 'The bird built its nest in the tree.'",
+        answers: [
+            ["Yes, it's correct.", true, "Correct! 'its' is the correct possessive form."],
+            ["No. We need to add an apostrophe.", false, "Wrong. The sentence is correct as it is."]
+        ]
+    },
+    8: {
         type: "text_multi",
-        question: "Fix this: 'The boys's bikes are here.'",
-        answers: ["The boys' bikes are here"]
+        question: "Complete the sentence: 'Nvidia stock lost half of _____ value overnight.'",
+        answers: ["its"]
+    },
+    9: {
+        type: "text_multi",
+        question: "Complete the sentence: 'The master bedroom has _____ own bathroom.'",
+        answers: ["its"]
+    },
+    10: {
+        type: "text_multi",
+        question: "Complete the sentence: 'Oh I love the jacket. _____ beautiful!'",
+        answers: ["it's", "it is"]
     }
 },
+
+
 
 // 1300/1310 Short Answers/Agreement (Yes, I did / So did I)
 "1300": {
