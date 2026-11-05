@@ -170,6 +170,7 @@
   </div>
 </v-col>
 
+<!-- Graph Generator -->
 <v-col cols="12" sm="6" md="4" class="d-flex justify-center">
   <div
     class="image-tile"
@@ -185,6 +186,7 @@
   </div>
 </v-col>
 
+<!-- Chemical Substances -->
 <v-col cols="12" sm="6" md="4" class="d-flex justify-center">
   <div
     class="image-tile"
@@ -193,6 +195,38 @@
     <div class="tile-frame">
       <v-img
         src="/images/banners/ChemicalSubstances.png"
+        class="tile-image"
+        cover
+      />
+    </div>
+  </div>
+</v-col>
+
+<!-- The Politician -->
+<v-col cols="12" sm="6" md="4" class="d-flex justify-center">
+  <div
+    class="image-tile"
+    @click="openDialog('The Politician')"
+  >
+    <div class="tile-frame">
+      <v-img
+        src="/images/banners/ThePolitician.png"
+        class="tile-image"
+        cover
+      />
+    </div>
+  </div>
+</v-col>
+
+<!-- Special Message -->
+<v-col cols="12" sm="6" md="4" class="d-flex justify-center">
+  <div
+    class="image-tile"
+    @click="openDialog('Special Message')"
+  >
+    <div class="tile-frame">
+      <v-img
+        src="/images/banners/SpecialMessage.png"
         class="tile-image"
         cover
       />

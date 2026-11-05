@@ -529,6 +529,7 @@ const GAME_NAMES = [
   "Comparison",
   "Graph Generator",
   "Idea Linker",
+  "Math Whiz",
   "Numbers Ninja",
   "Parallel Universe",  
   "Passive Party",
@@ -538,6 +539,8 @@ const GAME_NAMES = [
   "Quantifier Quest",
   "Regret Machine",
   "Reported Speech",
+  "Special Message",
+  "The Politician",
   "Tricky Translator",
   "Unfinished Business",
   "Uses Of Auxiliaries",
@@ -548,6 +551,7 @@ const GAME_NAMES = [
 ];
 
 const gamePictures: Record<string, string> = {
+  "Math Whiz": "/images/banners/MathWhiz.png",
   "Balanced Opinions": "/images/banners/BalancedOpinions.png",
   "Be Polite!": "/images/banners/BePolite.png",
   "Chemical Substances": "/images/banners/ChemicalSubstances.png",
@@ -569,7 +573,9 @@ const gamePictures: Record<string, string> = {
   "Reported Speech": "/images/banners/ReportedSpeech.png",
   "Parallel Universe": "/images/banners/ParallelUniverse.png",
   "Year 2040": "/images/banners/Year2040.png",
-  "Numbers Ninja": "/images/banners/NumbersNinja.png"
+  "Numbers Ninja": "/images/banners/NumbersNinja.png",
+  "The Politician": "/images/banners/ThePolitician.png",
+  "Special Message": "/images/banners/SpecialMessage.png"
 };
 
 const availableGames = computed(() =>

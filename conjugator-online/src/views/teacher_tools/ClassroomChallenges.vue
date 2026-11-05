@@ -100,7 +100,7 @@
       <div class="game-viewport-card-wrapper mb-6">
         
         <v-card 
-          v-if="props.game !== 'Balanced Opinions' && props.game !== 'Unfinished Business' && props.game !== 'Verb Mixer Classroom Edition' && props.game !== 'Spelling Bee'" 
+          v-if="props.game !== 'Balanced Opinions' && props.game !== 'Unfinished Business' && props.game !== 'Verb Mixer Classroom Edition' && props.game !== 'Spelling Bee' && props.game !== 'The Politician' && props.game !== 'Special Message'" 
           class="mx-auto rounded-2xl border border-slate-200 slide-card layout-flex-center"
           elevation="3"
           :class="animationClass"
@@ -186,6 +186,39 @@
           <div class="text-caption font-weight-medium text-slate-400">
             Choose between <code class="font-weight-black text-slate-600">to + verb</code> or <code class="font-weight-black text-slate-600">verb + -ing</code> verb complements.
           </div>
+        </v-card>
+
+        <v-card
+        v-else-if="props.game === 'The Politician'"
+        class="mx-auto rounded-2xl border border-slate-200 slide-card layout-flex-center pa-4"
+        elevation="3"
+        :class="animationClass"
+        >
+          <div class="text-overline font-weight-bold text-slate-400 tracking-widest mb-4">Cleft Sentence Challenge</div>
+          <div class="text-h4 text-center text-slate-800 font-weight-bold line-height-sm mb-4">
+            {{ prompt?.question }}  
+          </div>
+          <div class="text-caption font-weight-medium text-slate-400">
+            Answer using a cleft sentence structure.
+          </div>
+          <div class="d-flex justify-end mt-3"><v-chip color="info">{{ prompt?.category }}</v-chip></div>
+        </v-card>
+
+        <v-card
+        v-else-if="props.game === 'Special Message'"
+        class="mx-auto rounded-2xl border border-slate-200 slide-card layout-flex-center pa-8"
+        elevation="3"
+        :class="animationClass"
+        >
+          <div v-if="prompt?.category && inversionCategories.includes(prompt.category)" class="d-flex justify-end w-100 mb-10 px-5"><v-chip color="danger" size="large">Needs inversion!</v-chip></div>
+          <div class="text-caption font-weight-medium text-slate-400 mb-5">
+            Create a special sentence using correlative and/or inversion structures.
+          </div>
+          <div class="text-h5 text-center text-slate-800 font-weight-bold line-height-sm mb-4">
+            {{ prompt?.question }}  
+          </div>
+          
+          <div class="d-flex justify-end mt-3"><v-chip color="info" size="x-large">{{ prompt?.category }}</v-chip></div>
         </v-card>
       </div>
 
@@ -355,7 +388,7 @@ import api from "@/axios"
 
 
 const props = defineProps<{
-  game: "Spelling Bee" | "Pronunciation Challenge" | "Prove it!" | "Be Polite!" | "Balanced Opinions" | "Unfinished Business" | "Verb Mixer Classroom Edition" | "Numbers Ninja" | "Chemical Substances",
+  game: "Spelling Bee" | "Pronunciation Challenge" | "Prove it!" | "Be Polite!" | "Balanced Opinions" | "Unfinished Business" | "Verb Mixer Classroom Edition" | "Numbers Ninja" | "Chemical Substances" | "The Politician" | "Special Message" | "Math Whiz",
   student: string
 }>()
 
@@ -371,7 +404,10 @@ const BANNERS = {
   "Unfinished Business": "/images/banners/UnfinishedBusiness.png",
   "Verb Mixer Classroom Edition": "/images/banners/VerbMixer.png",
   "Numbers Ninja": "/images/banners/NumbersNinja.png",
-  "Chemical Substances": "/images/banners/ChemicalSubstances.png"
+  "Chemical Substances": "/images/banners/ChemicalSubstances.png",
+  "The Politician": "/images/banners/ThePolitician.png",
+  "Special Message": "/images/banners/SpecialMessage.png",
+  "Math Whiz": "/images/banners/MathWhiz.png"
 }
 
 const selectedCategory = ref<string>("") 
@@ -391,7 +427,7 @@ const promptQueue = ref<{ question: string; verb: string; correctAnswers: string
 const shownPrompts = ref<{ question: string; verb: string; correctAnswers: string[]; category: string; is_correct: boolean | null }[]>([])
 
 const totalRounds = computed(() =>
-  props.game === "Spelling Bee" ? 8 : props.game === "Balanced Opinions" ? 12 : props.game === "Unfinished Business" ? 24 : props.game === "Verb Mixer Classroom Edition" ? 28 : props.game === "Chemical Substances" ? 24 : 30
+  props.game === "Spelling Bee" ? 8 : props.game === "The Politician" ? 14 : props.game === "Special Message" ? 14 : props.game === "Balanced Opinions" ? 12 : props.game === "Unfinished Business" ? 24 : props.game === "Verb Mixer Classroom Edition" ? 28 : props.game === "Chemical Substances" ? 24 : props.game === "Math Whiz" ? 16 : 30
 )
 const remainingCount = ref(totalRounds.value)
 const snackbar = reactive({ show: false, message: "", color: "success" })
@@ -414,6 +450,17 @@ const proveItCategoryMap: Record<string, keyof typeof gameData> = {
   "Essential irregulars present perfect": "Essential irregulars present perfect",
   "Advanced irregulars present perfect": "Advanced irregulars present perfect",
 }
+const inversionCategories: string[] = [
+  "Just as... so...",
+  "Not only... but also...",
+  "Not until",
+  "Never",
+  "Rarely",
+  "Only when",
+  "Hardly... when...",
+  "No sooner... than...",
+  "Scarcely... when...",
+]
 
 // --------------------------
 // GAME DATA 
@@ -433,7 +480,177 @@ const gameData: Record<
     instructions: string
     prompts: Record<string, PromptGroup>
   }
-> =  { 
+> =  {
+  "The Politician": {
+    description: "Use cleft sentences to add clarity to your statements",
+    instructions: "The teacher will show you a question. Answer the question using a cleft sentence structure.",
+    prompts: {
+      "What... or All...": [
+        "What does the project need? [a clear direction]",
+        "What do you love about our country? [its people]",
+        "What do you want for the nation? [prosperity and peace]",
+        "What do people have to do to make a difference? [vote on election day]",
+        "How can the project be improved? [find a vision]",
+        "What matters most about the project? [having a clear vision]",
+        "What is the key issue for the country? [economic stability]"
+      ],
+      "What happens is... What happened was...": [
+        "How is the budget decided? [we go through a planning process]",
+        "Why is the government bankrupt? [the wrong people were put in charge]",
+        "Why did the project fail? [there was a lack of proper planning]",
+        "What went wrong with the campaign? [there was a lack of coordination]",
+        "How did the team succeed? [they followed a well-structured plan]",
+        "How do citizens share their opinions? [they use public forums and discussions]"
+      ],
+      "The person who...": [
+        "Who will take responsibility for the project? [the team leader]",
+        "Who will find a solution to the problem? [the project manager]",
+        "Who is responsible for the project's success? [the team leader]",
+        "Who will lead the next phase of the project? [the project manager]",
+        "Who will evaluate the project's outcomes? [the quality assurance team]",
+        "Who will implement the new strategy? [the operations team]",
+        "Who has influenced you the most? [my mentor]",
+        "Who has taught you the most? [my mother]",
+      ],
+      "The place where...": [
+        "Where will the meeting be held? [the conference room]",
+        "Where will the conference be held? [Washington, D.C.]",
+        "Where will the elections be decided? [in rural areas]",
+        "Where is the project taking place? [the main office]",
+        "Where will the team gather for the discussion? [the meeting room]",
+        "Where is the new strategy being implemented? [the operations department]",
+        "Where will the evaluation of the project occur? [the Dallas office]"
+      ],
+      "The reason why...": [
+        "Why did the project succeed? [because of careful planning]",
+        "Why did the team fail? [due to lack of coordination]",
+        "Why is the budget insufficient? [because of unexpected expenses]",
+        "Why is the strategy effective? [due to thorough research]",
+        "Why did the campaign succeed? [because of strong leadership]",
+        "Why did the initiative fail? [due to poor execution]"
+      ],
+      "The way in which...": [
+        "How did the team achieve success? [through effective collaboration]",
+        "How was the problem solved? [by following a structured approach]",
+        "How did the project stay on track? [through careful planning]",
+        "How is the strategy being implemented? [through a co-creation process]",
+        "How will the evaluation be conducted? [through a structured process]",
+        "How did the campaign gain traction? [with aggressive promotion]"
+      ],
+      "The last time...": [
+        "When was the last time the team met? [last Monday]",
+        "When did the project last receive an update? [yesterday]",
+        "When was the last time the strategy was reviewed? [last week]",
+        "When did the campaign last run? [last month]",
+        "When was the last evaluation conducted? [last quarter]"
+      ]
+
+    }
+  },
+  "Special Message": {
+    description: "Use correlatives and inversion to create special sentences",
+    instructions: "The teacher will show you information about a product. Create a special sentence using correlatives and/or inversion.",
+    prompts: {
+      "Either... or...": [
+        "We ship the product this month // The project will fail",
+        "We talk to our suppliers // The launch will be delayed",
+        "We update our strategy // We will lose the election",
+        "We start listening to feedback // We will lose touch with our customers",
+        "We finalize the report today // The bid will be rejected",
+        "Someone fixes the issue // The project will cancelled",
+        "We negotiate a solution now // We will have a long-term problem"
+    ],
+    "This is both... and...": [
+      "A fascinating experiment // a practical application",
+      "An innovative approach // a reliable method",
+      "A challenging problem // a simple solution",
+      "A high-risk investment // A legally-complicated venture",
+      "A groundbreaking discovery // a new way of thinking"
+    ],
+    "Just as... so...": [   // requires inversion
+      "Richard became a hero // you can help your community",
+      "Rose solved the problem // you can find a solution too",
+      "Tom achieved success // you can reach your goals as well",
+      "Nike changed marketing // your startup can innovate too",
+      "Individuals look for opportunities // Nations need new export markets",
+      "My company embraced change // your team can adapt as well"
+    ],
+    "Not only... but also...": [ // requires inversion
+      "She is talented // she is hardworking",
+      "The project is challenging // it is rewarding",
+      "The company is innovative // it is socially responsible",
+      "The strategy is effective // it is sustainable",
+      "The team is diverse // it is collaborative",
+      "The product top quality // it is affordable",
+      "The service is efficient // it is customer-friendly",
+      "The initiative is ambitious // it is well-supported",
+      "The market can be accessed // it is profitable",
+      "The technology is advanced // it is user-friendly",
+      "We will conquer the market // expand to new sectors",
+      "We will improve our skills // we will achieve great results"
+    ],
+    "Whether... or...": [
+      "working // relaxing >>> the airpods are for you",
+      "starting a company // managing your household >>> this budgeting tool is a game changer",
+      "exercising // relaxing >>> this fitness app is perfect for you",
+      "training with friends // exercising alone >>> this workout plan suits everyone",
+      "working from home // going to the office >>> this productivity tool makes life easier",
+      "decorating your home // enhancing your office >>> the super-table is perfect for you",
+      "reading a book // watching a movie >>> this cozy blanket is ideal for both activities",
+      "cooking at home // dining out >>> this recipe book is perfect for you",
+      "building at home // working on a construction site >>> this toolkit is perfect for real builders"
+    ],
+    "Rarely": [  // requires inversion
+        "you see such talent",
+        "you find such opportunities",
+        "you can experience such moments",
+        "you will have such a clear opportunity",
+        "you can make a difference in so many people's lives",
+        "you can impact so many people",
+        "you meet such inspiring individuals",
+        "I have seen such remarkable achievements",
+        "I have seen so much talent in a room",
+        "I have rarely seen such dedication",
+        "you find such commitment to the project"
+    ],
+    "Not until": [ // requires inversion
+        "you try it yourself // you will understand",
+        "you see the results // you will realize the potential",
+        "you experience it firsthand // you will understand its value",
+        "you see it in person // it clicks for you",
+        "you witness it firsthand // you realize how life-changing it is",
+        "you take the necessary steps // you will achieve success",
+        "you speak to Ella directly // you will see how great the project is",
+        "you try it out // you actually feel how good it is",
+        "you go through the current process // you understand the pain points we are trying to remove",
+        "you reach the top // you appreciate the journey",
+        "you get your first win // you realize your full potential"
+    ],
+    "Never": [ // requires inversion
+        "I have seen such a thing",
+        "I have experienced such a moment",
+        "I have encountered such a challenge",
+        "I have witnessed such dedication",
+        "I have found such commitment",
+        "I have met such inspiring individuals",
+        "I had imagined such success",
+        "I have come across a friendlier person"
+    ],
+    "Only when": [ // requires inversion
+        "you see the results // you understand the impact",
+        "you experience it firsthand // you realize its value",
+        "you witness it directly // you comprehend its significance",
+        "you take the necessary steps // you achieve success",
+        "you try it out // you feel its effectiveness",
+        "you go through the process // you understand the challenges",
+        "you reach the top // you appreciate the journey",
+        "you get your first win // you realize your full potential",
+        "you play with real money // you understand the stakes",
+        "you try it yourself // you can understand the challenge"
+    ]
+  }
+},
+  
   "Numbers Ninja": {
     description: "Practice number-related vocabulary and expressions",
     instructions: "A card will show a number-related question. Answer the question aloud. The teacher will validate the response.",
