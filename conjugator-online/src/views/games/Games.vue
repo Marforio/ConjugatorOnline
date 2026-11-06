@@ -55,6 +55,18 @@
         </RouterLink>
       </v-col>
 
+      <!-- Elegant Expressions -->
+      <v-col cols="12" sm="6" md="4" class="d-flex justify-center">
+        <RouterLink
+          :to="{ name: 'elegant-expressions' }"
+          class="image-tile"
+        >
+          <div class="tile-frame">
+            <v-img src="/images/banners/ElegantExpressions.png" alt="Elegant Expressions" cover class="tile-image" />
+          </div>
+        </RouterLink>
+      </v-col>
+
       <!-- Word Families -->
       <v-col v-if="isEnabled" cols="12" sm="6" md="4" class="d-flex justify-center">
         <RouterLink

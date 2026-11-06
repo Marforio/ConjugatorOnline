@@ -276,6 +276,23 @@
             <div v-else-if="gameName === 'Pronoun Practice'" class="text-body-1 mt-2 text-grey-darken-2">
               <div class="text-body-2">Nothing to configure. The game will randomly ask for pronouns from all categories.</div>
             </div>
+
+            <div v-else-if="gameName === 'Elegant Expressions'">
+              <p class="text-body-2 text-grey-darken-3 mb-3">
+                Complete the missing word in an expression.
+              </p>
+
+              <v-select
+                v-model="selections.settings.vocabulary_set"
+                :items="elegantExpressionSetOptions"
+                item-title="title"
+                item-value="value"
+                label="Choose vocabulary set"
+                density="compact"
+                variant="outlined"
+                max-width="300"
+              />
+            </div>
           </v-col>
 
           <v-col cols="12" md="4">
@@ -426,6 +443,9 @@
             <p v-else-if="gameName === 'Word Families'" class="text-body-2 text-grey-darken-3">
               Recommendation coming soon
             </p>
+            <p v-else-if="gameName === 'Elegant Expressions'" class="text-body-2 text-grey-darken-3">
+              Study the list of expressions (ask your teacher)
+            </p>
           </div>
         </v-card-text>
 
@@ -448,7 +468,7 @@ import { ref, computed, watch, onMounted } from "vue";
 import api from "@/axios";
 
 const props = defineProps<{
-  gameName: "Pronoun Practice" | "Regret Machine" | "Passive Party" | "Uses Of Auxiliaries" | "Comparison" | "Parallel Universe" | "Quantifier Quest" | "Verb Mixer" | "Word Families" | "Reported Speech" | "Year 2040" | "Tricky Translator" | "Idea Linker";
+  gameName: "Pronoun Practice" | "Regret Machine" | "Passive Party" | "Uses Of Auxiliaries" | "Comparison" | "Parallel Universe" | "Quantifier Quest" | "Verb Mixer" | "Word Families" | "Reported Speech" | "Year 2040" | "Tricky Translator" | "Idea Linker" | "Elegant Expressions";
 }>();
 
 const emit = defineEmits<{
@@ -458,9 +478,14 @@ const emit = defineEmits<{
 const loading = ref(false);
 
 const fixedRounds = computed(() => {
-  const rounds = (props.gameName === "Pronoun Practice" || props.gameName === "Uses Of Auxiliaries") ? 30 : 24;
-  console.log(`[DEBUG] Computed property [fixedRounds] re-evaluated to: ${rounds} (Based on gameName: ${props.gameName})`);
-  return rounds;
+  if (props.gameName === "Elegant Expressions") {
+    return elegantExpressionSetOptions.find(
+      (set) => set.value === selections.value.settings.vocabulary_set,
+    )?.rounds ?? 0;
+  }
+
+  return (props.gameName === "Pronoun Practice" ||
+    props.gameName === "Uses Of Auxiliaries") ? 30 : 24;
 });
 
 const bannerSrc = computed(() => {
@@ -477,6 +502,7 @@ const bannerSrc = computed(() => {
   else if (props.gameName === "Year 2040") path = "/images/banners/Year2040.png";
   else if (props.gameName === "Tricky Translator") path = "/images/banners/TrickyTranslator.png";
   else if (props.gameName === "Idea Linker") path = "/images/banners/IdeaLinker.png";
+  else if (props.gameName === "Elegant Expressions") path = "/images/banners/ElegantExpressions.png";
 
   return path;
 });
@@ -496,13 +522,24 @@ const isValid = computed(() => {
     const t = selections.value.settings?.conditionalTypes;
     return Array.isArray(t) && t.length > 0;
   }
+  if (props.gameName === "Elegant Expressions") {
+    return fixedRounds.value > 0;
+  }
   return true;
 });
 
-// 🚨 Add this state variable near your other refs
+const elegantExpressionSetOptions = [
+  { title: "Meeting expressions", value: "Meeting expressions", rounds: 70 },
+  {
+    title: "Business pitch (Coming soon)",
+    value: "Business pitch",
+    rounds: 0,
+    props: { disabled: true },
+  },
+];
+
 const showGrammarDialog = ref(false);
 
-// 🚨 Modify handleStart to act as the Gateway, and add executeActualGameLaunch
 async function handleStart() {
   if (!isValid.value) return;
   
@@ -617,6 +654,9 @@ watch(
         mode: "writing",
         track: "all"
       };
+    } else if (newGameName === "Elegant Expressions") {
+      selections.value.num_prompts = 70;
+      selections.value.settings = { vocabulary_set: "Meeting expressions" };
     } else if (newGameName === "Verb Mixer") {
       selections.value.num_prompts = 30; // Override default 24
       selections.value.settings = {
@@ -640,7 +680,14 @@ watch(
   { immediate: true }
 );
 
-// Inside <script setup> in OtherGameStart.vue
+watch(
+  () => selections.value.settings.vocabulary_set,
+  () => {
+    if (props.gameName === "Elegant Expressions") {
+      selections.value.num_prompts = fixedRounds.value;
+    }
+  },
+);
 
 // Monitor changes to the Verb Mixer selection strategy mode toggle
 watch(

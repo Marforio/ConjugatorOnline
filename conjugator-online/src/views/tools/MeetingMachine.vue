@@ -8,7 +8,7 @@
         width="340"
         class="pa-4 d-flex flex-column"
         >
-        <div class="sidebar-header text-center mt-6 mb-6">
+        <div class="sidebar-header text-center mt-6 mb-4">
             <h2 class="text-h5 font-weight-bold">Meeting Machine</h2>
             <div class="text-body-1">6:00 meeting simulations</div>
         </div>
@@ -29,18 +29,6 @@
                 <div v-if="phase.item" class="phase-item text-caption">{{ phase.item }}</div>
             </div>
             </div>
-        </div>
-
-        <v-spacer />
-        <v-divider />
-        <v-spacer />
-
-        <div class="mt-auto d-flex justify-center">
-            <RouterLink :to="{ name: 'tools' }">
-            <v-btn icon elevation="0" size="x-large">
-                <v-icon color="grey-darken-3" size="x-large">mdi-arrow-left-circle</v-icon>
-            </v-btn>
-            </RouterLink>
         </div>
 
         <v-spacer />
@@ -76,7 +64,6 @@
             <v-alert
                 border="start"
                 elevation="1"
-                class="mb-4"
                 style="background-color: #e3f2fd; color: #0d47a1;"
                 density="compact"
                 icon=""
@@ -87,7 +74,6 @@
             </v-alert>
           </div>
         <v-list-item
-          class="mt-4"
           style="background-color: #fff9c4; border-radius: 6px; padding: 12px;"
         >
           <div class="d-flex align-center w-100" style="position: relative;">
@@ -110,7 +96,7 @@
         </v-list-item>
 
 
-        <v-list-item class="mt-3 mb-6">
+        <v-list-item class="mt-2">
             <v-table class="bordered-table" striped="odd">
                     <tbody>
                     <tr>
@@ -151,7 +137,7 @@
         <v-btn color="success" large @click="startSimulation">START SIMULATION</v-btn>
 
           <!-- Dialog Buttons Row -->
-          <div class="d-flex justify-space-between align-center mt-4 w-100">
+          <div class="d-flex justify-space-between align-center mt-2 w-100">
             <!-- Left button: view all topics -->
             <v-btn
               variant="plain"
@@ -248,19 +234,12 @@
             </v-dialog>
           </div>
 
-        <div class="d-flex justify-center">
-            <RouterLink :to="{ name: 'tools' }">
-            <v-btn icon elevation="0" size="large">
-                <v-icon color="grey-darken-3" size="x-large">mdi-arrow-left-circle</v-icon>
-            </v-btn>
-            </RouterLink>
-        </div>
       </div>
 
 
       <div v-else class="d-flex flex-column align-center w-100">
         <!-- Top-right digital timer and phase timer -->
-        <div class="timer-row w-100 d-flex flex-column align-end mb-6 pe-8">
+        <div class="timer-row w-100 d-flex flex-column align-end mb-1 pe-8">
           <div class="digital-timer" v-if="!$vuetify.display.xs">{{ formattedTime }}</div>
           <div class="phase-timer" v-if="!$vuetify.display.xs">This part: <strong>{{ formattedPhaseTime }}</strong></div>
           <p class="text-caption mt-6" v-if="!$vuetify.display.xs">{{ simulationCode }}</p>
@@ -627,7 +606,7 @@ onUnmounted(() => clearInterval(tickInterval));
 <style scoped>
 /* layout */
 .sidebar-header { padding-bottom: 4px; }
-.phases-list { width: 100%; padding-top: 8px; padding-bottom: 8px; }
+.phases-list { width: 100%; padding-top: 6px; padding-bottom: 6px; }
 
 .bordered-table {
   border: 2px solid #ccc; /* or #1976d2 for primary accent */
@@ -673,7 +652,8 @@ onUnmounted(() => clearInterval(tickInterval));
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-top: -120px; /* nudge circle slightly higher in the viewport */
+  margin-top: -150px; /* nudge circle slightly higher in the viewport */
+  margin-right: -250px; /* nudge circle slightly to the left in the viewport */
 }
 .gauge-center {
   position: absolute;
@@ -712,6 +692,9 @@ onUnmounted(() => clearInterval(tickInterval));
 
 /* controls spacing */
 .controls > * { min-width: 110px; }
+.controls {
+  margin-right: -250px; 
+}
 
 .text-center h1 {
   color: #1a237e;

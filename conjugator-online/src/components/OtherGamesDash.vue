@@ -548,6 +548,7 @@ const GAME_NAMES = [
   "Verb Mixer Classroom Edition",
   "Year 2040",
   "Word Families",
+  "Elegant Expressions"
 ];
 
 const gamePictures: Record<string, string> = {
@@ -575,7 +576,8 @@ const gamePictures: Record<string, string> = {
   "Year 2040": "/images/banners/Year2040.png",
   "Numbers Ninja": "/images/banners/NumbersNinja.png",
   "The Politician": "/images/banners/ThePolitician.png",
-  "Special Message": "/images/banners/SpecialMessage.png"
+  "Special Message": "/images/banners/SpecialMessage.png",
+  "Elegant Expressions": "/images/banners/ElegantExpressions.png"
 };
 
 const availableGames = computed(() =>

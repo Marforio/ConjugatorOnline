@@ -109,6 +109,10 @@
               :disabled="showImmediateFeedback"
               hide-details
               @keyup.enter="handleEnterKeyOnInput"
+              autocomplete="off"
+              autocorrect="off"
+              autocapitalize="none"
+              spellcheck="false"
             />
 
             <!-- 🌟 Visualized Feedback Tray for Text Inputs -->

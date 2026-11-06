@@ -92,6 +92,10 @@
                       :disabled="inputLocked"
                       @keydown.enter.prevent.stop="handleKeyboardEnterEvent"
                       max-width="150"
+                      autocomplete="off"
+                      autocorrect="off"
+                      autocapitalize="none"
+                      spellcheck="false"
                     />
                   </div>
                 </div>
@@ -386,6 +390,16 @@
               </v-card>
             </div>
 
+            <div v-else-if="gameName === 'Elegant Expressions'" class="pa-4 text-center">
+              <div class="text-caption text-uppercase text-grey-darken-1 mb-5">
+                {{ gameSettings?.vocabulary_set || "Meeting expressions" }}
+              </div>
+              <div  class="mb-12"><v-chip color="primary">{{ activePrompt.category }}</v-chip></div>
+              <div class="text-h6 font-italic text-grey-darken-4">
+                "{{ activePrompt.blank }}"
+              </div>
+            </div>
+
             <div v-else-if="gameName === 'Comparison'">
               <div class="d-flex justify-center align-center ga-4 my-2">
                 <div class="d-flex flex-column align-center">
@@ -470,6 +484,10 @@
                       density="compact"
                       hide-details
                       :disabled="inputLocked"
+                      autocomplete="off"
+                      autocorrect="off"
+                      autocapitalize="none"
+                      spellcheck="false"
                       @keyup.enter="handleKeyboardEnterEvent"
                     />
                   </v-col>
@@ -593,6 +611,10 @@
                 hide-details
                 :disabled="inputLocked"
                 @keydown.enter.prevent.stop="handleKeyboardEnterEvent"
+                autocomplete="off"
+                autocorrect="off"
+                autocapitalize="none"
+                spellcheck="false"
               />
             </div>
 
@@ -704,12 +726,16 @@
           </div>
           
           <div class="mt-2 text-body-2">
-            Correct Answer: 
+            Correct Answer:
             <strong class="text-success font-mono">
-              {{ 
-                activePrompt?.blueprint?.accepted_pool?.join(' / ') || 
-                activePrompt?.blueprint?.answers?.join(' / ') || 
-                activePrompt?.blueprint?.correct_map ? Object.values(activePrompt.blueprint.correct_map).join(' | ') : 'Available at the end of the game'
+              {{
+                gameName === "Elegant Expressions"
+                  ? (currentIlCorrectTrack.join(" / ") || "Available at the end of the game")
+                  : (
+                      activePrompt?.blueprint?.accepted_pool?.join(" / ") ||
+                      activePrompt?.blueprint?.answers?.join(" / ") ||
+                      "Available at the end of the game"
+                    )
               }}
             </strong>
           </div>
@@ -1295,7 +1321,7 @@ async function handleAnswerSubmission() {
       isCorrect = !!response.data.is_correct;
       serverAcceptedPool = response.data.accepted_pool ?? null;
 
-    // C) All other games -> local hash
+    // C) all other games -> local hash verification
     } else {
       const userHash = await computeSha256(cleanedInput);
       isCorrect = activePrompt.value.answer_hashes?.includes(userHash) || false;
@@ -1395,6 +1421,7 @@ async function advanceNextRound() {
   
   showWrongDialog.value = false;
   userAnswer.value = "";
+  currentIlCorrectTrack.value = [];
 
   if (currentRound.value >= totalRounds.value - 1) {
     showGameOverOverlay.value = true;     // block page

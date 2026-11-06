@@ -91,6 +91,34 @@
         </RouterLink>
       </v-col>
 
+      <!-- Special Message -->
+      <v-col cols="12" sm="6" md="4" class="d-flex justify-center">
+        <RouterLink :to="{ name: 'special-message' }" class="image-tile">
+          <div class="tile-frame">
+            <v-img
+              src="/images/banners/SpecialMessage.png"
+              alt="Special Message"
+              cover
+              class="tile-image"
+            />
+          </div>
+        </RouterLink>
+      </v-col>
+
+      <!-- The Politician -->
+       <v-col cols="12" sm="6" md="4" class="d-flex justify-center">
+        <RouterLink :to="{ name: 'the-politician' }" class="image-tile">
+          <div class="tile-frame">
+            <v-img
+              src="/images/banners/ThePolitician.png"
+              alt="The Politician"
+              cover
+              class="tile-image"
+            />
+          </div>
+        </RouterLink>
+      </v-col>
+
     </v-row>
     <!-- Back Button -->
     <div class="d-flex justify-center mt-6">

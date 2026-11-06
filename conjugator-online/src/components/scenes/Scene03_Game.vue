@@ -300,6 +300,10 @@
               color="primary"
               class="rounded-xl font-weight-medium"
               hide-details
+              autocomplete="off"
+              autocorrect="off"
+              autocapitalize="none"
+              spellcheck="false"
             ></v-text-field>
 
             <!-- Submit trigger button -->

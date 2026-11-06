@@ -63,8 +63,8 @@
         <!-- Answer -->
         <div class="w-100" style="max-width: 460px">
           <v-text-field ref="answerRef" v-model="answer" label="Your answer" variant="outlined" rounded="xl"
-                        hide-details autocomplete="off" :disabled="submitted || !cardFlippedOpen"
-                        @keyup.enter="submitAnswer" />
+                        hide-details :disabled="submitted || !cardFlippedOpen"
+                        @keyup.enter="submitAnswer" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" />
           <div class="d-flex justify-center mt-4">
             <v-btn color="primary" size="large" width="180" rounded="xl" class="font-weight-black"
                    :disabled="submitted || !cardFlippedOpen || !answer.trim()" @click="submitAnswer">
