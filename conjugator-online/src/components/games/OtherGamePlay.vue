@@ -1436,7 +1436,9 @@ function logRoundMetrics(answer, isCorrect, timedOut) {
     questionString = `[${activePrompt.value.category.toUpperCase()}] Verb: "${activePrompt.value.answer_verb}" || Target: ${activePrompt.value.sentence}`;
   } else if (props.gameName === "Tricky Translator") {
   questionString = `[TRICKY TRANSLATOR - ${activePrompt.value.source_language?.toUpperCase()}] Input: "${activePrompt.value.source_sentence}" || Context: ${activePrompt.value.target_sentence}`;
-  } else if (props.gameName === "Parallel Universe") {
+  } else if (props.gameName === "Elegant Expressions") {
+  questionString = activePrompt.value.blank; 
+  }else if (props.gameName === "Parallel Universe") {
       const focusClause = activePrompt.value.condition ? "IF" : "MAIN";
       questionString = `[${activePrompt.value.conditional_type.toUpperCase()}] (${focusClause}) || ${activePrompt.value.sentence}`;
     } else if (props.gameName === "Passive Party") {
