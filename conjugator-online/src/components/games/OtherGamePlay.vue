@@ -394,9 +394,21 @@
               <div class="text-caption text-uppercase text-grey-darken-1 mb-5">
                 {{ gameSettings?.vocabulary_set || "Meeting expressions" }}
               </div>
-              <div  class="mb-12"><v-chip color="primary">{{ activePrompt.category }}</v-chip></div>
+              <div  class="mb-12">
+                <v-chip 
+                  v-if="activePrompt.category"
+                  :prepend-icon="expressionCategoryStyles[activePrompt.category]?.icon || 'mdi-comment-outline'"
+                  :color="expressionCategoryStyles[activePrompt.category]?.color || 'primary'"
+                  variant="tonal">
+                  {{ activePrompt.category }}
+                </v-chip>
+              </div>
               <div class="text-h6 font-italic text-grey-darken-4">
                 "{{ activePrompt.blank }}"
+              </div>
+              <div v-if="activePrompt.hint" class="text-body-2 text-grey-darken-1 mt-4">
+                Hint:
+                <span class="font-mono" style="white-space: pre-wrap">{{ activePrompt.hint }}</span>
               </div>
             </div>
 
@@ -944,6 +956,50 @@ const wfAnswers = ref({ verb: "", noun: "", adjective: "", adverb: "" });
 const selectedWfPos = ref(null);
 const wfBank = ref([]);
 const wfSlots = ref({ verb: [], noun: [], adjective: [], adverb: [] });
+
+// --- Elegant expressions ---
+const expressionCategoryStyles = {
+  "Starting the meeting": {
+    icon: "mdi-handshake",
+    color: "blue",
+  },
+  "Items (Managing the discussion)": {
+    icon: "mdi-format-list-bulleted",
+    color: "teal",
+  },
+  "Reacting to suggestions": {
+    icon: "mdi-comment-text-outline",
+    color: "purple",
+  },
+  "Transitions and time management": {
+    icon: "mdi-clock-outline",
+    color: "orange-darken-2",
+  },
+  "Deciding": {
+    icon: "mdi-vote-outline",
+    color: "indigo",
+  },
+  "Wrapping up": {
+    icon: "mdi-clipboard-check-outline",
+    color: "green-darken-2",
+  },
+  "Suggestions": {
+    icon: "mdi-lightbulb-outline",
+    color: "amber-darken-3",
+  },
+  "Agreeing": {
+    icon: "mdi-thumb-up-outline",
+    color: "cyan-darken-2",
+  },
+  "Disagreeing": {
+    icon: "mdi-thumb-down-outline",
+    color: "red-darken-2",
+  },
+  "Volunteering": {
+    icon: "mdi-hand-heart-outline",
+    color: "pink-darken-2",
+  },
+};
 
 // --- DYNAMIC SWITCH SWAP SWEEPERS ---
 const resetWfState = () => {
