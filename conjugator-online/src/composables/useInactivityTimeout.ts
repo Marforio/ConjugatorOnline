@@ -1,7 +1,7 @@
 import { onMounted, onUnmounted, watch } from "vue";
 import { useAuthStore } from "@/stores/auth";
 
-const INACTIVITY_LIMIT = 20 * 60 * 1000; // 20 min (set what you want)
+const INACTIVITY_LIMIT = 90 * 60 * 1000; // 90 min (set what you want)
 
 let timeoutId: ReturnType<typeof setTimeout> | null = null;
 let bound = false;

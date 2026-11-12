@@ -26,6 +26,7 @@ const errorMsg = ref('')
 const points = ref<{ date: string; close: number }[]>([])
 const canvasRef = shallowRef<HTMLCanvasElement | null>(null)
 let chart: Chart<'line'> | null = null
+let historyRequestId = 0
 
 const destroyChart = () => {
   if (chart) {
@@ -34,10 +35,11 @@ const destroyChart = () => {
   }
 }
 
-const buildChart = async () => {
+const buildChart = async (requestId: number) => {
   await nextTick()
   await new Promise<void>(resolve => requestAnimationFrame(() => resolve()))
   await new Promise<void>(resolve => setTimeout(resolve, 30))
+  if (requestId !== historyRequestId || !props.open) return
 
   const canvas = canvasRef.value
   if (!(canvas instanceof HTMLCanvasElement)) {
@@ -83,10 +85,10 @@ const buildChart = async () => {
           title: (items) => {
             const i = items?.[0]?.dataIndex ?? 0
             const raw = labels[i]
-            const d = new Date(raw)
+            const d = new Date(`${raw}T00:00:00Z`)
             return Number.isNaN(d.getTime())
               ? String(raw)
-              : d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+              : d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' })
           },
           label: (ctx) => `$${Number(ctx.parsed.y).toLocaleString(undefined, { maximumFractionDigits: 2 })}`
         }
@@ -101,20 +103,30 @@ const buildChart = async () => {
           maxTicksLimit: range.value === '1W' ? 7 : range.value === '1M' ? 6 : 8,
           maxRotation: 0,
           minRotation: 0,
-          callback: (_value, index) => {
-            const raw = labels[index as number]
-            const d = new Date(raw)
-            if (Number.isNaN(d.getTime())) return ''
+          callback: (value) => {
+            const raw = labels[Number(value)]
+            if (!raw) return ''
+            const date = new Date(`${raw}T00:00:00Z`)
+            if (Number.isNaN(date.getTime())) return raw
 
-            // adaptive formatting by selected range
             if (range.value === '1W') {
-              return d.toLocaleDateString('en-US', { weekday: 'short' }) // Mon Tue...
+              return date.toLocaleDateString('en-US', {
+                weekday: 'short',
+                timeZone: 'UTC',
+              })
             }
             if (range.value === '1M' || range.value === '3M') {
-              return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) // Oct 8
+              return date.toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                timeZone: 'UTC',
+              })
             }
-            // 6M, 1Y, 5Y
-            return d.toLocaleDateString('en-US', { month: 'short', year: '2-digit' }) // Oct 26
+            return date.toLocaleDateString('en-US', {
+              month: 'short',
+              year: '2-digit',
+              timeZone: 'UTC',
+            })
           }
         }
       },
@@ -130,8 +142,7 @@ const buildChart = async () => {
   })
 }
 
-const load = async () => {
-  if (!props.ticker) return
+const load = async (requestId: number, ticker: string, selectedRange: string) => {
   loading.value = true
   errorMsg.value = ''
   points.value = []
@@ -139,27 +150,28 @@ const load = async () => {
 
   try {
     const { data } = await api.get('/market-masters/assets/history/', {
-      params: { ticker: props.ticker, range: range.value },
+      params: { ticker, range: selectedRange },
     })
+    if (requestId !== historyRequestId) return
 
     if (Array.isArray(data.points)) {
       points.value = data.points
     } else if (Array.isArray(data.labels) && Array.isArray(data.prices)) {
-      points.value = data.labels.map((d: string, i: number) => ({
-        date: d,
-        close: Number(data.prices[i] ?? 0),
+      points.value = data.labels.map((date: string, i: number) => ({
+        date,
+        close: Number(data.prices[i]),
       }))
     } else {
-      points.value = []
+      throw new Error('Unexpected history response')
     }
 
-    // IMPORTANT: let template swap from "Loading..." to canvas
     loading.value = false
     await nextTick()
+    if (requestId !== historyRequestId) return
 
-    if (points.value.length) await buildChart()
-    else destroyChart()
+    if (points.value.length) await buildChart(requestId)
   } catch (e: any) {
+    if (requestId !== historyRequestId) return
     errorMsg.value = e?.response?.data?.error || 'Could not load history.'
     points.value = []
     loading.value = false
@@ -168,15 +180,24 @@ const load = async () => {
 }
 
 watch(
-  () => [props.open, props.ticker, range.value],
-  async ([open, ticker]) => {
-    if (open && ticker) await load()
+  () => [props.open, props.ticker, range.value] as const,
+  ([open, ticker, selectedRange]) => {
+    const requestId = ++historyRequestId
+    if (open && ticker) {
+      void load(requestId, ticker, selectedRange)
+    } else {
+      loading.value = false
+      destroyChart()
+    }
   },
   { immediate: true }
 )
 
+onBeforeUnmount(() => {
+  ++historyRequestId
+  destroyChart()
+})
 
-onBeforeUnmount(destroyChart)
 </script>
 
 <template>
@@ -204,7 +225,12 @@ onBeforeUnmount(destroyChart)
         <div v-else-if="errorMsg" class="mm-state mm-error">{{ errorMsg }}</div>
         <div v-else-if="!points.length" class="mm-state">No historical data available.</div>
         <div v-else class="mm-chart-wrap">
-          <canvas ref="canvasRef"></canvas>
+          <div class="text-caption">
+            Latest available history: {{ points[points.length - 1].date }}
+          </div>
+          <div style="height:360px;">
+            <canvas ref="canvasRef"></canvas>
+          </div>
         </div>
       </div>
     </div>

@@ -316,38 +316,55 @@
 
             <!-- 12. IDEA LINKER LIVE INTERACTIVE WORKSPACE CARD -->
             <div v-else-if="gameName === 'Idea Linker'" class="mb-2 w-100">
-              <div class="d-flex justify-space-between align-center mb-2">
-                <div class="d-flex ga-1 align-center">
-                  <v-chip size="x-small" color="primary" class="font-weight-bold text-uppercase">
-                    ⛓ {{ activePrompt.variant || activePrompt.category }}
-                  </v-chip>
-                  <v-chip size="x-small" :color="getBehaviorColor(activePrompt.behavior)" class="font-weight-bold text-uppercase">
-                    {{ activePrompt.behavior }}
-                  </v-chip>
-                </div>
-                
-                <v-chip v-if="activePrompt.excluded_linkers?.length" size="x-small" color="red-lighten-4" class="text-red-darken-4 font-weight-bold">
-                  🚫 Not Allowed: {{ activePrompt.excluded_linkers.join(', ') }}
+              <div class="d-flex flex-wrap ga-2 align-center mb-3">
+                <v-chip
+                  :prepend-icon="ideaLinkerCategoryStyles[activePrompt.category]?.icon || 'mdi-link-variant'"
+                  :color="ideaLinkerCategoryStyles[activePrompt.category]?.color || 'primary'"
+                  variant="tonal"
+                  class="font-weight-bold text-uppercase"
+                >
+                  {{ activePrompt.category }}
+                </v-chip>
+
+                <v-chip v-if="activePrompt.variant" size="small" variant="outlined">
+                  {{ activePrompt.variant }}
+                </v-chip>
+
+                <v-chip size="small" variant="outlined">
+                  {{ activePrompt.behavior }}
                 </v-chip>
               </div>
 
-              <v-card variant="flat" class="pa-5 bg-grey-lighten-4 border rounded-xl text-center mb-3">
-                <div class="text-h6 font-weight-medium text-grey-darken-4 font-italic line-height-2">
-                  " {{ activePrompt.sentence }} "
-                </div>
-                
-                <div v-if="activePrompt.translations" class="mt-3 d-flex justify-center ga-3 border-t pt-2 text-caption text-grey-darken-1">
-                  <span v-if="activePrompt.translations.French">🇫🇷 {{ activePrompt.translations.French.join(', ') }}</span>
-                  <span v-if="activePrompt.translations.German">🇩🇪 {{ activePrompt.translations.German.join(', ') }}</span>
-                  <span v-if="activePrompt.translations.Italian">🇮🇹 {{ activePrompt.translations.Italian.join(', ') }}</span>
+              <v-card variant="outlined" class="pa-5 bg-white text-center mb-3">
+                <div class="text-h6 font-weight-medium font-italic">
+                  {{ activePrompt.sentence }}
                 </div>
               </v-card>
 
-              <div v-if="ilUsedWords.length" class="mb-2 transition-all">
-                <div class="text-caption text-grey-darken-1 mb-1">⚠️ Already used linkers (cannot be repeated):</div>
-                <div class="d-flex flex-wrap ga-1 bg-amber-lighten-5 pa-2 rounded-lg border border-amber-lighten-3">
-                  <v-chip v-for="w in ilUsedWords" :key="w" size="x-small" color="amber-darken-3" variant="outlined" class="font-weight-bold">
-                    {{ w }}
+              <div v-if="activePrompt.excluded_linkers?.length" class="mb-3">
+                <v-chip
+                  prepend-icon="mdi-block-helper"
+                  color="error"
+                  variant="tonal"
+                  size="small"
+                >
+                  Not allowed: {{ activePrompt.excluded_linkers.join(", ") }}
+                </v-chip>
+              </div>
+
+              <div v-if="ilUsedWords.length" class="mb-2">
+                <div class="text-caption text-grey-darken-1 mb-1">
+                  Already used — choose a different linker:
+                </div>
+                <div class="d-flex flex-wrap ga-1">
+                  <v-chip
+                    v-for="word in ilUsedWords"
+                    :key="word"
+                    size="small"
+                    color="amber-darken-3"
+                    variant="outlined"
+                  >
+                    {{ word }}
                   </v-chip>
                 </div>
               </div>
@@ -737,21 +754,30 @@
             Target Form
           </div>
           
-          <div class="mt-2 text-body-2">
+          <div v-if="gameName === 'Idea Linker'" class="mt-2 text-body-2">
+            <template v-if="lastRoundTimeout">
+              Correct answers will be available in the results.
+            </template>
+            <template v-else>
+              Available answers:
+              <strong class="text-success font-mono">
+                {{ currentIlCorrectTrack.join(" / ") || "None available" }}
+              </strong>
+            </template>
+          </div>
+
+          <!-- Keep your existing Correct Answer block here for the other games. -->
+          <div v-else class="mt-2 text-body-2">
             Correct Answer:
             <strong class="text-success font-mono">
               {{
-                gameName === "Elegant Expressions"
-                  ? (currentIlCorrectTrack.join(" / ") || "Available at the end of the game")
-                  : (
-                      activePrompt?.blueprint?.accepted_pool?.join(" / ") ||
-                      activePrompt?.blueprint?.answers?.join(" / ") ||
-                      "Available at the end of the game"
-                    )
+                activePrompt?.blueprint?.accepted_pool?.join(" / ") ||
+                activePrompt?.blueprint?.answers?.join(" / ") ||
+                "Available at the end of the game"
               }}
             </strong>
           </div>
-        </v-card-text>
+                  </v-card-text>
         
         <v-card-actions>
           <v-spacer/>
@@ -956,6 +982,31 @@ const wfAnswers = ref({ verb: "", noun: "", adjective: "", adverb: "" });
 const selectedWfPos = ref(null);
 const wfBank = ref([]);
 const wfSlots = ref({ verb: [], noun: [], adjective: [], adverb: [] });
+
+// --- Idea Linker ---
+const ideaLinkerCategoryStyles = {
+  comparison: {
+    icon: "mdi-compare-horizontal",
+    color: "blue-darken-2",
+  },
+  expansion: {
+    icon: "mdi-plus-circle-outline",
+    color: "green-darken-2",
+  },
+  sequence: {
+    icon: "mdi-order-numeric-ascending",
+    color: "purple-darken-2",
+  },
+  "counter-expectation": {
+    icon: "mdi-swap-horizontal",
+    color: "orange-darken-2",
+  },
+  "cause and effect": {
+    icon: "mdi-arrow-right-bold-circle-outline",
+    color: "red-darken-2",
+  },
+};
+
 
 // --- Elegant expressions ---
 const expressionCategoryStyles = {
@@ -1432,6 +1483,8 @@ function logRoundMetrics(answer, isCorrect, timedOut) {
     questionString = `[REPORTED SPEECH] Speaker: "${activePrompt.value.speaker}" || Context Clue: ${activePrompt.value.direct} -> Output: ${activePrompt.value.reported}`;
   } else if (props.gameName === "Year 2040") {
   questionString = `[${activePrompt.value.tense.toUpperCase()}] Verb: "${activePrompt.value.verb}" || Context: ${activePrompt.value.sentence}`;
+  } else if (props.gameName === "Idea Linker") {
+    questionString = activePrompt.value.sentence; 
   } else if (props.gameName === "Verb Mixer") {
     questionString = `[${activePrompt.value.category.toUpperCase()}] Verb: "${activePrompt.value.answer_verb}" || Target: ${activePrompt.value.sentence}`;
   } else if (props.gameName === "Tricky Translator") {

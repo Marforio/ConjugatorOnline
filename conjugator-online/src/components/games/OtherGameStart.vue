@@ -144,7 +144,8 @@
 
             <div v-else-if="gameName === 'Idea Linker'">
               <p class="text-body-2 text-grey-darken-3 mb-2">
-                Expand your writing syntax fluency! Connect arguments using varied linking words without repeating identical terms throughout the session.
+                Complete each sentence with a linking word. Use each linker only once
+                during the game.
               </p>
               <div class="mt-2 text-caption text-grey-darken-1">
                 ⏱ Round sequence locked to <strong>24 prompts</strong> (60s timer limit).

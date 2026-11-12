@@ -24,7 +24,7 @@ function isAuthRoute(url?: string) {
 api.interceptors.request.use((config) => {
   const auth = useAuthStore();
 
-  if (isAuthRoute(config.url)) {
+    if (isAuthRoute(config.url) && !config.url?.includes("/token/validate/")) {
     return config;
   }
 

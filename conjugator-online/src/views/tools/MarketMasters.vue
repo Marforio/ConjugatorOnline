@@ -923,6 +923,34 @@
             <div style="height:240px;"><canvas ref="assetContribChartRef"></canvas></div>
           </v-col>
         </v-row>
+
+        <v-row>
+          <v-col cols="12">
+            <div class="text-caption text-medium-emphasis">
+              Closed assets show their last recorded unrealized P&L, not realized profit.
+              These values do not necessarily add up to portfolio P&L.
+            </div>
+          </v-col>
+          <v-col cols="12" md="6">
+            <div class="text-caption font-weight-bold mb-1">Positive asset P&L</div>
+            <div style="height:220px;"><canvas ref="positivePnlChartRef"></canvas></div>
+          </v-col>
+          <v-col cols="12" md="6">
+            <div class="text-caption font-weight-bold mb-1">Negative asset P&L</div>
+            <div style="height:220px;"><canvas ref="negativePnlChartRef"></canvas></div>
+          </v-col>
+        </v-row>
+        <v-overlay
+          :model-value="chartsLoading"
+          contained
+          persistent
+          class="align-center justify-center"
+        >
+          <div class="d-flex flex-column align-center ga-3">
+            <v-progress-circular indeterminate color="primary" size="48" />
+            <span class="font-weight-bold">Loading charts...</span>
+          </div>
+        </v-overlay>
       </v-card>
 
       <!-- PERFORMANCE CARD -->
@@ -1319,6 +1347,7 @@ const unifiedSelectedTicker = ref('')
 const isActionProcessing = ref(false)
 const isCreateModalActive = ref(false)
 const orderEntryOpen = ref([0]) // open by default
+const chartsLoading = ref(false)
 
 const isQuoteModalActive = ref(false)
 const quoteData = ref(null)
@@ -1334,6 +1363,10 @@ const cashVsAssetsChartRef = ref(null)
 const contribChartRef = ref(null)
 const assetContribChartRef = ref(null)
 let assetContribChart = null
+const positivePnlChartRef = ref(null)
+const negativePnlChartRef = ref(null)
+let positivePnlChart = null
+let negativePnlChart = null
 
 const activeCompetitionStandings = ref([])
 
@@ -1583,6 +1616,8 @@ const destroyVizCharts = () => {
   cashVsAssetsChart?.destroy(); cashVsAssetsChart = null
   contribChart?.destroy(); contribChart = null
   assetContribChart?.destroy(); assetContribChart = null
+  positivePnlChart?.destroy(); positivePnlChart = null
+  negativePnlChart?.destroy(); negativePnlChart = null
 }
 
 const normalizePositionType = (asset) => {
@@ -1607,117 +1642,347 @@ const normalizePositionType = (asset) => {
 }
 
 const renderPortfolioVizCharts = async () => {
-  const token = ++renderToken
-  await nextTick()
+    const token = ++renderToken
+    chartsLoading.value = true
 
-  const p = selectedPortfolio.value
-  if (!p) return
-  const data = computePortfolioVizData(p)
-  if (!data) return
+    try {
+      await nextTick()
 
-  // only latest invocation proceeds
-  if (token !== renderToken) return
+    const p = selectedPortfolio.value
+    if (!p) return
+    const data = computePortfolioVizData(p)
+    if (!data) return
 
-  destroyVizCharts()
+    // only latest invocation proceeds
+    if (token !== renderToken) return
 
-  const heldAssets = (data.allocationRows || []).filter(r => Number(r.marketValueAbs || 0) > 0)
+    destroyVizCharts()
 
-  if (allocationChartRef.value && token === renderToken) {
-  const ctx = allocationChartRef.value.getContext('2d')
-  if (ctx) {
-    // LONG ONLY for "Asset Allocation"
-    const longOnly = (data.allocationRows || []).filter(
-      r => String(r.position_type || '').toUpperCase() === 'LONG' && Number(r.marketValueAbs || 0) > 0
-    )
+    const heldAssets = (data.allocationRows || []).filter(r => Number(r.marketValueAbs || 0) > 0)
 
-    // If no long assets, render a neutral placeholder slice
-    const values = longOnly.length
-      ? longOnly.map(r => Number(r.marketValueAbs || 0))
-      : [1]
+    if (allocationChartRef.value && token === renderToken) {
+    const ctx = allocationChartRef.value.getContext('2d')
+    if (ctx) {
+      // LONG ONLY for "Asset Allocation"
+      const longOnly = (data.allocationRows || []).filter(
+        r => String(r.position_type || '').toUpperCase() === 'LONG' && Number(r.marketValueAbs || 0) > 0
+      )
 
-    const total = values.reduce((s, v) => s + v, 0)
+      // If no long assets, render a neutral placeholder slice
+      const values = longOnly.length
+        ? longOnly.map(r => Number(r.marketValueAbs || 0))
+        : [1]
 
-    const labels = longOnly.length
-      ? longOnly.map((r, i) => {
-          const pct = total > 0 ? ((values[i] / total) * 100).toFixed(1) : '0.0'
-          return `${r.ticker} (${pct}%)`
-        })
-      : ['No long holdings']
+      const total = values.reduce((s, v) => s + v, 0)
 
-    const colors = longOnly.length
-      ? [
-          '#3b82f6', '#6366f1', '#8b5cf6', '#0ea5e9', '#14b8a6',
-          '#22c55e', '#84cc16', '#eab308', '#f59e0b', '#f97316'
-        ]
-      : ['#cbd5e1']
+      const labels = longOnly.length
+        ? longOnly.map((r, i) => {
+            const pct = total > 0 ? ((values[i] / total) * 100).toFixed(1) : '0.0'
+            return `${r.ticker} (${pct}%)`
+          })
+        : ['No long holdings']
 
-    allocationChart = new Chart(ctx, {
-      type: 'doughnut',
-      data: {
-        labels,
-        datasets: [{
-          data: values,
-          backgroundColor: colors.slice(0, values.length),
-          borderColor: '#ffffff',
-          borderWidth: 2
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        cutout: '58%',
-        plugins: {
-          legend: { position: 'bottom' },
-          tooltip: {
-            callbacks: {
-              label: (context) => {
-                if (!longOnly.length) return 'No long holdings'
-                const row = longOnly[context.dataIndex]
-                const v = Number(context.raw || 0)
-                const pct = total > 0 ? ((v / total) * 100).toFixed(1) : '0.0'
-                const name = getAssetName(row.ticker)
-                const pnl = Number(row.pnlEstimate || 0)
-                const pnlText = `${pnl >= 0 ? '+' : '-'}$${Math.abs(pnl).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+      const colors = longOnly.length
+        ? [
+            '#3b82f6', '#6366f1', '#8b5cf6', '#0ea5e9', '#14b8a6',
+            '#22c55e', '#84cc16', '#eab308', '#f59e0b', '#f97316'
+          ]
+        : ['#cbd5e1']
 
-                return ` ${name}`
+      allocationChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels,
+          datasets: [{
+            data: values,
+            backgroundColor: colors.slice(0, values.length),
+            borderColor: '#ffffff',
+            borderWidth: 2
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          cutout: '58%',
+          plugins: {
+            legend: { position: 'bottom' },
+            tooltip: {
+              callbacks: {
+                label: (context) => {
+                  if (!longOnly.length) return 'No long holdings'
+                  const row = longOnly[context.dataIndex]
+                  const v = Number(context.raw || 0)
+                  const pct = total > 0 ? ((v / total) * 100).toFixed(1) : '0.0'
+                  const name = getAssetName(row.ticker)
+                  const pnl = Number(row.pnlEstimate || 0)
+                  const pnlText = `${pnl >= 0 ? '+' : '-'}$${Math.abs(pnl).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+
+                  return ` ${name}`
+                }
               }
             }
           }
         }
-      }
-    })
+      })
+    }
   }
-}
 
-  if (cashVsAssetsChartRef.value && token === renderToken) {
-    const ctx = cashVsAssetsChartRef.value.getContext('2d')
-    if (ctx) {
-      const cash = Number(data.cash || 0)
-      const longExp = Number(data.investedLongTotal || 0)
-      const shortExp = Number(data.shortExposureTotal || 0)
+    if (cashVsAssetsChartRef.value && token === renderToken) {
+      const ctx = cashVsAssetsChartRef.value.getContext('2d')
+      if (ctx) {
+        const cash = Number(data.cash || 0)
+        const longExp = Number(data.investedLongTotal || 0)
+        const shortExp = Number(data.shortExposureTotal || 0)
 
-      const slices = []
+        const slices = []
 
-      // always show cash
-      slices.push({ label: 'Cash', value: cash, color: '#10b981' })
+        // always show cash
+        slices.push({ label: 'Cash', value: cash, color: '#10b981' })
 
-      if (data.isAdvanced) {
-        if (longExp > 0) slices.push({ label: 'Long Exposure', value: longExp, color: '#3b82f6' })
-        if (shortExp > 0) slices.push({ label: 'Short Exposure', value: shortExp, color: '#ef4444' })
-      } else {
-        const invested = longExp // BASIC should only be long
-        if (invested > 0) slices.push({ label: 'Invested', value: invested, color: '#3b82f6' })
+        if (data.isAdvanced) {
+          if (longExp > 0) slices.push({ label: 'Long Exposure', value: longExp, color: '#3b82f6' })
+          if (shortExp > 0) slices.push({ label: 'Short Exposure', value: shortExp, color: '#ef4444' })
+        } else {
+          const invested = longExp // BASIC should only be long
+          if (invested > 0) slices.push({ label: 'Invested', value: invested, color: '#3b82f6' })
+        }
+
+        const values = slices.map(s => s.value)
+
+        cashVsAssetsChart = new Chart(ctx, {
+          type: 'pie',
+          data: {
+            labels: slices.map(s => s.label),
+            datasets: [{
+              data: values,
+              backgroundColor: slices.map(s => s.color),
+              borderColor: '#ffffff',
+              borderWidth: 2
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { position: 'bottom' },
+              tooltip: {
+                callbacks: {
+                  label: (context) => {
+                    const v = Number(context.raw || 0)
+                    const total = values.reduce((a, b) => a + Number(b || 0), 0)
+                    const pct = total > 0 ? ((v / total) * 100).toFixed(1) : '0.0'
+                    return `${context.label}: $${v.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} (${pct}%)`
+                  }
+                }
+              }
+            }
+          }
+        })
       }
+    }
+    
+    let payload = {}
+    try {
+      const res = await api.get(`/market-masters/portfolios/${p.id}/pnl-timeseries/`)
+      if (token !== renderToken) return
+      payload = res.data || {}
+    } catch (err) {
+      if (token !== renderToken) return
+      console.error('Failed to load P&L charts:', err?.response?.data || err)
+      triggerToast('Unable to load portfolio P&L history.', 'error')
+    }
 
-      const values = slices.map(s => s.value)
+    const pts = Array.isArray(payload.portfolio) ? payload.portfolio : []
 
-      cashVsAssetsChart = new Chart(ctx, {
-        type: 'pie',
+    if (contribChartRef.value) {
+      const ctx = contribChartRef.value.getContext('2d')
+      if (ctx) {
+        contribChart = new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: pts.map(point => point.t),
+            datasets: [{
+              label: 'Portfolio P&L',
+              data: pts.map(point => Number(point.pnl)),
+              tension: 0,
+              pointRadius: pts.length === 1 ? 3 : 0,
+              borderWidth: 2,
+              borderColor: ({ chart }) => {
+                const area = chart.chartArea
+                const scale = chart.scales.y
+                if (!area || !scale) return '#10b981'
+
+                const zero = scale.getPixelForValue(0)
+                const stop = Math.max(0, Math.min(1,
+                  (zero - area.top) / (area.bottom - area.top)
+                ))
+                const gradient = chart.ctx.createLinearGradient(0, area.top, 0, area.bottom)
+                gradient.addColorStop(0, '#10b981')
+                gradient.addColorStop(stop, '#10b981')
+                gradient.addColorStop(stop, '#eab308')
+                gradient.addColorStop(1, '#eab308')
+                return gradient
+              }
+            }]
+          },
+          plugins: [{
+            id: 'portfolioZeroLine',
+            beforeDatasetsDraw(chart) {
+              if (!pts.length) return
+              const { ctx, chartArea, scales } = chart
+              const y = scales.y.getPixelForValue(0)
+              if (y < chartArea.top || y > chartArea.bottom) return
+
+              ctx.save()
+              ctx.strokeStyle = '#475569'
+              ctx.lineWidth = 2
+              ctx.beginPath()
+              ctx.moveTo(chartArea.left, y)
+              ctx.lineTo(chartArea.right, y)
+              ctx.stroke()
+              ctx.restore()
+            }
+          }],
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              x: {
+                grid: { display: false },
+                ticks: {
+                  autoSkip: true,
+                  maxTicksLimit: 7,
+                  maxRotation: 0,
+                  callback: (_value, index) => {
+                    const raw = pts[index]?.t
+                    if (!raw) return ''
+                    const date = new Date(raw)
+                    return Number.isNaN(date.getTime())
+                      ? String(raw)
+                      : date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+                  }
+                }
+              },
+              y: {
+                beginAtZero: true,
+                ticks: { callback: value => `$${Number(value).toLocaleString()}` }
+              }
+            }
+          }
+        })
+      }
+    }
+
+    // Aggregate multiple open positions in the same ticker.
+    const current = new Map()
+    for (const holding of (p.assets || [])) {
+      if (Number(holding.quantity) <= 0) continue
+      const ticker = normalizeTicker(holding.ticker)
+      if (!ticker) continue
+      current.set(ticker, (current.get(ticker) || 0) + getHoldingPnL(holding))
+    }
+
+    const rows = [...current.entries()].map(([ticker, pnl]) => ({
+      ticker,
+      pnl,
+      closed: false,
+      asOf: null
+    }))
+
+    for (const [rawTicker, last] of Object.entries(payload.latest_asset_pnl || {})) {
+      const ticker = normalizeTicker(rawTicker)
+      if (!ticker || current.has(ticker)) continue
+      rows.push({
+        ticker,
+        pnl: Number(last.pnl),
+        closed: true,
+        asOf: last.t
+      })
+    }
+
+    const filtered = rows
+      .filter(row => Number.isFinite(row.pnl) && Math.abs(row.pnl) > 0.0001)
+      .sort((a, b) => Math.abs(b.pnl) - Math.abs(a.pnl))
+
+    const rowLabel = row => `${row.ticker}${row.closed ? ' (closed)' : ''}`
+    const money = value =>
+      `${value >= 0 ? '+' : '-'}$${Math.abs(value).toLocaleString(undefined, {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      })}`
+
+    if (assetContribChartRef.value) {
+      const ctx = assetContribChartRef.value.getContext('2d')
+      if (ctx) {
+        assetContribChart = new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels: filtered.length ? filtered.map(rowLabel) : ['No contribution'],
+            datasets: [{
+              data: filtered.length ? filtered.map(row => row.pnl) : [0],
+              backgroundColor: filtered.length
+                ? filtered.map(row => {
+                    const rgb = row.pnl > 0 ? '16,185,129' : '239,68,68'
+                    return `rgba(${rgb},${row.closed ? 0.35 : 0.8})`
+                  })
+                : ['rgba(148,163,184,0.5)'],
+              borderRadius: 6,
+              borderSkipped: false
+            }]
+          },
+          options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                callbacks: {
+                  title: items => {
+                    const row = filtered[items[0]?.dataIndex]
+                    return row ? `${rowLabel(row)} — ${getAssetName(row.ticker)}` : 'No contribution'
+                  },
+                  label: context => {
+                    const row = filtered[context.dataIndex]
+                    if (!row) return 'No contribution'
+                    const date = row.asOf ? new Date(row.asOf).toLocaleString() : ''
+                    return `${money(row.pnl)}${date ? ` — last snapshot ${date}` : ''}`
+                  }
+                }
+              }
+            },
+            scales: {
+              x: {
+                ticks: { callback: value => `$${Number(value).toLocaleString()}` },
+                grid: { color: 'rgba(148,163,184,0.2)' }
+              },
+              y: { grid: { display: false } }
+            }
+          }
+        })
+      }
+    }
+
+    const pieColors = [
+      '59,130,246', '139,92,246', '20,184,166', '249,115,22',
+      '236,72,153', '99,102,241', '132,204,22', '14,165,233'
+    ]
+
+    const makePnlPie = (canvas, items, emptyLabel) => {
+      const ctx = canvas?.getContext('2d')
+      if (!ctx) return null
+
+      const total = items.reduce((sum, row) => sum + Math.abs(row.pnl), 0)
+      return new Chart(ctx, {
+        type: 'doughnut',
         data: {
-          labels: slices.map(s => s.label),
+          labels: items.length ? items.map(rowLabel) : [emptyLabel],
           datasets: [{
-            data: values,
-            backgroundColor: slices.map(s => s.color),
+            data: items.length ? items.map(row => Math.abs(row.pnl)) : [1],
+            backgroundColor: items.length
+              ? items.map((row, index) =>
+                  `rgba(${pieColors[index % pieColors.length]},${row.closed ? 0.35 : 0.85})`)
+              : ['#cbd5e1'],
             borderColor: '#ffffff',
             borderWidth: 2
           }]
@@ -1729,11 +1994,12 @@ const renderPortfolioVizCharts = async () => {
             legend: { position: 'bottom' },
             tooltip: {
               callbacks: {
-                label: (context) => {
-                  const v = Number(context.raw || 0)
-                  const total = values.reduce((a, b) => a + Number(b || 0), 0)
-                  const pct = total > 0 ? ((v / total) * 100).toFixed(1) : '0.0'
-                  return `${context.label}: $${v.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} (${pct}%)`
+                label: context => {
+                  const row = items[context.dataIndex]
+                  if (!row) return emptyLabel
+                  const pct = (Math.abs(row.pnl) / total * 100).toFixed(1)
+                  const date = row.asOf ? new Date(row.asOf).toLocaleString() : ''
+                  return `${rowLabel(row)}: ${money(row.pnl)} (${pct}%)${date ? ` — last snapshot ${date}` : ''}`
                 }
               }
             }
@@ -1741,137 +2007,20 @@ const renderPortfolioVizCharts = async () => {
         }
       })
     }
-  }
 
-  if (contribChartRef.value && token === renderToken) {
-    const ctx = contribChartRef.value.getContext('2d')
-    if (!ctx) return
-
-    const portfolioId = selectedPortfolio.value?.id
-    if (!portfolioId) return
-
-    const res = await api.get(`/market-masters/portfolios/${portfolioId}/pnl-timeseries/`)
-    if (token !== renderToken) return
-
-    const pts = Array.isArray(res.data?.portfolio) ? res.data.portfolio : []
-    contribChart = new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels: pts.map(p => p.t),
-        datasets: [{
-          label: 'Portfolio PnL',
-          data: pts.map(p => Number(p.pnl || 0)),
-          tension: 0.3,
-          pointRadius: 0
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: { display: true }
-        },
-        scales: {
-          x: {
-            grid: { display: false },
-            ticks: {
-              autoSkip: true,
-              maxTicksLimit: 7,
-              maxRotation: 0,
-              minRotation: 0,
-              callback: (_v, i) => {
-                const raw = pts[i]?.t
-                if (!raw) return ''
-                const d = new Date(raw)
-                if (Number.isNaN(d.getTime())) return String(raw)
-                return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-              }
-            }
-          },
-          y: {
-            ticks: {
-              callback: (v) => `$${Number(v).toLocaleString()}`
-            }
-          }
-        }
-      }
-    })
-  }
-
-  if (assetContribChartRef.value && token === renderToken) {
-    const ctx = assetContribChartRef.value.getContext('2d')
-    if (ctx) {
-      const rows = (selectedPortfolio.value?.assets || []).map(h => {
-        const pnl = Number(getHoldingPnL(h) || 0)
-        return {
-          ticker: h.ticker,
-          name: getAssetName(h.ticker),
-          pnl
-        }
-      })
-
-      // keep non-zero, sorted by absolute contribution
-      const filtered = rows
-        .filter(r => Math.abs(r.pnl) > 0.0001)
-        .sort((a, b) => Math.abs(b.pnl) - Math.abs(a.pnl))
-        .slice(0, 12)
-
-      const labels = filtered.length
-        ? filtered.map(r => r.ticker)
-        : ['No active contribution']
-
-      const values = filtered.length
-        ? filtered.map(r => r.pnl)
-        : [0]
-
-      const colors = filtered.length
-        ? filtered.map(r => r.pnl >= 0 ? 'rgba(16,185,129,0.75)' : 'rgba(239,68,68,0.75)')
-        : ['rgba(148,163,184,0.5)']
-
-      assetContribChart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-          labels,
-          datasets: [{
-            label: 'PnL Contribution ($)',
-            data: values,
-            backgroundColor: colors,
-            borderRadius: 6,
-            borderSkipped: false
-          }]
-        },
-        options: {
-          indexAxis: 'y',
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: { display: false },
-            tooltip: {
-              callbacks: {
-                title: (items) => {
-                  const i = items?.[0]?.dataIndex ?? 0
-                  return filtered[i] ? `${filtered[i].ticker} — ${filtered[i].name}` : labels[i]
-                },
-                label: (ctx) => {
-                  const v = Number(ctx.raw || 0)
-                  return `Contribution: ${v >= 0 ? '+' : '-'}$${Math.abs(v).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-                }
-              }
-            }
-          },
-          scales: {
-            x: {
-              ticks: {
-                callback: (v) => `$${Number(v).toLocaleString()}`
-              },
-              grid: { color: 'rgba(148,163,184,0.2)' }
-            },
-            y: {
-              grid: { display: false }
-            }
-          }
-        }
-      })
+    positivePnlChart = makePnlPie(
+      positivePnlChartRef.value,
+      filtered.filter(row => row.pnl > 0),
+      'No positive P&L'
+    )
+    negativePnlChart = makePnlPie(
+      negativePnlChartRef.value,
+      filtered.filter(row => row.pnl < 0),
+      'No negative P&L'
+    )
+  } finally {
+    if (token === renderToken) {
+      chartsLoading.value = false
     }
   }
 }
@@ -2710,7 +2859,11 @@ watch(
   () => selectedPortfolio.value?.id,
   async (newId) => {
     if (newId) await renderPortfolioVizCharts()
-    else destroyVizCharts()
+        else {
+      ++renderToken
+      chartsLoading.value = false
+      destroyVizCharts()
+    }
   }
 )
 
@@ -3112,7 +3265,7 @@ onMounted(() => {
 onBeforeUnmount(() => {
   if (clockIntervalId) clearInterval(clockIntervalId)
   if (dashboardIntervalId) clearInterval(dashboardIntervalId)
-
+  ++renderToken
   destroyVizCharts()
 
   Object.values(sparklineCharts.value || {}).forEach(c => { try { c?.destroy?.() } catch {} })
