@@ -363,8 +363,6 @@
             </div>
           </v-card-text>
         </v-card>
-
-
       </v-col>
 
       <!-- Right: Sidebar - Course Objectives + Completed + Profile (5 cols) -->
