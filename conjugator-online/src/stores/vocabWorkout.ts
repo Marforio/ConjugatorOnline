@@ -2,6 +2,9 @@
 import { defineStore } from "pinia";
 import { ref, computed } from "vue";
 import api from "@/axios";
+import { watch } from "vue";
+import { useAuthStore } from "@/stores/auth";
+import type { CompletedVocabList } from "@/utils/vocabCompletion";
 
 export type VWMode = "write" | "quiz";
 export type VWLevel = "essential" | "advanced" | null;
@@ -164,6 +167,59 @@ export const useVocabWorkoutStore = defineStore("vocabWorkout", () => {
   const loadingMyWork = ref(false);
   const errorMyWork = ref<string | null>(null);
 
+  const auth = useAuthStore();
+  const completedLists = ref<CompletedVocabList[]>([]);
+  const loadingCompletedLists = ref(false);
+  const completedListsError = ref<string | null>(null);
+  let completionRequestId = 0;
+
+  async function fetchCompletedLists() {
+    const requestId = ++completionRequestId;
+
+    if (!auth.access) {
+      completedLists.value = [];
+      completedListsError.value = null;
+      loadingCompletedLists.value = false;
+      return;
+    }
+
+    loadingCompletedLists.value = true;
+    completedListsError.value = null;
+
+    try {
+      const { data } = await api.get("/vocab-workout-sessions/completed-lists/");
+      if (requestId !== completionRequestId) return;
+
+      if (!Array.isArray(data.completed_lists)) {
+        throw new Error("Unexpected completed-lists response");
+      }
+
+      completedLists.value = data.completed_lists;
+    } catch (error) {
+      if (requestId !== completionRequestId) return;
+      console.error("Failed to load completed vocabulary lists:", error);
+      completedLists.value = [];
+      completedListsError.value = "Could not load completed lists.";
+    } finally {
+      if (requestId === completionRequestId) {
+        loadingCompletedLists.value = false;
+      }
+    }
+  }
+
+  // Clear old account data immediately when the access token changes.
+  watch(
+    () => auth.access,
+    (token) => {
+      ++completionRequestId;
+      completedLists.value = [];
+      completedListsError.value = null;
+      loadingCompletedLists.value = false;
+      if (token) void fetchCompletedLists();
+    },
+    { flush: "sync" }
+  );
+
   const activeByList = computed(() => {
     const map = new Map<string, VWSession[]>();
     for (const s of activeSessions.value) {
@@ -273,6 +329,7 @@ async function continueSession(sessionId: number): Promise<VWQueueState> {
     const finished = normalizeSession(raw);
 
     activeSessions.value = activeSessions.value.filter((s) => s.session_id !== sessionId);
+    void fetchCompletedLists();
     return finished;
   }
 
@@ -295,6 +352,10 @@ async function continueSession(sessionId: number): Promise<VWQueueState> {
     appendAttempts,
     nextItem,
     finishSession,
-    fetchSessionAttempts
+    fetchSessionAttempts,
+    completedLists,
+    loadingCompletedLists,
+    completedListsError,
+    fetchCompletedLists,
   };
 });

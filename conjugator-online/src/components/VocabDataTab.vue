@@ -253,6 +253,8 @@
       </v-window-item>
 
       <v-window-item :value="1">
+        <CompletedVocabLists class="mb-4" />
+        
         <VWMyProgressPanel
           :completionTarget="COMPLETION_TARGET"
           title="Your progress — Vocab Training"
@@ -293,6 +295,8 @@ import { useUserStore } from "@/stores/user";
 import AiTutorChatDialog from "@/components/AiTutorChatDialog.vue";
 import VWMyProgressPanel from "@/components/vocab_workout_scenes/VWMyProgressPanel.vue";
 import VocabWorkoutDataTab from "@/components/VocabWorkoutDataTab.vue";
+import CompletedVocabLists from '@/components/vocab_workout_scenes/VWCompletedVocabLists.vue';
+
 
 const router = useRouter();
 const userStore = useUserStore();

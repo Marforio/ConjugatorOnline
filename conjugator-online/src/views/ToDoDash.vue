@@ -144,6 +144,8 @@
   </v-col>
 </v-row>
 
+
+
     <!-- MAIN CONTENT: Assignments (7) + Course Objectives + Completed + Profile (5) -->
     <v-row class="mb-6">
       <!-- Left: Assignments Panel (7 cols) -->
@@ -182,6 +184,7 @@
             </div>
 
             <div v-else class="ga-6 d-flex flex-column">
+
               <!-- Active Vocab Sessions (embedded compact panel) -->
               <div
                 v-if="hasActiveVocabSessions"
@@ -434,6 +437,10 @@
             </v-card>
           </v-col>
 
+          <v-col cols="12">
+            <CompletedVocabLists />
+          </v-col>
+
           <!-- Completed Tasks Card (Collapsible, closed by default) -->
           <v-col cols="12" v-if="welcomeStore.completedCount > 0">
             <v-expansion-panels v-model="completedTasksPanel">
@@ -620,6 +627,7 @@ import LinguisticProfileEmbedded from '@/components/LinguisticProfileEmbedded.vu
 import { useVocabWorkoutStore } from "@/stores/vocabWorkout";
 import VWActiveSessionsCompact from '@/components/vocab_workout_scenes/VWActiveSessionsCompact.vue';
 import VWWrongVocabFlip from '@/components/vocab_workout_scenes/VWWrongVocabFlip.vue';
+import CompletedVocabLists from '@/components/vocab_workout_scenes/VWCompletedVocabLists.vue';
 
 const userStore = useUserStore();
 const router = useRouter();

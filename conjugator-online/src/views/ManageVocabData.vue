@@ -58,7 +58,7 @@
 
       <v-card v-if="courseModeSlug && courseModeSlug !== 'all'" class="border bg-white" rounded="lg" elevation="0">
         <div class="pa-4 bg-slate-50 border-b font-weight-bold text-slate-700">
-          Student Activity and Progress by List (Showing list completion % > 0)
+          Finished write sessions by list, level and practice direction
         </div>
         
         <v-table density="comfortable" class="bg-white table-fixed">
@@ -80,18 +80,18 @@
                 <div class="d-flex flex-wrap ga-2">
                   <v-chip
                     v-for="list in student.completedLists"
-                    :key="list.list_key"
+                    :key="completionKey(list)"
                     size="small"
-                    color="teal-darken-1"
+                    :color="list.verified ? 'teal-darken-1' : 'warning'"
                     variant="tonal"
-                    class="font-weight-bold bg-teal-tight"
+                    class="font-weight-bold"
                   >
-                    <!-- Course table chips -->
-                    <span class="text-slate-800 font-weight-black mr-1">{{ getListDisplayName(list.list_key) }}:</span>
-                    {{ list.pct }}% Mastered
+                    {{ getListDisplayName(list.list_key, list.level) }}
+                    · {{ completionVariant(list) }}
+                    · {{ list.verified ? 'Completed' : 'Finished, unverified' }}
                   </v-chip>
                   <span v-if="student.completedLists.length === 0" class="text-caption text-slate-400 italic">
-                    No vocabulary lists studied yet.
+                    No finished write sessions.
                   </span>
                 </div>
               </td>
@@ -226,6 +226,11 @@
 import { ref, computed, onMounted, watch } from 'vue';
 import api from '@/axios';
 import { useUserStore } from '@/stores/user';
+import {
+  completionKey,
+  completionVariant,
+  type CompletedVocabList,
+} from '@/utils/vocabCompletion';
 
 interface Course {
   slug: string;
@@ -236,8 +241,7 @@ interface StudentProgressNode {
   id: number;
   initials: string;
   web_id: string;
-  course_slugs: string[];
-  completedLists: Array<{ list_key: string; pct: number }>;
+  completedLists: CompletedVocabList[];
 }
 
 const userStore = useUserStore();
@@ -252,6 +256,7 @@ const focusedListKey = ref<string | null>(null);
 const searchListQuery = ref('');
 
 const rawSessionsPool = ref<any[]>([]);
+const classCompletions = ref<CompletedVocabList[]>([]);
 const rawProgressPool = ref<any[]>([]);
 const listMetadataWrapper = ref<{ total_completions: number; terms: any[] }>({
   total_completions: 0,
@@ -333,75 +338,31 @@ watch(courseOptions, (newOptions) => {
  * Strips out loop lookups using an indexed lookup map strategy
  */
 const studentProgressByCourse = computed<StudentProgressNode[]>(() => {
-  const activeCourse = courseModeSlug.value;
-  if (!activeCourse || activeCourse === 'all' || !userStore.teacherRoster.length) return [];
+  const course = courseModeSlug.value?.trim().toLowerCase();
+  if (!course || course === 'all') return [];
 
-  const activeCourseSlug = activeCourse.trim().toLowerCase();
-
-  // 1. Create an indexed set of students enrolled in this course from userStore enrollments
-  const targetStudentWebIds = new Set<string>();
-  userStore.enrollments.forEach((e) => {
-    const enrollmentCourseSlug = String(e.course || '').trim().toLowerCase();
-    if (enrollmentCourseSlug === activeCourseSlug) {
-      const webId = String(e.student || '').trim();
-      if (webId) targetStudentWebIds.add(webId);
-    }
-  });
-
-  // Filter students based on our indexed lookup set
-  const targetCourseStudents = userStore.teacherRoster.filter(
-    (s) => s.web_id && targetStudentWebIds.has(String(s.web_id))
+  const studentWebIds = new Set(
+    userStore.enrollments
+      .filter(e => String(e.course || '').trim().toLowerCase() === course)
+      .map(e => String(e.student || '').trim())
+      .filter(Boolean)
   );
 
-  // 2. Pre-index raw session data by student ID to eliminate O(N) array filtering within loops
-  const sessionsByStudentMap = new Map<number, any[]>();
-  rawSessionsPool.value.forEach((session) => {
-    if (session.student) {
-      if (!sessionsByStudentMap.has(session.student)) {
-        sessionsByStudentMap.set(session.student, []);
-      }
-      sessionsByStudentMap.get(session.student)!.push(session);
-    }
-  });
+  const byStudent = new Map<number, CompletedVocabList[]>();
+  for (const row of classCompletions.value) {
+    const rows = byStudent.get(row.student_id) || [];
+    rows.push(row);
+    byStudent.set(row.student_id, rows);
+  }
 
-  // 3. Map progress snapshots with O(1) lookups
-  return targetCourseStudents.map((student) => {
-    const studentSessions = sessionsByStudentMap.get(student.id) || [];
-    const maxProgressMap = new Map<string, number>();
-
-    studentSessions.forEach((s) => {
-      if (!s.list_key) return;
-      const totalCount = s.total_count || s.all_item_ids?.length || 0;
-      const masteredCount = s.mastered_count || s.mastered_item_ids?.length || 0;
-
-      if (totalCount > 0) {
-        const percentage = Math.round((masteredCount * 100) / totalCount);
-        const currentMax = maxProgressMap.get(s.list_key) || 0;
-        if (percentage > currentMax) {
-          maxProgressMap.set(s.list_key, percentage);
-        }
-      }
-    });
-
-    // Format maps smoothly back into layout schemas
-    const completedLists = Array.from(maxProgressMap.entries())
-      .filter(([_, percentage]) => percentage > 0) // Hide lists with 0% progress
-      .map(([listKey, percentage]) => ({
-        list_key: listKey,
-        pct: percentage,
-      }));
-
-    return {
+  return userStore.teacherRoster
+    .filter(student => studentWebIds.has(String(student.web_id)))
+    .map(student => ({
       id: student.id,
       initials: student.initials,
       web_id: student.web_id,
-      // Fallback safely to current enrollments data references
-      course_slugs: userStore.enrollments
-        .filter((e) => String(e.student || '').trim() === String(student.web_id))
-        .map((e) => String(e.course)),
-      completedLists,
-    };
-  });
+      completedLists: byStudent.get(student.id) || [],
+    }));
 });
 
 // PANEL B DIRECTORY ENGINE
@@ -449,12 +410,20 @@ watch(focusedListKey, async (newKey) => {
 async function initializeDashboardContextData() {
   loading.value = true;
   try {
-    // 🚀 Fetch game states in parallel, omitting redundant endpoints
-    const [sessionsRes, progressRes, listsRes] = await Promise.all([
+    // Fetch game states in parallel, omitting redundant endpoints
+        const [sessionsRes, progressRes, listsRes, completionsRes] = await Promise.all([
       api.get('/vocab-workout-sessions/'),
       api.get('/vocab-workout-sessions/my-work/').catch(() => ({ data: { progress: [] } })),
       api.get('/vocab-lists/').catch(() => ({ data: [] })),
+      api.get('/vocab-workout-sessions/completed-lists/', {
+        params: { scope: 'class' },
+      }),
     ]);
+
+    if (!Array.isArray(completionsRes.data.completed_lists)) {
+      throw new Error('Unexpected class completion response');
+    }
+    classCompletions.value = completionsRes.data.completed_lists;
 
     rawSessionsPool.value = sessionsRes.data?.results || sessionsRes.data || [];
     rawProgressPool.value = progressRes.data?.progress || [];
@@ -467,6 +436,7 @@ async function initializeDashboardContextData() {
     customVocabLists.value = Array.isArray(rawLists) ? rawLists : [];
 
   } catch (err) {
+    classCompletions.value = [];
     console.error("Dashboard context boot cycle exception caught:", err);
   } finally {
     loading.value = false;
