@@ -1781,6 +1781,7 @@ const renderPortfolioVizCharts = async () => {
       }
     }
     
+    // Portfolio performance chart
     let payload = {}
     try {
       const res = await api.get(`/market-masters/portfolios/${p.id}/pnl-timeseries/`)
@@ -1793,6 +1794,77 @@ const renderPortfolioVizCharts = async () => {
     }
 
     const pts = Array.isArray(payload.portfolio) ? payload.portfolio : []
+
+    // Group trades at the nearest plotted snapshot.
+    const tradesByIndex = new Map()
+    const snapshotTimes = pts.map(point => new Date(point.t).getTime())
+
+    for (const tx of p.transactions || []) {
+      const tradeTime = new Date(tx.timestamp).getTime()
+
+      if (!Number.isFinite(tradeTime) || !snapshotTimes.length) continue
+
+      // Don't place trades outside the plotted history at a misleading endpoint.
+      if (
+        tradeTime < snapshotTimes[0] ||
+        tradeTime > snapshotTimes[snapshotTimes.length - 1]
+      ) continue
+
+      let nearestIndex = -1
+      let nearestDistance = Infinity
+
+      snapshotTimes.forEach((time, index) => {
+        const distance = Math.abs(time - tradeTime)
+        if (Number.isFinite(time) && distance < nearestDistance) {
+          nearestIndex = index
+          nearestDistance = distance
+        }
+      })
+
+      if (nearestIndex < 0) continue
+      if (!tradesByIndex.has(nearestIndex)) tradesByIndex.set(nearestIndex, [])
+      tradesByIndex.get(nearestIndex).push(tx)
+    }
+
+    const tradeEventsDataset = {
+      label: 'Trades',
+      data: pts.map((point, index) =>
+        tradesByIndex.has(index) ? Number(point.pnl) : null
+      ),
+      showLine: false,
+      pointRadius: 5,
+      pointHoverRadius: 7,
+      pointHitRadius: 8,
+      pointBorderColor: '#ffffff',
+      pointBorderWidth: 2,
+      pointBackgroundColor: (context) => {
+        const trades = tradesByIndex.get(context.dataIndex) || []
+        const actions = new Set(
+          trades.map(tx => String(tx.transaction_type).toUpperCase())
+        )
+
+        if (actions.size > 1) return '#7c3aed' // mixed actions
+        return actions.has('BUY') || actions.has('COVER')
+          ? '#16a34a'
+          : '#ea580c'
+      },
+      tooltip: {
+        callbacks: {
+          label: (context) => {
+            const trades = tradesByIndex.get(context.dataIndex) || []
+            return trades.map(tx => {
+              const action = String(tx.transaction_type).toUpperCase()
+              const when = new Date(tx.timestamp).toLocaleString()
+              const quantity = Number(tx.quantity).toLocaleString(undefined, {
+                maximumFractionDigits: 6,
+              })
+              const price = Number(tx.price_per_unit).toFixed(2)
+              return `${action} ${quantity} ${tx.ticker} @ $${price} — ${when}`
+            })
+          },
+        },
+      },
+    }
 
     if (contribChartRef.value) {
       const ctx = contribChartRef.value.getContext('2d')
@@ -1823,7 +1895,9 @@ const renderPortfolioVizCharts = async () => {
                 gradient.addColorStop(1, '#eab308')
                 return gradient
               }
-            }]
+            },
+          tradeEventsDataset,
+          ]
           },
           plugins: [{
             id: 'portfolioZeroLine',

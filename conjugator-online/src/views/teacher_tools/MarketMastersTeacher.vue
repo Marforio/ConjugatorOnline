@@ -287,6 +287,12 @@
                   </span>
                 </v-alert>
 
+                <CompetitionRankingHistory
+                    v-if="selectedCompDetails?.id"
+                    :competition-id="selectedCompDetails.id"
+                    class="mb-4"
+                  />
+
                 <v-table density="comfortable" class="border rounded text-caption">
                   <thead>
                     <tr class="bg-grey-lighten-4">
@@ -372,6 +378,7 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import api from '@/axios'
 import { useUserStore } from '@/stores/user'
+import CompetitionRankingHistory from '@/components/MarketMasters/CompetitionRankingHistory.vue'
 
 const userStore = useUserStore()
 
