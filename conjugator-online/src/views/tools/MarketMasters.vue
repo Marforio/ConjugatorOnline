@@ -1231,7 +1231,13 @@
                           </v-chip>
                         </td>
                         <td>{{ parseFloat(tx.quantity).toFixed(2) }}</td>
-                        <td class="text-right font-weight-bold">${{ parseFloat(tx.price_per_unit).toFixed(2) }}</td>
+                        <td class="text-right font-weight-bold">
+                          ${{ parseFloat(tx.price_per_unit).toFixed(2) }}
+
+                          <div v-if="tx.quote_warning" class="text-warning text-caption">
+                            {{ tx.quote_warning }}
+                          </div>
+                        </td>
                       </tr>
                       <tr v-if="!selectedPortfolio?.transactions?.length">
                         <td colspan="5" class="text-center text-slate-400 py-4">No recent trade operations completed.</td>
@@ -2266,6 +2272,20 @@ const fetchDashboardData = async () => {
     currentWatchlist.value = res.data.watchlist
     marketPrices.value = res.data.market_prices
 
+    const openPortfolio = selectedPortfolio.value
+    if (openPortfolio && portfolioDialog.value.isOpen) {
+      const updated = portfolios.value.find(p => p.id === openPortfolio.id)
+      if (updated) {
+        selectedPortfolio.value = {
+          ...openPortfolio,
+          net_equity: updated.net_equity,
+          total_exposure: updated.total_exposure,
+          pnl_value: updated.pnl_value,
+          pnl_pct: updated.pnl_pct,
+        }
+      }
+    }
+
     console.log('Portfolio data fetched:', res.data.portfolios)
 
     if (portfolios.value.some(p => !!p.competition)) {
@@ -3156,8 +3176,13 @@ const confirmAndRouteOrder = async () => {
         `🕒 Market closed: your MARKET ${payload.trade_type} order for ${payload.ticker} is queued for next NYSE open.`,
         "warning"
       )
+        } else if (data.quote_warning) {
+      triggerToast(
+        `${data.message || 'Order completed.'} ${data.quote_warning}`,
+        'warning'
+      )
     } else {
-      triggerToast(data.message || "Order completed successfully.", "success")
+      triggerToast(data.message || 'Order completed successfully.', 'success')
     }
 
     isQuoteModalActive.value = false

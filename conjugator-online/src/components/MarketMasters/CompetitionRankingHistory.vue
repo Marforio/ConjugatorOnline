@@ -6,7 +6,7 @@
           Ranking evolution
         </div>
         <div class="text-caption text-medium-emphasis">
-          Latest available snapshot per New York day. Rank 1 is at the top.
+          No ranking snapshots are available after the first seven days yet.
         </div>
       </div>
 
@@ -47,6 +47,10 @@ import api from '@/axios'
 const props = defineProps({
   competitionId: {
     type: [Number, String],
+    required: true,
+  },
+  competitionStart: {
+    type: String,
     required: true,
   },
 })
@@ -93,11 +97,46 @@ async function loadHistory() {
       throw new Error('Invalid ranking history response')
     }
 
-    const visibleSeries = series.filter(
-      row => Array.isArray(row.ranks) && row.ranks.some(rank => rank != null)
-    )
+    // First seven New York calendar dates, including the start date.
+    const start = new Date(props.competitionStart)
+    if (Number.isNaN(start.getTime())) {
+      throw new Error('Invalid competition start date')
+    }
 
-    if (!dates.length || !visibleSeries.length) return
+    const parts = new Intl.DateTimeFormat('en-US', {
+      timeZone: 'America/New_York',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    }).formatToParts(start)
+
+    const part = type => parts.find(p => p.type === type)?.value
+    const cutoff = new Date(Date.UTC(
+      Number(part('year')),
+      Number(part('month')) - 1,
+      Number(part('day')) + 7
+    )).toISOString().slice(0, 10)
+
+    const firstIndex = dates.findIndex(date => date >= cutoff)
+    if (firstIndex === -1) return
+
+    const chartDates = dates.slice(firstIndex)
+
+    // Select the five highest-ranked participants on the latest day.
+    const latestIndex = dates.length - 1
+    const visibleSeries = series
+      .filter(row =>
+        Array.isArray(row.ranks) &&
+        Number.isInteger(row.ranks[latestIndex])
+      )
+      .sort((a, b) => a.ranks[latestIndex] - b.ranks[latestIndex])
+      .slice(0, 5)
+      .map(row => ({
+        ...row,
+        ranks: row.ranks.slice(firstIndex),
+      }))
+
+    if (!chartDates.length || !visibleSeries.length) return
 
     hasData.value = true
     loading.value = false
@@ -123,7 +162,7 @@ async function loadHistory() {
 
     chart = new Chart(canvasRef.value, {
       type: 'line',
-      data: { labels: dates, datasets },
+      data: { labels: chartDates, datasets },
       options: {
         responsive: true,
         maintainAspectRatio: false,

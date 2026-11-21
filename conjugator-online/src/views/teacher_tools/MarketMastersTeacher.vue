@@ -288,10 +288,11 @@
                 </v-alert>
 
                 <CompetitionRankingHistory
-                    v-if="selectedCompDetails?.id"
-                    :competition-id="selectedCompDetails.id"
-                    class="mb-4"
-                  />
+                  v-if="selectedCompDetails?.id"
+                  :competition-id="selectedCompDetails.id"
+                  :competition-start="selectedCompDetails.start_time"
+                  class="mb-4"
+                />
 
                 <v-table density="comfortable" class="border rounded text-caption">
                   <thead>
