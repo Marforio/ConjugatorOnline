@@ -371,13 +371,35 @@
 
                 <v-expansion-panel-text>
                   <v-alert
+                    v-if="comp.competition.is_finalized"
+                    type="info"
+                    variant="tonal"
+                    density="compact"
+                    class="mb-2"
+                  >
+                    Final standings are estimated from recorded snapshots.
+                  </v-alert>
+
+                  <v-alert
+                    v-else-if="comp.competition.finalization_state"
+                    type="warning"
+                    variant="tonal"
+                    density="compact"
+                    class="mb-2"
+                  >
+                    Competition ended. Final results are awaiting processing or teacher review.
+                  </v-alert>
+                  <v-alert
                     v-if="comp.my_position"
                     density="compact"
                     variant="tonal"
                     color="primary"
                     class="mb-2"
                   >
-                    Your Rank: <strong>#{{ comp.my_position.rank }}</strong>
+                    <span v-if="comp.my_position.eligible !== false">
+                      Your Rank: <strong>#{{ comp.my_position.rank }}</strong>
+                    </span>
+                    <span v-else>Not eligible: minimum asset requirement not met</span>
                     • PnL:
                     <strong :class="Number(comp.my_position.pnl_value) >= 0 ? 'text-success' : 'text-error'">
                       {{ Number(comp.my_position.pnl_value) >= 0 ? '+' : '-' }}${{ Math.abs(Number(comp.my_position.pnl_value)).toFixed(2) }}
@@ -400,7 +422,7 @@
                         :key="row.portfolio_id"
                         :class="row.is_me ? 'bg-red-lighten-5' : ''"
                       >
-                        <td class="font-weight-bold">#{{ row.rank }}</td>
+                        <td class="font-weight-bold">{{ row.eligible === false ? 'Not eligible' : `#${row.rank}` }}</td>
                         <td>{{ row.student_name }}</td>
                         <td
                           class="text-right font-weight-bold"
@@ -721,90 +743,34 @@
                     </v-col>
                   </v-row>
                   <v-expand-transition>
-                    <div v-if="tradeForm.action === 'BUY' && canUseAdvancedActions && selectedPortfolio.leverage_setting !== 1" class="mb-4">
+                    <div
+                      v-if="tradeForm.action === 'BUY' && canUseAdvancedActions && selectedPortfolio.leverage_setting !== 1"
+                      class="mb-4"
+                    >
                       <v-alert type="info" variant="tonal" icon="mdi-finance" class="text-caption">
                         <div class="d-flex justify-space-between flex-wrap ga-2">
-                          <span><strong>Cash:</strong> ${{ Number(selectedPortfolio?.cash_balance || 0).toFixed(2) }}</span>
-                          <span><strong>Leverage:</strong> {{ selectedPortfolio?.leverage_setting || 1 }}x</span>
-                          <span><strong>Buying Power:</strong> ${{ buyPowerDisplay.toFixed(0) }}</span>
-                          <span><strong>Borrow Limit:</strong> ${{ Number(maxBorrowLimit || 0).toFixed(0) }}</span>
-                          <span><strong>Post-Order Headroom:</strong> ${{ buyHeadroomDisplay.toFixed(0) }}</span>
+                          <span>
+                            <strong>Cash:</strong>
+                            ${{ Number(selectedPortfolio?.cash_balance || 0).toFixed(2) }}
+                          </span>
+                          <span>
+                            <strong>Portfolio leverage limit:</strong>
+                            {{ selectedPortfolio?.leverage_setting || 1 }}x
+                          </span>
                         </div>
                         <div class="mt-2">
-                          <strong>Live Margin Health:</strong>
-                          <span :class="healthStatusColor"> {{ (liveMarginRatio * 100).toFixed(1) }}% </span>
+                          The server checks total portfolio exposure and prices when the order executes.
                         </div>
-                        <v-progress-linear
-                          :model-value="liveMarginRatio * 100"
-                          :color="healthBarColor"
-                          height="8"
-                          rounded
-                          class="mt-1"
-                        />
                       </v-alert>
                     </div>
                   </v-expand-transition>
 
-                  <!-- NEW: Advanced controls for SHORT -->
                   <v-expand-transition>
-                    <div v-if="tradeForm.action === 'SHORT' && !selectedPortfolio.leverage_setting === 1">
-                      <v-row class="mb-2">
-                        <v-col cols="12" md="6">
-                          <div class="d-flex align-center text-caption text-slate-600 mb-2 font-weight-bold">
-                            Desired Leverage (x)
-                            <v-tooltip location="top" max-width="340">
-                              <template #activator="{ props }">
-                                <v-icon v-bind="props" size="16" class="ml-1">mdi-help-circle-outline</v-icon>
-                              </template>
-                              <span>
-                                Leverage is like a magic booster. With 3x leverage, your $1 acts like $3 when you make a trade.
-                              </span>
-                            </v-tooltip>
-                          </div>
-
-                          <v-slider
-                            v-model="tradeForm.requestedLeverage"
-                            :min="1"
-                            :max="selectedPortfolio?.leverage_setting || 1"
-                            step="1"
-                            thumb-label="always"
-                            color="primary"
-                            hide-details
-                          />
-
-                          <div class="text-caption text-slate-500 mt-1">
-                            Portfolio max: {{ selectedPortfolio?.leverage_setting || 1 }}x
-                          </div>
-                        </v-col>
-
-                        <v-col cols="12" md="6">
-                          <div class="d-flex align-center text-caption text-slate-600 mb-1 font-weight-bold">
-                            Stop-Loss Price (Optional)
-                            <v-tooltip location="top" max-width="360">
-                              <template #activator="{ props }">
-                                <v-icon v-bind="props" size="16" class="ml-1">mdi-help-circle-outline</v-icon>
-                              </template>
-                              <span>
-                                For SHORT positions, stop-loss is a safety threshold above entry.
-                                If market price rises to this level, risk controls can force close to limit losses.
-                              </span>
-                            </v-tooltip>
-                          </div>
-
-                          <v-text-field
-                            v-model.number="tradeForm.stopLossPrice"
-                            type="number"
-                            step="0.01"
-                            min="0.01"
-                            variant="outlined"
-                            density="comfortable"
-                            placeholder="e.g. 145.00"
-                            :rules="[
-                              v => v === null || v === '' || Number(v) > 0 || 'Stop-loss must be positive.'
-                            ]"
-                          />
-                        </v-col>
-                      </v-row>
+                    <div v-if="tradeForm.action === 'SHORT'" class="mb-3">
+                      <v-alert type="warning" variant="tonal" density="comfortable">
+                        The {{ selectedPortfolio?.leverage_setting || 1 }}x portfolio limit applies
+                        to total exposure. Automatic stop-loss and liquidation are not enabled.
+                      </v-alert>
                     </div>
                   </v-expand-transition>
 
@@ -834,14 +800,14 @@
                     </h3>
 
                     <div class="d-flex justify-space-between text-subtitle-2 mb-1">
-                      <span>Recovered Principal:</span>
+                      <span>Gross Principal:</span>
                       <span class="font-weight-bold">${{ (computedGrossPrincipal || 0).toFixed(2) }}</span>
                     </div>
 
                     <div class="d-flex justify-space-between text-subtitle-2 mb-1">
                       <span>Processing Fee:</span>
                       <span :class="tradeForm.action === 'SELL' ? 'text-rose-600 font-weight-bold' : 'text-amber-700 font-weight-bold'">
-                        {{ tradeForm.action === 'SELL' ? '-' : '+' }}$10.00
+                        {{ ['SELL', 'SHORT'].includes(tradeForm.action) ? '-' : '+' }}$10.00
                       </span>
                     </div>
 
@@ -849,7 +815,7 @@
 
                     <div class="d-flex justify-space-between text-subtitle-1 mb-2">
                       <span class="font-weight-bold text-slate-700">
-                        {{ tradeForm.action === 'SELL' ? 'Net Cash Recovered:' : 'Total Order Impact:' }}
+                        {{ ['SELL', 'SHORT'].includes(tradeForm.action) ? 'Net Proceeds:' : 'Total Order Cost:' }}
                       </span>
                       <span :class="tradeForm.action === 'SELL' ? 'text-emerald-600 font-weight-black' : 'text-primary font-weight-black'">
                         {{ tradeForm.action === 'SELL' ? '+' : '' }}${{ (computedTotalImpact || 0).toFixed(2) }}
@@ -1035,9 +1001,11 @@
             </div>
           </v-col>
           <v-col cols="6" class="text-right">
-            <div class="text-overline font-weight-bold opacity-70 tracking-wide">Total Buying Power</div>
+            <div class="text-overline font-weight-bold opacity-70 tracking-wide">
+              Portfolio Leverage Limit
+            </div>
             <div class="text-h5 font-weight-bold text-blue-lighten-3">
-              ${{ Number(maxPurchasingPower || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
+              {{ selectedPortfolio?.leverage_setting || 1 }}x
             </div>
           </v-col>
         </v-row>
@@ -1069,22 +1037,23 @@
         </v-row>
 
         <div class="mb-1 d-flex justify-space-between text-caption font-weight-bold">
-          <span class="d-flex align-center gap-1">⚠️ Account Health Capacity</span>
-          <span :class="healthStatusColor">{{ (liveMarginRatio * 100).toFixed(1) }}% Ratio</span>
+          <span>Estimated Margin Ratio</span>
+          <span :class="healthStatusColor">{{ marginRatioText }}</span>
         </div>
 
         <v-progress-linear
-          :model-value="liveMarginRatio * 100"
+          v-if="liveMarginRatio !== null"
+          :model-value="Math.max(0, Math.min(100, liveMarginRatio * 100))"
           :color="healthBarColor"
           height="8"
           rounded
           striped
           :max="100"
-        ></v-progress-linear>
+        />
 
         <div class="d-flex justify-space-between text-slate-400 mt-1" style="font-size: 0.65rem;">
-          <span class="text-rose-400 font-weight-bold">10% Forced Liquidation Drop Limit</span>
-          <span>100% Fully Collateralized</span>
+          <span>Estimate uses cached prices, which may be stale.</span>
+          <span>Automatic liquidation is not enabled.</span>
         </div>
       </v-card>
 
@@ -1314,8 +1283,8 @@
               <li>Net Equity = Cash + Long Value − Short Value − Borrowed Funds.</li>
               <li>Gross Exposure = Long Value + Short Value.</li>
               <li>Margin Ratio = Net Equity / Gross Exposure.</li>
-              <li><strong>Forced liquidation triggers when Margin Ratio &lt; 10% (0.10).</strong></li>
-              <li>Liquidation closes positions immediately; in this simulation it is effectively game over for that portfolio.</li>
+              <li>Automatic liquidation and automatic stop-loss are not enabled. Monitor positions and close them manually.</li>
+              <li>Displayed valuations use cached prices and can be stale or unavailable.</li>
             </ul>
           </v-card-text>
           <v-card-actions>
@@ -2278,10 +2247,7 @@ const fetchDashboardData = async () => {
       if (updated) {
         selectedPortfolio.value = {
           ...openPortfolio,
-          net_equity: updated.net_equity,
-          total_exposure: updated.total_exposure,
-          pnl_value: updated.pnl_value,
-          pnl_pct: updated.pnl_pct,
+          ...updated,
         }
       }
     }
@@ -2799,22 +2765,19 @@ const maxSellableQuantity = computed(() => {
   if (!selectedPortfolio.value || !tradeForm.value.ticker || typeof tradeForm.value.ticker !== 'string') return 0
   
   const searchTicker = normalizeTicker(tradeForm.value.ticker)
-  const match = selectedPortfolio.value.assets.find(a => tickerEq(a.ticker, searchTicker))
+  const match = longPositions.value.find(a => tickerEq(a.ticker, searchTicker))
   return match ? parseFloat(match.quantity) : 0
 })
 
 // 🧮 FIXED COST & PROCEEDS COMPUTATION VECTORS
 const computedTotalImpact = computed(() => {
   if (computedGrossPrincipal.value === 0) return 0
-  
-  if (tradeForm.value.action === 'SELL') {
-    // 📉 FOR SELLS: Proceeds are calculated as Gross Value MINUS the transaction fee
-    const netProceeds = computedGrossPrincipal.value - 10.00
-    return Math.max(0, netProceeds)
-  } else {
-    // 📈 FOR BUYS/SHORTS/COVERS: Fee is an extra cost added to the order total
-    return computedGrossPrincipal.value + 10.00
+
+  if (['SELL', 'SHORT'].includes(tradeForm.value.action)) {
+    return computedGrossPrincipal.value - 10
   }
+
+  return computedGrossPrincipal.value + 10
 })
 
 // 🧼 Clears out input numbers when a new asset is selected to reset form rule validation blocks
@@ -3284,37 +3247,54 @@ const marginLoanRequired = computed(() => {
 
 // 4. Calculates the live margin profile safety ratio (Matching backend loops)
 const liveMarginRatio = computed(() => {
-  if (!selectedPortfolio.value) return 1.0
-  
-  const cash = parseFloat(selectedPortfolio.value.cash_balance || 0)
-  const debt = parseFloat(selectedPortfolio.value.borrowed_funds_balance || 0)
-  
+  const portfolio = selectedPortfolio.value
+  if (!portfolio || !Array.isArray(portfolio.assets)) return null
+  if (portfolio.cash_balance == null || portfolio.borrowed_funds_balance == null) return null
+
+  const cash = Number(portfolio.cash_balance)
+  const debt = Number(portfolio.borrowed_funds_balance)
+  if (!Number.isFinite(cash) || !Number.isFinite(debt)) return null
+
   let longValue = 0
   let shortValue = 0
-  
-  // Calculate aggregate asset values using live pricing feeds
-  if (selectedPortfolio.value.assets) {
-    selectedPortfolio.value.assets.forEach(asset => {
-      const livePrice = parseFloat(getLivePrice(asset.ticker)) || 0
-      const value = livePrice * parseFloat(asset.quantity)
-      
-      if (asset.position_type === 'LONG') {
-        longValue += value
-      } else if (asset.position_type === 'SHORT') {
-        shortValue += value
-      }
-    })
+
+  for (const asset of portfolio.assets) {
+    if (asset.quantity == null || asset.quantity === '') return null
+
+    const quantity = Number(asset.quantity)
+    if (!Number.isFinite(quantity) || quantity < 0) return null
+    if (quantity === 0) continue
+
+    const quote = marketPrices.value.find(p => tickerEq(p.ticker, asset.ticker))
+    if (!quote || quote.current_price == null || quote.current_price === '') return null
+
+    const price = Number(quote.current_price)
+    if (!Number.isFinite(price) || price <= 0) return null
+
+    if (asset.position_type === 'LONG') {
+      longValue += price * quantity
+    } else if (asset.position_type === 'SHORT') {
+      shortValue += price * quantity
+    } else {
+      return null
+    }
   }
-  
-  const netEquity = cash + longValue - shortValue - debt
-  const totalGrossExposure = longValue + shortValue
-  
-  if (totalGrossExposure === 0) return 1.0 // Fully liquid, zero liquidation risk
-  
-  const ratio = netEquity / totalGrossExposure
-  // Clamp the return output boundaries safely between 0% and 100% for the progress indicator
-  return Math.max(0, Math.min(1, ratio))
+
+  const equity = cash + longValue - shortValue - debt
+  const exposure = longValue + shortValue
+
+  if (!Number.isFinite(equity) || !Number.isFinite(exposure) || exposure <= 0) {
+    return null
+  }
+
+  return equity / exposure
 })
+
+const marginRatioText = computed(() =>
+  liveMarginRatio.value === null
+    ? 'Unavailable'
+    : `${(liveMarginRatio.value * 100).toFixed(1)}%`
+)
 
 // BUY-only effective spending power shown to student
 const buyPowerDisplay = computed(() => {
@@ -3335,6 +3315,7 @@ const buyHeadroomDisplay = computed(() => {
 
 // 🎨 DYNAMIC RISK ELEMENT COLORS
 const healthStatusColor = computed(() => {
+  if (liveMarginRatio.value === null) return 'text-slate-400'
   if (liveMarginRatio.value <= 0.20) return 'text-rose-400 font-weight-black'
   if (liveMarginRatio.value <= 0.40) return 'text-amber-400'
   return 'text-emerald-accent-3'

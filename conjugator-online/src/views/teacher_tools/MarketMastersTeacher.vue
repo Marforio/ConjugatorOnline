@@ -257,16 +257,6 @@
                   Performance in {{ selectedCompDetails?.name }}
                 </span>
                 <div class="d-flex align-center ga-2">
-                  <v-btn
-                    v-if="selectedCompDetails && !selectedCompDetails.is_finalized"
-                    color="deep-purple"
-                    size="small"
-                    class="font-weight-bold"
-                    :loading="isFinalizing"
-                    @click="handleFinalizeCompetition"
-                  >
-                    Finalize Winner
-                  </v-btn>
                   <v-btn variant="text" color="error" size="small" @click="closeRankingDialog">Close</v-btn>
                 </div>
               </v-card-title>
@@ -287,14 +277,62 @@
                   </span>
                 </v-alert>
 
-                <CompetitionRankingHistory
-                  v-if="selectedCompDetails?.id"
-                  :competition-id="selectedCompDetails.id"
-                  :competition-start="selectedCompDetails.start_time"
+                <v-alert
+                  v-if="selectedCompDetails?.has_ended"
+                  :type="selectedCompDetails.is_finalized ? 'info' : 'warning'"
+                  variant="tonal"
                   class="mb-4"
-                />
+                >
+                  <div>
+                    {{ selectedCompDetails.finalization_message || 'Waiting for automatic finalization.' }}
+                  </div>
+                  <div v-if="selectedCompDetails.final_standings?.length" class="mt-1">
+                    These results are estimates based on recorded snapshots.
+                  </div>
+                </v-alert>
 
-                <v-table density="comfortable" class="border rounded text-caption">
+                <v-table
+                  v-if="selectedCompDetails?.has_ended && selectedCompDetails.final_standings?.length"
+                  density="comfortable"
+                  class="border rounded text-caption mb-4"
+                >
+                  <thead>
+                    <tr>
+                      <th>Rank</th>
+                      <th>Student</th>
+                      <th>Assets</th>
+                      <th class="text-right">PnL</th>
+                      <th>Snapshot</th>
+                      <th v-if="selectedCompDetails.finalization_state === 'tie'"></th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    <tr
+                      v-for="row in selectedCompDetails.final_standings"
+                      :key="row.portfolio_id"
+                    >
+                      <td>{{ row.eligible ? `#${row.rank}` : 'Not eligible' }}</td>
+                      <td>{{ row.student_initials }} ({{ row.student_web_id }})</td>
+                      <td>{{ row.asset_count }} / {{ selectedCompDetails.min_assets_required }}</td>
+                      <td class="text-right">${{ Number(row.pnl_value).toFixed(2) }}</td>
+                      <td>{{ formatDate(row.as_of) }}</td>
+                      <td v-if="selectedCompDetails.finalization_state === 'tie'">
+                        <v-btn
+                          v-if="row.rank === 1"
+                          size="small"
+                          color="primary"
+                          :loading="isFinalizing"
+                          @click="resolveTie(row.portfolio_id)"
+                        >
+                          Choose winner
+                        </v-btn>
+                      </td>
+                    </tr>
+                  </tbody>
+                </v-table>
+
+                <v-table v-if="!selectedCompDetails?.has_ended" density="comfortable" class="border rounded text-caption">
                   <thead>
                     <tr class="bg-grey-lighten-4">
                       <th class="font-weight-bold">Student Code</th>
@@ -360,6 +398,14 @@
                     </tr>
                   </tbody>
                 </v-table>
+
+                <CompetitionRankingHistory
+                  v-if="selectedCompDetails?.id"
+                  :competition-id="selectedCompDetails.id"
+                  :competition-start="selectedCompDetails.start_time"
+                  class="mb-4"
+                />
+
               </v-card-text>
             </v-card>
           </v-dialog>
@@ -503,6 +549,29 @@ const sortedTeacherRoster = computed(() => {
   })
 })
 
+const resolveTie = async (portfolioId) => {
+  if (!selectedCompId.value) return
+
+  isFinalizing.value = true
+  try {
+    await api.post(
+      `/market-masters/competitions/${selectedCompId.value}/resolve-tie/`,
+      { portfolio_id: portfolioId }
+    )
+    showToast('Winner declared.')
+    await fetchCompetitionDetails(selectedCompId.value)
+    await fetchCompetitions()
+  } catch (err) {
+    console.error('Tie resolution failed:', err)
+    showToast(
+      err?.response?.data?.error || 'Could not resolve the tie.',
+      'error'
+    )
+  } finally {
+    isFinalizing.value = false
+  }
+}
+
 watch(uiCustomBudget, (v) => {
   uiCustomBudget.value = formatWithApostrophes(v, "money")
 })
@@ -645,21 +714,6 @@ const handleEnrollStudents = async () => {
   }
 }
 
-const handleFinalizeCompetition = async () => {
-  if (!selectedCompId.value) return
-  isFinalizing.value = true
-  try {
-    await api.post(`/market-masters/competitions/${selectedCompId.value}/finalize/`, { force: false })
-    showToast('Competition finalized. Winner declared.')
-    await fetchCompetitionDetails(selectedCompId.value)
-    await fetchCompetitions()
-  } catch (err) {
-    console.error('Finalize error:', err?.response?.data || err)
-    showToast(err?.response?.data?.error || 'Could not finalize competition.', 'error')
-  } finally {
-    isFinalizing.value = false
-  }
-}
 
 const calculatePortfolioValue = (portfolio) => {
   // For now fallback to cash; replace with backend-provided net_value when available.
